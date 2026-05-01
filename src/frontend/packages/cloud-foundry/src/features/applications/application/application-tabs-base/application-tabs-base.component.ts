@@ -44,6 +44,7 @@ import {
   ApplicationStateData
 } from '@stratosui/cloud-foundry';
 import { ApplicationPollingService } from './application-polling.service';
+import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -56,7 +57,8 @@ import { ApplicationPollingService } from './application-polling.service';
     CommonModule,
     RouterModule,
     LoadingPageComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    AppApplicationActionBarComponent
   ]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {

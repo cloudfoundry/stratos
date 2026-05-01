@@ -1,36 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { RouterModule } from '@angular/router';
 import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
-import { take, combineLatest, delay, distinct, filter, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { combineLatest, distinct, map, startWith, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
-  ConfirmationDialogConfig,
-  ConfirmationDialogService,
   MetadataItemComponent,
-  PageSubNavComponent,
-  PageSubNavSectionComponent,
   TileComponent,
   TileGridComponent,
   TileGroupComponent,
   MbToHumanSizePipe,
   UptimePipe } from '@stratosui/core';
-import { ResetPagination, getFullEndpointApiUrl, ActionState, EntityInfo } from '@stratosui/store';
-import { AppMetadataTypes } from '../../../../../../actions/app-metadata.actions';
-import { UpdateExistingApplication } from '../../../../../../actions/application.actions';
+import { getFullEndpointApiUrl, EntityInfo } from '@stratosui/store';
 import { IAppSummary } from '../../../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { CfUserPermissionDirective } from '../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
-import { CfAppsSignalConfigService } from '../../../../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
-import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
 import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
 import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
@@ -38,28 +26,6 @@ import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.componen
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
-
-// Confirmation dialogs
-const appStopConfirmation = new ConfirmationDialogConfig(
-  'Stop Application',
-  'Are you sure you want to stop this Application?',
-  'Stop'
-);
-const appStartConfirmation = new ConfirmationDialogConfig(
-  'Start Application',
-  'Are you sure you want to start this Application?',
-  'Start'
-);
-const appRestartConfirmation = new ConfirmationDialogConfig(
-  'Restart Application',
-  'Are you sure you want to restart this Application?',
-  'Restart'
-);
-const appRestageConfirmation = new ConfirmationDialogConfig(
-  'Restage Application',
-  'Are you sure you want to restage this Application?',
-  'Restage'
-);
 
 interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   label?: string;
@@ -76,10 +42,6 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
-    PageSubNavSectionComponent,
-    CfUserPermissionDirective,
-    ApplicationPollComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
@@ -98,15 +60,7 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
 export class BuildTabComponent implements OnInit {
   applicationService = inject(ApplicationService);
   private scmService = inject(GitSCMService);
-  private store = inject<Store<CFAppState>>(Store);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private confirmDialog = inject(ConfirmationDialogService);
   private cups = inject(CurrentUserPermissionsService);
-  private apps = inject(CfAppsSignalConfigService);
-
-  public isBusyUpdating$!: Observable<{ updating: boolean }>;
-  public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   cardTwoFetching$!: Observable<boolean>;
 
@@ -129,15 +83,6 @@ export class BuildTabComponent implements OnInit {
       map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
-
-    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
-      map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
-        return { updating };
-      }),
-      startWith({ updating: true })
-    );
 
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
@@ -235,10 +180,6 @@ export class BuildTabComponent implements OnInit {
     );
   }
 
-  private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
-  }
-
   private createDockerImageUrl(dockerImage: string): string {
     // https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html
     // Private Registry: MY-PRIVATE-REGISTRY.DOMAIN:PORT/REPO/IMAGE:TAG
@@ -248,84 +189,4 @@ export class BuildTabComponent implements OnInit {
     const res = isDockerHubRegEx.exec(dockerImage);
     return res && res.length === 4 ? `https://hub.docker.com/r/${res[1]}/${res[2]}` : null;
   }
-
-  // -----------
-  // App Actions
-  // -----------
-
-  private dispatchAppStats = () => {
-    const { cfGuid, appGuid } = this.applicationService;
-    cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
-  };
-
-  restartApplication() {
-    this.confirmDialog.open(appRestartConfirmation, () => {
-      this.runLifecycleAction(() => this.apps.restartApp(
-        this.applicationService.cfGuid,
-        this.applicationService.appGuid,
-      ));
-    });
-  }
-
-  // Lifecycle actions (start/stop/restart/restage) now flow through the
-  // Stratos async-job contract via CfAppsSignalConfigService: writeWithJob
-  // hits POST /pp/v1/cf/apps/{cnsi}/{app}/actions/{action} and awaits the
-  // CF-side job to terminal state. On resolve we refetch the app entity
-  // and stats so the summary reflects the new state.
-  //
-  // Previously the toolbar dispatched UpdateExistingApplication through
-  // NGRX, which PUT'd to the legacy /pp/v1/proxy/v2/apps/{guid} endpoint
-  // with {state: "STARTED"|"STOPPED"} and relied on pollEntityService to
-  // observe the state flip. That v2 proxy path is retired on the write
-  // side as part of the V3 migration.
-  private runLifecycleAction(action: () => Promise<void>, onAfter?: () => void): void {
-    const { cfGuid, appGuid } = this.applicationService;
-    void action()
-      .then(() => {
-        cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
-        this.dispatchAppStats();
-        onAfter?.();
-      })
-      .catch((err: unknown) => {
-        console.warn('Lifecycle action failed:', err);
-        this.dispatchAppStats();
-      });
-  }
-
-  stopApplication() {
-    this.confirmDialog.open(appStopConfirmation, () => {
-      this.runLifecycleAction(
-        () => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid),
-        () => {
-          // On app reaching STOPPED, clear the stats pagination section
-          // so a re-start comes up with fresh instance rows.
-          const { cfGuid, appGuid } = this.applicationService;
-          const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
-          this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
-        },
-      );
-    });
-  }
-
-  startApplication() {
-    this.confirmDialog.open(appStartConfirmation, () => {
-      this.runLifecycleAction(
-        () => this.apps.startApp(this.applicationService.cfGuid, this.applicationService.appGuid),
-      );
-    });
-  }
-
-  restageApplication() {
-    this.confirmDialog.open(appRestageConfirmation, () => {
-      this.runLifecycleAction(
-        () => this.apps.restageApp(this.applicationService.cfGuid, this.applicationService.appGuid),
-      );
-    });
-  }
-
-  redirectToDeletePage() {
-    this.router.navigate(['../delete'], { relativeTo: this.route });
-  }
-
-
 }
