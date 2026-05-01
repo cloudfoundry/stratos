@@ -182,6 +182,34 @@ func setCurrentDroplet(ctx context.Context, client capi.Client, appGUID, droplet
 	return err
 }
 
+// stopApp kicks a v3 stop on an app. Step 5 of the v3 restage sequence
+// (downtime path). cf-cli calls this between set-droplet on the running
+// path and start; it ensures CF tears down old instances cleanly.
+//
+// Maps to: POST /v3/apps/<a>/actions/stop
+//
+// CF v3 returns 202 + Location → /v3/jobs/<jobGuid>; the fork's
+// AppLifecycleClient.Stop populates the returned Job.GUID from that
+// header. Callers wait for the stop to complete via
+// client.Jobs().PollUntilComplete(ctx, job.GUID) before proceeding.
+func stopApp(ctx context.Context, client capi.Client, appGUID string) (*capi.Job, error) {
+	return client.Apps().Stop(ctx, appGUID)
+}
+
+// startApp kicks a v3 start on an app. Step 6 of the v3 restage
+// sequence (downtime path) and the "spin up the new droplet" trigger.
+//
+// Maps to: POST /v3/apps/<a>/actions/start
+//
+// CF v3 returns 202 + Location → /v3/jobs/<jobGuid>; the fork's
+// AppLifecycleClient.Start populates the returned Job.GUID from that
+// header. The orchestrator polls instances after start, not the start
+// job itself — instance state is the real "is the app running"
+// signal.
+func startApp(ctx context.Context, client capi.Client, appGUID string) (*capi.Job, error) {
+	return client.Apps().Start(ctx, appGUID)
+}
+
 // pollBuildUntilTerminal polls a v3 build until it reaches a terminal
 // state. Step 3 of the v3 restage sequence: cf-cli's actor build poll
 // loop inside `StagePackage`.

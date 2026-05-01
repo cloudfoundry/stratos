@@ -315,6 +315,70 @@ func TestSetCurrentDroplet_PropagatesError(t *testing.T) {
 	require.Error(t, err)
 }
 
+// TestStopApp_PostsActionAndReturnsJob verifies the helper POSTs to the
+// v3 stop action endpoint and surfaces the v3 job GUID from the
+// Location header (the fork's documented behavior for /actions/stop).
+func TestStopApp_PostsActionAndReturnsJob(t *testing.T) {
+	var capturedMethod string
+	var capturedPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps/app-1/actions/stop":
+			capturedMethod = r.Method
+			capturedPath = r.URL.Path
+			w.Header().Set("Location", "/v3/jobs/stop-job-7")
+			w.WriteHeader(http.StatusAccepted)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client, err := cfclient.NewWithToken(ctx, srv.URL, "test-token")
+	require.NoError(t, err)
+
+	job, err := stopApp(ctx, client, "app-1")
+	require.NoError(t, err)
+	require.NotNil(t, job)
+	assert.Equal(t, "stop-job-7", job.GUID)
+	assert.Equal(t, http.MethodPost, capturedMethod)
+	assert.Equal(t, "/v3/apps/app-1/actions/stop", capturedPath)
+}
+
+// TestStartApp_PostsActionAndReturnsJob mirrors the stop test against
+// the /actions/start endpoint.
+func TestStartApp_PostsActionAndReturnsJob(t *testing.T) {
+	var capturedPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps/app-1/actions/start":
+			capturedPath = r.URL.Path
+			w.Header().Set("Location", "/v3/jobs/start-job-9")
+			w.WriteHeader(http.StatusAccepted)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client, err := cfclient.NewWithToken(ctx, srv.URL, "test-token")
+	require.NoError(t, err)
+
+	job, err := startApp(ctx, client, "app-1")
+	require.NoError(t, err)
+	require.NotNil(t, job)
+	assert.Equal(t, "start-job-9", job.GUID)
+	assert.Equal(t, "/v3/apps/app-1/actions/start", capturedPath)
+}
+
 // TestPollBuildUntilTerminal_HonorsContextCancellation verifies that a
 // context timeout interrupts the poll loop. Models the
 // CF_STAGING_TIMEOUT contract — caller imposes a deadline; the helper
