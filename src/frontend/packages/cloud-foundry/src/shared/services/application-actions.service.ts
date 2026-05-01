@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
@@ -45,7 +45,6 @@ export class AppApplicationActionsService {
   private applicationService = inject(ApplicationService);
   private confirmDialog = inject(ConfirmationDialogService);
   private store = inject<Store<CFAppState>>(Store);
-  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
 
@@ -114,6 +113,7 @@ export class AppApplicationActionsService {
   }
 
   redirectToDelete() {
-    this.router.navigate(['../delete'], { relativeTo: this.route });
+    const { cfGuid, appGuid } = this.applicationService;
+    this.router.navigate(['/applications', cfGuid, appGuid, 'delete']);
   }
 }
