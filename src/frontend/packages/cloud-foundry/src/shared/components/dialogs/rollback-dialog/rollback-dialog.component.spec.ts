@@ -33,15 +33,13 @@ describe('RollbackDialogComponent', () => {
     dialogRefMock = { close: vi.fn() };
 
     await TestBed.configureTestingModule({
-      declarations: [RollbackDialogComponent],
-      imports: [NoopAnimationsModule],
+      imports: [NoopAnimationsModule, RollbackDialogComponent],
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: RevisionsService, useValue: revisionsServiceMock },
         { provide: TailwindDialogRef, useValue: dialogRefMock },
-        { provide: 'TailwindDialogRef', useValue: dialogRefMock },
         {
           provide: MAT_DIALOG_DATA,
           useValue: {

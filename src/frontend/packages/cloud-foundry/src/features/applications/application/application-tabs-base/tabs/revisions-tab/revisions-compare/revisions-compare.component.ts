@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-revisions-compare',
   templateUrl: './revisions-compare.component.html',
-  standalone: false,
+  standalone: true,
+  imports: [RouterModule],
 })
 export class RevisionsCompareComponent {
   private route = inject(ActivatedRoute);

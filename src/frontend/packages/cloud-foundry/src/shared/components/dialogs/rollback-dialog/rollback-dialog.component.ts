@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -26,8 +27,9 @@ export interface RollbackDialogResult {
 @Component({
   selector: 'app-rollback-dialog',
   templateUrl: './rollback-dialog.component.html',
-  standalone: false,
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule],
 })
 export class RollbackDialogComponent {
   private svc = inject(RevisionsService);

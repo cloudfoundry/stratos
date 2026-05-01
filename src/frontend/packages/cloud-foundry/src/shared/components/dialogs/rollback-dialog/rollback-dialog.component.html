@@ -1,55 +1,50 @@
-<h2 mat-dialog-title>Roll back to revision #{{data.revision.version}}</h2>
+<div class="p-6">
+  <h1 class="text-lg font-semibold mb-4 text-content-text">
+    Roll back to revision #{{ data.revision.version }}
+  </h1>
 
-<mat-dialog-content>
-  <dl class="rollback-dialog__details">
-    <div class="rollback-dialog__row">
-      <dt>Description</dt>
-      <dd>{{ data.revision.description || '—' }}</dd>
-    </div>
-    <div class="rollback-dialog__row">
-      <dt>Created</dt>
-      <dd>{{ data.revision.created_at | date:'medium' }}</dd>
-    </div>
-    <div class="rollback-dialog__row">
-      <dt>Deployable</dt>
-      <dd>{{ data.revision.deployable ? 'Yes' : 'No' }}</dd>
-    </div>
-    <div class="rollback-dialog__row">
-      <dt>Droplet GUID</dt>
-      <dd>{{ data.revision.droplet?.guid || '—' }}</dd>
-    </div>
-    <div class="rollback-dialog__row">
-      <dt>Strategy</dt>
-      <dd>rolling</dd>
-    </div>
+  <dl class="grid grid-cols-[10rem_1fr] gap-y-2 text-sm mb-4">
+    <dt class="text-content-muted">Description</dt>
+    <dd class="text-content-text">{{ data.revision.description || '—' }}</dd>
+
+    <dt class="text-content-muted">Created</dt>
+    <dd class="text-content-text">{{ data.revision.created_at | date:'medium' }}</dd>
+
+    <dt class="text-content-muted">Deployable</dt>
+    <dd class="text-content-text">{{ data.revision.deployable ? 'Yes' : 'No' }}</dd>
+
+    <dt class="text-content-muted">Droplet GUID</dt>
+    <dd class="text-content-text font-mono text-xs">{{ data.revision.droplet?.guid || '—' }}</dd>
+
+    <dt class="text-content-muted">Strategy</dt>
+    <dd class="text-content-text">rolling</dd>
   </dl>
 
   @if (errorMessage()) {
-    <div class="rollback-dialog__error" role="alert">
-      <mat-icon aria-hidden="true">error_outline</mat-icon>
-      <span>{{ errorMessage() }}</span>
+    <div class="flex items-start gap-2 p-3 mb-4 rounded bg-warning-shade-50 text-warning-shade-700" role="alert">
+      <span class="material-icons text-warning-shade-500" aria-hidden="true">error_outline</span>
+      <span class="text-sm">{{ errorMessage() }}</span>
     </div>
   }
-</mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button
-    mat-button
-    data-testid="cancel-btn"
-    [disabled]="inFlight()"
-    (click)="cancel()">
-    Cancel
-  </button>
-  <button
-    mat-flat-button
-    color="primary"
-    data-testid="confirm-btn"
-    [disabled]="inFlight()"
-    (click)="confirm()">
-    @if (inFlight()) {
-      Rolling back…
-    } @else {
-      Confirm Rollback
-    }
-  </button>
-</mat-dialog-actions>
+  <div class="flex gap-2 justify-end mt-6">
+    <button
+      class="btn btn-secondary"
+      data-testid="cancel-btn"
+      [disabled]="inFlight()"
+      (click)="cancel()">
+      Cancel
+    </button>
+    <button
+      class="btn btn-primary"
+      data-testid="confirm-btn"
+      [disabled]="inFlight()"
+      (click)="confirm()">
+      @if (inFlight()) {
+        Rolling back…
+      } @else {
+        Confirm Rollback
+      }
+    </button>
+  </div>
+</div>

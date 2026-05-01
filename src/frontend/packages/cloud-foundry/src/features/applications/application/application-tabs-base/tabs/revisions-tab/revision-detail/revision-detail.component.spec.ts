@@ -10,7 +10,7 @@ describe('RevisionDetailComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RevisionDetailComponent],
+      imports: [RevisionDetailComponent],
       providers: [
         {
           provide: ActivatedRoute,

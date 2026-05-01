@@ -10,7 +10,7 @@ describe('RevisionsCompareComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RevisionsCompareComponent],
+      imports: [RevisionsCompareComponent],
       providers: [
         {
           provide: ActivatedRoute,
