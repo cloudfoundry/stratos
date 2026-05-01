@@ -41,6 +41,13 @@ type CloudFoundrySpecification struct {
 	// asyncTranslator (CFJobTranslator) because restage is composed of many
 	// CF v3 calls — it doesn't poll a single /v3/jobs/{guid}.
 	restageTranslator stratosjobs.JobTranslator
+
+	// rollbackTranslator drives the v3 rollback state machine
+	// (deployment_create + deployment_poll). Separate from
+	// restageTranslator because rollback skips the package/build/droplet
+	// stages — it reuses an existing revision's droplet via
+	// /v3/deployments {revision: ...}.
+	rollbackTranslator stratosjobs.JobTranslator
 }
 
 const (
@@ -188,6 +195,7 @@ func (c *CloudFoundrySpecification) Init() error {
 			c.asyncTracker = jobsPlugin.Tracker()
 			c.asyncTranslator = NewCFJobTranslator(c)
 			c.restageTranslator = NewRestageJobTranslator(c)
+			c.rollbackTranslator = NewRollbackJobTranslator(c)
 		} else {
 			log.Warnf("CF plugin: %q found but has unexpected type %T; async-job contract disabled for CF writes", stratosjobs.PluginName, plug)
 		}

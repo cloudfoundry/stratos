@@ -270,6 +270,103 @@ func (c *CloudFoundrySpecification) restageApp(ctx echo.Context, cnsiGUID, appGU
 	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
+// RollbackRequest is the caller-supplied body for POST
+// /pp/v1/cf/apps/:cnsi/:app/rollback. RevisionGuid is required;
+// Strategy defaults to "rolling".
+//
+// MaxInFlight and CanarySteps are accepted at the handler boundary so
+// the wire shape is stable when slice 8+ wires them through to
+// DeploymentCreateRequest.Options.
+type RollbackRequest struct {
+	RevisionGuid string `json:"revisionGuid"`
+	Strategy     string `json:"strategy,omitempty"`
+	MaxInFlight  int    `json:"maxInFlight,omitempty"`
+	CanarySteps  []int  `json:"canarySteps,omitempty"`
+}
+
+// rollbackApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/rollback.
+//
+// CF v3 rollback is a single POST /v3/deployments with a revision_guid
+// (no package/build/droplet sequence — the revision already encodes a
+// droplet). The orchestrator therefore only runs deployment_create +
+// deployment_poll. We expose this behind the Stratos async-job contract
+// so the UI sees the same handoff/poll shape as restage.
+//
+// Request body:
+//
+//	{
+//	  "revisionGuid": "<guid>",          // required
+//	  "strategy": "rolling" | "canary",  // default "rolling"
+//	  "maxInFlight": 1,                  // optional, slice 8+
+//	  "canarySteps": [10,25,50]          // canary only, slice 8+
+//	}
+//
+// Response shape mirrors restageApp:
+//   - 200 + {state, result?, errors?} on fast-path drain.
+//   - 202 + handoff job otherwise; frontend polls
+//     /pp/v1/stratosjobs/{id}.
+func (c *CloudFoundrySpecification) rollbackApp(ctx echo.Context, cnsiGUID, appGUID string) error {
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	if c.asyncTracker == nil || c.rollbackTranslator == nil {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, "rollback: stratosjobs not registered")
+	}
+
+	req := RollbackRequest{}
+	if ctx.Request().Body != nil && ctx.Request().ContentLength > 0 {
+		if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("rollback: invalid body: %v", err))
+		}
+	}
+
+	if req.RevisionGuid == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "rollback: revisionGuid is required")
+	}
+
+	strategy := req.Strategy
+	if strategy == "" {
+		strategy = "rolling"
+	}
+	switch strategy {
+	case "rolling", "canary":
+		// Accepted. Canary plumbing lands with slice 8+; the wire
+		// contract holds steady so the frontend can be written once.
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("rollback: unknown strategy %q", strategy))
+	}
+
+	ref := &RollbackRef{
+		CNSIGuid:     cnsiGUID,
+		UserGuid:     userGUID,
+		AppGuid:      appGUID,
+		RevisionGuid: req.RevisionGuid,
+		Strategy:     strategy,
+		CurrentStage: StageRollbackDeploymentCreate,
+	}
+
+	res := stratosjobs.RunFastPath(ctx.Request().Context(), c.asyncTracker, c.rollbackTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: RollbackJobKind,
+	})
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
+}
+
 // scaleApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/scale — a
 // dedicated async-job-contract endpoint for scaling the web process.
 // Keeps patchApp focused on name/ssh/env composite updates; scale gets
