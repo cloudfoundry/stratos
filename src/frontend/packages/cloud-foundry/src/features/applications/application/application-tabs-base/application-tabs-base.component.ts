@@ -122,7 +122,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
       { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
       { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events', icon: 'watch_later' }
+      { link: 'events', label: 'Events', icon: 'watch_later' },
+      { link: 'revisions', label: 'Revisions', icon: 'history' },
     ];
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe((hasMetrics: boolean) => {
