@@ -119,6 +119,10 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord api.CNSI
 // confirmCapabilityMetadata re-probes /v2/info and /v3/info if the stored
 // metadata was assumed (both probes failed at registration). Writes confirmed
 // values back to the DB so subsequent info requests see real capability flags.
+//
+// The dual-probe is the same intentional pattern documented at the Info()
+// callsite: /v2/info and /v3/info return 404 on the other CF version, so
+// probing both is the canonical way to detect what the foundation supports.
 func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNSIRecord) {
 	var existing api.CFEndpointMetadata
 	if err := json.Unmarshal([]byte(cnsiRecord.Metadata), &existing); err != nil || !existing.Assumed {
@@ -329,6 +333,16 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	}
 
 	metadata := api.CFEndpointMetadata{}
+
+	// Capability detection — intentional dual-probe of /v2/info and /v3/info.
+	// This is NOT an unmigrated v2 callsite; it's how Stratos discovers what
+	// the foundation supports so downstream handlers know whether to gate
+	// V3-only operations (rolling/canary deployments, restage v3 composition).
+	// Both endpoints return 404 on the other version's CF, so each probe is
+	// soft-fail. Until RFC-0032's v2 sunset (end of 2026), every reachable CF
+	// has at least one of the two responding 200; if both fail (TLS / network),
+	// we fall through to "assume v2" + Assumed=true, which triggers re-probe
+	// at Connect time via confirmCapabilityMetadata.
 
 	// Probe /v2/info — soft failure; v3-only CFs will 404 here
 	v2Uri := *uri

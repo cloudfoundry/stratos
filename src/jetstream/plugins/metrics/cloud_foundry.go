@@ -28,12 +28,15 @@ var (
 
 // Metrics endpoints - non-admin - for a Cloud Foundry Application
 func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
-	// We need to go and fetch the CF App, to make sure that the user is permitted to access it
-	// We'll do this synchronously here for now - this can be done optimistically in parallel in the future
-	// Use the passthrough mechanism to get the App metadata from Cloud Foundry
+	// Permission check: probe the CF v3 app endpoint for each CNSI in scope.
+	// CF returns 200 if the caller has any role on the app's space and 404
+	// otherwise (404 is also returned for non-existent apps — the same
+	// "either you can see it or you can't" semantics we relied on with the
+	// pre-V3 /v2/apps/{guid} probe). Status<400 means "permitted, serve
+	// metrics for this CNSI".
 	appID := c.Param("appId")
 	prometheusOp := c.Param("op")
-	appURL, _ := url.Parse("/v2/apps/" + appID)
+	appURL, _ := url.Parse("/v3/apps/" + appID)
 	responses, err := m.portalProxy.ProxyRequest(c, appURL)
 	if err != nil {
 		return err

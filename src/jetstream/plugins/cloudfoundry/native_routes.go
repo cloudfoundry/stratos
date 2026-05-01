@@ -6,6 +6,7 @@ import "github.com/labstack/echo/v4"
 // addNativeRoutes registers Stratos-native CF v3 routes on the CF plugin.
 // Called from AddSessionGroupRoutes.
 func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
+	echoGroup.GET("/cf/info/:cnsiGuid", c.getNativeCFInfo)
 	echoGroup.GET("/cf/orgs/:cnsiGuid", c.getNativeOrgs)
 	echoGroup.GET("/cf/apps/:cnsiGuid", c.getNativeApps)
 	echoGroup.DELETE("/cf/apps/:cnsiGuid/:appGuid", c.deleteNativeApp)
