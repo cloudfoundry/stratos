@@ -31,7 +31,10 @@ import (
 )
 
 // StratosCFInfo is the JSON the /pp/v1/cf/info/{cnsiGuid} handler returns.
-// Field names are camelCase to match Stratos frontend conventions.
+// Field names mirror the legacy /v2/info wire shape (snake_case) so the
+// frontend cutover is a pure URL swap — existing consumers continue to
+// read api_version, app_ssh_endpoint, etc. unchanged. The values come
+// exclusively from V3 sources (/v3/info + / root with meta).
 type StratosCFInfo struct {
 	// Name is the CF foundation name (e.g. "Cloud Foundry (adept-ivy-dev)").
 	Name string `json:"name"`
@@ -42,34 +45,34 @@ type StratosCFInfo struct {
 	// Version is the CF deployment version integer from /v3/info.
 	Version int `json:"version"`
 	// MinCLIVersion is the minimum cf-cli version the foundation accepts.
-	MinCLIVersion string `json:"minCliVersion,omitempty"`
-	// RecommendedCLIVersion is the cf-cli version the foundation recommends.
-	RecommendedCLIVersion string `json:"recommendedCliVersion,omitempty"`
+	MinCLIVersion string `json:"min_cli_version,omitempty"`
+	// MinRecommendedCLIVersion is the cf-cli version the foundation recommends.
+	MinRecommendedCLIVersion string `json:"min_recommended_cli_version,omitempty"`
 	// APIVersion is the CF v3 API semver from /'s
-	// links.cloud_controller_v3.meta.version (e.g. "3.180.0").
-	APIVersion string `json:"apiVersion,omitempty"`
-	// AuthorizationEndpoint is the UAA authorize URL (from / links.login.href
-	// or links.uaa.href — operator may use either).
-	AuthorizationEndpoint string `json:"authorizationEndpoint,omitempty"`
+	// links.cloud_controller_v3.meta.version (e.g. "3.180.0"). Replaces the
+	// legacy /v2/info api_version (which was the v2 API semver, "2.245.0").
+	APIVersion string `json:"api_version,omitempty"`
+	// AuthorizationEndpoint is the UAA authorize URL (from / links.login.href).
+	AuthorizationEndpoint string `json:"authorization_endpoint,omitempty"`
 	// TokenEndpoint is the UAA base URL (from / links.uaa.href).
-	TokenEndpoint string `json:"tokenEndpoint,omitempty"`
+	TokenEndpoint string `json:"token_endpoint,omitempty"`
 	// DopplerLoggingEndpoint is the loggregator websocket URL (from /
 	// links.logging.href).
-	DopplerLoggingEndpoint string `json:"dopplerLoggingEndpoint,omitempty"`
+	DopplerLoggingEndpoint string `json:"doppler_logging_endpoint,omitempty"`
 	// RoutingEndpoint is the routing API base URL (from / links.routing.href).
-	RoutingEndpoint string `json:"routingEndpoint,omitempty"`
+	RoutingEndpoint string `json:"routing_endpoint,omitempty"`
 	// AppSSHEndpoint is the SSH proxy host:port (from / links.app_ssh.href).
-	AppSSHEndpoint string `json:"appSshEndpoint,omitempty"`
+	AppSSHEndpoint string `json:"app_ssh_endpoint,omitempty"`
 	// AppSSHHostKeyFingerprint is the SSH proxy host key fingerprint, used
 	// by clients to verify they're connecting to the legitimate proxy.
 	// Sourced from / links.app_ssh.meta.host_key_fingerprint — capi's
 	// Link.Method/Href pair drops meta, so we parse / via raw HTTP.
-	AppSSHHostKeyFingerprint string `json:"appSshHostKeyFingerprint,omitempty"`
+	AppSSHHostKeyFingerprint string `json:"app_ssh_host_key_fingerprint,omitempty"`
 	// AppSSHOauthClient is the UAA client_id used to mint short-lived SSH
 	// access codes (conventionally "ssh-proxy"). Sourced from /
 	// links.app_ssh.meta.oauth_client.
-	AppSSHOauthClient string `json:"appSshOauthClient,omitempty"`
-	// Links is the /v3/ root resource link map (key=resource name, value=href).
+	AppSSHOauthClient string `json:"app_ssh_oauth_client,omitempty"`
+	// Links is the / root link map (key=resource name, value=href).
 	// Frontend uses this to flag capability availability without re-probing.
 	Links map[string]string `json:"links,omitempty"`
 }
@@ -139,8 +142,8 @@ func (c *CloudFoundrySpecification) getNativeCFInfo(ctx echo.Context) error {
 		Build:                 info.Build,
 		Description:           info.Description,
 		Version:               info.Version,
-		MinCLIVersion:         info.CLIVersion.Minimum,
-		RecommendedCLIVersion: info.CLIVersion.Recommended,
+		MinCLIVersion:            info.CLIVersion.Minimum,
+		MinRecommendedCLIVersion: info.CLIVersion.Recommended,
 	}
 
 	if root != nil {

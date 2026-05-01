@@ -101,7 +101,7 @@ func TestGetNativeCFInfo_HappyPath(t *testing.T) {
 	assert.Equal(t, "Use `genesis info` on environment file", body.Description)
 	assert.Equal(t, 44, body.Version)
 	assert.Equal(t, "6.23.0", body.MinCLIVersion)
-	assert.Equal(t, "6.23.0", body.RecommendedCLIVersion)
+	assert.Equal(t, "6.23.0", body.MinRecommendedCLIVersion)
 	assert.Equal(t, "https://cf.example.com/v3", body.Links["cloud_controller_v3"])
 	assert.Equal(t, "ssh.example.com:2222", body.Links["app_ssh"])
 	assert.Equal(t, "wss://doppler.example.com:443", body.Links["logging"])
