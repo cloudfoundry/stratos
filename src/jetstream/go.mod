@@ -66,7 +66,7 @@ require (
 require (
 	code.cloudfoundry.org/bytefmt v0.67.0 // indirect
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e // indirect
-	code.cloudfoundry.org/cli/v8 v8.18.2 // indirect
+	code.cloudfoundry.org/cli/v8 v8.18.3 // indirect
 	code.cloudfoundry.org/clock v1.64.0 // indirect
 	code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
