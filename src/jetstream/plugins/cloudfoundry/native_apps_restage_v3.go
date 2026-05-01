@@ -116,6 +116,13 @@ type RestageRef struct {
 // distinguishable so callers can map to a translatable user error.
 var errNoReadyPackage = errors.New("no READY package available for app")
 
+// errBuildFailed is returned when a v3 build poll observes the build
+// transitioning to FAILED. cf-cli surfaces StagingFailedError /
+// StagingFailedNoAppDetectedError variants; we keep one terminal sentinel
+// so callers can map to a translatable user error and surface CF's
+// build.Error string as the cause.
+var errBuildFailed = errors.New("v3 build failed during staging")
+
 // getNewestReadyPackage resolves the GUID of the most recently created
 // package in state READY for the given app. This is step 1 of the v3
 // restage sequence: cf-cli's `actor.GetNewestReadyPackageForApplication`.
@@ -149,7 +156,7 @@ func getNewestReadyPackage(ctx context.Context, client capi.Client, appGUID stri
 // Maps to: POST /v3/builds {"package":{"guid":"<p>"}}
 //
 // CF v3 returns the build with state STAGING; the build polls advance it
-// to STAGED (success) or FAILED. Build polling lives in a later slice.
+// to STAGED (success) or FAILED. See pollBuildUntilTerminal.
 func createBuildForPackage(ctx context.Context, client capi.Client, packageGUID string) (string, error) {
 	build, err := client.Builds().Create(ctx, &capi.BuildCreateRequest{
 		Package: &capi.BuildPackageRef{GUID: packageGUID},
@@ -158,4 +165,45 @@ func createBuildForPackage(ctx context.Context, client capi.Client, packageGUID 
 		return "", err
 	}
 	return build.GUID, nil
+}
+
+// pollBuildUntilTerminal polls a v3 build until it reaches a terminal
+// state. Step 3 of the v3 restage sequence: cf-cli's actor build poll
+// loop inside `StagePackage`.
+//
+// Maps to: GET /v3/builds/<build_guid>
+//
+// State machine:
+//   - "STAGED"  → returns the build (Droplet.GUID populated by CF).
+//   - "FAILED"  → returns the build + errBuildFailed; build.Error holds CF's reason.
+//   - "STAGING" → continues polling.
+//
+// Honors context cancellation between polls so callers can impose
+// CF_STAGING_TIMEOUT (default 15min) via context.WithTimeout.
+//
+// pollInterval is the duration between polls. cf-cli v8 uses 5s by
+// default; tests pass a small value.
+func pollBuildUntilTerminal(
+	ctx context.Context,
+	client capi.Client,
+	buildGUID string,
+	pollInterval time.Duration,
+) (*capi.Build, error) {
+	for {
+		build, err := client.Builds().Get(ctx, buildGUID)
+		if err != nil {
+			return nil, err
+		}
+		switch build.State {
+		case "STAGED":
+			return build, nil
+		case "FAILED":
+			return build, errBuildFailed
+		}
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(pollInterval):
+		}
+	}
 }
