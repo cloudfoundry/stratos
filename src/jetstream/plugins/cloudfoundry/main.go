@@ -36,6 +36,11 @@ type CloudFoundrySpecification struct {
 	// behavior (bare 202) when either is nil.
 	asyncTracker    stratosjobs.Tracker
 	asyncTranslator stratosjobs.JobTranslator
+
+	// restageTranslator drives the v3 restage state machine. Separate from
+	// asyncTranslator (CFJobTranslator) because restage is composed of many
+	// CF v3 calls — it doesn't poll a single /v3/jobs/{guid}.
+	restageTranslator stratosjobs.JobTranslator
 }
 
 const (
@@ -178,6 +183,7 @@ func (c *CloudFoundrySpecification) Init() error {
 		if jobsPlugin, ok := plug.(*stratosjobs.StratosJobs); ok {
 			c.asyncTracker = jobsPlugin.Tracker()
 			c.asyncTranslator = NewCFJobTranslator(c)
+			c.restageTranslator = NewRestageJobTranslator(c)
 		} else {
 			log.Warnf("CF plugin: %q found but has unexpected type %T; async-job contract disabled for CF writes", stratosjobs.PluginName, plug)
 		}

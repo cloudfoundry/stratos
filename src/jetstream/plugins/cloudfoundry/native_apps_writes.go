@@ -112,11 +112,10 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid params (action=%q)", action))
 	}
 
-	// Restage has no v3 endpoint (CF replaced /v2/apps/{guid}/restage with
-	// the builds resource; /v3/apps/{guid}/actions/restage never existed).
-	// We route restage to the v2 endpoint directly, which is atomic and
-	// supported on every CF with v2 still alive (RFC-0032 sunsets v2 end
-	// of 2026). See restageApp for the long-form note.
+	// Restage has no atomic v3 endpoint — it is composed of ~7 v3 calls
+	// (newest READY package → build → poll → set-droplet → stop → start
+	// → poll instances). The orchestration runs through the Stratos
+	// async-job contract and is dispatched through restageApp.
 	if action == "restage" {
 		return c.restageApp(ctx, cnsiGUID, appGUID)
 	}
@@ -185,67 +184,90 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
-// restageApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/actions/restage
-// by proxying to the CF v2 endpoint /v2/apps/{guid}/restage.
+// restageApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/actions/restage.
 //
-// Why v2?
+// CF v3 has no atomic restage endpoint — it is composed of ~7 calls
+// (newest READY package → build → poll → set-droplet → stop → start →
+// poll instances). cf-cli v8's shared.AppStager implements the same
+// composition. We expose this composition behind the Stratos async-job
+// contract so the UI sees a uniform handoff/poll shape regardless of
+// how many round-trips the orchestrator made.
 //
-//	CF v3 has no restage endpoint. The atomic /v2/apps/{guid}/restage was
-//	replaced by the builds resource (v3.216 docs: "finer-grained control
-//	and increased flexibility... V3 API avoids making assumptions about
-//	what users want to happen"). The v3 equivalent is a composition:
+// Optional request body:
 //
-//	  1. GET /v3/packages?app_guids=<a>&states=READY
-//	        &order_by=-created_at&per_page=1          (newest READY pkg)
-//	  2. POST /v3/builds {"package":{"guid":"<p>"}}   (kick build)
-//	  3. GET  /v3/builds/<build_guid>  (poll until state != STAGING)
-//	  4. POST /v3/apps/<a>/actions/stop               (if running)
-//	  5. PATCH /v3/apps/<a>/relationships/current_droplet
-//	        {"data":{"guid":"<droplet>"}}
-//	  6. POST /v3/apps/<a>/actions/start
+//	{
+//	  "strategy": "" | "rolling" | "canary",   // downtime path = ""
+//	  "noWait": false,                          // exit on first RUNNING
+//	  "maxInFlight": 1,                         // rolling/canary only
+//	  "instanceSteps": [10,25,50]               // canary only
+//	}
 //
-//	That's what cf-cli v8 shared.AppStager does. For Stratos it's the
-//	future implementation; the ticket is Phase 2 of FWT-restage-v3 in
-//	the Stratos V3 migration track. v2 restage remains live on every
-//	CF we target until RFC-0032's 2026-end sunset, so we ship the v2
-//	passthrough now and revisit when the deadline forces us.
+// Empty body is valid and selects the downtime strategy with default
+// startup-wait semantics. Slices ≥10 implement rolling/canary; this
+// handler accepts the body fields now to keep the wire shape stable
+// once those slices land.
 //
-// Response: sync-complete envelope {"state":"COMPLETE"} on 2xx from CF,
-// matching the shape returned by Stop/Start/Scale lifecycle handlers.
-// Error envelope {"state":"FAILED","errors":[...]} with the CF body on
-// non-2xx, so the frontend snackbar logic can surface failures uniformly.
+// Response shape mirrors the other lifecycle handlers (delete, scale):
+//   - 200 + {state, result?, errors?} when the orchestrator drained
+//     within the fast-path window (rare for restage — package+build kick
+//     finish in <3s, but staging takes minutes).
+//   - 202 + handoff job when the orchestrator handed off; the frontend
+//     polls /pp/v1/stratosjobs/{id} and renders ref.Stages from the
+//     terminal result.
 func (c *CloudFoundrySpecification) restageApp(ctx echo.Context, cnsiGUID, appGUID string) error {
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	cnsi, err := c.nativeProxy().GetCNSIRecord(cnsiGUID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("unknown cnsi %s", cnsiGUID))
+	if c.asyncTracker == nil || c.restageTranslator == nil {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, "restage: stratosjobs not registered")
 	}
 
-	token, ok := c.nativeProxy().GetCNSITokenRecord(cnsiGUID, userGUID)
-	if !ok {
-		return echo.NewHTTPError(http.StatusUnauthorized, "no token for CNSI")
+	req := RestageRequest{}
+	if ctx.Request().Body != nil && ctx.Request().ContentLength > 0 {
+		if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("restage: invalid body: %v", err))
+		}
 	}
 
-	restageURL := fmt.Sprintf("%s/v2/apps/%s/restage", cnsi.APIEndpoint.String(), appGUID)
-	res, err := c.nativeProxy().DoProxySingleRequestWithToken(cnsiGUID, &token, http.MethodPost, restageURL, nil, nil)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, fmt.Sprintf("restage: %v", err))
+	switch req.Strategy {
+	case RestageStrategyDowntime, RestageStrategyRolling, RestageStrategyCanary:
+		// Accepted at the handler boundary; orchestrator currently only
+		// implements the downtime path (slice 7). Rolling/canary stages
+		// land in slice 10+; the wire contract holds steady so the
+		// frontend can be written once.
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("restage: unknown strategy %q", req.Strategy))
 	}
+
+	ref := &RestageRef{
+		CNSIGuid:     cnsiGUID,
+		UserGuid:     userGUID,
+		AppGuid:      appGUID,
+		Strategy:     req.Strategy,
+		NoWait:       req.NoWait,
+		CurrentStage: StageRestagePackageLookup,
+	}
+
+	res := stratosjobs.RunFastPath(ctx.Request().Context(), c.asyncTracker, c.restageTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: RestageJobKind,
+	})
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-			"state":  stratosjobs.JobStateFailed,
-			"errors": []string{string(res.Response)},
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
 		})
 	}
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"state": stratosjobs.JobStateComplete,
-	})
+	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
 // scaleApp handles POST /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/scale — a

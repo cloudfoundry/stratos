@@ -156,25 +156,19 @@ func TestAppAction_ForwardsLifecycleVerbs(t *testing.T) {
 	}
 }
 
-// TestRestageApp_ProxiesToV2 pins the v2 passthrough: when the frontend
-// POSTs to /pp/v1/cf/apps/{cnsi}/{app}/actions/restage, the handler must
-// call /v2/apps/{guid}/restage on the target CF using the CNSI's stored
-// token and return a sync-complete envelope on 2xx. See the long-form
-// note on restageApp for why v2 instead of a v3 composition.
-func TestRestageApp_ProxiesToV2(t *testing.T) {
-	var capturedURL string
-	var capturedMethod string
-	proxy := &mockNativeCFProxy{
-		userID:      "user-1",
-		cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
-		tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		proxyRequest: func(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error) {
-			capturedURL = requestURL
-			capturedMethod = method
-			return &api.CNSIRequest{StatusCode: http.StatusCreated, Response: []byte(`{"metadata":{"guid":"app-1"}}`)}, nil
+// TestRestageApp_NoTrackerReturns503 verifies the handler refuses to
+// kick a restage if the stratosjobs plugin wasn't registered at startup.
+// Restage *must* run via the async-job contract (multi-minute, multi-step)
+// so the legacy bare-202 fallback used by other lifecycle handlers is
+// not appropriate here.
+func TestRestageApp_NoTrackerReturns503(t *testing.T) {
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
 		},
 	}
-	plugin := &CloudFoundrySpecification{testProxy: proxy}
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/restage", nil)
@@ -184,37 +178,80 @@ func TestRestageApp_ProxiesToV2(t *testing.T) {
 	c.SetParamNames("cnsiGuid", "appGuid", "action")
 	c.SetParamValues("cnsi-1", "app-1", "restage")
 
-	require.NoError(t, plugin.appAction(c))
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, http.MethodPost, capturedMethod)
-	assert.Equal(t, "https://cf.example.com/v2/apps/app-1/restage", capturedURL)
-
-	var body map[string]interface{}
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
-	assert.Equal(t, string(stratosjobs.JobStateComplete), body["state"])
+	err := plugin.appAction(c)
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok)
+	assert.Equal(t, http.StatusServiceUnavailable, httpErr.Code)
 }
 
-// TestRestageApp_SurfacesV2Failure pins the error envelope shape. When CF v2
-// replies non-2xx, restageApp returns 502 with {state:"failed", errors:[body]}
-// so the frontend snackbar logic can surface the upstream error text.
-func TestRestageApp_SurfacesV2Failure(t *testing.T) {
-	proxy := &mockNativeCFProxy{
-		userID:      "user-1",
-		cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
-		tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		proxyRequest: func(_ string, _ *api.TokenRecord, _, _ string, _ http.Header, _ []byte) (*api.CNSIRequest, error) {
-			return &api.CNSIRequest{StatusCode: http.StatusNotFound, Response: []byte(`{"error_code":"CF-AppNotFound"}`)}, nil
+// TestRestageApp_RejectsInvalidStrategy guards the wire shape: any
+// strategy outside {"", "rolling", "canary"} is rejected at the handler
+// boundary before the orchestrator runs.
+func TestRestageApp_RejectsInvalidStrategy(t *testing.T) {
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
 		},
+		asyncTracker: stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{}),
 	}
-	plugin := &CloudFoundrySpecification{testProxy: proxy}
+	plugin.restageTranslator = NewRestageJobTranslator(plugin)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/missing/actions/restage", nil)
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/restage",
+		strings.NewReader(`{"strategy":"voodoo"}`))
+	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
 	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "missing", "restage")
+	c.SetParamValues("cnsi-1", "app-1", "restage")
+
+	err := plugin.appAction(c)
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+}
+
+// TestRestageApp_FastPathResolvesOnNoEligiblePackage exercises the
+// orchestrator end-to-end through the handler when the very first stage
+// (package_lookup) terminally fails. The fast-path window resolves
+// before handoff, so the handler returns 502 with the FAILED envelope —
+// matching the shape used by other write handlers.
+func TestRestageApp_FastPathResolvesOnNoEligiblePackage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/packages":
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+		asyncTracker: stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{}),
+	}
+	plugin.restageTranslator = NewRestageJobTranslator(plugin)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-empty/actions/restage", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "app-empty", "restage")
 
 	require.NoError(t, plugin.appAction(c))
 	assert.Equal(t, http.StatusBadGateway, rec.Code)
@@ -223,9 +260,10 @@ func TestRestageApp_SurfacesV2Failure(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
 	assert.Equal(t, string(stratosjobs.JobStateFailed), body["state"])
 	errs, ok := body["errors"].([]interface{})
-	require.True(t, ok, "errors should be an array")
+	require.True(t, ok)
 	require.Len(t, errs, 1)
-	assert.Contains(t, errs[0].(string), "CF-AppNotFound")
+	errObj := errs[0].(map[string]interface{})
+	assert.Equal(t, "stratos.restage.package_lookup", errObj["code"])
 }
 
 // TestAppAction_RejectsUnknownVerb confirms that a verb outside the allowlist
