@@ -120,6 +120,13 @@ export class ApplicationBasePage extends BasePage {
   }
 
   /**
+   * Navigate to Revisions tab
+   */
+  async goToRevisionsTab(): Promise<void> {
+    await this.goToTab('Revisions', 'revisions');
+  }
+
+  /**
    * Navigate to Autoscaler tab
    */
   async goToAutoscalerTab(): Promise<void> {
