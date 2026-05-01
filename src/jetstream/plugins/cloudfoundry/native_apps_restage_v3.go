@@ -1,13 +1,47 @@
 // src/jetstream/plugins/cloudfoundry/native_apps_restage_v3.go
 //
-// V3 restage orchestration types and primitives. The end-to-end design is
-// documented in
-//   stratos/docs/2026-04-30-A8-restage-orchestration-design.md
-// (knowledge store).
+// V3 restage orchestration: primitives + state machine.
 //
-// This file is built incrementally. Each slice adds one more step of the
-// 9-step v3 restage sequence with tests, and the orchestrator that ties
-// them together lands once all primitives are in place.
+// # Reference implementation
+//
+// The orchestrator mirrors cf-cli v8.18.3 (the version pinned in
+// jetstream/go.mod). Two upstream files define the behavior we replicate:
+//
+//   - command/v7/restage_command.go      — the user-facing restage flow:
+//     resolves app, fetches newest READY package, builds AppStartOpts
+//     {Strategy, NoWait, MaxInFlight, CanarySteps}, then delegates to
+//     Stager.StageAndStart.
+//
+//   - command/v7/shared/app_stager.go    — Stager.StageAndStart: the
+//     actual sequence (StagePackage → SetApplicationDroplet →
+//     StopApplication → StartApplication → PollStart, with rolling/
+//     canary swapped for CreateDeployment + PollDeployment).
+//
+// Each helper in this file names the cf-cli function it mirrors in its
+// doc comment ("cf-cli's `actor.X`"). When upstream changes:
+//
+//  1. Bump the `code.cloudfoundry.org/cli/v8` line in jetstream/go.mod.
+//  2. Re-read the two files above; diff against the version they replace.
+//  3. For any behavioral change in {package selection, build poll
+//     loop, droplet set, stop/start sequencing, instance-startup
+//     criteria, deployment_create payload, deployment poll loop}, find
+//     the matching helper here (per-helper comments cite the cf-cli
+//     symbol) and update it together with its httptest fake.
+//
+// The end-to-end design — including rejected alternatives, state-machine
+// ownership, and the 4-layer test plan — lives in the knowledge store at
+// stratos/docs/2026-04-30-A8-restage-orchestration-design.md (not in
+// this repo, since AI-collaboration design notes are kept out of
+// publishable Stratos history per the AI-artifact policy).
+//
+// # Drift detection
+//
+// httptest fakes in *_test.go pin the request shape we issue and the
+// response shape we accept. They catch us-side drift but NOT cf-cli-side
+// or CF-side drift. The gate-improvements assessment
+// (KS docs/2026-04-30-gate-improvements-assessment.md) documents the
+// follow-up work — capability-gate tests, contract fixtures, and a
+// `gate-extra` integration target — that closes that gap.
 package cloudfoundry
 
 import (
