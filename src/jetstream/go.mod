@@ -184,9 +184,6 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
-	github.com/nats-io/nats.go v1.45.0 // indirect
-	github.com/nats-io/nkeys v0.4.11 // indirect
-	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
@@ -274,4 +271,4 @@ require (
 // the fork's go.mod declaration (which still says fivetwenty-io/capi/v3)
 // during resolution. Retire this once the fix lands upstream in
 // fivetwenty-io/capi and a tagged release is cut.
-replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.4-fix-apps-delete.6
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.4-fix-apps-delete.7
