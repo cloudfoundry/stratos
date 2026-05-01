@@ -141,3 +141,21 @@ func getNewestReadyPackage(ctx context.Context, client capi.Client, appGUID stri
 	}
 	return resp.Resources[0].GUID, nil
 }
+
+// createBuildForPackage kicks a v3 build for the given package, returning
+// the new build's GUID. Step 2 of the v3 restage sequence: cf-cli's
+// `actor.StagePackage` (the Create-build phase only; polling is step 3).
+//
+// Maps to: POST /v3/builds {"package":{"guid":"<p>"}}
+//
+// CF v3 returns the build with state STAGING; the build polls advance it
+// to STAGED (success) or FAILED. Build polling lives in a later slice.
+func createBuildForPackage(ctx context.Context, client capi.Client, packageGUID string) (string, error) {
+	build, err := client.Builds().Create(ctx, &capi.BuildCreateRequest{
+		Package: &capi.BuildPackageRef{GUID: packageGUID},
+	})
+	if err != nil {
+		return "", err
+	}
+	return build.GUID, nil
+}

@@ -108,3 +108,72 @@ func TestGetNewestReadyPackage_PropagatesUpstreamError(t *testing.T) {
 	require.NotErrorIs(t, err, errNoReadyPackage)
 	assert.Empty(t, pkgGUID)
 }
+
+// TestCreateBuildForPackage_HappyPath verifies the helper POSTs to
+// /v3/builds with the v3 BuildCreateRequest envelope, and returns the new
+// build's GUID from the response body.
+func TestCreateBuildForPackage_HappyPath(t *testing.T) {
+	var capturedMethod string
+	var capturedPath string
+	var capturedBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/builds":
+			capturedMethod = r.Method
+			capturedPath = r.URL.Path
+			_ = json.NewDecoder(r.Body).Decode(&capturedBody)
+			w.WriteHeader(http.StatusCreated)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":  "build-new",
+				"state": "STAGING",
+				"package": map[string]interface{}{
+					"guid": "pkg-1",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client, err := cfclient.NewWithToken(ctx, srv.URL, "test-token")
+	require.NoError(t, err)
+
+	buildGUID, err := createBuildForPackage(ctx, client, "pkg-1")
+	require.NoError(t, err)
+	assert.Equal(t, "build-new", buildGUID)
+	assert.Equal(t, http.MethodPost, capturedMethod)
+	assert.Equal(t, "/v3/builds", capturedPath)
+
+	pkg, ok := capturedBody["package"].(map[string]interface{})
+	require.True(t, ok, "request body must include a package object: %v", capturedBody)
+	assert.Equal(t, "pkg-1", pkg["guid"])
+}
+
+// TestCreateBuildForPackage_PropagatesError verifies the helper returns
+// the upstream error rather than masking it. Build creation can fail
+// when the package is not READY or the app is missing.
+func TestCreateBuildForPackage_PropagatesError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/v3" {
+			_, _ = w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_, _ = w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"Package state must be READY"}]}`))
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client, err := cfclient.NewWithToken(ctx, srv.URL, "test-token")
+	require.NoError(t, err)
+
+	buildGUID, err := createBuildForPackage(ctx, client, "pkg-not-ready")
+	require.Error(t, err)
+	assert.Empty(t, buildGUID)
+}
