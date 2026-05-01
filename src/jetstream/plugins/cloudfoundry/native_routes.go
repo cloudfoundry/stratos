@@ -57,6 +57,13 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.POST("/cf/user_provided_service_instances/:cnsiGuid", c.createUserProvidedServiceInstance)
 	echoGroup.PATCH("/cf/user_provided_service_instances/:cnsiGuid/:siGuid", c.updateUserProvidedServiceInstance)
 
+	// A10 Revisions UI: list + rollback. Rollback's signature mirrors
+	// restageApp (pre-extracted GUIDs), so we wrap it for echo.
+	echoGroup.GET("/cf/apps/:cnsiGuid/:appGuid/revisions", c.getAppRevisions)
+	echoGroup.POST("/cf/apps/:cnsiGuid/:appGuid/rollback", func(ctx echo.Context) error {
+		return c.rollbackApp(ctx, ctx.Param("cnsiGuid"), ctx.Param("appGuid"))
+	})
+
 	// Phase 1C write-side completion
 	echoGroup.PATCH("/cf/orgs/:cnsiGuid/:orgGuid", c.updateNativeOrg)
 	echoGroup.POST("/cf/spaces/:cnsiGuid", c.createNativeSpace)
