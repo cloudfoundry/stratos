@@ -92,6 +92,7 @@ type RestageRequest struct {
 // then transitioning forward.
 type RestageRef struct {
 	CNSIGuid string
+	UserGuid string
 	AppGuid  string
 	Strategy RestageStrategy
 	NoWait   bool
