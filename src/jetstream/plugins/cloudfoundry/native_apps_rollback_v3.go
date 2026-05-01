@@ -16,19 +16,26 @@
 //
 // CAPI reference: cf-cli v8's `actor.CreateDeploymentByApplicationAndRevision`
 // composes with `actor.PollStartForRolling`. Our happy path mirrors that.
-// Error states (CANCELED, SUPERSEDED, polling timeout) are stubbed with
-// `// TODO Task 8` markers — Task 8 backfills tests + handling without
-// changing the stage layout.
+// Error states (CANCELED, SUPERSEDED, polling timeout) are handled in
+// advanceRollbackDeploymentPoll alongside the DEPLOYED success branch.
 package cloudfoundry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 )
+
+// RollbackPollTimeout caps wall-clock time spent on the deployment_poll
+// stage. Anything longer is treated as a stuck deployment and surfaced as
+// a terminal failure rather than letting the job hang. cf-cli v8 has no
+// hard ceiling here — it polls until the user kills the command — but
+// Stratos jobs need a definite end so the frontend stops polling.
+const RollbackPollTimeout = 30 * time.Minute
 
 // RollbackStage names a single step in the v3 rollback state machine.
 // Like RestageStage, these names are surfaced to the frontend through
@@ -193,16 +200,21 @@ func advanceRollbackDeploymentCreate(
 }
 
 // advanceRollbackDeploymentPoll performs a single GET on the deployment
-// and either advances (success) or stays on the poll stage.
+// and either advances (FINALIZED+DEPLOYED), terminally fails
+// (FINALIZED+CANCELED, FINALIZED+SUPERSEDED, polling-budget exceeded), or
+// stays on the poll stage.
 //
-// Happy path (Task 7): status.value == "FINALIZED" && status.reason ==
-// "DEPLOYED" → JobStateComplete. Anything else → JobStateProcessing.
+// Reason codes mirror CF v3's deployment status taxonomy:
+//   - DEPLOYED   — terminal success.
+//   - CANCELED   — operator (or CF) canceled the deployment; the
+//     status.details.error string typically explains why (e.g.
+//     "instances crashed").
+//   - SUPERSEDED — a newer deployment for the same app started, so this
+//     one is abandoned by CF.
 //
-// TODO Task 8: handle terminal-but-failed states (FINALIZED + CANCELED,
-// FINALIZED + SUPERSEDED) and a polling timeout. The current stub keeps
-// the state machine on the poll stage indefinitely for those cases —
-// safe for the happy path but not for production. Task 8 wires the
-// failure transitions and adds tests.
+// The polling timeout is wall-clock from the stage's StartedAt; this is
+// the only place the orchestrator imposes its own deadline (CF itself
+// keeps the deployment record indefinitely).
 func advanceRollbackDeploymentPoll(
 	ctx context.Context,
 	client capi.Client,
@@ -214,13 +226,38 @@ func advanceRollbackDeploymentPoll(
 	if err != nil {
 		return failRollbackStage(rec, err, now)
 	}
+
+	// Branch 1: FINALIZED + DEPLOYED — terminal success.
 	if dep.Status.Value == "FINALIZED" && dep.Status.Reason == "DEPLOYED" {
 		completeRollbackStage(rec, "deployed", now)
 		ref.CurrentStage = ""
 		return stratosjobs.JobStateComplete, nil, nil
 	}
-	// TODO Task 8: terminal failure reasons (CANCELED, SUPERSEDED) and
-	// polling timeout. For now, stay on the poll stage so the happy
-	// path advances correctly.
+
+	// Branch 2: FINALIZED + CANCELED — terminal failure. Propagate
+	// status.details.error if present (mirror of advanceBuildPoll's
+	// build.Error handling — CF's user-facing reason).
+	if dep.Status.Value == "FINALIZED" && dep.Status.Reason == "CANCELED" {
+		msg := "Deployment canceled"
+		if dep.Status.Details != nil && dep.Status.Details.Error != nil && *dep.Status.Details.Error != "" {
+			msg = *dep.Status.Details.Error
+		}
+		return failRollbackStage(rec, errors.New(msg), now)
+	}
+
+	// Branch 3: FINALIZED + SUPERSEDED — terminal failure. CF has
+	// abandoned this deployment because a newer one started.
+	if dep.Status.Value == "FINALIZED" && dep.Status.Reason == "SUPERSEDED" {
+		return failRollbackStage(rec, errors.New("Superseded by another deployment"), now)
+	}
+
+	// Branch 4: polling budget exceeded — terminal failure. Use the
+	// stage's StartedAt as the reference point so a single hung poll
+	// doesn't bias the budget.
+	if !rec.StartedAt.IsZero() && now().Sub(rec.StartedAt) > RollbackPollTimeout {
+		return failRollbackStage(rec, errors.New("Rollback polling timed out"), now)
+	}
+
+	// Otherwise (ACTIVE/DEPLOYING, etc.) — stay on this stage.
 	return stratosjobs.JobStateProcessing, nil, nil
 }
