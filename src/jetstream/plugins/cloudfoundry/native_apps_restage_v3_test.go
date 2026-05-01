@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/fivetwenty-io/capi/v3/pkg/cfclient"
 	"github.com/stretchr/testify/assert"
@@ -614,4 +615,498 @@ func TestPollBuildUntilTerminal_HonorsContextCancellation(t *testing.T) {
 	assert.True(t, errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled),
 		"expected deadline exceeded or canceled, got %v", err)
 	assert.Nil(t, build)
+}
+
+// fixedClock returns a now() func that yields a deterministic, advancing
+// timestamp on each call (10s per call). Tests use it to assert StartedAt
+// vs EndedAt without sleeping.
+func fixedClock() func() time.Time {
+	base := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	calls := 0
+	return func() time.Time {
+		t := base.Add(time.Duration(calls) * 10 * time.Second)
+		calls++
+		return t
+	}
+}
+
+// orchestratorTestClient builds a capi client wired to an httptest server.
+// All orchestrator tests use this helper to keep the boilerplate per-test
+// down to handler-shape only.
+func orchestratorTestClient(t *testing.T, srv *httptest.Server) capi.Client {
+	t.Helper()
+	client, err := cfclient.NewWithToken(context.Background(), srv.URL, "test-token")
+	require.NoError(t, err)
+	return client
+}
+
+// rootHandler responds to the /v3 capability probe so cfclient.NewWithToken
+// succeeds before the test-specific handler runs.
+func rootHandler(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(`{"links":{}}`))
+}
+
+func TestEnsureStageInProgress_AppendsRecordOnFirstCall(t *testing.T) {
+	ref := &RestageRef{}
+	now := fixedClock()
+	rec := ensureStageInProgress(ref, StageRestagePackageLookup, now)
+	require.NotNil(t, rec)
+	require.Len(t, ref.Stages, 1)
+	assert.Equal(t, StageRestagePackageLookup, ref.Stages[0].Stage)
+	assert.Equal(t, StageStateInProgress, ref.Stages[0].State)
+	assert.False(t, ref.Stages[0].StartedAt.IsZero())
+}
+
+func TestEnsureStageInProgress_IsIdempotent(t *testing.T) {
+	ref := &RestageRef{}
+	now := fixedClock()
+	rec1 := ensureStageInProgress(ref, StageRestagePackageLookup, now)
+	rec2 := ensureStageInProgress(ref, StageRestagePackageLookup, now)
+	assert.Same(t, rec1, rec2)
+	assert.Len(t, ref.Stages, 1)
+}
+
+func TestAdvanceRestage_PackageLookupAdvancesToBuildCreate(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/packages":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources":  []map[string]interface{}{{"guid": "pkg-1", "state": "READY"}},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{AppGuid: "app-1", CurrentStage: StageRestagePackageLookup}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Empty(t, errs)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, "pkg-1", ref.PackageGuid)
+	assert.Equal(t, StageRestageBuildCreate, ref.CurrentStage)
+	require.Len(t, ref.Stages, 1)
+	assert.Equal(t, StageStateDone, ref.Stages[0].State)
+}
+
+func TestAdvanceRestage_PackageLookupNoEligiblePackageFailsTerminal(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/packages":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{AppGuid: "app-empty", CurrentStage: StageRestagePackageLookup}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.Len(t, errs, 1)
+	assert.Equal(t, "stratos.restage.package_lookup", errs[0].Code)
+	require.Len(t, ref.Stages, 1)
+	assert.Equal(t, StageStateFailed, ref.Stages[0].State)
+	assert.Contains(t, ref.Stages[0].Error, "no READY package")
+}
+
+func TestAdvanceRestage_BuildCreateAdvancesToBuildPoll(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			rootHandler(w)
+		case r.URL.Path == "/v3/builds" && r.Method == http.MethodPost:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":  "build-1",
+				"state": "STAGING",
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		PackageGuid:  "pkg-1",
+		CurrentStage: StageRestageBuildCreate,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, "build-1", ref.BuildGuid)
+	assert.Equal(t, StageRestageBuildPoll, ref.CurrentStage)
+}
+
+func TestAdvanceRestage_BuildPollStagingStaysOnSameStage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/builds/build-1":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":  "build-1",
+				"state": "STAGING",
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		BuildGuid:    "build-1",
+		CurrentStage: StageRestageBuildPoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, StageRestageBuildPoll, ref.CurrentStage)
+	require.Len(t, ref.Stages, 1)
+	assert.Equal(t, StageStateInProgress, ref.Stages[0].State)
+}
+
+func TestAdvanceRestage_BuildPollStagedAdvancesAndCapturesDroplet(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/builds/build-1":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":    "build-1",
+				"state":   "STAGED",
+				"droplet": map[string]string{"guid": "droplet-1"},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		BuildGuid:    "build-1",
+		CurrentStage: StageRestageBuildPoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, "droplet-1", ref.DropletGuid)
+	assert.Equal(t, StageRestageSetDroplet, ref.CurrentStage)
+}
+
+func TestAdvanceRestage_BuildPollFailedTerminalWithCfErrorMessage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/builds/build-bad":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":  "build-bad",
+				"state": "FAILED",
+				"error": "StagingError - no buildpack matched",
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		BuildGuid:    "build-bad",
+		CurrentStage: StageRestageBuildPoll,
+	}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.Len(t, errs, 1)
+	assert.Contains(t, errs[0].Message, "no buildpack matched")
+}
+
+func TestAdvanceRestage_SetDropletAdvancesToStop(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			rootHandler(w)
+		case r.URL.Path == "/v3/apps/app-1/relationships/current_droplet" && r.Method == http.MethodPatch:
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"data": map[string]string{"guid": "droplet-1"},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		DropletGuid:  "droplet-1",
+		CurrentStage: StageRestageSetDroplet,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, StageRestageStop, ref.CurrentStage)
+}
+
+func TestAdvanceRestage_StopKicksAndAdvancesToStart(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			rootHandler(w)
+		case r.URL.Path == "/v3/apps/app-1/actions/stop" && r.Method == http.MethodPost:
+			w.Header().Set("Location", "/v3/jobs/stop-job-1")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusAccepted)
+			_, _ = w.Write([]byte(`{"guid":"app-1","state":"STOPPED"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{AppGuid: "app-1", CurrentStage: StageRestageStop}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, StageRestageStart, ref.CurrentStage)
+}
+
+func TestAdvanceRestage_StartKicksAndAdvancesToInstancePoll(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			rootHandler(w)
+		case r.URL.Path == "/v3/apps/app-1/actions/start" && r.Method == http.MethodPost:
+			w.Header().Set("Location", "/v3/jobs/start-job-1")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusAccepted)
+			_, _ = w.Write([]byte(`{"guid":"app-1","state":"STARTED"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{AppGuid: "app-1", CurrentStage: StageRestageStart}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, StageRestageInstancePoll, ref.CurrentStage)
+}
+
+// TestAdvanceRestage_InstancePollResolvesProcessOnFirstCall verifies the
+// orchestrator caches the web-process GUID via /v3/processes lookup before
+// querying stats.
+func TestAdvanceRestage_InstancePollResolvesProcessOnFirstCall(t *testing.T) {
+	processLookups := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/processes":
+			processLookups++
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources":  []map[string]interface{}{{"guid": "proc-web", "type": "web"}},
+			})
+		case "/v3/processes/proc-web/stats":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"resources": []map[string]interface{}{{"state": "RUNNING"}},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{AppGuid: "app-1", CurrentStage: StageRestageInstancePoll}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateComplete, state)
+	assert.Equal(t, "proc-web", ref.WebProcessGuid)
+	assert.Equal(t, RestageStage(""), ref.CurrentStage)
+	assert.Equal(t, 1, processLookups)
+}
+
+// TestAdvanceRestage_InstancePollAllRunningCompletes verifies the terminal
+// transition when every instance is RUNNING.
+func TestAdvanceRestage_InstancePollAllRunningCompletes(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/processes/proc-web/stats":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"resources": []map[string]interface{}{
+					{"state": "RUNNING"},
+					{"state": "RUNNING"},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:        "app-1",
+		WebProcessGuid: "proc-web",
+		CurrentStage:   StageRestageInstancePoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateComplete, state)
+}
+
+// TestAdvanceRestage_InstancePollNoWaitShortCircuits verifies the noWait
+// shortcut returns COMPLETE the moment any instance is RUNNING.
+func TestAdvanceRestage_InstancePollNoWaitShortCircuits(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/processes/proc-web/stats":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"resources": []map[string]interface{}{
+					{"state": "RUNNING"},
+					{"state": "STARTING"},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:        "app-1",
+		WebProcessGuid: "proc-web",
+		NoWait:         true,
+		CurrentStage:   StageRestageInstancePoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateComplete, state)
+}
+
+// TestAdvanceRestage_InstancePollStillStartingStays verifies the orchestrator
+// stays on INSTANCE_POLL when no instance is RUNNING yet.
+func TestAdvanceRestage_InstancePollStillStartingStays(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/processes/proc-web/stats":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"resources": []map[string]interface{}{{"state": "STARTING"}},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		WebProcessGuid: "proc-web",
+		CurrentStage:   StageRestageInstancePoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, StageRestageInstancePoll, ref.CurrentStage)
+}
+
+// TestAdvanceRestage_InstancePollAllCrashedFailsFast verifies the
+// fail-fast path when all running instances crash, rather than waiting
+// for context timeout.
+func TestAdvanceRestage_InstancePollAllCrashedFailsFast(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/processes/proc-web/stats":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"resources": []map[string]interface{}{
+					{"state": "CRASHED"},
+					{"state": "CRASHED"},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		WebProcessGuid: "proc-web",
+		CurrentStage:   StageRestageInstancePoll,
+	}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.Len(t, errs, 1)
+	assert.Contains(t, errs[0].Message, "all app instances crashed")
+}
+
+// TestAdvanceRestage_UnknownStageFailsTerminal guards against a ref that
+// names a stage the downtime path does not own (e.g. deployment_create
+// from the rolling/canary path before that slice lands).
+func TestAdvanceRestage_UnknownStageFailsTerminal(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v3" {
+			rootHandler(w)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{CurrentStage: "bogus_stage"}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.Len(t, errs, 1)
+	assert.Equal(t, "stratos.restage.invalid_stage", errs[0].Code)
+}
+
+// TestAdvanceRestage_TerminalStageReturnsComplete verifies a ref that
+// has already drained (CurrentStage == "") is reported COMPLETE rather
+// than treated as an error.
+func TestAdvanceRestage_TerminalStageReturnsComplete(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v3" {
+			rootHandler(w)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{CurrentStage: ""}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateComplete, state)
 }

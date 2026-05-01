@@ -13,8 +13,10 @@ package cloudfoundry
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 )
 
@@ -103,8 +105,12 @@ type RestageRef struct {
 	// DeploymentGuid created by deployment_create (rolling/canary path).
 	DeploymentGuid string
 
+	// WebProcessGuid is a runtime cache resolved on first instance_poll.
+	// Not on the wire — the frontend reads stage records, not ref state.
+	WebProcessGuid string
+
 	// CurrentStage names the next stage to execute or the in-flight stage
-	// being polled.
+	// being polled. The empty string means terminal (success).
 	CurrentStage RestageStage
 
 	// Stages is the running history surfaced as result.stages[] on the job.
@@ -366,4 +372,215 @@ func pollBuildUntilTerminal(
 		case <-time.After(pollInterval):
 		}
 	}
+}
+
+// advanceRestage drives the v3 restage state machine forward by ONE stage
+// per call. It is invoked by the JobTranslator on each Tracker.Refresh
+// poll, so individual HTTP requests stay short — multi-minute waits
+// (build staging, instance startup) are expressed as repeated stays on
+// the BUILD_POLL / INSTANCE_POLL stages.
+//
+// Returns the Stratos job state to surface (PROCESSING during in-flight,
+// COMPLETE on terminal success, FAILED on terminal failure) plus any
+// StratosError envelope. The transport-error return is reserved for
+// internal logic faults (unknown stage); CF transport errors are mapped
+// to per-stage failures so the job's stage list shows where it broke.
+//
+// This is the downtime-strategy path only:
+//
+//	package_lookup → build_create → build_poll → set_droplet
+//	             → stop → start → instance_poll → terminal
+//
+// Rolling / canary paths add a deployment_create + deployment_poll
+// branch and are introduced in a follow-up slice.
+func advanceRestage(
+	ctx context.Context,
+	client capi.Client,
+	ref *RestageRef,
+	now func() time.Time,
+) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	if now == nil {
+		now = time.Now
+	}
+	if ref.CurrentStage == "" {
+		// Already terminal — caller should not be polling, but tolerate.
+		return stratosjobs.JobStateComplete, nil, nil
+	}
+
+	rec := ensureStageInProgress(ref, ref.CurrentStage, now)
+
+	switch ref.CurrentStage {
+	case StageRestagePackageLookup:
+		return advancePackageLookup(ctx, client, ref, rec, now)
+	case StageRestageBuildCreate:
+		return advanceBuildCreate(ctx, client, ref, rec, now)
+	case StageRestageBuildPoll:
+		return advanceBuildPoll(ctx, client, ref, rec, now)
+	case StageRestageSetDroplet:
+		return advanceSetDroplet(ctx, client, ref, rec, now)
+	case StageRestageStop:
+		return advanceStop(ctx, client, ref, rec, now)
+	case StageRestageStart:
+		return advanceStart(ctx, client, ref, rec, now)
+	case StageRestageInstancePoll:
+		return advanceInstancePoll(ctx, client, ref, rec, now)
+	default:
+		return stratosjobs.JobStateFailed, []stratosjobs.StratosError{{
+			Code:    "stratos.restage.invalid_stage",
+			Message: fmt.Sprintf("unknown restage stage: %q", ref.CurrentStage),
+		}}, nil
+	}
+}
+
+// ensureStageInProgress returns a pointer to the stage record for `stage`,
+// creating it (with state=in_progress) if missing. Idempotent — second
+// and subsequent calls for the same stage return the existing record.
+func ensureStageInProgress(ref *RestageRef, stage RestageStage, now func() time.Time) *RestageStageRecord {
+	for i := range ref.Stages {
+		if ref.Stages[i].Stage == stage {
+			return &ref.Stages[i]
+		}
+	}
+	ref.Stages = append(ref.Stages, RestageStageRecord{
+		Stage:     stage,
+		State:     StageStateInProgress,
+		StartedAt: now(),
+	})
+	return &ref.Stages[len(ref.Stages)-1]
+}
+
+// completeStage marks rec as done with an optional human-facing detail.
+func completeStage(rec *RestageStageRecord, detail string, now func() time.Time) {
+	rec.State = StageStateDone
+	rec.EndedAt = now()
+	if detail != "" {
+		rec.Detail = detail
+	}
+}
+
+// failStage marks rec as failed with the error string and produces the
+// StratosError envelope for the Stratos job's errors[].
+func failStage(rec *RestageStageRecord, err error, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	rec.State = StageStateFailed
+	rec.EndedAt = now()
+	rec.Error = err.Error()
+	return stratosjobs.JobStateFailed, []stratosjobs.StratosError{{
+		Code:    "stratos.restage." + string(rec.Stage),
+		Message: err.Error(),
+	}}, nil
+}
+
+func advancePackageLookup(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	guid, err := getNewestReadyPackage(ctx, client, ref.AppGuid)
+	if err != nil {
+		return failStage(rec, err, now)
+	}
+	ref.PackageGuid = guid
+	completeStage(rec, "package="+guid, now)
+	ref.CurrentStage = StageRestageBuildCreate
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+func advanceBuildCreate(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	guid, err := createBuildForPackage(ctx, client, ref.PackageGuid)
+	if err != nil {
+		return failStage(rec, err, now)
+	}
+	ref.BuildGuid = guid
+	completeStage(rec, "build="+guid, now)
+	ref.CurrentStage = StageRestageBuildPoll
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+// advanceBuildPoll performs a single GET on the build and either advances
+// or stays on the BUILD_POLL stage. Multi-minute staging waits are
+// expressed as repeated stays.
+func advanceBuildPoll(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	build, err := client.Builds().Get(ctx, ref.BuildGuid)
+	if err != nil {
+		return failStage(rec, err, now)
+	}
+	switch build.State {
+	case "STAGED":
+		if build.Droplet == nil || build.Droplet.GUID == "" {
+			return failStage(rec, errors.New("build STAGED but droplet GUID missing"), now)
+		}
+		ref.DropletGuid = build.Droplet.GUID
+		completeStage(rec, "droplet="+build.Droplet.GUID, now)
+		ref.CurrentStage = StageRestageSetDroplet
+		return stratosjobs.JobStateProcessing, nil, nil
+	case "FAILED":
+		msg := errBuildFailed.Error()
+		if build.Error != nil && *build.Error != "" {
+			msg = *build.Error
+		}
+		return failStage(rec, errors.New(msg), now)
+	}
+	// STAGING (or anything non-terminal) — stay on this stage.
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+func advanceSetDroplet(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	if err := setCurrentDroplet(ctx, client, ref.AppGuid, ref.DropletGuid); err != nil {
+		return failStage(rec, err, now)
+	}
+	completeStage(rec, "current droplet set", now)
+	ref.CurrentStage = StageRestageStop
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+// advanceStop kicks the v3 stop and immediately advances to start. CF
+// queues start-while-stopping (POST /v3/apps/<a>/actions/start during a
+// pending stop is accepted), and the subsequent INSTANCE_POLL stage is
+// the canonical "is the new droplet alive" signal. We deliberately don't
+// poll the stop job here — that would add a stage with no UX value.
+func advanceStop(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	if _, err := stopApp(ctx, client, ref.AppGuid); err != nil {
+		return failStage(rec, err, now)
+	}
+	completeStage(rec, "stop kicked", now)
+	ref.CurrentStage = StageRestageStart
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+func advanceStart(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	if _, err := startApp(ctx, client, ref.AppGuid); err != nil {
+		return failStage(rec, err, now)
+	}
+	completeStage(rec, "start kicked", now)
+	ref.CurrentStage = StageRestageInstancePoll
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+// advanceInstancePoll caches the web-process GUID on first call, then
+// performs one stats GET per call. Termination criteria match
+// pollInstancesUntilRunning's blocking form: all-running (or some-running
+// under noWait) → COMPLETE; all-crashed → FAILED; otherwise stay.
+func advanceInstancePoll(ctx context.Context, client capi.Client, ref *RestageRef, rec *RestageStageRecord, now func() time.Time) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	if ref.WebProcessGuid == "" {
+		guid, err := getWebProcessGUID(ctx, client, ref.AppGuid)
+		if err != nil {
+			return failStage(rec, err, now)
+		}
+		ref.WebProcessGuid = guid
+	}
+	stats, err := client.Processes().GetStats(ctx, ref.WebProcessGuid)
+	if err != nil {
+		return failStage(rec, err, now)
+	}
+	state := summarizeInstanceStates(stats.Resources)
+	if state.allRunning && len(stats.Resources) > 0 {
+		completeStage(rec, fmt.Sprintf("%d instances running", len(stats.Resources)), now)
+		ref.CurrentStage = ""
+		return stratosjobs.JobStateComplete, nil, nil
+	}
+	if ref.NoWait && state.someRunning {
+		completeStage(rec, "no-wait: at least one instance running", now)
+		ref.CurrentStage = ""
+		return stratosjobs.JobStateComplete, nil, nil
+	}
+	if state.allCrashed {
+		return failStage(rec, errAllInstancesCrashed, now)
+	}
+	return stratosjobs.JobStateProcessing, nil, nil
 }
