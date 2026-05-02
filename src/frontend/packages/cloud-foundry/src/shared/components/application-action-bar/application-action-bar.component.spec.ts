@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -61,6 +61,7 @@ describe('AppApplicationActionBarComponent', () => {
     overrides: {
       applicationState$?: any;
       updatingSection$?: any;
+      inFlight?: boolean;
     } = {}
   ) {
     applicationServiceMock = new ApplicationServiceMock();
@@ -78,7 +79,11 @@ describe('AppApplicationActionBarComponent', () => {
     }
 
     // Mock action methods so click handlers don't trigger real navigation/dispatch.
+    // The component reads `actions.inFlight` as a readonly Signal and pipes it
+    // through toObservable() — the mock must expose a real Signal here, not
+    // just a value, or toObservable will throw "source is not a function".
     const actionsMock = {
+      inFlight: signal(overrides.inFlight ?? false).asReadonly(),
       restart: () => {},
       stop: () => {},
       start: () => {},
@@ -158,16 +163,19 @@ describe('AppApplicationActionBarComponent', () => {
     expect(stopBtn).toBeFalsy();
   });
 
-  it('disables action buttons when busy.updating is true', async () => {
+  it('disables action buttons when actions.inFlight is true', async () => {
+    // Busy state used to come from ngrx updatingSection$.restaging; the
+    // action service now owns its own inFlight signal so external state
+    // can never strand the buttons. The test drives the new signal
+    // directly.
     await setUp({
       applicationState$: new BehaviorSubject({
         label: 'Running',
         indicator: null,
         actions: { restart: true, stop: true, start: false, restage: true },
       }).asObservable(),
-      updatingSection$: new BehaviorSubject({
-        restaging: { busy: true },
-      }).asObservable(),
+      updatingSection$: new BehaviorSubject({}).asObservable(),
+      inFlight: true,
     });
 
     const root: HTMLElement = fixture.nativeElement;

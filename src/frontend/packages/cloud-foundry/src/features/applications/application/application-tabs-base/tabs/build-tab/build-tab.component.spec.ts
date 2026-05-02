@@ -1,6 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -8,6 +8,7 @@ import { generateTestApplicationServiceProvider, generateCfStoreModules, Applica
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
 import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { ApplicationPollingService } from '../../application-polling.service';
+import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from "./view-buildpack/view-buildpack.component";
 describe('BuildTabComponent', () => {
@@ -31,6 +32,14 @@ describe('BuildTabComponent', () => {
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         ApplicationPollingService,
+        // BuildTab reads actions.inFlight() to drive the status-card pulse
+        // animation. The mock exposes a readonly Signal so the template
+        // binding {{ actions.inFlight() }} resolves without injecting the
+        // real action service (which depends on parent-scoped providers).
+        {
+          provide: AppApplicationActionsService,
+          useValue: { inFlight: signal(false).asReadonly() },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
