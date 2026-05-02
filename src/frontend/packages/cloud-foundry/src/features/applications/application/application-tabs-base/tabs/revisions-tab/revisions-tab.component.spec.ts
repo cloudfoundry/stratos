@@ -4,10 +4,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { of } from 'rxjs';
 
-import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
 import { RevisionsTabComponent } from './revisions-tab.component';
 import { RevisionsSignalConfigService } from '../../../../../../shared/components/list/list-types/revisions/revisions-signal-config.service';
 import type { RevisionRow } from '../../../../../../shared/services/revisions.service';
@@ -58,6 +56,8 @@ describe('RevisionsTabComponent', () => {
   let component: RevisionsTabComponent;
   let fixture: ComponentFixture<RevisionsTabComponent>;
 
+  const dataStub = { cnsiGuid: 'test-cf-guid', appGuid: 'test-app-guid' };
+
   function setupTestBed(configMockOverrides: Parameters<typeof makeConfigSvcMock>[0] = {}) {
     const configMock = makeConfigSvcMock(configMockOverrides);
 
@@ -68,7 +68,7 @@ describe('RevisionsTabComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useValue: dataStub },
         { provide: RevisionsSignalConfigService, useValue: configMock },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -97,8 +97,8 @@ describe('RevisionsTabComponent', () => {
   it('calls initialize and loadAll on construction', () => {
     const configMock = setupTestBed();
     expect(configMock.initialize).toHaveBeenCalledWith(
-      ApplicationServiceMock.cfGuid,
-      ApplicationServiceMock.appGuid,
+      dataStub.cnsiGuid,
+      dataStub.appGuid,
     );
     expect(configMock.loadAll).toHaveBeenCalled();
   });

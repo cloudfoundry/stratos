@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig, TailwindDialogService } from '@stratosui/core';
-import { ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { RevisionsSignalConfigService } from '../../../../../../shared/components/list/list-types/revisions/revisions-signal-config.service';
 import {
   RollbackDialogComponent,
@@ -31,7 +31,7 @@ import type { RevisionRow } from '../../../../../../shared/services/revisions.se
   ],
 })
 export class RevisionsTabComponent {
-  private readonly appSvc = inject(ApplicationService);
+  private readonly data = inject(AppDetailDataService);
   private readonly revsConfig = inject(RevisionsSignalConfigService);
   private readonly dialog = inject(TailwindDialogService);
 
@@ -41,7 +41,7 @@ export class RevisionsTabComponent {
   readonly rollingBackGuid: WritableSignal<string | null> = signal(null);
 
   constructor() {
-    this.revsConfig.initialize(this.appSvc.cfGuid, this.appSvc.appGuid);
+    this.revsConfig.initialize(this.data.cnsiGuid, this.data.appGuid);
     void this.revsConfig.loadAll();
 
     this.listConfig.set({
@@ -124,7 +124,7 @@ export class RevisionsTabComponent {
     const ref = this.dialog.open<RollbackDialogComponent, unknown, RollbackDialogResult>(
       RollbackDialogComponent,
       {
-        data: { revision: row, cnsi: this.appSvc.cfGuid, appGuid: this.appSvc.appGuid },
+        data: { revision: row, cnsi: this.data.cnsiGuid, appGuid: this.data.appGuid },
       },
     );
     ref.afterClosed().subscribe((r) => {
