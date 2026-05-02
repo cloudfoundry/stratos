@@ -53,6 +53,7 @@ type InMemoryTracker struct {
 	ttl       time.Duration
 	clock     func() time.Time
 	sweepTick time.Duration
+	metrics   *Metrics // optional; nil-safe everywhere
 
 	stopOnce sync.Once
 	stopCh   chan struct{}
@@ -68,6 +69,9 @@ type InMemoryTrackerConfig struct {
 	SweepInterval time.Duration
 	// Clock is overridable for tests.
 	Clock func() time.Time
+	// Metrics, if non-nil, receives ActiveJobs gauge + StageCountTotal
+	// counter updates as jobs come and go and stages are appended.
+	Metrics *Metrics
 }
 
 // NewInMemoryTracker constructs a tracker and starts its eviction sweeper
@@ -87,6 +91,7 @@ func NewInMemoryTracker(cfg InMemoryTrackerConfig) *InMemoryTracker {
 		ttl:       cfg.TTL,
 		clock:     cfg.Clock,
 		sweepTick: cfg.SweepInterval,
+		metrics:   cfg.Metrics,
 		stopCh:    make(chan struct{}),
 	}
 	go t.sweepLoop()
@@ -115,6 +120,9 @@ func (t *InMemoryTracker) Create(kind string, translator JobTranslator, ref inte
 		ref:        ref,
 	}
 	t.mu.Unlock()
+	if t.metrics != nil {
+		t.metrics.ActiveJobs.Inc()
+	}
 	return id
 }
 
@@ -188,6 +196,9 @@ func (t *InMemoryTracker) appendStageLocked(tj *trackedJob, stage JobStage) {
 	}
 	tj.job.Stages = append(tj.job.Stages, stage)
 	tj.job.UpdatedAt = t.clock()
+	if t.metrics != nil {
+		t.metrics.StageCountTotal.WithLabelValues(tj.job.Kind).Inc()
+	}
 }
 
 // AppendStage adds a stage to the job's history if its Code differs from
@@ -220,13 +231,18 @@ func (t *InMemoryTracker) sweepLoop() {
 
 func (t *InMemoryTracker) sweep() {
 	cutoff := t.clock().Add(-t.ttl)
+	var evicted int
 	t.mu.Lock()
 	for id, tj := range t.jobs {
 		if tj.terminalAt != nil && tj.terminalAt.Before(cutoff) {
 			delete(t.jobs, id)
+			evicted++
 		}
 	}
 	t.mu.Unlock()
+	if t.metrics != nil && evicted > 0 {
+		t.metrics.ActiveJobs.Sub(float64(evicted))
+	}
 }
 
 // newJobID produces an opaque 128-bit hex id. No backend information is

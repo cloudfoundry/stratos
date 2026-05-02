@@ -45,6 +45,67 @@ func NewRollbackJobTranslator(cf *CloudFoundrySpecification) *RollbackJobTransla
 // Kind returns the stable kind prefix for rollback jobs.
 func (t *RollbackJobTranslator) Kind() string { return RollbackJobKind }
 
+// CurrentStage implements stratosjobs.StageEmittingTranslator. It maps
+// the last entry in the RollbackRef.Stages slice to a JobStage for the
+// tracker's dedup-appending pipeline.
+//
+// Rollback has exactly two stages (deployment_create, deployment_poll),
+// so Index/Of are always 1-based within [1,2]. Returns (JobStage{}, false)
+// when the ref is the wrong type or the history is empty (job has not yet
+// started executing the state machine).
+func (t *RollbackJobTranslator) CurrentStage(ref interface{}) (stratosjobs.JobStage, bool) {
+	rRef, ok := ref.(*RollbackRef)
+	if !ok || len(rRef.Stages) == 0 {
+		return stratosjobs.JobStage{}, false
+	}
+	last := rRef.Stages[len(rRef.Stages)-1]
+	return stratosjobs.JobStage{
+		Code:      rollbackStageCode(last.Stage),
+		Label:     rollbackStageLabel(last.Stage),
+		Index:     rollbackStageIndex(last.Stage),
+		Of:        2, // deployment_create + deployment_poll
+		EnteredAt: last.StartedAt,
+	}, true
+}
+
+// rollbackStageCode maps a RollbackStage to a stable wire code that the
+// frontend uses for dedup and rendering. Must be stable — treat as wire
+// contract.
+func rollbackStageCode(s RollbackStage) string {
+	switch s {
+	case StageRollbackDeploymentCreate:
+		return "DEPLOYMENT_CREATE"
+	case StageRollbackDeploymentPoll:
+		return "DEPLOYMENT_POLL"
+	default:
+		return string(s)
+	}
+}
+
+// rollbackStageLabel returns a human-readable label for each rollback stage.
+func rollbackStageLabel(s RollbackStage) string {
+	switch s {
+	case StageRollbackDeploymentCreate:
+		return "Creating deployment"
+	case StageRollbackDeploymentPoll:
+		return "Waiting for rollback to complete"
+	default:
+		return string(s)
+	}
+}
+
+// rollbackStageIndex returns the 1-based step index for a rollback stage.
+func rollbackStageIndex(s RollbackStage) int {
+	switch s {
+	case StageRollbackDeploymentCreate:
+		return 1
+	case StageRollbackDeploymentPoll:
+		return 2
+	default:
+		return 0
+	}
+}
+
 // Fetch advances the rollback state machine by one stage and translates
 // the orchestrator's outcome onto the Stratos job tuple.
 //

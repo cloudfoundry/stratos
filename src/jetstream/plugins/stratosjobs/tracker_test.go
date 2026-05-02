@@ -5,6 +5,9 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 )
 
 // stubTranslator lets tests script the sequence of Fetch responses.
@@ -372,5 +375,57 @@ func TestSweep_LeavesNonTerminalAlone(t *testing.T) {
 	tr.sweep()
 	if _, ok := tr.Get(id); !ok {
 		t.Error("non-terminal job should never be evicted by TTL sweep")
+	}
+}
+
+// TestMetrics_WiringFiresOnLifecycle verifies the tracker honors a
+// supplied *Metrics: ActiveJobs increments on Create, decrements on
+// sweep eviction; StageCountTotal increments per appended stage with
+// the correct kind label; dedupes do not double-count.
+func TestMetrics_WiringFiresOnLifecycle(t *testing.T) {
+	reg := prometheus.NewRegistry()
+	m, err := RegisterMetrics(reg)
+	if err != nil {
+		t.Fatalf("RegisterMetrics: %v", err)
+	}
+
+	now := time.Date(2026, 5, 2, 10, 0, 0, 0, time.UTC)
+	clock := now
+	tr := NewInMemoryTracker(InMemoryTrackerConfig{
+		TTL:           5 * time.Minute,
+		SweepInterval: time.Hour,
+		Clock:         func() time.Time { return clock },
+		Metrics:       m,
+	})
+	t.Cleanup(tr.Stop)
+
+	tl := &stubTranslator{kind: "cf.app.restage", fn: func(int) (JobState, []StratosError, interface{}, error) {
+		return JobStateProcessing, nil, nil, nil
+	}}
+
+	id := tr.Create("cf.app.restage", tl, "ref")
+	if got := testutil.ToFloat64(m.ActiveJobs); got != 1 {
+		t.Errorf("ActiveJobs after Create: got %v want 1", got)
+	}
+
+	tr.AppendStage(id, JobStage{Code: "PACKAGE_LOOKUP"})
+	tr.AppendStage(id, JobStage{Code: "PACKAGE_LOOKUP"}) // dedup — must not count
+	tr.AppendStage(id, JobStage{Code: "BUILD_CREATE"})
+	if got := testutil.ToFloat64(m.StageCountTotal.WithLabelValues("cf.app.restage")); got != 2 {
+		t.Errorf("StageCountTotal[cf.app.restage]: got %v want 2", got)
+	}
+
+	// Force the job to terminal state so the sweep can evict it.
+	tl.fn = func(int) (JobState, []StratosError, interface{}, error) {
+		return JobStateComplete, nil, nil, nil
+	}
+	if _, ok := tr.Refresh(context.Background(), id); !ok {
+		t.Fatal("refresh failed")
+	}
+
+	clock = now.Add(time.Hour)
+	tr.sweep()
+	if got := testutil.ToFloat64(m.ActiveJobs); got != 0 {
+		t.Errorf("ActiveJobs after sweep eviction: got %v want 0", got)
 	}
 }
