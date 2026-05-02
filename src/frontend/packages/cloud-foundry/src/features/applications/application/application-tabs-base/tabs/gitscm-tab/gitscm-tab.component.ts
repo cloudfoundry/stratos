@@ -2,8 +2,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import { GitCommit, gitEntityCatalog, GitMeta, GitRepo, GitSCMService, GitSCMType, SCMIcon, GithubCommitAuthorComponent } from '@stratosui/git';
-import { Observable, Subscription } from 'rxjs';
-import { take,
+import { Observable, Subscription, of } from 'rxjs';
+import {
   distinctUntilChanged,
   filter,
   map,
@@ -11,8 +11,11 @@ import { take,
   refCount,
   startWith,
   switchMap,
+  take,
   withLatestFrom,
 } from 'rxjs/operators';
+
+import { ApplicationService } from '../../../../application.service';
 
 import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
 import {
@@ -21,7 +24,7 @@ import {
 import {
   GithubCommitsListConfigServiceAppTab,
 } from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
-import { ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { TileGridComponent } from '../../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
@@ -60,7 +63,8 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
   ],
 })
 export class GitSCMTabComponent implements OnInit, OnDestroy {
-  appService = inject(ApplicationService);
+  data = inject(AppDetailDataService);
+  private appService = inject(ApplicationService);
   private snackBar = inject(TailwindSnackBarService);
   private scmService = inject(GitSCMService);
 
@@ -102,78 +106,79 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const coreInfo$: Observable<[EnvVarStratosProject, GitMeta]> = this.appService.applicationStratProject$.pipe(
-      take(1),
-      map(stProject => [stProject, this.createBaseGitMeta(stProject)])
-    );
+    // Show the loading spinner until applicationStratProject$ resolves.
+    // The fields built inside the subscribe overwrite this once the
+    // project (and its repo) become available.
+    this.isLoading$ = of(true);
 
-    this.icon$ = this.appService.applicationStratProject$.pipe(
-      take(1),
-      map((stProject: EnvVarStratosProject) => {
-        const meta: GitMeta = this.createBaseGitMeta(stProject);
-        return meta.scm.getIcon();
-      })
-    );
+    // applicationStratProject$ is filtered to non-null by the facade
+    // (application.service.ts:197-199), so it suspends until env vars
+    // load and STRATOS_PROJECT is parsed. take(1) gives us a one-shot
+    // value with the same timing as the legacy observable.
+    this.appService.applicationStratProject$.pipe(take(1)).subscribe(stProject => {
+      const baseGitMeta = this.createBaseGitMeta(stProject);
+      const coreInfo$: Observable<[EnvVarStratosProject, GitMeta]> = of(
+        [stProject, baseGitMeta] as [EnvVarStratosProject, GitMeta]
+      );
 
-    this.hasRepo$ = this.appService.applicationStratProject$.pipe(
-      take(1),
-      switchMap((stProject: EnvVarStratosProject) => {
-        const gitRepInfoMeta: GitMeta = this.createBaseGitMeta(stProject);
-        return gitEntityCatalog.repo.store.getRepoInfo.getEntityService(gitRepInfoMeta).entityObs$;
-      }),
-      map(entity => entity.entity ? true : entity.entityRequestInfo.error ? false : undefined),
-      startWith(undefined),
-      publishReplay(1),
-      refCount()
-    );
+      this.icon$ = of(baseGitMeta.scm.getIcon());
 
-    this.isLoading$ = this.hasRepo$.pipe(
-      filter(hasRepo => hasRepo !== undefined),
-      map(() => false),
-      startWith(true)
-    );
+      this.hasRepo$ = gitEntityCatalog.repo.store.getRepoInfo
+        .getEntityService(baseGitMeta).entityObs$.pipe(
+          map(entity => entity.entity ? true : entity.entityRequestInfo.error ? false : undefined),
+          startWith(undefined),
+          publishReplay(1),
+          refCount()
+        );
 
-    const blockedOnRepo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
-      filter(hasRepo => hasRepo),
-      switchMap(() => coreInfo$)
-    );
+      this.isLoading$ = this.hasRepo$.pipe(
+        filter(hasRepo => hasRepo !== undefined),
+        map(() => false),
+        startWith(true)
+      );
 
-    this.gitSCMRepo$ = blockedOnRepo$.pipe(
-      map(([, baseGitMeta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(baseGitMeta)),
-      switchMap(repoService => repoService.waitForEntity$),
-      map(p => p.entity)
-    );
+      const blockedOnRepo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
+        filter(hasRepo => hasRepo),
+        switchMap(() => coreInfo$)
+      );
 
-    this.gitSCMRepoErrorSub = this.hasRepo$.pipe(
-      filter(hasRepo => hasRepo === false),
-      switchMap(() => coreInfo$),
-      switchMap(([, baseGitMeta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(baseGitMeta).entityMonitor.entityRequest$),
-      map(request => request.message),
-      distinctUntilChanged(),
-      withLatestFrom(coreInfo$)
-    ).subscribe(([errorMessage, [, baseGitMeta]]) => {
-      if (this.snackBarRef) {
-        this.snackBarRef.dismiss();
-      }
-      this.snackBarRef = this.snackBar.open(`Unable to fetch ${baseGitMeta.scm.getLabel()} project: ${errorMessage}`, 'Dismiss');
+      this.gitSCMRepo$ = blockedOnRepo$.pipe(
+        map(([, meta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(meta)),
+        switchMap(repoService => repoService.waitForEntity$),
+        map(p => p.entity)
+      );
+
+      this.gitSCMRepoErrorSub = this.hasRepo$.pipe(
+        filter(hasRepo => hasRepo === false),
+        switchMap(() => coreInfo$),
+        switchMap(([, meta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(meta).entityMonitor.entityRequest$),
+        map(request => request.message),
+        distinctUntilChanged(),
+        withLatestFrom(coreInfo$)
+      ).subscribe(([errorMessage, [, meta]]) => {
+        if (this.snackBarRef) {
+          this.snackBarRef.dismiss();
+        }
+        this.snackBarRef = this.snackBar.open(`Unable to fetch ${meta.scm.getLabel()} project: ${errorMessage}`, 'Dismiss');
+      });
+
+      this.commit$ = blockedOnRepo$.pipe(
+        map(([project, meta]) => gitEntityCatalog.commit.store.getEntityService(null, null, {
+          ...meta,
+          commitSha: project.deploySource.commit.trim()
+        })),
+        switchMap(commitService => commitService.waitForEntity$),
+        map(p => p.entity)
+      );
+      this.isHead$ = blockedOnRepo$.pipe(
+        map(([project, meta]) => gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
+          ...meta,
+          branchName: project.deploySource.branch
+        })),
+        switchMap(branchService => branchService.waitForEntity$),
+        withLatestFrom(blockedOnRepo$),
+        map(([p, [project]]) => p.entity.commit.sha === project.deploySource.commit.trim()),
+      );
     });
-
-    this.commit$ = blockedOnRepo$.pipe(
-      map(([stProject, baseGitMeta]) => gitEntityCatalog.commit.store.getEntityService(null, null, {
-        ...baseGitMeta,
-        commitSha: stProject.deploySource.commit.trim()
-      })),
-      switchMap(commitService => commitService.waitForEntity$),
-      map(p => p.entity)
-    );
-    this.isHead$ = blockedOnRepo$.pipe(
-      map(([stProject, baseGitMeta]) => gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
-        ...baseGitMeta,
-        branchName: stProject.deploySource.branch
-      })),
-      switchMap(branchService => branchService.waitForEntity$),
-      withLatestFrom(blockedOnRepo$),
-      map(([p, [stProject]]) => p.entity.commit.sha === stProject.deploySource.commit.trim()),
-    );
   }
 }
