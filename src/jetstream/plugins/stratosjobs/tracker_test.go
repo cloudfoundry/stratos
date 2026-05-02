@@ -202,6 +202,43 @@ func TestSweep_EvictsTerminalAfterTTL(t *testing.T) {
 	}
 }
 
+func TestInMemoryTracker_AppendStage_Dedups(t *testing.T) {
+	tr := NewInMemoryTracker(InMemoryTrackerConfig{})
+	defer tr.Stop()
+
+	id := tr.Create("test-kind", nil, nil)
+
+	s1 := JobStage{Code: "STAGING", Label: "Staging", Index: 1, Of: 3, EnteredAt: time.Now()}
+	tr.AppendStage(id, s1)
+	tr.AppendStage(id, s1) // duplicate by Code — must no-op
+
+	job, ok := tr.Get(id)
+	if !ok {
+		t.Fatal("job missing")
+	}
+	if got := len(job.Stages); got != 1 {
+		t.Fatalf("expected 1 stage after dedup, got %d", got)
+	}
+
+	s2 := JobStage{Code: "STARTING", Label: "Starting", Index: 2, Of: 3, EnteredAt: time.Now()}
+	tr.AppendStage(id, s2)
+	job, _ = tr.Get(id)
+	if got := len(job.Stages); got != 2 {
+		t.Fatalf("expected 2 stages after distinct-Code append, got %d", got)
+	}
+	if job.Stages[1].Code != "STARTING" {
+		t.Errorf("expected last stage code=STARTING, got %s", job.Stages[1].Code)
+	}
+}
+
+func TestInMemoryTracker_AppendStage_UnknownJob_NoOp(t *testing.T) {
+	tr := NewInMemoryTracker(InMemoryTrackerConfig{})
+	defer tr.Stop()
+
+	// Should not panic on unknown id
+	tr.AppendStage("nonexistent", JobStage{Code: "X"})
+}
+
 func TestSweep_LeavesNonTerminalAlone(t *testing.T) {
 	now := time.Date(2026, 4, 22, 20, 0, 0, 0, time.UTC)
 	clock := now

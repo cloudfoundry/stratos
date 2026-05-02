@@ -36,9 +36,23 @@ type StratosError struct {
 	Detail  interface{} `json:"detail,omitempty"`
 }
 
+// JobStage is one transition in an operation's progress timeline.
+// Translators emit stages via Tracker.AppendStage; the tracker dedups
+// by Code and appends. Frontend renders done/current/pending from
+// the resulting Stages slice.
+type JobStage struct {
+	Code      string    `json:"code"`      // e.g. "STAGING", "STARTING"
+	Label     string    `json:"label"`     // human-readable
+	Index     int       `json:"index"`     // 1-based step; 0 if unknown
+	Of        int       `json:"of"`        // total steps; 0 if unknown
+	EnteredAt time.Time `json:"enteredAt"`
+}
+
 // StratosJob is the wire shape returned from GET /pp/v1/stratos/jobs/{id}
 // and also the 202 handoff body. `Result` carries the final backend payload
 // only when State == COMPLETE. `Errors` is populated only when State == FAILED.
+// `Stages` accumulates the progress timeline via Tracker.AppendStage; omitted
+// from the wire when empty so old clients are unaffected.
 type StratosJob struct {
 	ID        string         `json:"id"`
 	Kind      string         `json:"kind"`
@@ -47,4 +61,5 @@ type StratosJob struct {
 	UpdatedAt time.Time      `json:"updatedAt"`
 	Errors    []StratosError `json:"errors,omitempty"`
 	Result    interface{}    `json:"result,omitempty"`
+	Stages    []JobStage     `json:"stages,omitempty"`
 }

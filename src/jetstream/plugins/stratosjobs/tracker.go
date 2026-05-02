@@ -27,6 +27,12 @@ type Tracker interface {
 	// frontends see progress without the translator being driven by a timer.
 	// Returns the refreshed job, or (nil, false) if unknown.
 	Refresh(ctx context.Context, id string) (*StratosJob, bool)
+
+	// AppendStage adds a stage to the job's progress timeline. The tracker
+	// dedups by Code against the last existing stage, so translators may
+	// call this on every poll without checking themselves. No-op for unknown
+	// job ids.
+	AppendStage(id string, stage JobStage)
 }
 
 // trackedJob is the internal tracker row — adds bookkeeping the wire shape
@@ -163,6 +169,25 @@ func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, 
 	snap := tj.job
 	t.mu.Unlock()
 	return &snap, true
+}
+
+// AppendStage adds a stage to the job's history if its Code differs from
+// the last existing stage. Dedup-by-Code makes it safe for translators
+// to call on every poll without checking themselves.
+func (t *InMemoryTracker) AppendStage(id string, stage JobStage) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	tj, ok := t.jobs[id]
+	if !ok {
+		return // unknown job — no-op
+	}
+	n := len(tj.job.Stages)
+	if n > 0 && tj.job.Stages[n-1].Code == stage.Code {
+		return // dedup: same code as last stage
+	}
+	tj.job.Stages = append(tj.job.Stages, stage)
+	tj.job.UpdatedAt = t.clock()
 }
 
 // sweepLoop periodically evicts jobs whose terminalAt + ttl has elapsed.
