@@ -233,10 +233,12 @@ func (c *CloudFoundrySpecification) restageApp(ctx echo.Context, cnsiGUID, appGU
 
 	switch req.Strategy {
 	case RestageStrategyDowntime, RestageStrategyRolling, RestageStrategyCanary:
-		// Accepted at the handler boundary; orchestrator currently only
-		// implements the downtime path (slice 7). Rolling/canary stages
-		// land in slice 10+; the wire contract holds steady so the
-		// frontend can be written once.
+		// Downtime: stop → set_droplet → start → instance_poll.
+		// Rolling/canary: deployment_create → deployment_poll (CF
+		// orchestrates the rolling instance swap; canary parks at
+		// ACTIVE/PAUSED awaiting human continue/cancel issued via
+		// cf cli — Stratos UI continue/cancel endpoints are a follow-up
+		// slice).
 	default:
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("restage: unknown strategy %q", req.Strategy))
 	}

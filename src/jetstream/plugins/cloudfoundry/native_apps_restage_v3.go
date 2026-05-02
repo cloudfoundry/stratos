@@ -54,6 +54,27 @@ import (
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 )
 
+// RestageBuildPollTimeout caps wall-clock time spent on the build_poll
+// stage. CF can leave a build STAGING for an unbounded period (slow
+// buildpack download, large source upload, stuck staging instance); the
+// orchestrator imposes a hard ceiling so the Stratos job has a definite
+// end rather than spinning forever. Mirror of RollbackPollTimeout.
+const RestageBuildPollTimeout = 30 * time.Minute
+
+// RestageInstancePollTimeout caps wall-clock time spent on the
+// instance_poll stage. The poll terminates naturally on all-running or
+// all-crashed; this ceiling catches the pathological case where some
+// instances stay STARTING indefinitely (e.g. health check never returns
+// 200 but doesn't crash either). Mirror of RollbackPollTimeout.
+const RestageInstancePollTimeout = 30 * time.Minute
+
+// RestageDeploymentPollTimeout caps wall-clock time spent on the
+// deployment_poll stage for the rolling/canary path. Mirror of
+// RollbackPollTimeout. Note: the budget pauses while the deployment is
+// in ACTIVE/PAUSED state (canary's human-review checkpoint) — the
+// timeout is meant to catch a hung CF, not a long human review.
+const RestageDeploymentPollTimeout = 30 * time.Minute
+
 // RestageStage names a single step in the v3 restage state machine. The
 // stage names are surfaced to the frontend through the Stratos job's
 // result.stages[]; treat them as a wire contract.
@@ -114,6 +135,20 @@ type RestageRequest struct {
 	NoWait        bool            `json:"noWait,omitempty"`
 	MaxInFlight   int             `json:"maxInFlight,omitempty"`
 	InstanceSteps []int           `json:"instanceSteps,omitempty"`
+}
+
+// requestStrategy carries the non-empty CF v3 deployment strategy string
+// for an active rolling/canary path. Used by the deployment_create stage
+// to set DeploymentCreateRequest.Strategy.
+func (r RestageStrategy) requestStrategy() string {
+	switch r {
+	case RestageStrategyRolling:
+		return "rolling"
+	case RestageStrategyCanary:
+		return "canary"
+	default:
+		return ""
+	}
 }
 
 // RestageRef is the per-job state carried by the Tracker and consumed by
@@ -459,6 +494,10 @@ func advanceRestage(
 		return advanceStart(ctx, client, ref, rec, now)
 	case StageRestageInstancePoll:
 		return advanceInstancePoll(ctx, client, ref, rec, now)
+	case StageRestageDeploymentCreate:
+		return advanceRestageDeploymentCreate(ctx, client, ref, rec, now)
+	case StageRestageDeploymentPoll:
+		return advanceRestageDeploymentPoll(ctx, client, ref, rec, now)
 	default:
 		return stratosjobs.JobStateFailed, []stratosjobs.StratosError{{
 			Code:    "stratos.restage.invalid_stage",
@@ -542,7 +581,15 @@ func advanceBuildPoll(ctx context.Context, client capi.Client, ref *RestageRef, 
 		}
 		ref.DropletGuid = build.Droplet.GUID
 		completeStage(rec, "droplet="+build.Droplet.GUID, now)
-		ref.CurrentStage = StageRestageSetDroplet
+		// Strategy fork: downtime path uses set_droplet → stop → start →
+		// instance_poll. Rolling/canary path uses CF v3's
+		// /v3/deployments to drive the cutover (CF orchestrates the
+		// rolling instance swap; we just poll deployment status).
+		if ref.Strategy == RestageStrategyDowntime {
+			ref.CurrentStage = StageRestageSetDroplet
+		} else {
+			ref.CurrentStage = StageRestageDeploymentCreate
+		}
 		return stratosjobs.JobStateProcessing, nil, nil
 	case "FAILED":
 		msg := errBuildFailed.Error()
@@ -550,6 +597,12 @@ func advanceBuildPoll(ctx context.Context, client capi.Client, ref *RestageRef, 
 			msg = *build.Error
 		}
 		return failStage(rec, errors.New(msg), now)
+	}
+	// Polling budget exceeded — terminal failure (mirror of rollback's
+	// deployment_poll branch 4). Use the stage's StartedAt as the
+	// reference point so a single hung poll doesn't bias the budget.
+	if !rec.StartedAt.IsZero() && now().Sub(rec.StartedAt) > RestageBuildPollTimeout {
+		return failStage(rec, errors.New("Build polling timed out"), now)
 	}
 	// STAGING (or anything non-terminal) — stay on this stage.
 	return stratosjobs.JobStateProcessing, nil, nil
@@ -617,5 +670,127 @@ func advanceInstancePoll(ctx context.Context, client capi.Client, ref *RestageRe
 	if state.allCrashed {
 		return failStage(rec, errAllInstancesCrashed, now)
 	}
+	// Polling budget exceeded — terminal failure (mirror of rollback's
+	// deployment_poll branch 4). Catches the pathological case where
+	// some instances stay STARTING indefinitely without crashing.
+	if !rec.StartedAt.IsZero() && now().Sub(rec.StartedAt) > RestageInstancePollTimeout {
+		return failStage(rec, errors.New("Instance polling timed out"), now)
+	}
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+// advanceRestageDeploymentCreate POSTs /v3/deployments with the new
+// droplet GUID + strategy, captures the deployment GUID in the ref, and
+// advances to deployment_poll.
+//
+// Mirror of advanceRollbackDeploymentCreate, but with droplet.guid (the
+// freshly-built droplet from build_poll) instead of revision.guid (the
+// revision being rolled back to). Strategy is "rolling" or "canary" —
+// the downtime path takes the set_droplet → stop → start branch and
+// never reaches this stage.
+//
+// Maps to: POST /v3/deployments
+//
+//	{
+//	  "strategy": "<strategy>",
+//	  "droplet": {"guid": "<droplet>"},
+//	  "options": {"max_in_flight": <N>, "canary": {"steps": [...]}},
+//	  "relationships": {"app": {"data": {"guid": "<app>"}}}
+//	}
+func advanceRestageDeploymentCreate(
+	ctx context.Context,
+	client capi.Client,
+	ref *RestageRef,
+	rec *RestageStageRecord,
+	now func() time.Time,
+) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	strategy := ref.Strategy.requestStrategy()
+	req := &capi.DeploymentCreateRequest{
+		Droplet: &capi.DeploymentDropletRef{GUID: ref.DropletGuid},
+		Relationships: capi.DeploymentRelationships{
+			App: &capi.Relationship{Data: &capi.RelationshipData{GUID: ref.AppGuid}},
+		},
+	}
+	if strategy != "" {
+		req.Strategy = &strategy
+	}
+
+	dep, err := client.Deployments().Create(ctx, req)
+	if err != nil {
+		return failStage(rec, err, now)
+	}
+	if dep == nil || dep.GUID == "" {
+		return failStage(rec, errors.New("deployment create returned empty guid"), now)
+	}
+	ref.DeploymentGuid = dep.GUID
+	completeStage(rec, "deployment="+dep.GUID, now)
+	ref.CurrentStage = StageRestageDeploymentPoll
+	return stratosjobs.JobStateProcessing, nil, nil
+}
+
+// advanceRestageDeploymentPoll performs a single GET on the deployment
+// and either advances (FINALIZED+DEPLOYED), terminally fails
+// (FINALIZED+CANCELED, FINALIZED+SUPERSEDED, polling-budget exceeded),
+// or stays on the poll stage.
+//
+// Mirror of advanceRollbackDeploymentPoll. The one behavioral difference
+// is canary's ACTIVE/PAUSED handling: canary deployments park at PAUSED
+// awaiting a human continue/cancel decision. The orchestrator must NOT
+// trip the polling timeout while in PAUSED state — paused time is not
+// "stuck CF" time, it's "human reviewing" time. The user issues
+// continue/cancel via cf cli (a follow-up slice wires Stratos endpoints
+// for that).
+func advanceRestageDeploymentPoll(
+	ctx context.Context,
+	client capi.Client,
+	ref *RestageRef,
+	rec *RestageStageRecord,
+	now func() time.Time,
+) (stratosjobs.JobState, []stratosjobs.StratosError, error) {
+	dep, err := client.Deployments().Get(ctx, ref.DeploymentGuid)
+	if err != nil {
+		return failStage(rec, err, now)
+	}
+
+	// Branch 1: FINALIZED + DEPLOYED — terminal success.
+	if dep.Status.Value == "FINALIZED" && dep.Status.Reason == "DEPLOYED" {
+		completeStage(rec, "deployed", now)
+		ref.CurrentStage = ""
+		return stratosjobs.JobStateComplete, nil, nil
+	}
+
+	// Branch 2: FINALIZED + CANCELED — terminal failure. Propagate
+	// status.details.error if present (mirror of advanceBuildPoll's
+	// build.Error handling — CF's user-facing reason).
+	if dep.Status.Value == "FINALIZED" && dep.Status.Reason == "CANCELED" {
+		msg := "Deployment canceled"
+		if dep.Status.Details != nil && dep.Status.Details.Error != nil && *dep.Status.Details.Error != "" {
+			msg = *dep.Status.Details.Error
+		}
+		return failStage(rec, errors.New(msg), now)
+	}
+
+	// Branch 3: FINALIZED + SUPERSEDED — terminal failure. CF has
+	// abandoned this deployment because a newer one started.
+	if dep.Status.Value == "FINALIZED" && dep.Status.Reason == "SUPERSEDED" {
+		return failStage(rec, errors.New("Superseded by another deployment"), now)
+	}
+
+	// Branch 4: ACTIVE + PAUSED — canary checkpoint. Stay on this stage
+	// without applying the polling-budget check, since the deployment is
+	// paused awaiting an explicit human continue/cancel and that wait can
+	// legitimately exceed the 30-minute budget.
+	if dep.Status.Value == "ACTIVE" && dep.Status.Reason == "PAUSED" {
+		return stratosjobs.JobStateProcessing, nil, nil
+	}
+
+	// Branch 5: polling budget exceeded — terminal failure. Use the
+	// stage's StartedAt as the reference point so a single hung poll
+	// doesn't bias the budget.
+	if !rec.StartedAt.IsZero() && now().Sub(rec.StartedAt) > RestageDeploymentPollTimeout {
+		return failStage(rec, errors.New("Deployment polling timed out"), now)
+	}
+
+	// Otherwise (ACTIVE/DEPLOYING etc.) — stay on this stage.
 	return stratosjobs.JobStateProcessing, nil, nil
 }

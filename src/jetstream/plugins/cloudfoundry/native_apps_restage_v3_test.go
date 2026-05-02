@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -1109,4 +1110,437 @@ func TestAdvanceRestage_TerminalStageReturnsComplete(t *testing.T) {
 	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
 	require.NoError(t, err)
 	assert.Equal(t, stratosjobs.JobStateComplete, state)
+}
+
+// TestAdvanceRestage_BuildPollTimeout verifies the wall-clock budget
+// branch in advanceBuildPoll. CF can leave a build STAGING for an
+// unbounded period; the orchestrator imposes RestageBuildPollTimeout so
+// the Stratos job has a definite end. Mirror of
+// TestAdvanceRollback_PollingTimeout.
+//
+// Mechanic: call 1 with `now` returning T0 anchors the build_poll stage's
+// StartedAt at T0. Call 2 with `now` returning T0 + RestageBuildPollTimeout
+// + 1s should trip the budget branch even though the GET response still
+// indicates STAGING.
+func TestAdvanceRestage_BuildPollTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/builds/build-slow":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":  "build-slow",
+				"state": "STAGING",
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client := orchestratorTestClient(t, srv)
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		BuildGuid:    "build-slow",
+		CurrentStage: StageRestageBuildPoll,
+	}
+
+	t0 := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	nowAtT0 := func() time.Time { return t0 }
+
+	// Call 1: build_poll at T0 — anchors the stage's StartedAt; server
+	// returns STAGING so we stay.
+	state, _, err := advanceRestage(ctx, client, ref, nowAtT0)
+	require.NoError(t, err)
+	require.Equal(t, stratosjobs.JobStateProcessing, state)
+	require.Len(t, ref.Stages, 1)
+	require.Equal(t, t0, ref.Stages[0].StartedAt, "build_poll StartedAt anchored at T0")
+
+	// Call 2: poll again past the budget. Server still says STAGING; the
+	// budget branch must trip first.
+	beyondBudget := func() time.Time { return t0.Add(RestageBuildPollTimeout + time.Second) }
+	state, errs, err := advanceRestage(ctx, client, ref, beyondBudget)
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.NotEmpty(t, errs)
+	assert.True(t,
+		strings.Contains(errs[0].Message, "timed out") || strings.Contains(errs[0].Message, "timeout"),
+		"timeout branch message should mention timeout, got %q", errs[0].Message)
+	assert.Equal(t, "stratos.restage.build_poll", errs[0].Code)
+	assert.Equal(t, StageStateFailed, ref.Stages[0].State)
+}
+
+// TestAdvanceRestage_InstancePollTimeout verifies the wall-clock budget
+// branch in advanceInstancePoll. Catches the pathological case where
+// some instances stay STARTING indefinitely without crashing.
+func TestAdvanceRestage_InstancePollTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/processes/proc-web/stats":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"resources": []map[string]interface{}{{"state": "STARTING"}},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client := orchestratorTestClient(t, srv)
+
+	ref := &RestageRef{
+		AppGuid:        "app-1",
+		WebProcessGuid: "proc-web",
+		CurrentStage:   StageRestageInstancePoll,
+	}
+
+	t0 := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	nowAtT0 := func() time.Time { return t0 }
+
+	// Call 1: instance_poll at T0 — anchors the stage's StartedAt; server
+	// returns STARTING so we stay.
+	state, _, err := advanceRestage(ctx, client, ref, nowAtT0)
+	require.NoError(t, err)
+	require.Equal(t, stratosjobs.JobStateProcessing, state)
+	require.Len(t, ref.Stages, 1)
+	require.Equal(t, t0, ref.Stages[0].StartedAt, "instance_poll StartedAt anchored at T0")
+
+	// Call 2: poll again past the budget. Server still says STARTING; the
+	// budget branch must trip first.
+	beyondBudget := func() time.Time { return t0.Add(RestageInstancePollTimeout + time.Second) }
+	state, errs, err := advanceRestage(ctx, client, ref, beyondBudget)
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.NotEmpty(t, errs)
+	assert.True(t,
+		strings.Contains(errs[0].Message, "timed out") || strings.Contains(errs[0].Message, "timeout"),
+		"timeout branch message should mention timeout, got %q", errs[0].Message)
+	assert.Equal(t, "stratos.restage.instance_poll", errs[0].Code)
+	assert.Equal(t, StageStateFailed, ref.Stages[0].State)
+}
+
+// TestAdvanceRestage_BuildPollAdvancesToDeploymentCreateForRolling verifies
+// that the build_poll success branch routes to deployment_create (not
+// set_droplet) when Strategy is rolling.
+func TestAdvanceRestage_BuildPollAdvancesToDeploymentCreateForRolling(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/builds/build-1":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":    "build-1",
+				"state":   "STAGED",
+				"droplet": map[string]string{"guid": "droplet-1"},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		BuildGuid:    "build-1",
+		Strategy:     RestageStrategyRolling,
+		CurrentStage: StageRestageBuildPoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, "droplet-1", ref.DropletGuid)
+	assert.Equal(t, StageRestageDeploymentCreate, ref.CurrentStage)
+}
+
+// TestAdvanceRestage_BuildPollAdvancesToDeploymentCreateForCanary mirror
+// of the rolling test for the canary strategy.
+func TestAdvanceRestage_BuildPollAdvancesToDeploymentCreateForCanary(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/builds/build-1":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":    "build-1",
+				"state":   "STAGED",
+				"droplet": map[string]string{"guid": "droplet-1"},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		BuildGuid:    "build-1",
+		Strategy:     RestageStrategyCanary,
+		CurrentStage: StageRestageBuildPoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, StageRestageDeploymentCreate, ref.CurrentStage)
+}
+
+// TestAdvanceRestage_DeploymentCreateAdvancesToPoll verifies the POST
+// /v3/deployments call captures the deployment GUID and advances.
+func TestAdvanceRestage_DeploymentCreateAdvancesToPoll(t *testing.T) {
+	var gotBody map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			rootHandler(w)
+		case r.URL.Path == "/v3/deployments" && r.Method == http.MethodPost:
+			_ = json.NewDecoder(r.Body).Decode(&gotBody)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusAccepted)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "ACTIVE",
+					"reason": "DEPLOYING",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		AppGuid:      "app-1",
+		DropletGuid:  "droplet-1",
+		Strategy:     RestageStrategyRolling,
+		CurrentStage: StageRestageDeploymentCreate,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state)
+	assert.Equal(t, "dep-1", ref.DeploymentGuid)
+	assert.Equal(t, StageRestageDeploymentPoll, ref.CurrentStage)
+
+	// Wire-shape assertions: the body must carry droplet.guid (NOT
+	// revision.guid — that's rollback's path), strategy, and the app
+	// relationship.
+	require.NotNil(t, gotBody)
+	droplet, _ := gotBody["droplet"].(map[string]interface{})
+	require.NotNil(t, droplet, "POST body missing droplet block")
+	assert.Equal(t, "droplet-1", droplet["guid"])
+	assert.Equal(t, "rolling", gotBody["strategy"])
+}
+
+// TestAdvanceRestage_DeploymentPollDeployedCompletes verifies the
+// FINALIZED+DEPLOYED branch terminates as success.
+func TestAdvanceRestage_DeploymentPollDeployedCompletes(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/deployments/dep-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "FINALIZED",
+					"reason": "DEPLOYED",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		DeploymentGuid: "dep-1",
+		Strategy:       RestageStrategyRolling,
+		CurrentStage:   StageRestageDeploymentPoll,
+	}
+	state, _, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateComplete, state)
+	assert.Equal(t, RestageStage(""), ref.CurrentStage)
+}
+
+// TestAdvanceRestage_DeploymentPollCanceledFails verifies the
+// FINALIZED+CANCELED branch surfaces status.details.error.
+func TestAdvanceRestage_DeploymentPollCanceledFails(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/deployments/dep-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "FINALIZED",
+					"reason": "CANCELED",
+					"details": map[string]interface{}{
+						"error": "instances crashed",
+					},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		DeploymentGuid: "dep-1",
+		Strategy:       RestageStrategyRolling,
+		CurrentStage:   StageRestageDeploymentPoll,
+	}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.NotEmpty(t, errs)
+	assert.Equal(t, "stratos.restage.deployment_poll", errs[0].Code)
+	assert.Contains(t, errs[0].Message, "instances crashed")
+}
+
+// TestAdvanceRestage_DeploymentPollSupersededFails verifies the
+// FINALIZED+SUPERSEDED branch (a newer deployment for the same app
+// abandons this one) is treated as a terminal failure.
+func TestAdvanceRestage_DeploymentPollSupersededFails(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/deployments/dep-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "FINALIZED",
+					"reason": "SUPERSEDED",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ref := &RestageRef{
+		DeploymentGuid: "dep-1",
+		Strategy:       RestageStrategyRolling,
+		CurrentStage:   StageRestageDeploymentPoll,
+	}
+	state, errs, err := advanceRestage(context.Background(), orchestratorTestClient(t, srv), ref, fixedClock())
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.NotEmpty(t, errs)
+	assert.Contains(t, errs[0].Message, "Superseded")
+}
+
+// TestAdvanceRestage_DeploymentPollPausedStaysWithoutTimeout verifies
+// canary's PAUSED state stays on the poll stage indefinitely without
+// tripping the polling-budget check, even past RestageDeploymentPollTimeout.
+// This is the behavior that lets a human review take longer than the
+// deployment timeout would otherwise allow.
+func TestAdvanceRestage_DeploymentPollPausedStaysWithoutTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/deployments/dep-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "ACTIVE",
+					"reason": "PAUSED",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client := orchestratorTestClient(t, srv)
+
+	ref := &RestageRef{
+		DeploymentGuid: "dep-1",
+		Strategy:       RestageStrategyCanary,
+		CurrentStage:   StageRestageDeploymentPoll,
+	}
+
+	t0 := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	nowAtT0 := func() time.Time { return t0 }
+
+	// Anchor the poll stage at T0.
+	state, _, err := advanceRestage(ctx, client, ref, nowAtT0)
+	require.NoError(t, err)
+	require.Equal(t, stratosjobs.JobStateProcessing, state)
+
+	// Past the budget, but still PAUSED — must NOT trip timeout.
+	beyondBudget := func() time.Time { return t0.Add(RestageDeploymentPollTimeout + time.Hour) }
+	state, errs, err := advanceRestage(ctx, client, ref, beyondBudget)
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateProcessing, state, "PAUSED canary must not trip timeout")
+	assert.Empty(t, errs)
+	assert.Equal(t, StageRestageDeploymentPoll, ref.CurrentStage)
+}
+
+// TestAdvanceRestage_DeploymentPollTimeout verifies the wall-clock budget
+// branch trips when the deployment stays ACTIVE/DEPLOYING (NOT PAUSED) past
+// RestageDeploymentPollTimeout. Mirror of TestAdvanceRollback_PollingTimeout.
+func TestAdvanceRestage_DeploymentPollTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			rootHandler(w)
+		case "/v3/deployments/dep-slow":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-slow",
+				"status": map[string]interface{}{
+					"value":  "ACTIVE",
+					"reason": "DEPLOYING",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	ctx := context.Background()
+	client := orchestratorTestClient(t, srv)
+
+	ref := &RestageRef{
+		DeploymentGuid: "dep-slow",
+		Strategy:       RestageStrategyRolling,
+		CurrentStage:   StageRestageDeploymentPoll,
+	}
+
+	t0 := time.Date(2026, 5, 1, 12, 0, 0, 0, time.UTC)
+	nowAtT0 := func() time.Time { return t0 }
+	state, _, err := advanceRestage(ctx, client, ref, nowAtT0)
+	require.NoError(t, err)
+	require.Equal(t, stratosjobs.JobStateProcessing, state)
+
+	beyondBudget := func() time.Time { return t0.Add(RestageDeploymentPollTimeout + time.Second) }
+	state, errs, err := advanceRestage(ctx, client, ref, beyondBudget)
+	require.NoError(t, err)
+	assert.Equal(t, stratosjobs.JobStateFailed, state)
+	require.NotEmpty(t, errs)
+	assert.True(t,
+		strings.Contains(errs[0].Message, "timed out") || strings.Contains(errs[0].Message, "timeout"),
+		"timeout branch message should mention timeout, got %q", errs[0].Message)
+	assert.Equal(t, "stratos.restage.deployment_poll", errs[0].Code)
 }
