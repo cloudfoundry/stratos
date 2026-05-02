@@ -53,13 +53,19 @@ export class AppApplicationActionBarComponent implements OnInit {
   public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   ngOnInit() {
+    // Default to NOT busy. The lifecycle path uses writeWithJob (no ngrx
+    // dispatch), so updatingSection$.restaging is never set or cleared.
+    // Starting busy=true left the buttons stranded after restage because
+    // nothing emits a non-busy state until an unrelated ngrx GET happens
+    // to fire. Trust "not busy" by default; the runLifecycleAction
+    // snackbar gives the operator the visible in-flight signal instead.
     this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
       map(updatingSection => {
         const updating = this.updatingSectionBusy(updatingSection.restaging) ||
           this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
         return { updating };
       }),
-      startWith({ updating: true })
+      startWith({ updating: false })
     );
   }
 
