@@ -81,7 +81,11 @@ export class AppApplicationActionsService {
       start: 'Started', stop: 'Stopped', restart: 'Restarted', restage: 'Restaged',
     };
     this._inFlight.set(true);
-    const inProgress = this.snackBar.open(`${gerund[verb]} ${appName}…`, '');
+    // duration: 0 keeps the in-progress snackbar visible until the
+    // writeWithJob promise resolves and we dismiss it explicitly. The
+    // default 4s auto-dismiss made the in-flight feedback flash and
+    // disappear before the operation finished.
+    const inProgress = this.snackBar.open(`${gerund[verb]} ${appName}…`, '', { duration: 0 });
     void action()
       .then(() => {
         inProgress.dismiss();
