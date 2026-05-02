@@ -1,16 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
   PageSubNavSectionComponent,
 } from '@stratosui/core';
-import { ActionState } from '@stratosui/store';
 
-import { UpdateExistingApplication } from '../../../actions/application.actions';
 import { ApplicationService } from '../../../features/applications/application.service';
 import { ApplicationPollComponent } from '../../../features/applications/application/application-tabs-base/application-poll/application-poll.component';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -25,9 +23,11 @@ import { AppApplicationActionsService } from '../../services/application-actions
  * every tab (Summary, Variables, Events, Routes, Services, Log Stream,
  * Instances, Metrics, Git SCM) shows the same controls.
  *
- * Template was extracted verbatim from build-tab.component.html (lines 1-58
- * pre-extraction) so the rendered output on the Summary tab is byte-equivalent
- * to before this refactor.
+ * The busy state used to read from ngrx updatingSection$.restaging — that
+ * was driven by pre-writeWithJob dispatch paths and could persist
+ * busy=true across reloads via localStorage hydration, stranding the
+ * buttons permanently. The action service now owns its own inFlight
+ * signal so external state can never strand the buttons.
  */
 @Component({
   selector: 'app-application-action-bar',
@@ -45,31 +45,14 @@ import { AppApplicationActionsService } from '../../services/application-actions
   ],
   providers: [AppApplicationActionsService],
 })
-export class AppApplicationActionBarComponent implements OnInit {
+export class AppApplicationActionBarComponent {
   applicationService = inject(ApplicationService);
   actions = inject(AppApplicationActionsService);
 
-  public isBusyUpdating$!: Observable<{ updating: boolean }>;
-  public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
-
-  ngOnInit() {
-    // Default to NOT busy. The lifecycle path uses writeWithJob (no ngrx
-    // dispatch), so updatingSection$.restaging is never set or cleared.
-    // Starting busy=true left the buttons stranded after restage because
-    // nothing emits a non-busy state until an unrelated ngrx GET happens
-    // to fire. Trust "not busy" by default; the runLifecycleAction
-    // snackbar gives the operator the visible in-flight signal instead.
-    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
-      map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
-        return { updating };
-      }),
-      startWith({ updating: false })
-    );
-  }
-
-  private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
-  }
+  // Adapt the action service's inFlight signal back to the
+  // {updating: boolean} shape the existing template binding expects.
+  isBusyUpdating$ = toObservable(this.actions.inFlight).pipe(
+    map(inFlight => ({ updating: inFlight })),
+  );
+  manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 }

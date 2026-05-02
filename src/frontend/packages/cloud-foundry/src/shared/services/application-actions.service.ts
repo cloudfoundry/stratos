@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, WritableSignal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { firstValueFrom, race, timer } from 'rxjs';
@@ -45,6 +45,16 @@ export class AppApplicationActionsService {
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
 
+  // Local in-flight signal — owned by this service, decoupled from ngrx
+  // updatingSection$.restaging. The legacy ngrx busy flag was driven by
+  // pre-writeWithJob dispatch paths that no longer fire, and persisted
+  // localStorage state from earlier hung attempts could survive a
+  // reload and keep the action bar permanently disabled. This signal
+  // is set true only while a writeWithJob promise is in flight, and
+  // false otherwise — no external state can strand it.
+  private readonly _inFlight: WritableSignal<boolean> = signal(false);
+  readonly inFlight: Signal<boolean> = this._inFlight.asReadonly();
+
   // Lifecycle actions (start/stop/restart/restage) flow through the
   // Stratos async-job contract via CfAppsSignalConfigService: writeWithJob
   // hits POST /pp/v1/cf/apps/{cnsi}/{app}/actions/{action} and awaits the
@@ -70,6 +80,7 @@ export class AppApplicationActionsService {
     const past: Record<typeof verb, string> = {
       start: 'Started', stop: 'Stopped', restart: 'Restarted', restage: 'Restaged',
     };
+    this._inFlight.set(true);
     const inProgress = this.snackBar.open(`${gerund[verb]} ${appName}…`, '');
     void action()
       .then(() => {
@@ -84,6 +95,9 @@ export class AppApplicationActionsService {
         const msg = err?.job?.errors?.[0]?.message ?? err?.message ?? String(err);
         this.snackBar.open(`Failed to ${verb} ${appName}: ${msg}`, 'Dismiss');
         this.dispatchAppStats();
+      })
+      .finally(() => {
+        this._inFlight.set(false);
       });
   }
 
