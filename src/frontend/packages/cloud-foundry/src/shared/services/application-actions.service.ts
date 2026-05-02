@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { firstValueFrom, race, timer } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { ResetPagination } from '@stratosui/store';
@@ -8,29 +10,8 @@ import { ResetPagination } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
+import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
-
-// Confirmation dialogs
-const appStopConfirmation = new ConfirmationDialogConfig(
-  'Stop Application',
-  'Are you sure you want to stop this Application?',
-  'Stop'
-);
-const appStartConfirmation = new ConfirmationDialogConfig(
-  'Start Application',
-  'Are you sure you want to start this Application?',
-  'Start'
-);
-const appRestartConfirmation = new ConfirmationDialogConfig(
-  'Restart Application',
-  'Are you sure you want to restart this Application?',
-  'Restart'
-);
-const appRestageConfirmation = new ConfirmationDialogConfig(
-  'Restage Application',
-  'Are you sure you want to restage this Application?',
-  'Restage'
-);
 
 /**
  * AppApplicationActionsService
@@ -46,10 +27,18 @@ const appRestageConfirmation = new ConfirmationDialogConfig(
  * cannot inject ApplicationService — Angular would try to instantiate it
  * in the root injector, where CF_GUID has no provider, and throw NG0201.
  * Provide on the action bar component instead.
+ *
+ * Each confirmation dialog is built dynamically from the live observables
+ * (app, endpoint, org, space) so the operator can see exactly which
+ * application is about to be acted on. The static "Are you sure you want
+ * to stop this Application?" message was a foot-gun on multi-CF
+ * deployments where the same app name exists in multiple spaces or under
+ * multiple CF endpoints sharing a domain.
  */
 @Injectable()
 export class AppApplicationActionsService {
   private applicationService = inject(ApplicationService);
+  private cfEndpointService = inject(CloudFoundryEndpointService);
   private confirmDialog = inject(ConfirmationDialogService);
   private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
@@ -79,8 +68,42 @@ export class AppApplicationActionsService {
     cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
   };
 
-  restart() {
-    this.confirmDialog.open(appRestartConfirmation, () => {
+  // Resolves an observable's first emitted value within a 1s budget; falls
+  // back to a default so the dialog never hangs if upstream data hasn't
+  // arrived yet (e.g. user clicked Stop within the first second of page
+  // load before appOrg$/endpoint$ have replayed).
+  private async firstWithFallback<T>(obs$: any, fallback: T): Promise<T> {
+    const timeout$ = timer(1000).pipe(map(() => fallback as T));
+    return firstValueFrom(race(obs$ as any, timeout$)) as Promise<T>;
+  }
+
+  // Reads app/endpoint/org/space names from the live observables. Each is
+  // gated by a 1s fallback so a slow-replaying observable (endpoint$ in
+  // particular: it waits for the endpoint entity to load) doesn't strand
+  // the dialog and leave the user staring at a non-responsive button.
+  private async buildDialog(
+    title: string,
+    verb: string,
+    confirmLabel: string,
+  ): Promise<ConfirmationDialogConfig> {
+    const [appEntity, orgRes, spaceRes, endpointInfo] = await Promise.all([
+      this.firstWithFallback<any>(this.applicationService.application$, null),
+      this.firstWithFallback<any>(this.applicationService.appOrg$, null),
+      this.firstWithFallback<any>(this.applicationService.appSpace$, null),
+      this.firstWithFallback<any>(this.cfEndpointService.endpoint$, null),
+    ]);
+    const appName = appEntity?.app?.entity?.name ?? this.applicationService.appGuid;
+    const orgName = orgRes?.entity?.name ?? '?';
+    const spaceName = spaceRes?.entity?.name ?? '?';
+    const cfName = endpointInfo?.entity?.name ?? this.applicationService.cfGuid;
+    const message =
+      `${verb} "${appName}" on Cloud Foundry "${cfName}" — org "${orgName}" / space "${spaceName}"?`;
+    return new ConfirmationDialogConfig(`${title}: ${appName}`, message, confirmLabel);
+  }
+
+  async restart() {
+    const cfg = await this.buildDialog('Restart', 'Are you sure you want to restart', 'Restart');
+    this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(() => this.apps.restartApp(
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
@@ -88,8 +111,9 @@ export class AppApplicationActionsService {
     });
   }
 
-  stop() {
-    this.confirmDialog.open(appStopConfirmation, () => {
+  async stop() {
+    const cfg = await this.buildDialog('Stop', 'Are you sure you want to stop', 'Stop');
+    this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         () => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid),
         () => {
@@ -103,16 +127,18 @@ export class AppApplicationActionsService {
     });
   }
 
-  start() {
-    this.confirmDialog.open(appStartConfirmation, () => {
+  async start() {
+    const cfg = await this.buildDialog('Start', 'Are you sure you want to start', 'Start');
+    this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         () => this.apps.startApp(this.applicationService.cfGuid, this.applicationService.appGuid),
       );
     });
   }
 
-  restage() {
-    this.confirmDialog.open(appRestageConfirmation, () => {
+  async restage() {
+    const cfg = await this.buildDialog('Restage', 'Are you sure you want to restage', 'Restage');
+    this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         () => this.apps.restageApp(this.applicationService.cfGuid, this.applicationService.appGuid),
       );
