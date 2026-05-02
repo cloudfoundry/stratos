@@ -117,10 +117,19 @@ export class TailwindSnackBarService {
     const snackbar = document.createElement('div');
 
     // Base classes
+    //
+    // max-w-2xl + items-start + whitespace-normal/break-words: previously the
+    // snackbar was max-w-md (~448px) with items-center and no wrap class, so
+    // longer messages (e.g. "Restaging sample-go-app on Cloud Foundry 'dup3'
+    // — org 'opensource' / space 'openproject'") truncated to a single line
+    // and the operator could not read what action was in flight. Switching
+    // to a wider container with proper wrapping lets multi-line messages
+    // render in full while keeping short ones on a single line.
     let classes = [
       'fixed', 'bottom-4', 'left-1/2', 'transform', '-translate-x-1/2',
       'bg-gray-800', 'text-white', 'px-6', 'py-3', 'rounded-lg', 'shadow-lg',
-      'flex', 'items-center', 'space-x-4', 'z-50', 'min-w-72', 'max-w-md',
+      'flex', 'items-start', 'space-x-4', 'z-50', 'min-w-72', 'max-w-2xl',
+      'whitespace-normal', 'break-words',
       'animate-fade-in'
     ];
 

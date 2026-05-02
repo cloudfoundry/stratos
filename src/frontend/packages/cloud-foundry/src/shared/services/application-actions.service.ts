@@ -74,7 +74,7 @@ export class AppApplicationActionsService {
   // user has no signal that the action was even acknowledged.
   private runLifecycleAction(
     verb: 'start' | 'stop' | 'restart' | 'restage',
-    appName: string,
+    target: string,
     action: () => Promise<void>,
     onAfter?: () => void,
   ): void {
@@ -96,11 +96,11 @@ export class AppApplicationActionsService {
     // writeWithJob promise resolves and we dismiss it explicitly. The
     // default 4s auto-dismiss made the in-flight feedback flash and
     // disappear before the operation finished.
-    const inProgress = this.snackBar.open(`${gerund[verb]} ${appName}…`, '', { duration: 0 });
+    const inProgress = this.snackBar.open(`${gerund[verb]} ${target}…`, '', { duration: 0 });
     void action()
       .then(() => {
         inProgress.dismiss();
-        this.snackBar.open(`${past[verb]} ${appName}`, 'Dismiss');
+        this.snackBar.open(`${past[verb]} ${target}`, 'Dismiss');
         cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
         this.dispatchAppStats();
         onAfter?.();
@@ -108,7 +108,7 @@ export class AppApplicationActionsService {
       .catch((err: any) => {
         inProgress.dismiss();
         const msg = err?.job?.errors?.[0]?.message ?? err?.message ?? String(err);
-        this.snackBar.open(`Failed to ${verb} ${appName}: ${msg}`, 'Dismiss');
+        this.snackBar.open(`Failed to ${verb} ${target}: ${msg}`, 'Dismiss');
         this.dispatchAppStats();
       })
       .finally(() => {
@@ -137,13 +137,16 @@ export class AppApplicationActionsService {
   // gated by a 1s fallback so a slow-replaying observable (endpoint$ in
   // particular: it waits for the endpoint entity to load) doesn't strand
   // the dialog and leave the user staring at a non-responsive button.
-  // Returns the resolved appName alongside the config so the lifecycle
-  // snackbar can address the operator by app name without re-fetching.
+  // Returns a fully-qualified target string alongside the config so the
+  // lifecycle snackbar can echo the same disambiguation the operator just
+  // confirmed: "Restaging sample-go-app on dup3 / opensource / openproject…"
+  // — the snackbar previously showed only the app name, which was useless
+  // on multi-CF deployments where the same name exists in several places.
   private async buildDialog(
     title: string,
     verb: string,
     confirmLabel: string,
-  ): Promise<{ cfg: ConfirmationDialogConfig; appName: string }> {
+  ): Promise<{ cfg: ConfirmationDialogConfig; target: string }> {
     const [appEntity, orgRes, spaceRes, endpointInfo] = await Promise.all([
       this.firstWithFallback<any>(this.applicationService.application$, null),
       this.firstWithFallback<any>(this.applicationService.appOrg$, null),
@@ -157,13 +160,14 @@ export class AppApplicationActionsService {
     const message =
       `${verb} "${appName}" on Cloud Foundry "${cfName}" — org "${orgName}" / space "${spaceName}"?`;
     const cfg = new ConfirmationDialogConfig(`${title}: ${appName}`, message, confirmLabel);
-    return { cfg, appName };
+    const target = `${appName} on ${cfName} / ${orgName} / ${spaceName}`;
+    return { cfg, target };
   }
 
   async restart() {
-    const { cfg, appName } = await this.buildDialog('Restart', 'Are you sure you want to restart', 'Restart');
+    const { cfg, target } = await this.buildDialog('Restart', 'Are you sure you want to restart', 'Restart');
     this.confirmDialog.open(cfg, () => {
-      this.runLifecycleAction('restart', appName, () => this.apps.restartApp(
+      this.runLifecycleAction('restart', target, () => this.apps.restartApp(
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
       ));
@@ -171,11 +175,11 @@ export class AppApplicationActionsService {
   }
 
   async stop() {
-    const { cfg, appName } = await this.buildDialog('Stop', 'Are you sure you want to stop', 'Stop');
+    const { cfg, target } = await this.buildDialog('Stop', 'Are you sure you want to stop', 'Stop');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'stop',
-        appName,
+        target,
         () => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid),
         () => {
           // On app reaching STOPPED, clear the stats pagination section
@@ -189,22 +193,22 @@ export class AppApplicationActionsService {
   }
 
   async start() {
-    const { cfg, appName } = await this.buildDialog('Start', 'Are you sure you want to start', 'Start');
+    const { cfg, target } = await this.buildDialog('Start', 'Are you sure you want to start', 'Start');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'start',
-        appName,
+        target,
         () => this.apps.startApp(this.applicationService.cfGuid, this.applicationService.appGuid),
       );
     });
   }
 
   async restage() {
-    const { cfg, appName } = await this.buildDialog('Restage', 'Are you sure you want to restage', 'Restage');
+    const { cfg, target } = await this.buildDialog('Restage', 'Are you sure you want to restage', 'Restage');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'restage',
-        appName,
+        target,
         () => this.apps.restageApp(this.applicationService.cfGuid, this.applicationService.appGuid),
       );
     });
