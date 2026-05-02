@@ -5,7 +5,7 @@
         <form #addForm="ngForm" novalidate>
           <div class="form-field">
             <input class="input" id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name"
-              [(ngModel)]="envVarsDataSource.addItem.name" required [appUnique]="(envVars$ | async)?.names">
+              [(ngModel)]="envVarsDataSource.addItem.name" required [appUnique]="envVarNames()">
             @if (envVarName.errors && envVarName.errors.required) {
               <div class="text-red-500 text-sm mt-1">Name is required</div>
             }
