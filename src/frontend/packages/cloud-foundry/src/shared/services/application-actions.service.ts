@@ -10,6 +10,7 @@ import { ResetPagination } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
+import { ApplicationPollingService } from '../../features/applications/application/application-tabs-base/application-polling.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
 
@@ -44,6 +45,10 @@ export class AppApplicationActionsService {
   private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
+  // Optional: ApplicationPollingService is provided at ApplicationTabsBaseComponent;
+  // when this service is constructed somewhere outside that subtree (rare),
+  // skip the polling pause. {optional:true} keeps DI from throwing.
+  private polling = inject(ApplicationPollingService, { optional: true });
 
   // Local in-flight signal — owned by this service, decoupled from ngrx
   // updatingSection$.restaging. The legacy ngrx busy flag was driven by
@@ -81,6 +86,12 @@ export class AppApplicationActionsService {
       start: 'Started', stop: 'Stopped', restart: 'Restarted', restage: 'Restaged',
     };
     this._inFlight.set(true);
+    // Pause auto-refresh polling while the lifecycle action is in flight.
+    // The 10-second auto-poll otherwise races against our writeWithJob
+    // resolution: a stale entity fetched mid-action could overwrite the
+    // fresh post-action state and confuse the status card. We resume
+    // polling in finally() after explicitly refetching the entity.
+    this.polling?.stop();
     // duration: 0 keeps the in-progress snackbar visible until the
     // writeWithJob promise resolves and we dismiss it explicitly. The
     // default 4s auto-dismiss made the in-flight feedback flash and
@@ -102,6 +113,9 @@ export class AppApplicationActionsService {
       })
       .finally(() => {
         this._inFlight.set(false);
+        // Restart polling so the status card auto-refreshes after the
+        // action's explicit refetch lands.
+        this.polling?.start();
       });
   }
 
