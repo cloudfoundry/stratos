@@ -9,6 +9,7 @@ import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/vie
 import type { StApp, StAppRoutesResponse, StAppServiceBindingsResponse, StOrg, StOrgsResponse, StRoute, StServiceBinding, StSpace, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
+import type { StratosJob } from '../../../../../services/async-jobs/async-job.types';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore } from '@stratosui/core';
 
@@ -535,30 +536,31 @@ export class CfAppsSignalConfigService {
   // write callsite a uniform client shape regardless of whether CF itself
   // was sync or async. Thrown StratosJobError surfaces CF errors; callers
   // should catch and surface via snackbar.
-  async startApp(cnsiGuid: string, appGuid: string): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'start');
+  async startApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'start', opts);
   }
-  async stopApp(cnsiGuid: string, appGuid: string): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'stop');
+  async stopApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'stop', opts);
   }
-  async restartApp(cnsiGuid: string, appGuid: string): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'restart');
+  async restartApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'restart', opts);
   }
-  async restageApp(cnsiGuid: string, appGuid: string): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'restage');
+  async restageApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'restage', opts);
   }
 
   private async appAction(
     cnsiGuid: string,
     appGuid: string,
     action: 'start' | 'stop' | 'restart' | 'restage',
+    opts?: { onProgress?: (job: StratosJob) => void },
   ): Promise<void> {
     const call = this.http.post(
       `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/actions/${action}`,
       null,
       { observe: 'response' },
     );
-    await writeWithJob(this.http, call);
+    await writeWithJob(this.http, call, { onProgress: opts?.onProgress });
   }
 
   // Scales the web process of an app through the async-job contract.

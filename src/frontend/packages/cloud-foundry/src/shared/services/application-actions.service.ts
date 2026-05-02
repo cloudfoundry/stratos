@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, WritableSignal, Signal } from '@angular/core';
+import { Injectable, computed, inject, signal, WritableSignal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { firstValueFrom, race, timer } from 'rxjs';
@@ -12,6 +12,7 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
+import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
 
 /**
  * AppApplicationActionsService
@@ -35,6 +36,17 @@ import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-
  * deployments where the same app name exists in multiple spaces or under
  * multiple CF endpoints sharing a domain.
  */
+type LifecycleVerb = 'STARTING' | 'STOPPING' | 'RESTARTING' | 'RESTAGING' | 'DELETING';
+
+interface OperationLogEntry {
+  at: Date;
+  verb: LifecycleVerb;
+  target: { app: string; cf: string; org: string; space: string };
+  event: 'begin' | 'stage' | 'success' | 'fail';
+  stage?: JobStage;
+  error?: { code: string; message: string };
+}
+
 @Injectable()
 export class AppApplicationActionsService {
   private applicationService = inject(ApplicationService);
@@ -44,6 +56,7 @@ export class AppApplicationActionsService {
   private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
+
   // Local in-flight signal — owned by this service, decoupled from ngrx
   // updatingSection$.restaging. The legacy ngrx busy flag was driven by
   // pre-writeWithJob dispatch paths that no longer fire, and persisted
@@ -53,6 +66,36 @@ export class AppApplicationActionsService {
   // false otherwise — no external state can strand it.
   private readonly _inFlight: WritableSignal<boolean> = signal(false);
   readonly inFlight: Signal<boolean> = this._inFlight.asReadonly();
+
+  // Live progress signals — null when idle, populated during in-flight ops.
+  // currentStage() reflects the latest stage received from the backend; Tasks
+  // 9 (snackbar) and 10 (status card) read these to render the running ticker.
+  private readonly _progress = signal<JobStage[] | null>(null);
+  private readonly _verb = signal<LifecycleVerb | null>(null);
+  private readonly _log = signal<OperationLogEntry[]>([]);
+
+  readonly progress: Signal<JobStage[] | null> = this._progress.asReadonly();
+  readonly currentStage = computed(() => {
+    const s = this._progress();
+    return s && s.length ? s[s.length - 1] : null;
+  });
+  readonly verb: Signal<LifecycleVerb | null> = this._verb.asReadonly();
+  readonly log: Signal<OperationLogEntry[]> = this._log.asReadonly();
+
+  constructor() {
+    // Diagnostic surface for Playwright + browser-console inspection.
+    // Per reference_playwright_diag_pattern.md — no UI surface in slice 1.
+    if (typeof window !== 'undefined') {
+      (window as any).__stratosOps = {
+        log: () => this._log(),
+        current: () => ({
+          inFlight: this.inFlight(),
+          verb: this._verb(),
+          stage: this.currentStage(),
+        }),
+      };
+    }
+  }
 
   // Lifecycle actions (start/stop/restart/restage) flow through the
   // Stratos async-job contract via CfAppsSignalConfigService: writeWithJob
@@ -69,7 +112,7 @@ export class AppApplicationActionsService {
   private runLifecycleAction(
     verb: 'start' | 'stop' | 'restart' | 'restage',
     target: string,
-    action: () => Promise<void>,
+    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void>,
     onAfter?: () => void,
   ): void {
     const { cfGuid, appGuid } = this.applicationService;
@@ -79,14 +122,38 @@ export class AppApplicationActionsService {
     const past: Record<typeof verb, string> = {
       start: 'Started', stop: 'Stopped', restart: 'Restarted', restage: 'Restaged',
     };
+    const lifecycleVerb: LifecycleVerb =
+      verb === 'start' ? 'STARTING' :
+      verb === 'stop' ? 'STOPPING' :
+      verb === 'restart' ? 'RESTARTING' : 'RESTAGING';
+
+    // Decompose the target string back into named parts for log entries.
+    // Format from buildDialog: "<appName> on <cfName> / <orgName> / <spaceName>"
+    // Fall back to the raw target string if parsing fails.
+    const parsedTarget = this.parseTarget(target);
+
     this._inFlight.set(true);
+    this._verb.set(lifecycleVerb);
+    this._progress.set([]);
+    this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'begin' });
+
     // duration: 0 keeps the in-progress snackbar visible until the
     // writeWithJob promise resolves and we dismiss it explicitly. The
     // default 4s auto-dismiss made the in-flight feedback flash and
     // disappear before the operation finished.
     const inProgress = this.snackBar.open(`${gerund[verb]} ${target}…`, '', { duration: 0 });
-    void action()
+
+    const onProgress = (job: StratosJob) => {
+      if (job.stages?.length) {
+        this._progress.set([...job.stages]);
+        const lastStage = job.stages[job.stages.length - 1];
+        this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'stage', stage: lastStage });
+      }
+    };
+
+    void action({ onProgress })
       .then(() => {
+        this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
         inProgress.dismiss();
         this.snackBar.open(`${past[verb]} ${target}`, 'Dismiss');
         cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
@@ -94,14 +161,42 @@ export class AppApplicationActionsService {
         onAfter?.();
       })
       .catch((err: any) => {
+        const firstError = err?.job?.errors?.[0];
+        this.appendLog({
+          at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
+          error: firstError ? { code: String(firstError.code), message: String(firstError.message) } : undefined,
+        });
         inProgress.dismiss();
-        const msg = err?.job?.errors?.[0]?.message ?? err?.message ?? String(err);
+        const msg = firstError?.message ?? err?.message ?? String(err);
         this.snackBar.open(`Failed to ${verb} ${target}: ${msg}`, 'Dismiss');
         this.dispatchAppStats();
       })
       .finally(() => {
         this._inFlight.set(false);
+        this._verb.set(null);
+        // Settle delay: keep progress visible briefly after terminal state so
+        // Tasks 9/10 can display "complete" before clearing the ticker.
+        setTimeout(() => this._progress.set(null), 800);
       });
+  }
+
+  // Ring-buffer append: cap log at 50 entries, dropping oldest.
+  private appendLog(entry: OperationLogEntry): void {
+    this._log.update(l => {
+      const next = [...l, entry];
+      return next.length > 50 ? next.slice(next.length - 50) : next;
+    });
+  }
+
+  // Parse the target string produced by buildDialog:
+  // "<appName> on <cfName> / <orgName> / <spaceName>"
+  private parseTarget(target: string): { app: string; cf: string; org: string; space: string } {
+    const onIdx = target.indexOf(' on ');
+    if (onIdx < 0) return { app: target, cf: '?', org: '?', space: '?' };
+    const app = target.slice(0, onIdx);
+    const rest = target.slice(onIdx + 4); // after " on "
+    const parts = rest.split(' / ');
+    return { app, cf: parts[0] ?? '?', org: parts[1] ?? '?', space: parts[2] ?? '?' };
   }
 
   private dispatchAppStats = () => {
@@ -152,9 +247,10 @@ export class AppApplicationActionsService {
   async restart() {
     const { cfg, target } = await this.buildDialog('Restart', 'Are you sure you want to restart', 'Restart');
     this.confirmDialog.open(cfg, () => {
-      this.runLifecycleAction('restart', target, () => this.apps.restartApp(
+      this.runLifecycleAction('restart', target, ({ onProgress }) => this.apps.restartApp(
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
+        { onProgress },
       ));
     });
   }
@@ -165,7 +261,7 @@ export class AppApplicationActionsService {
       this.runLifecycleAction(
         'stop',
         target,
-        () => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid),
+        ({ onProgress }) => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid, { onProgress }),
         () => {
           // On app reaching STOPPED, clear the stats pagination section
           // so a re-start comes up with fresh instance rows.
@@ -183,7 +279,7 @@ export class AppApplicationActionsService {
       this.runLifecycleAction(
         'start',
         target,
-        () => this.apps.startApp(this.applicationService.cfGuid, this.applicationService.appGuid),
+        ({ onProgress }) => this.apps.startApp(this.applicationService.cfGuid, this.applicationService.appGuid, { onProgress }),
       );
     });
   }
@@ -194,7 +290,7 @@ export class AppApplicationActionsService {
       this.runLifecycleAction(
         'restage',
         target,
-        () => this.apps.restageApp(this.applicationService.cfGuid, this.applicationService.appGuid),
+        ({ onProgress }) => this.apps.restageApp(this.applicationService.cfGuid, this.applicationService.appGuid, { onProgress }),
       );
     });
   }
