@@ -69,21 +69,36 @@
                 <a [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid]"
                   title="CF API URL: {{ getFullApiUrl(applicationService.cf) }}">{{ applicationService.cf?.name}}</a>
               </app-metadata-item>
-              @if (applicationService.appOrg$ | async; as appOrg) {
-                <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
-                  <a
-                    [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
-                </app-metadata-item>
-                @if (applicationService.appSpace$ | async; as appSpace) {
-                  <app-metadata-item iconFont="stratos-icons"
-                    icon="virtual_space" label="Space">
-                    <a
-                      [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
-                  </app-metadata-item>
+              <!-- Organization and Space rows render unconditionally so the
+                   Cloud Foundry card always disambiguates which (cnsi, org,
+                   space) tuple this app belongs to — critical when the same
+                   app name exists across multiple endpoints sharing a domain
+                   or across orgs/spaces. Falls back to "—" when the
+                   appOrg$/appSpace$ observables haven't emitted yet (e.g.
+                   v2 proxy degraded or app entity still loading). -->
+              <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
+                @if (applicationService.appOrg$ | async; as appOrg) {
+                  <a [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
+                } @else {
+                  —
                 }
+              </app-metadata-item>
+              <app-metadata-item iconFont="stratos-icons" icon="virtual_space" label="Space">
+                @if ((applicationService.appOrg$ | async); as appOrg) {
+                  @if (applicationService.appSpace$ | async; as appSpace) {
+                    <a [routerLink]="['/cloud-foundry/' + applicationService.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+                  } @else {
+                    —
+                  }
+                } @else if (applicationService.appSpace$ | async; as appSpace) {
+                  {{ appSpace.entity.name }}
+                } @else {
+                  —
+                }
+              </app-metadata-item>
+              @if (applicationService.appOrg$ | async) {
                 <app-metadata-item icon="keyboard" label="CLI Info" class="cli-link">
-                  <a
-                    [routerLink]="['/applications/' + applicationService.cf?.guid + '/' + applicationService.app?.metadata.guid + '/cli']">View</a>
+                  <a [routerLink]="['/applications/' + applicationService.cf?.guid + '/' + applicationService.app?.metadata.guid + '/cli']">View</a>
                 </app-metadata-item>
               }
             </div>
