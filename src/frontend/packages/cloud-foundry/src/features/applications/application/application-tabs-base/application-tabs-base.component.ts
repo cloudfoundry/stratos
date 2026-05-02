@@ -45,12 +45,17 @@ import {
 } from '@stratosui/cloud-foundry';
 import { ApplicationPollingService } from './application-polling.service';
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
+import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
 
 @Component({
   selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
   styleUrls: ['./application-tabs-base.component.scss'],
-  providers: [ApplicationPollingService],
+  // AppApplicationActionsService is provided here (rather than on the action
+  // bar component) so the BuildTab status card can read its inFlight signal
+  // for the in-flight pulse animation. The action bar consumes the same
+  // instance as a sibling consumer.
+  providers: [ApplicationPollingService, AppApplicationActionsService],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

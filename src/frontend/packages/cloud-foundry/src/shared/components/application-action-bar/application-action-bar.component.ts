@@ -43,7 +43,10 @@ import { AppApplicationActionsService } from '../../services/application-actions
     CfUserPermissionDirective,
     ApplicationPollComponent,
   ],
-  providers: [AppApplicationActionsService],
+  // AppApplicationActionsService is now provided at ApplicationTabsBaseComponent
+  // level so the BuildTab status card can read its inFlight signal too (for
+  // the in-flight pulse animation). No providers here — the action bar reads
+  // the parent-provided instance.
 })
 export class AppApplicationActionBarComponent {
   applicationService = inject(ApplicationService);

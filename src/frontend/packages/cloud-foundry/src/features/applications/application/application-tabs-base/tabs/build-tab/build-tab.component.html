@@ -3,7 +3,9 @@
     <app-tile-grid>
       <app-tile-group class="tile-group-3-cols">
         <app-tile>
-          <app-card-app-status></app-card-app-status>
+          <div [class.animate-pulse]="actions.inFlight()">
+            <app-card-app-status></app-card-app-status>
+          </div>
         </app-tile>
         <app-tile>
           <app-card-app-instances></app-card-app-instances>
