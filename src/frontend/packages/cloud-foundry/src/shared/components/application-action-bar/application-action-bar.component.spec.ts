@@ -16,7 +16,6 @@ import {
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 
-import { ApplicationPollingService } from '../../../features/applications/application/application-tabs-base/application-polling.service';
 import { AppApplicationActionsService } from '../../services/application-actions.service';
 import { AppApplicationActionBarComponent } from './application-action-bar.component';
 
@@ -110,7 +109,6 @@ describe('AppApplicationActionBarComponent', () => {
         { provide: ApplicationService, useValue: applicationServiceMock },
         { provide: AppApplicationActionsService, useValue: actionsMock },
         { provide: CurrentUserPermissionsService, useValue: permissionsMock },
-        ApplicationPollingService,
         ApplicationStateService,
         ApplicationEnvVarsHelper,
       ],

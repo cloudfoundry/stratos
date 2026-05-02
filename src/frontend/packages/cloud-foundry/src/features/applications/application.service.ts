@@ -30,7 +30,7 @@ import {
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { ApplicationStateData } from '../../shared/services/application-state.service';
+import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppStat } from '../../store/types/app-metadata.types';
@@ -68,12 +68,32 @@ export interface ApplicationData {
  * an injection-token bug — APP_GUID/CF_GUID come from the route.
  *
  * entityService and appEnvVars are kept from the legacy ngrx path
- * because ApplicationPollingService and the variables tab access
+ * because the variables tab accesses
  * ngrx-specific properties (poll(), action, entities$) that cannot
  * be replaced without a full ngrx removal — which is deferred.
  */
 @Injectable()
 export class ApplicationService {
+  // Static utility — used by app list cards, the home compact-app-card, and
+  // the table-cell app status renderer. Independent of the per-app detail
+  // page lifecycle; pulls live stats from the legacy ngrx paginator and
+  // composes via ApplicationStateService. Stays here because consumers
+  // already import ApplicationService for the static call.
+  static getApplicationState(
+    appStateService: ApplicationStateService,
+    app: IApp,
+    appGuid: string,
+    cfGuid: string,
+  ): Observable<ApplicationStateData> {
+    return cfEntityCatalog.appStats.store
+      .getPaginationMonitor(appGuid, cfGuid).currentPage$
+      .pipe(
+        map(appInstancesPages => appStateService.get(app, appInstancesPages)),
+        publishReplay(1),
+        refCount(),
+      );
+  }
+
   cfGuid = inject(CF_GUID);
   appGuid = inject(APP_GUID);
   private store = inject<Store<CFAppState>>(Store);
@@ -81,8 +101,7 @@ export class ApplicationService {
   private detail = inject(AppDetailDataService);
 
   // ---------------------------------------------------------------------------
-  // Legacy ngrx EntityService — kept for ApplicationPollingService
-  // (updatingSection$, poll(), action, entityObs$) and application-tabs-base
+  // Legacy ngrx EntityService — kept for application-tabs-base
   // (entityMonitor.entityRequest$, updatingSection$).
   // ---------------------------------------------------------------------------
   public entityService: EntityService<APIResource<IApp>>;

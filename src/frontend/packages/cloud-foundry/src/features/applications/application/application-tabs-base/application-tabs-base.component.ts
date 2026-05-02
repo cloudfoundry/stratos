@@ -43,7 +43,6 @@ import {
   CfCurrentUserPermissions,
   ApplicationStateData
 } from '@stratosui/cloud-foundry';
-import { ApplicationPollingService } from './application-polling.service';
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
 import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
 
@@ -55,7 +54,7 @@ import { AppApplicationActionsService } from '../../../../shared/services/applic
   // bar component) so the BuildTab status card can read its inFlight signal
   // for the in-flight pulse animation. The action bar consumes the same
   // instance as a sibling consumer.
-  providers: [ApplicationPollingService, AppApplicationActionsService],
+  providers: [AppApplicationActionsService],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -73,8 +72,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private userFavoriteManager = inject(UserFavoriteManager);
-  private appPollingService = inject(ApplicationPollingService);
-
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
   public favorite$: Observable<any>;
@@ -302,17 +299,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.summaryDataChanging$ = observableCombineLatest(
       initialFetch$,
       this.applicationService.isUpdatingApp$,
-      this.appPollingService.isPolling$
-    ).pipe(map(([isFetchingApp, isUpdating, isPolling]) => {
-      if (isPolling) {
-        return false;
-      }
+    ).pipe(map(([isFetchingApp, isUpdating]) => {
       return !!(isFetchingApp || isUpdating);
     }));
   }
 
   ngOnDestroy() {
     safeUnsubscribe(this.appSub$, this.stratosProjectSub);
-    this.appPollingService.stop();
   }
 }

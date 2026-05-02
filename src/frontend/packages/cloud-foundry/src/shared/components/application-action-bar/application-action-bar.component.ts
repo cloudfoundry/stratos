@@ -10,7 +10,6 @@ import {
 } from '@stratosui/core';
 
 import { ApplicationService } from '../../../features/applications/application.service';
-import { ApplicationPollComponent } from '../../../features/applications/application/application-tabs-base/application-poll/application-poll.component';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserPermissionDirective } from '../../directives/cf-user-permission/cf-user-permission.directive';
 import { AppApplicationActionsService } from '../../services/application-actions.service';
@@ -41,7 +40,6 @@ import { AppApplicationActionsService } from '../../services/application-actions
     PageSubNavComponent,
     PageSubNavSectionComponent,
     CfUserPermissionDirective,
-    ApplicationPollComponent,
   ],
   // AppApplicationActionsService is now provided at ApplicationTabsBaseComponent
   // level so the BuildTab status card can read its inFlight signal too (for

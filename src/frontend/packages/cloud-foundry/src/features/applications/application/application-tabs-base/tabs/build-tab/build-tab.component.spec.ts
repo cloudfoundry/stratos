@@ -6,8 +6,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
-import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
-import { ApplicationPollingService } from '../../application-polling.service';
 import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from "./view-buildpack/view-buildpack.component";
@@ -23,7 +21,6 @@ describe('BuildTabComponent', () => {
       imports: [
         BuildTabComponent,
         ViewBuildpackComponent,
-        ApplicationPollComponent,
         ...generateCfStoreModules(),
         HttpClientTestingModule,
       ],
@@ -31,7 +28,6 @@ describe('BuildTabComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        ApplicationPollingService,
         // BuildTab reads actions.inFlight() to drive the status-card pulse
         // animation. The mock exposes a readonly Signal so the template
         // binding {{ actions.inFlight() }} resolves without injecting the
