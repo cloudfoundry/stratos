@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import { ApplicationService } from '../../../features/applications/application.s
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { CfUserPermissionDirective } from '../../directives/cf-user-permission/cf-user-permission.directive';
 import { AppApplicationActionsService } from '../../services/application-actions.service';
+import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifecycle-progress.service';
 
 /**
  * AppApplicationActionBarComponent
@@ -46,9 +47,11 @@ import { AppApplicationActionsService } from '../../services/application-actions
   // the in-flight pulse animation). No providers here — the action bar reads
   // the parent-provided instance.
 })
-export class AppApplicationActionBarComponent {
+export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
   actions = inject(AppApplicationActionsService);
+  private host = inject(ElementRef);
+  private progressSvc = inject(AppLifecycleProgressService);
 
   // Adapt the action service's inFlight signal back to the
   // {updating: boolean} shape the existing template binding expects.
@@ -56,4 +59,12 @@ export class AppApplicationActionBarComponent {
     map(inFlight => ({ updating: inFlight })),
   );
   manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
+
+  ngOnInit(): void {
+    this.progressSvc.setAnchor(this.host);
+  }
+
+  ngOnDestroy(): void {
+    this.progressSvc.setAnchor(null);
+  }
 }

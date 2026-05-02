@@ -45,6 +45,7 @@ import {
 } from '@stratosui/cloud-foundry';
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
 import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
+import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -54,7 +55,12 @@ import { AppApplicationActionsService } from '../../../../shared/services/applic
   // bar component) so the BuildTab status card can read its inFlight signal
   // for the in-flight pulse animation. The action bar consumes the same
   // instance as a sibling consumer.
-  providers: [AppApplicationActionsService],
+  //
+  // AppLifecycleProgressService must be co-provided here because it injects
+  // AppApplicationActionsService — a component-scoped service whose tokens
+  // (CF_GUID / APP_GUID) only exist in this injector subtree. A root-scoped
+  // service cannot inject it.
+  providers: [AppApplicationActionsService, AppLifecycleProgressService],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -72,6 +78,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private lifecycleProgress = inject(AppLifecycleProgressService);
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
   public favorite$: Observable<any>;
@@ -267,6 +274,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Activate the lifecycle-progress overlay service. The service needs an
+    // injection context for its effect(), which is why activation is deferred
+    // to ngOnInit rather than happening in the constructor.
+    this.lifecycleProgress.initialize();
+
     this.appSub$ = this.applicationService.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
@@ -305,6 +317,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.lifecycleProgress.destroy();
     safeUnsubscribe(this.appSub$, this.stratosProjectSub);
   }
 }

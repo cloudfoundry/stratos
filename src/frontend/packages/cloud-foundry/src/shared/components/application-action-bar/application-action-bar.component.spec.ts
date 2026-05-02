@@ -17,6 +17,7 @@ import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 
 import { AppApplicationActionsService } from '../../services/application-actions.service';
+import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifecycle-progress.service';
 import { AppApplicationActionBarComponent } from './application-action-bar.component';
 
 /**
@@ -108,6 +109,7 @@ describe('AppApplicationActionBarComponent', () => {
         provideHttpClient(),
         { provide: ApplicationService, useValue: applicationServiceMock },
         { provide: AppApplicationActionsService, useValue: actionsMock },
+        { provide: AppLifecycleProgressService, useValue: { setAnchor: vi.fn() } },
         { provide: CurrentUserPermissionsService, useValue: permissionsMock },
         ApplicationStateService,
         ApplicationEnvVarsHelper,

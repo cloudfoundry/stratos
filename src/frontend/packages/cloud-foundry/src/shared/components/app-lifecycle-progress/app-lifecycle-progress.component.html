@@ -1,0 +1,18 @@
+@if (actions.inFlight()) {
+  <div class="bg-surface-elevated text-content shadow-lg rounded-lg p-3 max-w-md flex items-start gap-2"
+       role="status"
+       aria-live="polite">
+    <span class="text-lg leading-none animate-spin inline-block">&#8987;</span>
+    <div class="flex-1 text-sm">
+      <div class="font-semibold">
+        {{ actions.verb() }} {{ actions.log()[0]?.target?.app }}
+      </div>
+      <div class="text-content-secondary text-xs">
+        {{ actions.log()[0]?.target?.cf }} / {{ actions.log()[0]?.target?.org }} / {{ actions.log()[0]?.target?.space }}
+      </div>
+      @if (actions.progress()?.length) {
+        <app-stage-row [stages]="actions.progress() ?? []" />
+      }
+    </div>
+  </div>
+}

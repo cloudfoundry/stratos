@@ -137,11 +137,10 @@ export class AppApplicationActionsService {
     this._progress.set([]);
     this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'begin' });
 
-    // duration: 0 keeps the in-progress snackbar visible until the
-    // writeWithJob promise resolves and we dismiss it explicitly. The
-    // default 4s auto-dismiss made the in-flight feedback flash and
-    // disappear before the operation finished.
-    const inProgress = this.snackBar.open(`${gerund[verb]} ${target}…`, '', { duration: 0 });
+    // The in-flight snackbar is no longer opened here — AppLifecycleProgressComponent
+    // mounts automatically via the CDK Overlay when inFlight() becomes true.
+    // Terminal success/failure announcements still use snackBar (different content,
+    // transient, appropriate for MatSnackBar semantics).
 
     const onProgress = (job: StratosJob) => {
       if (job.stages?.length) {
@@ -154,7 +153,6 @@ export class AppApplicationActionsService {
     void action({ onProgress })
       .then(() => {
         this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
-        inProgress.dismiss();
         this.snackBar.open(`${past[verb]} ${target}`, 'Dismiss');
         cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
         this.dispatchAppStats();
@@ -166,7 +164,6 @@ export class AppApplicationActionsService {
           at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
           error: firstError ? { code: String(firstError.code), message: String(firstError.message) } : undefined,
         });
-        inProgress.dismiss();
         const msg = firstError?.message ?? err?.message ?? String(err);
         this.snackBar.open(`Failed to ${verb} ${target}: ${msg}`, 'Dismiss');
         this.dispatchAppStats();
