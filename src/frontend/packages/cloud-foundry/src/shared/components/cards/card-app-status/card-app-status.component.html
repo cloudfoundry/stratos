@@ -21,7 +21,7 @@
         <div class="flex justify-between items-center py-1">
           <span class="text-content-secondary text-sm">Memory</span>
           <span>
-            @if (data.summary()?.memory != null) {
+            @if ((data.summary()?.memory ?? null) !== null) {
               {{ data.summary()!.memory | mbToHumanSize }}
             } @else {
               -
@@ -33,7 +33,7 @@
         <div class="flex justify-between items-center py-1">
           <span class="text-content-secondary text-sm">Disk</span>
           <span>
-            @if (data.summary()?.disk_quota != null) {
+            @if ((data.summary()?.disk_quota ?? null) !== null) {
               {{ data.summary()!.disk_quota | mbToHumanSize }}
             } @else {
               -
