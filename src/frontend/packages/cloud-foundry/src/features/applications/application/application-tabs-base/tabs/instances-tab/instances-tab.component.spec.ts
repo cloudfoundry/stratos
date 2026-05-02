@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, signal, computed } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -11,6 +11,8 @@ import { PaginationMonitorFactory } from '@stratosui/store';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
 import { ListConfig } from '@stratosui/core';
+import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
+import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { InstancesTabComponent } from './instances-tab.component';
 
 describe('InstancesTabComponent', () => {
@@ -46,6 +48,22 @@ describe('InstancesTabComponent', () => {
     enableTextFilter: false
   };
 
+  /** Minimal AppDetailDataService stub required by CardAppStatusComponent. */
+  const makeDataStub = () => ({
+    app: signal<any>(undefined).asReadonly(),
+    summary: signal<any>(undefined).asReadonly(),
+    stats: signal<any[]>([]).asReadonly(),
+    state: computed(() => ({ label: '', indicator: null, actions: {} })),
+    lastPolledAt: signal<Date | null>(null).asReadonly(),
+  });
+
+  /** Minimal AppApplicationActionsService stub. */
+  const makeActionsStub = () => ({
+    inFlight: signal(false).asReadonly(),
+    verb: signal<any>(null).asReadonly(),
+    progress: signal<any[] | null>(null).asReadonly(),
+  });
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -60,6 +78,8 @@ describe('InstancesTabComponent', () => {
         { provide: PaginationMonitorFactory, useValue: mockPmf },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+        { provide: AppDetailDataService, useFactory: makeDataStub },
+        { provide: AppApplicationActionsService, useFactory: makeActionsStub },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })

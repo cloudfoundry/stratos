@@ -18,6 +18,7 @@ import { IAppSummary } from '../../../../../../cf-api.types';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
@@ -60,6 +61,7 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
 })
 export class BuildTabComponent implements OnInit {
   applicationService = inject(ApplicationService);
+  data = inject(AppDetailDataService);
   // Read inFlight signal from the action service so the status card pulses
   // while a lifecycle action is in progress — visual feedback right where
   // the operator is looking, in addition to the bottom-of-page snackbar.

@@ -6,7 +6,46 @@
     </div>
     <div class="card-content">
       <div class="card-app-status__large">
-        <app-application-state [state]="applicationService.applicationState$"></app-application-state>
+        <!-- State row -->
+        <div class="flex justify-between items-center py-1">
+          <span class="text-content-secondary text-sm">State</span>
+          <span [class]="stateClasses()">{{ stateLabel() }}</span>
+        </div>
+
+        <!-- Transition row: visible while an action is in-flight and has stage data -->
+        @if (actions.inFlight() && actions.progress()?.length) {
+          <app-stage-row [stages]="actions.progress()!" />
+        }
+
+        <!-- Memory row -->
+        <div class="flex justify-between items-center py-1">
+          <span class="text-content-secondary text-sm">Memory</span>
+          <span>
+            @if (data.summary()?.memory != null) {
+              {{ data.summary()!.memory | mbToHumanSize }}
+            } @else {
+              -
+            }
+          </span>
+        </div>
+
+        <!-- Disk row -->
+        <div class="flex justify-between items-center py-1">
+          <span class="text-content-secondary text-sm">Disk</span>
+          <span>
+            @if (data.summary()?.disk_quota != null) {
+              {{ data.summary()!.disk_quota | mbToHumanSize }}
+            } @else {
+              -
+            }
+          </span>
+        </div>
+
+        <!-- Instances row -->
+        <div class="flex justify-between items-center py-1">
+          <span class="text-content-secondary text-sm">Instances</span>
+          <span>{{ instancesLabel() }}</span>
+        </div>
       </div>
     </div>
   </a>

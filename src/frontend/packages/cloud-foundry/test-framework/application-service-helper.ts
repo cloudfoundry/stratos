@@ -137,6 +137,7 @@ function makeAppDetailDataServiceStub() {
     stratosProject: computed(() => null),
     state: computed(() => ({ label: '', indicator: null, actions: {} })),
     fetching: computed(() => false),
+    lastPolledAt: signal<Date | null>(null).asReadonly(),
   };
 }
 
