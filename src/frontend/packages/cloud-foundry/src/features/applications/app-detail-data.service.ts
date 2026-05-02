@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { AppDetailPrefs } from './app-detail-prefs.service';
@@ -187,23 +187,40 @@ export class AppDetailDataService {
   }
 
   // ---------------------------------------------------------------------------
-  // URL helpers
+  // URL + header helpers
+  //
+  // Single-resource reads go through the Jetstream CAPI v2 proxy
+  // (/pp/v1/proxy/v2/...) with the target endpoint identified via the
+  // x-cap-cnsi-list header. This matches the wire shape produced by the
+  // legacy ngrx actions (GetApplication: `apps/{guid}`, GetAppSummary, etc.)
+  // and avoids the gap that single-resource Jetstream native handlers
+  // (/pp/v1/cf/apps/{cnsi}/{appGuid}, etc.) don't exist for these reads.
+  //
+  // V3 native handlers exist only for sub-resources (/routes, /service_bindings,
+  // /revisions) and the apps LIST endpoint; single-app, summary, env, stats,
+  // space, org, and domains are still v2-proxied. The v3 migration of these
+  // is a separate workstream.
   // ---------------------------------------------------------------------------
 
   private appUrl(suffix = ''): string {
-    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}${suffix}`;
+    return `/pp/v1/proxy/v2/apps/${this.appGuid}${suffix}`;
   }
 
   private spaceUrl(spaceGuid: string): string {
-    return `/pp/v1/cf/spaces/${this.cnsiGuid}/${spaceGuid}`;
+    return `/pp/v1/proxy/v2/spaces/${spaceGuid}`;
   }
 
   private orgUrl(orgGuid: string): string {
-    return `/pp/v1/cf/organizations/${this.cnsiGuid}/${orgGuid}`;
+    return `/pp/v1/proxy/v2/organizations/${orgGuid}`;
   }
 
   private orgDomainsUrl(orgGuid: string): string {
-    return `/pp/v1/cf/organizations/${this.cnsiGuid}/${orgGuid}/domains`;
+    return `/pp/v1/proxy/v2/organizations/${orgGuid}/domains`;
+  }
+
+  /** CNSI selector header expected by the Jetstream proxy. */
+  private cnsiHeaders(): { headers: HttpHeaders } {
+    return { headers: new HttpHeaders({ 'x-cap-cnsi-list': this.cnsiGuid }) };
   }
 
   // ---------------------------------------------------------------------------
@@ -217,13 +234,32 @@ export class AppDetailDataService {
   ): Promise<void> {
     this._loading.update(m => ({ ...m, [kind]: true }));
     this._errors.update(m => ({ ...m, [kind]: null }));
+    const t0 = performance.now();
     try {
-      const value = await firstValueFrom(this.http.get<T>(url));
+      const value = await firstValueFrom(this.http.get<T>(url, this.cnsiHeaders()));
       target.set(value);
+      this.debugTrace(kind, url, 'ok', performance.now() - t0);
     } catch (err: unknown) {
       this._errors.update(m => ({ ...m, [kind]: this.toStratosError(kind, err) }));
+      this.debugTrace(kind, url, 'err', performance.now() - t0, err);
     } finally {
       this._loading.update(m => ({ ...m, [kind]: false }));
+    }
+  }
+
+  /**
+   * Diagnostic trace for slice 1 verification. Gated on
+   * localStorage.stratosDebug to keep production console clean.
+   */
+  private debugTrace(kind: EntityKind, url: string, outcome: 'ok' | 'err', ms: number, err?: unknown): void {
+    try {
+      if (typeof localStorage === 'undefined' || !localStorage.getItem('stratosDebug')) {
+        return;
+      }
+      // eslint-disable-next-line no-console
+      console.debug('[AppDetailData]', kind, outcome, `${ms.toFixed(0)}ms`, url, err ?? '');
+    } catch {
+      // localStorage may throw in private-mode browsers; ignore.
     }
   }
 
@@ -235,7 +271,7 @@ export class AppDetailDataService {
     this._loading.update(m => ({ ...m, stats: true }));
     this._errors.update(m => ({ ...m, stats: null }));
     try {
-      const raw = await firstValueFrom(this.http.get<Record<string, AppStat>>(this.appUrl('/stats')));
+      const raw = await firstValueFrom(this.http.get<Record<string, AppStat>>(this.appUrl('/stats'), this.cnsiHeaders()));
       this._stats.set(Object.values(raw ?? {}));
     } catch (err: unknown) {
       // Apps that are STOPPED have no stats; treat as empty rather than error.
@@ -290,7 +326,7 @@ export class AppDetailDataService {
     this._errors.update(m => ({ ...m, domains: null }));
     try {
       const result = await firstValueFrom(
-        this.http.get<{ resources: IDomain[] }>(this.orgDomainsUrl(org))
+        this.http.get<{ resources: IDomain[] }>(this.orgDomainsUrl(org), this.cnsiHeaders())
       );
       this._domains.set(result?.resources ?? []);
     } catch (err: unknown) {

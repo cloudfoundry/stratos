@@ -14,7 +14,7 @@ import { ApplicationStateService } from '../../shared/services/application-state
 // ---------------------------------------------------------------------------
 const CNSI = 'cnsi-1';
 const APP_GUID = 'app-1';
-const BASE_URL = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}`;
+const BASE_URL = `/pp/v1/proxy/v2/apps/${APP_GUID}`;
 
 const MOCK_APP_ENTITY = {
   metadata: { guid: APP_GUID, created_at: '', updated_at: '', url: '' },
@@ -230,19 +230,19 @@ describe('AppDetailDataService', () => {
     await tick();
 
     // Phase 2: space request (needs app.space_guid = 'sp-1')
-    httpMock.expectOne(`/pp/v1/cf/spaces/${CNSI}/sp-1`).flush(MOCK_SPACE);
+    httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);
 
     // Drain microtasks so phase 2 resolves and phase 3 initiates
     await tick();
 
     // Phase 3a: org (needs space.organization_guid = 'org-1')
-    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1`).flush(MOCK_ORG);
+    httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1`).flush(MOCK_ORG);
 
     // Drain microtasks so org resolves and domains fetch initiates
     await tick();
 
     // Phase 3b: domains (needs org.metadata.guid = 'org-1')
-    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
+    httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
     await promise;
 
@@ -267,15 +267,15 @@ describe('AppDetailDataService', () => {
 
     // Phase 2
     await tick();
-    httpMock.expectOne(`/pp/v1/cf/spaces/${CNSI}/sp-1`).flush(MOCK_SPACE);
+    httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);
 
     // Phase 3a: org
     await tick();
-    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1`).flush(MOCK_ORG);
+    httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1`).flush(MOCK_ORG);
 
     // Phase 3b: domains (sequential after org)
     await tick();
-    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
+    httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
     await promise;
 
@@ -303,7 +303,7 @@ describe('AppDetailDataService', () => {
 
     expect(svc.space()).toBeUndefined();
     expect(svc.org()).toBeUndefined();
-    httpMock.expectNone(`/pp/v1/cf/spaces/${CNSI}/sp-1`);
+    httpMock.expectNone(`/pp/v1/proxy/v2/spaces/sp-1`);
   });
 
   it('sets lastPolledAt after a successful refresh("all")', async () => {
@@ -317,14 +317,14 @@ describe('AppDetailDataService', () => {
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
 
     await tick();
-    httpMock.expectOne(`/pp/v1/cf/spaces/${CNSI}/sp-1`).flush(MOCK_SPACE);
+    httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);
 
     await tick();
-    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1`).flush(MOCK_ORG);
+    httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1`).flush(MOCK_ORG);
 
     // Domains are sequential after org
     await tick();
-    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
+    httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
     await promise;
 

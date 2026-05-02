@@ -8,10 +8,6 @@ import { AppDetailDataService } from '../app-detail-data.service';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 
-export function applicationServiceFactory() {
-  return new ApplicationService();
-}
-
 export function getGuids(type?: string) {
   return (activatedRoute: ActivatedRoute) => {
     const { id, endpointId } = activatedRoute.snapshot.params;
@@ -31,7 +27,6 @@ export function getGuids(type?: string) {
     RouterModule
 ],
   providers: [
-    ApplicationService,
     {
       provide: CF_GUID,
       useFactory: getGuids('cf'),
@@ -42,11 +37,11 @@ export function getGuids(type?: string) {
       useFactory: getGuids(),
       deps: [ActivatedRoute]
     },
-    {
-      provide: ApplicationService,
-      useFactory: applicationServiceFactory,
-      deps: []
-    },
+    // ApplicationService is the facade shim. Provide as a plain class so
+    // Angular's DI handles construction in a proper injection context;
+    // the legacy useFactory wrapper triggered NG0201 inside the inject()
+    // field initializers under some lifecycle orderings.
+    ApplicationService,
     // CloudFoundryEndpointService is providedIn:'root' but its constructor
     // calls getEntityService(this.cfGuid) at construction time. The cfGuid
     // comes from ActiveRouteCfOrgSpace, which the root injector only has as
