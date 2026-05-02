@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { CloudFoundryEventsListComponent } from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
-import { ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 
 // App-scoped Events tab. Passes the appGuid as targetGuid plus
 // `typeMustContain='audit.app'` so platform-level events (org / space
@@ -16,5 +16,5 @@ import { ApplicationService } from '../../../../application.service';
   ],
 })
 export class EventsTabComponent {
-  applicationService = inject(ApplicationService);
+  data = inject(AppDetailDataService);
 }
