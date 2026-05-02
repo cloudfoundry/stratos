@@ -7,7 +7,9 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
@@ -15,6 +17,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// mustParseTime parses an RFC 3339 timestamp and panics if it fails.
+// Test helper only.
+func mustParseTime(s string) time.Time {
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic("mustParseTime: " + err.Error())
+	}
+	return t
+}
 
 // newTestRestageTranslator wires a translator to a fixed mockNativeCFProxy
 // that points capi at the supplied test server. Returns the translator
@@ -210,6 +222,96 @@ func TestRestageJobTranslator_Fetch_TransportFailurePropagates(t *testing.T) {
 	_, _, _, err := tr.Fetch(context.Background(), ref)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "build capi client")
+}
+
+// TestRestageJobTranslator_CurrentStage_WrongRefType verifies that a non-
+// *RestageRef ref causes CurrentStage to return (JobStage{}, false) rather
+// than panicking or returning stale data.
+func TestRestageJobTranslator_CurrentStage_WrongRefType(t *testing.T) {
+	tr := &RestageJobTranslator{}
+	stage, has := tr.CurrentStage(CFJobRef{JobGUID: "wrong"})
+	assert.False(t, has)
+	assert.Equal(t, "", stage.Code)
+}
+
+// TestRestageJobTranslator_CurrentStage_EmptyStages verifies that a valid
+// *RestageRef with no stage history returns (JobStage{}, false).
+func TestRestageJobTranslator_CurrentStage_EmptyStages(t *testing.T) {
+	tr := &RestageJobTranslator{}
+	ref := &RestageRef{
+		CNSIGuid:     "cnsi-1",
+		UserGuid:     "user-1",
+		AppGuid:      "app-1",
+		CurrentStage: StageRestagePackageLookup,
+		// Stages intentionally empty
+	}
+	stage, has := tr.CurrentStage(ref)
+	assert.False(t, has)
+	assert.Equal(t, "", stage.Code)
+}
+
+// TestRestageJobTranslator_CurrentStage_MapsLastRecord verifies that
+// CurrentStage returns a properly mapped JobStage from the last entry in
+// ref.Stages, including the uppercase Code, human label, and 1-based Index.
+func TestRestageJobTranslator_CurrentStage_MapsLastRecord(t *testing.T) {
+	tr := &RestageJobTranslator{}
+
+	startedAt := mustParseTime("2026-05-02T10:00:00Z")
+	ref := &RestageRef{
+		Stages: []RestageStageRecord{
+			{
+				Stage:     StageRestagePackageLookup,
+				State:     StageStateDone,
+				StartedAt: startedAt,
+			},
+			{
+				Stage:     StageRestageBuildCreate,
+				State:     StageStateInProgress,
+				StartedAt: startedAt,
+			},
+		},
+	}
+
+	stage, has := tr.CurrentStage(ref)
+	require.True(t, has)
+	assert.Equal(t, "BUILD_CREATE", stage.Code)
+	assert.Equal(t, "Creating build", stage.Label)
+	assert.Equal(t, 2, stage.Index) // two records → Index 2
+	assert.Equal(t, 0, stage.Of)   // unknown total
+	assert.Equal(t, startedAt, stage.EnteredAt)
+}
+
+// TestRestageJobTranslator_CurrentStage_AllStageCodes exercises every
+// RestageStage value to ensure none falls through to the default case
+// (which returns the raw constant value as label — acceptable as a
+// fallback, but we want explicit labels for all known stages).
+func TestRestageJobTranslator_CurrentStage_AllStageCodes(t *testing.T) {
+	tr := &RestageJobTranslator{}
+	knownStages := []RestageStage{
+		StageRestagePackageLookup,
+		StageRestageBuildCreate,
+		StageRestageBuildPoll,
+		StageRestageSetDroplet,
+		StageRestageStop,
+		StageRestageStart,
+		StageRestageInstancePoll,
+		StageRestageDeploymentCreate,
+		StageRestageDeploymentPoll,
+	}
+	for _, s := range knownStages {
+		ref := &RestageRef{
+			Stages: []RestageStageRecord{{Stage: s, State: StageStateDone}},
+		}
+		stage, has := tr.CurrentStage(ref)
+		require.True(t, has, "expected CurrentStage to return true for stage %q", s)
+		// Code must be uppercase form of the constant value.
+		assert.Equal(t, strings.ToUpper(string(s)), stage.Code,
+			"Code mismatch for stage %q", s)
+		// Label must not fall back to the raw constant value (all known
+		// stages have a dedicated human label).
+		assert.NotEqual(t, string(s), stage.Label,
+			"stage %q missing human label — fell through to default", s)
+	}
 }
 
 // noTokenProxy returns no token so newCapiClient surfaces a forbidden

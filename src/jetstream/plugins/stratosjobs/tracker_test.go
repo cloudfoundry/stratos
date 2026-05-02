@@ -239,6 +239,119 @@ func TestInMemoryTracker_AppendStage_UnknownJob_NoOp(t *testing.T) {
 	tr.AppendStage("nonexistent", JobStage{Code: "X"})
 }
 
+// stageEmittingStub extends stubTranslator with the StageEmittingTranslator
+// capability so tests can exercise the Refresh hook without needing a real
+// translator.
+type stageEmittingStub struct {
+	stubTranslator
+	// stageFn is called by CurrentStage; the ref arg is whatever was
+	// passed to Tracker.Create.
+	stageFn func(ref interface{}) (JobStage, bool)
+}
+
+func (s *stageEmittingStub) CurrentStage(ref interface{}) (JobStage, bool) {
+	if s.stageFn == nil {
+		return JobStage{}, false
+	}
+	return s.stageFn(ref)
+}
+
+// TestRefresh_StageEmittingTranslator_AppendsStageOnEachPoll verifies that
+// Refresh calls CurrentStage and appends the returned stage when the
+// translator implements StageEmittingTranslator.
+func TestRefresh_StageEmittingTranslator_AppendsStageOnEachPoll(t *testing.T) {
+	tr := newTestTracker(t, time.Now)
+
+	// Translator always returns PROCESSING so multiple Refresh calls proceed.
+	call := 0
+	stages := []JobStage{
+		{Code: "STAGE_A", Label: "Stage A", Index: 1, Of: 0},
+		{Code: "STAGE_B", Label: "Stage B", Index: 2, Of: 0},
+	}
+	tl := &stageEmittingStub{
+		stubTranslator: stubTranslator{
+			fn: func(int) (JobState, []StratosError, interface{}, error) {
+				return JobStateProcessing, nil, nil, nil
+			},
+		},
+		stageFn: func(_ interface{}) (JobStage, bool) {
+			if call < len(stages) {
+				return stages[call], true
+			}
+			return JobStage{}, false
+		},
+	}
+
+	id := tr.Create("test-kind", tl, "ref")
+
+	// First poll — should append STAGE_A.
+	call = 0
+	job, ok := tr.Refresh(context.Background(), id)
+	if !ok {
+		t.Fatal("expected job present")
+	}
+	if got := len(job.Stages); got != 1 {
+		t.Fatalf("expected 1 stage after first poll, got %d", got)
+	}
+	if job.Stages[0].Code != "STAGE_A" {
+		t.Errorf("expected STAGE_A, got %s", job.Stages[0].Code)
+	}
+
+	// Second poll with same stage code — dedup must suppress.
+	call = 0
+	_, _ = tr.Refresh(context.Background(), id)
+	job, _ = tr.Get(id)
+	if got := len(job.Stages); got != 1 {
+		t.Fatalf("expected 1 stage after dedup poll, got %d", got)
+	}
+
+	// Third poll with a new stage code — should append STAGE_B.
+	call = 1
+	_, _ = tr.Refresh(context.Background(), id)
+	job, _ = tr.Get(id)
+	if got := len(job.Stages); got != 2 {
+		t.Fatalf("expected 2 stages after new-code poll, got %d", got)
+	}
+	if job.Stages[1].Code != "STAGE_B" {
+		t.Errorf("expected STAGE_B, got %s", job.Stages[1].Code)
+	}
+}
+
+// TestRefresh_PlainTranslator_NoStagesAppended verifies that a translator
+// that does NOT implement StageEmittingTranslator leaves Stages untouched.
+func TestRefresh_PlainTranslator_NoStagesAppended(t *testing.T) {
+	tr := newTestTracker(t, time.Now)
+	tl := &stubTranslator{fn: func(int) (JobState, []StratosError, interface{}, error) {
+		return JobStateProcessing, nil, nil, nil
+	}}
+
+	id := tr.Create("test-kind", tl, "ref")
+	job, _ := tr.Refresh(context.Background(), id)
+	if len(job.Stages) != 0 {
+		t.Errorf("expected no stages from plain translator, got %d", len(job.Stages))
+	}
+}
+
+// TestRefresh_StageEmittingTranslator_HasFalse_NoStage verifies that when
+// CurrentStage returns (_, false) no stage is appended.
+func TestRefresh_StageEmittingTranslator_HasFalse_NoStage(t *testing.T) {
+	tr := newTestTracker(t, time.Now)
+	tl := &stageEmittingStub{
+		stubTranslator: stubTranslator{
+			fn: func(int) (JobState, []StratosError, interface{}, error) {
+				return JobStateProcessing, nil, nil, nil
+			},
+		},
+		stageFn: func(_ interface{}) (JobStage, bool) { return JobStage{}, false },
+	}
+
+	id := tr.Create("test-kind", tl, "ref")
+	job, _ := tr.Refresh(context.Background(), id)
+	if len(job.Stages) != 0 {
+		t.Errorf("expected no stage when CurrentStage returns false, got %d", len(job.Stages))
+	}
+}
+
 func TestSweep_LeavesNonTerminalAlone(t *testing.T) {
 	now := time.Date(2026, 4, 22, 20, 0, 0, 0, time.UTC)
 	clock := now

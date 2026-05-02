@@ -166,9 +166,28 @@ func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, 
 		tTerminal := now
 		tj.terminalAt = &tTerminal
 	}
+	// Optional capability: if the translator knows its current stage,
+	// append it to the timeline under the same lock — no external call,
+	// no risk of deadlock.
+	if se, ok := tj.translator.(StageEmittingTranslator); ok {
+		if stage, has := se.CurrentStage(tj.ref); has {
+			t.appendStageLocked(tj, stage)
+		}
+	}
 	snap := tj.job
 	t.mu.Unlock()
 	return &snap, true
+}
+
+// appendStageLocked appends a stage to tj's timeline when its Code
+// differs from the last existing stage. Must be called with t.mu held.
+func (t *InMemoryTracker) appendStageLocked(tj *trackedJob, stage JobStage) {
+	n := len(tj.job.Stages)
+	if n > 0 && tj.job.Stages[n-1].Code == stage.Code {
+		return // dedup: same code as last stage
+	}
+	tj.job.Stages = append(tj.job.Stages, stage)
+	tj.job.UpdatedAt = t.clock()
 }
 
 // AppendStage adds a stage to the job's history if its Code differs from
@@ -182,12 +201,7 @@ func (t *InMemoryTracker) AppendStage(id string, stage JobStage) {
 	if !ok {
 		return // unknown job — no-op
 	}
-	n := len(tj.job.Stages)
-	if n > 0 && tj.job.Stages[n-1].Code == stage.Code {
-		return // dedup: same code as last stage
-	}
-	tj.job.Stages = append(tj.job.Stages, stage)
-	tj.job.UpdatedAt = t.clock()
+	t.appendStageLocked(tj, stage)
 }
 
 // sweepLoop periodically evicts jobs whose terminalAt + ttl has elapsed.

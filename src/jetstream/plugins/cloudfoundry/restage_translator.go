@@ -13,6 +13,8 @@ package cloudfoundry
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -95,4 +97,74 @@ func (t *RestageJobTranslator) Fetch(ctx context.Context, ref interface{}) (
 		}
 	}
 	return state, errs, result, nil
+}
+
+// CurrentStage implements stratosjobs.StageEmittingTranslator. It maps the
+// last RestageStageRecord in ref.Stages to a JobStage for the tracker's
+// progress timeline.
+//
+// Of is always 0 ("unknown") because the total step count is strategy-
+// dependent (downtime: 7, rolling: 6, canary: 6) and is only known after the
+// ref.Strategy is resolved mid-flight. Using 0 avoids emitting a wrong total
+// that the frontend might display as "step 1 of 7" when the app ends up on
+// the rolling path. This is a known gap — see feedback_research_provisional.md.
+//
+// Returns (JobStage{}, false) for wrong ref type or empty stage history.
+func (t *RestageJobTranslator) CurrentStage(ref interface{}) (stratosjobs.JobStage, bool) {
+	rRef, ok := ref.(*RestageRef)
+	if !ok || len(rRef.Stages) == 0 {
+		return stratosjobs.JobStage{}, false
+	}
+
+	last := rRef.Stages[len(rRef.Stages)-1]
+	code := restageStageCode(last.Stage)
+	label := restageStageLabel(last.Stage)
+
+	var enteredAt time.Time
+	if !last.StartedAt.IsZero() {
+		enteredAt = last.StartedAt
+	}
+
+	return stratosjobs.JobStage{
+		Code:      code,
+		Label:     label,
+		Index:     len(rRef.Stages), // 1-based: number of stages completed so far
+		Of:        0,                // unknown — strategy determines total; see doc above
+		EnteredAt: enteredAt,
+	}, true
+}
+
+// restageStageCode returns the stable uppercase Code string for a
+// RestageStage. The Code is the uppercase form of the const value so it
+// is both human-scannable in logs and stable as a wire dedup key.
+func restageStageCode(s RestageStage) string {
+	return strings.ToUpper(string(s))
+}
+
+// restageStageLabel returns the human-readable label for a RestageStage.
+// Labels are presentational only — they may change without breaking
+// frontend logic that keys on Code.
+func restageStageLabel(s RestageStage) string {
+	switch s {
+	case StageRestagePackageLookup:
+		return "Resolving package"
+	case StageRestageBuildCreate:
+		return "Creating build"
+	case StageRestageBuildPoll:
+		return "Staging"
+	case StageRestageSetDroplet:
+		return "Setting droplet"
+	case StageRestageStop:
+		return "Stopping app"
+	case StageRestageStart:
+		return "Starting app"
+	case StageRestageInstancePoll:
+		return "Waiting for instances"
+	case StageRestageDeploymentCreate:
+		return "Creating deployment"
+	case StageRestageDeploymentPoll:
+		return "Deploying"
+	default:
+		return string(s)
+	}
 }
