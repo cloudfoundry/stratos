@@ -1,5 +1,6 @@
 import { Observable, of as observableOf, of, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { signal, computed } from '@angular/core';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
@@ -9,6 +10,7 @@ import { ApplicationData } from '../src/features/applications/application.servic
 import { EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData } from '../src/shared/services/application-state.service';
 import { AppStat } from '../src/store/types/app-metadata.types';
+import { AppDetailDataService } from '../src/features/applications/app-detail-data.service';
 
 function createEntity<T>(entity: T): APIResource<T> {
   return {
@@ -103,10 +105,49 @@ export class ApplicationServiceMock {
   } as EntityService<APIResource<IApp<unknown>>>
 }
 
+/**
+ * Minimal AppDetailDataService stub for use in tests that instantiate the
+ * real ApplicationService (via generateTestApplicationServiceProvider).
+ * ApplicationService now requires AppDetailDataService via inject(), so
+ * the stub must be provided whenever the real ApplicationService is used.
+ */
+function makeAppDetailDataServiceStub() {
+  const _loading = signal<Record<string, boolean>>({
+    app: false, summary: false, stats: false, envVars: false,
+    space: false, org: false, domains: false,
+  });
+  const _errors = signal<Record<string, any>>({
+    app: null, summary: null, stats: null, envVars: null,
+    space: null, org: null, domains: null,
+  });
+  return {
+    app: signal<any>(undefined).asReadonly(),
+    summary: signal<any>(undefined).asReadonly(),
+    stats: signal<any[]>([]).asReadonly(),
+    envVars: signal<any>(undefined).asReadonly(),
+    space: signal<any>(undefined).asReadonly(),
+    org: signal<any>(undefined).asReadonly(),
+    domains: signal<any[]>([]).asReadonly(),
+    loading: _loading.asReadonly(),
+    errors: _errors.asReadonly(),
+    running: computed(() => false),
+    url: computed(() => null as string | null),
+    // null means env vars not loaded — ApplicationService.applicationStratProject$
+    // filters null values out, so components that do take(1) won't receive null.
+    stratosProject: computed(() => null),
+    state: computed(() => ({ label: '', indicator: null, actions: {} })),
+    fetching: computed(() => false),
+  };
+}
+
 export function generateTestApplicationServiceProvider(appGuid: string, cfGuid: string) {
   return [
     { provide: CF_GUID, useValue: cfGuid },
     { provide: APP_GUID, useValue: appGuid },
+    {
+      provide: AppDetailDataService,
+      useFactory: makeAppDetailDataServiceStub,
+    },
     {
       provide: ApplicationService,
       useFactory: () => new ApplicationService(),

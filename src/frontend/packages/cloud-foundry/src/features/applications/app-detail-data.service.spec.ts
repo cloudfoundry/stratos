@@ -47,6 +47,39 @@ const MOCK_ENV = {
   },
 };
 
+const MOCK_SPACE = {
+  metadata: { guid: 'sp-1', created_at: '', updated_at: '', url: '' },
+  entity: { name: 'my-space', organization_guid: 'org-1' },
+};
+
+const MOCK_ORG = {
+  metadata: { guid: 'org-1', created_at: '', updated_at: '', url: '' },
+  entity: { name: 'my-org' },
+};
+
+const MOCK_DOMAINS_RESPONSE = {
+  resources: [
+    { metadata: { guid: 'd-1', created_at: '', updated_at: '', url: '' }, entity: { name: 'example.com' } },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// Async helper — drain the microtask queue
+// ---------------------------------------------------------------------------
+
+/**
+ * Yield to the microtask queue so that Promise.all / await chains inside
+ * AppDetailDataService can advance between HTTP-flush phases.
+ * Multiple ticks may be needed because each `await firstValueFrom(...)` in
+ * the service resolves across two microtask boundaries (Observable emit +
+ * firstValueFrom completion).
+ */
+async function tick(times = 4): Promise<void> {
+  for (let i = 0; i < times; i++) {
+    await Promise.resolve();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Test suite
 // ---------------------------------------------------------------------------
@@ -177,18 +210,39 @@ describe('AppDetailDataService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // refresh('all') — parallel HTTP fan-out
+  // refresh('all') — phased HTTP fan-out
+  //
+  // Pattern: start the refresh Promise, tick microtasks to let each phase
+  // initiate its HTTP requests, flush them, tick again, repeat for each phase.
   // -------------------------------------------------------------------------
 
-  it('refresh("all") fetches app, summary, stats, envVars in parallel', async () => {
+  it('refresh("all") phase 1: fetches app, summary, stats, envVars in parallel', async () => {
     const promise = svc.refresh('all');
 
+    // Phase 1: all four requests are in-flight immediately (started in parallel)
+    await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
     httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
-    // space/org/domains are skipped: at call time app.space_guid is not yet
-    // populated (parallel fetch hasn't returned), so fetchSpace returns early.
+
+    // Drain microtasks so Promise.all resolves and phase 2 initiates
+    await tick();
+
+    // Phase 2: space request (needs app.space_guid = 'sp-1')
+    httpMock.expectOne(`/pp/v1/cf/spaces/${CNSI}/sp-1`).flush(MOCK_SPACE);
+
+    // Drain microtasks so phase 2 resolves and phase 3 initiates
+    await tick();
+
+    // Phase 3a: org (needs space.organization_guid = 'org-1')
+    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1`).flush(MOCK_ORG);
+
+    // Drain microtasks so org resolves and domains fetch initiates
+    await tick();
+
+    // Phase 3b: domains (needs org.metadata.guid = 'org-1')
+    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
     await promise;
 
@@ -196,16 +250,81 @@ describe('AppDetailDataService', () => {
     expect(svc.summary()).toEqual(MOCK_SUMMARY);
     expect(svc.stats()).toHaveLength(1);
     expect(svc.envVars()).toEqual(MOCK_ENV);
+    expect(svc.space()).toEqual(MOCK_SPACE);
+    expect(svc.org()).toEqual(MOCK_ORG);
+    expect(svc.domains()).toHaveLength(1);
+  });
+
+  it('refresh("all") phased: space only populated after app, org only populated after space', async () => {
+    const promise = svc.refresh('all');
+
+    // Phase 1
+    await tick();
+    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    // Phase 2
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/${CNSI}/sp-1`).flush(MOCK_SPACE);
+
+    // Phase 3a: org
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1`).flush(MOCK_ORG);
+
+    // Phase 3b: domains (sequential after org)
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
+
+    await promise;
+
+    expect(svc.space()).toEqual(MOCK_SPACE);
+    expect(svc.org()).toEqual(MOCK_ORG);
+  });
+
+  it('refresh("all") skips space/org/domains when app has no space_guid', async () => {
+    const promise = svc.refresh('all');
+
+    // Phase 1: flush app without space_guid so phase 2 skips silently
+    await tick();
+    httpMock.expectOne(BASE_URL).flush({
+      ...MOCK_APP_ENTITY,
+      entity: { ...MOCK_APP_ENTITY.entity, space_guid: undefined },
+    });
+    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    // Drain — phase 2 runs but fetchSpace() skips (no space_guid)
+    await tick();
+
+    await promise;
+
+    expect(svc.space()).toBeUndefined();
+    expect(svc.org()).toBeUndefined();
+    httpMock.expectNone(`/pp/v1/cf/spaces/${CNSI}/sp-1`);
   });
 
   it('sets lastPolledAt after a successful refresh("all")', async () => {
     const before = Date.now();
     const promise = svc.refresh('all');
 
+    await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
     httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/${CNSI}/sp-1`).flush(MOCK_SPACE);
+
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1`).flush(MOCK_ORG);
+
+    // Domains are sequential after org
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/organizations/${CNSI}/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
     await promise;
 
@@ -219,6 +338,8 @@ describe('AppDetailDataService', () => {
 
   it('refresh("app") only fetches the app entity', async () => {
     const promise = svc.refresh('app');
+
+    await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     await promise;
 
@@ -234,8 +355,10 @@ describe('AppDetailDataService', () => {
 
   it('loading.app is true during fetch and false after', async () => {
     const promise = svc.refresh('app');
+    // loading.app is set synchronously before the HTTP request
     expect(svc.loading().app).toBe(true);
 
+    await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     await promise;
 
@@ -244,6 +367,8 @@ describe('AppDetailDataService', () => {
 
   it('HTTP errors land in errors.<kind> and do not throw', async () => {
     const promise = svc.refresh('app');
+
+    await tick();
     httpMock.expectOne(BASE_URL).flush('Not Found', { status: 404, statusText: 'Not Found' });
     await promise; // must not throw
 
@@ -255,12 +380,14 @@ describe('AppDetailDataService', () => {
   it('clears a previous error on successful re-fetch', async () => {
     // First fetch: fails
     const p1 = svc.refresh('app');
+    await tick();
     httpMock.expectOne(BASE_URL).flush('err', { status: 500, statusText: 'Server Error' });
     await p1;
     expect(svc.errors().app).not.toBeNull();
 
     // Second fetch: succeeds
     const p2 = svc.refresh('app');
+    await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     await p2;
     expect(svc.errors().app).toBeNull();
@@ -272,6 +399,8 @@ describe('AppDetailDataService', () => {
 
   it('fetchStats() treats 400 with "STARTED" in message as benign — no error signal', async () => {
     const promise = svc.refresh('stats');
+
+    await tick();
     httpMock.expectOne(`${BASE_URL}/stats`).flush(
       { description: 'App must be in the STARTED state' },
       { status: 400, statusText: 'Bad Request' }
@@ -288,6 +417,8 @@ describe('AppDetailDataService', () => {
 
   it('stats() is an array even when the backend returns an object keyed by index', async () => {
     const promise = svc.refresh('stats');
+
+    await tick();
     httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     await promise;
 

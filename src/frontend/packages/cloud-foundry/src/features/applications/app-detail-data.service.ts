@@ -141,24 +141,45 @@ export class AppDetailDataService {
   // ---------------------------------------------------------------------------
 
   /**
-   * Fetch one or all entity kinds. Pass 'all' for a parallel fan-out.
-   * Each fetch is independently gated with loading / error signals so a
-   * partial failure doesn't block other entities from rendering.
+   * Fetch one or all entity kinds.
+   *
+   * When scope === 'all', uses a three-phase refresh so that relations that
+   * depend on previously fetched entities are resolved in the correct order:
+   *
+   *   Phase 1 (parallel): app, summary, stats, envVars  — independent entities
+   *   Phase 2 (sequential): space  — needs app.entity.space_guid
+   *   Phase 3 (parallel): org, domains  — both need space.entity.organization_guid
+   *
+   * When scope is a single EntityKind, that entity is fetched in isolation.
+   * This keeps targeted refreshes (e.g. refresh('app')) fast and predictable.
    */
   async refresh(scope: EntityKind | 'all' = 'all'): Promise<void> {
-    const fetchers: Record<EntityKind, () => Promise<void>> = {
-      app:     () => this.fetchOne('app',     this.appUrl(),               this._app),
-      summary: () => this.fetchOne('summary', this.appUrl('/summary'),     this._summary),
-      stats:   () => this.fetchStats(),
-      envVars: () => this.fetchOne('envVars', this.appUrl('/env'),         this._envVars),
-      space:   () => this.fetchSpace(),
-      org:     () => this.fetchOrg(),
-      domains: () => this.fetchDomains(),
-    };
-
     if (scope === 'all') {
-      await Promise.all(Object.values(fetchers).map(f => f()));
+      // Phase 1: independent entities — no relation walks needed
+      await Promise.all([
+        this.fetchOne('app',     this.appUrl(),           this._app),
+        this.fetchOne('summary', this.appUrl('/summary'), this._summary),
+        this.fetchStats(),
+        this.fetchOne('envVars', this.appUrl('/env'),     this._envVars),
+      ]);
+
+      // Phase 2: space — requires app.entity.space_guid to be populated
+      await this.fetchSpace();
+
+      // Phase 3: org then domains — domains uses org.metadata.guid which is
+      // only available after fetchOrg() completes, so they are sequential.
+      await this.fetchOrg();
+      await this.fetchDomains();
     } else {
+      const fetchers: Record<EntityKind, () => Promise<void>> = {
+        app:     () => this.fetchOne('app',     this.appUrl(),           this._app),
+        summary: () => this.fetchOne('summary', this.appUrl('/summary'), this._summary),
+        stats:   () => this.fetchStats(),
+        envVars: () => this.fetchOne('envVars', this.appUrl('/env'),     this._envVars),
+        space:   () => this.fetchSpace(),
+        org:     () => this.fetchOrg(),
+        domains: () => this.fetchDomains(),
+      };
       await fetchers[scope]();
     }
 

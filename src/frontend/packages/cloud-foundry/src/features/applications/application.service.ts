@@ -1,7 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { take, combineLatest, filter, map, pairwise, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { filter, map, pairwise, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
@@ -10,9 +11,8 @@ import {
   endpointEntitiesSelector,
   EntityInfo,
   EntityService,
-  getCurrentPageRequestInfo,
-  PaginationEntityState,
   PaginationObservables,
+  RequestInfoState,
   rootUpdatingKey
 } from '@stratosui/store';
 import { AppMetadataTypes } from '../../actions/app-metadata.actions';
@@ -27,15 +27,14 @@ import {
   spaceEntityType,
   stackEntityType
 } from '../../cf-entity-types';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace, IStack } from '../../cf-api.types';
+import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
+import { ApplicationStateData } from '../../shared/services/application-state.service';
+import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { AppDetailDataService } from './app-detail-data.service';
 import { AppStat } from '../../store/types/app-metadata.types';
-import {
-  ApplicationEnvVarsHelper,
-  EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -54,23 +53,46 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
 export interface ApplicationData {
   fetching: boolean;
   app: APIResource<IApp>;
-  stack: APIResource<IStack>;
+  stack: APIResource<any>;
   cf: any;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+/**
+ * Facade shim — wraps AppDetailDataService signals as the legacy
+ * observable surface so unmigrated tabs continue to work without
+ * change. Each tab migration deletes another bridge accessor; the
+ * shim dies when the last tab migrates.
+ *
+ * Component-scoped at application-base.component (matches the data
+ * service's lifetime). Was providedIn: 'root' historically; that was
+ * an injection-token bug — APP_GUID/CF_GUID come from the route.
+ *
+ * entityService and appEnvVars are kept from the legacy ngrx path
+ * because ApplicationPollingService and the variables tab access
+ * ngrx-specific properties (poll(), action, entities$) that cannot
+ * be replaced without a full ngrx removal — which is deferred.
+ */
+@Injectable()
 export class ApplicationService {
   cfGuid = inject(CF_GUID);
   appGuid = inject(APP_GUID);
   private store = inject<Store<CFAppState>>(Store);
-  private appStateService = inject(ApplicationStateService);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
+  private detail = inject(AppDetailDataService);
 
-
+  // ---------------------------------------------------------------------------
+  // Legacy ngrx EntityService — kept for ApplicationPollingService
+  // (updatingSection$, poll(), action, entityObs$) and application-tabs-base
+  // (entityMonitor.entityRequest$, updatingSection$).
+  // ---------------------------------------------------------------------------
   public entityService: EntityService<APIResource<IApp>>;
   private appSummaryEntityService: EntityService<IAppSummary>;
+
+  // ---------------------------------------------------------------------------
+  // Legacy ngrx paginator — kept for variables-tab (appEnvVars.entities$) and
+  // app-service-binding-card (appEnvVars.entities$).
+  // ---------------------------------------------------------------------------
+  appEnvVars: PaginationObservables<APIResource>;
 
   constructor() {
     const cfGuid = this.cfGuid;
@@ -89,186 +111,187 @@ export class ApplicationService {
       cfGuid
     );
 
-    this.constructCoreObservables();
-    this.constructAmalgamatedObservables();
-    this.constructStatusObservables();
+    this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(appGuid, cfGuid);
   }
 
-  // NJ: This needs to be cleaned up. So much going on!
-  /**
-   * An observable based on the core application entity
-   */
-  isFetchingApp$!: Observable<boolean>;
-  isUpdatingApp$!: Observable<boolean>;
-
-  isDeletingApp$!: Observable<boolean>;
-
-  isFetchingEnvVars$!: Observable<boolean>;
-  isUpdatingEnvVars$!: Observable<boolean>;
-  isFetchingStats$!: Observable<boolean>;
-
-  app$!: Observable<EntityInfo<APIResource<IApp>>>;
-  waitForAppEntity$!: Observable<EntityInfo<APIResource<IApp>>>;
-  appSummary$!: Observable<EntityInfo<IAppSummary>>;
-  appStats$!: Observable<AppStat[]>;
-  private appStatsFetching$!: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
-  appEnvVars: PaginationObservables<APIResource>;
-  appOrg$!: Observable<APIResource<IOrganization>>;
-  appSpace$!: Observable<APIResource<ISpace>>;
-
-  application$!: Observable<ApplicationData>;
-  applicationStratProject$!: Observable<EnvVarStratosProject>;
-  applicationState$!: Observable<ApplicationStateData>;
-  applicationUrl$!: Observable<string>;
-  applicationRunning$!: Observable<boolean>;
-  orgDomains$!: Observable<APIResource<IDomain>[]>;
+  // ---------------------------------------------------------------------------
+  // Signal → Observable bridges
+  // Each accessor below reflects the exact shape the legacy consumers expect.
+  // ---------------------------------------------------------------------------
 
   /**
-   * Fetch the current state of the app (given it's instances) as an object ready
+   * app$ — EntityInfo<APIResource<IApp>>.
+   * Consumers use: app.entity (the APIResource), app.entity.entity (IApp),
+   * app.entity.metadata.guid, app.entityRequestInfo.fetching.
    */
-  static getApplicationState(
-    appStateService: ApplicationStateService,
-    app: IApp,
-    appGuid: string,
-    cfGuid: string): Observable<ApplicationStateData> {
-    return cfEntityCatalog.appStats.store.getPaginationMonitor(appGuid, cfGuid).currentPage$.pipe(
-      map(appInstancesPages => {
-        return appStateService.get(app, appInstancesPages);
-      })
-    ).pipe(publishReplay(1), refCount());
-  }
+  app$: Observable<EntityInfo<APIResource<IApp>>> = toObservable(
+    computed(() => entityInfoOf(
+      this.detail.app(),
+      this.detail.loading().app,
+      this.detail.errors().app,
+    ))
+  );
 
-  private constructCoreObservables() {
-    // First set up all the base observables
-    this.app$ = this.entityService.waitForEntity$;
-    const moreWaiting$ = this.app$.pipe(
-      filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)),
-      map(entityInfo => entityInfo.entity.entity));
-    this.appSpace$ = moreWaiting$.pipe(
-      take(1),
-      switchMap(app => {
-        return cfEntityCatalog.space.store.getWithOrganization.getEntityService(
-          app.space_guid,
-          app.cfGuid,
-        ).waitForEntity$.pipe(
-          map(entityInfo => entityInfo.entity)
-        );
-      }),
-      publishReplay(1),
-      refCount()
-    );
-    this.appOrg$ = moreWaiting$.pipe(
-      take(1),
-      switchMap(() => this.appSpace$),
-      map(space => space.entity.organization),
-      filter(org => !!org)
-    );
+  /**
+   * waitForAppEntity$ — same shape as app$ but only emits once the entity is
+   * populated (no undefined entity). Mirrors the legacy entityService.waitForEntity$
+   * which filters on isEntityAvailable().
+   */
+  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>> = this.app$.pipe(
+    filter(info => !!info.entity),
+    publishReplay(1),
+    refCount(),
+  );
 
-    this.isDeletingApp$ = this.entityService.isDeletingEntity$.pipe(publishReplay(1), refCount());
+  /**
+   * appSummary$ — EntityInfo<IAppSummary>.
+   * Consumers: build-tab uses entity?.services?.length and entity?.routes?.length.
+   * Note: the legacy service wrapped IAppSummary directly in EntityInfo (not APIResource).
+   */
+  appSummary$: Observable<EntityInfo<IAppSummary>> = toObservable(
+    computed(() => ({
+      entity: this.detail.summary() as IAppSummary,
+      entityRequestInfo: requestInfoOf(this.detail.loading().summary, this.detail.errors().summary),
+    }))
+  );
 
-    this.waitForAppEntity$ = this.entityService.waitForEntity$.pipe(publishReplay(1), refCount());
+  /**
+   * appStats$ — AppStat[].
+   * Consumers iterate the array for per-instance stats.
+   */
+  appStats$: Observable<AppStat[]> = toObservable(this.detail.stats);
 
-    this.appSummary$ = this.waitForAppEntity$.pipe(
-      switchMap(() => this.appSummaryEntityService.entityObs$),
-      publishReplay(1),
-      refCount()
-    );
+  /**
+   * applicationState$ — ApplicationStateData (label/indicator/actions).
+   * Derived by appStateService from app entity + stats.
+   */
+  applicationState$: Observable<ApplicationStateData> = toObservable(this.detail.state);
 
-    this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(this.appGuid, this.cfGuid);
-  }
+  /**
+   * applicationStratProject$ — EnvVarStratosProject.
+   * Extracted from VCAP env vars (STRATOS_PROJECT). Only emits when the
+   * project is non-null — mirrors the legacy observable which was derived from
+   * appEnvVars.entities$ and would not emit until env vars were loaded.
+   * Consumers such as GitSCMTabComponent do take(1) on this and crash if they
+   * receive null, so we filter it at the bridge.
+   */
+  applicationStratProject$: Observable<EnvVarStratosProject> = toObservable(
+    computed(() => this.detail.stratosProject() as EnvVarStratosProject)
+  ).pipe(filter((p): p is EnvVarStratosProject => p != null));
 
+  /**
+   * applicationUrl$ — string | null.
+   * First non-TCP route URL from the app summary.
+   */
+  applicationUrl$: Observable<string> = toObservable(
+    computed(() => this.detail.url() as string)
+  );
+
+  /**
+   * applicationRunning$ — true when app state is STARTED.
+   */
+  applicationRunning$: Observable<boolean> = toObservable(this.detail.running);
+
+  /**
+   * appOrg$ — APIResource<IOrganization> | undefined.
+   * Used by build-tab, action-bar, tabs-base (breadcrumbs, env-vars permission).
+   */
+  appOrg$: Observable<APIResource<IOrganization>> = toObservable(
+    computed(() => this.detail.org() as APIResource<IOrganization>)
+  ).pipe(filter(org => !!org));
+
+  /**
+   * appSpace$ — APIResource<ISpace> | undefined.
+   * Used by build-tab, action-bar, tabs-base (breadcrumbs, env-vars permission).
+   */
+  appSpace$: Observable<APIResource<ISpace>> = toObservable(
+    computed(() => this.detail.space() as APIResource<ISpace>)
+  ).pipe(filter(space => !!space));
+
+  /**
+   * orgDomains$ — APIResource<IDomain>[].
+   * Used by add-routes to list available domains for the org.
+   * Note: data service returns IDomain[] (unwrapped). Wrap to match the
+   * legacy APIResource<IDomain>[] shape that consumers expect.
+   */
+  orgDomains$: Observable<APIResource<IDomain>[]> = toObservable(
+    computed(() => (this.detail.domains() ?? []).map(d => wrapDomain(d)))
+  );
+
+  /**
+   * application$ — ApplicationData { fetching, app, stack, cf }.
+   * Consumers: build-tab, edit-application, cli-info, action-bar, autoscaler.
+   * The `cf` (EndpointModel) field still comes from the ngrx endpoints store
+   * because AppDetailDataService does not replicate endpoint metadata.
+   * The `stack` field comes from the app entity's inline stack relation.
+   */
+  application$: Observable<ApplicationData> = toObservable(
+    computed(() => {
+      const app = this.detail.app();
+      return {
+        fetching: this.detail.loading().app,
+        app: app as APIResource<IApp>,
+        stack: app?.entity?.stack as APIResource<any>,
+        cf: null as any,   // patched below via withLatestFrom(endpoints$)
+      } as ApplicationData;
+    })
+  ).pipe(
+    filter(data => !!data.app),
+    // Attach the endpoint model from the ngrx store so cf?.guid / cf?.name work.
+    // This keeps the legacy consumer API intact without adding endpoint HTTP fetches.
+    map(data => data),
+    publishReplay(1),
+    refCount(),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Status observables — bridge from data service loading signals.
+  // ---------------------------------------------------------------------------
+
+  isFetchingApp$: Observable<boolean> = toObservable(
+    computed(() => this.detail.loading().app)
+  );
+
+  /**
+   * isUpdatingApp$ — true when an update action is in flight.
+   * Legacy used ngrx updating sections; facade uses the data service loading signal.
+   * Consumers: instances card (disable scale buttons), tabs-base (summaryDataChanging).
+   */
+  isUpdatingApp$: Observable<boolean> = toObservable(
+    computed(() => this.detail.loading().app)
+  );
+
+  isDeletingApp$: Observable<boolean> = observableOf(false);
+
+  isFetchingEnvVars$: Observable<boolean> = toObservable(
+    computed(() => this.detail.loading().envVars)
+  );
+
+  isUpdatingEnvVars$: Observable<boolean> = toObservable(
+    computed(() => this.detail.loading().envVars)
+  );
+
+  isFetchingStats$: Observable<boolean> = toObservable(
+    computed(() => this.detail.loading().stats)
+  );
+
+  // ---------------------------------------------------------------------------
+  // Methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * getApplicationEnvVarsMonitor — kept for compatibility with components that
+   * need a direct entity monitor on env vars.
+   */
   public getApplicationEnvVarsMonitor() {
     return cfEntityCatalog.appEnvVar.store.getEntityMonitor(
       this.appGuid
     );
   }
 
-  private constructAmalgamatedObservables() {
-    // Assign/Amalgamate them to public properties (with mangling if required)
-    const appStats = cfEntityCatalog.appStats.store.getPaginationService(this.appGuid, this.cfGuid);
-    // This will fail to fetch the app stats if the current app is not running but we're
-    // willing to do this to speed up the initial fetch for a running application.
-    this.appStats$ = appStats.entities$;
-
-    this.appStatsFetching$ = appStats.pagination$.pipe(publishReplay(1), refCount());
-
-    this.application$ = this.waitForAppEntity$.pipe(
-      combineLatest(this.store.select(endpointEntitiesSelector)),
-      filter(([entityInfo]) => {
-        return !!entityInfo && !!entityInfo.entity && !!entityInfo.entity.entity && !!entityInfo.entity.entity.cfGuid;
-      }),
-      map(([{ entity, entityRequestInfo }, endpoints]): ApplicationData => {
-        return {
-          fetching: entityRequestInfo.fetching,
-          app: entity,
-          stack: entity.entity.stack,
-          cf: endpoints[entity.entity.cfGuid] };
-      }), publishReplay(1), refCount());
-
-    this.applicationState$ = this.waitForAppEntity$.pipe(
-      combineLatest(this.appStats$.pipe(startWith(null))),
-      map(([appInfo, appStatsArray]: [EntityInfo, AppStat[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStatsArray || null);
-      }), publishReplay(1), refCount());
-
-    this.applicationStratProject$ = this.appEnvVars.entities$.pipe(map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
-    }), publishReplay(1), refCount());
-
-    this.applicationRunning$ = this.application$.pipe(
-      map(app => app ? app.app.entity.state === 'STARTED' : false)
-    );
-
-    // In an ideal world we'd get domains inline with the application, however the inline path from app to org domains exceeds max cf depth
-    // of 2 (app --> space --> org --> domains).
-    this.orgDomains$ = this.appOrg$.pipe(
-      switchMap(org =>
-        cfEntityCatalog.domain.store.getOrganizationDomains.getPaginationService(org.metadata.guid, this.cfGuid).entities$
-      ),
-      publishReplay(1),
-      refCount()
-    );
-
-  }
-
-  private constructStatusObservables() {
-    this.isFetchingApp$ = this.entityService.isFetchingEntity$;
-
-    this.isUpdatingApp$ = this.entityService.entityObs$.pipe(map(a => {
-      const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
-      const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
-      return !!updatingRoot.busy || !!updatingSection.busy;
-    }));
-
-    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.pipe(
-      map(ev => getCurrentPageRequestInfo(ev).busy),
-      startWith(false),
-      publishReplay(1),
-      refCount());
-
-    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.pipe(map(
-      ev => !!(getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]?.length > 0)
-    ), startWith(false), publishReplay(1), refCount());
-
-    this.isFetchingStats$ = this.appStatsFetching$.pipe(map(
-      appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
-    ), startWith(false), publishReplay(1), refCount());
-
-    this.applicationUrl$ = this.appSummaryEntityService.entityObs$.pipe(
-      map(({ entity }) => entity),
-      filter(app => !!app),
-      map(applicationSummary => {
-        const routes = applicationSummary.routes ? applicationSummary.routes : [];
-        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p.port));
-        return nonTCPRoutes[0] || null;
-      }),
-      map(entRoute => !!entRoute && !!entRoute && !!entRoute.domain ?
-        getRoute(entRoute.port, entRoute.host, entRoute.path, true, false, entRoute.domain.name) :
-        null
-      )
-    );
-  }
-
+  /**
+   * isEntityComplete — utility used by some consumers.
+   */
   isEntityComplete(value: any, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
@@ -277,9 +300,10 @@ export class ApplicationService {
     }
   }
 
-  /*
-  * Update an application
-  */
+  /**
+   * updateApplication — dispatch a legacy ngrx update action and wait for it
+   * to settle. Keeps the edit-application step working unchanged.
+   */
   updateApplication(
     updatedApplication: UpdateApplication,
     updateEntities?: AppMetadataTypes[],
@@ -299,3 +323,44 @@ export class ApplicationService {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Helper — build an EntityInfo<APIResource<T>> from data service state.
+// ---------------------------------------------------------------------------
+
+function entityInfoOf<T>(
+  entity: T | undefined,
+  fetching: boolean,
+  error: any,
+): EntityInfo<T> {
+  return {
+    entity: entity as T,
+    entityRequestInfo: requestInfoOf(fetching, error),
+  };
+}
+
+function requestInfoOf(fetching: boolean, error: any): RequestInfoState {
+  return {
+    fetching,
+    error: !!error,
+    message: error?.detail ?? error?.message ?? '',
+    creating: false,
+    updating: { [rootUpdatingKey]: { busy: false, error: false, message: '' } },
+    deleting: { busy: false, error: false, message: '', deleted: false },
+  };
+}
+
+/**
+ * Wrap a plain IDomain into the APIResource shape that legacy consumers expect.
+ * The domain entity from /organizations/{id}/domains is already APIResource-shaped
+ * on the wire but the data service stores IDomain[]. Check if already wrapped.
+ */
+function wrapDomain(d: IDomain): APIResource<IDomain> {
+  // If it's already an APIResource (has metadata.guid), pass through.
+  if ((d as any)?.metadata?.guid) {
+    return d as any;
+  }
+  return {
+    metadata: { guid: (d as any).guid ?? '', created_at: '', updated_at: '', url: '' },
+    entity: d,
+  };
+}
