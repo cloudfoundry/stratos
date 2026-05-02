@@ -3,6 +3,7 @@ package cloudfoundry
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -681,4 +682,230 @@ func TestDeleteAppInstance_RejectsNonIntegerIndex(t *testing.T) {
 	require.True(t, ok, "expected *echo.HTTPError, got %T", err)
 	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
 	assert.Equal(t, 0, capiCalls, "no upstream call should be made for a bad index")
+}
+
+// TestRollbackApp_NoTrackerReturns503 mirrors TestRestageApp_NoTrackerReturns503.
+// Without the asyncTracker / rollbackTranslator wired up the handler must
+// reject the request before any state-machine work happens.
+func TestRollbackApp_NoTrackerReturns503(t *testing.T) {
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/rollback",
+		strings.NewReader(`{"revisionGuid":"rev-1"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	err := plugin.rollbackApp(c, "cnsi-1", "app-1")
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok)
+	assert.Equal(t, http.StatusServiceUnavailable, httpErr.Code)
+}
+
+// TestRollbackApp_RejectsMissingRevisionGuid guards the wire shape: the
+// handler refuses a request without the required revisionGuid before
+// reaching the orchestrator.
+func TestRollbackApp_RejectsMissingRevisionGuid(t *testing.T) {
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+		asyncTracker: stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{}),
+	}
+	plugin.rollbackTranslator = NewRollbackJobTranslator(plugin)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/rollback",
+		strings.NewReader(`{}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	err := plugin.rollbackApp(c, "cnsi-1", "app-1")
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+	assert.Contains(t, fmt.Sprintf("%v", httpErr.Message), "revisionGuid is required")
+}
+
+// TestRollbackApp_RejectsInvalidStrategy mirrors restage's strategy
+// validation: only "rolling" and "canary" are accepted (default
+// "rolling" is applied when the field is absent).
+func TestRollbackApp_RejectsInvalidStrategy(t *testing.T) {
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL("https://cf.example.com")},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+		asyncTracker: stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{}),
+	}
+	plugin.rollbackTranslator = NewRollbackJobTranslator(plugin)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/rollback",
+		strings.NewReader(`{"revisionGuid":"rev-1","strategy":"voodoo"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	err := plugin.rollbackApp(c, "cnsi-1", "app-1")
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+}
+
+// TestRollbackApp_FastPathResolvesOnDeploymentRejected exercises the
+// orchestrator end-to-end through the rollback handler when CF rejects
+// /v3/deployments with 422. Mirror of
+// TestRestageApp_FastPathResolvesOnNoEligiblePackage — the fast-path
+// window resolves before handoff and the handler returns 502 with the
+// FAILED envelope.
+func TestRollbackApp_FastPathResolvesOnDeploymentRejected(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/deployments":
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			_, _ = w.Write([]byte(`{"errors":[{"detail":"revision not found","title":"CF-ResourceNotFound","code":10010}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+		asyncTracker: stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{}),
+	}
+	plugin.rollbackTranslator = NewRollbackJobTranslator(plugin)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/rollback",
+		strings.NewReader(`{"revisionGuid":"rev-bogus"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
+	c.SetParamNames("cnsiGuid", "appGuid")
+	c.SetParamValues("cnsi-1", "app-1")
+
+	require.NoError(t, plugin.rollbackApp(c, "cnsi-1", "app-1"))
+	assert.Equal(t, http.StatusBadGateway, rec.Code)
+
+	var body map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
+	assert.Equal(t, string(stratosjobs.JobStateFailed), body["state"])
+	errs, ok := body["errors"].([]interface{})
+	require.True(t, ok)
+	require.Len(t, errs, 1)
+	errObj := errs[0].(map[string]interface{})
+	assert.Equal(t, "stratos.rollback.deployment_create", errObj["code"])
+}
+
+// TestRestageApp_RollingFastPathReachesDeployment exercises the
+// strategy=rolling path end-to-end through the restage handler. The
+// orchestrator should walk package_lookup → build_create → build_poll →
+// deployment_create (skipping set_droplet/stop/start for rolling) and
+// resolve to COMPLETE on FINALIZED+DEPLOYED — proving the strategy fork
+// in advanceBuildPoll routes correctly through the handler boundary.
+func TestRestageApp_RollingFastPathReachesDeployment(t *testing.T) {
+	deploymentCreated := false
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/packages":
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":1,"total_pages":1},"resources":[{"guid":"pkg-1","state":"READY"}]}`))
+		case r.URL.Path == "/v3/builds" && r.Method == http.MethodPost:
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "build-1",
+				"state": "STAGED",
+				"droplet": map[string]string{"guid": "droplet-1"},
+			})
+		case r.URL.Path == "/v3/builds/build-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "build-1",
+				"state": "STAGED",
+				"droplet": map[string]string{"guid": "droplet-1"},
+			})
+		case r.URL.Path == "/v3/deployments" && r.Method == http.MethodPost:
+			deploymentCreated = true
+			w.WriteHeader(http.StatusAccepted)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "FINALIZED",
+					"reason": "DEPLOYED",
+				},
+			})
+		case r.URL.Path == "/v3/deployments/dep-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "dep-1",
+				"status": map[string]interface{}{
+					"value":  "FINALIZED",
+					"reason": "DEPLOYED",
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+		asyncTracker: stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{}),
+	}
+	plugin.restageTranslator = NewRestageJobTranslator(plugin)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/cf/apps/cnsi-1/app-1/actions/restage",
+		strings.NewReader(`{"strategy":"rolling"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
+	c.SetParamNames("cnsiGuid", "appGuid", "action")
+	c.SetParamValues("cnsi-1", "app-1", "restage")
+
+	require.NoError(t, plugin.appAction(c))
+	assert.Equal(t, http.StatusOK, rec.Code, "rolling restage should fast-path resolve to COMPLETE")
+	assert.True(t, deploymentCreated, "rolling strategy must POST /v3/deployments")
+
+	var body map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
+	assert.Equal(t, string(stratosjobs.JobStateComplete), body["state"])
 }
