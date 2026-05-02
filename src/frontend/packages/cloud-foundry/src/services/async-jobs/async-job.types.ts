@@ -11,6 +11,17 @@ export type JobState = 'PROCESSING' | 'COMPLETE' | 'FAILED';
 export const isTerminalJobState = (s: JobState): boolean =>
   s === 'COMPLETE' || s === 'FAILED';
 
+// JobStage mirrors the Go JobStage struct in
+// src/jetstream/plugins/stratosjobs/types.go.
+// Tracks a single step within a multi-stage async job (e.g. staging pipeline).
+export interface JobStage {
+  code: string;       // wire dedup key — e.g. "PACKAGE_LOOKUP", "BUILD_CREATE"
+  label: string;      // human-readable step name
+  index: number;      // 1-based position; 0 if unknown
+  of: number;         // total step count; 0 if unknown
+  enteredAt: string;  // ISO-8601 timestamp (Go time.Time marshals to ISO string)
+}
+
 export interface StratosError {
   code: string;
   message: string;
@@ -25,6 +36,7 @@ export interface StratosJob {
   updatedAt: string;
   errors?: StratosError[];
   result?: unknown;
+  stages?: JobStage[];
 }
 
 // AsyncJobResult is what writeWithJob resolves to. `state` is the terminal
