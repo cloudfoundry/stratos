@@ -1,0 +1,297 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+
+import { AppDetailDataService } from './app-detail-data.service';
+import { AppDetailPrefs } from './app-detail-prefs.service';
+import { AppApplicationActionsService } from '../../shared/services/application-actions.service';
+import { ApplicationStateService } from '../../shared/services/application-state.service';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+const CNSI = 'cnsi-1';
+const APP_GUID = 'app-1';
+const BASE_URL = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}`;
+
+const MOCK_APP_ENTITY = {
+  metadata: { guid: APP_GUID, created_at: '', updated_at: '', url: '' },
+  entity: { name: 'my-app', state: 'STARTED', space_guid: 'sp-1', instances: 2 },
+};
+
+const MOCK_SUMMARY = {
+  guid: APP_GUID,
+  name: 'my-app',
+  routes: [{ guid: 'r-1', host: 'my-app', path: '', port: null, domain: { name: 'example.com' } }],
+  state: 'STARTED',
+  instances: 2,
+  running_instances: 2,
+  package_state: 'STAGED',
+};
+
+const MOCK_STATS = {
+  '0': {
+    cfGuid: CNSI, guid: APP_GUID, state: 'RUNNING',
+    stats: { host: 'h', port: 8080, name: 'my-app', disk_quota: 1024, mem_quota: 512, fds_quota: 16384, uptime: 100, uris: [], usage: { cpu: 0, disk: 0, mem: 0, time: '' } },
+  },
+};
+
+const MOCK_ENV = {
+  environment_json: {
+    STRATOS_PROJECT: JSON.stringify({
+      deploySource: { type: 'github', timestamp: 0, endpointGuid: 'ep-1' },
+      deployOverrides: {},
+    }),
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Test suite
+// ---------------------------------------------------------------------------
+
+describe('AppDetailDataService', () => {
+  let svc: AppDetailDataService;
+  let httpMock: HttpTestingController;
+
+  // Polling disabled so no interval fires during tests.
+  const prefsStub = {
+    idleSeconds: signal(45),
+    activeSeconds: signal(5),
+    enabled: signal(false),
+  };
+  const actionsStub = { inFlight: signal(false) };
+
+  // Configure once per test file — the global afterEach in test-setup.ts
+  // calls getTestBed().resetTestingModule() after each test so the next
+  // beforeEach finds a clean slate.
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        AppDetailDataService,
+        ApplicationStateService,
+        { provide: AppDetailPrefs, useValue: prefsStub },
+        { provide: AppApplicationActionsService, useValue: actionsStub },
+      ],
+    });
+    httpMock = TestBed.inject(HttpTestingController);
+    // Inject but do NOT call initialize() — tests that need HTTP fetches
+    // set cnsiGuid/appGuid and call refresh() themselves to keep the
+    // httpMock state clean.
+    svc = TestBed.inject(AppDetailDataService);
+    svc.cnsiGuid = CNSI;
+    svc.appGuid = APP_GUID;
+  });
+
+  afterEach(() => httpMock.verify());
+
+  // -------------------------------------------------------------------------
+  // Initial state
+  // -------------------------------------------------------------------------
+
+  it('starts with undefined primary signals and no errors', () => {
+    expect(svc.app()).toBeUndefined();
+    expect(svc.summary()).toBeUndefined();
+    expect(svc.stats()).toEqual([]);
+    expect(svc.envVars()).toBeUndefined();
+    expect(svc.space()).toBeUndefined();
+    expect(svc.org()).toBeUndefined();
+    expect(svc.domains()).toEqual([]);
+    expect(svc.fetching()).toBe(false);
+    expect(svc.lastPolledAt()).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // running() derived signal
+  // -------------------------------------------------------------------------
+
+  it('running() reflects app.entity.state', () => {
+    svc['_app'].set({ metadata: { guid: 'a', created_at: '', updated_at: '', url: '' }, entity: { name: 'a', state: 'STARTED', space_guid: '' } });
+    expect(svc.running()).toBe(true);
+    svc['_app'].set({ metadata: { guid: 'a', created_at: '', updated_at: '', url: '' }, entity: { name: 'a', state: 'STOPPED', space_guid: '' } });
+    expect(svc.running()).toBe(false);
+  });
+
+  it('running() is false when app is undefined', () => {
+    expect(svc.running()).toBe(false);
+  });
+
+  // -------------------------------------------------------------------------
+  // url() derived signal
+  // -------------------------------------------------------------------------
+
+  it('url() returns http URL for first non-TCP route', () => {
+    svc['_summary'].set(MOCK_SUMMARY as any);
+    expect(svc.url()).toBe('http://my-app.example.com');
+  });
+
+  it('url() returns null when no routes', () => {
+    svc['_summary'].set({ ...MOCK_SUMMARY, routes: [] } as any);
+    expect(svc.url()).toBeNull();
+  });
+
+  it('url() skips TCP routes and returns the first HTTP route', () => {
+    svc['_summary'].set({
+      ...MOCK_SUMMARY,
+      routes: [
+        { guid: 'tcp', host: '', path: '', port: '1234', domain: { name: 'tcp.example.com' } },
+        { guid: 'http', host: 'my-app', path: '', port: null, domain: { name: 'example.com' } },
+      ],
+    } as any);
+    expect(svc.url()).toBe('http://my-app.example.com');
+  });
+
+  // -------------------------------------------------------------------------
+  // stratosProject() derived signal
+  // -------------------------------------------------------------------------
+
+  it('stratosProject() returns null when env vars not loaded', () => {
+    expect(svc.stratosProject()).toBeNull();
+  });
+
+  it('stratosProject() extracts STRATOS_PROJECT from env vars', () => {
+    svc['_envVars'].set(MOCK_ENV as any);
+    const proj = svc.stratosProject();
+    expect(proj).not.toBeNull();
+    expect(proj?.deploySource?.type).toBe('github');
+  });
+
+  it('stratosProject() returns null when STRATOS_PROJECT is absent', () => {
+    svc['_envVars'].set({ environment_json: {} } as any);
+    expect(svc.stratosProject()).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // fetching() derived signal
+  // -------------------------------------------------------------------------
+
+  it('fetching() is true while any entity loading flag is set', () => {
+    svc['_loading'].update(m => ({ ...m, app: true }));
+    expect(svc.fetching()).toBe(true);
+    svc['_loading'].update(m => ({ ...m, app: false }));
+    expect(svc.fetching()).toBe(false);
+  });
+
+  // -------------------------------------------------------------------------
+  // refresh('all') — parallel HTTP fan-out
+  // -------------------------------------------------------------------------
+
+  it('refresh("all") fetches app, summary, stats, envVars in parallel', async () => {
+    const promise = svc.refresh('all');
+
+    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+    // space/org/domains are skipped: at call time app.space_guid is not yet
+    // populated (parallel fetch hasn't returned), so fetchSpace returns early.
+
+    await promise;
+
+    expect(svc.app()).toEqual(MOCK_APP_ENTITY);
+    expect(svc.summary()).toEqual(MOCK_SUMMARY);
+    expect(svc.stats()).toHaveLength(1);
+    expect(svc.envVars()).toEqual(MOCK_ENV);
+  });
+
+  it('sets lastPolledAt after a successful refresh("all")', async () => {
+    const before = Date.now();
+    const promise = svc.refresh('all');
+
+    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    await promise;
+
+    const ts = svc.lastPolledAt()?.getTime() ?? 0;
+    expect(ts).toBeGreaterThanOrEqual(before);
+  });
+
+  // -------------------------------------------------------------------------
+  // refresh('app') — scoped refetch
+  // -------------------------------------------------------------------------
+
+  it('refresh("app") only fetches the app entity', async () => {
+    const promise = svc.refresh('app');
+    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    await promise;
+
+    expect(svc.app()).toEqual(MOCK_APP_ENTITY);
+    // no other requests issued
+    httpMock.expectNone(`${BASE_URL}/summary`);
+    httpMock.expectNone(`${BASE_URL}/stats`);
+  });
+
+  // -------------------------------------------------------------------------
+  // loading / error signal lifecycle
+  // -------------------------------------------------------------------------
+
+  it('loading.app is true during fetch and false after', async () => {
+    const promise = svc.refresh('app');
+    expect(svc.loading().app).toBe(true);
+
+    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    await promise;
+
+    expect(svc.loading().app).toBe(false);
+  });
+
+  it('HTTP errors land in errors.<kind> and do not throw', async () => {
+    const promise = svc.refresh('app');
+    httpMock.expectOne(BASE_URL).flush('Not Found', { status: 404, statusText: 'Not Found' });
+    await promise; // must not throw
+
+    expect(svc.errors().app).not.toBeNull();
+    expect(svc.errors().app?.code).toBe('FETCH_ERROR');
+    expect(svc.app()).toBeUndefined(); // not overwritten on error
+  });
+
+  it('clears a previous error on successful re-fetch', async () => {
+    // First fetch: fails
+    const p1 = svc.refresh('app');
+    httpMock.expectOne(BASE_URL).flush('err', { status: 500, statusText: 'Server Error' });
+    await p1;
+    expect(svc.errors().app).not.toBeNull();
+
+    // Second fetch: succeeds
+    const p2 = svc.refresh('app');
+    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    await p2;
+    expect(svc.errors().app).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // Stats — stopped-app 400 treated as benign
+  // -------------------------------------------------------------------------
+
+  it('fetchStats() treats 400 with "STARTED" in message as benign — no error signal', async () => {
+    const promise = svc.refresh('stats');
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(
+      { description: 'App must be in the STARTED state' },
+      { status: 400, statusText: 'Bad Request' }
+    );
+    await promise;
+
+    expect(svc.stats()).toEqual([]);
+    expect(svc.errors().stats).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // Stats array normalisation
+  // -------------------------------------------------------------------------
+
+  it('stats() is an array even when the backend returns an object keyed by index', async () => {
+    const promise = svc.refresh('stats');
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    await promise;
+
+    expect(Array.isArray(svc.stats())).toBe(true);
+    expect(svc.stats()[0].state).toBe('RUNNING');
+  });
+});

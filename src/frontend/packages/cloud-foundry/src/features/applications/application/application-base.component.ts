@@ -1,9 +1,10 @@
 
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { ApplicationService } from '../application.service';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 
@@ -61,7 +62,19 @@ export function getGuids(type?: string) {
       deps: [CF_GUID]
     },
     CloudFoundryEndpointService,
+    // AppDetailDataService is component-scoped — its signals live for the
+    // lifetime of the app-detail subtree only. Providing it here means each
+    // navigation to a different app gets a fresh instance and signals from
+    // the previous app are torn down cleanly.
+    AppDetailDataService,
   ]
 })
-export class ApplicationBaseComponent {
+export class ApplicationBaseComponent implements OnInit {
+  private readonly dataService = inject(AppDetailDataService);
+  private readonly cfGuid = inject(CF_GUID);
+  private readonly appGuid = inject(APP_GUID);
+
+  ngOnInit(): void {
+    this.dataService.initialize(this.cfGuid, this.appGuid);
+  }
 }
