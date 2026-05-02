@@ -1,22 +1,21 @@
 // src/jetstream/plugins/stratosjobs/metrics.go
 //
-// Prometheus metric collectors for the stratosjobs package. The orchestrator
-// wires these into tracker.go (incrementing on Create, on AppendStage, and
-// decrementing on TTL sweep) as a follow-on commit; this file only registers
-// the collectors so tests and static analysis have a stable surface.
+// Prometheus metric collectors for the stratosjobs package. The tracker
+// honors an optional *Metrics in InMemoryTrackerConfig — incrementing on
+// Create, incrementing per appended stage in appendStageLocked (after
+// dedup), and decrementing on TTL sweep eviction.
 //
 // Namespace: stratosjobs
 // Subsystem: (none — keeps metric names short and predictable)
 //
 //   stratosjobs_active_jobs
-//     Gauge — number of PROCESSING jobs currently held in the tracker. The
-//     orchestrator increments this on Create and decrements on sweep eviction.
+//     Gauge — number of non-terminal jobs currently held in the tracker.
+//     Increments on Create; decrements per evicted job on sweep.
 //
 //   stratosjobs_stage_count_total
 //     CounterVec — cumulative stage appends, labelled by `kind` (e.g.
-//     "cf.app.restage", "cf.app.rollback"). The orchestrator increments this
-//     inside AppendStage so each unique stage emit is counted once (the
-//     tracker's dedup already prevents double-counting the same Code).
+//     "cf.app.restage", "cf.app.rollback"). Each unique stage emit is
+//     counted once — the tracker's dedup-by-Code prevents double-counting.
 package stratosjobs
 
 import "github.com/prometheus/client_golang/prometheus"

@@ -412,7 +412,29 @@ func TestMetrics_WiringFiresOnLifecycle(t *testing.T) {
 	tr.AppendStage(id, JobStage{Code: "PACKAGE_LOOKUP"}) // dedup — must not count
 	tr.AppendStage(id, JobStage{Code: "BUILD_CREATE"})
 	if got := testutil.ToFloat64(m.StageCountTotal.WithLabelValues("cf.app.restage")); got != 2 {
-		t.Errorf("StageCountTotal[cf.app.restage]: got %v want 2", got)
+		t.Errorf("StageCountTotal[cf.app.restage] after AppendStage: got %v want 2", got)
+	}
+
+	// Also verify the Refresh → StageEmittingTranslator path increments
+	// the same counter — both AppendStage and Refresh route through
+	// appendStageLocked, so the metric should fire either way.
+	stageStub := &stageEmittingStub{
+		stubTranslator: stubTranslator{
+			kind: "cf.app.refresh-path",
+			fn: func(int) (JobState, []StratosError, interface{}, error) {
+				return JobStateProcessing, nil, nil, nil
+			},
+		},
+		stageFn: func(_ interface{}) (JobStage, bool) {
+			return JobStage{Code: "BUILD_POLL"}, true
+		},
+	}
+	refreshID := tr.Create("cf.app.refresh-path", stageStub, "ref")
+	if _, ok := tr.Refresh(context.Background(), refreshID); !ok {
+		t.Fatal("refresh failed")
+	}
+	if got := testutil.ToFloat64(m.StageCountTotal.WithLabelValues("cf.app.refresh-path")); got != 1 {
+		t.Errorf("StageCountTotal[cf.app.refresh-path] after Refresh: got %v want 1", got)
 	}
 
 	// Force the job to terminal state so the sweep can evict it.
@@ -425,7 +447,9 @@ func TestMetrics_WiringFiresOnLifecycle(t *testing.T) {
 
 	clock = now.Add(time.Hour)
 	tr.sweep()
-	if got := testutil.ToFloat64(m.ActiveJobs); got != 0 {
-		t.Errorf("ActiveJobs after sweep eviction: got %v want 0", got)
+	// Only the first job became terminal; the refresh-path job is still
+	// PROCESSING and remains in the tracker.
+	if got := testutil.ToFloat64(m.ActiveJobs); got != 1 {
+		t.Errorf("ActiveJobs after sweep eviction: got %v want 1", got)
 	}
 }

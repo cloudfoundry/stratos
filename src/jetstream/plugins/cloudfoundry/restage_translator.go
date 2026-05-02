@@ -117,8 +117,6 @@ func (t *RestageJobTranslator) CurrentStage(ref interface{}) (stratosjobs.JobSta
 	}
 
 	last := rRef.Stages[len(rRef.Stages)-1]
-	code := restageStageCode(last.Stage)
-	label := restageStageLabel(last.Stage)
 
 	var enteredAt time.Time
 	if !last.StartedAt.IsZero() {
@@ -126,19 +124,74 @@ func (t *RestageJobTranslator) CurrentStage(ref interface{}) (stratosjobs.JobSta
 	}
 
 	return stratosjobs.JobStage{
-		Code:      code,
-		Label:     label,
-		Index:     len(rRef.Stages), // 1-based: number of stages completed so far
-		Of:        0,                // unknown — strategy determines total; see doc above
+		Code:      restageStageCode(last.Stage),
+		Label:     restageStageLabel(last.Stage),
+		Index:     restageStageIndex(last.Stage),
+		Of:        0, // unknown — strategy determines total; see doc above
 		EnteredAt: enteredAt,
 	}, true
 }
 
-// restageStageCode returns the stable uppercase Code string for a
-// RestageStage. The Code is the uppercase form of the const value so it
-// is both human-scannable in logs and stable as a wire dedup key.
+// restageStageCode returns the stable wire Code for a RestageStage.
+// The Code is part of the wire contract — the frontend dedups by it
+// and pattern-matches on it for label localization. Listed explicitly
+// (not derived from the const value) so refactoring the internal const
+// names cannot silently change the wire shape.
 func restageStageCode(s RestageStage) string {
-	return strings.ToUpper(string(s))
+	switch s {
+	case StageRestagePackageLookup:
+		return "PACKAGE_LOOKUP"
+	case StageRestageBuildCreate:
+		return "BUILD_CREATE"
+	case StageRestageBuildPoll:
+		return "BUILD_POLL"
+	case StageRestageSetDroplet:
+		return "SET_DROPLET"
+	case StageRestageStop:
+		return "STOP"
+	case StageRestageStart:
+		return "START"
+	case StageRestageInstancePoll:
+		return "INSTANCE_POLL"
+	case StageRestageDeploymentCreate:
+		return "DEPLOYMENT_CREATE"
+	case StageRestageDeploymentPoll:
+		return "DEPLOYMENT_POLL"
+	default:
+		return strings.ToUpper(string(s))
+	}
+}
+
+// restageStageIndex returns the canonical 1-based position of a stage
+// within the restage path. Tied to stage identity rather than to the
+// number of records appended so far, so retries that produce duplicate
+// records (rare) do not advance the displayed step. Of is left 0 because
+// the strategy-conditional total is not represented here.
+func restageStageIndex(s RestageStage) int {
+	switch s {
+	case StageRestagePackageLookup:
+		return 1
+	case StageRestageBuildCreate:
+		return 2
+	case StageRestageBuildPoll:
+		return 3
+	case StageRestageSetDroplet:
+		return 4
+	case StageRestageStop:
+		return 5
+	case StageRestageStart:
+		return 6
+	case StageRestageInstancePoll:
+		return 7
+	case StageRestageDeploymentCreate:
+		// Rolling/canary skip set_droplet/stop/start; this is step 4
+		// in those paths.
+		return 4
+	case StageRestageDeploymentPoll:
+		return 5
+	default:
+		return 0
+	}
 }
 
 // restageStageLabel returns the human-readable label for a RestageStage.
