@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -18,9 +18,9 @@ import {
 import { StratosStatus } from '@stratosui/store';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
-import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm', true);
@@ -38,15 +38,27 @@ const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Ins
     AppInputDirective,
     CustomFormFieldComponent,
     CardStatusComponent,
-    RunningInstancesComponent
   ]
 })
 export class CardAppInstancesComponent implements OnInit, OnDestroy {
   appService = inject(ApplicationService);
+  private dataService = inject(AppDetailDataService);
   private apps = inject(CfAppsSignalConfigService);
   private renderer = inject(Renderer2);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+
+  // running/desired counts come from AppDetailDataService.stats() — the same
+  // signal-native source the Status card reads. The legacy ngrx paginator
+  // path used by RunningInstancesComponent is not refreshed by the signal-
+  // native fetchStats() and goes stale on stop/start until a write triggers
+  // a dispatchAppStats() (or a 45s idle-poll tick fires).
+  readonly runningCount = computed(() => {
+    const stats = this.dataService.stats();
+    if (!stats?.length) return 0;
+    return stats.filter(s => s.state === 'RUNNING').length;
+  });
+  readonly desiredCount = computed(() => this.dataService.app()?.entity?.instances ?? 0);
 
 
   // Should the card show the actions to scale/down the number of instances?

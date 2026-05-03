@@ -7,9 +7,7 @@
       </div>
       <div class="card-content card-app-instances__compact">
         <div class="card-app-instances__large">
-          <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
-            [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
-          </app-running-instances>
+          {{ runningCount() }} / {{ desiredCount() }}
         </div>
       </div>
     </a>
@@ -20,9 +18,7 @@
     <div class="card-content card-app-instances__compact">
       @if (!isEditing) {
         <div class="card-app-instances__large">
-          <app-running-instances [instances]="(appService.application$ | async)?.app.entity?.instances"
-            [cfGuid]="appService.cfGuid" [appGuid]="this.appService.appGuid">
-          </app-running-instances>
+          {{ runningCount() }} / {{ desiredCount() }}
         </div>
       }
       <form [hidden]="!isEditing" class="card-app-instances__form">
