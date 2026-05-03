@@ -1,8 +1,6 @@
-import { Injectable, computed, inject, signal, WritableSignal, Signal } from '@angular/core';
+import { Injectable, computed, inject, signal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { firstValueFrom, race, timer } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { ResetPagination } from '@stratosui/store';
@@ -10,6 +8,7 @@ import { ResetPagination } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
+import { AppDeleteSelectionService } from '../../features/applications/app-delete-selection.service';
 import { AppDetailDataService } from '../../features/applications/app-detail-data.service';
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
@@ -59,6 +58,7 @@ export class AppApplicationActionsService {
   private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
+  private deleteSelection = inject(AppDeleteSelectionService);
 
   // In-flight flag delegates to AppLifecycleStateService — the leaf
   // shared-state service used to break the construction cycle with
@@ -214,10 +214,32 @@ export class AppApplicationActionsService {
           // Refresh ngrx-backed entity store (legacy consumers still rely on it).
           cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
           this.dispatchAppStats();
-          // Refresh the signal-native data service so the Status card and any
-          // other AppDetailDataService consumers reflect the new state without
-          // waiting for the 45s idle-poll tick.
-          void this.dataService.refresh('all');
+          // Refresh only the signals that can change post-action: app entity
+          // (state) and stats (running/total). Skip space/org/domains which
+          // physically can't change during a lifecycle op — refreshing them
+          // flips their loading signals and produces a visible card-wide
+          // flicker. envVars is conditionally refreshed below.
+          void this.dataService.refresh('app');
+          void this.dataService.refresh('stats');
+          // Start, restart, and restage all bring containers up and bind
+          // services — any of which can refresh the env. Restage rebinds
+          // and may inject fresh VCAP_SERVICES / VCAP_APPLICATION. Restart
+          // and start pick up rotated CUPS credentials and any env-var
+          // edits made while the app was stopped. Pull envVars once on
+          // success so the Variables tab reflects post-op truth without
+          // waiting for the user to navigate there. Stop doesn't change
+          // env (the container goes down with whatever it had), skip it.
+          if (verb === 'start' || verb === 'restart' || verb === 'restage') {
+            void this.dataService.refresh('envVars');
+          }
+          // Boot-settling poll for verbs that bring containers up: CF returns
+          // STARTED on the app entity as soon as it accepts the command, but
+          // /v3/processes/.../stats reports 0 RUNNING for several seconds
+          // while the container actually boots. Without this, the Instances
+          // card sticks at "0/1" until the next 45 s idle-poll catches up.
+          if (verb === 'start' || verb === 'restart' || verb === 'restage') {
+            this.startSettlingPoll();
+          }
         }
         onAfter?.();
       })
@@ -271,39 +293,81 @@ export class AppApplicationActionsService {
     cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
   };
 
-  // Resolves an observable's first emitted value within a 1s budget; falls
-  // back to a default so the dialog never hangs if upstream data hasn't
-  // arrived yet (e.g. user clicked Stop within the first second of page
-  // load before appOrg$/endpoint$ have replayed).
-  private async firstWithFallback<T>(obs$: any, fallback: T): Promise<T> {
-    const timeout$ = timer(1000).pipe(map(() => fallback as T));
-    return firstValueFrom(race(obs$ as any, timeout$)) as Promise<T>;
+  // After a start/restart/restage success, poll stats every 5 s for up to
+  // 60 s — bridging the gap between "CF accepted the command" (state goes
+  // STARTED immediately) and "containers are actually RUNNING" (stats
+  // catches up over the next several seconds). Stops early when running
+  // == desired, or after the hard cap. Reentrant: a new op cancels any
+  // in-flight settling timer so we don't double-poll.
+  //
+  // Refreshes only `app` + `stats` (parallel) — the only signals that
+  // can change during container boot. envVars, space, org, and domains
+  // are stable; a full refresh('all') fired loading signals on every
+  // kind and caused visible UI flicker across summary/info/cf cards.
+  private settlingTimer: ReturnType<typeof setInterval> | null = null;
+  private startSettlingPoll(): void {
+    if (this.settlingTimer) {
+      clearInterval(this.settlingTimer);
+      this.settlingTimer = null;
+    }
+    const maxAttempts = 12;          // 12 × 5 s = 60 s ceiling
+    const intervalMs = 5000;
+    let attempts = 0;
+    this.settlingTimer = setInterval(() => {
+      attempts++;
+      void Promise.all([
+        this.dataService.refresh('app'),
+        this.dataService.refresh('stats'),
+      ]).then(() => {
+        const desired = this.dataService.app()?.entity?.instances ?? 0;
+        const running = (this.dataService.stats() ?? []).filter(s => s.state === 'RUNNING').length;
+        const reachedSteadyState = desired > 0 && running >= desired;
+        if (reachedSteadyState || attempts >= maxAttempts) {
+          if (this.settlingTimer) {
+            clearInterval(this.settlingTimer);
+            this.settlingTimer = null;
+          }
+        }
+      });
+    }, intervalMs);
   }
 
-  // Reads app/endpoint/org/space names from the live observables. Each is
-  // gated by a 1s fallback so a slow-replaying observable (endpoint$ in
-  // particular: it waits for the endpoint entity to load) doesn't strand
-  // the dialog and leave the user staring at a non-responsive button.
+  // Reads app/endpoint/org/space names from sync signals on the parent
+  // page. By the time the user can click an action button, those signals
+  // are populated (the data service finished its initial fetch as part
+  // of mounting the app-detail subtree). No await race; no fallback to
+  // GUIDs in normal flow.
   // Returns a fully-qualified target string alongside the config so the
   // lifecycle snackbar can echo the same disambiguation the operator just
   // confirmed: "Restaging sample-go-app on dup3 / opensource / openproject…"
   // — the snackbar previously showed only the app name, which was useless
   // on multi-CF deployments where the same name exists in several places.
-  private async buildDialog(
+  private buildDialog(
     title: string,
     verb: string,
     confirmLabel: string,
-  ): Promise<{ cfg: ConfirmationDialogConfig; target: string }> {
-    const [appEntity, orgRes, spaceRes, endpointInfo] = await Promise.all([
-      this.firstWithFallback<any>(this.applicationService.application$, null),
-      this.firstWithFallback<any>(this.applicationService.appOrg$, null),
-      this.firstWithFallback<any>(this.applicationService.appSpace$, null),
-      this.firstWithFallback<any>(this.cfEndpointService.endpoint$, null),
-    ]);
-    const appName = appEntity?.app?.entity?.name ?? this.applicationService.appGuid;
-    const orgName = orgRes?.entity?.name ?? '?';
-    const spaceName = spaceRes?.entity?.name ?? '?';
-    const cfName = endpointInfo?.entity?.name ?? this.applicationService.cfGuid;
+    preResolved?: { appName: string; endpointName: string; orgName: string; spaceName: string },
+  ): { cfg: ConfirmationDialogConfig; target: string } {
+    // Three resolution paths in priority order:
+    //   1. preResolved — caller already has the names (delete wizard)
+    //   2. sync signal reads — hot path, action bar firing on app summary
+    //   3. fallback to appGuid / cfGuid / "?" — only if signals aren't
+    //      populated yet, which on the live action bar shouldn't happen
+    let appName: string;
+    let cfName: string;
+    let orgName: string;
+    let spaceName: string;
+    if (preResolved?.appName && preResolved?.endpointName) {
+      appName = preResolved.appName;
+      cfName = preResolved.endpointName;
+      orgName = preResolved.orgName || '?';
+      spaceName = preResolved.spaceName || '?';
+    } else {
+      appName = this.dataService.app()?.entity?.name ?? this.applicationService.appGuid;
+      cfName = this.cfEndpointService.endpoint()?.entity?.name ?? this.applicationService.cfGuid;
+      orgName = this.dataService.org()?.entity?.name ?? '?';
+      spaceName = this.dataService.space()?.entity?.name ?? '?';
+    }
     const message =
       `${verb} "${appName}" on Cloud Foundry "${cfName}" — org "${orgName}" / space "${spaceName}"?`;
     const cfg = new ConfirmationDialogConfig(`${title}: ${appName}`, message, confirmLabel);
@@ -312,7 +376,7 @@ export class AppApplicationActionsService {
   }
 
   async restart() {
-    const { cfg, target } = await this.buildDialog('Restart', 'Are you sure you want to restart', 'Restart');
+    const { cfg, target } = this.buildDialog('Restart', 'Are you sure you want to restart', 'Restart');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction('restart', target, ({ onProgress }) => this.apps.restartApp(
         this.applicationService.cfGuid,
@@ -323,7 +387,7 @@ export class AppApplicationActionsService {
   }
 
   async stop() {
-    const { cfg, target } = await this.buildDialog('Stop', 'Are you sure you want to stop', 'Stop');
+    const { cfg, target } = this.buildDialog('Stop', 'Are you sure you want to stop', 'Stop');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'stop',
@@ -341,7 +405,7 @@ export class AppApplicationActionsService {
   }
 
   async start() {
-    const { cfg, target } = await this.buildDialog('Start', 'Are you sure you want to start', 'Start');
+    const { cfg, target } = this.buildDialog('Start', 'Are you sure you want to start', 'Start');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'start',
@@ -352,7 +416,7 @@ export class AppApplicationActionsService {
   }
 
   async restage() {
-    const { cfg, target } = await this.buildDialog('Restage', 'Are you sure you want to restage', 'Restage');
+    const { cfg, target } = this.buildDialog('Restage', 'Are you sure you want to restage', 'Restage');
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'restage',
@@ -364,6 +428,19 @@ export class AppApplicationActionsService {
 
   redirectToDelete() {
     const { cfGuid, appGuid } = this.applicationService;
+    // All four names read synchronously from signals on the parent page:
+    // app/org/space from AppDetailDataService, endpoint from
+    // CloudFoundryEndpointService.endpoint. No await, no race, no
+    // fallback strings — by the time the user can click trash, every
+    // signal is populated. Both the wizard's Confirm step and the
+    // post-wizard "Are you sure?" dialog read this seed, so the
+    // wrong-org/space disambiguator stays visible at every step.
+    this.deleteSelection.seed(appGuid, {
+      appName: this.dataService.app()?.entity?.name ?? appGuid,
+      endpointName: this.cfEndpointService.endpoint()?.entity?.name ?? cfGuid,
+      orgName: this.dataService.org()?.entity?.name ?? '',
+      spaceName: this.dataService.space()?.entity?.name ?? '',
+    });
     this.router.navigate(['/applications', cfGuid, appGuid, 'delete']);
   }
 
@@ -383,8 +460,9 @@ export class AppApplicationActionsService {
   async deleteWithCleanup(
     routes: { guid: string }[],
     bindings: { guid: string }[],
+    preResolvedTarget?: { appName: string; endpointName: string; orgName: string; spaceName: string },
   ): Promise<void> {
-    const { cfg, target } = await this.buildDialog('Delete', 'Are you sure you want to delete', 'Delete');
+    const { cfg, target } = this.buildDialog('Delete', 'Are you sure you want to delete', 'Delete', preResolvedTarget);
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'delete',

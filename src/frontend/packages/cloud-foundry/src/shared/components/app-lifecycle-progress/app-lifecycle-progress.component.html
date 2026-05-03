@@ -1,5 +1,5 @@
 @if (actions.showProgress()) {
-  <div class="bg-surface-elevated text-content shadow-lg rounded-lg p-3 max-w-md flex items-start gap-2"
+  <div class="bg-content-bg text-content-text border border-content-border shadow-lg rounded-lg p-3 max-w-md flex items-start gap-2"
        role="status"
        aria-live="polite">
     @if (actions.inFlight()) {
@@ -13,14 +13,14 @@
       <div class="font-semibold">
         {{ actions.displayLabel() }} {{ actions.currentTarget()?.app }}
       </div>
-      <div class="text-content-secondary text-xs">
+      <div class="text-content-muted text-xs">
         {{ actions.currentTarget()?.cf }} / {{ actions.currentTarget()?.org }} / {{ actions.currentTarget()?.space }}
       </div>
       @if (actions.outcomeError()) {
         <div class="text-rose-500 text-xs mt-1">{{ actions.outcomeError() }}</div>
       }
       @if (actions.progress()?.length) {
-        <app-stage-row [stages]="actions.progress() ?? []" />
+        <app-stage-row [stages]="actions.progress() ?? []" [inFlight]="actions.inFlight()" />
       }
     </div>
   </div>

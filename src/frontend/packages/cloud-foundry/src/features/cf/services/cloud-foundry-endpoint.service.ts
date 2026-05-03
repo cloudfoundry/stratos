@@ -1,5 +1,5 @@
-import { Injectable, Injector, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
@@ -74,6 +74,16 @@ export class CloudFoundryEndpointService {
   info$!: Observable<EntityInfo<APIResource<ICfV2Info>>>;
   cfInfoEntityService!: EntityService<APIResource<ICfV2Info>>;
   endpoint$!: Observable<EntityInfo<EndpointModel>>;
+  /**
+   * Sync signal mirror of `endpoint$`. Hot read from anywhere — no race,
+   * no observable subscription. Use this for one-shot reads at action
+   * time (e.g. building a confirm dialog) where awaiting an observable
+   * loses to the 1s fallback when the underlying observable hasn't yet
+   * emitted a value through fresh subscribers (post route-recreate).
+   * `endpoint$` stays for stream consumers (combineLatest, derived
+   * observables, async-pipe templates).
+   */
+  endpoint!: Signal<EntityInfo<EndpointModel> | undefined>;
   cfEndpointEntityService!: EntityService<EndpointModel>;
   connected$!: Observable<boolean>;
   currentUser$!: Observable<EndpointUser>;
@@ -176,6 +186,10 @@ export class CloudFoundryEndpointService {
 
   private constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
+    // Sync mirror — backs the new `endpoint` signal. toSignal needs an
+    // injection context; we have one because constructCoreObservables runs
+    // during constructor execution.
+    this.endpoint = toSignal(this.endpoint$, { initialValue: undefined, injector: this.injector });
 
     this.orgs$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.cfGuid);
 

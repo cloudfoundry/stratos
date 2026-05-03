@@ -710,6 +710,13 @@ func (cf *CloudFoundrySpecification) assignRouteToApp(c echo.Context) error {
 // lookupWebProcessGUID resolves the GUID of the web process for an app by
 // querying /v3/processes with the app_guids + types filters. Returns the first
 // matching process GUID; errors if the app has no web process.
+//
+// The "no web process" branch wraps capi.ErrNotFound so statusFromCapiError
+// classifies it as 404 rather than the default 502. CAPI's response to a
+// gone-process can be either 404 CF-ResourceNotFound or 200 with empty
+// resources depending on timing — both should surface to the client as 404
+// (the resource is gone), not as 502 Bad Gateway (which falsely implies
+// upstream connectivity trouble).
 func lookupWebProcessGUID(ctx context.Context, cfClient capi.Client, appGUID string) (string, error) {
 	params := capi.NewQueryParams()
 	params.Filters["app_guids"] = []string{appGUID}
@@ -721,7 +728,7 @@ func lookupWebProcessGUID(ctx context.Context, cfClient capi.Client, appGUID str
 		return "", err
 	}
 	if len(list.Resources) == 0 {
-		return "", fmt.Errorf("no web process found for app %s", appGUID)
+		return "", fmt.Errorf("no web process found for app %s: %w", appGUID, capi.ErrNotFound)
 	}
 	return list.Resources[0].GUID, nil
 }

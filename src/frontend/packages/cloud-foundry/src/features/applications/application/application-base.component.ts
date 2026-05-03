@@ -77,12 +77,8 @@ export function getGuids(type?: string) {
     // navigation to a different app gets a fresh instance and signals from
     // the previous app are torn down cleanly.
     AppDetailDataService,
-    // AppDeleteSelectionService holds the wizard's pending route + binding
-    // selections so the wizard (a child route /applications/{cf}/{app}/delete)
-    // and this app-detail page can communicate through one shared signal.
-    // Wizard sets pending; this component picks it up on navigation back
-    // and triggers the orchestrated delete.
-    AppDeleteSelectionService,
+    // AppDeleteSelectionService is providedIn:'root' (see service file for
+    // why the root scope is required) — no component-level provider here.
   ]
 })
 export class ApplicationBaseComponent implements OnInit {
@@ -98,14 +94,25 @@ export class ApplicationBaseComponent implements OnInit {
   // exactly once (clear it eagerly so a back-navigation refresh doesn't
   // re-fire), prompt the user via deleteWithCleanup's Are-you-sure dialog,
   // and let the action service orchestrate the staged cleanup + delete.
+  //
+  // Guard: the service is providedIn:'root' (it has to survive parent
+  // recreation across the wizard navigation), so a stale request from a
+  // prior app could in principle leak across to a different app's detail
+  // page. Verify the wizard's `forAppGuid` matches this component's app
+  // before firing — discard the stale request otherwise.
   private readonly _deleteWatcher = effect(() => {
     if (!this.selection.requested()) {
       return;
     }
+    if (this.selection.forAppGuid() !== this.appGuid) {
+      this.selection.clear();
+      return;
+    }
     const routes = this.selection.routes();
     const bindings = this.selection.bindings();
+    const target = this.selection.target();
     this.selection.clear();
-    void this.actions.deleteWithCleanup(routes, bindings);
+    void this.actions.deleteWithCleanup(routes, bindings, target ?? undefined);
   });
 
   ngOnInit(): void {

@@ -40,7 +40,11 @@ export class CardAppStatusComponent {
     }
     const state = this.data.app()?.entity?.state;
     if (state === 'STARTED') return 'text-success';
-    if (state === 'STOPPED') return 'text-content-secondary';
+    // STOPPED was previously `text-content-secondary` — that's the surface
+    // color (#f8fafc / #0f172a), not a text color, so the value rendered
+    // near-invisible against the card background. Use text-warning to
+    // match the orange "stopped" indicator convention used elsewhere.
+    if (state === 'STOPPED') return 'text-warning';
     if (state === 'CRASHED') return 'text-danger';
     return '';
   });
