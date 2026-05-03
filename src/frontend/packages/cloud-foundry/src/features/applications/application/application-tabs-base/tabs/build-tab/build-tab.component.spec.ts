@@ -7,8 +7,31 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
 import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from "./view-buildpack/view-buildpack.component";
+
+function makeDataServiceStub() {
+  return {
+    appDetail: signal(undefined).asReadonly(),
+    app: signal(undefined).asReadonly(),
+    summary: signal(undefined).asReadonly(),
+    stats: signal([]).asReadonly(),
+    envVars: signal(undefined).asReadonly(),
+    space: signal(undefined).asReadonly(),
+    org: signal(undefined).asReadonly(),
+    domains: signal([]).asReadonly(),
+    loading: signal({ app: false, stats: false, envVars: false, space: false, org: false, domains: false }).asReadonly(),
+    errors: signal({ app: null, stats: null, envVars: null, space: null, org: null, domains: null }).asReadonly(),
+    running: signal(false).asReadonly(),
+    url: signal(null).asReadonly(),
+    stratosProject: signal(null).asReadonly(),
+    state: signal({ status: 'UNKNOWN' }).asReadonly(),
+    fetching: signal(false).asReadonly(),
+    lastPolledAt: signal(null).asReadonly(),
+    refresh: () => Promise.resolve(),
+  };
+}
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
@@ -36,6 +59,7 @@ describe('BuildTabComponent', () => {
           provide: AppApplicationActionsService,
           useValue: { inFlight: signal(false).asReadonly() },
         },
+        { provide: AppDetailDataService, useFactory: makeDataServiceStub },
         {
           provide: ActivatedRoute,
           useValue: {

@@ -1,4 +1,4 @@
-@if (data.app(); as app) {
+@if (data.appDetail(); as detail) {
   <div class="summary">
     <app-tile-grid>
       <app-tile-group class="tile-group-3-cols">
@@ -14,7 +14,7 @@
           <app-card-app-uptime></app-card-app-uptime>
         </app-tile>
       </app-tile-group>
-      @if (app.entity.staging_failed_description; as errorMsg) {
+      @if (detail.build?.error; as errorMsg) {
         <app-tile-group class="tile-group-1-cols">
           <app-tile>
             <div class="card bg-yellow-50 border-yellow-400 border-l-4 summary__staging-error">
@@ -33,28 +33,28 @@
             <div class="card-body">
               <div class="app-metadata">
                 <div class="app-metadata__two-cols">
-                  <app-metadata-item icon="memory" label="Memory Quota">{{ app.entity.memory | mbToHumanSize }}
+                  <app-metadata-item icon="memory" label="Memory Quota">{{ detail.process?.memoryMb | mbToHumanSize }}
                   </app-metadata-item>
-                  <app-metadata-item icon="storage" label="Disk Quota">{{ app.entity.disk_quota | mbToHumanSize}}
+                  <app-metadata-item icon="storage" label="Disk Quota">{{ detail.process?.diskMb | mbToHumanSize }}
                   </app-metadata-item>
                   <app-metadata-item icon="date_range" label="Created">
-                    {{ app.metadata.created_at | date:'medium' }}</app-metadata-item>
+                    {{ detail.app.createdAt | date:'medium' }}</app-metadata-item>
                   <app-metadata-item icon="access_time" label="Modified">
-                    {{ app.entity.package_updated_at ? (app.entity.package_updated_at | date:'medium') : '-' }}
+                    {{ detail.pkg?.updatedAt ? (detail.pkg?.updatedAt | date:'medium') : '-' }}
                   </app-metadata-item>
                   <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">
                     {{ sshStatus$ | async }}
                   </app-metadata-item>
                 </div>
                 <div class="app-metadata__two-cols">
-                  <app-metadata-item icon="touch_app" label="App State">{{ app.entity.state }}</app-metadata-item>
-                  <app-metadata-item icon="card_travel" label="Package State">{{ app.entity.package_state }}
+                  <app-metadata-item icon="touch_app" label="App State">{{ detail.app.state }}</app-metadata-item>
+                  <app-metadata-item icon="card_travel" label="Package State">{{ detail.pkg?.state ?? '-' }}
                   </app-metadata-item>
                   <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
                     {{ data.summary()?.services?.length || '0' }}
                   </app-metadata-item>
                   <app-metadata-item icon="route" iconFont="stratos-icons" label="Routes">
-                    {{ data.summary()?.routes?.length || '0' }}
+                    {{ detail.app.routes?.length || '0' }}
                   </app-metadata-item>
                 </div>
               </div>
@@ -99,7 +99,7 @@
               </app-metadata-item>
               @if (data.org()) {
                 <app-metadata-item icon="keyboard" label="CLI Info" class="cli-link">
-                  <a [routerLink]="['/applications/' + applicationService.cfGuid + '/' + app.metadata.guid + '/cli']">View</a>
+                  <a [routerLink]="['/applications/' + applicationService.cfGuid + '/' + detail.app.guid + '/cli']">View</a>
                 </app-metadata-item>
               }
             </div>
@@ -116,10 +116,10 @@
             </div>
             <div class="card-body">
               <app-metadata-item icon="build" label="Buildpack">
-                <app-view-buildpack [buildPack]="app.entity.buildpack || app.entity.detected_buildpack">
+                <app-view-buildpack [buildPack]="detail.droplet?.buildpacks?.[0]?.name || detail.droplet?.buildpacks?.[0]?.detectOutput">
                 </app-view-buildpack>
               </app-metadata-item>
-              <app-metadata-item icon="code" label="Stack">{{ app.entity.stack?.entity.name || '-' }}
+              <app-metadata-item icon="code" label="Stack">{{ detail.droplet?.stack || detail.app.stackName || '-' }}
               </app-metadata-item>
             </div>
           </div>
@@ -219,11 +219,11 @@
               <h3 class="text-lg font-semibold">Additional Application Info</h3>
             </div>
             <div class="card-body">
-              <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="app.entity.guid">
-                {{ app.entity.guid }}</app-metadata-item>
+              <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="detail.app.guid">
+                {{ detail.app.guid }}</app-metadata-item>
               <app-metadata-item icon="chevron_right" label="Command">
-                {{ app.entity.command || app.entity.detected_start_command || '-' }}</app-metadata-item>
-              <app-metadata-item icon="power" label="Ports">{{ app.entity.ports || '-' }}</app-metadata-item>
+                {{ detail.process?.command || '-' }}</app-metadata-item>
+              <app-metadata-item icon="power" label="Ports">{{ detail.process?.ports?.length ? detail.process?.ports?.join(', ') : '-' }}</app-metadata-item>
             </div>
           </div>
         </app-tile>
@@ -234,12 +234,12 @@
             </div>
             <div class="card-body">
               <app-metadata-item icon="favorite_border" label="Health Check Type">
-                {{ app.entity.health_check_type }}</app-metadata-item>
+                {{ detail.process?.healthCheckType ?? '-' }}</app-metadata-item>
               <app-metadata-item icon="schedule" label="Health Check Timeout">
-                {{ app.entity.health_check_timeout | uptime }}</app-metadata-item>
-              @if (app.entity.health_check_type === 'http') {
+                {{ detail.process?.healthCheckTimeoutSeconds | uptime }}</app-metadata-item>
+              @if (detail.process?.healthCheckType === 'http') {
                 <app-metadata-item icon="http"
-                  label="Health Check HTTP Endpoint">{{ app.entity.health_check_http_endpoint }}</app-metadata-item>
+                  label="Health Check HTTP Endpoint">{{ detail.process?.healthCheckEndpoint }}</app-metadata-item>
               }
             </div>
           </div>

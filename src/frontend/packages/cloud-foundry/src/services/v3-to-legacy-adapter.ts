@@ -68,10 +68,19 @@ function appDetailToLegacy(detail: StAppDetail | undefined): APIResource<IApp> |
       : undefined,
     // Process-derived runtime config fields.
     command: process?.command,
+    // Legacy IApp had a `detected_start_command` separate from `command`
+    // (CF v2 returned both: user-set vs auto-detected). V3 collapses them
+    // into a single `command` field that already resolves to the detected
+    // command when no user override exists. Mirror the same value into
+    // both legacy slots so consumers reading either continue to work.
+    detected_start_command: process?.command,
     ports: process?.ports,
     health_check_type: process?.healthCheckType,
     health_check_timeout: process?.healthCheckTimeoutSeconds,
     health_check_http_endpoint: process?.healthCheckEndpoint,
+    // Docker lifecycle: the image lives on the droplet. Buildpack-lifecycle
+    // droplets carry no image; the legacy field stays undefined for those.
+    docker_image: droplet?.image,
     // Package + build state drive Summary tab "package state" /
     // "staging failed reason" cells.
     package_state: pkg?.state,
