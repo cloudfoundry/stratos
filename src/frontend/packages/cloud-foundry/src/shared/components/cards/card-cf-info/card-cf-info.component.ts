@@ -43,7 +43,7 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   // already V3-native (the effect under cfEntityCatalog.cfInfo.api.get
   // hits /pp/v1/cf/info/{cnsi}); these are template-side signal reads,
   // not a data-path migration.
-  readonly endpointInfo = toSignal(this.cfEndpointService.endpoint$, { initialValue: null as any });
+  readonly endpointInfo = this.cfEndpointService.endpoint;
   readonly info = toSignal(this.cfEndpointService.info$, { initialValue: null as any });
   readonly hasSSHAccess = toSignal(this.cfEndpointService.hasSSHAccess$, { initialValue: false });
   readonly canConfigureInvites = toSignal(this.userInviteService.canConfigure$, { initialValue: false });
