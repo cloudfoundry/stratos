@@ -219,17 +219,23 @@ describe('AppDetailDataService', () => {
   // initiate its HTTP requests, flush them, tick again, repeat for each phase.
   // -------------------------------------------------------------------------
 
-  it('refresh("all") phase 1: fetches app, summary, stats, envVars in parallel', async () => {
+  it('refresh("all") phase 1: app/summary/env in parallel, then stats', async () => {
     const promise = svc.refresh('all');
 
-    // Phase 1: all four requests are in-flight immediately (started in parallel)
+    // Phase 1a: app, summary, env in parallel — stats deferred so we know
+    // app state before issuing /stats (CF returns 400 on stopped apps).
     await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
 
-    // Drain microtasks so Promise.all resolves and phase 2 initiates
+    // Drain so phase 1a Promise.all resolves and phase 1b initiates
+    await tick();
+
+    // Phase 1b: stats (app state is STARTED, so it fires)
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+
+    // Drain so phase 1b resolves and phase 2 initiates
     await tick();
 
     // Phase 2: space request (needs app.space_guid = 'sp-1')
@@ -261,12 +267,15 @@ describe('AppDetailDataService', () => {
   it('refresh("all") phased: space only populated after app, org only populated after space', async () => {
     const promise = svc.refresh('all');
 
-    // Phase 1
+    // Phase 1a
     await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    // Phase 1b: stats (sequential after app state is known)
+    await tick();
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
 
     // Phase 2
     await tick();
@@ -289,15 +298,18 @@ describe('AppDetailDataService', () => {
   it('refresh("all") skips space/org/domains when app has no space_guid', async () => {
     const promise = svc.refresh('all');
 
-    // Phase 1: flush app without space_guid so phase 2 skips silently
+    // Phase 1a: flush app without space_guid so phase 2 skips silently
     await tick();
     httpMock.expectOne(BASE_URL).flush({
       ...MOCK_APP_ENTITY,
       entity: { ...MOCK_APP_ENTITY.entity, space_guid: undefined },
     });
     httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    // Phase 1b: stats (state is STARTED, fires)
+    await tick();
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
 
     // Drain — phase 2 runs but fetchSpace() skips (no space_guid)
     await tick();
@@ -316,8 +328,10 @@ describe('AppDetailDataService', () => {
     await tick();
     httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
     httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
     httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+
+    await tick();
+    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
 
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);

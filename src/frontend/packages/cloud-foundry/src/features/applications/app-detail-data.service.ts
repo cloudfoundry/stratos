@@ -155,13 +155,24 @@ export class AppDetailDataService {
    */
   async refresh(scope: EntityKind | 'all' = 'all'): Promise<void> {
     if (scope === 'all') {
-      // Phase 1: independent entities — no relation walks needed
+      // Phase 1a: independent entities — no relation walks needed.
+      // Stats are deferred to phase 1b so we know the app state first;
+      // CF returns 400 CF-AppStoppedStatsError for /stats on STOPPED apps,
+      // and the network-level 400 surfaces in browser DevTools even though
+      // the JS catch silences it (isStoppedAppError). Sequencing app→stats
+      // costs one round-trip on initial load but keeps the console clean.
       await Promise.all([
         this.fetchOne('app',     this.appUrl(),           this._app),
         this.fetchOne('summary', this.appUrl('/summary'), this._summary),
-        this.fetchStats(),
         this.fetchOne('envVars', this.appUrl('/env'),     this._envVars),
       ]);
+
+      // Phase 1b: conditional stats fetch based on app/summary state.
+      if (this.shouldFetchStats()) {
+        await this.fetchStats();
+      } else {
+        this._stats.set([]);
+      }
 
       // Phase 2: space — requires app.entity.space_guid to be populated
       await this.fetchSpace();
@@ -174,7 +185,7 @@ export class AppDetailDataService {
       const fetchers: Record<EntityKind, () => Promise<void>> = {
         app:     () => this.fetchOne('app',     this.appUrl(),           this._app),
         summary: () => this.fetchOne('summary', this.appUrl('/summary'), this._summary),
-        stats:   () => this.fetchStats(),
+        stats:   () => this.shouldFetchStats() ? this.fetchStats() : (this._stats.set([]), Promise.resolve()),
         envVars: () => this.fetchOne('envVars', this.appUrl('/env'),     this._envVars),
         space:   () => this.fetchSpace(),
         org:     () => this.fetchOrg(),
@@ -384,6 +395,18 @@ export class AppDetailDataService {
       title: `Failed to load ${kind}`,
       detail,
     };
+  }
+
+  /**
+   * True when the app is in a state that supports /stats. Reads state from
+   * the app entity first, then falls back to summary. Returns true when
+   * state is unknown so the first-ever load (no cache) still fetches —
+   * the catch in fetchStats handles the 400 silently if we got it wrong.
+   */
+  private shouldFetchStats(): boolean {
+    const state = this._app()?.entity?.state ?? (this._summary() as any)?.state;
+    if (!state) return true;
+    return state === 'STARTED';
   }
 
   /**
