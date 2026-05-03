@@ -88,9 +88,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const scmService = inject(GitSCMService);
 
     // Initialize favorite$ after applicationService is available
+    // Filter for fully-hydrated entity with cfGuid stamped — getFavorite
+    // resolves the endpoint id via cf-entity-generator's getEndpointIdFromEntity
+    // (entity.entity.cfGuid). Loose !!app emissions slip through with empty
+    // inner entity and trigger "endpointId is undefined" warnings on every
+    // ngrx state churn (4 on initial load, 14+ during a lifecycle action).
     this.favorite$ = this.applicationService.app$.pipe(
-      filter(app => !!app),
-      map(app => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(app.entity, applicationEntityType, CF_ENDPOINT_TYPE))
+      filter(info => !!info?.entity?.entity?.cfGuid),
+      map(info => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(info.entity, applicationEntityType, CF_ENDPOINT_TYPE))
     );
     const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     this.schema = catalogEntity.getSchema();
@@ -100,6 +105,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         endpoints$,
         applicationService.appOrg$,
         applicationService.appSpace$
+      ),
+      // Skip emissions where the endpoint entry, org, or space hasn't loaded
+      // yet — getBreadcrumbs reads .name off each and throws on undefined.
+      // Without this guard, ngrx state churn during refreshes (or a slow
+      // endpoint reducer hydrating after waitForAppEntity$ already replayed)
+      // produces console TypeErrors on every navigation.
+      filter(([app, endpoints, org, space]) =>
+        !!endpoints?.[app.entity.entity.cfGuid] && !!org?.entity && !!space?.entity
       ),
       map(([app, endpoints, org, space]) => {
         return this.getBreadcrumbs(
