@@ -18,30 +18,39 @@
               </button>
             </app-page-sub-nav-section>
             @if (applicationService.applicationState$ | async; as appState) {
-              <div class="app-page-header__actions">
-                <app-page-sub-nav-section>
-                  <button class="btn btn-secondary btn-icon" name="restart" [disabled]="busy.updating || !appState.actions.restart"
-                    (click)="actions.restart()" title="Restart">
-                    <span class="material-icons">refresh</span>
-                  </button>
-                  @if (appState.actions.stop) {
-                    <button class="btn btn-secondary btn-icon" name="stop" [disabled]="busy.updating"
-                      (click)="actions.stop()" title="Stop">
-                      <span class="material-icons">stop</span>
+              <!--
+                appState.actions is null during the initial load window —
+                ApplicationStateService.get() returns the Unknown fallback
+                with actions=null when summary/state aren't populated yet.
+                Guard the block so Angular doesn't try to read .restart /
+                .stop / .start / .restage off null in change-detection.
+              -->
+              @if (appState.actions; as appActions) {
+                <div class="app-page-header__actions">
+                  <app-page-sub-nav-section>
+                    <button class="btn btn-secondary btn-icon" name="restart" [disabled]="busy.updating || !appActions.restart"
+                      (click)="actions.restart()" title="Restart">
+                      <span class="material-icons">refresh</span>
                     </button>
-                  } @else {
-                    <button class="btn btn-success btn-icon" name="start"
-                      [disabled]="busy.updating || !appState.actions.start && !appState.actions.stop"
-                      (click)="actions.start()" title="Start">
-                      <span class="material-icons">play_arrow</span>
+                    @if (appActions.stop) {
+                      <button class="btn btn-secondary btn-icon" name="stop" [disabled]="busy.updating"
+                        (click)="actions.stop()" title="Stop">
+                        <span class="material-icons">stop</span>
+                      </button>
+                    } @else {
+                      <button class="btn btn-success btn-icon" name="start"
+                        [disabled]="busy.updating || !appActions.start && !appActions.stop"
+                        (click)="actions.start()" title="Start">
+                        <span class="material-icons">play_arrow</span>
+                      </button>
+                    }
+                    <button class="btn btn-secondary btn-icon" name="restage" [disabled]="busy.updating || !appActions.restage"
+                      (click)="actions.restage()" title="Restage">
+                      <span class="material-icons">redo</span>
                     </button>
-                  }
-                  <button class="btn btn-secondary btn-icon" name="restage" [disabled]="busy.updating || !appState.actions.restage"
-                    (click)="actions.restage()" title="Restage">
-                    <span class="material-icons">redo</span>
-                  </button>
-                </app-page-sub-nav-section>
-              </div>
+                  </app-page-sub-nav-section>
+                </div>
+              }
             }
           </ng-container>
         </div>
