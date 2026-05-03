@@ -93,9 +93,10 @@ describe('stToLegacy.appDetail', () => {
     expect(legacy!.entity.detected_buildpack).toBe('ruby');
   });
 
-  it('maps package + build state onto staging fields', () => {
+  it('maps package_updated_at and translates V3 package state to V2 vocabulary', () => {
+    // fullDetail has droplet.state="STAGED" → legacy package_state="STAGED"
     const legacy = stToLegacy.appDetail(fullDetail);
-    expect(legacy!.entity.package_state).toBe('READY');
+    expect(legacy!.entity.package_state).toBe('STAGED');
     expect(legacy!.entity.package_updated_at).toBe('2024-01-01T00:00:30Z');
   });
 
@@ -106,6 +107,40 @@ describe('stToLegacy.appDetail', () => {
     };
     const legacy = stToLegacy.appDetail(detailWithBuildError);
     expect(legacy!.entity.staging_failed_description).toBe('Build failed: out of memory');
+  });
+
+  it('maps build FAILED to legacy package_state FAILED', () => {
+    const detail: StAppDetail = {
+      ...fullDetail,
+      droplet: null,
+      build: { ...fullDetail.build!, state: 'FAILED' },
+    };
+    expect(stToLegacy.appDetail(detail)!.entity.package_state).toBe('FAILED');
+  });
+
+  it('maps pkg FAILED/EXPIRED to legacy package_state FAILED', () => {
+    const failedPkg: StAppDetail = {
+      ...fullDetail,
+      droplet: null,
+      pkg: { ...fullDetail.pkg!, state: 'FAILED' },
+    };
+    expect(stToLegacy.appDetail(failedPkg)!.entity.package_state).toBe('FAILED');
+    const expiredPkg: StAppDetail = {
+      ...fullDetail,
+      droplet: null,
+      pkg: { ...fullDetail.pkg!, state: 'EXPIRED' },
+    };
+    expect(stToLegacy.appDetail(expiredPkg)!.entity.package_state).toBe('FAILED');
+  });
+
+  it('falls back to PENDING when no terminal droplet/build/pkg state', () => {
+    const inFlight: StAppDetail = {
+      ...fullDetail,
+      droplet: null,
+      build: { ...fullDetail.build!, state: 'STAGING' },
+      pkg: { ...fullDetail.pkg!, state: 'PROCESSING_UPLOAD' },
+    };
+    expect(stToLegacy.appDetail(inFlight)!.entity.package_state).toBe('PENDING');
   });
 
   it('mirrors sshEnabled onto enable_ssh', () => {
@@ -125,10 +160,12 @@ describe('stToLegacy.appDetail', () => {
     expect(legacy!.entity.detected_buildpack).toBeUndefined();
   });
 
-  it('leaves package-derived fields undefined when pkg is null', () => {
+  it('leaves package_updated_at undefined when pkg is null but maps state from droplet', () => {
     const noPkg: StAppDetail = { ...fullDetail, pkg: null };
     const legacy = stToLegacy.appDetail(noPkg);
-    expect(legacy!.entity.package_state).toBeUndefined();
+    // droplet.state STAGED still drives package_state — pkg-derived
+    // updated_at is the only field that should fall back.
+    expect(legacy!.entity.package_state).toBe('STAGED');
     expect(legacy!.entity.package_updated_at).toBeUndefined();
   });
 });
@@ -147,7 +184,8 @@ describe('stToLegacy.appSummary', () => {
     expect(summary!.routes[0].url).toBe('my-app.example.com');
     expect(summary!.buildpack).toBe('ruby_buildpack');
     expect(summary!.detected_buildpack).toBe('ruby');
-    expect(summary!.package_state).toBe('READY');
+    // V3 droplet.state "STAGED" maps to V2 package_state "STAGED"
+    expect(summary!.package_state).toBe('STAGED');
     expect(summary!.enable_ssh).toBe(true);
   });
 
@@ -155,21 +193,21 @@ describe('stToLegacy.appSummary', () => {
     expect(stToLegacy.appSummary(undefined)).toBeNull();
   });
 
-  it('defaults package_state to "" when pkg is null', () => {
-    const noPkg: StAppDetail = { ...fullDetail, pkg: null };
-    const summary = stToLegacy.appSummary(noPkg);
-    expect(summary!.package_state).toBe('');
+  it('falls back to PENDING when no droplet is staged', () => {
+    const noDroplet: StAppDetail = { ...fullDetail, droplet: null, pkg: null, build: null };
+    const summary = stToLegacy.appSummary(noDroplet);
+    expect(summary!.package_state).toBe('PENDING');
   });
 });
 
 describe('stToLegacy.envVars', () => {
   it('renames v3-camelCase fields to v2-snake_case shape', () => {
     const env: StEnvVars = {
-      Environment: { FOO: 'bar' },
-      SystemProvided: { VCAP_SERVICES: { db: [{ name: 'pg' }] } },
-      ApplicationProvided: { VCAP_APPLICATION: { name: 'my-app' } },
-      RunningProvided: { RUN: 'yes' },
-      StagingProvided: { STAGE: 'true' },
+      environment: { FOO: 'bar' },
+      systemProvided: { VCAP_SERVICES: { db: [{ name: 'pg' }] } },
+      applicationProvided: { VCAP_APPLICATION: { name: 'my-app' } },
+      runningProvided: { RUN: 'yes' },
+      stagingProvided: { STAGE: 'true' },
     };
     const legacy = stToLegacy.envVars(env);
     expect(legacy).not.toBeNull();

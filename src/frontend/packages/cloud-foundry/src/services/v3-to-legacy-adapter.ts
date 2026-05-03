@@ -23,6 +23,20 @@ import {
 } from './endpoint-data/stratos-types';
 
 /**
+ * Map V3 package / build / droplet state onto the V2 `package_state`
+ * vocabulary the legacy state-machine dispatches on. Precedence: a
+ * positive droplet state wins (the app is runnable); explicit failures
+ * propagate through the FAILED slot; everything else (in-flight upload,
+ * staging in progress, no droplet yet) is PENDING.
+ */
+function v3PackageStateToLegacy(detail: StAppDetail): string {
+  if (detail.droplet?.state === 'STAGED') return 'STAGED';
+  if (detail.build?.state === 'FAILED') return 'FAILED';
+  if (detail.pkg?.state === 'FAILED' || detail.pkg?.state === 'EXPIRED') return 'FAILED';
+  return 'PENDING';
+}
+
+/**
  * Build the legacy v2 `APIResource<IApp>` shape from a Stratos-shape
  * `StAppDetail`. The result mirrors what the ngrx app entity store
  * would have populated via `GetApplication` — flat IApp fields under
@@ -81,9 +95,16 @@ function appDetailToLegacy(detail: StAppDetail | undefined): APIResource<IApp> |
     // Docker lifecycle: the image lives on the droplet. Buildpack-lifecycle
     // droplets carry no image; the legacy field stays undefined for those.
     docker_image: droplet?.image,
-    // Package + build state drive Summary tab "package state" /
-    // "staging failed reason" cells.
-    package_state: pkg?.state,
+    // Package state: legacy IApp.package_state uses V2 vocabulary
+    // (STAGED / PENDING / FAILED) and ApplicationStateService.stateMetadata
+    // dispatches on those exact strings. V3 splits the same concept across
+    // pkg.state ("READY" / "PROCESSING_UPLOAD" / "FAILED" / ...) and
+    // droplet.state / build.state ("STAGED" / "STAGING" / "FAILED").
+    // Map onto the V2 vocabulary so the legacy state-table lookup hits:
+    //   - droplet "STAGED"        → "STAGED" (active running state)
+    //   - pkg/build "FAILED"      → "FAILED"
+    //   - everything else         → "PENDING"
+    package_state: v3PackageStateToLegacy(detail),
     package_updated_at: pkg?.updatedAt,
     staging_failed_description: build?.error,
   };
@@ -153,7 +174,7 @@ function appDetailToLegacySummary(detail: StAppDetail | undefined): IAppSummary 
     command: process?.command,
     console: false,
     staging_task_id: '',
-    package_state: pkg?.state ?? '',
+    package_state: v3PackageStateToLegacy(detail),
     health_check_type: process?.healthCheckType ?? '',
     health_check_timeout: process?.healthCheckTimeoutSeconds,
     health_check_http_endpoint: process?.healthCheckEndpoint ?? '',
@@ -163,6 +184,9 @@ function appDetailToLegacySummary(detail: StAppDetail | undefined): IAppSummary 
     detected_start_command: process?.command ?? '',
     enable_ssh: detail.sshEnabled,
     ports: process?.ports,
+    // package_state already set above with V2 vocabulary; overwrite the
+    // direct read with the mapped value so the IAppSummary consumer sees
+    // the same translation as IApp.package_state.
   };
 }
 
