@@ -218,9 +218,20 @@ export class AppDetailDataService {
     return `/pp/v1/proxy/v2/organizations/${orgGuid}/domains`;
   }
 
-  /** CNSI selector header expected by the Jetstream proxy. */
+  /**
+   * CNSI selector + passthrough headers expected by the Jetstream proxy.
+   * Without x-cap-passthrough:true the backend wraps the response as
+   * { "<cnsiGuid>": <body> } (multi-endpoint shape); with it we get the
+   * raw body, which is what the data service expects to assign directly
+   * into the typed signals.
+   */
   private cnsiHeaders(): { headers: HttpHeaders } {
-    return { headers: new HttpHeaders({ 'x-cap-cnsi-list': this.cnsiGuid }) };
+    return {
+      headers: new HttpHeaders({
+        'x-cap-cnsi-list': this.cnsiGuid,
+        'x-cap-passthrough': 'true',
+      }),
+    };
   }
 
   // ---------------------------------------------------------------------------
