@@ -9,43 +9,74 @@ import { AppDetailPrefs } from './app-detail-prefs.service';
 import { AppApplicationActionsService } from '../../shared/services/application-actions.service';
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService } from '../../shared/services/application-state.service';
+import { StAppDetail } from '../../services/endpoint-data/stratos-types';
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 const CNSI = 'cnsi-1';
 const APP_GUID = 'app-1';
-const BASE_URL = `/pp/v1/proxy/v2/apps/${APP_GUID}`;
+const DETAIL_URL = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}?return=details`;
+const ENV_URL    = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}/env`;
+const STATS_URL  = `/pp/v1/cf/app-stats/${CNSI}/${APP_GUID}`;
 
-const MOCK_APP_ENTITY = {
-  metadata: { guid: APP_GUID, created_at: '', updated_at: '', url: '' },
-  entity: { name: 'my-app', state: 'STARTED', space_guid: 'sp-1', instances: 2 },
-};
-
-const MOCK_SUMMARY = {
-  guid: APP_GUID,
-  name: 'my-app',
-  routes: [{ guid: 'r-1', host: 'my-app', path: '', port: null, domain: { name: 'example.com' } }],
-  state: 'STARTED',
-  instances: 2,
-  running_instances: 2,
-  package_state: 'STAGED',
-};
-
-const MOCK_STATS = {
-  '0': {
-    cfGuid: CNSI, guid: APP_GUID, state: 'RUNNING',
-    stats: { host: 'h', port: 8080, name: 'my-app', disk_quota: 1024, mem_quota: 512, fds_quota: 16384, uptime: 100, uris: [], usage: { cpu: 0, disk: 0, mem: 0, time: '' } },
+// V3-shape composed envelope. Wire matches what
+// /pp/v1/cf/apps/{cnsi}/{appGuid}?return=details returns.
+const MOCK_APP_DETAIL: StAppDetail = {
+  app: {
+    guid: APP_GUID,
+    name: 'my-app',
+    state: 'STARTED',
+    spaceGuid: 'sp-1',
+    stackName: 'cflinuxfs4',
+    instances: 2,
+    memory: 256,
+    diskQuota: 1024,
+    routes: [{ guid: 'r-1', url: 'my-app.example.com' }],
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z',
+    cnsiGuid: CNSI,
   },
+  process: {
+    guid: 'proc-1',
+    type: 'web',
+    instances: 2,
+    memoryMb: 256,
+    diskMb: 1024,
+    logRateLimitInBytesPerSecond: 1048576,
+    command: 'rails s',
+    healthCheckType: 'port',
+    ports: [8080],
+  },
+  droplet: null,
+  pkg: null,
+  build: null,
+  sshEnabled: true,
+};
+
+const MOCK_STATS_RESPONSE = {
+  instances: [
+    {
+      index: 0,
+      state: 'RUNNING',
+      uptime: 100,
+      memQuota: 268435456,
+      diskQuota: 1073741824,
+      fdsQuota: 16384,
+      host: '10.0.0.1',
+      usage: { time: '2026-05-03T00:00:00Z', cpu: 0.05, mem: 67108864, disk: 134217728 },
+    },
+  ],
 };
 
 const MOCK_ENV = {
-  environment_json: {
+  Environment: {
     STRATOS_PROJECT: JSON.stringify({
       deploySource: { type: 'github', timestamp: 0, endpointGuid: 'ep-1' },
       deployOverrides: {},
     }),
   },
+  SystemProvided: {},
 };
 
 const MOCK_SPACE = {
@@ -64,16 +95,9 @@ const MOCK_DOMAINS_RESPONSE = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Async helper — drain the microtask queue
-// ---------------------------------------------------------------------------
-
 /**
  * Yield to the microtask queue so that Promise.all / await chains inside
  * AppDetailDataService can advance between HTTP-flush phases.
- * Multiple ticks may be needed because each `await firstValueFrom(...)` in
- * the service resolves across two microtask boundaries (Observable emit +
- * firstValueFrom completion).
  */
 async function tick(times = 4): Promise<void> {
   for (let i = 0; i < times; i++) {
@@ -81,15 +105,10 @@ async function tick(times = 4): Promise<void> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Test suite
-// ---------------------------------------------------------------------------
-
 describe('AppDetailDataService', () => {
   let svc: AppDetailDataService;
   let httpMock: HttpTestingController;
 
-  // Polling disabled so no interval fires during tests.
   const prefsStub = {
     idleSeconds: signal(45),
     activeSeconds: signal(5),
@@ -98,9 +117,6 @@ describe('AppDetailDataService', () => {
   const actionsStub = { inFlight: signal(false) };
   const lifecycleStub = { inFlight: signal(false), setInFlight: () => {} };
 
-  // Configure once per test file — the global afterEach in test-setup.ts
-  // calls getTestBed().resetTestingModule() after each test so the next
-  // beforeEach finds a clean slate.
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -115,9 +131,6 @@ describe('AppDetailDataService', () => {
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
-    // Inject but do NOT call initialize() — tests that need HTTP fetches
-    // set cnsiGuid/appGuid and call refresh() themselves to keep the
-    // httpMock state clean.
     svc = TestBed.inject(AppDetailDataService);
     svc.cnsiGuid = CNSI;
     svc.appGuid = APP_GUID;
@@ -130,6 +143,7 @@ describe('AppDetailDataService', () => {
   // -------------------------------------------------------------------------
 
   it('starts with undefined primary signals and no errors', () => {
+    expect(svc.appDetail()).toBeUndefined();
     expect(svc.app()).toBeUndefined();
     expect(svc.summary()).toBeUndefined();
     expect(svc.stats()).toEqual([]);
@@ -145,14 +159,14 @@ describe('AppDetailDataService', () => {
   // running() derived signal
   // -------------------------------------------------------------------------
 
-  it('running() reflects app.entity.state', () => {
-    svc['_app'].set({ metadata: { guid: 'a', created_at: '', updated_at: '', url: '' }, entity: { name: 'a', state: 'STARTED', space_guid: '' } });
+  it('running() reflects appDetail.app.state', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
     expect(svc.running()).toBe(true);
-    svc['_app'].set({ metadata: { guid: 'a', created_at: '', updated_at: '', url: '' }, entity: { name: 'a', state: 'STOPPED', space_guid: '' } });
+    svc['_appDetail'].set({ ...MOCK_APP_DETAIL, app: { ...MOCK_APP_DETAIL.app, state: 'STOPPED' } });
     expect(svc.running()).toBe(false);
   });
 
-  it('running() is false when app is undefined', () => {
+  it('running() is false when appDetail is undefined', () => {
     expect(svc.running()).toBe(false);
   });
 
@@ -160,25 +174,14 @@ describe('AppDetailDataService', () => {
   // url() derived signal
   // -------------------------------------------------------------------------
 
-  it('url() returns http URL for first non-TCP route', () => {
-    svc['_summary'].set(MOCK_SUMMARY as any);
-    expect(svc.url()).toBe('http://my-app.example.com');
+  it('url() returns first route url from appDetail', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    expect(svc.url()).toBe('my-app.example.com');
   });
 
   it('url() returns null when no routes', () => {
-    svc['_summary'].set({ ...MOCK_SUMMARY, routes: [] } as any);
+    svc['_appDetail'].set({ ...MOCK_APP_DETAIL, app: { ...MOCK_APP_DETAIL.app, routes: [] } });
     expect(svc.url()).toBeNull();
-  });
-
-  it('url() skips TCP routes and returns the first HTTP route', () => {
-    svc['_summary'].set({
-      ...MOCK_SUMMARY,
-      routes: [
-        { guid: 'tcp', host: '', path: '', port: '1234', domain: { name: 'tcp.example.com' } },
-        { guid: 'http', host: 'my-app', path: '', port: null, domain: { name: 'example.com' } },
-      ],
-    } as any);
-    expect(svc.url()).toBe('http://my-app.example.com');
   });
 
   // -------------------------------------------------------------------------
@@ -189,16 +192,47 @@ describe('AppDetailDataService', () => {
     expect(svc.stratosProject()).toBeNull();
   });
 
-  it('stratosProject() extracts STRATOS_PROJECT from env vars', () => {
+  it('stratosProject() extracts STRATOS_PROJECT from env vars (string-encoded)', () => {
     svc['_envVars'].set(MOCK_ENV as any);
     const proj = svc.stratosProject();
     expect(proj).not.toBeNull();
     expect(proj?.deploySource?.type).toBe('github');
   });
 
+  it('stratosProject() tolerates STRATOS_PROJECT already arriving as an object', () => {
+    svc['_envVars'].set({
+      Environment: { STRATOS_PROJECT: { deploySource: { type: 'docker', timestamp: 0, endpointGuid: 'ep-1' } } },
+      SystemProvided: {},
+    } as any);
+    expect(svc.stratosProject()?.deploySource?.type).toBe('docker');
+  });
+
   it('stratosProject() returns null when STRATOS_PROJECT is absent', () => {
-    svc['_envVars'].set({ environment_json: {} } as any);
+    svc['_envVars'].set({ Environment: {}, SystemProvided: {} } as any);
     expect(svc.stratosProject()).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // app() / summary() legacy adapter views
+  // -------------------------------------------------------------------------
+
+  it('app() exposes the legacy APIResource<IApp> shape via the adapter', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    const app = svc.app();
+    expect(app).not.toBeUndefined();
+    expect(app!.entity.name).toBe('my-app');
+    expect(app!.entity.guid).toBe(APP_GUID);
+    expect(app!.entity.memory).toBe(256);
+    expect(app!.metadata.guid).toBe(APP_GUID);
+  });
+
+  it('summary() exposes the legacy IAppSummary shape via the adapter', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    const summary = svc.summary();
+    expect(summary).not.toBeUndefined();
+    expect(summary!.guid).toBe(APP_GUID);
+    expect(summary!.memory).toBe(256);
+    expect(summary!.instances).toBe(2);
   });
 
   // -------------------------------------------------------------------------
@@ -213,52 +247,45 @@ describe('AppDetailDataService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // refresh('all') — phased HTTP fan-out
+  // refresh('all') — phased HTTP fan-out via native handlers
   //
-  // Pattern: start the refresh Promise, tick microtasks to let each phase
-  // initiate its HTTP requests, flush them, tick again, repeat for each phase.
+  // Phase 1a (parallel): app + envVars (no separate /summary fetch — the
+  // composed StAppDetail envelope carries every Summary-tab field).
+  // Phase 1b: stats (conditional on app.state === STARTED).
+  // Phase 2:  space (V2 proxy — until org/space migration).
+  // Phase 3:  org → domains (sequential).
   // -------------------------------------------------------------------------
 
-  it('refresh("all") phase 1: app/summary/env in parallel, then stats', async () => {
+  it('refresh("all") phase 1: app + envVars in parallel, then stats, then space/org/domains', async () => {
     const promise = svc.refresh('all');
 
-    // Phase 1a: app, summary, env in parallel — stats deferred so we know
-    // app state before issuing /stats (CF returns 400 on stopped apps).
+    // Phase 1a
     await tick();
-    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
-    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
 
-    // Drain so phase 1a Promise.all resolves and phase 1b initiates
+    // Phase 1b: stats fires because app.state === 'STARTED'
     await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
-    // Phase 1b: stats (app state is STARTED, so it fires)
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
-
-    // Drain so phase 1b resolves and phase 2 initiates
+    // Phase 2: space request needs app.spaceGuid
     await tick();
-
-    // Phase 2: space request (needs app.space_guid = 'sp-1')
     httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);
 
-    // Drain microtasks so phase 2 resolves and phase 3 initiates
+    // Phase 3a: org needs space.organization_guid
     await tick();
-
-    // Phase 3a: org (needs space.organization_guid = 'org-1')
     httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1`).flush(MOCK_ORG);
 
-    // Drain microtasks so org resolves and domains fetch initiates
+    // Phase 3b: domains needs org.metadata.guid
     await tick();
-
-    // Phase 3b: domains (needs org.metadata.guid = 'org-1')
     httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
     await promise;
 
-    expect(svc.app()).toEqual(MOCK_APP_ENTITY);
-    expect(svc.summary()).toEqual(MOCK_SUMMARY);
-    expect(svc.stats()).toHaveLength(1);
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
     expect(svc.envVars()).toEqual(MOCK_ENV);
+    expect(svc.stats()).toHaveLength(1);
+    expect(svc.stats()[0].state).toBe('RUNNING');
     expect(svc.space()).toEqual(MOCK_SPACE);
     expect(svc.org()).toEqual(MOCK_ORG);
     expect(svc.domains()).toHaveLength(1);
@@ -267,25 +294,19 @@ describe('AppDetailDataService', () => {
   it('refresh("all") phased: space only populated after app, org only populated after space', async () => {
     const promise = svc.refresh('all');
 
-    // Phase 1a
     await tick();
-    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
-    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
 
-    // Phase 1b: stats (sequential after app state is known)
     await tick();
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
-    // Phase 2
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);
 
-    // Phase 3a: org
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1`).flush(MOCK_ORG);
 
-    // Phase 3b: domains (sequential after org)
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
@@ -295,23 +316,19 @@ describe('AppDetailDataService', () => {
     expect(svc.org()).toEqual(MOCK_ORG);
   });
 
-  it('refresh("all") skips space/org/domains when app has no space_guid', async () => {
+  it('refresh("all") skips space/org/domains when app has no spaceGuid', async () => {
     const promise = svc.refresh('all');
 
-    // Phase 1a: flush app without space_guid so phase 2 skips silently
     await tick();
-    httpMock.expectOne(BASE_URL).flush({
-      ...MOCK_APP_ENTITY,
-      entity: { ...MOCK_APP_ENTITY.entity, space_guid: undefined },
+    httpMock.expectOne(DETAIL_URL).flush({
+      ...MOCK_APP_DETAIL,
+      app: { ...MOCK_APP_DETAIL.app, spaceGuid: '' },
     });
-    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
 
-    // Phase 1b: stats (state is STARTED, fires)
     await tick();
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
-    // Drain — phase 2 runs but fetchSpace() skips (no space_guid)
     await tick();
 
     await promise;
@@ -326,12 +343,11 @@ describe('AppDetailDataService', () => {
     const promise = svc.refresh('all');
 
     await tick();
-    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
-    httpMock.expectOne(`${BASE_URL}/summary`).flush(MOCK_SUMMARY);
-    httpMock.expectOne(`${BASE_URL}/env`).flush(MOCK_ENV);
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
 
     await tick();
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
 
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/spaces/sp-1`).flush(MOCK_SPACE);
@@ -339,7 +355,6 @@ describe('AppDetailDataService', () => {
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1`).flush(MOCK_ORG);
 
-    // Domains are sequential after org
     await tick();
     httpMock.expectOne(`/pp/v1/proxy/v2/organizations/org-1/domains`).flush(MOCK_DOMAINS_RESPONSE);
 
@@ -353,17 +368,16 @@ describe('AppDetailDataService', () => {
   // refresh('app') — scoped refetch
   // -------------------------------------------------------------------------
 
-  it('refresh("app") only fetches the app entity', async () => {
+  it('refresh("app") only fetches the app detail', async () => {
     const promise = svc.refresh('app');
 
     await tick();
-    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
     await promise;
 
-    expect(svc.app()).toEqual(MOCK_APP_ENTITY);
-    // no other requests issued
-    httpMock.expectNone(`${BASE_URL}/summary`);
-    httpMock.expectNone(`${BASE_URL}/stats`);
+    expect(svc.appDetail()).toEqual(MOCK_APP_DETAIL);
+    httpMock.expectNone(ENV_URL);
+    httpMock.expectNone(STATS_URL);
   });
 
   // -------------------------------------------------------------------------
@@ -372,11 +386,10 @@ describe('AppDetailDataService', () => {
 
   it('loading.app is true during fetch and false after', async () => {
     const promise = svc.refresh('app');
-    // loading.app is set synchronously before the HTTP request
     expect(svc.loading().app).toBe(true);
 
     await tick();
-    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
     await promise;
 
     expect(svc.loading().app).toBe(false);
@@ -386,26 +399,24 @@ describe('AppDetailDataService', () => {
     const promise = svc.refresh('app');
 
     await tick();
-    httpMock.expectOne(BASE_URL).flush('Not Found', { status: 404, statusText: 'Not Found' });
-    await promise; // must not throw
+    httpMock.expectOne(DETAIL_URL).flush('Not Found', { status: 404, statusText: 'Not Found' });
+    await promise;
 
     expect(svc.errors().app).not.toBeNull();
     expect(svc.errors().app?.code).toBe('FETCH_ERROR');
-    expect(svc.app()).toBeUndefined(); // not overwritten on error
+    expect(svc.appDetail()).toBeUndefined();
   });
 
   it('clears a previous error on successful re-fetch', async () => {
-    // First fetch: fails
     const p1 = svc.refresh('app');
     await tick();
-    httpMock.expectOne(BASE_URL).flush('err', { status: 500, statusText: 'Server Error' });
+    httpMock.expectOne(DETAIL_URL).flush('err', { status: 500, statusText: 'Server Error' });
     await p1;
     expect(svc.errors().app).not.toBeNull();
 
-    // Second fetch: succeeds
     const p2 = svc.refresh('app');
     await tick();
-    httpMock.expectOne(BASE_URL).flush(MOCK_APP_ENTITY);
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
     await p2;
     expect(svc.errors().app).toBeNull();
   });
@@ -415,10 +426,12 @@ describe('AppDetailDataService', () => {
   // -------------------------------------------------------------------------
 
   it('fetchStats() treats 400 with "STARTED" in message as benign — no error signal', async () => {
+    // Force fetchStats to actually run by setting state to STARTED first
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
     const promise = svc.refresh('stats');
 
     await tick();
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(
+    httpMock.expectOne(STATS_URL).flush(
       { description: 'App must be in the STARTED state' },
       { status: 400, statusText: 'Bad Request' }
     );
@@ -429,17 +442,37 @@ describe('AppDetailDataService', () => {
   });
 
   // -------------------------------------------------------------------------
-  // Stats array normalisation
+  // Stats array extraction
   // -------------------------------------------------------------------------
 
-  it('stats() is an array even when the backend returns an object keyed by index', async () => {
+  it('stats() extracts the instances array from the native response envelope', async () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
     const promise = svc.refresh('stats');
 
     await tick();
-    httpMock.expectOne(`${BASE_URL}/stats`).flush(MOCK_STATS);
+    httpMock.expectOne(STATS_URL).flush({
+      instances: [
+        { index: 0, state: 'RUNNING', uptime: 100, memQuota: 0, diskQuota: 0, fdsQuota: 0 },
+        { index: 1, state: 'CRASHED', uptime: 0, memQuota: 0, diskQuota: 0, fdsQuota: 0 },
+      ],
+    });
     await promise;
 
-    expect(Array.isArray(svc.stats())).toBe(true);
+    expect(svc.stats()).toHaveLength(2);
     expect(svc.stats()[0].state).toBe('RUNNING');
+    expect(svc.stats()[1].state).toBe('CRASHED');
+  });
+
+  it('stats() preserves usage metrics from the native response', async () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    const promise = svc.refresh('stats');
+
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await promise;
+
+    expect(svc.stats()[0].usage?.cpu).toBe(0.05);
+    expect(svc.stats()[0].usage?.mem).toBe(67108864);
+    expect(svc.stats()[0].uptime).toBe(100);
   });
 });

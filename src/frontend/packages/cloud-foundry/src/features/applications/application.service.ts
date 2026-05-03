@@ -34,6 +34,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../shared/serv
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppStat } from '../../store/types/app-metadata.types';
+import { stToLegacy } from '../../services/v3-to-legacy-adapter';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
@@ -176,9 +177,16 @@ export class ApplicationService {
 
   /**
    * appStats$ — AppStat[].
-   * Consumers iterate the array for per-instance stats.
+   * Consumers iterate the array for per-instance stats. The data
+   * service holds the trimmed V3 shape (index/state); the adapter
+   * widens to the legacy AppStat shape with cpu/uptime/memory zero-
+   * filled. Consumers reading those fields (e.g. the auto-scaler
+   * monitor) get zeros until the Instances tab migration brings a
+   * richer stats endpoint.
    */
-  appStats$: Observable<AppStat[]> = toObservable(this.detail.stats);
+  appStats$: Observable<AppStat[]> = toObservable(
+    computed(() => stToLegacy.appStats(this.detail.stats(), this.cfGuid, this.appGuid))
+  );
 
   /**
    * applicationState$ — ApplicationStateData (label/indicator/actions).

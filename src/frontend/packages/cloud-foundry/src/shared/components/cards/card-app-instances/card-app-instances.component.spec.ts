@@ -14,8 +14,31 @@ import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/t
 import { ApplicationServiceMock } from '@test-framework/application-service-helper';
 import { CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationService } from '../../../../features/applications/application.service';
+import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { ApplicationStateService } from '../../../services/application-state.service';
 import { CardAppInstancesComponent } from './card-app-instances.component';
+
+function makeDataServiceStub() {
+  return {
+    appDetail: () => undefined,
+    app: () => undefined,
+    summary: () => undefined,
+    stats: () => [],
+    envVars: () => undefined,
+    space: () => undefined,
+    org: () => undefined,
+    domains: () => [],
+    loading: () => ({ app: false, stats: false, envVars: false, space: false, org: false, domains: false }),
+    errors: () => ({ app: null, stats: null, envVars: null, space: null, org: null, domains: null }),
+    running: () => false,
+    url: () => null,
+    stratosProject: () => null,
+    state: () => ({ status: 'UNKNOWN' }),
+    fetching: () => false,
+    lastPolledAt: () => null,
+    refresh: () => Promise.resolve(),
+  };
+}
 describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
   let fixture: ComponentFixture<CardAppInstancesComponent>;
@@ -41,6 +64,7 @@ describe('CardAppInstancesComponent', () => {
           multi: true
         },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: AppDetailDataService, useFactory: makeDataServiceStub },
         ApplicationStateService,
         ConfirmationDialogService,
         ...cfCurrentUserPermissionsService,

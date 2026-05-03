@@ -184,21 +184,30 @@ export interface StEnvVars {
   stagingProvided?: Record<string, string>;
 }
 
-// V3 process-stats row. Sourced from
-// /pp/v1/cf/apps/{cnsi}/{appGuid}/stats — composed from
-// /v3/apps/:guid/processes/web/stats. One row per running instance; empty
-// array for STOPPED apps (the backend swallows CF-AppStoppedStatsError 400
-// and returns []).
+// V3 process-stats row, mirroring the backend StAppStatsInstance DTO.
+// Sourced from /pp/v1/cf/app-stats/{cnsi}/{appGuid}, composed from
+// /v3/apps/:guid/processes/web/stats. One row per running instance.
+// Backend emits an empty `instances` array for STOPPED apps (it
+// swallows CF-AppStoppedStatsError 400). `usage` carries the live
+// CPU/memory/disk metrics auto-scaler / app-monitor consumers read;
+// it's omitempty on the wire when CF reports no usage data (e.g.
+// CRASHED instances).
 export interface StAppStat {
   index: number;
   state: string;
   uptime: number;
-  cpu: number;
-  memUsage: number;
-  diskUsage: number;
   memQuota: number;
   diskQuota: number;
-  details?: string;
+  fdsQuota: number;
+  host?: string;
+  usage?: StProcessUsage;
+}
+
+export interface StProcessUsage {
+  time: string;
+  cpu: number;
+  mem: number;
+  disk: number;
 }
 
 export interface StSpace {

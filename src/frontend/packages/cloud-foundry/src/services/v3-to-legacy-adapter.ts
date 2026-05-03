@@ -1,7 +1,7 @@
 // src/frontend/packages/cloud-foundry/src/services/v3-to-legacy-adapter.ts
 //
 // Stratos-shape (v3-composed) → legacy v2 shape adapter. The Stratos
-// data model (StAppDetail, StEnvVars, StAppStatsInstance, etc.) is the
+// data model (StAppDetail, StEnvVars, StAppStat, etc.) is the
 // canonical wire contract; this file manufactures the v2-flavored
 // `APIResource<IApp>` / `IAppSummary` / `AppEnvVarsState` shapes that
 // unmigrated ngrx consumers still depend on.
@@ -18,7 +18,7 @@ import { IApp, IAppSummary } from '../cf-api.types';
 import { AppStat, AppEnvVarsState } from '../store/types/app-metadata.types';
 import {
   StAppDetail,
-  StAppStatsInstance,
+  StAppStat,
   StEnvVars,
 } from './endpoint-data/stratos-types';
 
@@ -177,18 +177,16 @@ function envVarsToLegacy(env: StEnvVars | undefined): AppEnvVarsState | null {
 }
 
 /**
- * Build the legacy `AppStat[]` shape from the trimmed
- * `StAppStatsInstance[]` shape served by `/cf/app-stats/:cnsi/:appGuid`.
- *
- * Slice 1's stats handler returns only `{index, state}` per instance —
- * enough to count RUNNING for the Summary card but missing the
- * cpu / memory / uptime fields the Instances tab renders. Those
- * default to zero here; the Instances tab migration in a later slice
- * either swaps to a richer stats endpoint or moves off this adapter
- * entirely.
+ * Build the legacy `AppStat[]` shape from the V3 `StAppStat[]` returned
+ * by `/cf/app-stats/:cnsi/:appGuid`. Wire shape carries the full
+ * per-instance metrics (uptime + quotas + usage) so the auto-scaler /
+ * app-monitor / Instances-tab consumers all read real values, not
+ * placeholders. CRASHED / STARTING instances may arrive with
+ * `usage` absent — preserve the zero defaults for those, mirroring CF
+ * behavior of not emitting usage for non-RUNNING states.
  */
 function appStatsToLegacy(
-  stats: StAppStatsInstance[],
+  stats: StAppStat[],
   cfGuid: string,
   appGuid: string,
 ): AppStat[] {
@@ -197,15 +195,20 @@ function appStatsToLegacy(
     guid: appGuid,
     state: s.state,
     stats: {
-      disk_quota: 0,
-      fds_quota: 0,
-      host: '',
-      mem_quota: 0,
+      disk_quota: s.diskQuota ?? 0,
+      fds_quota: s.fdsQuota ?? 0,
+      host: s.host ?? '',
+      mem_quota: s.memQuota ?? 0,
       name: '',
       port: 0,
-      uptime: 0,
+      uptime: s.uptime ?? 0,
       uris: [],
-      usage: { cpu: 0, disk: 0, mem: 0, time: '' },
+      usage: {
+        cpu: s.usage?.cpu ?? 0,
+        disk: s.usage?.disk ?? 0,
+        mem: s.usage?.mem ?? 0,
+        time: s.usage?.time ?? '',
+      },
     },
   }));
 }

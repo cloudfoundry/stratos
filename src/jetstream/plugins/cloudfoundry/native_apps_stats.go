@@ -8,19 +8,37 @@ import (
 )
 
 // StAppStatsInstance is the per-instance Stratos-shape entry returned by
-// the app-stats read. CF V3 returns many fields under /v3/processes/{guid}/stats
-// (usage, host, ports, uptime, quotas); the app-wall running-instances
-// indicator only needs `state` to count RUNNING vs desired, so we trim the
-// surface to keep the polling payload small.
+// the app-stats read. Mirrors the v3 /processes/{guid}/stats per-instance
+// shape: index/state for the running-count indicator (cheap callers), plus
+// uptime / quotas / usage for the auto-scaler / app-monitor / Instances
+// tab consumers that need the full picture. Numeric fields default to 0
+// when CF reports an instance in a non-RUNNING state where the metrics
+// aren't meaningful.
 type StAppStatsInstance struct {
-	Index int    `json:"index"`
-	State string `json:"state"`
+	Index     int                  `json:"index"`
+	State     string               `json:"state"`
+	Uptime    int                  `json:"uptime"`
+	MemQuota  int64                `json:"memQuota"`
+	DiskQuota int64                `json:"diskQuota"`
+	FdsQuota  int                  `json:"fdsQuota"`
+	Host      string               `json:"host,omitempty"`
+	Usage     *StProcessUsage      `json:"usage,omitempty"`
+}
+
+// StProcessUsage mirrors v3's process usage block. The auto-scaler /
+// app-monitor reads cpu / mem / disk / time off this shape — keeping the
+// field names normalised so the frontend wire shape is consistent across
+// every "process metrics" response.
+type StProcessUsage struct {
+	Time string  `json:"time"`
+	CPU  float64 `json:"cpu"`
+	Mem  int64   `json:"mem"`
+	Disk int64   `json:"disk"`
 }
 
 // StAppStatsResponse is the Stratos-shape JSON returned from the app-stats
 // read. Callers derive "running / desired" by counting `instances[].state ==
-// "RUNNING"` and comparing to the app's desired instance count (already on
-// StApp.instances, not duplicated here).
+// "RUNNING"` and comparing to the app's desired instance count (on StApp).
 type StAppStatsResponse struct {
 	Instances []StAppStatsInstance `json:"instances"`
 }
@@ -65,10 +83,24 @@ func (c *CloudFoundrySpecification) getAppStats(ctx echo.Context) error {
 
 	out := StAppStatsResponse{Instances: make([]StAppStatsInstance, 0, len(stats.Resources))}
 	for _, inst := range stats.Resources {
-		out.Instances = append(out.Instances, StAppStatsInstance{
-			Index: inst.Index,
-			State: inst.State,
-		})
+		entry := StAppStatsInstance{
+			Index:     inst.Index,
+			State:     inst.State,
+			Uptime:    inst.Uptime,
+			MemQuota:  inst.MemQuota,
+			DiskQuota: inst.DiskQuota,
+			FdsQuota:  inst.FdsQuota,
+			Host:      inst.Host,
+		}
+		if inst.Usage != nil {
+			entry.Usage = &StProcessUsage{
+				Time: inst.Usage.Time,
+				CPU:  inst.Usage.CPU,
+				Mem:  inst.Usage.Mem,
+				Disk: inst.Usage.Disk,
+			}
+		}
+		out.Instances = append(out.Instances, entry)
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)

@@ -7,19 +7,33 @@ import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService, ApplicationStateData } from '../../shared/services/application-state.service';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
 import { APIResource } from '@stratosui/store';
-import { AppStat, AppEnvVarsState } from '../../store/types/app-metadata.types';
-import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { StratosError } from '../../services/endpoint-data/stratos-types';
+import {
+  StAppDetail,
+  StAppStat,
+  StEnvVars,
+  StratosError,
+} from '../../services/endpoint-data/stratos-types';
+import { stToLegacy } from '../../services/v3-to-legacy-adapter';
 
-export type EntityKind = 'app' | 'summary' | 'stats' | 'envVars' | 'space' | 'org' | 'domains';
+export type EntityKind = 'app' | 'stats' | 'envVars' | 'space' | 'org' | 'domains';
+
+interface StAppStatsResponse {
+  instances: StAppStat[];
+}
 
 /**
  * AppDetailDataService — component-scoped page data source for the app detail page.
  *
- * Owns one signal per primary entity (app / summary / stats / envVars / space / org / domains).
- * Exposes derived computed signals (running / url / stratosProject / state).
- * Runs a background polling effect that toggles cadence on actions.inFlight().
+ * Stratos data model is the canonical wire contract. The primary signals
+ * here are V3-shaped (`StAppDetail`, `StEnvVars`, `StAppStat[]`)
+ * sourced from Jetstream-native handlers (`/pp/v1/cf/apps/{cnsi}/{guid}` etc.).
+ * Legacy v2-shape views (`app()`, `summary()`) are exposed as computed
+ * signals via the `stToLegacy` adapter so unmigrated cards/tabs keep
+ * reading their familiar shape during the migration.
+ *
+ * Space / org / domains stay v2-shaped for now — those are addressed in
+ * a later slice when the org/space detail pages migrate.
  *
  * Provide at application-base.component so signals are torn down when the
  * user navigates away from the app detail page. DO NOT add `providedIn:'root'`.
@@ -35,35 +49,43 @@ export class AppDetailDataService {
   appGuid!: string;
 
   // ---------------------------------------------------------------------------
-  // Primary signal sources — writable inside the service, readonly outside.
+  // Primary signal sources — V3-shaped, writable inside the service.
   // ---------------------------------------------------------------------------
-  private readonly _app = signal<APIResource<IApp> | undefined>(undefined);
-  private readonly _summary = signal<IAppSummary | undefined>(undefined);
-  private readonly _stats = signal<AppStat[]>([]);
-  private readonly _envVars = signal<AppEnvVarsState | undefined>(undefined);
+  private readonly _appDetail = signal<StAppDetail | undefined>(undefined);
+  private readonly _envVars = signal<StEnvVars | undefined>(undefined);
+  private readonly _stats = signal<StAppStat[]>([]);
+
+  // Space / org / domains stay V2-shaped — out of scope for slice 1 commit 4.
+  // These switch to V3 native handlers when the org/space detail pages migrate.
   private readonly _space = signal<APIResource<ISpace> | undefined>(undefined);
   private readonly _org = signal<APIResource<IOrganization> | undefined>(undefined);
   private readonly _domains = signal<IDomain[]>([]);
 
   private readonly _loading = signal<Record<EntityKind, boolean>>({
-    app: false, summary: false, stats: false, envVars: false,
+    app: false, stats: false, envVars: false,
     space: false, org: false, domains: false,
   });
   private readonly _errors = signal<Record<EntityKind, StratosError | null>>({
-    app: null, summary: null, stats: null, envVars: null,
+    app: null, stats: null, envVars: null,
     space: null, org: null, domains: null,
   });
 
-  // lastPolledAt — consumed by card-app-status "updating…" threshold (Task 10).
+  // lastPolledAt — consumed by card-app-status "updating…" threshold.
   private readonly _lastPolledAt = signal<Date | null>(null);
 
   // ---------------------------------------------------------------------------
   // Public readonly views
   // ---------------------------------------------------------------------------
-  readonly app: Signal<APIResource<IApp> | undefined> = this._app.asReadonly();
-  readonly summary: Signal<IAppSummary | undefined> = this._summary.asReadonly();
-  readonly stats: Signal<AppStat[]> = this._stats.asReadonly();
-  readonly envVars: Signal<AppEnvVarsState | undefined> = this._envVars.asReadonly();
+
+  /** Stratos-shape composed app detail. Primary V3 signal — Task F templates read this directly. */
+  readonly appDetail: Signal<StAppDetail | undefined> = this._appDetail.asReadonly();
+
+  /** V3-shape env vars envelope. */
+  readonly envVars: Signal<StEnvVars | undefined> = this._envVars.asReadonly();
+
+  /** Trimmed V3 stats — one row per running instance with `{ index, state }`. */
+  readonly stats: Signal<StAppStat[]> = this._stats.asReadonly();
+
   readonly space: Signal<APIResource<ISpace> | undefined> = this._space.asReadonly();
   readonly org: Signal<APIResource<IOrganization> | undefined> = this._org.asReadonly();
   readonly domains: Signal<IDomain[]> = this._domains.asReadonly();
@@ -71,42 +93,69 @@ export class AppDetailDataService {
   readonly errors: Signal<Record<EntityKind, StratosError | null>> = this._errors.asReadonly();
   readonly lastPolledAt: Signal<Date | null> = this._lastPolledAt.asReadonly();
 
+  /**
+   * Legacy `APIResource<IApp>` view computed via the V3→legacy adapter.
+   * Exists so unmigrated cards/components reading `dataService.app()` keep
+   * working. Each consumer's migration to read `appDetail()` directly
+   * shrinks this view's audience; once there are no consumers, this
+   * accessor and the adapter entry can be removed together.
+   */
+  readonly app: Signal<APIResource<IApp> | undefined> = computed(() =>
+    stToLegacy.appDetail(this._appDetail()) ?? undefined,
+  );
+
+  /**
+   * Legacy `IAppSummary` view computed via the adapter. Slice 1 doesn't
+   * fetch a separate /summary endpoint — the StAppDetail composed envelope
+   * already carries every Summary-tab field, and the adapter manufactures
+   * the legacy shape on demand for the facade.
+   */
+  readonly summary: Signal<IAppSummary | undefined> = computed(() =>
+    stToLegacy.appSummary(this._appDetail()) ?? undefined,
+  );
+
   // ---------------------------------------------------------------------------
   // Derived computed signals
   // ---------------------------------------------------------------------------
 
-  /** True when the app entity's state is STARTED. */
-  readonly running = computed(() => this._app()?.entity?.state === 'STARTED');
+  /** True when the app's state is STARTED. */
+  readonly running = computed(() => this._appDetail()?.app.state === 'STARTED');
 
   /**
-   * First non-TCP route URL from the app summary.
-   * Returns null if no routes are available or no non-TCP route exists.
+   * First route URL from the composed StAppDetail. The list-shape
+   * `StAppRoute` carries the rendered URL (CF composes host + domain
+   * server-side) — no per-route port to filter TCP from HTTP, so we
+   * return whatever the first route is. If the app has no routes,
+   * returns null. Slice 2's StRoute carries port; if a future template
+   * needs the TCP filter back, that's the shape to read from.
    */
   readonly url = computed((): string | null => {
-    const routes = this._summary()?.routes ?? [];
-    const nonTcp = routes.filter(r => !isTCPRoute(r.port));
-    const r = nonTcp[0];
-    if (!r || !r.domain) {
-      return null;
-    }
-    return getRoute(r.port, r.host, r.path, true, false, r.domain.name);
+    const routes = this._appDetail()?.app.routes ?? [];
+    return routes[0]?.url ?? null;
   });
 
   /**
-   * Stratos deploy-source metadata extracted from VCAP_APPLICATION / env vars.
-   * Null if the app was not deployed via Stratos or env vars are not loaded yet.
+   * Stratos deploy-source metadata extracted from VCAP env vars.
+   * Null if the app was not deployed via Stratos or env vars are not loaded.
+   * V3 env vars come through with mixed-typed values; STRATOS_PROJECT is
+   * stored as a JSON-encoded string by the deploy step, so we parse on
+   * read. Tolerates the field already arriving as an object (e.g. if a
+   * future deploy step writes it pre-parsed).
    */
   readonly stratosProject = computed((): EnvVarStratosProject | null => {
     const env = this._envVars();
     if (!env) {
       return null;
     }
-    const stratosProjectString = env.environment_json?.STRATOS_PROJECT ?? null;
-    if (!stratosProjectString) {
+    const raw = env.Environment?.STRATOS_PROJECT ?? null;
+    if (!raw) {
       return null;
     }
+    if (typeof raw === 'object') {
+      return raw as EnvVarStratosProject;
+    }
     try {
-      return JSON.parse(stratosProjectString as string) as EnvVarStratosProject;
+      return JSON.parse(String(raw)) as EnvVarStratosProject;
     } catch {
       return null;
     }
@@ -114,12 +163,18 @@ export class AppDetailDataService {
 
   /**
    * Application state metadata derived from app entity + instance stats.
-   * Drives the status card indicator / label / action set.
+   * The legacy `ApplicationStateService.get()` is V2-shape native, so we
+   * convert via the adapter. When ApplicationStateService migrates to V3,
+   * this collapses into a direct read.
    */
   readonly state = computed((): ApplicationStateData => {
-    const app = this._app()?.entity ?? null;
+    const detail = this._appDetail();
+    const legacyApp = detail ? stToLegacy.appDetail(detail)?.entity ?? null : null;
     const stats = this._stats();
-    return this.appStateService.get(app ?? null, stats?.length ? stats : null);
+    const legacyStats = stats.length
+      ? stToLegacy.appStats(stats, this.cnsiGuid, this.appGuid)
+      : null;
+    return this.appStateService.get(legacyApp, legacyStats);
   });
 
   /** True when any entity fetch is in progress. */
@@ -129,7 +184,6 @@ export class AppDetailDataService {
   // Lifecycle
   // ---------------------------------------------------------------------------
 
-  /** Store guids and kick off the initial full fetch. */
   initialize(cnsi: string, appGuid: string): void {
     this.cnsiGuid = cnsi;
     this.appGuid = appGuid;
@@ -143,50 +197,34 @@ export class AppDetailDataService {
   /**
    * Fetch one or all entity kinds.
    *
-   * When scope === 'all', uses a three-phase refresh so that relations that
-   * depend on previously fetched entities are resolved in the correct order:
-   *
-   *   Phase 1 (parallel): app, summary, stats, envVars  — independent entities
-   *   Phase 2 (sequential): space  — needs app.entity.space_guid
-   *   Phase 3 (parallel): org, domains  — both need space.entity.organization_guid
-   *
-   * When scope is a single EntityKind, that entity is fetched in isolation.
-   * This keeps targeted refreshes (e.g. refresh('app')) fast and predictable.
+   * scope === 'all':
+   *   Phase 1a (parallel): app + envVars
+   *   Phase 1b (conditional): stats — only when state is STARTED to avoid
+   *     a noisy 400 from CF's CF-AppStoppedStatsError on stopped apps.
+   *   Phase 2 (sequential): space (needs app.spaceGuid), then org (needs
+   *     space.organization_guid), then domains (needs org.guid).
    */
   async refresh(scope: EntityKind | 'all' = 'all'): Promise<void> {
     if (scope === 'all') {
-      // Phase 1a: independent entities — no relation walks needed.
-      // Stats are deferred to phase 1b so we know the app state first;
-      // CF returns 400 CF-AppStoppedStatsError for /stats on STOPPED apps,
-      // and the network-level 400 surfaces in browser DevTools even though
-      // the JS catch silences it (isStoppedAppError). Sequencing app→stats
-      // costs one round-trip on initial load but keeps the console clean.
       await Promise.all([
-        this.fetchOne('app',     this.appUrl(),           this._app),
-        this.fetchOne('summary', this.appUrl('/summary'), this._summary),
-        this.fetchOne('envVars', this.appUrl('/env'),     this._envVars),
+        this.fetchAppDetail(),
+        this.fetchEnvVars(),
       ]);
 
-      // Phase 1b: conditional stats fetch based on app/summary state.
       if (this.shouldFetchStats()) {
         await this.fetchStats();
       } else {
         this._stats.set([]);
       }
 
-      // Phase 2: space — requires app.entity.space_guid to be populated
       await this.fetchSpace();
-
-      // Phase 3: org then domains — domains uses org.metadata.guid which is
-      // only available after fetchOrg() completes, so they are sequential.
       await this.fetchOrg();
       await this.fetchDomains();
     } else {
       const fetchers: Record<EntityKind, () => Promise<void>> = {
-        app:     () => this.fetchOne('app',     this.appUrl(),           this._app),
-        summary: () => this.fetchOne('summary', this.appUrl('/summary'), this._summary),
+        app:     () => this.fetchAppDetail(),
         stats:   () => this.shouldFetchStats() ? this.fetchStats() : (this._stats.set([]), Promise.resolve()),
-        envVars: () => this.fetchOne('envVars', this.appUrl('/env'),     this._envVars),
+        envVars: () => this.fetchEnvVars(),
         space:   () => this.fetchSpace(),
         org:     () => this.fetchOrg(),
         domains: () => this.fetchDomains(),
@@ -198,23 +236,23 @@ export class AppDetailDataService {
   }
 
   // ---------------------------------------------------------------------------
-  // URL + header helpers
+  // URL helpers
   //
-  // Single-resource reads go through the Jetstream CAPI v2 proxy
-  // (/pp/v1/proxy/v2/...) with the target endpoint identified via the
-  // x-cap-cnsi-list header. This matches the wire shape produced by the
-  // legacy ngrx actions (GetApplication: `apps/{guid}`, GetAppSummary, etc.)
-  // and avoids the gap that single-resource Jetstream native handlers
-  // (/pp/v1/cf/apps/{cnsi}/{appGuid}, etc.) don't exist for these reads.
-  //
-  // V3 native handlers exist only for sub-resources (/routes, /service_bindings,
-  // /revisions) and the apps LIST endpoint; single-app, summary, env, stats,
-  // space, org, and domains are still v2-proxied. The v3 migration of these
-  // is a separate workstream.
+  // App detail / env / stats now hit Jetstream native handlers — the cnsi
+  // is in the path, no x-cap-passthrough header needed. Space / org /
+  // domains still hit the V2 proxy until those pages migrate (slice 2+).
   // ---------------------------------------------------------------------------
 
-  private appUrl(suffix = ''): string {
-    return `/pp/v1/proxy/v2/apps/${this.appGuid}${suffix}`;
+  private nativeAppDetailUrl(): string {
+    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}?return=details`;
+  }
+
+  private nativeAppEnvUrl(): string {
+    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/env`;
+  }
+
+  private nativeAppStatsUrl(): string {
+    return `/pp/v1/cf/app-stats/${this.cnsiGuid}/${this.appGuid}`;
   }
 
   private spaceUrl(spaceGuid: string): string {
@@ -230,13 +268,11 @@ export class AppDetailDataService {
   }
 
   /**
-   * CNSI selector + passthrough headers expected by the Jetstream proxy.
-   * Without x-cap-passthrough:true the backend wraps the response as
-   * { "<cnsiGuid>": <body> } (multi-endpoint shape); with it we get the
-   * raw body, which is what the data service expects to assign directly
-   * into the typed signals.
+   * Headers required by the V2 proxy paths (space / org / domains). Native
+   * handlers don't need these — cnsi is in the path and the response is
+   * the raw shape, no envelope.
    */
-  private cnsiHeaders(): { headers: HttpHeaders } {
+  private v2ProxyHeaders(): { headers: HttpHeaders } {
     return {
       headers: new HttpHeaders({
         'x-cap-cnsi-list': this.cnsiGuid,
@@ -249,29 +285,71 @@ export class AppDetailDataService {
   // Fetch helpers
   // ---------------------------------------------------------------------------
 
-  private async fetchOne<T>(
-    kind: EntityKind,
-    url: string,
-    target: WritableSignal<T | undefined>,
-  ): Promise<void> {
-    this._loading.update(m => ({ ...m, [kind]: true }));
-    this._errors.update(m => ({ ...m, [kind]: null }));
+  private async fetchAppDetail(): Promise<void> {
+    this._loading.update(m => ({ ...m, app: true }));
+    this._errors.update(m => ({ ...m, app: null }));
     const t0 = performance.now();
+    const url = this.nativeAppDetailUrl();
     try {
-      const value = await firstValueFrom(this.http.get<T>(url, this.cnsiHeaders()));
-      target.set(value);
-      this.debugTrace(kind, url, 'ok', performance.now() - t0);
+      const value = await firstValueFrom(this.http.get<StAppDetail>(url));
+      this._appDetail.set(value);
+      this.debugTrace('app', url, 'ok', performance.now() - t0);
     } catch (err: unknown) {
-      this._errors.update(m => ({ ...m, [kind]: this.toStratosError(kind, err) }));
-      this.debugTrace(kind, url, 'err', performance.now() - t0, err);
+      this._errors.update(m => ({ ...m, app: this.toStratosError('app', err) }));
+      this.debugTrace('app', url, 'err', performance.now() - t0, err);
     } finally {
-      this._loading.update(m => ({ ...m, [kind]: false }));
+      this._loading.update(m => ({ ...m, app: false }));
+    }
+  }
+
+  private async fetchEnvVars(): Promise<void> {
+    this._loading.update(m => ({ ...m, envVars: true }));
+    this._errors.update(m => ({ ...m, envVars: null }));
+    const t0 = performance.now();
+    const url = this.nativeAppEnvUrl();
+    try {
+      const value = await firstValueFrom(this.http.get<StEnvVars>(url));
+      this._envVars.set(value);
+      this.debugTrace('envVars', url, 'ok', performance.now() - t0);
+    } catch (err: unknown) {
+      this._errors.update(m => ({ ...m, envVars: this.toStratosError('envVars', err) }));
+      this.debugTrace('envVars', url, 'err', performance.now() - t0, err);
+    } finally {
+      this._loading.update(m => ({ ...m, envVars: false }));
     }
   }
 
   /**
-   * Diagnostic trace for slice 1 verification. Gated on
-   * localStorage.stratosDebug to keep production console clean.
+   * Fetch /cf/app-stats/{cnsi}/{appGuid}. The native handler returns
+   * `{ instances: [{ index, state }] }` — extract the array. Apps in
+   * states that don't support stats (STOPPED, etc.) are filtered out
+   * before the request via shouldFetchStats(); a residual 4xx still
+   * lands here harmlessly because the handler swallows that case
+   * server-side.
+   */
+  private async fetchStats(): Promise<void> {
+    this._loading.update(m => ({ ...m, stats: true }));
+    this._errors.update(m => ({ ...m, stats: null }));
+    const t0 = performance.now();
+    const url = this.nativeAppStatsUrl();
+    try {
+      const raw = await firstValueFrom(this.http.get<StAppStatsResponse>(url));
+      this._stats.set(raw?.instances ?? []);
+      this.debugTrace('stats', url, 'ok', performance.now() - t0);
+    } catch (err: unknown) {
+      this._stats.set([]);
+      if (!this.isStoppedAppError(err)) {
+        this._errors.update(m => ({ ...m, stats: this.toStratosError('stats', err) }));
+      }
+      this.debugTrace('stats', url, 'err', performance.now() - t0, err);
+    } finally {
+      this._loading.update(m => ({ ...m, stats: false }));
+    }
+  }
+
+  /**
+   * Diagnostic trace. Gated on localStorage.stratosDebug to keep the
+   * production console clean.
    */
   private debugTrace(kind: EntityKind, url: string, outcome: 'ok' | 'err', ms: number, err?: unknown): void {
     try {
@@ -285,70 +363,54 @@ export class AppDetailDataService {
     }
   }
 
-  /**
-   * Stats come back as an object keyed by instance index, not an array.
-   * Normalise to an array so consumers can iterate uniformly.
-   */
-  private async fetchStats(): Promise<void> {
-    this._loading.update(m => ({ ...m, stats: true }));
-    this._errors.update(m => ({ ...m, stats: null }));
-    try {
-      const raw = await firstValueFrom(this.http.get<Record<string, AppStat>>(this.appUrl('/stats'), this.cnsiHeaders()));
-      this._stats.set(Object.values(raw ?? {}));
-    } catch (err: unknown) {
-      // Apps that are STOPPED have no stats; treat as empty rather than error.
-      this._stats.set([]);
-      if (!this.isStoppedAppError(err)) {
-        this._errors.update(m => ({ ...m, stats: this.toStratosError('stats', err) }));
-      }
-    } finally {
-      this._loading.update(m => ({ ...m, stats: false }));
-    }
-  }
-
-  /**
-   * Walk app → space. The app entity must already be populated; if not, skip.
-   * This mirrors the relation-walk from application.service.ts but uses HTTP
-   * directly instead of the ngrx entity store.
-   */
   private async fetchSpace(): Promise<void> {
-    const app = this._app()?.entity;
-    const spaceGuid = app?.space_guid;
+    const spaceGuid = this._appDetail()?.app.spaceGuid;
     if (!spaceGuid) {
-      // App not loaded yet — nothing to do; refresh('all') will run space
-      // after app anyway via Promise.all which fires them concurrently.
-      // On isolated refresh('space') calls, we skip silently.
       return;
     }
-    await this.fetchOne('space', this.spaceUrl(spaceGuid), this._space);
+    this._loading.update(m => ({ ...m, space: true }));
+    this._errors.update(m => ({ ...m, space: null }));
+    try {
+      const value = await firstValueFrom(
+        this.http.get<APIResource<ISpace>>(this.spaceUrl(spaceGuid), this.v2ProxyHeaders())
+      );
+      this._space.set(value);
+    } catch (err: unknown) {
+      this._errors.update(m => ({ ...m, space: this.toStratosError('space', err) }));
+    } finally {
+      this._loading.update(m => ({ ...m, space: false }));
+    }
   }
 
-  /**
-   * Walk space → org. The space entity must already be populated; if not, skip.
-   */
   private async fetchOrg(): Promise<void> {
-    const space = this._space()?.entity;
-    const orgGuid = space?.organization_guid;
+    const orgGuid = this._space()?.entity?.organization_guid;
     if (!orgGuid) {
       return;
     }
-    await this.fetchOne('org', this.orgUrl(orgGuid), this._org);
+    this._loading.update(m => ({ ...m, org: true }));
+    this._errors.update(m => ({ ...m, org: null }));
+    try {
+      const value = await firstValueFrom(
+        this.http.get<APIResource<IOrganization>>(this.orgUrl(orgGuid), this.v2ProxyHeaders())
+      );
+      this._org.set(value);
+    } catch (err: unknown) {
+      this._errors.update(m => ({ ...m, org: this.toStratosError('org', err) }));
+    } finally {
+      this._loading.update(m => ({ ...m, org: false }));
+    }
   }
 
-  /**
-   * Fetch org domains. Org entity must be loaded; domains are an array
-   * returned directly (not APIResource-wrapped at this endpoint).
-   */
   private async fetchDomains(): Promise<void> {
-    const org = this._org()?.metadata?.guid;
-    if (!org) {
+    const orgGuid = this._org()?.metadata?.guid;
+    if (!orgGuid) {
       return;
     }
     this._loading.update(m => ({ ...m, domains: true }));
     this._errors.update(m => ({ ...m, domains: null }));
     try {
       const result = await firstValueFrom(
-        this.http.get<{ resources: IDomain[] }>(this.orgDomainsUrl(org), this.cnsiHeaders())
+        this.http.get<{ resources: IDomain[] }>(this.orgDomainsUrl(orgGuid), this.v2ProxyHeaders())
       );
       this._domains.set(result?.resources ?? []);
     } catch (err: unknown) {
@@ -397,22 +459,12 @@ export class AppDetailDataService {
     };
   }
 
-  /**
-   * True when the app is in a state that supports /stats. Reads state from
-   * the app entity first, then falls back to summary. Returns true when
-   * state is unknown so the first-ever load (no cache) still fetches —
-   * the catch in fetchStats handles the 400 silently if we got it wrong.
-   */
   private shouldFetchStats(): boolean {
-    const state = this._app()?.entity?.state ?? (this._summary() as any)?.state;
+    const state = this._appDetail()?.app.state;
     if (!state) return true;
     return state === 'STARTED';
   }
 
-  /**
-   * CF returns 400 "App must be in the STARTED state" for stats on a
-   * stopped app. Treat as benign — clear stats rather than show an error.
-   */
   private isStoppedAppError(err: unknown): boolean {
     if (err && typeof err === 'object') {
       const status = (err as any)?.status;

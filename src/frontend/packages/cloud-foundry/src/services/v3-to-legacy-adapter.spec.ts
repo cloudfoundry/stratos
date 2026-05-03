@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { stToLegacy } from './v3-to-legacy-adapter';
 import {
   StAppDetail,
-  StAppStatsInstance,
+  StAppStat,
   StEnvVars,
 } from './endpoint-data/stratos-types';
 
@@ -186,18 +186,43 @@ describe('stToLegacy.envVars', () => {
 });
 
 describe('stToLegacy.appStats', () => {
-  it('expands trimmed StAppStatsInstance into AppStat with zero-filled stats block', () => {
-    const trimmed: StAppStatsInstance[] = [
-      { index: 0, state: 'RUNNING' },
-      { index: 1, state: 'CRASHED' },
+  it('maps full StAppStat shape onto legacy AppStat (cpu/mem/disk/uptime preserved)', () => {
+    const stats: StAppStat[] = [
+      {
+        index: 0,
+        state: 'RUNNING',
+        uptime: 12345,
+        memQuota: 268435456,
+        diskQuota: 1073741824,
+        fdsQuota: 16384,
+        host: '10.0.0.1',
+        usage: { time: '2026-05-03T00:00:00Z', cpu: 0.42, mem: 134217728, disk: 536870912 },
+      },
     ];
-    const legacy = stToLegacy.appStats(trimmed, 'cnsi-1', 'app-1');
-    expect(legacy).toHaveLength(2);
+    const legacy = stToLegacy.appStats(stats, 'cnsi-1', 'app-1');
+    expect(legacy).toHaveLength(1);
     expect(legacy[0].cfGuid).toBe('cnsi-1');
     expect(legacy[0].guid).toBe('app-1');
     expect(legacy[0].state).toBe('RUNNING');
+    expect(legacy[0].stats.uptime).toBe(12345);
+    expect(legacy[0].stats.mem_quota).toBe(268435456);
+    expect(legacy[0].stats.disk_quota).toBe(1073741824);
+    expect(legacy[0].stats.fds_quota).toBe(16384);
+    expect(legacy[0].stats.host).toBe('10.0.0.1');
+    expect(legacy[0].stats.usage.cpu).toBe(0.42);
+    expect(legacy[0].stats.usage.mem).toBe(134217728);
+    expect(legacy[0].stats.usage.disk).toBe(536870912);
+    expect(legacy[0].stats.usage.time).toBe('2026-05-03T00:00:00Z');
+  });
+
+  it('zero-fills usage for non-RUNNING instances where CF emits no usage block', () => {
+    const stats: StAppStat[] = [
+      { index: 0, state: 'CRASHED', uptime: 0, memQuota: 0, diskQuota: 0, fdsQuota: 0 },
+    ];
+    const legacy = stToLegacy.appStats(stats, 'cnsi-1', 'app-1');
+    expect(legacy[0].state).toBe('CRASHED');
     expect(legacy[0].stats.usage.cpu).toBe(0);
-    expect(legacy[1].state).toBe('CRASHED');
+    expect(legacy[0].stats.usage.mem).toBe(0);
   });
 
   it('returns [] for empty input', () => {

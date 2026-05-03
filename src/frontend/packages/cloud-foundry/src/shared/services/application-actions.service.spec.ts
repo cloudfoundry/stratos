@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
 import { AppApplicationActionsService } from './application-actions.service';
+import { AppDetailDataService } from '../../features/applications/app-detail-data.service';
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
@@ -119,6 +120,7 @@ describe('AppApplicationActionsService', () => {
         { provide: CloudFoundryEndpointService, useValue: makeEndpointStub() },
         { provide: CfAppsSignalConfigService, useValue: appsStub },
         { provide: ConfirmationDialogService, useValue: confirmDialogStub },
+        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve() } },
       ],
     });
 

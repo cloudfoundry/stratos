@@ -16,6 +16,7 @@ import {
 import { GitSCMService } from '@stratosui/git';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
 import { AppLifecycleStateService } from '../../app-lifecycle-state.service';
+import { AppDetailDataService } from '../../app-detail-data.service';
 import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
 import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 
@@ -116,6 +117,10 @@ describe('ApplicationTabsBaseComponent', () => {
         AppLifecycleStateService,
         AppApplicationActionsService,
         AppLifecycleProgressService,
+        // AppApplicationActionsService injects AppDetailDataService for
+        // the post-op refresh fan-out. Provide a no-op stub so the test
+        // doesn't need to thread the full HTTP-backed service.
+        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve() } },
         provideRouter([]),
         provideZonelessChangeDetection(),
       ]
