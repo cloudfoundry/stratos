@@ -96,10 +96,10 @@ describe('CardAppStatusComponent', () => {
       expect(component.stateClasses()).toContain('text-success');
     });
 
-    it('applies text-content-secondary class for STOPPED state', () => {
+    it('applies text-warning class for STOPPED state', () => {
       const { fixture } = setup({ state: 'STOPPED' });
       const component = fixture.componentInstance;
-      expect(component.stateClasses()).toContain('text-content-secondary');
+      expect(component.stateClasses()).toContain('text-warning');
     });
 
     it('applies text-danger class for CRASHED state', () => {

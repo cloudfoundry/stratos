@@ -70,13 +70,13 @@ const MOCK_STATS_RESPONSE = {
 };
 
 const MOCK_ENV = {
-  Environment: {
+  environment: {
     STRATOS_PROJECT: JSON.stringify({
       deploySource: { type: 'github', timestamp: 0, endpointGuid: 'ep-1' },
       deployOverrides: {},
     }),
   },
-  SystemProvided: {},
+  systemProvided: {},
 };
 
 const MOCK_SPACE = {
@@ -201,14 +201,14 @@ describe('AppDetailDataService', () => {
 
   it('stratosProject() tolerates STRATOS_PROJECT already arriving as an object', () => {
     svc['_envVars'].set({
-      Environment: { STRATOS_PROJECT: { deploySource: { type: 'docker', timestamp: 0, endpointGuid: 'ep-1' } } },
-      SystemProvided: {},
+      environment: { STRATOS_PROJECT: { deploySource: { type: 'docker', timestamp: 0, endpointGuid: 'ep-1' } } },
+      systemProvided: {},
     } as any);
     expect(svc.stratosProject()?.deploySource?.type).toBe('docker');
   });
 
   it('stratosProject() returns null when STRATOS_PROJECT is absent', () => {
-    svc['_envVars'].set({ Environment: {}, SystemProvided: {} } as any);
+    svc['_envVars'].set({ environment: {}, systemProvided: {} } as any);
     expect(svc.stratosProject()).toBeNull();
   });
 

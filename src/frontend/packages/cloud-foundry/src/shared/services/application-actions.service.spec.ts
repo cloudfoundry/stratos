@@ -34,6 +34,28 @@ function makeAppServiceStub(cfGuid = 'cf-1', appGuid = 'app-1') {
 function makeEndpointStub(cfName = 'test-cf') {
   return {
     endpoint$: new BehaviorSubject({ entity: { name: cfName } }),
+    // Sync signal mirror — slice 1 added a sync read path on this service.
+    endpoint: signal({ entity: { name: cfName } }),
+  };
+}
+
+// AppDetailDataService stub: slice 1 made the actions service read app/org/
+// space/stats sync via signals on the data service. Refresh accepts a
+// 'kind' enum and returns a Promise.
+function makeDataServiceStub(opts: { instances?: number, runningStats?: number } = {}) {
+  const instances = opts.instances ?? 1;
+  const running = opts.runningStats ?? instances;
+  const stats = Array.from({ length: instances }, (_, i) => ({
+    state: i < running ? 'RUNNING' : 'STARTING',
+  }));
+  return {
+    app: signal({ entity: { name: 'test-app', instances } }),
+    org: signal({ entity: { name: 'test-org' } }),
+    space: signal({ entity: { name: 'test-space' } }),
+    stats: signal(stats),
+    summary: signal({ memory: 256, disk_quota: 512 }),
+    lastPolledAt: signal(new Date()),
+    refresh: vi.fn(async (_kind?: string) => undefined),
   };
 }
 
@@ -120,7 +142,7 @@ describe('AppApplicationActionsService', () => {
         { provide: CloudFoundryEndpointService, useValue: makeEndpointStub() },
         { provide: CfAppsSignalConfigService, useValue: appsStub },
         { provide: ConfirmationDialogService, useValue: confirmDialogStub },
-        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve() } },
+        { provide: AppDetailDataService, useValue: makeDataServiceStub() },
       ],
     });
 
