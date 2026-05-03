@@ -65,6 +65,142 @@ export interface StratosError {
   affectedGuids?: string[];
 }
 
+// V3 web-process shape. The web process owns the runtime config legacy v2
+// callers read off the app entity itself (memory, disk, instances, command,
+// health-check fields). Sourced from /v3/apps/:guid/processes/web.
+export interface StProcess {
+  guid: string;
+  type: string;
+  instances: number;
+  memoryMb: number;
+  diskMb: number;
+  logRateLimitInBytesPerSecond: number;
+  command: string;
+  healthCheckType: string;
+  healthCheckEndpoint?: string;
+  healthCheckInvocationTimeoutSeconds?: number;
+  healthCheckTimeoutSeconds?: number;
+  readinessHealthCheckType?: string;
+  ports: number[];
+}
+
+// V3 droplet shape. The droplet is the staged artifact CF runs — buildpack
+// outputs, stack image, optional docker image. Sourced from
+// /v3/apps/:guid/droplets/current. Null when the app has never been staged.
+export interface StDroplet {
+  guid: string;
+  state: string;
+  error?: string;
+  lifecycleType: string;
+  stack?: string;
+  buildpacks: StDropletBuildpack[];
+  image?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StDropletBuildpack {
+  name: string;
+  detectOutput?: string;
+  version?: string;
+  buildpackName?: string;
+}
+
+// V3 package shape — the uploaded source bits (or docker image reference)
+// that get staged into a droplet. `state` mirrors v2's package_state field
+// (PROCESSING_UPLOAD / READY / FAILED / AWAITING_UPLOAD). Sourced from
+// /v3/apps/:guid/packages with order_by=-created_at,limit=1.
+export interface StPackage {
+  guid: string;
+  state: string;
+  type: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// V3 build shape — the staging job that turns a package into a droplet.
+// `error` populates the legacy staging_failed_description field. Sourced
+// from /v3/apps/:guid/builds with order_by=-created_at,limit=1.
+export interface StBuild {
+  guid: string;
+  state: string;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Composed v3 app-detail envelope. The Jetstream native handler at
+// /pp/v1/cf/apps/{cnsi}/{appGuid} fans out to /v3/apps/:guid + /processes/web
+// + /droplets/current + /packages + /builds + /ssh_enabled and returns this
+// shape in one response. Missing sub-resources are listed in
+// _meta.unavailable per the V2/V3 tristate pattern; consumers render those
+// cells as "Not Available" rather than empty.
+export interface StAppDetail {
+  app: StApp;
+  process: StProcess;
+  droplet: StDroplet | null;
+  pkg: StPackage | null;
+  build: StBuild | null;
+  sshEnabled: boolean;
+  _meta?: StratosMeta;
+}
+
+// Composed v3 app-summary envelope. Sourced from
+// /pp/v1/cf/apps/{cnsi}/{appGuid}/summary — same fan-out as StAppDetail
+// plus /v3/apps/:guid/routes and /v3/apps/:guid/service_credential_bindings,
+// flattened into the field set the legacy Summary tab template reads.
+// Backend coerces missing v3 nullables (buildpack, stack, command,
+// health-check fields) to undefined so the UI can branch on presence.
+export interface StAppSummary {
+  guid: string;
+  name: string;
+  state: string;
+  memory: number;
+  diskQuota: number;
+  instances: number;
+  routes: StAppRoute[];
+  services: StServiceBinding[];
+  buildpack?: string;
+  detectedBuildpack?: string;
+  stackName?: string;
+  command?: string;
+  healthCheckType?: string;
+  healthCheckTimeout?: number;
+  packageState?: string;
+  packageUpdatedAt?: string;
+  stagingFailedDescription?: string;
+  _meta?: StratosMeta;
+}
+
+// V3 env-vars envelope. Sourced from /pp/v1/cf/apps/{cnsi}/{appGuid}/env,
+// composed from /v3/apps/:guid/env and /v3/apps/:guid/environment_variables.
+// `systemProvided` carries VCAP_SERVICES + VCAP_APPLICATION (typed as `any`
+// because their inner shape is broker-defined and varies wildly).
+export interface StEnvVars {
+  environment: Record<string, string>;
+  systemProvided: { VCAP_SERVICES?: any; VCAP_APPLICATION?: any };
+  applicationProvided?: Record<string, string>;
+  runningProvided?: Record<string, string>;
+  stagingProvided?: Record<string, string>;
+}
+
+// V3 process-stats row. Sourced from
+// /pp/v1/cf/apps/{cnsi}/{appGuid}/stats — composed from
+// /v3/apps/:guid/processes/web/stats. One row per running instance; empty
+// array for STOPPED apps (the backend swallows CF-AppStoppedStatsError 400
+// and returns []).
+export interface StAppStat {
+  index: number;
+  state: string;
+  uptime: number;
+  cpu: number;
+  memUsage: number;
+  diskUsage: number;
+  memQuota: number;
+  diskQuota: number;
+  details?: string;
+}
+
 export interface StSpace {
   guid: string;
   name: string;
