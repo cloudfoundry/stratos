@@ -51,16 +51,11 @@ import { AppLifecycleProgressService } from '../../../../shared/components/app-l
   selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
   styleUrls: ['./application-tabs-base.component.scss'],
-  // AppApplicationActionsService is provided here (rather than on the action
-  // bar component) so the BuildTab status card can read its inFlight signal
-  // for the in-flight pulse animation. The action bar consumes the same
-  // instance as a sibling consumer.
-  //
-  // AppLifecycleProgressService must be co-provided here because it injects
-  // AppApplicationActionsService — a component-scoped service whose tokens
-  // (CF_GUID / APP_GUID) only exist in this injector subtree. A root-scoped
-  // service cannot inject it.
-  providers: [AppApplicationActionsService, AppLifecycleProgressService],
+  // AppApplicationActionsService and AppLifecycleProgressService are
+  // provided at application-base.component (the parent) — see comments
+  // there. They must live above AppDetailDataService in the injector tree
+  // because the data service injects the action service for poll-cadence
+  // gating; a child-scoped provider would be invisible to it (NG0201).
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

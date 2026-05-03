@@ -10,6 +10,7 @@ import { ResetPagination } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
+import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
@@ -50,6 +51,7 @@ interface OperationLogEntry {
 @Injectable()
 export class AppApplicationActionsService {
   private applicationService = inject(ApplicationService);
+  private lifecycle = inject(AppLifecycleStateService);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -57,15 +59,11 @@ export class AppApplicationActionsService {
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
 
-  // Local in-flight signal — owned by this service, decoupled from ngrx
-  // updatingSection$.restaging. The legacy ngrx busy flag was driven by
-  // pre-writeWithJob dispatch paths that no longer fire, and persisted
-  // localStorage state from earlier hung attempts could survive a
-  // reload and keep the action bar permanently disabled. This signal
-  // is set true only while a writeWithJob promise is in flight, and
-  // false otherwise — no external state can strand it.
-  private readonly _inFlight: WritableSignal<boolean> = signal(false);
-  readonly inFlight: Signal<boolean> = this._inFlight.asReadonly();
+  // In-flight flag delegates to AppLifecycleStateService — the leaf
+  // shared-state service used to break the construction cycle with
+  // AppDetailDataService (which polls faster while writes are in flight).
+  // Both services depend on AppLifecycleStateService rather than each other.
+  readonly inFlight: Signal<boolean> = this.lifecycle.inFlight;
 
   // Live progress signals — null when idle, populated during in-flight ops.
   // currentStage() reflects the latest stage received from the backend; Tasks
@@ -132,7 +130,7 @@ export class AppApplicationActionsService {
     // Fall back to the raw target string if parsing fails.
     const parsedTarget = this.parseTarget(target);
 
-    this._inFlight.set(true);
+    this.lifecycle.setInFlight(true);
     this._verb.set(lifecycleVerb);
     this._progress.set([]);
     this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'begin' });
@@ -169,7 +167,7 @@ export class AppApplicationActionsService {
         this.dispatchAppStats();
       })
       .finally(() => {
-        this._inFlight.set(false);
+        this.lifecycle.setInFlight(false);
         this._verb.set(null);
         // Settle delay: keep progress visible briefly after terminal state so
         // Tasks 9/10 can display "complete" before clearing the ticker.

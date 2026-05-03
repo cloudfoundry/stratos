@@ -7,6 +7,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppDetailPrefs } from './app-detail-prefs.service';
 import { AppApplicationActionsService } from '../../shared/services/application-actions.service';
+import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService } from '../../shared/services/application-state.service';
 
 // ---------------------------------------------------------------------------
@@ -95,6 +96,7 @@ describe('AppDetailDataService', () => {
     enabled: signal(false),
   };
   const actionsStub = { inFlight: signal(false) };
+  const lifecycleStub = { inFlight: signal(false), setInFlight: () => {} };
 
   // Configure once per test file — the global afterEach in test-setup.ts
   // calls getTestBed().resetTestingModule() after each test so the next
@@ -109,6 +111,7 @@ describe('AppDetailDataService', () => {
         ApplicationStateService,
         { provide: AppDetailPrefs, useValue: prefsStub },
         { provide: AppApplicationActionsService, useValue: actionsStub },
+        { provide: AppLifecycleStateService, useValue: lifecycleStub },
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);

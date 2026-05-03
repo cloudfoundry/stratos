@@ -5,8 +5,11 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { ApplicationService } from '../application.service';
 import { AppDetailDataService } from '../app-detail-data.service';
+import { AppLifecycleStateService } from '../app-lifecycle-state.service';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
+import { AppApplicationActionsService } from '../../../shared/services/application-actions.service';
+import { AppLifecycleProgressService } from '../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 
 export function getGuids(type?: string) {
   return (activatedRoute: ActivatedRoute) => {
@@ -57,6 +60,17 @@ export function getGuids(type?: string) {
       deps: [CF_GUID]
     },
     CloudFoundryEndpointService,
+    // AppLifecycleStateService is the leaf shared-state holder for the
+    // "is a write in flight" flag. AppDetailDataService reads it for poll
+    // cadence; AppApplicationActionsService writes it. Provided here so
+    // both services see the same instance.
+    AppLifecycleStateService,
+    // AppApplicationActionsService and AppLifecycleProgressService must be
+    // provided at THIS level (not a deeper one like application-tabs-base)
+    // because AppDetailDataService — also provided here — needs the action
+    // service available in the same injector subtree.
+    AppApplicationActionsService,
+    AppLifecycleProgressService,
     // AppDetailDataService is component-scoped — its signals live for the
     // lifetime of the app-detail subtree only. Providing it here means each
     // navigation to a different app gets a fresh instance and signals from

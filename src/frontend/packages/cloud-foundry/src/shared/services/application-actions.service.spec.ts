@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
 import { AppApplicationActionsService } from './application-actions.service';
+import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
@@ -121,6 +122,7 @@ describe('AppApplicationActionsService', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         AppApplicationActionsService,
+        AppLifecycleStateService,
         { provide: ApplicationService, useValue: makeAppServiceStub() },
         { provide: CloudFoundryEndpointService, useValue: makeEndpointStub() },
         { provide: CfAppsSignalConfigService, useValue: appsStub },

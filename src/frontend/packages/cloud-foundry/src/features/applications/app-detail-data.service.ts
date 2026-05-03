@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { AppDetailPrefs } from './app-detail-prefs.service';
-import { AppApplicationActionsService } from '../../shared/services/application-actions.service';
+import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService, ApplicationStateData } from '../../shared/services/application-state.service';
 import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
 import { APIResource } from '@stratosui/store';
@@ -28,7 +28,7 @@ export type EntityKind = 'app' | 'summary' | 'stats' | 'envVars' | 'space' | 'or
 export class AppDetailDataService {
   private readonly http = inject(HttpClient);
   private readonly prefs = inject(AppDetailPrefs);
-  private readonly actions = inject(AppApplicationActionsService);
+  private readonly lifecycle = inject(AppLifecycleStateService);
   private readonly appStateService = inject(ApplicationStateService);
 
   cnsiGuid!: string;
@@ -344,7 +344,7 @@ export class AppDetailDataService {
     if (!this.prefs.enabled()) {
       return;
     }
-    const seconds = this.actions.inFlight()
+    const seconds = this.lifecycle.inFlight()
       ? this.prefs.activeSeconds()
       : this.prefs.idleSeconds();
     if (seconds <= 0) {
