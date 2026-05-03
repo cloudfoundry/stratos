@@ -5,9 +5,9 @@
     [class.opacity-0]="!copySuccessWait"
     class="transition-opacity duration-300">
     @if (showSuccessText) {
-      <span class="copy__copied-msg text-sm text-success-600">Copied to clipboard</span>
+      <span class="copy__copied-msg text-sm text-success-shade-600">Copied to clipboard</span>
     }
-    <span class="material-icons copy__copied-icon text-success-600"
+    <span class="material-icons copy__copied-icon text-success-shade-600"
       [ngClass]="{'text-sm': compact, 'text-base': !compact}">
       check_circle
     </span>

@@ -1,4 +1,38 @@
 /** @type {import('tailwindcss').Config} */
+
+// Shade scales — defined once, referenced from both the shade-named entries
+// (`brand`, `success-shade`, etc.) and merged into the semantic singletons
+// (`primary`, `success`, …) so utilities like `text-warning-600` resolve
+// against the same hex values as `text-warning-shade-600`. Defensive layer:
+// canonical templates use the `*-shade-{n}` form, but if anyone writes the
+// shaded singleton form by habit, Tailwind no longer silently drops it.
+const brandScale = {
+  50: '#e3f2fd', 100: '#bbdefb', 200: '#90caf9', 300: '#64b5f6', 400: '#42a5f5',
+  500: '#2196f3', 600: '#1e88e5', 700: '#1976d2', 800: '#1565c0', 900: '#0d47a1',
+};
+const accentShadeScale = {
+  50: '#e0f7fa', 100: '#b2ebf2', 200: '#80deea', 300: '#4dd0e1', 400: '#26c6da',
+  500: '#00bcd4', 600: '#00acc1', 700: '#0097a7', 800: '#00838f', 900: '#006064',
+};
+const successShadeScale = {
+  50: '#e8f5e9', 100: '#c8e6c9', 200: '#a5d6a7', 300: '#81c784', 400: '#66bb6a',
+  500: '#4caf50', 600: '#43a047', 700: '#388e3c', 800: '#2e7d32', 900: '#1b5e20',
+};
+const warningShadeScale = {
+  50: '#fff3e0', 100: '#ffe0b2', 200: '#ffcc80', 300: '#ffb74d', 400: '#ffa726',
+  500: '#ff9800', 600: '#fb8c00', 700: '#f57c00', 800: '#ef6c00', 900: '#e65100',
+};
+const dangerShadeScale = {
+  50: '#ffebee', 100: '#ffcdd2', 200: '#ef9a9a', 300: '#e57373', 400: '#ef5350',
+  500: '#f44336', 600: '#e53935', 700: '#d32f2f', 800: '#c62828', 900: '#b71c1c',
+};
+const infoShadeScale = {
+  // Same hex values as brandScale (Material Blue) — info and brand are the
+  // same color family in this design system.
+  50: '#e3f2fd', 100: '#bbdefb', 200: '#90caf9', 300: '#64b5f6', 400: '#42a5f5',
+  500: '#2196f3', 600: '#1e88e5', 700: '#1976d2', 800: '#1565c0', 900: '#0d47a1',
+};
+
 module.exports = {
   darkMode: 'class', // Enable class-based dark mode
   content: [
@@ -37,97 +71,51 @@ module.exports = {
       // ========================================
       colors: {
         // Primary brand colors (Material Blue)
-        'brand': {
-          50: '#e3f2fd',
-          100: '#bbdefb',
-          200: '#90caf9',
-          300: '#64b5f6',
-          400: '#42a5f5',
-          500: '#2196f3',
-          600: '#1e88e5',
-          700: '#1976d2',
-          800: '#1565c0',
-          900: '#0d47a1',
-        },
+        'brand': brandScale,
 
         // Secondary accent colors (Cyan)
-        'accent-shade': {
-          50: '#e0f7fa',
-          100: '#b2ebf2',
-          200: '#80deea',
-          300: '#4dd0e1',
-          400: '#26c6da',
-          500: '#00bcd4',
-          600: '#00acc1',
-          700: '#0097a7',
-          800: '#00838f',
-          900: '#006064',
-        },
+        'accent-shade': accentShadeScale,
 
         // Status colors - Success (Green)
-        'success-shade': {
-          50: '#e8f5e9',
-          100: '#c8e6c9',
-          200: '#a5d6a7',
-          300: '#81c784',
-          400: '#66bb6a',
-          500: '#4caf50',
-          600: '#43a047',
-          700: '#388e3c',
-          800: '#2e7d32',
-          900: '#1b5e20',
-        },
+        'success-shade': successShadeScale,
 
         // Status colors - Warning (Orange)
-        'warning-shade': {
-          50: '#fff3e0',
-          100: '#ffe0b2',
-          200: '#ffcc80',
-          300: '#ffb74d',
-          400: '#ffa726',
-          500: '#ff9800',
-          600: '#fb8c00',
-          700: '#f57c00',
-          800: '#ef6c00',
-          900: '#e65100',
-        },
+        'warning-shade': warningShadeScale,
 
         // Status colors - Danger (Red)
-        'danger-shade': {
-          50: '#ffebee',
-          100: '#ffcdd2',
-          200: '#ef9a9a',
-          300: '#e57373',
-          400: '#ef5350',
-          500: '#f44336',
-          600: '#e53935',
-          700: '#d32f2f',
-          800: '#c62828',
-          900: '#b71c1c',
-        },
+        'danger-shade': dangerShadeScale,
 
         // Status colors - Info (Blue)
-        'info-shade': {
-          50: '#e3f2fd',
-          100: '#bbdefb',
-          200: '#90caf9',
-          300: '#64b5f6',
-          400: '#42a5f5',
-          500: '#2196f3',
-          600: '#1e88e5',
-          700: '#1976d2',
-          800: '#1565c0',
-          900: '#0d47a1',
-        },
+        'info-shade': infoShadeScale,
 
-        // Semantic colors (CSS variable-based for theme support)
-        'primary': 'var(--color-primary)',
+        // Semantic colors (CSS variable-based for theme support).
+        // Each singleton also carries the matching shade scale — see the
+        // shade-scale const block at the top of this file. The singleton
+        // (`text-warning`) returns the themed CSS variable; the shaded
+        // form (`text-warning-600`) returns a fixed hex matching the
+        // `warning-shade-600` token. This is a defensive layer so the
+        // shaded-singleton form (a habit-shape from Tailwind defaults)
+        // doesn't silently drop. Canonical templates use the explicit
+        // `*-shade-{n}` form.
+        'primary':   { DEFAULT: 'var(--color-primary)',   ...brandScale },
         'secondary': 'var(--color-secondary)',
-        'accent': 'var(--color-accent)',
-        'success': 'var(--color-success)',
-        'warning': 'var(--color-warning)',
-        'danger': 'var(--color-danger)',
-        'info': 'var(--color-info)',
+        'accent':    { DEFAULT: 'var(--color-accent)',    ...accentShadeScale },
+        'success':   { DEFAULT: 'var(--color-success)',   ...successShadeScale },
+        'warning':   { DEFAULT: 'var(--color-warning)',   ...warningShadeScale },
+        'danger':    { DEFAULT: 'var(--color-danger)',    ...dangerShadeScale },
+        'info':      { DEFAULT: 'var(--color-info)',      ...infoShadeScale },
+
+        // `error` is an alias of `danger` — same defensive idea. The project
+        // uses `danger` canonically; some templates wrote `error-*` from
+        // muscle memory.
+        'error':     { DEFAULT: 'var(--color-danger)',    ...dangerShadeScale },
+
+        // `tentative` — neutral gray for "uncertain / initialising" status
+        // icons (autoscaler events, kube analysis report severities,
+        // application state when the runtime hasn't reported yet). Direct
+        // hex (gray-400 equivalent) — not theme-shifted, intentionally
+        // legible against both light and dark surfaces.
+        'tentative': '#9ca3af',
 
         // Navigation semantic tokens
         'nav': {

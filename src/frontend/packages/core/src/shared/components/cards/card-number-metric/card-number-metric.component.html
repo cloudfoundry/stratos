@@ -18,8 +18,8 @@
                 <div class="flex items-baseline flex-wrap">
                   <span class="text-2xl font-bold"
                     [ngClass]="{
-                      'text-danger-500': status === 'error',
-                      'text-warning-500': status === 'warning',
+                      'text-danger-shade-500': status === 'error',
+                      'text-warning-shade-500': status === 'warning',
                       'text-content-text': status !== 'error' && status !== 'warning'
                     }">{{ formattedValue }}</span>
                   @if (limit) {
@@ -74,12 +74,12 @@
           @if ((status$ | async); as status) {
             <div class="number-metric-card__value text-content-text">
               <span class="number-metric-card__usage-count"
-              [ngClass]="{'text-danger-500': status === 'error', 'text-warning-500': status === 'warning', 'text-content-text': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
+              [ngClass]="{'text-danger-shade-500': status === 'error', 'text-warning-shade-500': status === 'warning', 'text-content-text': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
               @if (limit) {
                 <span class="number-metric-card__limit text-content-muted"> / {{ formattedLimit }}</span>
               }
               @if (usage) {
-                <div class="number-metric-card__usage text-primary-600 dark:text-primary-400">{{ usage }} %</div>
+                <div class="number-metric-card__usage text-brand-600 dark:text-brand-400">{{ usage }} %</div>
               }
             </div>
           }

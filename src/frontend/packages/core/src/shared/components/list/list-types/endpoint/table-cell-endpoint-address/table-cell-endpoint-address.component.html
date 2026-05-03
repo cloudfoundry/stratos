@@ -4,7 +4,7 @@
     <app-copy-to-clipboard class="endpoint-address-cell__copy" [compact]="true" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false">
     </app-copy-to-clipboard>
     @if (isDuplicate$ | async) {
-      <span class="material-icons text-warning-600 dark:text-warning-300 ml-1 text-[20px] leading-none"
+      <span class="material-icons text-warning-shade-600 dark:text-warning-shade-300 ml-1 text-[20px] leading-none"
         matTooltip="Another endpoint is registered at this URL">warning</span>
     }
   </div>

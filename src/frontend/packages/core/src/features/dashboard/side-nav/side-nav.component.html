@@ -36,7 +36,7 @@
 
     <!-- Show All Menu Items Toggle (only in expanded mode) -->
     <div class="nav-show-all-toggle border-b border-nav-border p-3" [class.hidden]="iconMode">
-      <label class="flex items-center space-x-2 text-nav-muted hover:text-nav-text cursor-pointer">
+      <label class="flex items-center space-x-2 text-nav-text-muted hover:text-nav-text cursor-pointer">
         <input
           type="checkbox"
           class="form-checkbox h-4 w-4 text-accent rounded border-nav-border focus:ring-accent focus:ring-2"
@@ -53,7 +53,7 @@
         <li class="nav-item-container">
           @if (showAllMenuItems || !tab.hidden || (tab.hidden && (tab.hidden | async) === false)) {
             <a
-              class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 text-nav-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
+              class="nav-item nav-item-link flex items-center pl-0 pr-3 py-3 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover transition-all duration-200 relative group"
               [class.nav-item--active]="isActiveRoute(tab.link)"
               [class.bg-nav-active]="isActiveRoute(tab.link)"
               [class.text-nav-text]="isActiveRoute(tab.link)"
@@ -88,7 +88,7 @@
     <!-- Logout Button -->
     <div class="nav-logout border-t border-nav-border p-3">
       <button
-        class="logout-button w-full flex items-center p-2 text-nav-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
+        class="logout-button w-full flex items-center p-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
         [class.justify-center]="iconMode"
         (click)="signOut()"
         [title]="iconMode ? 'Sign Out' : ''"
@@ -105,7 +105,7 @@
     <!-- Navigation Footer -->
     @if (copyright()) {
       <div class="nav-bottom p-4 border-t border-nav-border">
-        <div class="nav-copyright text-nav-muted text-xs text-center" [class.hidden]="iconMode">
+        <div class="nav-copyright text-nav-text-muted text-xs text-center" [class.hidden]="iconMode">
           <div class="nav-copyright-icon inline">&copy;</div>
           <div class="nav-copyright-text inline ml-1" [innerHTML]="copyright()"></div>
         </div>

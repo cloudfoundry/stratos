@@ -2,7 +2,7 @@
   <div class="flex items-center space-x-2">
     @if (commit.author.html_url) {
       <a href="{{commit.author.html_url}}" target="_blank"
-      class="text-primary-600 hover:text-primary-800 font-medium">{{commit.commit.author.name}}</a>
+      class="text-brand-600 hover:text-brand-800 font-medium">{{commit.commit.author.name}}</a>
     }
     @if (!commit.author.html_url) {
       <span class="text-content-text font-medium">{{commit.commit.author.name}}</span>

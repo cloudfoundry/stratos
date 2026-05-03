@@ -53,7 +53,7 @@
            routerLinkActive="signal-detail-tab--active text-accent border-accent"
            [routerLinkActiveOptions]="{ exact: false }"
            data-test="signal-detail-tab"
-           class="signal-detail-tab flex items-center gap-1.5 px-4 py-2.5 text-sm border-b-2 border-transparent text-content-muted hover:text-content-text hover:border-content-border-strong transition-colors whitespace-nowrap">
+           class="signal-detail-tab flex items-center gap-1.5 px-4 py-2.5 text-sm border-b-2 border-transparent text-content-muted hover:text-content-text hover:border-content-border transition-colors whitespace-nowrap">
           @if (tab.icon) {
             <span class="material-icons text-base leading-none">{{ tab.icon }}</span>
           }
@@ -72,7 +72,7 @@
       </div>
     } @else if (hasError()) {
       <div data-test="signal-detail-error"
-           class="m-4 p-3 rounded border border-danger-300 bg-danger-50 dark:bg-danger-900/20 dark:border-danger-700 text-danger-700 dark:text-danger-200 text-sm">
+           class="m-4 p-3 rounded border border-danger-shade-300 bg-danger-shade-50 dark:bg-danger-shade-900/20 dark:border-danger-shade-700 text-danger-shade-700 dark:text-danger-shade-200 text-sm">
         {{ errorMessage() }}
       </div>
     } @else {

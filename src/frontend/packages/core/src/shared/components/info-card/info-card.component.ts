@@ -7,7 +7,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
   template: `
     <div class="border border-content-border rounded-lg overflow-hidden">
       @if (title) {
-        <div class="bg-card-header-bg px-4 py-2.5 border-b border-content-border">
+        <div class="bg-content-secondary px-4 py-2.5 border-b border-content-border">
           <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">{{ title }}</span>
         </div>
       }

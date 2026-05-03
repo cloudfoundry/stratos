@@ -16,7 +16,7 @@
                     <button (click)="onChangeLayout(layout); closeDropdown(dropdownButton)"
                       class="layout-dropdown__option">
                       <span>{{ layout.title }}</span>
-                      <span class="material-icons text-primary-600"
+                      <span class="material-icons text-brand-600"
                         [class.opacity-100]="layout.id === layoutID"
                       [class.opacity-0]="layout.id !== layoutID">done</span>
                     </button>
@@ -30,7 +30,7 @@
               <button (click)="toggleShowAllEndpoints(); closeDropdown(dropdownButton)"
                 class="layout-dropdown__option">
                 <span>Show connected endpoints</span>
-                <span class="material-icons text-primary-600"
+                <span class="material-icons text-brand-600"
                   [class.opacity-100]="showAllEndpoints"
                 [class.opacity-0]="!showAllEndpoints">done</span>
             </button>

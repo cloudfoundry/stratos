@@ -20,7 +20,7 @@
         <div class="text-xs fav-card__type mt-1 truncate">{{ favoriteType }}</div>
       </div>
       @if (!valid) {
-        <span class="material-icons text-warning-500 text-sm shrink-0" title="The entity for this favorite may have been deleted">warning</span>
+        <span class="material-icons text-warning-shade-500 text-sm shrink-0" title="The entity for this favorite may have been deleted">warning</span>
       }
       <app-entity-favorite-star class="shrink-0" [favorite]="favorite" [confirmRemoval]="true"></app-entity-favorite-star>
     </div>

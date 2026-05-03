@@ -17,7 +17,7 @@
                   [class.cursor-not-allowed]="gitTypeEntry.value.exists"
                   [class.pointer-events-none]="gitTypeEntry.value.exists">
                   <input type="radio" formControlName="selectedType" [value]="gitTypeEntry.key"
-                    class="mt-1 text-primary-600 focus:ring-primary-500 border-gray-300"
+                    class="mt-1 text-brand-600 focus:ring-brand-500 border-gray-300"
                     [attr.aria-disabled]="gitTypeEntry.value.exists ? 'true' : null">
                   <div class="flex-1">
                     <div class="font-medium text-content-text">{{ gitTypeEntry.value.label }}</div>

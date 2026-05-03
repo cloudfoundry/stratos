@@ -55,7 +55,7 @@ describe('SignalDetailComponent', () => {
     const pill = fixture.nativeElement.querySelector('[data-test="signal-detail-status"]');
     expect(pill).not.toBeNull();
     expect(pill.textContent).toContain('Running');
-    expect(pill.className).toContain('bg-success-100');
+    expect(pill.className).toContain('bg-success-shade-100');
   });
 
   it('renders default neutral pill when status color is omitted', () => {
