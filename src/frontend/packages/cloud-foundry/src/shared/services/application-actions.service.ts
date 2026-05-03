@@ -160,7 +160,7 @@ export class AppApplicationActionsService {
   // restage, where CF cycles through states the UI debounces) and the
   // user has no signal that the action was even acknowledged.
   private runLifecycleAction(
-    verb: 'start' | 'stop' | 'restart' | 'restage',
+    verb: 'start' | 'stop' | 'restart' | 'restage' | 'delete',
     target: string,
     action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void>,
     onAfter?: () => void,
@@ -169,7 +169,8 @@ export class AppApplicationActionsService {
     const lifecycleVerb: LifecycleVerb =
       verb === 'start' ? 'STARTING' :
       verb === 'stop' ? 'STOPPING' :
-      verb === 'restart' ? 'RESTARTING' : 'RESTAGING';
+      verb === 'restart' ? 'RESTARTING' :
+      verb === 'restage' ? 'RESTAGING' : 'DELETING';
 
     // Decompose the target string back into named parts for log entries.
     // Format from buildDialog: "<appName> on <cfName> / <orgName> / <spaceName>"
@@ -206,13 +207,18 @@ export class AppApplicationActionsService {
     void action({ onProgress })
       .then(() => {
         this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
-        // Refresh ngrx-backed entity store (legacy consumers still rely on it).
-        cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
-        this.dispatchAppStats();
-        // Refresh the signal-native data service so the Status card and any
-        // other AppDetailDataService consumers reflect the new state without
-        // waiting for the 45s idle-poll tick.
-        void this.dataService.refresh('all');
+        // Skip post-success refreshes for delete — the app is gone, so
+        // GET /apps/:guid 404s and stats fetches return empty. The
+        // onAfter callback handles navigation to /applications instead.
+        if (verb !== 'delete') {
+          // Refresh ngrx-backed entity store (legacy consumers still rely on it).
+          cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
+          this.dispatchAppStats();
+          // Refresh the signal-native data service so the Status card and any
+          // other AppDetailDataService consumers reflect the new state without
+          // waiting for the 45s idle-poll tick.
+          void this.dataService.refresh('all');
+        }
         onAfter?.();
       })
       .catch((err: any) => {
@@ -359,5 +365,58 @@ export class AppApplicationActionsService {
   redirectToDelete() {
     const { cfGuid, appGuid } = this.applicationService;
     this.router.navigate(['/applications', cfGuid, appGuid, 'delete']);
+  }
+
+  /**
+   * Orchestrated delete: walks routes → service bindings → app delete as
+   * a single DELETING lifecycle event so the progress overlay shows the
+   * whole sequence (one verb, three stages) instead of three independent
+   * actions. Caller passes the selections collected by the wizard;
+   * empty arrays skip the corresponding stage.
+   *
+   * Surfaces "Are you sure?" via ConfirmationDialogService — the wizard
+   * already collected selections so this is the user's last chance to
+   * abort. On confirm, the route + binding cleanup runs first so CF
+   * doesn't reject the app delete with attached dependencies. On
+   * success, navigates to the app wall.
+   */
+  async deleteWithCleanup(
+    routes: { guid: string }[],
+    bindings: { guid: string }[],
+  ): Promise<void> {
+    const { cfg, target } = await this.buildDialog('Delete', 'Are you sure you want to delete', 'Delete');
+    this.confirmDialog.open(cfg, () => {
+      this.runLifecycleAction(
+        'delete',
+        target,
+        async ({ onProgress }) => {
+          const { cfGuid, appGuid } = this.applicationService;
+          const stages: StratosJob['stages'] = [];
+          // Compute total stage count up front so the progress strip
+          // shows "1/N" / "2/N" with the right denominator from frame 1.
+          const ofN = (routes.length ? 1 : 0) + (bindings.length ? 1 : 0) + 1;
+          const emit = (code: string, label: string) => {
+            stages.push({ code, label, index: stages.length + 1, of: ofN, enteredAt: new Date().toISOString() });
+            onProgress({ guid: '', operation: 'app.delete', state: 'PROCESSING', stages: [...stages] } as StratosJob);
+          };
+
+          if (routes.length) {
+            emit('CLEANUP_ROUTES', `Removing ${routes.length} route${routes.length === 1 ? '' : 's'}`);
+            await Promise.all(routes.map(r => this.apps.deleteRoute(cfGuid, r.guid)));
+          }
+          if (bindings.length) {
+            emit('CLEANUP_BINDINGS', `Unbinding ${bindings.length} service${bindings.length === 1 ? '' : 's'}`);
+            await Promise.all(bindings.map(b => this.apps.deleteServiceBinding(cfGuid, b.guid)));
+          }
+          emit('DELETE_APP', 'Deleting application');
+          await this.apps.deleteApp(cfGuid, appGuid);
+        },
+        () => {
+          // App is gone — navigate to the app wall instead of staying on
+          // the now-orphaned detail page.
+          this.router.navigate(['/applications']);
+        },
+      );
+    });
   }
 }

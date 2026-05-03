@@ -1,8 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { defer, from, Observable, of } from 'rxjs';
-import { catchError, filter, map, pairwise, shareReplay, startWith, take, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { filter, map, pairwise, shareReplay, startWith, take, tap } from 'rxjs/operators';
 
 import {
   LoadingPageComponent,
@@ -11,8 +11,6 @@ import {
   StepComponent,
   SteppersComponent } from '@stratosui/core';
 import {
-  RouterNav,
-  GeneralEntityAppState,
   EntityMonitor,
   APIResource } from '@stratosui/store';
 import {
@@ -22,6 +20,7 @@ import {
 
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import type { StRoute, StServiceBinding } from '../../../services/endpoint-data/stratos-types';
+import { AppDeleteSelectionService } from '../app-delete-selection.service';
 import { AppRoutesPickerComponent } from './app-routes-picker.component';
 import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker.component';
 
@@ -43,9 +42,10 @@ import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker
   ],
 })
 export class ApplicationDeleteComponent {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
   private applicationService = inject(ApplicationService);
   private apps = inject(CfAppsSignalConfigService);
+  private selection = inject(AppDeleteSelectionService);
+  private router = inject(Router);
 
   // Signal-native route + service binding state. Populated by direct HTTP
   // fetches to the native /pp/v1/cf/apps/{cnsi}/{app}/{routes|service_bindings}
@@ -54,7 +54,6 @@ export class ApplicationDeleteComponent {
   public routesLoaded = signal<boolean>(false);
   public appBindings = signal<StServiceBinding[]>([]);
   public bindingsLoaded = signal<boolean>(false);
-  public deleteStarted = false;
 
   public selectedRoutes: StRoute[] = [];
   public selectedServiceBindings: StServiceBinding[] = [];
@@ -71,44 +70,22 @@ export class ApplicationDeleteComponent {
 
   public cancelUrl: string;
 
-  // FWT-957: signal-native step handles. Routes and Service Instances are
-  // confirmation-only sub-pickers (no submit; selection state is captured
-  // via setSelected* outputs). Confirm step's submit drives the same
-  // delete-app + cascading-delete flow as the legacy startDelete path,
-  // and on success the existing redirectToAppWall() handles navigation —
-  // submit just needs to mirror that behavior in Promise form so the
-  // stepper can await it.
+  // The wizard now collects selections only; it does not execute the
+  // delete itself. Confirm step's submit stashes selections in
+  // AppDeleteSelectionService and navigates back to the app detail page
+  // we came from. The detail page (ApplicationBaseComponent) detects the
+  // pending request, asks the user "Are you sure?", and runs the
+  // orchestrated cleanup + delete via AppApplicationActionsService so the
+  // whole sequence renders as one DELETING lifecycle event.
   routesStepHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
   bindingsStepHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
   confirmStepHandle: SignalStepHandle = {
     valid: signal(true).asReadonly(),
+    finishButtonText: signal('Confirm').asReadonly(),
     submit: async () => {
-      if (this.deleteStarted) {
-        this.redirectToAppWall();
-        return;
-      }
-      this.deleteStarted = true;
-      const { appGuid, cfGuid } = this.applicationService;
-      try {
-        await this.apps.deleteApp(cfGuid, appGuid);
-      } catch (err) {
-        throw err instanceof Error ? err : new Error(String(err));
-      }
-      // Route deletion + binding unbinding both go through the async-job
-      // contract. Fire-and-forget — the app is already deleted; related-
-      // entity failures don't block navigation.
-      if (this.selectedRoutes && this.selectedRoutes.length) {
-        this.selectedRoutes.forEach(route => {
-          void this.apps.deleteRoute(cfGuid, route.guid).catch((): void => undefined);
-        });
-      }
-      if (this.selectedServiceBindings && this.selectedServiceBindings.length) {
-        this.selectedServiceBindings.forEach(binding => {
-          void this.apps.deleteServiceBinding(cfGuid, binding.guid).catch((): void => undefined);
-        });
-      }
-      void this.apps.refresh().catch((): void => undefined);
-      this.redirectToAppWall();
+      this.selection.setPending(this.selectedRoutes ?? [], this.selectedServiceBindings ?? []);
+      const { cfGuid, appGuid } = this.applicationService;
+      this.router.navigate(['/applications', cfGuid, appGuid]);
     },
   };
 
@@ -161,7 +138,7 @@ export class ApplicationDeleteComponent {
   }
 
   public redirectToAppWall() {
-    this.store.dispatch(new RouterNav({ path: '/applications' }));
+    this.router.navigate(['/applications']);
   }
 
   public getApplicationMonitor() {
@@ -193,42 +170,4 @@ export class ApplicationDeleteComponent {
   public setSelectedRoutes(selected: StRoute[]) {
     this.selectedRoutes = selected;
   }
-
-  /**
-   * Starts the deletion or the application and related entities.
-   * It ensures that the application is deleted before attempting to delete the other entities.
-   */
-  public startDelete = () => {
-    if (this.deleteStarted) {
-      this.redirectToAppWall();
-      return of({ success: true });
-    }
-    this.deleteStarted = true;
-    const { appGuid, cfGuid } = this.applicationService;
-    return defer(() => from(this.apps.deleteApp(cfGuid, appGuid))).pipe(
-      tap(() => {
-        // Route deletion + binding unbinding both go through the async-job
-        // contract. Fire-and-forget — the app is already being deleted;
-        // related-entity failures (CF refusing the delete because
-        // destinations still reference the departing app) are surfaced via
-        // the returned promises but don't block navigation.
-        if (this.selectedRoutes && this.selectedRoutes.length) {
-          this.selectedRoutes.forEach(route => {
-            void this.apps.deleteRoute(cfGuid, route.guid).catch((): void => undefined);
-          });
-        }
-        if (this.selectedServiceBindings && this.selectedServiceBindings.length) {
-          this.selectedServiceBindings.forEach(binding => {
-            void this.apps.deleteServiceBinding(cfGuid, binding.guid).catch((): void => undefined);
-          });
-        }
-        // On successful delete: kick off a refresh so the app-wall lands on
-        // a fresh fetch (not a stale cache), then redirect.
-        void this.apps.refresh().catch((): void => undefined);
-        this.redirectToAppWall();
-      }),
-      map(() => ({ success: true })),
-      catchError(() => of({ success: false }))
-    );
-  };
 }

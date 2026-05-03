@@ -2,9 +2,8 @@ import { DatePipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { take } from 'rxjs/operators';
 
 import { TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -16,6 +15,7 @@ import {
 } from '@test-framework/cf';
 
 import { ApplicationDeleteComponent } from './application-delete.component';
+import { AppDeleteSelectionService } from '../app-delete-selection.service';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 
 function makeStubSignalConfigService() {
@@ -54,6 +54,7 @@ describe('ApplicationDeleteComponent', () => {
   let component: ApplicationDeleteComponent;
   let fixture: ComponentFixture<ApplicationDeleteComponent>;
   let stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
+  let selection: AppDeleteSelectionService;
   const appId = '1';
   const cfId = '2';
 
@@ -75,11 +76,18 @@ describe('ApplicationDeleteComponent', () => {
         TabNavService,
         DatePipe,
         { provide: CfAppsSignalConfigService, useValue: stubSignalConfig },
+        AppDeleteSelectionService,
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ApplicationDeleteComponent);
     component = fixture.componentInstance;
+    selection = TestBed.inject(AppDeleteSelectionService);
+    // Replace the real router's navigate with a stub so the confirm-step
+    // submit doesn't blow up on the empty router config we provided. The
+    // tests exercise the selection-stash side effect, not navigation.
+    const router = TestBed.inject(Router);
+    (router as any).navigate = vi.fn().mockResolvedValue(true);
     fixture.detectChanges();
   });
 
@@ -87,16 +95,30 @@ describe('ApplicationDeleteComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('invokes CfAppsSignalConfigService.deleteApp on startDelete', async () => {
-    const result$ = component.startDelete();
-    const result = await new Promise<{ success: boolean }>((resolve, reject) => {
-      (result$ as any).pipe(take(1)).subscribe({
-        next: (r: { success: boolean }) => resolve(r),
-        error: reject,
-      });
-    });
-    expect(stubSignalConfig.deleteApp).toHaveBeenCalledTimes(1);
-    expect(stubSignalConfig.deleteApp).toHaveBeenCalledWith(cfId, appId);
-    expect(result).toEqual({ success: true });
+  it('confirm step submit stashes selections in AppDeleteSelectionService', async () => {
+    component.selectedRoutes = [{ guid: 'r-1' } as any, { guid: 'r-2' } as any];
+    component.selectedServiceBindings = [{ guid: 'b-1' } as any];
+    await component.confirmStepHandle.submit?.();
+    expect(selection.requested()).toBe(true);
+    expect(selection.routes()).toEqual([{ guid: 'r-1' }, { guid: 'r-2' }]);
+    expect(selection.bindings()).toEqual([{ guid: 'b-1' }]);
+  });
+
+  it('confirm step submit stashes empty arrays when nothing was selected', async () => {
+    component.selectedRoutes = [];
+    component.selectedServiceBindings = [];
+    await component.confirmStepHandle.submit?.();
+    expect(selection.requested()).toBe(true);
+    expect(selection.routes()).toEqual([]);
+    expect(selection.bindings()).toEqual([]);
+  });
+
+  it('confirm step submit does NOT call deleteApp directly (the app page does)', async () => {
+    component.selectedRoutes = [];
+    component.selectedServiceBindings = [];
+    await component.confirmStepHandle.submit?.();
+    expect(stubSignalConfig.deleteApp).not.toHaveBeenCalled();
+    expect(stubSignalConfig.deleteRoute).not.toHaveBeenCalled();
+    expect(stubSignalConfig.deleteServiceBinding).not.toHaveBeenCalled();
   });
 });

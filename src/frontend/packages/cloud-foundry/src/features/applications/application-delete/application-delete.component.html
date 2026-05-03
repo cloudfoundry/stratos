@@ -36,9 +36,7 @@
         </div>
       </div>
     </app-step>
-    <app-step title="Confirm" class="app-delete__monitors" [canClose]="!deleteStarted"
-      [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [signalHandle]="confirmStepHandle"
-      [finishButtonText]="deleteStarted ? 'Close' : 'Delete'">
+    <app-step title="Confirm" class="app-delete__monitors" [signalHandle]="confirmStepHandle">
       <div class="app-delete__monitors">
         <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceBindings && selectedServiceBindings.length)) {
           <span

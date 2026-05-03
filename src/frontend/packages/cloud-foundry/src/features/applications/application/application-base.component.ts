@@ -1,10 +1,11 @@
 
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, effect, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { ApplicationService } from '../application.service';
 import { AppDetailDataService } from '../app-detail-data.service';
+import { AppDeleteSelectionService } from '../app-delete-selection.service';
 import { AppLifecycleStateService } from '../app-lifecycle-state.service';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
@@ -76,12 +77,36 @@ export function getGuids(type?: string) {
     // navigation to a different app gets a fresh instance and signals from
     // the previous app are torn down cleanly.
     AppDetailDataService,
+    // AppDeleteSelectionService holds the wizard's pending route + binding
+    // selections so the wizard (a child route /applications/{cf}/{app}/delete)
+    // and this app-detail page can communicate through one shared signal.
+    // Wizard sets pending; this component picks it up on navigation back
+    // and triggers the orchestrated delete.
+    AppDeleteSelectionService,
   ]
 })
 export class ApplicationBaseComponent implements OnInit {
   private readonly dataService = inject(AppDetailDataService);
   private readonly cfGuid = inject(CF_GUID);
   private readonly appGuid = inject(APP_GUID);
+  private readonly selection = inject(AppDeleteSelectionService);
+  private readonly actions = inject(AppApplicationActionsService);
+
+  // Watch for the wizard signaling that the user has confirmed selections
+  // and is ready to actually delete. The selection service's `requested`
+  // flag flips true when the wizard's Confirm submit fires; we consume it
+  // exactly once (clear it eagerly so a back-navigation refresh doesn't
+  // re-fire), prompt the user via deleteWithCleanup's Are-you-sure dialog,
+  // and let the action service orchestrate the staged cleanup + delete.
+  private readonly _deleteWatcher = effect(() => {
+    if (!this.selection.requested()) {
+      return;
+    }
+    const routes = this.selection.routes();
+    const bindings = this.selection.bindings();
+    this.selection.clear();
+    void this.actions.deleteWithCleanup(routes, bindings);
+  });
 
   ngOnInit(): void {
     this.dataService.initialize(this.cfGuid, this.appGuid);
