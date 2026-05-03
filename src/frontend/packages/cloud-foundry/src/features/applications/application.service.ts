@@ -167,11 +167,15 @@ export class ApplicationService {
    * appSummary$ — EntityInfo<IAppSummary>.
    * Consumers: build-tab uses entity?.services?.length and entity?.routes?.length.
    * Note: the legacy service wrapped IAppSummary directly in EntityInfo (not APIResource).
+   * The data service no longer fetches /summary as a separate kind — the
+   * StAppDetail envelope carries every Summary tab field, and the adapter
+   * derives IAppSummary from it. Tie loading/error to the `app` kind since
+   * that's the fetch the summary data piggybacks on.
    */
   appSummary$: Observable<EntityInfo<IAppSummary>> = toObservable(
     computed(() => ({
       entity: this.detail.summary() as IAppSummary,
-      entityRequestInfo: requestInfoOf(this.detail.loading().summary, this.detail.errors().summary),
+      entityRequestInfo: requestInfoOf(this.detail.loading().app, this.detail.errors().app),
     }))
   );
 

@@ -147,7 +147,7 @@ export class AppDetailDataService {
     if (!env) {
       return null;
     }
-    const raw = env.Environment?.STRATOS_PROJECT ?? null;
+    const raw = env.environment?.STRATOS_PROJECT ?? null;
     if (!raw) {
       return null;
     }

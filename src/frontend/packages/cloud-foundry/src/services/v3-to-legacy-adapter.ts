@@ -177,11 +177,11 @@ function envVarsToLegacy(env: StEnvVars | undefined): AppEnvVarsState | null {
     return null;
   }
   return {
-    environment_json: env.Environment as any,
-    application_env_json: env.ApplicationProvided,
-    running_env_json: env.RunningProvided,
-    staging_env_json: env.StagingProvided,
-    system_env_json: env.SystemProvided,
+    environment_json: env.environment as any,
+    application_env_json: env.applicationProvided,
+    running_env_json: env.runningProvided,
+    staging_env_json: env.stagingProvided,
+    system_env_json: env.systemProvided,
   };
 }
 
@@ -211,7 +211,7 @@ function appStatsToLegacy(
       name: '',
       port: 0,
       uptime: s.uptime ?? 0,
-      uris: [],
+      uris: [] as string[],
       usage: {
         cpu: s.usage?.cpu ?? 0,
         disk: s.usage?.disk ?? 0,

@@ -397,7 +397,15 @@ export class AppApplicationActionsService {
           const ofN = (routes.length ? 1 : 0) + (bindings.length ? 1 : 0) + 1;
           const emit = (code: string, label: string) => {
             stages.push({ code, label, index: stages.length + 1, of: ofN, enteredAt: new Date().toISOString() });
-            onProgress({ guid: '', operation: 'app.delete', state: 'PROCESSING', stages: [...stages] } as StratosJob);
+            const now = new Date().toISOString();
+            onProgress({
+              id: '',
+              kind: 'app.delete',
+              state: 'PROCESSING',
+              startedAt: now,
+              updatedAt: now,
+              stages: [...stages],
+            });
           };
 
           if (routes.length) {
