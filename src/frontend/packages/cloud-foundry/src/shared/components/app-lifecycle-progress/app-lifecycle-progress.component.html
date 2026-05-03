@@ -1,15 +1,24 @@
-@if (actions.inFlight()) {
+@if (actions.showProgress()) {
   <div class="bg-surface-elevated text-content shadow-lg rounded-lg p-3 max-w-md flex items-start gap-2"
        role="status"
        aria-live="polite">
-    <span class="text-lg leading-none animate-spin inline-block">&#8987;</span>
+    @if (actions.inFlight()) {
+      <span class="text-lg leading-none animate-spin inline-block" aria-hidden="true">&#8987;</span>
+    } @else if (actions.outcome() === 'success') {
+      <span class="text-lg leading-none inline-block text-emerald-500" aria-hidden="true">&#10003;</span>
+    } @else if (actions.outcome() === 'fail') {
+      <span class="text-lg leading-none inline-block text-rose-500" aria-hidden="true">&#10005;</span>
+    }
     <div class="flex-1 text-sm">
       <div class="font-semibold">
-        {{ actions.verb() }} {{ actions.log()[0]?.target?.app }}
+        {{ actions.displayLabel() }} {{ actions.currentTarget()?.app }}
       </div>
       <div class="text-content-secondary text-xs">
-        {{ actions.log()[0]?.target?.cf }} / {{ actions.log()[0]?.target?.org }} / {{ actions.log()[0]?.target?.space }}
+        {{ actions.currentTarget()?.cf }} / {{ actions.currentTarget()?.org }} / {{ actions.currentTarget()?.space }}
       </div>
+      @if (actions.outcomeError()) {
+        <div class="text-rose-500 text-xs mt-1">{{ actions.outcomeError() }}</div>
+      }
       @if (actions.progress()?.length) {
         <app-stage-row [stages]="actions.progress() ?? []" />
       }

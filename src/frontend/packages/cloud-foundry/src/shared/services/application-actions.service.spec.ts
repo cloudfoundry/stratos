@@ -9,7 +9,6 @@ import { AppLifecycleStateService } from '../../features/applications/app-lifecy
 import { ApplicationService } from '../../features/applications/application.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
-import { TailwindSnackBarService } from '@stratosui/core';
 import { ConfirmationDialogService } from '@stratosui/core';
 import type { StratosJob, JobStage } from '../../services/async-jobs/async-job.types';
 
@@ -57,11 +56,6 @@ function makeAppsStub() {
   };
 }
 
-const snackBarRef = { dismiss: vi.fn() };
-const snackBarStub = {
-  open: vi.fn().mockReturnValue(snackBarRef),
-};
-
 // Call the dialog callback immediately (simulate user confirming).
 const confirmDialogStub = {
   open: vi.fn((_cfg: unknown, cb: () => void) => cb()),
@@ -108,8 +102,6 @@ describe('AppApplicationActionsService', () => {
 
   beforeEach(() => {
     capturedOnProgress = undefined;
-    snackBarRef.dismiss.mockClear();
-    snackBarStub.open.mockClear();
     confirmDialogStub.open.mockClear();
 
     appsStub = makeAppsStub();
@@ -126,7 +118,6 @@ describe('AppApplicationActionsService', () => {
         { provide: ApplicationService, useValue: makeAppServiceStub() },
         { provide: CloudFoundryEndpointService, useValue: makeEndpointStub() },
         { provide: CfAppsSignalConfigService, useValue: appsStub },
-        { provide: TailwindSnackBarService, useValue: snackBarStub },
         { provide: ConfirmationDialogService, useValue: confirmDialogStub },
       ],
     });
@@ -150,18 +141,34 @@ describe('AppApplicationActionsService', () => {
   // verb() flips during in-flight, resets after
   // -------------------------------------------------------------------------
 
-  it('verb() flips to RESTAGING while in-flight then resets to null', async () => {
-    void svc.restage();
-    await tick();
+  it('verb() flips to RESTAGING while in-flight then resets to null after linger', async () => {
+    vi.useFakeTimers();
+    try {
+      void svc.restage();
+      await tick();
 
-    expect(svc.verb()).toBe('RESTAGING');
-    expect(svc.inFlight()).toBe(true);
+      expect(svc.verb()).toBe('RESTAGING');
+      expect(svc.inFlight()).toBe(true);
+      expect(svc.showProgress()).toBe(true);
 
-    appsStub._resolveAll();
-    await tick(8);
+      appsStub._resolveAll();
+      await tick(8);
 
-    expect(svc.inFlight()).toBe(false);
-    expect(svc.verb()).toBeNull();
+      // inFlight clears immediately at finally; verb stays set during the
+      // 10s linger so the snackbar can display the terminal state.
+      expect(svc.inFlight()).toBe(false);
+      expect(svc.verb()).toBe('RESTAGING');
+      expect(svc.showProgress()).toBe(true);
+
+      vi.advanceTimersByTime(10000);
+      await tick();
+
+      expect(svc.verb()).toBeNull();
+      expect(svc.showProgress()).toBe(false);
+      expect(svc.progress()).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('verb() reflects STARTING for start action', async () => {

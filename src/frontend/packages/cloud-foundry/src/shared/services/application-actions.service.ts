@@ -4,12 +4,13 @@ import { Store } from '@ngrx/store';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ConfirmationDialogConfig, ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
+import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { ResetPagination } from '@stratosui/store';
 
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
+import { AppDetailDataService } from '../../features/applications/app-detail-data.service';
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
@@ -51,10 +52,10 @@ interface OperationLogEntry {
 @Injectable()
 export class AppApplicationActionsService {
   private applicationService = inject(ApplicationService);
+  private dataService = inject(AppDetailDataService);
   private lifecycle = inject(AppLifecycleStateService);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private snackBar = inject(TailwindSnackBarService);
   private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
@@ -71,6 +72,13 @@ export class AppApplicationActionsService {
   private readonly _progress = signal<JobStage[] | null>(null);
   private readonly _verb = signal<LifecycleVerb | null>(null);
   private readonly _log = signal<OperationLogEntry[]>([]);
+  // showProgress drives the lifecycle snackbar's mount window. It goes true
+  // when an op begins and stays true through a 10s linger past terminal state
+  // so the operator has time to read the outcome (verb + final stage). The
+  // overlay's @if gate reads this signal; the in-flight spinner reads inFlight().
+  private readonly _showProgress = signal(false);
+  private readonly _currentTarget = signal<{ app: string; cf: string; org: string; space: string } | null>(null);
+  private hideTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly progress: Signal<JobStage[] | null> = this._progress.asReadonly();
   readonly currentStage = computed(() => {
@@ -79,6 +87,50 @@ export class AppApplicationActionsService {
   });
   readonly verb: Signal<LifecycleVerb | null> = this._verb.asReadonly();
   readonly log: Signal<OperationLogEntry[]> = this._log.asReadonly();
+  readonly showProgress: Signal<boolean> = this._showProgress.asReadonly();
+  readonly currentTarget = this._currentTarget.asReadonly();
+  // outcome() exposes the terminal event of the most recent op for the
+  // snackbar's linger-window display. Null while in flight.
+  readonly outcome = computed<'success' | 'fail' | null>(() => {
+    if (this.inFlight()) return null;
+    const log = this._log();
+    for (let i = log.length - 1; i >= 0; i--) {
+      if (log[i].event === 'success') return 'success';
+      if (log[i].event === 'fail') return 'fail';
+    }
+    return null;
+  });
+  readonly outcomeError = computed<string | null>(() => {
+    if (this.outcome() !== 'fail') return null;
+    const log = this._log();
+    for (let i = log.length - 1; i >= 0; i--) {
+      if (log[i].event === 'fail') return log[i].error?.message ?? 'Operation failed';
+    }
+    return null;
+  });
+  // Human-readable label for the snackbar title. Gerund while in flight
+  // ("Starting"); past-tense + outcome during linger ("Started", "Start failed").
+  readonly displayLabel = computed<string>(() => {
+    const v = this._verb();
+    if (!v) return '';
+    const inFlight = this.inFlight();
+    const gerund: Record<LifecycleVerb, string> = {
+      STARTING: 'Starting', STOPPING: 'Stopping', RESTARTING: 'Restarting',
+      RESTAGING: 'Restaging', DELETING: 'Deleting',
+    };
+    const past: Record<LifecycleVerb, string> = {
+      STARTING: 'Started', STOPPING: 'Stopped', RESTARTING: 'Restarted',
+      RESTAGING: 'Restaged', DELETING: 'Deleted',
+    };
+    const action: Record<LifecycleVerb, string> = {
+      STARTING: 'Start', STOPPING: 'Stop', RESTARTING: 'Restart',
+      RESTAGING: 'Restage', DELETING: 'Delete',
+    };
+    if (inFlight) return gerund[v];
+    if (this.outcome() === 'success') return past[v];
+    if (this.outcome() === 'fail') return `${action[v]} failed`;
+    return gerund[v];
+  });
 
   constructor() {
     // Diagnostic surface for Playwright + browser-console inspection.
@@ -114,12 +166,6 @@ export class AppApplicationActionsService {
     onAfter?: () => void,
   ): void {
     const { cfGuid, appGuid } = this.applicationService;
-    const gerund: Record<typeof verb, string> = {
-      start: 'Starting', stop: 'Stopping', restart: 'Restarting', restage: 'Restaging',
-    };
-    const past: Record<typeof verb, string> = {
-      start: 'Started', stop: 'Stopped', restart: 'Restarted', restage: 'Restaged',
-    };
     const lifecycleVerb: LifecycleVerb =
       verb === 'start' ? 'STARTING' :
       verb === 'stop' ? 'STOPPING' :
@@ -130,15 +176,24 @@ export class AppApplicationActionsService {
     // Fall back to the raw target string if parsing fails.
     const parsedTarget = this.parseTarget(target);
 
+    // If a previous linger window is still open from a prior op, cancel it
+    // so the new op's window starts clean. Without this, a fast follow-up
+    // would inherit the tail of the previous timer and clear too early.
+    if (this.hideTimer) {
+      clearTimeout(this.hideTimer);
+      this.hideTimer = null;
+    }
+
     this.lifecycle.setInFlight(true);
     this._verb.set(lifecycleVerb);
     this._progress.set([]);
+    this._currentTarget.set(parsedTarget);
+    this._showProgress.set(true);
     this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'begin' });
 
-    // The in-flight snackbar is no longer opened here — AppLifecycleProgressComponent
-    // mounts automatically via the CDK Overlay when inFlight() becomes true.
-    // Terminal success/failure announcements still use snackBar (different content,
-    // transient, appropriate for MatSnackBar semantics).
+    // Single feedback channel: AppLifecycleProgressComponent mounts via the
+    // CDK Overlay for the full op + 10s linger window. No MatSnackBar pops
+    // on completion — the overlay carries the terminal state itself.
 
     const onProgress = (job: StratosJob) => {
       if (job.stages?.length) {
@@ -151,9 +206,13 @@ export class AppApplicationActionsService {
     void action({ onProgress })
       .then(() => {
         this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
-        this.snackBar.open(`${past[verb]} ${target}`, 'Dismiss');
+        // Refresh ngrx-backed entity store (legacy consumers still rely on it).
         cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
         this.dispatchAppStats();
+        // Refresh the signal-native data service so the Status card and any
+        // other AppDetailDataService consumers reflect the new state without
+        // waiting for the 45s idle-poll tick.
+        void this.dataService.refresh('all');
         onAfter?.();
       })
       .catch((err: any) => {
@@ -162,16 +221,23 @@ export class AppApplicationActionsService {
           at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
           error: firstError ? { code: String(firstError.code), message: String(firstError.message) } : undefined,
         });
-        const msg = firstError?.message ?? err?.message ?? String(err);
-        this.snackBar.open(`Failed to ${verb} ${target}: ${msg}`, 'Dismiss');
         this.dispatchAppStats();
+        // Failure path may have left CF in a partial state — refresh to
+        // pick up whatever the actual current state is.
+        void this.dataService.refresh('all');
       })
       .finally(() => {
         this.lifecycle.setInFlight(false);
-        this._verb.set(null);
-        // Settle delay: keep progress visible briefly after terminal state so
-        // Tasks 9/10 can display "complete" before clearing the ticker.
-        setTimeout(() => this._progress.set(null), 800);
+        // Visibility window: keep the snackbar mounted for 10 seconds after
+        // terminal state so the operator has time to read the outcome.
+        // (Total visible duration = op_duration + 10s, with a 10s floor.)
+        this.hideTimer = setTimeout(() => {
+          this._verb.set(null);
+          this._progress.set(null);
+          this._currentTarget.set(null);
+          this._showProgress.set(false);
+          this.hideTimer = null;
+        }, 10000);
       });
   }
 

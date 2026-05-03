@@ -4,6 +4,7 @@ import {
   effect,
   ElementRef,
   EnvironmentInjector,
+  Injector,
   runInInjectionContext,
 } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
@@ -44,6 +45,11 @@ export class AppLifecycleProgressService {
   private router = inject(Router);
   private actions = inject(AppApplicationActionsService);
   private envInjector = inject(EnvironmentInjector);
+  // Component-scoped Injector chain. Captured here (not at mount) so the
+  // ComponentPortal sees the same providers AppApplicationActionsService
+  // is registered under — without it the portal resolves through the CDK
+  // overlay's environment injector and throws NG0201.
+  private parentInjector = inject(Injector);
 
   private overlayRef: OverlayRef | null = null;
   private anchor: ElementRef | null = null;
@@ -59,13 +65,14 @@ export class AppLifecycleProgressService {
     // so we can call this from ngOnInit (outside constructor).
     this.effectRef = runInInjectionContext(this.envInjector, () =>
       effect(() => {
-        const inFlight = this.actions.inFlight();
-        if (inFlight && !this.overlayRef) {
+        // showProgress spans the full op + 10s linger window managed by
+        // AppApplicationActionsService.runLifecycleAction. Mount/unmount
+        // tracks that signal directly — no settle delay here.
+        const show = this.actions.showProgress();
+        if (show && !this.overlayRef) {
           this.mount();
-        } else if (!inFlight && this.overlayRef) {
-          // Settle delay: let the terminal stage stay visible briefly so
-          // the operator can see "complete" before the overlay disappears.
-          setTimeout(() => this.unmount(), 1500);
+        } else if (!show && this.overlayRef) {
+          this.unmount();
         }
       })
     );
@@ -101,7 +108,7 @@ export class AppLifecycleProgressService {
 
   private mount(): void {
     this.overlayRef = this.overlay.create({ hasBackdrop: false });
-    const portal = new ComponentPortal(AppLifecycleProgressComponent);
+    const portal = new ComponentPortal(AppLifecycleProgressComponent, null, this.parentInjector);
     this.overlayRef.attach(portal);
     this.reposition();
   }
