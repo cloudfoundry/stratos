@@ -1,0 +1,213 @@
+import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+
+import { ListStateStore, SignalListColumn, SignalListRowAction, UtilsService } from '@stratosui/core';
+
+import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
+import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import type { StAppStat } from '../../../../../services/endpoint-data/stratos-types';
+import { AppInstanceActionsService } from '../../../../services/app-instance-actions.service';
+
+// CF App Instances signal-list config — single-app, per-instance rows of
+// the app-detail Instances tab. Replaces the legacy
+// CfAppInstancesConfigService (ngrx-coupled) with a signal-native
+// configuration that drives the signal-list framework.
+//
+// Source signal is `AppDetailDataService.stats()` — slice 1 already wires
+// the fetch + (slice-2) focus-driven 5s continuous poll. Per-row Kill
+// uses AppInstanceActionsService.killInstance(index); confirmation
+// dialog wiring stays in the consuming component to match peer
+// convention (see application-wall.component for the Delete pattern).
+//
+// Service is tab-scoped (provided in the Instances tab component
+// `providers` array, NOT providedIn:'root') so its filter/sort state
+// resets cleanly when the user navigates between apps. The tab also
+// provides AppInstanceActionsService at the same scope.
+@Injectable()
+export class CfAppInstancesSignalConfigService {
+  private readonly dataService = inject(AppDetailDataService);
+  private readonly actionsService = inject(AppInstanceActionsService);
+  private readonly utils = inject(UtilsService);
+  private readonly injector = inject(Injector);
+
+  private readonly state = inject(ListStateStore).bind('cf-app-instances', {
+    viewMode: 'table',
+    pageSize: [25, 25],
+    pageIndex: [0, 0],
+    sort: [
+      { field: 'index', direction: 'asc' },
+      { field: 'index', direction: 'asc' },
+    ],
+  });
+
+  readonly filter: WritableSignal<(s: StAppStat) => boolean> = signal(() => true);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StAppStat>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
+  readonly nameFilter: WritableSignal<string> = signal('');
+  readonly viewMode = this.state.viewMode;
+
+  // Source signal: per-instance rows surfaced by AppDetailDataService.
+  // Re-exposed here so consumers can read the same Signal<StAppStat[]>
+  // off the config service (mirrors the `routes` / `stacks` accessors
+  // on peer signal-config services).
+  readonly stats: Signal<StAppStat[]> = this.dataService.stats;
+
+  private readonly _sortExtractors: WritableSignal<Map<string, (row: StAppStat) => unknown>> = signal(new Map());
+
+  view!: ViewPipeline<StAppStat>;
+
+  constructor() {
+    this.view = new ViewPipeline<StAppStat>(
+      this.stats,
+      this.filter,
+      this.sort,
+      this.pageSize,
+      this.pageIndex,
+      this._sortExtractors.asReadonly(),
+    );
+
+    runInInjectionContext(this.injector, () => {
+      // Filter mirrors legacy `CfAppInstancesConfigService` text filter:
+      // matches against state (e.g. "running", "crashed"), so the user
+      // can find a misbehaving instance by typing its state.
+      effect(() => {
+        const q = this.nameFilter().trim().toLowerCase();
+        this.filter.set((s: StAppStat) => {
+          if (!q) return true;
+          return (s.state ?? '').toLowerCase().includes(q);
+        });
+      });
+    });
+  }
+
+  clearFilters(): void {
+    this.nameFilter.set('');
+    this.sort.set({ field: 'index', direction: 'asc' });
+    this.pageIndex.set(0);
+  }
+
+  // Re-fetches stats via the data service. Stats poll naturally on the
+  // slice-2 focus cadence; this exposes a manual refresh hook for the
+  // toolbar's refresh button.
+  async refresh(): Promise<void> {
+    await this.dataService.refresh('stats');
+  }
+
+  registerSortExtractor(fieldKey: string, extractor: (row: StAppStat) => unknown): void {
+    this._sortExtractors.update(curr => {
+      const next = new Map(curr);
+      next.set(fieldKey, extractor);
+      return next;
+    });
+  }
+
+  // Build the column set for the Instances tab. Mirrors legacy
+  // `CfAppInstancesConfigService.columns` 1:1 — same column ids, same
+  // labels, same sort axes (index, state, memory, disk, cpu, uptime).
+  // Cell rendering uses UtilsService.usageBytes / percent / formatUptime
+  // for visual parity with legacy. The CF Cell column from legacy is
+  // intentionally omitted here — it depends on cf-cell metrics that the
+  // signal-native data path doesn't surface yet; the consuming component
+  // can append it when metrics are available (mirrors legacy's
+  // conditional splice via CfCellHelper.hasCellMetrics).
+  buildColumns(): SignalListColumn<StAppStat>[] {
+    const columns: SignalListColumn<StAppStat>[] = [
+      {
+        header: 'Index', key: 'index',
+        render: (row) => `${row.index}`,
+        sortField: 'index',
+      },
+      {
+        header: 'State', key: 'state',
+        kind: 'pill',
+        render: (row) => row.state ?? '',
+        sortField: 'state',
+      },
+      {
+        header: 'Memory', key: 'memory',
+        render: (row) => this.utils.usageBytes([
+          row.usage?.mem ?? 0,
+          row.memQuota ?? 0,
+        ]),
+        sortField: (row) => row.usage?.mem ?? 0,
+      },
+      {
+        header: 'Disk', key: 'disk',
+        render: (row) => this.utils.usageBytes([
+          row.usage?.disk ?? 0,
+          row.diskQuota ?? 0,
+        ]),
+        sortField: (row) => row.usage?.disk ?? 0,
+      },
+      {
+        header: 'CPU', key: 'cpu',
+        render: (row) => this.utils.percent(row.usage?.cpu ?? 0),
+        sortField: (row) => row.usage?.cpu ?? 0,
+      },
+      {
+        header: 'Uptime', key: 'uptime',
+        render: (row) => row.uptime != null ? this.utils.formatUptime(row.uptime) : '-',
+        sortField: 'uptime',
+      },
+      {
+        header: 'Host', key: 'host',
+        render: (row) => row.host ?? '-',
+        sortField: 'host',
+      },
+      {
+        header: '', key: 'actions',
+        kind: 'actions',
+        actions: this.buildRowActions,
+        render: () => '',
+        widthHint: '3rem',
+      },
+    ];
+    return columns;
+  }
+
+  // Per-row action factory. Returns the kebab-menu entries for a row.
+  // Single entry today: Kill (terminate the instance; CF replaces it
+  // automatically). Disabled is bound to per-row precise state when
+  // possible (the same index is currently transitioning) and falls
+  // back to the global `inFlight` guard otherwise — overlapping
+  // per-instance verbs would scramble the action service's
+  // transitioningIndex signal anyway, so the framework's reentrancy
+  // guard rejects a second concurrent invoke.
+  //
+  // The actual confirmation dialog ("Terminate Instance ${n}?") is
+  // wired by the consuming component (matches peer convention — see
+  // application-wall.component's Delete row action). The component
+  // injects ConfirmationDialogService and replaces this.buildRowActions
+  // with its own factory if a confirm dialog is required at slice-2
+  // ship; the default factory here is the no-confirm path used by
+  // tests and any future surface that doesn't need confirmation.
+  readonly buildRowActions = (row: StAppStat): readonly SignalListRowAction<StAppStat>[] => {
+    const transitioning = this.actionsService.transitioningIndex();
+    const isThisRow = transitioning === row.index;
+    // Per-row precise: this row's button shows disabled while it's
+    // being killed. Other rows also disabled — the action service
+    // rejects concurrent invokes, so a UI that pretends otherwise
+    // would lead to a confusing "click did nothing" response.
+    const disabled = this.actionsService.inFlight();
+    return [
+      {
+        label: 'Kill', icon: 'cancel', danger: true,
+        disabled,
+        // The current-row variant is provided in case a future
+        // refinement wants distinct copy ("Killing…" vs "Kill")
+        // — see slice-2 followups.
+        invoke: () => this.killInstance(row.index, isThisRow),
+      },
+    ];
+  };
+
+  // Internal kill helper. Errors propagate as Promise rejections to the
+  // signal-list framework's invokeAction wrapper, which surfaces them
+  // via TailwindSnackBarService — no try/catch needed here.
+  // The `_` parameter is reserved for the per-row "is this row
+  // currently transitioning" hint described above; it's not used by the
+  // default no-confirm path.
+  private async killInstance(index: number, _isThisRow: boolean): Promise<void> {
+    await this.actionsService.killInstance(index);
+  }
+}

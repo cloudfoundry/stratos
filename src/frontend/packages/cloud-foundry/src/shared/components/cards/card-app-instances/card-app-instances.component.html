@@ -1,12 +1,12 @@
-<div class="card-app-instances block p-4 rounded bg-[var(--card-bg)] text-[color:var(--content-text)] border border-[color:var(--card-border)] shadow-none h-full">
+<div class="relative block p-4 rounded bg-[var(--card-bg)] text-[color:var(--content-text)] border border-[color:var(--card-border)] shadow-none h-full">
   <app-card-status [status$]="status$"></app-card-status>
   @if (!showActions) {
     <a class="block no-underline cursor-pointer" [routerLink]="['../instances']" title="Go to Instances tab">
       <div class="card-header">
         <h2 class="card-title">Instances</h2>
       </div>
-      <div class="card-content card-app-instances__compact">
-        <div class="card-app-instances__large">
+      <div class="card-content">
+        <div class="text-base">
           {{ runningCount() }} / {{ desiredCount() }}
         </div>
       </div>
@@ -15,44 +15,42 @@
     <div class="card-header">
       <h2 class="card-title">Instances</h2>
     </div>
-    <div class="card-content card-app-instances__compact">
+    <div class="card-content">
       @if (!isEditing) {
-        <div class="card-app-instances__large">
+        <div class="text-base">
           {{ runningCount() }} / {{ desiredCount() }}
         </div>
       }
-      <form [hidden]="!isEditing" class="card-app-instances__form">
+      <form [hidden]="!isEditing" class="mt-1">
         <app-form-field>
-          <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">
+          <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue">
         </app-form-field>
       </form>
     </div>
   }
-  @if (canEditApp$ | async) {
-    @if (showActions && (appService.applicationRunning$ | async) && !isEditing) {
-      <div
-        class="card-actions card-app-instances__actions">
-        <button (click)="edit()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+  @if (canEdit()) {
+    @if (showActions && isRunning() && !isEditing) {
+      <div class="absolute top-4 right-4 flex gap-1 text-right">
+        <button (click)="edit()" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">edit</span>
         </button>
-        <button (click)="scaleDown()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+        <button (click)="scaleDown()" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">remove_circle_outline</span>
         </button>
-        <button (click)="scaleUp()" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+        <button (click)="scaleUp()" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">add_circle_outline</span>
         </button>
       </div>
     }
     @if (showActions && isEditing) {
-      <div class="card-actions card-app-instances__actions">
-        <button (click)="finishEdit(false)" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+      <div class="absolute top-4 right-4 flex gap-1 text-right">
+        <button (click)="finishEdit(false)" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">clear</span>
         </button>
-        <button (click)="finishEdit(true)" class="btn btn-icon" [disabled]="appService.isUpdatingApp$ | async">
+        <button (click)="finishEdit(true)" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">done</span>
         </button>
       </div>
     }
   }
-
 </div>

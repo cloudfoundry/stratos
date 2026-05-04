@@ -10,6 +10,13 @@ export interface CnsiSourceView<T> {
   readonly totalResults: Signal<number>;
   load(): Promise<void>;
   refresh(): Promise<void>;
+  /**
+   * Drop a single item by guid from local state without re-fetching.
+   * Idempotent. See `CnsiEntitySource.removeItem` for semantics. Optional
+   * on the view interface so plain test fakes don't have to stub it; the
+   * orchestrator's `removeRow` no-ops when the source doesn't expose it.
+   */
+  removeItem?(guid: string): void;
 }
 
 export class MergeOrchestrator<T> {
@@ -42,5 +49,22 @@ export class MergeOrchestrator<T> {
 
   sourceFor(cnsiGuid: string): CnsiSourceView<T> | undefined {
     return this.sources.find(s => s.cnsiGuid === cnsiGuid);
+  }
+
+  /**
+   * Remove a single row from a specific CNSI's source without re-fetching.
+   * Idempotent: unknown cnsi or absent guid is a no-op. Source must expose
+   * `removeItem` (the standard `CnsiEntitySource` does); test fakes that
+   * omit it are silently skipped.
+   *
+   * Use after a successful destructive write (delete, unmap) to drop the
+   * row from local state immediately, instead of waiting for the next
+   * refresh cycle. Closes the post-delete poller-noise gap on app wall
+   * (pre-slice-2 sweep #3) and is the symmetric hook for visible-row
+   * guid-batch sweeps (#4).
+   */
+  removeRow(cnsiGuid: string, guid: string): void {
+    const src = this.sourceFor(cnsiGuid);
+    src?.removeItem?.(guid);
   }
 }

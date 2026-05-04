@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppDetailPrefs } from './app-detail-prefs.service';
@@ -474,5 +474,92 @@ describe('AppDetailDataService', () => {
     expect(svc.stats()[0].usage?.cpu).toBe(0.05);
     expect(svc.stats()[0].usage?.mem).toBe(67108864);
     expect(svc.stats()[0].uptime).toBe(100);
+  });
+
+  // -------------------------------------------------------------------------
+  // raiseFocusPriority — focus set lifecycle
+  // -------------------------------------------------------------------------
+
+  it('raiseFocusPriority adds the kind; the returned callback removes it', () => {
+    expect(svc['_focusPriority']().has('stats')).toBe(false);
+
+    const release = svc.raiseFocusPriority('stats');
+    expect(svc['_focusPriority']().has('stats')).toBe(true);
+
+    release();
+    expect(svc['_focusPriority']().has('stats')).toBe(false);
+  });
+
+  it('raiseFocusPriority dedupes identical kinds (Set semantics)', () => {
+    svc.raiseFocusPriority('stats');
+    svc.raiseFocusPriority('stats');
+
+    const set = svc['_focusPriority']();
+    expect(set.has('stats')).toBe(true);
+    expect(set.size).toBe(1);
+  });
+
+  it('raiseFocusPriority refcounts: kind stays held until ALL consumers release', () => {
+    const releaseA = svc.raiseFocusPriority('stats');
+    const releaseB = svc.raiseFocusPriority('stats');
+    expect(svc['_focusPriority']().has('stats')).toBe(true);
+
+    releaseA();
+    expect(svc['_focusPriority']().has('stats')).toBe(true);
+
+    releaseB();
+    expect(svc['_focusPriority']().has('stats')).toBe(false);
+  });
+
+  it('raiseFocusPriority release callback is idempotent (calling twice is safe)', () => {
+    const releaseA = svc.raiseFocusPriority('stats');
+    const releaseB = svc.raiseFocusPriority('stats');
+
+    releaseA();
+    releaseA(); // no-op — must not over-release B's hold
+    expect(svc['_focusPriority']().has('stats')).toBe(true);
+
+    releaseB();
+    expect(svc['_focusPriority']().has('stats')).toBe(false);
+  });
+
+  // -------------------------------------------------------------------------
+  // raiseFocusPriority — cadence: 5s continuous poll on stats while focused
+  // -------------------------------------------------------------------------
+
+  it('focus on "stats" drives a 5s continuous poll; release stops it', async () => {
+    vi.useFakeTimers();
+    try {
+      // Pre-seed app detail so refresh('stats') actually fires (state STARTED).
+      svc['_appDetail'].set(MOCK_APP_DETAIL);
+
+      const release = svc.raiseFocusPriority('stats');
+
+      // Allow the effect to schedule the interval.
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // No request yet — interval hasn't fired.
+      httpMock.expectNone(STATS_URL);
+
+      // Advance 5s — first interval fires refresh('stats').
+      await vi.advanceTimersByTimeAsync(5000);
+      httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+
+      // Advance another 5s — second tick fires.
+      await vi.advanceTimersByTimeAsync(5000);
+      httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+
+      // Release focus — effect cleanup clears the interval.
+      release();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Advance 10s — no further requests issued.
+      await vi.advanceTimersByTimeAsync(10000);
+      httpMock.expectNone(STATS_URL);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

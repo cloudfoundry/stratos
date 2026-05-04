@@ -280,4 +280,51 @@ describe('CnsiEntitySource', () => {
       expect(src.items().map(i => i.guid).sort()).toEqual(['a', 'b']);
     });
   });
+
+  describe('removeItem', () => {
+    async function loaded(): Promise<TestSource> {
+      const resp = {
+        resources: [new TestItem('a'), new TestItem('b'), new TestItem('c')],
+        pagination: { totalResults: 3, totalPages: 1, next: null, previous: null, first: { href: '...' }, last: { href: '...' } }
+      };
+      const src = new TestSource('cnsi-1', makeHttp([resp]));
+      await src.load();
+      return src;
+    }
+
+    it('drops the matching item and decrements totalResults', async () => {
+      const src = await loaded();
+      expect(src.totalResults()).toBe(3);
+      src.removeItem('b');
+      expect(src.items().map(i => i.guid)).toEqual(['a', 'c']);
+      expect(src.totalResults()).toBe(2);
+    });
+
+    it('is a no-op for an unknown guid (no items removed, totalResults unchanged)', async () => {
+      const src = await loaded();
+      src.removeItem('zzz');
+      expect(src.items().map(i => i.guid)).toEqual(['a', 'b', 'c']);
+      expect(src.totalResults()).toBe(3);
+    });
+
+    it('is idempotent — removing the same guid twice only decrements once', async () => {
+      const src = await loaded();
+      src.removeItem('b');
+      src.removeItem('b');
+      expect(src.items().map(i => i.guid)).toEqual(['a', 'c']);
+      expect(src.totalResults()).toBe(2);
+    });
+
+    it('floors totalResults at 0 even if called more times than items present', async () => {
+      const src = await loaded();
+      src.removeItem('a');
+      src.removeItem('b');
+      src.removeItem('c');
+      expect(src.items()).toEqual([]);
+      expect(src.totalResults()).toBe(0);
+      // One more removal of an absent guid: still 0, not negative.
+      src.removeItem('a');
+      expect(src.totalResults()).toBe(0);
+    });
+  });
 });

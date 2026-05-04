@@ -1,8 +1,17 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  ViewChild,
+  computed,
+  inject,
+} from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
 import {
@@ -13,124 +22,136 @@ import {
   CurrentUserPermissionsService,
   CustomFormFieldComponent,
   TailwindSnackBarRef,
-  TailwindSnackBarService
+  TailwindSnackBarService,
 } from '@stratosui/core';
-import { StratosStatus } from '@stratosui/store';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 
-const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
-  'Are you sure you want to set the instance count to 0?', 'Confirm', true);
+const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig(
+  'Set Instance count to 0',
+  'Are you sure you want to set the instance count to 0?',
+  'Confirm',
+  true,
+);
 
+/**
+ * Signal-native instances summary card.
+ *
+ * Reskin of the legacy ngrx-coupled card per slice-2 design (decision #6):
+ * same surface (running/desired counts + scale up/down/edit row), but reads
+ * directly from `AppDetailDataService` signals and styles via Tailwind.
+ *
+ * The action-bar lifecycle verbs (start/stop/restart/restage) live in
+ * `AppApplicationActionsService` and render on the action bar — not on this
+ * card. This card's actions are scaling actions (edit instance count).
+ *
+ * SCSS is gone: position-absolute corner placement of the action row is now
+ * a Tailwind `absolute top-4 right-4` and the legacy 16px font-size is
+ * `text-base`.
+ */
 @Component({
   selector: 'app-card-app-instances',
   templateUrl: './card-app-instances.component.html',
-  styleUrls: ['./card-app-instances.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     RouterLink,
     AppInputDirective,
     CustomFormFieldComponent,
     CardStatusComponent,
-  ]
+  ],
 })
-export class CardAppInstancesComponent implements OnInit, OnDestroy {
+export class CardAppInstancesComponent implements OnDestroy {
   appService = inject(ApplicationService);
   private dataService = inject(AppDetailDataService);
   private apps = inject(CfAppsSignalConfigService);
-  private renderer = inject(Renderer2);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private cups = inject(CurrentUserPermissionsService);
 
-  // running/desired counts come from AppDetailDataService.stats() — the same
-  // signal-native source the Status card reads. The legacy ngrx paginator
-  // path used by RunningInstancesComponent is not refreshed by the signal-
-  // native fetchStats() and goes stale on stop/start until a write triggers
-  // a dispatchAppStats() (or a 45s idle-poll tick fires).
-  readonly runningCount = computed(() => {
-    const stats = this.dataService.stats();
-    if (!stats?.length) return 0;
-    return stats.filter(s => s.state === 'RUNNING').length;
-  });
-  readonly desiredCount = computed(() => this.dataService.app()?.entity?.instances ?? 0);
-
-
-  // Should the card show the actions to scale/down the number of instances?
+  /** Should the card show the scale/edit actions? */
   @Input() showActions = false;
 
   @Input() busy: any;
 
   @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
 
-  status$: Observable<StratosStatus>;
+  // ---------------------------------------------------------------------------
+  // Signal-native reads
+  // ---------------------------------------------------------------------------
 
-  public canEditApp$: Observable<boolean>;
+  /** RUNNING instance count from per-instance stats. */
+  readonly runningCount = computed(() => {
+    const stats = this.dataService.stats();
+    if (!stats?.length) return 0;
+    return stats.filter(s => s.state === 'RUNNING').length;
+  });
 
-  constructor() {
-    const appService = this.appService;
-    const cups = inject(CurrentUserPermissionsService);
+  /** Desired instance count off the app entity. */
+  readonly desiredCount = computed(() => this.dataService.app()?.entity?.instances ?? 0);
 
-    this.status$ = this.appService.applicationState$.pipe(
-      map(state => state.indicator)
-    );
-    this.canEditApp$ = combineLatest(
-      appService.appOrg$,
-      appService.appSpace$
-    ).pipe(
+  /** Card status indicator — feeds the colored bar via Observable bridge. */
+  readonly status$ = toObservable(this.dataService.state).pipe(map(s => s?.indicator));
+
+  /** Disable scale buttons while an app-level update is in flight. */
+  readonly isUpdating = computed(() => this.dataService.loading().app);
+
+  /** True when the app entity reports STARTED. */
+  readonly isRunning = computed(() => this.dataService.running());
+
+  /**
+   * Edit-permission gate. Wraps the perm-check Observable into a signal
+   * so the template stays pipe-free. canEdit() is null while the perm
+   * check is pending and resolves to a boolean after it lands.
+   */
+  readonly canEdit = toSignal(
+    combineLatest([this.appService.appOrg$, this.appService.appSpace$]).pipe(
       switchMap(([org, space]) =>
-        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
-      ));
+        this.cups.can(
+          CfCurrentUserPermissions.APPLICATION_EDIT,
+          this.appService.cfGuid,
+          org.metadata.guid,
+          space.metadata.guid,
+        ),
+      ),
+    ),
+    { initialValue: false },
+  );
 
-  }
-
-  private currentCount = 0;
-  public editCount = 0;
-
-  private sub!: Subscription;
+  // ---------------------------------------------------------------------------
+  // Edit state
+  // ---------------------------------------------------------------------------
 
   public isEditing = false;
-
   public editValue: any;
-
-  // Observable on the running instances count for the application
-  public runningInstances$!: Observable<number>;
 
   private snackBarRef!: TailwindSnackBarRef<any>;
 
-  ngOnInit() {
-    this.sub = this.appService.application$.subscribe(app => {
-      if (app.app.entity) {
-        this.currentCount = app.app.entity.instances;
-      }
-    });
-  }
-
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
     }
   }
 
-  scaleUp(_current: number) {
-    this.setInstanceCount(this.currentCount + 1);
+  scaleUp() {
+    this.setInstanceCount(this.desiredCount() + 1);
   }
 
-  scaleDown(_current: number) {
-    this.setInstanceCount(this.currentCount - 1);
+  scaleDown() {
+    this.setInstanceCount(this.desiredCount() - 1);
   }
 
   edit() {
-    this.editValue = this.currentCount;
+    this.editValue = this.desiredCount();
     this.isEditing = true;
     setTimeout(() => {
-      this.instanceField.nativeElement.focus();
+      // ngIf-style structural switch may keep the input out of the DOM
+      // until the next CD cycle on first edit click; guard the focus.
+      this.instanceField?.nativeElement?.focus();
     }, 0);
   }
 
@@ -141,17 +162,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Set instance count. Ask for confirmation if setting count to 0
+  /** Set instance count. Ask for confirmation if setting count to 0. */
   private setInstanceCount(value: number) {
     const doUpdate = async () => {
       try {
         await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value });
-        // Legacy updateApplication([STATS]) also triggered appStats.getMultiple
-        // so the Instances tab's per-instance table would reflect the new
-        // container count. The signal-native scaleApp path skips ngrx
-        // entirely, so we need to dispatch the stats refresh explicitly —
-        // otherwise the newly-created (or torn-down) instances stay frozen
-        // at whatever state the last fetch saw.
+        // Signal-native scaleApp skips ngrx; dispatch the stats refresh
+        // explicitly so the Instances tab reflects the new container count.
         cfEntityCatalog.appStats.actions.getMultiple(this.appService.appGuid, this.appService.cfGuid);
       } catch (err: any) {
         this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${err?.message ?? err}`, 'Dismiss');

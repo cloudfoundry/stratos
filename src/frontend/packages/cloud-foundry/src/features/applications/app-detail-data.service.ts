@@ -73,6 +73,24 @@ export class AppDetailDataService {
   // lastPolledAt — consumed by card-app-status "updating…" threshold.
   private readonly _lastPolledAt = signal<Date | null>(null);
 
+  /**
+   * Focus-priority set — consumers that are actively viewing a kind raise
+   * its priority via `raiseFocusPriority(kind)` to opt that kind into a
+   * faster continuous poll cadence (5s) for as long as the consumer is
+   * alive. The slice-1 settling-poll cadence (`_pollEffect` below) is
+   * unchanged; focus priority is purely additive.
+   *
+   * Currently only `stats` honours focus priority — that's the slice-2
+   * Instances tab use case. Other kinds can opt in by extending the
+   * `_focusPollEffect` switch when their consumers need it.
+   *
+   * Multiple consumers can hold focus on the same kind concurrently;
+   * `_focusRefCount` tracks how many holders each kind has so the public
+   * `_focusPriority` set keeps the kind for as long as ANY holder is alive.
+   */
+  private readonly _focusPriority = signal<Set<EntityKind>>(new Set());
+  private readonly _focusRefCount = new Map<EntityKind, number>();
+
   // ---------------------------------------------------------------------------
   // Public readonly views
   // ---------------------------------------------------------------------------
@@ -188,6 +206,47 @@ export class AppDetailDataService {
     this.cnsiGuid = cnsi;
     this.appGuid = appGuid;
     void this.refresh('all');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Focus priority
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Raise the focus priority for `kind`, opting it into a 5s continuous
+   * poll while the returned callback is held. Multiple consumers can raise
+   * the same kind concurrently — the focus is held as long as at least one
+   * consumer hasn't unsubscribed. The returned callback is idempotent;
+   * calling it twice is a no-op.
+   */
+  raiseFocusPriority(kind: EntityKind): () => void {
+    const next = (this._focusRefCount.get(kind) ?? 0) + 1;
+    this._focusRefCount.set(kind, next);
+    if (next === 1) {
+      this._focusPriority.update(s => {
+        const n = new Set(s);
+        n.add(kind);
+        return n;
+      });
+    }
+    let released = false;
+    return () => {
+      if (released) {
+        return;
+      }
+      released = true;
+      const cur = this._focusRefCount.get(kind) ?? 0;
+      if (cur <= 1) {
+        this._focusRefCount.delete(kind);
+        this._focusPriority.update(s => {
+          const n = new Set(s);
+          n.delete(kind);
+          return n;
+        });
+      } else {
+        this._focusRefCount.set(kind, cur - 1);
+      }
+    };
   }
 
   // ---------------------------------------------------------------------------
@@ -442,6 +501,30 @@ export class AppDetailDataService {
       void this.refresh('all');
     }, seconds * 1000);
 
+    onCleanup(() => clearInterval(id));
+  });
+
+  /**
+   * Focus-driven continuous poll for `stats`. Runs at 5s while at least one
+   * consumer has raised focus priority on `stats` (the slice-2 Instances
+   * tab is the first such consumer). Independent of `_pollEffect` and
+   * `prefs.enabled()` — focus means a consumer is actively watching, so we
+   * keep the data fresh regardless of the user's auto-refresh preference.
+   *
+   * The slice-1 settling cadence and this focus poll de-dup naturally via
+   * the `_loading.stats` guard inside `fetchStats()` (concurrent in-flight
+   * is suppressed by `refresh('stats')` flow).
+   */
+  private readonly _focusStatsPollEffect = effect((onCleanup) => {
+    if (!this._focusPriority().has('stats')) {
+      return;
+    }
+    const id = setInterval(() => {
+      if (this.fetching()) {
+        return; // skip-if-still-fetching guard
+      }
+      void this.refresh('stats');
+    }, 5000);
     onCleanup(() => clearInterval(id));
   });
 

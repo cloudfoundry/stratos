@@ -1,46 +1,167 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  Signal,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 
-import { ListComponent, ListConfig } from '@stratosui/core';
-import { TileComponent, TileGridComponent, TileGroupComponent } from '@stratosui/core';
-import { CF_GUID } from '@stratosui/core';
+import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListRowAction,
+  TailwindSnackBarService,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+} from '@stratosui/core';
+
 import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
 import { CardAppUsageComponent } from '../../../../../../shared/components/cards/card-app-usage/card-app-usage.component';
 import {
-  CfAppInstancesConfigService,
-} from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../cf/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../../cf/services/cloud-foundry-endpoint.service';
-import { ApplicationMonitorService } from '../../../../application-monitor.service';
+  CfAppInstancesSignalConfigService,
+} from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-signal-config.service';
+import { AppInstanceActionsService } from '../../../../../../shared/services/app-instance-actions.service';
+import type { StAppStat } from '../../../../../../services/endpoint-data/stratos-types';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 
+/**
+ * InstancesTabComponent — slice-2 signal-native rewrite.
+ *
+ * - Tab-scoped `AppInstanceActionsService` and `CfAppInstancesSignalConfigService`
+ *   so per-instance state (transitioningIndex, filter/sort/page) resets cleanly
+ *   on navigation away from this app's detail page.
+ * - Raises focus priority `'stats'` on init / lowers on destroy so the slice-1
+ *   `AppDetailDataService` polling effect bumps stats to a 5s continuous cadence
+ *   while the tab is mounted (mirrors legacy `ApplicationMonitorService`).
+ * - Wraps the wave-2 config service's no-confirm Kill row action with a
+ *   confirmation dialog at the component layer (matches peer convention; see
+ *   cloud-foundry-routes-signal.component for the Delete pattern).
+ */
 @Component({
   selector: 'app-instances-tab',
   templateUrl: './instances-tab.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CommonModule,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
     CardAppUsageComponent,
-    ListComponent
+    SignalListComponent,
   ],
   providers: [
-    {
-      provide: ActiveRouteCfOrgSpace,
-      useFactory: (cfGuid: string) => ({ cfGuid }),
-      deps: [CF_GUID]
-    },
-    CloudFoundryEndpointService,
-    {
-      provide: ListConfig,
-      useClass: CfAppInstancesConfigService,
-    },
-    ApplicationMonitorService,
-  ]
+    AppInstanceActionsService,
+    CfAppInstancesSignalConfigService,
+  ],
 })
-export class InstancesTabComponent {
+export class InstancesTabComponent implements OnInit, OnDestroy {
+  private dataService = inject(AppDetailDataService);
+  private actionsService = inject(AppInstanceActionsService);
+  private instancesConfig = inject(CfAppInstancesSignalConfigService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
 
+  /** Release callback returned by `dataService.raiseFocusPriority('stats')`. */
+  private _releaseFocus?: () => void;
+
+  /** Loading map projected for the signal-list framework. */
+  private readonly _isAnyLoading: Signal<boolean> = computed(() => this.dataService.loading().stats);
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+
+  /** SignalListConfig consumed by `<app-signal-list>`. Built once on construction. */
+  readonly listConfig: SignalListConfig<StAppStat>;
+
+  constructor() {
+    // Build the columns from the config service, then replace the actions
+    // column's factory with our confirm-wrapped version. Wave-2 service
+    // exposes a no-confirm `buildRowActions` for tests/future surfaces;
+    // the tab layer adds the legacy "Terminate Instance ${index}?"
+    // confirmation dialog (matches legacy CfAppInstancesConfigService text).
+    const baseColumns = this.instancesConfig.buildColumns();
+    const columns: SignalListColumn<StAppStat>[] = baseColumns.map(col => {
+      if (col.key === 'actions' && col.kind === 'actions') {
+        return { ...col, actions: this.buildRowActions };
+      }
+      return col;
+    });
+
+    this.listConfig = {
+      pagedItems: this.instancesConfig.view.pagedItems,
+      totalFilteredResults: this.instancesConfig.view.totalFilteredResults,
+      totalPages: this.instancesConfig.view.totalPages,
+      pageIndex: this.instancesConfig.pageIndex,
+      pageSize: this.instancesConfig.pageSize,
+      isAnyLoading: this._isAnyLoading,
+      errorsByCnsi: this._errorsByCnsi.asReadonly(),
+      columns,
+      getRowKey: (row: StAppStat) => `${row.index}`,
+      emptyMessage: 'There are no instances of this application',
+      emptyFilterMessage: 'No instances match the current filter',
+      loadingMessage: 'Loading instances…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.instancesConfig.nameFilter,
+      onRefresh: () => this.instancesConfig.refresh(),
+      onClear: () => this.instancesConfig.clearFilters(),
+      viewMode: this.instancesConfig.viewMode,
+      sort: this.instancesConfig.sort,
+    };
+  }
+
+  ngOnInit(): void {
+    // Bump stats polling to the 5s continuous cadence while the Instances
+    // tab is mounted. The release callback is idempotent per the wave-1
+    // contract.
+    this._releaseFocus = this.dataService.raiseFocusPriority('stats');
+  }
+
+  ngOnDestroy(): void {
+    this._releaseFocus?.();
+    this._releaseFocus = undefined;
+  }
+
+  /**
+   * Per-row Kill factory wrapping the wave-2 service's killInstance with a
+   * confirmation dialog. Legacy text/style preserved verbatim — see
+   * `cf-app-instances-config.service.ts` listActionTerminate.
+   */
+  private readonly buildRowActions = (row: StAppStat): readonly SignalListRowAction<StAppStat>[] => {
+    const disabled = this.actionsService.inFlight();
+    return [
+      {
+        label: 'Terminate', icon: 'cancel', danger: true,
+        disabled,
+        invoke: () => {
+          const confirm = new ConfirmationDialogConfig(
+            'Terminate Instance?',
+            `Are you sure you want to terminate instance ${row.index}?`,
+            'Terminate',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            try {
+              await this.actionsService.killInstance(row.index);
+            } catch (err: any) {
+              this.snackBar.open(`Terminate failed: ${err?.message ?? err}`, 'Dismiss');
+            }
+          });
+        },
+      },
+    ];
+  };
 }

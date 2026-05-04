@@ -135,4 +135,26 @@ export abstract class CnsiEntitySource<T> {
   protected patchItems(fn: (items: T[]) => T[]): void {
     this._items.update(fn);
   }
+
+  /**
+   * Drop a single item by guid from local state, no HTTP. Idempotent —
+   * removing an already-absent item is a no-op. Decrements totalResults
+   * to keep paging counts consistent with the items array. Use when a
+   * write path (e.g. delete) has succeeded server-side and the consumer
+   * wants to reflect the removal without re-fetching.
+   */
+  removeItem(guid: string): void {
+    let removed = false;
+    this._items.update(curr => {
+      const idx = curr.findIndex(i => (i as { guid?: string }).guid === guid);
+      if (idx < 0) return curr;
+      removed = true;
+      const next = [...curr];
+      next.splice(idx, 1);
+      return next;
+    });
+    if (removed) {
+      this._totalResults.update(n => Math.max(0, n - 1));
+    }
+  }
 }
