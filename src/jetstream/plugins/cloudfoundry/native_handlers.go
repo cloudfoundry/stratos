@@ -323,6 +323,12 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 //   - summary: Stratos-shape paged response with paging/sort/filter params
 //     (WU 3 — see native_apps_summary.go for handler)
 //   - (default): single CAPI page passthrough, Stratos paged envelope.
+//
+// Optional filters (default path only):
+//   - ?guids=g1,g2,...  name-resolution lookup by app guid (Routes tab
+//     Apps-Attached column resolver). Triggers the enrichment-skip path
+//     (no per-app process / space / route fan-out) and returns the flat
+//     StAppsResponse envelope since the caller only needs guid → name.
 func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -368,9 +374,36 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 
 	perPage, page, present := parsePerPageAndPage(ctx)
 	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+
+	// Optional guid-batch filter: ?guids=g1,g2,... forwards as
+	// /v3/apps?guids=g1,g2 — used by the slice-3 Routes tab Apps-Attached
+	// column resolver to fill in app names for the destinations of visible
+	// route rows. Bounded by visible row count so it can't time out the
+	// way an unbounded drain would. When present we skip the per-app
+	// process / space / route enrichment: the resolver only needs guid →
+	// name mapping, and the three extra fan-out calls are unjustifiable
+	// for a name lookup.
+	guidsFilter := false
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+			guidsFilter = true
+		}
+	}
+
 	raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
 	if lerr != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+	}
+
+	if guidsFilter {
+		// Name-resolution lookup path: skip enrichment.
+		apps := make([]StApp, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			apps = append(apps, toStApp(r))
+		}
+		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
 	}
 
 	// Enrich each app with its web-process memory / diskQuota / instances

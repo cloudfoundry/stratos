@@ -707,3 +707,85 @@ func TestGetNativeSpaces_OrganizationGuidsFilter(t *testing.T) {
 	assert.Equal(t, "sp-a", resp.Resources[0].GUID)
 	assert.Equal(t, "sp-b", resp.Resources[1].GUID)
 }
+
+// TestGetNativeApps_GuidsFilter verifies the apps handler forwards
+// ?guids=g1,g2 verbatim as the V3 filter — the transport piece of the
+// slice-3 Routes-tab Apps-Attached column resolver. Skipping per-app
+// process / space / route enrichment is implicit (the resolver only
+// needs names) so the test asserts no /v3/processes, /v3/spaces, or
+// /v3/routes traffic happened, and that the response is the flat
+// StAppsResponse envelope.
+func TestGetNativeApps_GuidsFilter(t *testing.T) {
+	var appsQuery url.Values
+	var sawProcesses, sawSpaces, sawRoutes bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			appsQuery = r.URL.Query()
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+					{
+						"guid": "app-2", "name": "App Two", "state": "STOPPED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-2"}},
+						},
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			sawProcesses = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		case "/v3/spaces":
+			sawSpaces = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		case "/v3/routes":
+			sawRoutes = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1?guids=app-1,app-2", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "app-1,app-2", appsQuery.Get("guids"))
+	assert.False(t, sawProcesses, "name-resolution path must skip process enrichment")
+	assert.False(t, sawSpaces, "name-resolution path must skip space enrichment")
+	assert.False(t, sawRoutes, "name-resolution path must skip route enrichment")
+
+	var resp StAppsResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 2, resp.TotalResults)
+	assert.Len(t, resp.Resources, 2)
+	assert.Equal(t, "app-1", resp.Resources[0].GUID)
+	assert.Equal(t, "App One", resp.Resources[0].Name)
+	assert.Equal(t, "app-2", resp.Resources[1].GUID)
+	assert.Equal(t, "App Two", resp.Resources[1].Name)
+}
