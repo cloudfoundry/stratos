@@ -24,7 +24,6 @@ import {
   TailwindSnackBarRef,
   TailwindSnackBarService,
 } from '@stratosui/core';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
@@ -167,9 +166,18 @@ export class CardAppInstancesComponent implements OnDestroy {
     const doUpdate = async () => {
       try {
         await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value });
-        // Signal-native scaleApp skips ngrx; dispatch the stats refresh
-        // explicitly so the Instances tab reflects the new container count.
-        cfEntityCatalog.appStats.actions.getMultiple(this.appService.appGuid, this.appService.cfGuid);
+        // Refresh both signals in parallel so the Status and Instances
+        // cards converge as soon as the scale job resolves: the app
+        // entity carries the new desired count (denominator), stats
+        // carry the per-container state list (numerator + total). The
+        // legacy ngrx dispatch (cfEntityCatalog.appStats.actions.
+        // getMultiple) doesn't feed _appDetail/_stats and left both
+        // cards lagging the focus-poll cadence; explicit refreshes
+        // restore the legacy "matches quickly" behaviour.
+        await Promise.all([
+          this.dataService.refresh('app'),
+          this.dataService.refresh('stats'),
+        ]);
       } catch (err: any) {
         this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${err?.message ?? err}`, 'Dismiss');
       }
