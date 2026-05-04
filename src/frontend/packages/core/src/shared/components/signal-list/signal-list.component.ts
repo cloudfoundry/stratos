@@ -25,6 +25,19 @@ export interface SignalListFavoriteBinding<T> {
   readonly toggle: (row: T) => void;
 }
 
+// Binding for a `kind: 'radio'` column. Single-row selection: the
+// consumer owns the writable signal holding the selected row's key
+// (per config.getRowKey) or null when nothing is selected. The list
+// renders a radio input per row that reads/writes the signal directly,
+// and offers an optional `isDisabled` predicate so rows that can't be
+// picked (already-attached routes, archived items) render as a dimmed
+// disabled radio. Mirrors the `favorite` slot's shape: column carries
+// the binding, component handles the click + visual state.
+export interface SignalListRadioBinding<T> {
+  readonly selectedKey: WritableSignal<string | null>;
+  readonly isDisabled?: (row: T) => boolean;
+}
+
 // One entry in a `kind: 'actions'` kebab menu. Callers return the set
 // relevant to each row — items that don't apply (e.g. Stop on a stopped
 // app) can either be elided from the array or emitted with `disabled:
@@ -69,7 +82,7 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions';
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions' | 'radio';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
@@ -111,6 +124,12 @@ export interface SignalListColumn<T> {
   // dismisses. Card mode treats the kebab identically to the favorite
   // star and lifts it onto the Name row.
   actions?: (row: T) => readonly SignalListRowAction<T>[];
+  // Required when kind === 'radio'. See SignalListRadioBinding.
+  // The cell renders a single radio input bound to the consumer's
+  // selectedKey signal; clicking sets it to the row's key (or unsets
+  // if already selected — radio behavior is single-select, so re-click
+  // is a no-op). Disabled rows show a dimmed radio that doesn't react.
+  radio?: SignalListRadioBinding<T>;
   // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
   // <col> in the table's <colgroup>. Unset columns share remaining width
   // equally under the fixed table layout.
@@ -456,6 +475,22 @@ export class SignalListComponent<T> implements AfterViewInit {
   onToggleFavorite(col: SignalListColumn<T>, row: T, ev: Event): void {
     ev.stopPropagation();
     col.favorite?.toggle(row);
+  }
+
+  // Radio-select helpers -----------------------------------------------
+
+  isRadioSelected(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.radio && col.radio.selectedKey() === this.config.getRowKey(row);
+  }
+
+  isRadioDisabled(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.radio?.isDisabled && col.radio.isDisabled(row);
+  }
+
+  onSelectRadio(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    if (!col.radio || this.isRadioDisabled(col, row)) return;
+    col.radio.selectedKey.set(this.config.getRowKey(row));
   }
 
   // Compound-cell overflow ---------------------------------------------

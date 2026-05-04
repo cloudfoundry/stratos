@@ -488,4 +488,92 @@ describe('SignalListComponent', () => {
     expect(spacesCell.textContent).not.toContain('sp-5');
     expect(spacesCell.querySelector('[data-test="compound-expand"]')).not.toBeNull();
   });
+
+  describe('radio-select column (kind: radio)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`
+    })
+    class RadioHost {
+      items = signal([
+        { name: 'one' },
+        { name: 'two' },
+        { name: 'three-disabled' },
+      ]);
+      selected = signal<string | null>(null);
+      pageIndex = signal(0);
+      pageSize = signal(10);
+      config: SignalListConfig<{ name: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(3).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: this.pageIndex,
+        pageSize: this.pageSize,
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          {
+            header: 'Pick', key: 'pick',
+            kind: 'radio',
+            render: () => '',
+            radio: {
+              selectedKey: this.selected,
+              isDisabled: (r) => r.name === 'three-disabled',
+            },
+          },
+          { header: 'Name', render: r => r.name },
+        ],
+        getRowKey: r => r.name,
+      };
+    }
+
+    it('renders one radio input per row', () => {
+      const fixture = TestBed.createComponent(RadioHost);
+      fixture.detectChanges();
+      const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]');
+      expect(radios.length).toBe(3);
+    });
+
+    it('clicking a radio writes the row key to the selection signal', () => {
+      const fixture = TestBed.createComponent(RadioHost);
+      fixture.detectChanges();
+      const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
+      radios[1].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected()).toBe('two');
+    });
+
+    it('selected row reads checked from the signal', () => {
+      const fixture = TestBed.createComponent(RadioHost);
+      fixture.componentInstance.selected.set('one');
+      fixture.detectChanges();
+      const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
+      expect(radios[0].checked).toBe(true);
+      expect(radios[1].checked).toBe(false);
+    });
+
+    it('disabled rows render disabled radio and clicks are no-ops', () => {
+      const fixture = TestBed.createComponent(RadioHost);
+      fixture.detectChanges();
+      const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
+      expect(radios[2].disabled).toBe(true);
+      radios[2].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected()).toBe(null);
+    });
+
+    it('selecting a different row replaces the previous selection (single-select)', () => {
+      const fixture = TestBed.createComponent(RadioHost);
+      fixture.detectChanges();
+      const radios = fixture.nativeElement.querySelectorAll('[data-test="row-radio"]') as NodeListOf<HTMLInputElement>;
+      radios[0].click();
+      fixture.detectChanges();
+      radios[1].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected()).toBe('two');
+      expect(radios[0].checked).toBe(false);
+      expect(radios[1].checked).toBe(true);
+    });
+  });
 });

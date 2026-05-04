@@ -226,6 +226,20 @@
                   </div>
                 } @else if (col.kind === 'favorite' || col.kind === 'actions') {
                   <!-- Suppressed: star + kebab are attached to the Name row above -->
+                } @else if (col.kind === 'radio' && col.radio) {
+                  <div class="flex justify-between items-center gap-2 text-sm py-0.5">
+                    <span class="text-content-muted">{{ col.header }}</span>
+                    <input
+                      data-test="row-radio"
+                      type="radio"
+                      [name]="'signal-list-radio-card-' + (col.key ?? col.header)"
+                      [checked]="isRadioSelected(col, row)"
+                      [disabled]="isRadioDisabled(col, row)"
+                      (click)="onSelectRadio(col, row, $event)"
+                      [class.cursor-pointer]="!isRadioDisabled(col, row)"
+                      [class.cursor-not-allowed]="isRadioDisabled(col, row)"
+                      [class.opacity-40]="isRadioDisabled(col, row)" />
+                  </div>
                 } @else if (col.kind === 'compound' && col.compound) {
                   <div class="flex items-start justify-between gap-2 text-sm py-0.5">
                     <span class="text-content-muted shrink-0">{{ col.header }}</span>
@@ -317,9 +331,9 @@
             <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
               @for (col of config.columns; track col.key) {
                 <td class="px-3 py-2 text-sm text-content-text"
-                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite'"
-                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite'"
-                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' ? null : col.render(row)">
+                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio'"
+                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio'"
+                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' ? null : col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
@@ -403,6 +417,17 @@
                         </div>
                       }
                     </div>
+                  } @else if (col.kind === 'radio' && col.radio) {
+                    <input
+                      data-test="row-radio"
+                      type="radio"
+                      [name]="'signal-list-radio-' + (col.key ?? col.header)"
+                      [checked]="isRadioSelected(col, row)"
+                      [disabled]="isRadioDisabled(col, row)"
+                      (click)="onSelectRadio(col, row, $event)"
+                      [class.cursor-pointer]="!isRadioDisabled(col, row)"
+                      [class.cursor-not-allowed]="isRadioDisabled(col, row)"
+                      [class.opacity-40]="isRadioDisabled(col, row)" />
                   } @else {
                     {{ col.render(row) }}
                   }
