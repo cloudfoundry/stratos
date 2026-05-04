@@ -111,6 +111,104 @@ func TestGetAppRoutes_ReturnsMappedRoutes(t *testing.T) {
 	assert.Equal(t, "sample-go-app-e2e-2.run.adepttech.ca/api", r1.URL)
 }
 
+// TestToStRoute_PopulatesAppGUIDsFromInlineDestinations verifies that
+// toStRoute reads destinations directly from the inline field on the list
+// response (as CF v3 returns it) instead of requiring a per-route fan-out
+// to /v3/routes/{guid}/destinations. The N+1 fan-out via
+// populateRouteDestinations was retired in slice 3.5 commit #4.5 once we
+// confirmed CF v3 inlines destinations on /v3/routes.
+func TestToStRoute_PopulatesAppGUIDsFromInlineDestinations(t *testing.T) {
+	var hits int
+	var paths []string
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		paths = append(paths, r.URL.Path)
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/routes" && r.Method == http.MethodGet:
+			hits++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"pagination": {"total_results": 2, "total_pages": 1, "next": null},
+				"resources": [
+					{
+						"guid":"route-1",
+						"created_at":"2026-04-22T12:00:00Z",
+						"updated_at":"2026-04-22T12:00:00Z",
+						"protocol":"http",
+						"host":"app-a","path":"","port":null,"url":"app-a.example.com",
+						"destinations": [
+							{"guid":"d1","app":{"guid":"app-1","process":{"type":"web"}},"port":8080,"protocol":"http1"},
+							{"guid":"d2","app":{"guid":"app-2","process":{"type":"web"}},"port":8080,"protocol":"http1"}
+						],
+						"relationships": {
+							"space": {"data": {"guid": "space-1"}},
+							"domain": {"data": {"guid": "domain-1"}}
+						}
+					},
+					{
+						"guid":"route-2",
+						"created_at":"2026-04-22T12:05:00Z",
+						"updated_at":"2026-04-22T12:05:00Z",
+						"protocol":"http",
+						"host":"app-b","path":"","port":null,"url":"app-b.example.com",
+						"destinations": [],
+						"relationships": {
+							"space": {"data": {"guid": "space-1"}},
+							"domain": {"data": {"guid": "domain-1"}}
+						}
+					}
+				]
+			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/cnsi-1", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/routes/:cnsiGuid")
+	c.SetParamNames("cnsiGuid")
+	c.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeRouteCount(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	// CRITICAL: only one /v3/routes call. No /v3/routes/{guid}/destinations
+	// fan-out should hit the upstream — destinations come back inline now.
+	assert.Equal(t, 1, hits, "should make exactly one list call (no destinations fan-out)")
+	for _, p := range paths {
+		assert.NotContains(t, p, "/destinations", "must NOT call per-route destinations endpoint")
+	}
+
+	var resp StRoutesResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Len(t, resp.Resources, 2)
+
+	// Route 1 — two destinations, both app guids populated.
+	r0 := resp.Resources[0]
+	assert.Equal(t, "route-1", r0.GUID)
+	assert.Equal(t, []string{"app-1", "app-2"}, r0.AppGUIDs)
+
+	// Route 2 — empty destinations array → AppGUIDs nil (omitempty in JSON).
+	r1 := resp.Resources[1]
+	assert.Equal(t, "route-2", r1.GUID)
+	assert.Empty(t, r1.AppGUIDs, "route with no destinations has no app guids")
+}
+
 // TestGetAppRoutes_EmptyResult verifies the handler returns an empty
 // (not null) resources array when CF returns no routes for the app. The
 // JSON contract matters: frontend pickers iterate the array without a

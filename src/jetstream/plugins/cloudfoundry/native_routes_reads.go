@@ -86,7 +86,22 @@ func (c *CloudFoundrySpecification) getAppRoutes(ctx echo.Context) error {
 // stamped into the row so the frontend can key favorites + delete calls by
 // (cnsi, route) without threading the endpoint through every closure — same
 // convention as StApp/StOrg/StSpace.
+//
+// AppGUIDs is populated from CF v3's inline destinations field on the list
+// endpoint — verified against /v3/routes (3.180.0) which returns destinations
+// embedded in each route resource. The earlier per-route ListDestinations
+// fan-out (populateRouteDestinations) was N+1 against CAPI for no reason;
+// reading r.Destinations directly drops the fan-out entirely.
 func toStRoute(r capi.Route, cnsiGUID string) StRoute {
+	var appGUIDs []string
+	if len(r.Destinations) > 0 {
+		appGUIDs = make([]string, 0, len(r.Destinations))
+		for _, d := range r.Destinations {
+			if d.App.GUID != "" {
+				appGUIDs = append(appGUIDs, d.App.GUID)
+			}
+		}
+	}
 	return StRoute{
 		GUID:       r.GUID,
 		URL:        r.URL,
@@ -96,6 +111,7 @@ func toStRoute(r capi.Route, cnsiGUID string) StRoute {
 		DomainGUID: relationshipGUID(r.Relationships.Domain),
 		SpaceGUID:  relationshipGUID(r.Relationships.Space),
 		CnsiGUID:   cnsiGUID,
+		AppGUIDs:   appGUIDs,
 		CreatedAt:  r.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:  r.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}

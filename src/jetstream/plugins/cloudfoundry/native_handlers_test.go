@@ -345,6 +345,134 @@ func TestGetNativeRouteCount(t *testing.T) {
 	assert.Equal(t, 42, resp.TotalResults)
 }
 
+// Slice 3.5 #4.5 — getNativeRouteCount must forward ?space_guids= to CF v3
+// via the space_guids filter on the full-list branch. CF v3 docs (3.180.0):
+// /v3/routes accepts space_guids as a comma-delimited filter. Without this
+// the map-routes picker drains every route on the cnsi instead of just the
+// app's space. The ?return=counts branch is intentionally cnsi-wide and
+// does NOT honor space_guids — its consumers (home-page card, endpoint-data
+// totals) never need a space-scoped count today, and adding the filter
+// there would be dead code.
+func TestGetNativeRouteCount_SpaceGuidsFilter(t *testing.T) {
+	t.Run("counts branch ignores space_guids (cnsi-wide by design)", func(t *testing.T) {
+		var seenQuery string
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/routes":
+				seenQuery = r.URL.RawQuery
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+					"resources":  []interface{}{},
+				})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi?return=counts&space_guids=space-1", nil)
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+		ctx.SetParamNames("cnsiGuid")
+		ctx.SetParamValues("test-cnsi")
+
+		plugin := &CloudFoundrySpecification{
+			testProxy: &mockNativeCFProxy{
+				userID:      "user-1",
+				cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+				tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+			},
+		}
+
+		require.NoError(t, plugin.getNativeRouteCount(ctx))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.NotContains(t, seenQuery, "space_guids", "counts branch is cnsi-wide; must NOT forward space_guids")
+		assert.Contains(t, seenQuery, "per_page=1", "counts branch must request per_page=1")
+	})
+
+	t.Run("full-list branch forwards space_guids", func(t *testing.T) {
+		var seenQuery string
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/routes":
+				seenQuery = r.URL.RawQuery
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 0, "total_pages": 1},
+					"resources":  []interface{}{},
+				})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi?space_guids=space-1,space-2", nil)
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+		ctx.SetParamNames("cnsiGuid")
+		ctx.SetParamValues("test-cnsi")
+
+		plugin := &CloudFoundrySpecification{
+			testProxy: &mockNativeCFProxy{
+				userID:      "user-1",
+				cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+				tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+			},
+		}
+
+		require.NoError(t, plugin.getNativeRouteCount(ctx))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, seenQuery, "space_guids=space-1%2Cspace-2", "comma-delimited space_guids must be forwarded URL-encoded")
+	})
+
+	t.Run("no space_guids = unfiltered drain (legacy)", func(t *testing.T) {
+		var seenQuery string
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/routes":
+				seenQuery = r.URL.RawQuery
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 0, "total_pages": 1},
+					"resources":  []interface{}{},
+				})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi", nil)
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+		ctx.SetParamNames("cnsiGuid")
+		ctx.SetParamValues("test-cnsi")
+
+		plugin := &CloudFoundrySpecification{
+			testProxy: &mockNativeCFProxy{
+				userID:      "user-1",
+				cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+				tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+			},
+		}
+
+		require.NoError(t, plugin.getNativeRouteCount(ctx))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.NotContains(t, seenQuery, "space_guids", "absent space_guids must produce unfiltered drain")
+	})
+}
+
 func TestGetNativeOrgDetail(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

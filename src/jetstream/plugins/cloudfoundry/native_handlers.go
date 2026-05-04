@@ -597,8 +597,24 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 // listAllRoutes drains /v3/routes and returns the full set plus the total
 // count. Page 1 synchronous; pages 2..N parallel with bounded concurrency.
 // Mirrors listAllOrgs/listAllSpaces/listAllApps.
-func listAllRoutes(ctx context.Context, cfClient capi.Client) ([]capi.Route, int, error) {
-	firstParams := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+//
+// spaceGUIDs (optional) narrows the drain to routes within the given space
+// guids via CF v3's space_guids filter. Empty string = unfiltered (legacy
+// behavior — drain every route on the cnsi). The slice 3.5 map-routes picker
+// passes the app's space guid here so production tenants with thousands of
+// routes don't get drained client-side.
+func listAllRoutes(ctx context.Context, cfClient capi.Client, spaceGUIDs string) ([]capi.Route, int, error) {
+	withRouteFilters := func(p *capi.QueryParams) *capi.QueryParams {
+		if spaceGUIDs != "" {
+			guids := splitNonEmpty(spaceGUIDs, ",")
+			if len(guids) > 0 {
+				p = p.WithFilter("space_guids", guids...)
+			}
+		}
+		return p
+	}
+
+	firstParams := withRouteFilters(capi.NewQueryParams().WithPerPage(fullPagePerRequest))
 	firstParams.Page = 1
 	first, err := cfClient.Routes().List(ctx, firstParams)
 	if err != nil {
@@ -618,7 +634,7 @@ func listAllRoutes(ctx context.Context, cfClient capi.Client) ([]capi.Route, int
 	for page := 2; page <= totalPages; page++ {
 		p := page
 		g.Go(func() error {
-			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params := withRouteFilters(capi.NewQueryParams().WithPerPage(fullPagePerRequest))
 			params.Page = p
 			raw, err := cfClient.Routes().List(gctx, params)
 			if err != nil {
@@ -637,64 +653,34 @@ func listAllRoutes(ctx context.Context, cfClient capi.Client) ([]capi.Route, int
 	return all, totalResults, nil
 }
 
-// populateRouteDestinations fills routes[i].AppGUIDs from CF v3's
-// /v3/routes/{guid}/destinations endpoint, one request per route, with
-// bounded parallelism (maxParallelPages).
-//
-// CF v3 doesn't return destinations inline on the list endpoint, so the
-// Route cell can't show mapped apps without this extra fan-out. For a space
-// with N routes this costs N CAPI calls; bounded concurrency keeps the worst
-// case predictable on large spaces without overwhelming CAPI.
-//
-// Errors on any one destinations call are logged and the route's AppGUIDs
-// stays nil — the UI will render the route without app segments rather than
-// failing the whole list. Treat partial data as acceptable; the page still
-// renders.
-func populateRouteDestinations(ctx context.Context, cfClient capi.Client, routes []StRoute) {
-	if len(routes) == 0 {
-		return
-	}
-	g, gctx := errgroup.WithContext(ctx)
-	g.SetLimit(maxParallelPages)
-	for i := range routes {
-		idx := i
-		guid := routes[idx].GUID
-		g.Go(func() error {
-			dests, derr := cfClient.Routes().ListDestinations(gctx, guid)
-			if derr != nil {
-				log.Warnf("routes: ListDestinations(%s) failed: %v", guid, derr)
-				return nil
-			}
-			if dests == nil || len(dests.Destinations) == 0 {
-				return nil
-			}
-			appGUIDs := make([]string, 0, len(dests.Destinations))
-			for _, d := range dests.Destinations {
-				if d.App.GUID != "" {
-					appGUIDs = append(appGUIDs, d.App.GUID)
-				}
-			}
-			routes[idx].AppGUIDs = appGUIDs
-			return nil
-		})
-	}
-	_ = g.Wait()
-}
-
 // getNativeRouteCount dispatches on ?return=
 //   - counts (default legacy path): per_page=1, totalResults only. Kept as
 //     the default because home-page card count + endpoint-data route count
-//     only need the total; paying to drain every route + every destination
-//     would balloon the home-page load.
+//     only need the total. Counts is a deliberate fast path: 1 CAPI call,
+//     no destinations fan-out, no marshaling of resources. The data branch
+//     drains every page (per_page=fullPagePerRequest, parallel pages 2..N)
+//     and would be much slower for the count-only consumers.
 //   - (none or any other value): full list, paginated, with each route's
-//     mapped apps resolved via ListDestinations. Used by the
-//     CloudFoundrySpaceRoutesSignalComponent.
+//     mapped apps read from the inline destinations field on /v3/routes.
+//     Used by the CloudFoundrySpaceRoutesSignalComponent and slice 3.5's
+//     map-routes picker.
 //
 // The query-param dispatch mirrors getNativeOrgs/getNativeApps/getNativeSpaces.
 // "counts" retains the original wire format on the same URL so endpoint-data
 // consumers don't need to change URLs.
 func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
+	// space_guids forwards CF v3's /v3/routes?space_guids= filter to narrow
+	// the drain. Used by slice 3.5's map-routes picker so production tenants
+	// with thousands of routes across hundreds of spaces don't pay a full
+	// drain when the user only wants routes within one space. Empty = legacy
+	// unfiltered drain (full CF Routes list page).
+	//
+	// Only honored on the full-list branch. The ?return=counts branch is
+	// cnsi-wide by design (home-page card, endpoint-data totals); it has no
+	// consumer that needs space-filtered counts today, so adding the filter
+	// there would be dead code.
+	spaceGUIDs := ctx.QueryParam("space_guids")
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
@@ -719,15 +705,16 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 		})
 	}
 
-	resources, totalResults, err := listAllRoutes(ctx.Request().Context(), cfClient)
+	resources, totalResults, err := listAllRoutes(ctx.Request().Context(), cfClient, spaceGUIDs)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
 	}
 	routes := make([]StRoute, 0, len(resources))
 	for _, r := range resources {
+		// Destinations are inline on /v3/routes — toStRoute populates
+		// AppGUIDs from r.Destinations directly. No fan-out needed.
 		routes = append(routes, toStRoute(r, cnsiGUID))
 	}
-	populateRouteDestinations(ctx.Request().Context(), cfClient, routes)
 	return ctx.JSON(http.StatusOK, StRoutesResponse{
 		Resources:    routes,
 		TotalResults: totalResults,
