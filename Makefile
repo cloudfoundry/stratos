@@ -305,7 +305,7 @@ $(call register, test, e2e)
 # ── Check (quality gates) ────────────────────────────────────
 # make check          — lint + gate (default)
 # make check lint     — ESLint + go vet only
-# make check gate     — lint + unit tests (= bun run gate-check)
+# make check gate     — lint + unit tests + production build (= bun run gate-check)
 # make check tests    — unit tests only
 # make check coverage — unit tests with coverage
 # make check e2e      — Playwright E2E core tests
@@ -318,7 +318,7 @@ endef
 $(call register, check, lint)
 
 define check.gate
-	@echo "Running gate checks (lint + unit tests)..."
+	@echo "Running gate checks (lint + unit tests + production build)..."
 	bun run gate-check
 	cd src/jetstream && go test ./... -v -count=1
 endef
