@@ -120,7 +120,6 @@ export { cfEntityCatalog } from './cf-entity-catalog';
 export { BaseCfListConfig } from './shared/components/list/list-types/base-cf/base-cf-list-config';
 
 // List Configuration Services
-export { CfAppRoutesListConfigService } from './shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 export { AppServiceBindingListConfigService } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 export { AppServiceBindingDataSource } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
 
