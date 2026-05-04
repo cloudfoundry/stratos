@@ -37,7 +37,7 @@ export abstract class CfAppRoutesListConfigServiceBase extends CfRoutesListConfi
     hasActions = false,
     genericRouteState = true
   ) {
-    const canEditAppsInSpace = hasActions ? appService.app$.pipe(
+    const canEditAppsInSpace = hasActions ? appService.waitForAppEntity$.pipe(
       switchMap(app => currentUserPermissionsService.can(
         CfCurrentUserPermissions.APPLICATION_EDIT,
         appService.cfGuid,
