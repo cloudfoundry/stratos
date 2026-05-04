@@ -27,6 +27,14 @@ export class CloudFoundryEffects {
   proxyAPIVersion = environment.proxyAPIVersion;
 
   
+  // Hits the Stratos-native V3-only handler at GET /pp/v1/cf/info/<guid>.
+  // Replaces the legacy /pp/v1/proxy/v2/info passthrough so no frontend
+  // call reaches CF v2 directly. The response shape mirrors the legacy
+  // ICfV2Info wire shape (snake_case fields: api_version,
+  // app_ssh_endpoint, app_ssh_host_key_fingerprint, etc.) — values are
+  // sourced exclusively from /v3/info + the unversioned API root /
+  // (where SSH host_key_fingerprint and oauth_client live in
+  // links.app_ssh.meta).
   fetchInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetCFInfo>(GET_CF_INFO),
     flatMap(action => {
@@ -34,14 +42,11 @@ export class CloudFoundryEffects {
       const catalogEntity = entityCatalog.getEntity(action.endpointType, action.entityType);
       const cfInfoKey = catalogEntity.entityKey;
       this.store.dispatch(new StartRequestAction(action, actionType));
-      const requestArgs = {
-        headers: { 'x-cap-cnsi-list': action.guid }
-      };
-      const url = `/pp/${this.proxyAPIVersion}/proxy/v2/info`;
+      const url = `/pp/${this.proxyAPIVersion}/cf/info/${action.guid}`;
       return this.http
-        .get<{ [guid: string]: any }>(url, requestArgs)
+        .get<any>(url)
         .pipe(
-          mergeMap((info: { [guid: string]: any }) => {
+          mergeMap((info: any) => {
             const mappedData = {
               entities: { [cfInfoKey]: {} },
               result: []
@@ -49,7 +54,7 @@ export class CloudFoundryEffects {
             const id = action.guid;
 
             mappedData.entities[cfInfoKey][id] = {
-              entity: info[id],
+              entity: info,
               metadata: {}
             };
             mappedData.result.push(id);

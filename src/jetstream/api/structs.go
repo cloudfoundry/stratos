@@ -49,6 +49,26 @@ type V2Info struct {
 	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
 }
 
+// V3Info is the response for the Cloud Foundry /v3/info API
+type V3Info struct {
+	Build string `json:"build"`
+	Name  string `json:"name"`
+	Links struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"links"`
+}
+
+// CFEndpointMetadata stores capability flags detected at registration time.
+// Assumed=true means both probes failed at registration; values are defaults
+// and will be confirmed when the user first connects.
+type CFEndpointMetadata struct {
+	SupportsV2 bool `json:"supportsV2"`
+	SupportsV3 bool `json:"supportsV3"`
+	Assumed    bool `json:"assumed"`
+}
+
 type EndpointInfo struct {
 	ApiRoot ApiRoot
 	V2Info  V2Info
@@ -262,8 +282,10 @@ type Info struct {
 		ListMaxSize               int64  `json:"listMaxSize,omitempty"`
 		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
 		APIKeysEnabled            string `json:"APIKeysEnabled"`
-		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
-		UserEndpointsEnabled      string `json:"userEndpointsEnabled"`
+		HomeViewShowFavoritesOnly  bool   `json:"homeViewShowFavoritesOnly"`
+		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
+		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
+		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
 	} `json:"config"`
 }
 
@@ -430,7 +452,13 @@ type PortalConfig struct {
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
 	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
+	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
 	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
+	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
+	// Off by default in production; opt-in per deployment (dev, staging) via the
+	// DIAGNOSTICS_ENABLED env var. FWT-934.
+	DiagnosticsEnabled                 bool                         `configName:"DIAGNOSTICS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance

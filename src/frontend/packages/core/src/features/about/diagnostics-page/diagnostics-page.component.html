@@ -105,7 +105,7 @@
           <div class="border-t border-content-border mx-4 my-3"></div>
           <div class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-muted px-4 pb-1">
             @if (isAdminUser) {
-              <app-custom-icon class="text-base text-warning-500">security</app-custom-icon>
+              <app-custom-icon class="text-base text-warning-shade-500">security</app-custom-icon>
             }
             User
           </div>
@@ -117,7 +117,7 @@
             </div>
             @if (session.config.enableTechPreview) {
               <div class="grid grid-cols-[1.5rem_auto_1fr] gap-x-2 items-center px-4 py-1 min-h-7">
-                <app-custom-icon class="text-base text-warning-500">whatshot</app-custom-icon>
+                <app-custom-icon class="text-base text-warning-shade-500">whatshot</app-custom-icon>
                 <span class="text-sm text-content-muted whitespace-nowrap">Tech Preview</span>
                 <span class="text-sm font-medium text-right">Enabled</span>
               </div>
@@ -159,7 +159,7 @@
             </thead>
             <tbody>
               @for (row of session.diagnostics.databaseMigrations; track row) {
-                <tr class="hover:bg-surface-hover transition-colors">
+                <tr class="hover:bg-content-secondary transition-colors">
                   <td class="px-3 py-1.5 whitespace-nowrap">{{ row.id }}</td>
                   <td class="px-3 py-1.5 whitespace-nowrap">{{ row.version_id }}</td>
                   <td class="px-3 py-1.5 whitespace-nowrap"><app-boolean-indicator [isTrue]="row.is_applied" type="yes-no" subtle="true"></app-boolean-indicator></td>

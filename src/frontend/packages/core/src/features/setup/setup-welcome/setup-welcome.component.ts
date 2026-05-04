@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
@@ -9,7 +9,7 @@ import { APP_TITLE } from './../../../core/core.types';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { TileSelectorTileComponent } from '../../../shared/components/tile-selector-tile/tile-selector-tile.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
@@ -31,6 +31,11 @@ selector: 'app-setup-welcome',
 ]
 })
 export class SetupWelcomeComponent {
+
+  // FWT-956: signal-native step handle. Setup welcome is a confirmation-style
+  // step (no submission, Next button hidden); navigation happens via the
+  // tile-selector selectionChange handler.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   public tileSelectorConfig = [
     new ITileConfig<ITileData>(

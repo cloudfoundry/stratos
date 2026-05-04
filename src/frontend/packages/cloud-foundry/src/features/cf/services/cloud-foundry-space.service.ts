@@ -1,7 +1,11 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+
+import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { createUserRoleInSpace } from '../../../store/types/cf-user.types';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
@@ -40,6 +44,8 @@ export class CloudFoundrySpaceService {
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
   private cfOrgService = inject(CloudFoundryOrganizationService);
+  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private injector = inject(Injector);
 
 
   cfGuid: string;
@@ -87,18 +93,29 @@ export class CloudFoundrySpaceService {
     this.initialiseSpaceObservables();
     this.initialiseAppObservables();
 
-    this.userRole$ = this.cfEndpointService.currentUser$.pipe(
-      switchMap(u => {
-        return this.cfUserService.getUserRoleInSpace(
-          u.guid,
-          this.spaceGuid,
-          this.cfGuid
-        );
+    // V3-native: read role buckets from the StUser snapshot (lazy fetch of
+    // /pp/v1/cf/users/:cnsi). V2 helpers inspect user.managed_spaces etc. —
+    // fields the V3 wire no longer carries.
+    const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
+    this.userRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
+      map(([currentUser, users]) => {
+        if (!users) return 'None';
+        const me = users.find(u => u.guid === currentUser.guid);
+        const roles = me?.spaceRoles.find(r => r.spaceGuid === this.spaceGuid)?.roles ?? [];
+        return getSpaceRolesString(createUserRoleInSpace(
+          roles.includes('manager'),
+          roles.includes('auditor'),
+          roles.includes('developer'),
+        ));
       }),
-      map(u => getSpaceRolesString(u))
     );
 
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid, this.spaceGuid);
+    this.usersCount$ = users$.pipe(
+      map(users => {
+        if (!users) return null;
+        return users.filter(u => u.spaceRoles.some(r => r.spaceGuid === this.spaceGuid)).length;
+      }),
+    );
   }
 
   private initialiseSpaceObservables() {

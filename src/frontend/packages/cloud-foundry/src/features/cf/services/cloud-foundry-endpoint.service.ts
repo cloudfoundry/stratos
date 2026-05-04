@@ -1,7 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
+
+import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 
 import {
   EntityService,
@@ -58,6 +61,8 @@ export class CloudFoundryEndpointService {
   private store = inject<Store<CFAppState>>(Store);
   private cfUserService = inject(CfUserService);
   private pmf = inject(PaginationMonitorFactory);
+  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private injector = inject(Injector);
 
 
   hasSSHAccess$!: Observable<boolean>;
@@ -69,15 +74,23 @@ export class CloudFoundryEndpointService {
   info$!: Observable<EntityInfo<APIResource<ICfV2Info>>>;
   cfInfoEntityService!: EntityService<APIResource<ICfV2Info>>;
   endpoint$!: Observable<EntityInfo<EndpointModel>>;
+  /**
+   * Sync signal mirror of `endpoint$`. Hot read from anywhere — no race,
+   * no observable subscription. Use this for one-shot reads at action
+   * time (e.g. building a confirm dialog) where awaiting an observable
+   * loses to the 1s fallback when the underlying observable hasn't yet
+   * emitted a value through fresh subscribers (post route-recreate).
+   * `endpoint$` stays for stream consumers (combineLatest, derived
+   * observables, async-pipe templates).
+   */
+  endpoint!: Signal<EntityInfo<EndpointModel> | undefined>;
   cfEndpointEntityService!: EntityService<EndpointModel>;
   connected$!: Observable<boolean>;
   currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
 
   static createGetAllOrganizations(cfGuid: string) {
-    const paginationKey = cfGuid ?
-      createEntityRelationPaginationKey(endpointEntityType, cfGuid)
-      : createEntityRelationPaginationKey(endpointEntityType);
+    const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const getAllOrganizationsAction = cfEntityCatalog.org.actions.getMultiple(cfGuid, paginationKey,
       {
         includeRelations: [
@@ -90,9 +103,7 @@ export class CloudFoundryEndpointService {
     return getAllOrganizationsAction;
   }
   static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
-    const paginationKey = cfGuid ?
-      createEntityRelationPaginationKey(endpointEntityType, cfGuid)
-      : createEntityRelationPaginationKey(endpointEntityType);
+    const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
     const getAllOrganizationsAction = cfEntityCatalog.org.actions.getMultiple(cfGuid, paginationKey,
       {
         includeRelations: [
@@ -175,12 +186,21 @@ export class CloudFoundryEndpointService {
 
   private constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
+    // Sync mirror — backs the new `endpoint` signal. toSignal needs an
+    // injection context; we have one because constructCoreObservables runs
+    // during constructor execution.
+    this.endpoint = toSignal(this.endpoint$, { initialValue: undefined, injector: this.injector });
 
     this.orgs$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.cfGuid);
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid);
+    // V3-native: lazy snapshot of /pp/v1/cf/users/:cnsi. Counts every user
+    // visible to the connected principal — admin sees the whole CNSI; non-
+    // admin sees the role-restricted subset that getNativeUsers returns.
+    this.usersCount$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector }).pipe(
+      map(users => users === null ? null : users.length),
+    );
 
     this.constructAppObs();
   }

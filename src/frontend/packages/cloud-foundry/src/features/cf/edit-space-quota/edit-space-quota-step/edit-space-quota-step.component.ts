@@ -1,10 +1,10 @@
-import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, tap } from 'rxjs/operators';
 
-import { safeUnsubscribe, StepOnNextFunction } from '@stratosui/core';
+import { safeUnsubscribe, SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
 import { ActionState, APIResource, AppState } from '@stratosui/store';
 import { ISpaceQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
@@ -30,6 +30,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   private store = inject<Store<AppState>>(Store);
   private activatedRoute = inject(ActivatedRoute);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private router = inject(Router);
 
 
   spaceQuotaSubscription!: Subscription;
@@ -39,8 +40,49 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
   quota!: ISpaceQuotaDefinition;
 
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: validity mirrored from the embedded SpaceQuotaDefinitionFormComponent.
+   * The form is conditionally rendered (@if quota), so we wire the
+   * subscription via the ViewChild setter once the child appears.
+   */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
+  private _form?: SpaceQuotaDefinitionFormComponent;
+
   @ViewChild('form', { static: false })
-  form!: SpaceQuotaDefinitionFormComponent;
+  set form(value: SpaceQuotaDefinitionFormComponent) {
+    this._form = value;
+    this.formStatusSub?.unsubscribe();
+    if (value?.formGroup) {
+      this.validSignal.set(value.formGroup.valid && value.formGroup.dirty);
+      this.formStatusSub = value.formGroup.statusChanges.subscribe(
+        () => this.validSignal.set(value.formGroup.valid && value.formGroup.dirty)
+      );
+    }
+  }
+  get form(): SpaceQuotaDefinitionFormComponent {
+    return this._form;
+  }
+
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const finalState = await firstValueFrom(
+        cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => oldV.busy && !newV.busy),
+          map(([, newV]) => newV),
+        )
+      );
+      if (finalState.error) {
+        throw new Error(`Failed to update space quota: ${finalState.message}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
 
   constructor() {
 
@@ -63,22 +105,8 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
     this.spaceQuotaSubscription = this.spaceQuotaDefinition$.subscribe();
   }
 
-  validate = () => !!this.form && this.form.valid() && this.form.formGroup.dirty;
-
-  submit: StepOnNextFunction = () =>
-    cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV),
-      map(requestInfo => ({
-        success: !requestInfo.error,
-        redirect: !requestInfo.error,
-        message: requestInfo.error ? `Failed to update space quota: ${requestInfo.message}` : ''
-      }))
-    );
-
-
   ngOnDestroy() {
     safeUnsubscribe(this.spaceQuotaSubscription);
+    this.formStatusSub?.unsubscribe();
   }
 }

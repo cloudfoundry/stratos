@@ -21,7 +21,7 @@
       issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and
       doesn't contain the new report. This leaves user with no way to see report/refresh reports list
       -->
-      <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+      <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500">
         <span class="text-content-text">{{ prompt }}</span>
         @if (selection) {
           <span class="text-content-text">: {{ selection.title }}</span>

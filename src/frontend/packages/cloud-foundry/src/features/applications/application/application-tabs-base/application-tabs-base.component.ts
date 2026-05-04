@@ -43,20 +43,27 @@ import {
   CfCurrentUserPermissions,
   ApplicationStateData
 } from '@stratosui/cloud-foundry';
-import { ApplicationPollingService } from './application-polling.service';
+import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
+import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
+import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 
 @Component({
   selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
   styleUrls: ['./application-tabs-base.component.scss'],
-  providers: [ApplicationPollingService],
+  // AppApplicationActionsService and AppLifecycleProgressService are
+  // provided at application-base.component (the parent) — see comments
+  // there. They must live above AppDetailDataService in the injector tree
+  // because the data service injects the action service for poll-cadence
+  // gating; a child-scoped provider would be invisible to it (NG0201).
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
     LoadingPageComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    AppApplicationActionBarComponent
   ]
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
@@ -66,8 +73,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private userFavoriteManager = inject(UserFavoriteManager);
-  private appPollingService = inject(ApplicationPollingService);
-
+  private lifecycleProgress = inject(AppLifecycleProgressService);
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
   public favorite$: Observable<any>;
@@ -82,9 +88,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const scmService = inject(GitSCMService);
 
     // Initialize favorite$ after applicationService is available
+    // Filter for fully-hydrated entity with cfGuid stamped — getFavorite
+    // resolves the endpoint id via cf-entity-generator's getEndpointIdFromEntity
+    // (entity.entity.cfGuid). Loose !!app emissions slip through with empty
+    // inner entity and trigger "endpointId is undefined" warnings on every
+    // ngrx state churn (4 on initial load, 14+ during a lifecycle action).
     this.favorite$ = this.applicationService.app$.pipe(
-      filter(app => !!app),
-      map(app => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(app.entity, applicationEntityType, CF_ENDPOINT_TYPE))
+      filter(info => !!info?.entity?.entity?.cfGuid),
+      map(info => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(info.entity, applicationEntityType, CF_ENDPOINT_TYPE))
     );
     const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     this.schema = catalogEntity.getSchema();
@@ -94,6 +105,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         endpoints$,
         applicationService.appOrg$,
         applicationService.appSpace$
+      ),
+      // Skip emissions where the endpoint entry, org, or space hasn't loaded
+      // yet — getBreadcrumbs reads .name off each and throws on undefined.
+      // Without this guard, ngrx state churn during refreshes (or a slow
+      // endpoint reducer hydrating after waitForAppEntity$ already replayed)
+      // produces console TypeErrors on every navigation.
+      filter(([app, endpoints, org, space]) =>
+        !!endpoints?.[app.entity.entity.cfGuid] && !!org?.entity && !!space?.entity
       ),
       map(([app, endpoints, org, space]) => {
         return this.getBreadcrumbs(
@@ -116,11 +135,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.tabLinks = [
       { link: 'summary', label: 'Summary', iconFont: 'stratos-icons', icon: 'application' },
       { link: 'instances', label: 'Instances', iconFont: 'stratos-icons', icon: 'application_instance' },
-      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'route' },
       { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
-      { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
+      { link: 'revisions', label: 'Revisions', icon: 'history' },
+      { link: 'routes', label: 'Routes', iconFont: 'stratos-icons', icon: 'route' },
       { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
-      { link: 'events', label: 'Events', icon: 'watch_later' }
+      { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
+      { link: 'events', label: 'Events', icon: 'watch_later' },
     ];
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe((hasMetrics: boolean) => {
@@ -262,6 +282,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Activate the lifecycle-progress overlay service. The service needs an
+    // injection context for its effect(), which is why activation is deferred
+    // to ngOnInit rather than happening in the constructor.
+    this.lifecycleProgress.initialize();
+
     this.appSub$ = this.applicationService.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
         requestInfo.deleting.deleted ||
@@ -294,17 +319,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.summaryDataChanging$ = observableCombineLatest(
       initialFetch$,
       this.applicationService.isUpdatingApp$,
-      this.appPollingService.isPolling$
-    ).pipe(map(([isFetchingApp, isUpdating, isPolling]) => {
-      if (isPolling) {
-        return false;
-      }
+    ).pipe(map(([isFetchingApp, isUpdating]) => {
       return !!(isFetchingApp || isUpdating);
     }));
   }
 
   ngOnDestroy() {
+    this.lifecycleProgress.destroy();
     safeUnsubscribe(this.appSub$, this.stratosProjectSub);
-    this.appPollingService.stop();
   }
 }

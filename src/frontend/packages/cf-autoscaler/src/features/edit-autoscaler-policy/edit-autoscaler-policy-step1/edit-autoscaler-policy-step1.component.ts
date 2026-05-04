@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { of as observableOf } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { StepOnNextFunction } from '@stratosui/core';
@@ -42,6 +42,10 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   policyAlert = PolicyAlert;
   timezoneOptions = Intl.supportedValuesOf('timeZone');
   editLimitForm: FormGroup<EditLimitForm>;
+  // FWT-959 Part 2: observable surface for the parent's signal-step
+  // handle. Mirrors editLimitForm.valid; statusChanges fires after every
+  // value/validator update so the handle's `valid` signal stays in sync.
+  valid$: Observable<boolean>;
 
   private editLimitValid = true;
 
@@ -52,6 +56,10 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
       instance_max_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMax()]),
       timezone: this.fb.nonNullable.control('', [Validators.required])
     });
+    this.valid$ = this.editLimitForm.statusChanges.pipe(
+      startWith(this.editLimitForm.status),
+      map(status => status === 'VALID'),
+    );
   }
 
   ngOnInit() {

@@ -1,11 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, of } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map } from 'rxjs/operators';
 
-import { PageHeaderComponent, StepComponent, StepOnNextFunction, SteppersComponent } from '@stratosui/core';
+import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -39,18 +49,103 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
     CfRolesService
   ]
 })
-export class UsersRolesComponent implements OnDestroy {
+export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfUserService = inject(CfUserService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   initialUsers$!: Observable<CfUser[]>;
   singleUser$!: Observable<CfUser | null>;
   defaultCancelUrl!: string;
-  applyStarted = false;
+  // FWT-959 Part 2: applyStarted promoted to a signal so the confirm step's
+  // canClose / disablePrevious / destructiveStep / finishButtonText handle
+  // fields can be `computed()` over it. The legacy boolean read/write API
+  // is kept via a getter/setter pair so the existing imperative call-sites
+  // don't need to learn signal syntax.
+  applyStartedSignal = signal<boolean>(false);
+  get applyStarted(): boolean { return this.applyStartedSignal(); }
+  set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   setUsernames = false;
   title$!: Observable<string>;
+
+  // FWT-959 Part 2: SignalStepHandle wiring for the 3-step manage-users
+  // flow. The first step (`Usernames`) is rendered conditionally via the
+  // `@if (setUsernames)` template guard (setUsernames is set in the
+  // constructor and never flips, so a static template gate suffices —
+  // no signal-handle `hidden` field needed). The `setUsers` / `modify` /
+  // `confirm` children own most of the per-step state (validity, blocked,
+  // onEnter, onLeave, onNext) so each handle is mostly a thin delegating
+  // shell.
+  //
+  // Cross-step state survives via the existing ngrx pipeline
+  // (UsersRolesSetUsers / UsersRolesExecuteChanges / etc.) — no parent-
+  // owned signal coordination needed beyond `applyStartedSignal`.
+  @ViewChild('setUsers', { static: false }) setUsers?: ManageUsersSetUsernamesComponent;
+  @ViewChild('modify', { static: false }) modify!: UsersRolesModifyComponent;
+  @ViewChild('confirm', { static: false }) confirm!: UsersRolesConfirmComponent;
+
+  private setUsersValid = signal<boolean>(false);
+  private setUsersBlocked = signal<boolean>(false);
+  private modifyValid = signal<boolean>(false);
+  private modifyBlocked = signal<boolean>(true);
+  private bridgeSubs: Subscription[] = [];
+
+  setUsernamesStepHandle: SignalStepHandle = {
+    valid: this.setUsersValid.asReadonly(),
+    blocked: this.setUsersBlocked.asReadonly(),
+    submit: async () => {
+      // setUsers.onNext returns of({ success: true }) after dispatching
+      // UsersRolesSetUsers — we just need to wait for it to fire so the
+      // store is primed before the modify step's onEnter runs.
+      const result = await firstValueFrom(this.setUsers!.onNext(0, null as any));
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to set usernames');
+      }
+    },
+  };
+
+  modifyStepHandle: SignalStepHandle = {
+    valid: this.modifyValid.asReadonly(),
+    blocked: this.modifyBlocked.asReadonly(),
+    onEnter: () => this.modify?.onEnter(),
+    onLeave: (isNext?: boolean) => this.modify?.onLeave(!!isNext),
+    submit: async () => {
+      const result = await firstValueFrom(this.modify.onNext());
+      if (!result.success) {
+        throw new Error('Failed to update roles');
+      }
+    },
+  };
+
+  confirmStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    canClose: computed(() => !this.applyStartedSignal()),
+    disablePrevious: computed(() => this.applyStartedSignal()),
+    destructiveStep: computed(() => !this.applyStartedSignal()),
+    finishButtonText: computed(() => this.applyStartedSignal() ? 'Close' : 'Apply'),
+    onEnter: () => this.confirm?.onEnter(),
+    submit: async () => {
+      // Two-click apply semantic — see remove-user for the long form.
+      // First click dispatches the changes and returns ignoreSuccess so
+      // the per-row monitor stays visible; second click navigates back.
+      if (this.applyStartedSignal()) {
+        await this.router.navigateByUrl(this.defaultCancelUrl);
+        return;
+      }
+      this.applyStartedSignal.set(true);
+      this.store.dispatch(
+        new UsersRolesExecuteChanges(
+          this.setUsernames,
+          this.activeRouteCfOrgSpace.orgGuid,
+          this.activeRouteCfOrgSpace.spaceGuid,
+        ),
+      );
+      return { ignoreSuccess: true };
+    },
+  };
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
@@ -97,7 +192,41 @@ export class UsersRolesComponent implements OnDestroy {
     );
   }
 
+  ngAfterViewInit(): void {
+    // Bridge child Observable surfaces into the local signals the handles
+    // read so the stepper re-evaluates blocked/valid reactively.
+    if (this.setUsers) {
+      this.bridgeSubs.push(
+        this.setUsers.valid$.subscribe(v => {
+          this.setUsersValid.set(!!v);
+          this.cdr.markForCheck();
+        }),
+      );
+      this.bridgeSubs.push(
+        this.setUsers.blocked$.subscribe(v => {
+          this.setUsersBlocked.set(!!v);
+          this.cdr.markForCheck();
+        }),
+      );
+    }
+    if (this.modify) {
+      this.bridgeSubs.push(
+        this.modify.valid$.subscribe(v => {
+          this.modifyValid.set(!!v);
+          this.cdr.markForCheck();
+        }),
+      );
+      this.bridgeSubs.push(
+        this.modify.blocked$.subscribe(v => {
+          this.modifyBlocked.set(!!v);
+          this.cdr.markForCheck();
+        }),
+      );
+    }
+  }
+
   ngOnDestroy(): void {
+    this.bridgeSubs.forEach(s => s.unsubscribe());
     this.store.dispatch(new UsersRolesClear());
   }
 
@@ -114,16 +243,5 @@ export class UsersRolesComponent implements OnDestroy {
     }
     route += `/users`;
     return route;
-  }
-
-  startApply: StepOnNextFunction = () => {
-    if (this.applyStarted) {
-      return observableOf({ success: true, redirect: true });
-    }
-    this.applyStarted = true;
-    this.store.dispatch(
-      new UsersRolesExecuteChanges(this.setUsernames, this.activeRouteCfOrgSpace.orgGuid, this.activeRouteCfOrgSpace.spaceGuid)
-    );
-    return observableOf({ success: true, ignoreSuccess: true });
   }
 }

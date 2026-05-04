@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -21,6 +21,7 @@ import {
   CfAppVariablesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
 import { ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 
 export interface VariableTabAllEnvVarType {
   name: string;
@@ -49,6 +50,7 @@ export interface VariableTabAllEnvVarType {
 export class VariablesTabComponent implements OnInit {
   private store = inject<Store<CFAppState>>(Store);
   private appService = inject(ApplicationService);
+  private data = inject(AppDetailDataService);
   private listConfig = inject<ListConfig<ListAppEnvVar>>(ListConfig);
 
 
@@ -58,19 +60,18 @@ export class VariablesTabComponent implements OnInit {
     this.envVarsDataSource = listConfig.getDataSource();
   }
 
-  envVars$!: Observable<{
-    names: string[],
-    values: Record<string, unknown>
-  }>;
+  /** Signal: names of user-defined environment variables from the app entity. */
+  readonly envVarNames: Signal<string[]> = computed(() => {
+    const envJson = this.data.app()?.entity?.environment_json;
+    return envJson ? Object.keys(envJson) : [];
+  });
 
   envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;
   allEnvVars$!: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
-    this.envVars$ = this.appService.waitForAppEntity$.pipe(map(app => ({
-      names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
-      values: app.entity.entity.environment_json || {}
-    })));
+    // appEnvVars is the paginator-backed ngrx path for all env var sections —
+    // kept on the legacy path intentionally (Task 5 decision).
     this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
       map(this.mapEnvVars.bind(this))
     );

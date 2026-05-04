@@ -21,7 +21,7 @@ export class GetAllCfEvents extends CFStartAction implements PaginatedAction {
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, endpointGuid);
     this.options = new HttpRequest(
       'GET',
-      'events',
+      `/pp/v1/cf/audit_events/${endpointGuid}`,
       {
         params: new HttpParams({
           fromObject: {

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import {
@@ -13,6 +13,7 @@ import {
   CustomOptionComponent,
   CustomSlideToggleComponent,
   FocusDirective,
+  SignalStepHandle,
   StepOnNextFunction
 } from '@stratosui/core';
 import { ActionState } from '@stratosui/store';
@@ -49,10 +50,39 @@ interface EditSpaceForm {
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private cfSpaceService = inject(CloudFoundrySpaceService);
+  private router = inject(Router);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
+
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Performs the two-stage update
+   * (space attributes, then optional quota change) and navigates to the
+   * parent-supplied redirectUrl on success. Replaces legacy onNext.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
+      const spaceState = await firstValueFrom(this.updateSpace());
+      if (spaceState.error) {
+        throw new Error(`Failed to update space: ${spaceState.message}`);
+      }
+      const quotaUnchanged = this.originalSpaceQuotaGuid === spaceQuotaGuid ||
+        (!this.originalSpaceQuotaGuid && !spaceQuotaGuid);
+      if (!quotaUnchanged) {
+        const quotaResult = await firstValueFrom(this.updateSpaceQuota());
+        if (!quotaResult.success) {
+          throw new Error(quotaResult.message || 'Failed to update space quota');
+        }
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
 
   originalName: any;
   spaceSubscription!: Subscription;

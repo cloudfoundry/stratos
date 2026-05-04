@@ -1,0 +1,82 @@
+<div class="signal-detail">
+  @if (showToolbar()) {
+    <div data-test="signal-detail-toolbar"
+         class="signal-detail-toolbar flex items-center justify-between gap-3 px-4 py-2 border-b border-content-border bg-content-bg">
+      <div class="signal-detail-toolbar-left flex items-center gap-3 min-w-0">
+        @if (breadcrumbs().length > 0) {
+          <div data-test="signal-detail-breadcrumbs"
+               class="signal-detail-breadcrumbs flex items-center gap-1 text-sm text-content-muted min-w-0">
+            @for (c of breadcrumbs(); track $index) {
+              @if (c.link) {
+                <a [routerLink]="c.link"
+                   class="signal-detail-breadcrumb hover:text-content-text hover:underline truncate">{{ c.label }}</a>
+              } @else {
+                <span class="signal-detail-breadcrumb truncate">{{ c.label }}</span>
+              }
+              @if (!$last) {
+                <span class="material-icons text-base opacity-50 flex-shrink-0">chevron_right</span>
+              }
+            }
+          </div>
+        }
+        @if (status(); as st) {
+          <span data-test="signal-detail-status"
+                [class]="statusPillClasses(st.color)"
+                [title]="st.label">{{ st.label }}</span>
+        }
+      </div>
+      @if (visibleHeaderActions().length > 0) {
+        <div data-test="signal-detail-header-actions"
+             class="signal-detail-toolbar-right flex items-center gap-2 flex-shrink-0">
+          @for (act of visibleHeaderActions(); track act.label) {
+            <button data-test="signal-detail-header-action"
+                    [class]="headerActionClasses(act)"
+                    [disabled]="isHeaderActionDisabled(act)"
+                    [title]="act.tooltip ?? act.label"
+                    (click)="invokeHeaderAction(act, $event)">
+              @if (act.icon) {
+                <span class="material-icons text-base leading-none">{{ act.icon }}</span>
+              }
+              <span>{{ act.label }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (visibleTabs().length > 0) {
+    <div data-test="signal-detail-tabs"
+         class="signal-detail-tabs flex items-center gap-1 border-b border-content-border bg-content-bg px-2 overflow-x-auto">
+      @for (tab of visibleTabs(); track trackTab($index, tab)) {
+        <a [routerLink]="tab.link"
+           routerLinkActive="signal-detail-tab--active text-accent border-accent"
+           [routerLinkActiveOptions]="{ exact: false }"
+           data-test="signal-detail-tab"
+           class="signal-detail-tab flex items-center gap-1.5 px-4 py-2.5 text-sm border-b-2 border-transparent text-content-muted hover:text-content-text hover:border-content-border transition-colors whitespace-nowrap">
+          @if (tab.icon) {
+            <span class="material-icons text-base leading-none">{{ tab.icon }}</span>
+          }
+          <span>{{ tab.label }}</span>
+        </a>
+      }
+    </div>
+  }
+
+  <div class="signal-detail-body">
+    @if (isLoading()) {
+      <div data-test="signal-detail-loading"
+           class="p-6 flex items-center gap-3 text-content-muted">
+        <div class="spinner spinner-primary"></div>
+        <span>Loading…</span>
+      </div>
+    } @else if (hasError()) {
+      <div data-test="signal-detail-error"
+           class="m-4 p-3 rounded border border-danger-shade-300 bg-danger-shade-50 dark:bg-danger-shade-900/20 dark:border-danger-shade-700 text-danger-shade-700 dark:text-danger-shade-200 text-sm">
+        {{ errorMessage() }}
+      </div>
+    } @else {
+      <ng-content></ng-content>
+    }
+  </div>
+</div>

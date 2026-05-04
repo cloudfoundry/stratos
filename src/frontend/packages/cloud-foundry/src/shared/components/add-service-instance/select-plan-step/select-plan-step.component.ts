@@ -4,8 +4,9 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Store } from '@ngrx/store';
-import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take,
+  catchError,
   distinctUntilChanged,
   filter,
   map,
@@ -23,10 +24,11 @@ import {
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import {
   canShowServicePlanCosts,
-  getServicePlanAccessibilityCardStatus,
+  getPlanAccessibilityV3,
   getServicePlanName,
   populateServicePlanExtraTyped,
 } from '../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
+import { ServiceCatalogDataService } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
 import {
   selectCreateServiceInstance,
 } from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
@@ -77,6 +79,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private modeService = inject(CsiModeService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
 
   selectedPlan$!: Observable<APIResource<IServicePlan>>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
@@ -94,6 +97,15 @@ export class SelectPlanStepComponent implements OnDestroy {
   constructor() {
     this.stepperForm = new FormGroup<SelectPlanForm>({
       servicePlans: new FormControl<string>('', { validators: Validators.required, nonNullable: true }),
+    });
+
+    // Keep `validate` synced with the form's actual validity. The parent
+    // wizard's selectPlanHandle.valid reads this signal; if we only
+    // updated it inside the one-shot servicePlans$ subscription in
+    // onEnter, manual plan picks after that point would never re-flip
+    // validate to true and the Next button would stay disabled.
+    this.stepperForm.statusChanges.subscribe(() => {
+      this.validate.set(this.stepperForm.valid);
     });
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -132,12 +144,14 @@ export class SelectPlanStepComponent implements OnDestroy {
         }),
         filter(selectedServicePlan => !!selectedServicePlan),
         tap(selectedServicePlan => {
-          getServicePlanAccessibilityCardStatus(
-            selectedServicePlan,
-            this.cSIHelperService.servicePlanVisibilities$,
-            this.cSIHelperService.serviceBroker$).pipe(
-              take(1)
-            ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
+          const cfGuid = selectedServicePlan.entity.cfGuid;
+          const planGuid = selectedServicePlan.metadata.guid;
+          const isPublicPlan = !!selectedServicePlan.entity.public;
+          this.serviceCatalog.planVisibility(cfGuid, planGuid).pipe(
+            catchError(() => observableOf(null)),
+            map(visibility => getPlanAccessibilityV3(isPublicPlan, visibility)),
+            take(1),
+          ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
         })
       );
 

@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState, RouterNav } from '@stratosui/store';
 
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { TileSelectorComponent } from '../../../../shared/components/tile-selector/tile-selector.component';
 
 interface IAppTileData extends ITileData {
@@ -31,6 +31,12 @@ export class BackupRestoreEndpointsComponent {
 
   public serviceType!: string;
   public tileSelectorConfig: ITileConfig<IAppTileData>[];
+
+  // FWT-956: signal-native step handle. The tile selector is a confirmation-
+  // style step (no submission, Next button hidden); the constant `valid`
+  // signal exists so the step participates in the new contract identically
+  // to consumers that drive validity reactively.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {

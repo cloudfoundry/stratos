@@ -65,6 +65,22 @@ function mapJetstreamResponses(
 
 function getAllEntitiesFromResponses(response: any, getEntitiesFromResponse?: (response: any) => any) {
   if (!Array.isArray(response)) {
+    // Non-paged (single-resource) path. V3-native entity definitions register a
+    // getEntitiesFromResponse adapter that lifts a flat `{guid, ...}` resource
+    // into the legacy `{metadata, entity}` shape the schema normaliser expects.
+    // Run it here so single-resource fetches (e.g. GetOrganization) are wrapped
+    // before normalize(). Fall back to passthrough when no adapter is registered
+    // (legacy V2 entities) or when the adapter declines (returns undefined).
+    if (getEntitiesFromResponse && response) {
+      const entities = getEntitiesFromResponse(response);
+      if (Array.isArray(entities) && entities.length === 1) {
+        return entities[0];
+      }
+      if (Array.isArray(entities)) {
+        return entities;
+      }
+      return entities ?? response;
+    }
     return response;
   }
   if (getEntitiesFromResponse) {

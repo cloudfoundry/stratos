@@ -1,5 +1,5 @@
 <app-page-header [tabs]="tabLinks" [tabsHeader]="tabsHeader" [favorite]="favorite$ | async">
-  <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
+  <h1>{{ cfEndpointService.endpoint()?.entity.name }}</h1>
 </app-page-header>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Cloud Foundry details'">
   <router-outlet></router-outlet>

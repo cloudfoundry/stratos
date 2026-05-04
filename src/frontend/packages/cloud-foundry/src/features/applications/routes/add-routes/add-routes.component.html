@@ -22,7 +22,7 @@
           </app-select>
         </app-form-field>
       </form>
-      @if (selectedDomain?.entity.router_group_type !== 'tcp') {
+      @if (selectedDomain?.entity?.router_group_type !== 'tcp') {
         <form [formGroup]="addHTTPRoute" class="stepper-form">
           <div class="add-route__form-prompt">
             This is an HTTP Domain - an HTTP Route will be created
@@ -53,7 +53,7 @@
           </div>
         </form>
       }
-      @if (selectedDomain?.entity.router_group_type === 'tcp') {
+      @if (selectedDomain?.entity?.router_group_type === 'tcp') {
         <form [formGroup]="addTCPRoute" class="stepper-form">
           <div class="add-route__form-prompt">
             This is a TCP Domain - a TCP Route will be created
@@ -79,9 +79,9 @@
       <div class="add-route__form-message">
         Please select the route you wish to map
       </div>
-      <form class="add-route__form-maptable">
-        <app-map-routes [selectedRoute$]="selectedRoute$"></app-map-routes>
-      </form>
+      <div class="add-route__form-maptable" data-test="map-routes-picker">
+        <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
+      </div>
     </div>
   }
 </div>

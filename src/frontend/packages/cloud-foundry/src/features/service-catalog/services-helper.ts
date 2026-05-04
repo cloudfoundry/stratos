@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { take, combineLatest, filter, map, share, switchMap } from 'rxjs/operators';
 
+import { StServicePlanVisibility } from '../../services/endpoint-data/stratos-types';
+
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
 import { EntityService } from '../../../../store/src/entity-service';
@@ -142,6 +144,33 @@ export const getServicePlanAccessibility = (
     combineLatest(safeServicePlanVisibilities$),
     map(([serviceBroker, allServicePlanVisibilities]) => getSvcAvailability(servicePlan, serviceBroker, allServicePlanVisibilities))
   );
+};
+
+// V3-native plan accessibility derivation. The V3 service_plan_visibility
+// resource encodes everything we need: type ∈ {public, admin, organization,
+// space}. `space`/`organization` collapse into the legacy WARNING bucket
+// (limited visibility); `admin` is ERROR (no general visibility); `public`
+// is OK. No broker traversal required — V3 surfaces the space-scoped intent
+// directly on the visibility resource.
+//
+// `isPublicPlan` is the per-plan public flag (V2 `plan.entity.public` or V3
+// `plan.visibilityType === 'public'`). Callers pre-translate so the helper
+// stays shape-agnostic across the migration.
+export const getPlanAccessibilityV3 = (
+  isPublicPlan: boolean,
+  visibility: StServicePlanVisibility | null,
+): StratosStatus => {
+  if (isPublicPlan) {
+    return StratosStatus.OK;
+  }
+  const t = visibility?.type;
+  if (t === 'public') {
+    return StratosStatus.OK;
+  }
+  if (t === 'organization' || t === 'space') {
+    return StratosStatus.WARNING;
+  }
+  return StratosStatus.ERROR;
 };
 
 export const getServicePlanAccessibilityCardStatus = (

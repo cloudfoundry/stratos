@@ -1,18 +1,43 @@
 import { CommonModule } from '@angular/common';
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, distinctUntilChanged, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
-
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  startWith,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import {
+  SignalStepHandle,
+  StepComponent,
+  StepOnNextResult,
+} from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { helmEntityCatalog } from '../../../helm/helm-entity-catalog';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
@@ -60,9 +85,6 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   details: FormGroup<CreateReleaseForm>;
   namespaces$: Observable<string[]>;
 
-  private endpointChangedSignal: WritableSignal<string | null> = signal(null);
-  private endpointChanged: Observable<string | null>;
-
   @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
 
@@ -74,12 +96,22 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   public endpointsService = inject(EndpointsService);
   private chartsService = inject(ChartsService);
+  private router = inject(Router);
 
-
+  // FWT-959 Part 2: signal-native step handles.
+  //
+  // - detailsStepHandle: validity tracks the form's `valid` state via a
+  //   signal mirror of the existing validate$ stream. No submit (the user
+  //   advances to Overrides on Next).
+  // - overridesStepHandle: submit drives the existing createNamespace +
+  //   installChart pipeline; on success the legacy `redirect: true` +
+  //   redirectPayload navigates to the workload summary page — we make
+  //   that navigation explicit via Router.navigate. onEnter resizes the
+  //   chart editor (carried over from the legacy onEnterOverrides).
+  detailsStepHandle!: SignalStepHandle;
+  overridesStepHandle!: SignalStepHandle;
 
   constructor() {
-    this.endpointChanged = toObservable(this.endpointChangedSignal);
-
     const chart = this.route.snapshot.params as HelmChartReference;
     this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
@@ -94,7 +126,9 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
     this.setupDetailsStep();
 
-
+    // Build the signal-native step handles after the form is assembled so
+    // we can derive validity from validate$ via toSignal.
+    this.setupStepHandles();
   }
 
   private setupDetailsStep() {
@@ -113,7 +147,10 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     );
     this.namespaces$ = combineLatest([
       allNamespaces$,
-      this.endpointChanged,
+      // endpointChanged stream — need to expose via toObservable; reuse
+      // the original Observable construction by reading the signal in a
+      // statusChanges-driven map for parity with the legacy stream.
+      this.details.controls.endpoint.valueChanges.pipe(startWith('')),
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
@@ -167,13 +204,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subs.push(
-      this.details.controls.endpoint.valueChanges.subscribe(val => {
-        this.endpointChangedSignal.set(val);
-      })
-    );
-
     this.validate$ = this.details.statusChanges.pipe(
+      startWith(this.details.status),
       map(() => this.details.valid)
     );
 
@@ -183,6 +215,37 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
         this.details.controls.endpoint.setValue(endpoints[0].guid);
       }
     });
+  }
+
+  private setupStepHandles() {
+    // Signal mirror of validate$. `initialValue` matches the form's initial
+    // validity (false — releaseName/releaseNamespace are required and empty).
+    const validSignal = toSignal(this.validate$, { initialValue: this.details.valid });
+    this.detailsStepHandle = {
+      valid: computed(() => !!validSignal()),
+    };
+    this.overridesStepHandle = {
+      // Overrides step has no per-step validation gate; the chart values
+      // editor handles its own JSON-schema validation at submit time.
+      valid: signal(true).asReadonly(),
+      finishButtonText: signal('Install').asReadonly(),
+      onEnter: () => {
+        // Resize the editor when the step becomes visible.
+        this.editor.resizeEditor();
+      },
+      submit: async () => {
+        const result = await firstValueFrom(this.submit$());
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to install chart');
+        }
+        if (result.redirect && result.redirectPayload?.path) {
+          // Legacy { redirect: true, redirectPayload: { path } } navigated
+          // to the workload summary page. Make the navigation explicit so
+          // we don't rely on the deprecated stepper redirect plumbing.
+          await this.router.navigate(['/' + result.redirectPayload.path]);
+        }
+      },
+    };
   }
 
   private filterTyped(namespaces: string[], namespace: string): string[] {
@@ -195,7 +258,6 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.kubeEndpoints$.pipe(take(1)).subscribe(ep => {
       if (ep.length > 1) {
         this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });
-        this.endpointChangedSignal.set(ep[0].guid);
         setTimeout(() => {
           this.releaseNameInputField.nativeElement.focus();
         }, 1);
@@ -203,12 +265,10 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Ensure the editor is resized when the overrides step becomes visible
-  onEnterOverrides = () => {
-    this.editor.resizeEditor();
-  };
-
-  submit: StepOnNextFunction = () => {
+  // The full submit pipeline used by the signal-handle. Returns the legacy
+  // StepOnNextResult shape so the createNamespace + installChart pieces
+  // can stay observable-shaped; the handle wraps the result above.
+  private submit$ = (): Observable<StepOnNextResult> => {
     return this.createNamespace().pipe(
       switchMap(createRes => createRes.success ? this.installChart() : of(createRes))
     );

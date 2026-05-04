@@ -17,7 +17,6 @@ import {
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { CfStacksListConfigService } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-list-config.service';
 import { CloudFoundryStacksComponent } from "./cloud-foundry-stacks.component";
 
 describe('CloudFoundryStacksComponent', () => {
@@ -57,7 +56,6 @@ describe('CloudFoundryStacksComponent', () => {
             spaceGuid: testSCFEndpointGuid
           }
         },
-        CfStacksListConfigService,
       ]
     }).compileComponents();
 

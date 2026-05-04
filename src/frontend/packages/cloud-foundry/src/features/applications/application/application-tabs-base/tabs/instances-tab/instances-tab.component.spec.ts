@@ -1,27 +1,42 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import {
+  CUSTOM_ELEMENTS_SCHEMA,
+  Signal,
+  WritableSignal,
+  computed,
+  provideZonelessChangeDetection,
+  signal,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { of } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { of } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PaginationMonitorFactory } from '@stratosui/store';
+import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
-import { ApplicationService } from '@stratosui/cloud-foundry';
-import { ListConfig } from '@stratosui/core';
+import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  TailwindSnackBarService,
+} from '@stratosui/core';
+
+import { AppDetailDataService } from '../../../../app-detail-data.service';
+import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
+import { AppInstanceActionsService } from '../../../../../../shared/services/app-instance-actions.service';
+import { CfAppInstancesSignalConfigService } from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-signal-config.service';
 import { InstancesTabComponent } from './instances-tab.component';
 
 describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;
   let fixture: ComponentFixture<InstancesTabComponent>;
 
-  // Mock services
   const mockStore = {
     dispatch: vi.fn(),
     select: vi.fn(() => of({})),
-    pipe: vi.fn(() => of({}))
+    pipe: vi.fn(() => of({})),
   };
 
   const mockPmf = {
@@ -29,28 +44,98 @@ describe('InstancesTabComponent', () => {
       currentPage$: of([]),
       pagination$: of({}),
       fetchingCurrentPage$: of(false),
-      isLoadingPage$: of(false)
-    }))
+      isLoadingPage$: of(false),
+    })),
   };
 
-  // Mock ListConfig
-  const mockListConfig = {
-    getDataSource: vi.fn(),
-    getColumns: vi.fn(() => []),
-    getSingleActions: vi.fn(() => []),
-    getMultiActions: vi.fn(() => []),
-    getGlobalActions: vi.fn(() => []),
-    getMultiFiltersConfigs: vi.fn(() => []),
-    viewType: 'table',
-    text: { title: 'Test', filter: '', noEntries: '' },
-    enableTextFilter: false
+  // Spy holders, refreshed per test.
+  let raiseFocusPriority: ReturnType<typeof vi.fn>;
+  let releaseFocus: ReturnType<typeof vi.fn>;
+  let killInstance: ReturnType<typeof vi.fn>;
+  let confirmOpen: ReturnType<typeof vi.fn>;
+
+  /** Minimal AppDetailDataService stub. */
+  const makeDataStub = () => {
+    releaseFocus = vi.fn();
+    raiseFocusPriority = vi.fn(() => releaseFocus);
+    return {
+      app: signal<any>(undefined).asReadonly(),
+      summary: signal<any>(undefined).asReadonly(),
+      stats: signal<any[]>([]).asReadonly(),
+      state: computed(() => ({ label: '', indicator: null, actions: {} })),
+      lastPolledAt: signal<Date | null>(null).asReadonly(),
+      loading: signal({ stats: false } as any).asReadonly(),
+      running: signal(false).asReadonly(),
+      raiseFocusPriority,
+    };
   };
+
+  const makeActionsStub = () => ({
+    inFlight: signal(false).asReadonly(),
+    verb: signal<any>(null).asReadonly(),
+    progress: signal<any[] | null>(null).asReadonly(),
+  });
+
+  const makeInstanceActionsStub = () => {
+    killInstance = vi.fn(async () => undefined);
+    return {
+      transitioningIndex: signal<number | null>(null).asReadonly(),
+      inFlight: signal(false).asReadonly(),
+      killInstance,
+    };
+  };
+
+  // Stub for the tab's signal-list config service. Mirrors the public
+  // surface the tab consumes (view pipeline, page/sort signals, columns,
+  // refresh/clear). The `actions` column carries an unwrapped invoke that
+  // the tab replaces with a confirm-wrapped factory.
+  const makeInstancesConfigStub = () => {
+    const stats: WritableSignal<any[]> = signal([]);
+    const filtered = computed(() => stats());
+    const view = {
+      pagedItems: filtered,
+      totalFilteredResults: computed(() => filtered().length),
+      totalPages: computed(() => 1),
+    };
+    const pageIndex: WritableSignal<number> = signal(0);
+    const pageSize: WritableSignal<number> = signal(25);
+    const nameFilter: WritableSignal<string> = signal('');
+    const sort: WritableSignal<any> = signal({ field: 'index', direction: 'asc' });
+    const viewMode: WritableSignal<'table' | 'card'> = signal('table');
+    return {
+      view,
+      pageIndex,
+      pageSize,
+      nameFilter,
+      sort,
+      viewMode,
+      stats: stats.asReadonly(),
+      buildColumns: () => [
+        { header: 'Index', key: 'index', render: (r: any) => `${r.index}` },
+        {
+          header: '', key: 'actions', kind: 'actions',
+          render: () => '',
+          actions: () => [{ label: 'Kill', invoke: () => Promise.resolve() }],
+        } as any,
+      ],
+      buildRowActions: () => [],
+      refresh: vi.fn(async () => undefined),
+      clearFilters: vi.fn(),
+    };
+  };
+
+  const makeConfirmStub = () => {
+    confirmOpen = vi.fn();
+    return { open: confirmOpen };
+  };
+
+  const makeSnackStub = () => ({
+    open: vi.fn(),
+  });
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        InstancesTabComponent,
-      ],
+      imports: [InstancesTabComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -59,38 +144,42 @@ describe('InstancesTabComponent', () => {
         { provide: Store, useValue: mockStore },
         { provide: PaginationMonitorFactory, useValue: mockPmf },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+        { provide: AppDetailDataService, useFactory: makeDataStub },
+        { provide: AppApplicationActionsService, useFactory: makeActionsStub },
+        { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
+        { provide: TailwindSnackBarService, useFactory: makeSnackStub },
       ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     })
-    .overrideComponent(InstancesTabComponent, {
-      remove: {
-        providers: [
-          // Remove all component providers to avoid deep dependency issues
-        ]
-      },
-      add: {
-        providers: [
-          { provide: ListConfig, useValue: mockListConfig }
-        ]
-      }
-    })
-    .compileComponents();
+      .overrideComponent(InstancesTabComponent, {
+        // Replace the heavy tab-scoped providers with stubs so we can
+        // observe lifecycle calls without booting the real services
+        // (which would pull in HttpClient, ListStateStore, etc.).
+        remove: {
+          providers: [AppInstanceActionsService, CfAppInstancesSignalConfigService],
+        },
+        add: {
+          providers: [
+            { provide: AppInstanceActionsService, useFactory: makeInstanceActionsStub },
+            { provide: CfAppInstancesSignalConfigService, useFactory: makeInstancesConfigStub },
+          ],
+        },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(InstancesTabComponent);
     component = fixture.componentInstance;
-    // Don't call detectChanges() to avoid complex initialization
   });
 
-  // Explicitly destroy fixture to avoid cleanup errors
   afterEach(() => {
-    // Absorb any pending company-config request from StratosBrandingService
     const httpMock = TestBed.inject(HttpTestingController);
     httpMock.match(() => true);
     if (fixture) {
       try {
         fixture.destroy();
       } catch (_e) {
-        // Ignore cleanup errors - component creation was successful
+        // Ignore cleanup errors.
       }
     }
   });
@@ -99,7 +188,51 @@ describe('InstancesTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // Note: This test validates component creation without full initialization.
-  // The ApplicationServiceMock provides proper cfGuid and appGuid values,
-  // fixing the original error: "get action for entity application has no guid"
+  it('renders without throwing', () => {
+    expect(() => fixture.detectChanges()).not.toThrow();
+  });
+
+  it('raises focus priority for stats on init and releases on destroy', () => {
+    fixture.detectChanges();
+    expect(raiseFocusPriority).toHaveBeenCalledWith('stats');
+    expect(releaseFocus).not.toHaveBeenCalled();
+    fixture.destroy();
+    expect(releaseFocus).toHaveBeenCalledTimes(1);
+  });
+
+  it('builds a signal-list config from the wave-2 service', () => {
+    fixture.detectChanges();
+    expect(component.listConfig).toBeTruthy();
+    expect(component.listConfig.pagedItems).toBeTruthy();
+    // Actions column carries the tab's confirm-wrapped factory, not the
+    // service's no-confirm one.
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    expect(actionsCol).toBeTruthy();
+    expect(actionsCol!.actions).toBeTruthy();
+  });
+
+  it('opens a confirmation dialog before killing an instance, and only kills on confirm', async () => {
+    fixture.detectChanges();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    const rowActions = actionsCol!.actions!({ index: 2 } as any);
+    const killAction = rowActions[0];
+    expect(killAction.label).toBe('Terminate');
+
+    // Trigger the kebab Kill click.
+    killAction.invoke({ index: 2 } as any);
+
+    // ConfirmationDialogService.open(config, onConfirm) — synchronous setup,
+    // onConfirm fires when the user accepts.
+    expect(confirmOpen).toHaveBeenCalledTimes(1);
+    const [config, onConfirm] = confirmOpen.mock.calls[0];
+    expect(config).toBeInstanceOf(ConfirmationDialogConfig);
+    expect((config as ConfirmationDialogConfig).message).toContain('instance 2');
+
+    // killInstance hasn't been called yet — only the confirm dialog is open.
+    expect(killInstance).not.toHaveBeenCalled();
+
+    // Simulate user confirming.
+    await onConfirm();
+    expect(killInstance).toHaveBeenCalledWith(2);
+  });
 });

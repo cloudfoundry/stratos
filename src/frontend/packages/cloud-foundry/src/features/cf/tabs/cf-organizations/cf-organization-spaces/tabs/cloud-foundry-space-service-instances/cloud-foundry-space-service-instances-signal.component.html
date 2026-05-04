@@ -1,0 +1,5 @@
+<div class="space-service-instances h-full flex flex-col">
+  @if (listConfig(); as config) {
+    <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
+  }
+</div>

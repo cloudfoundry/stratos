@@ -5,7 +5,7 @@
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
     <app-steppers>
-      <app-step title="Local Account Information" [valid]="validateLocalAuthForm | async" [onNext]="next">
+      <app-step title="Local Account Information" [signalHandle]="signalHandle">
         <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
           text="Please wait - this will take a few moments">
           <div class="space-y-6">

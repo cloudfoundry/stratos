@@ -63,6 +63,15 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 	s.Configuration.HomeViewShowFavoritesOnly = p.Config.HomeViewShowFavoritesOnly
 	s.Configuration.UserEndpointsEnabled = string(p.Config.UserEndpointsEnabled)
+	s.Configuration.EndpointCardConcurrency = p.Config.EndpointCardConcurrency
+	s.Configuration.EndpointRequestConcurrency = p.Config.EndpointRequestConcurrency
+
+	if s.Configuration.EndpointCardConcurrency == 0 {
+		s.Configuration.EndpointCardConcurrency = 2
+	}
+	if s.Configuration.EndpointRequestConcurrency == 0 {
+		s.Configuration.EndpointRequestConcurrency = 3
+	}
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {

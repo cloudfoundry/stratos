@@ -21,6 +21,14 @@ export class MarketplaceSummaryPage extends BasePage {
     return this.container.locator('.service-summary');
   }
 
+  getServiceBrokerCard(): Locator {
+    return this.page.locator('app-service-broker-card');
+  }
+
+  getAuthUsernameTristate(): Locator {
+    return this.getServiceBrokerCard().locator('app-tristate-value span.tristate-value');
+  }
+
   getRecentInstances(): Locator {
     return this.container.locator('.recent-instances');
   }

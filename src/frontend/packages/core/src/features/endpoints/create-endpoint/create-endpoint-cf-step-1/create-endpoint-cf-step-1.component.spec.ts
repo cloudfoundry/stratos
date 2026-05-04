@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import {
   entityCatalog,
@@ -12,13 +12,25 @@ import {
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
+import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
+
+function makeStubEndpointsSignalConfig() {
+  return {
+    // Only the methods create-endpoint-cf-step-1 touches need stubs; the rest
+    // of the service's signal/computed surface is not read by this component.
+    register: vi.fn().mockResolvedValue({ busy: false, error: false, message: 'new-endpoint-guid' }),
+    unregister: vi.fn().mockResolvedValue({ busy: false, error: false, message: '' }),
+  };
+}
 
 describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
   let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
+  let stubSignalConfig: ReturnType<typeof makeStubEndpointsSignalConfig>;
 
   beforeEach(async () => {
+    stubSignalConfig = makeStubEndpointsSignalConfig();
     // Clear and register entities BEFORE TestBed configuration for Angular 20
     (entityCatalog as any).clear();
     const entities = generateStratosEntities();
@@ -43,6 +55,7 @@ describe('CreateEndpointCfStep1Component', () => {
       ],
       providers: [
         EntityServiceFactory,
+        { provide: EndpointsSignalConfigService, useValue: stubSignalConfig },
         {
           provide: ActivatedRoute,
           useValue: {

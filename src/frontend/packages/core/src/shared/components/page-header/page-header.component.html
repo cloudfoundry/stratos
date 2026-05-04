@@ -134,7 +134,7 @@
                 <span class="material-icons">notifications</span>
                 @if ((unreadEventCount$ | async); as count) {
                   <span
-                    class="absolute -top-1 -right-1 bg-danger-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
+                    class="absolute -top-1 -right-1 bg-danger-shade-500 text-white text-xs rounded-full min-w-[1.25rem] h-5 flex items-center justify-center px-1">
                     {{ count }}
                   </span>
                 }

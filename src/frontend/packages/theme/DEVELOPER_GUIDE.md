@@ -63,7 +63,7 @@ Replace `mat-card` with our card system:
 
 <!-- Card with status indicator -->
 <div class="card relative">
-  <div class="absolute top-0 left-0 w-full h-1 bg-success-500 rounded-t-lg"></div>
+  <div class="absolute top-0 left-0 w-full h-1 bg-success-shade-500 rounded-t-lg"></div>
   <div class="card-body">Content</div>
 </div>
 ```
@@ -224,11 +224,11 @@ Use semantic color classes that automatically adapt to the theme:
 ```html
 <!-- Text colors -->
 <p class="text-primary">Primary text</p>
-<p class="text-primary-600">Darker primary</p>
+<p class="text-brand-600">Darker primary</p>
 
 <!-- Background colors -->
 <div class="bg-primary text-white">Primary background</div>
-<div class="bg-primary-50">Light primary background</div>
+<div class="bg-brand-50">Light primary background</div>
 
 <!-- Border colors -->
 <div class="border border-primary">Primary border</div>
@@ -237,20 +237,20 @@ Use semantic color classes that automatically adapt to the theme:
 ### **Status Colors**
 ```html
 <!-- Success -->
-<p class="text-success-600">Success text</p>
-<div class="bg-success-500">Success background</div>
+<p class="text-success-shade-600">Success text</p>
+<div class="bg-success-shade-500">Success background</div>
 
 <!-- Warning -->
-<p class="text-warning-600">Warning text</p>
-<div class="bg-warning-500">Warning background</div>
+<p class="text-warning-shade-600">Warning text</p>
+<div class="bg-warning-shade-500">Warning background</div>
 
 <!-- Danger -->
-<p class="text-danger-600">Error text</p>
-<div class="bg-danger-500">Error background</div>
+<p class="text-danger-shade-600">Error text</p>
+<div class="bg-danger-shade-500">Error background</div>
 
 <!-- Info -->
-<p class="text-info-600">Info text</p>
-<div class="bg-info-500">Info background</div>
+<p class="text-info-shade-600">Info text</p>
+<div class="bg-info-shade-500">Info background</div>
 ```
 
 ### **Navigation Colors**
@@ -459,17 +459,17 @@ Use Tailwind's responsive prefixes:
   <div class="card-body">
     <div class="grid grid-cols-2 gap-4 mb-6">
       <div class="text-center">
-        <div class="text-3xl font-bold text-success-600">{{ metrics.healthy }}</div>
+        <div class="text-3xl font-bold text-success-shade-600">{{ metrics.healthy }}</div>
         <div class="text-sm text-gray-600">Healthy</div>
       </div>
       <div class="text-center">
-        <div class="text-3xl font-bold text-warning-600">{{ metrics.warning }}</div>
+        <div class="text-3xl font-bold text-warning-shade-600">{{ metrics.warning }}</div>
         <div class="text-sm text-gray-600">Warning</div>
       </div>
     </div>
 
     <div class="progress mb-2">
-      <div class="progress-bar bg-success-500"
+      <div class="progress-bar bg-success-shade-500"
            [style.width.%]="(metrics.healthy / metrics.total) * 100"></div>
     </div>
     <div class="text-sm text-gray-600 text-center">

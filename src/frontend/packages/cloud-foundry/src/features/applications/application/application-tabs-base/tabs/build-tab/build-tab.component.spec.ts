@@ -1,15 +1,37 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
-import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
-import { ApplicationPollingService } from '../../application-polling.service';
+import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from "./view-buildpack/view-buildpack.component";
+
+function makeDataServiceStub() {
+  return {
+    appDetail: signal(undefined).asReadonly(),
+    app: signal(undefined).asReadonly(),
+    summary: signal(undefined).asReadonly(),
+    stats: signal([]).asReadonly(),
+    envVars: signal(undefined).asReadonly(),
+    space: signal(undefined).asReadonly(),
+    org: signal(undefined).asReadonly(),
+    domains: signal([]).asReadonly(),
+    loading: signal({ app: false, stats: false, envVars: false, space: false, org: false, domains: false }).asReadonly(),
+    errors: signal({ app: null, stats: null, envVars: null, space: null, org: null, domains: null }).asReadonly(),
+    running: signal(false).asReadonly(),
+    url: signal(null).asReadonly(),
+    stratosProject: signal(null).asReadonly(),
+    state: signal({ status: 'UNKNOWN' }).asReadonly(),
+    fetching: signal(false).asReadonly(),
+    lastPolledAt: signal(null).asReadonly(),
+    refresh: () => Promise.resolve(),
+  };
+}
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
@@ -22,7 +44,6 @@ describe('BuildTabComponent', () => {
       imports: [
         BuildTabComponent,
         ViewBuildpackComponent,
-        ApplicationPollComponent,
         ...generateCfStoreModules(),
         HttpClientTestingModule,
       ],
@@ -30,7 +51,15 @@ describe('BuildTabComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
-        ApplicationPollingService,
+        // BuildTab reads actions.inFlight() to drive the status-card pulse
+        // animation. The mock exposes a readonly Signal so the template
+        // binding {{ actions.inFlight() }} resolves without injecting the
+        // real action service (which depends on parent-scoped providers).
+        {
+          provide: AppApplicationActionsService,
+          useValue: { inFlight: signal(false).asReadonly() },
+        },
+        { provide: AppDetailDataService, useFactory: makeDataServiceStub },
         {
           provide: ActivatedRoute,
           useValue: {

@@ -1,4 +1,5 @@
 
+import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -15,6 +16,7 @@ import { ConfirmationDialogService } from '../../../../shared/components/confirm
   styleUrls: ['./favorites-meta-card.component.scss'],
   standalone: true,
   imports: [
+    NgClass,
     EntityFavoriteStarComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush

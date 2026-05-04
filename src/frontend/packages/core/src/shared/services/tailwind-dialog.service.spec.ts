@@ -523,7 +523,7 @@ describe('TailwindDialogService', () => {
       vi.useRealTimers();
     });
 
-    it('should have scale-in animation on panel', async () => {
+    it('should have fade-in animation on panel', async () => {
 
       vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent);
@@ -532,17 +532,21 @@ describe('TailwindDialogService', () => {
       const panel = document.querySelector('.rounded-lg') as HTMLElement;
       expect(panel).toBeTruthy();
 
-      // The service uses inline styles for animation, not classes
-      // Panel should have transition classes and start scaled down
-      expect(panel.classList.contains('transform')).toBe(true);
-      expect(panel.classList.contains('transition-all')).toBe(true);
-      expect(panel.classList.contains('scale-95')).toBe(true);
+      // Opacity-only animation. The previous implementation used `transform`
+      // + `scale-95` for a scale-in entrance, but those classes made the
+      // panel a containing block for any position:fixed descendant — which
+      // broke CustomSelect dropdown anchoring inside the dialog. Animation
+      // is now opacity-only; the rounded-lg panel starts hidden and fades
+      // in via inline opacity transitions.
+      expect(panel.classList.contains('transition-opacity')).toBe(true);
       expect(panel.classList.contains('opacity-0')).toBe(true);
 
-      // After requestAnimationFrame, it should scale and fade in
+      // After requestAnimationFrame, it should fade in to full opacity.
+      // No transform style is set — keeping transform === 'none' is what
+      // preserves the position:fixed viewport-coordinate math.
       await vi.runAllTimersAsync();
-      expect(panel.style.transform).toBe('scale(1)');
       expect(panel.style.opacity).toBe('1');
+      expect(panel.style.transform).toBe('');
 
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);

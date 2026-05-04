@@ -6,6 +6,11 @@ applications:
     timeout: 180
     buildpack: https://github.com/cloudfoundry/stratos-buildpack#v5
     health-check-type: port
+    env:
+      # FWT-934: enable admin-gated /pp/v1/admin/diagnostics endpoint so we can
+      # observe CF-call counts + timings under real adepttech traffic. Off by
+      # default in production; adepttech is the test environment.
+      DIAGNOSTICS_ENABLED: "true"
 #    env:
 # Override CF API endpoint URL inferred from VCAP_APPLICATION env 
 #       CF_API_URL: https://CLOUD_FOUNDRY_API_ENDPOINT

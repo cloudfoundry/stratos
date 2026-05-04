@@ -7,21 +7,23 @@ import { AppInputDirective, CustomFormFieldComponent, AppErrorComponent } from '
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
-  ActionState,
-  stratosEntityCatalog,
+  AppState,
+  endpointEntitiesSelector,
   entityCatalog,
   StratosCatalogEndpointEntity
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter, map, pairwise, startWith } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { from, Observable } from 'rxjs';
+import { map, startWith, take } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
-import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../shared/services/snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
+import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { CreateEndpointHelperComponent } from '../create-endpoint-helper';
 import { UniqueDirective } from '../../../../shared/components/unique.directive';
@@ -59,6 +61,8 @@ interface CreateEndpointForm {
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
   private fb = inject(FormBuilder);
   private snackBarService = inject(SnackBarService);
+  private store = inject<Store<AppState>>(Store);
+  private endpointsSignalConfig = inject(EndpointsSignalConfigService);
 
 
   registerForm: FormGroup<CreateEndpointForm>;
@@ -123,54 +127,76 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.clientRedirectURI = getSSOClientRedirectURI();
   }
 
-  onNext: StepOnNextFunction = () => {
+  onNext: StepOnNextFunction = () => from(this.runRegistration());
+
+  // Perform the endpoint registration via the signal-config service. Returns
+  // a step-shaped result the stepper's onNext can act on directly. The
+  // service wraps the legacy ngrx ActionState observable in a Promise that
+  // resolves once the busy edge transitions, so we no longer need pairwise/
+  // filter/map gymnastics here.
+  private async runRegistration(): Promise<StepOnNextResult> {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
 
     // SSL Setttings
-    let sslAllow = this.registerForm.value.skipSSLField;
+    let sslAllow = this.registerForm.value.skipSSLField ?? false;
     if (this.showCACertField) {
       sslAllow = false;
     }
 
     // Normalize URL using shared utility
     const url = normalizeUrl(this.registerForm.value.urlField || '');
+    const name = this.registerForm.value.nameField ?? '';
 
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(
-      type,
-      subType,
-      this.registerForm.value.nameField,
-      url,
-      sslAllow,
-      this.registerForm.value.clientIDField,
-      this.registerForm.value.clientSecretField,
-      this.registerForm.value.ssoAllowedField,
-      this.registerForm.value.createSystemEndpointField,
-      this.registerForm.value.caCertField,
-    ).pipe(
-      pairwise(),
-      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-      map(([, newVal]) => newVal),
-      map(result => {
-        const data: ConnectEndpointConfig = {
-          guid: result.message,
-          name: this.registerForm.value.nameField ?? '',
-          type: type || '',
-          subType: subType || '',
-          ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
-        };
-        if (!result.error) {
-          this.snackBarService.show(`Successfully registered '${this.registerForm.value.nameField ?? ''}'`);
-        }
-        const success = !result.error;
-        return {
-          success,
-          redirect: success && this.finalStep,
-          message: success ? '' : result.message,
-          data
-        };
-      })
-    );
-  };
+    const result = await this.endpointsSignalConfig.register({
+      endpointType: type,
+      endpointSubType: subType,
+      name,
+      endpoint: url,
+      skipSslValidation: sslAllow,
+      clientID: this.registerForm.value.clientIDField,
+      clientSecret: this.registerForm.value.clientSecretField,
+      ssoAllowed: this.registerForm.value.ssoAllowedField,
+      createSystemEndpoint: this.registerForm.value.createSystemEndpointField,
+      caCert: this.registerForm.value.caCertField,
+    });
+
+    const data: ConnectEndpointConfig = {
+      guid: result.message,
+      name,
+      type: type || '',
+      subType: subType || '',
+      ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
+    };
+    if (!result.error) {
+      this.snackBarService.show(`Successfully registered '${name}'`);
+      // Warn if another endpoint is already registered with the same URL.
+      // Multiple registrations are permitted (different users/operators may each need their own),
+      // but the user should know about existing registrations.
+      const urlHost = new URL(url).host;
+      // Delay past the endpoints-page subscription that calls snackBarService.hide()
+      // when endpoint connectivity state updates after registration completes.
+      setTimeout(() => {
+        this.store.select(endpointEntitiesSelector).pipe(
+          take(1),
+          map(entities => Object.values(entities).filter(e =>
+            e.api_endpoint?.Host === urlHost && e.guid !== result.message
+          ))
+        ).subscribe(dupes => {
+          if (dupes.length > 0) {
+            const names = dupes.map(e => e.name).join(', ');
+            this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
+          }
+        });
+      }, 1500);
+    }
+    const success = !result.error;
+    return {
+      success,
+      redirect: success && this.finalStep,
+      message: success ? '' : result.message,
+      data
+    };
+  }
 
   ngAfterContentInit() {
     this.validate = this.registerForm.statusChanges.pipe(

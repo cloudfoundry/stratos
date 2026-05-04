@@ -5,11 +5,11 @@
     <div class="card mb-6">
       <div class="card-body">
         <div class="flex items-start space-x-4">
-          <span class="material-icons text-primary-600 text-2xl mt-1">equalizer</span>
+          <span class="material-icons text-brand-600 text-2xl mt-1">equalizer</span>
           <div class="flex-1">
             <div class="text-lg font-semibold text-content-text mb-1">{{ ep.provider.name }}</div>
             <h2 class="text-sm mb-2">
-              <a target="metrics" href="{{ ep.provider.token_endpoint }}" class="text-primary-600 hover:text-primary-700 underline">{{ ep.provider.token_endpoint }}</a>
+              <a target="metrics" href="{{ ep.provider.token_endpoint }}" class="text-brand-600 hover:text-brand-700 underline">{{ ep.provider.token_endpoint }}</a>
             </h2>
             @if (error) {
               <div class="text-content-muted">
@@ -36,7 +36,7 @@
                 }
                 <div class="card-body">
                   <div class="flex items-start space-x-4">
-                    <span class="material-icons text-primary-600 text-2xl mt-1" [attr.data-font]="info.icon.font">{{info.icon.name }}</span>
+                    <span class="material-icons text-brand-600 text-2xl mt-1" [attr.data-font]="info.icon.font">{{info.icon.name }}</span>
                     <div class="flex-1">
                       <div class="text-lg font-semibold text-content-text mb-1">{{ info.name }}</div>
                       <div class="text-sm text-content-muted mb-4">{{ info.type }}</div>
@@ -69,11 +69,11 @@
                         <div class="mt-4">
                           <div class="alert alert-warning">
                             <div class="flex items-start space-x-3">
-                              <span class="material-icons text-warning-600 mt-0.5">warning</span>
+                              <span class="material-icons text-warning-shade-600 mt-0.5">warning</span>
                               <div class="flex-1">
-                                <div class="text-warning-800 font-medium mb-2">The metrics endpoint reports that it provides data for this endpoint which is not registered
+                                <div class="text-warning-shade-800 font-medium mb-2">The metrics endpoint reports that it provides data for this endpoint which is not registered
                                   with <app-product-name></app-product-name></div>
-                                  <div class="text-warning-700 text-sm">This could be intentional or there may be a mismatch in the
+                                  <div class="text-warning-shade-700 text-sm">This could be intentional or there may be a mismatch in the
                                     endpoint address used by this Metrics endpoint and that which is registered with <app-product-name></app-product-name>.</div>
                                   </div>
                                 </div>

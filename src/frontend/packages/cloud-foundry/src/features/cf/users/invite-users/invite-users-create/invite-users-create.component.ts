@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { firstValueFrom, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
+  SignalStepHandle,
   StackedInputActionResult,
   StackedInputActionsComponent,
   StackedInputActionsState,
@@ -40,10 +42,32 @@ export class InviteUsersCreateComponent implements OnInit {
   private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private userInviteService = inject(UserInviteService);
+  private router = inject(Router);
 
 
   public stepValid = signal<boolean>(false);
   public valid$: Observable<boolean>;
+
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Reuses the existing onNext side
+   * effects (per-user state updates, pagination clear) by awaiting the
+   * same observable, then navigates to the parent-supplied redirectUrl
+   * unless the top-level invite call errored. Partial-failure semantics
+   * are preserved: when any user succeeds the redirect still happens.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.stepValid.asReadonly(),
+    submit: async () => {
+      const res = await firstValueFrom(this.runInvite());
+      if (res.error) {
+        throw new Error(res.errorMessage || 'Failed to invite users');
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
   public stateIn = signal<StackedInputActionsState[]>([]);
   public stateIn$: Observable<StackedInputActionsState[]>;
   public org$!: Observable<APIResource<IOrganization>>;
@@ -93,8 +117,13 @@ export class InviteUsersCreateComponent implements OnInit {
     ) : observableOf(null);
   }
 
-  onNext: StepOnNextFunction = () => {
-
+  /**
+   * FWT-957 helper: runs the invite request and applies per-user state
+   * updates / madeChanges side effects. Returns the invite response so
+   * both the legacy onNext map and the new SignalStepHandle.submit path
+   * can branch on res.error uniformly.
+   */
+  private runInvite() {
     // Mark all as processing
     const processingState: StackedInputActionsState[] = [];
     Object.keys(this.users.values).forEach(key => {
@@ -154,12 +183,15 @@ export class InviteUsersCreateComponent implements OnInit {
           }
           return res;
         }),
-        map(res => ({
-          success: !res.error,
-          message: res.errorMessage,
-          redirect: !res.error
-        })),
       );
   }
+
+  onNext: StepOnNextFunction = () => this.runInvite().pipe(
+    map(res => ({
+      success: !res.error,
+      message: res.errorMessage,
+      redirect: !res.error
+    })),
+  );
 
 }

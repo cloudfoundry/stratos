@@ -55,7 +55,7 @@
                         <div class="page-header-sub-nav-breadcrumbs flex items-center space-x-2">
                           @for (breadcrumbDef of breadcrumbs; track breadcrumbDef.value; let isLast = $last) {
                             @if (breadcrumbDef.routerLink) {
-                              <span class="page-header-sub-nav-breadcrumb text-accent hover:text-accent-dark cursor-pointer font-medium"
+                              <span class="page-header-sub-nav-breadcrumb text-accent hover:text-accent-shade-700 cursor-pointer font-medium"
                               [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
                             }
                             @if (!breadcrumbDef.routerLink) {

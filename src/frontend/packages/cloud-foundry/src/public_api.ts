@@ -15,7 +15,6 @@ export { ApplicationEnvVarsHelper } from './features/applications/application/ap
 export { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
 export { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 export { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
-export { CfAppConfigService } from './shared/components/list/list-types/app/cf-app-config.service';
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
 
 // Utility Functions
@@ -121,7 +120,6 @@ export { cfEntityCatalog } from './cf-entity-catalog';
 export { BaseCfListConfig } from './shared/components/list/list-types/base-cf/base-cf-list-config';
 
 // List Configuration Services
-export { CfAppRoutesListConfigService } from './shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 export { AppServiceBindingListConfigService } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 export { AppServiceBindingDataSource } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
 
@@ -140,3 +138,22 @@ export { TableCellAppInstancesComponent } from './shared/components/list/list-ty
 export { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 export { TableCellRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
 export { TableCellTCPRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
+
+// FWT-934 entity-key namespacing + diagnostics channel
+export { cfEntityId, parseCfEntityId, isComposite } from './cf-entity-ref';
+export type { CFEntityRef, CFEntityId } from './cf-entity-ref';
+export { selectCFEntity, selectCFEntities } from './selectors/cf-entity.selectors';
+export { StratosDiagnostics } from './services/diagnostics/stratos-diagnostics.service';
+export { BareGuidLookupGuard } from './services/diagnostics/bare-guid-lookup-guard';
+export { cfApiInterceptor } from './interceptors/cf-api-interceptor';
+export {
+  DIAGNOSTIC_CODE_FAMILIES,
+  isDiagnosticCode,
+} from './services/diagnostics/diagnostics.types';
+export type {
+  DiagnosticCode,
+  DiagnosticCounter,
+  DiagnosticSample,
+  DiagnosticsQueryOptions,
+  DiagnosticsSnapshotEnvelope,
+} from './services/diagnostics/diagnostics.types';

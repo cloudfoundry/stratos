@@ -7,8 +7,7 @@
   </div>
 </app-page-header>
 <app-steppers cancel="/user-profile">
-  <app-step [title]="'Edit User Profile'" [valid]="editProfileForm.valid && editProfileForm.dirty"
-    [onNext]="updateProfile" finishButtonText="Save">
+  <app-step [title]="'Edit User Profile'" [signalHandle]="signalHandle" finishButtonText="Save">
     <div>
       <form [formGroup]="editProfileForm" validate class="edit-profile edit-profile__group">
         <app-form-field>

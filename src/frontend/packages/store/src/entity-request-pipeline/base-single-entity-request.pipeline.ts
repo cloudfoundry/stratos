@@ -52,12 +52,18 @@ export const baseRequestPipelineFactory: EntityRequestPipeline = (
   const request = preRequest ? preRequest(baseRequest, action, catalogEntity) : baseRequest;
   const definition = catalogEntity.definition as IStratosEntityDefinition;
   const isJetstreamEntityRequest = isJetstreamRequest(definition);
+  // Single-entity fetches honour the entity's paginationConfig.getEntitiesFromResponse
+  // adapter — V3-native definitions register one to lift flat resources into the
+  // legacy {metadata, entity} shape that the schema normaliser expects.
+  const flattenerConfig = definition.paginationConfig || definition.endpoint.paginationConfig;
   const handleMultiEndpointsPipe = isJetstreamEntityRequest ?
     handleJetstreamResponsePipeFactory(
-      action.options.url
+      action.options.url,
+      flattenerConfig
     ) : handleNonJetstreamResponsePipeFactory(
       action.options.url,
-      definition.nonJetstreamRequestHandler
+      definition.nonJetstreamRequestHandler,
+      flattenerConfig
     );
 
   const requestPipe = makeRequestEntityPipe(

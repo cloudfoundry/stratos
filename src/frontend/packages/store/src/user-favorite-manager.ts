@@ -249,7 +249,13 @@ export class UserFavoriteManager {
     return null;
   }
 
-  private getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  // Public so list cards on single-endpoint pages can supply the page's
+  // endpoint id explicitly. The default getFavorite() reads endpoint id off
+  // the entity row, but ngrx dedupes rows across Stratos endpoints that
+  // share a backend (e.g. multiple CF endpoints on one CAPI), so the row's
+  // stamped endpoint id can differ from the page's context — leading to
+  // stars rendering on the wrong endpoint's list page.
+  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     entityType: string,
     endpointType: string,
     endpointId: string,

@@ -5,7 +5,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService, RowState, ListViewTypes } from '@stratosui/core';
-import { endpointEntityType, PaginationMonitorFactory, APIResource } from '@stratosui/store';
+import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
 import { CFAppState } from '../../../../cf-app-state';
 import { serviceBindingEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
@@ -54,7 +54,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
         const action = cfEntityCatalog.serviceBinding.actions.getAllForServiceInstance(
           serviceBinding.entity.service_instance_guid,
           appService.cfGuid,
-          createEntityRelationPaginationKey(endpointEntityType, serviceBindingEntityType),
+          createEntityRelationPaginationKey(serviceBindingEntityType, serviceBinding.entity.service_instance_guid),
           {
             includeRelations: [],
           }

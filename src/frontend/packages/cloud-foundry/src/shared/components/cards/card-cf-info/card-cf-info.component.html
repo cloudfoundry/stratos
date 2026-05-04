@@ -3,46 +3,45 @@
     <div class="card-content">
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
-          <app-metadata-item icon="title" label="Description">{{ (description$ | async) }}</app-metadata-item>
-          <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="apiUrl">
+          <app-metadata-item icon="title" label="Description">{{ description() }}</app-metadata-item>
+          <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="apiUrl()">
             <div class="app-metadata__address">
-              <div class="app-metadata__address__value">{{ apiUrl }}</div>
+              <div class="app-metadata__address__value">{{ apiUrl() }}</div>
             </div>
           </app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
-          {{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}</app-metadata-item>
-          @if (autoscalerVersion$ | async; as autoscalerVersion) {
+          {{ info()?.entity?.entity?.api_version }}</app-metadata-item>
+          @if (autoscalerVersionLabel(); as v) {
             <app-metadata-item icon="meter"
               iconFont="stratos-icons" label="Autoscaler Version">
-            {{ autoscalerVersion }}</app-metadata-item>
+            {{ v }}</app-metadata-item>
           }
         </div>
         <div class="app-metadata__two-cols">
           <app-metadata-item icon="person" label="Account Username">
-            {{ (cfEndpointService.endpoint$ | async )?.entity.user.name }}
-            @if ((cfEndpointService.endpoint$ | async )?.entity.user.admin) {
+            {{ endpointInfo()?.entity?.user?.name }}
+            @if (endpointInfo()?.entity?.user?.admin) {
               <span> (Administrator)</span>
             }
           </app-metadata-item>
           <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Access">
-          {{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available'}}</app-metadata-item>
+          {{ hasSSHAccess() ? 'Available' : 'Not available' }}</app-metadata-item>
           <app-metadata-item icon="email" label="User Invitation Support">
             <div class="user-invites">
-              @if ((userInviteService.canConfigure$ | async)) {
-                @if ((userInviteService.configured$ | async)) {
-                  Configured - <button class="btn btn-ghost" (click)="deConfigureUserInvites()"
-                [disabled]="userInviteBusy">Disable</button>
+              @if (canConfigureInvites()) {
+                @if (invitesConfigured()) {
+                  Configured - <button class="btn btn-ghost" (click)="deConfigureUserInvites()">Disable</button>
+                } @else {
+                  Not Configured - <button class="btn btn-ghost"
+                  (click)="configureUserInvites()">Configure</button>
+                }
               } @else {
-                Not Configured - <button class="btn btn-ghost"
-              (click)="configureUserInvites()">Configure</button>
-            }
-          } @else {
-            {{ (userInviteService.configured$ | async) ? 'Enabled' : 'Disabled' }}
-          }
+                {{ invitesConfigured() ? 'Enabled' : 'Disabled' }}
+              }
+            </div>
+          </app-metadata-item>
         </div>
-      </app-metadata-item>
+      </div>
     </div>
   </div>
-</div>
-</div>
 </div>

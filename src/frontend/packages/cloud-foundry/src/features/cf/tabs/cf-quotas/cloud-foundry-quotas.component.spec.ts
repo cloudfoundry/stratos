@@ -1,40 +1,77 @@
-import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideMockStore } from '@ngrx/store/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '@stratosui/core';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateTestCfEndpointServiceProvider } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { CfQuotasListConfigService } from "../../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service";
-import { CloudFoundryQuotasComponent } from "./cloud-foundry-quotas.component";
+import {
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { CloudFoundryQuotasComponent } from './cloud-foundry-quotas.component';
 
 describe('CloudFoundryQuotasComponent', () => {
   let component: CloudFoundryQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryQuotasComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CloudFoundryQuotasComponent,
       ],
       providers: [
-        provideMockStore(),
-        ...STORE_TEST_PROVIDERS,
-        CfQuotasListConfigService,
-        generateTestCfEndpointServiceProvider(),
-        TabNavService,
-        DatePipe,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
+        },
       ]
-    });
+    }).compileComponents();
+
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
   });
 
-  // TODO: Fix EntityCatalogHelper initialization to enable component creation test
-  // The component requires EntityCatalogHelper to be initialized, which needs CoreModule
-  // or a proper entity catalog setup. This needs to be addressed in the test framework.
-  it('should be defined', () => {
-    expect(CloudFoundryQuotasComponent).toBeDefined();
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CloudFoundryQuotasComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

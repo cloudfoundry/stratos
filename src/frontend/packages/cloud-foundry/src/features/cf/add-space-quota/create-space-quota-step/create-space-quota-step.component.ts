@@ -1,9 +1,9 @@
-import { Component, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { AfterViewInit, Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '@stratosui/core';
+import { SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
 import { RequestInfoState, APIResource } from '@stratosui/store';
 import { IQuotaDefinition } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
@@ -25,8 +25,9 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
     SpaceQuotaDefinitionFormComponent
 ]
 })
-export class CreateSpaceQuotaStepComponent {
+export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
+  private router = inject(Router);
 
 
   quotasSubscription!: Subscription;
@@ -37,6 +38,37 @@ export class CreateSpaceQuotaStepComponent {
   @ViewChild('form', { static: true })
   form!: SpaceQuotaDefinitionFormComponent;
 
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: validity mirrored from the embedded SpaceQuotaDefinitionFormComponent
+   * via a statusChanges subscription wired in ngAfterViewInit.
+   */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
+
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const formValues = this.form.formGroup.getRawValue();
+      const finalState = await firstValueFrom(
+        cfEntityCatalog.spaceQuota.api.create<RequestInfoState>(formValues.name, this.cfGuid, {
+          orgGuid: this.orgGuid,
+          createQuota: formValues
+        }).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => oldV.creating && !newV.creating),
+          map(([, newV]) => newV),
+        )
+      );
+      if (finalState.error) {
+        throw new Error(`Failed to create space quota: ${finalState.message}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
+
   constructor() {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
@@ -44,23 +76,16 @@ export class CreateSpaceQuotaStepComponent {
     this.orgGuid = this.activatedRoute.snapshot.params.orgId;
   }
 
-  validate = () => !!this.form && this.form.valid();
+  ngAfterViewInit() {
+    if (this.form?.formGroup) {
+      this.validSignal.set(this.form.formGroup.valid);
+      this.formStatusSub = this.form.formGroup.statusChanges.subscribe(
+        () => this.validSignal.set(this.form.formGroup.valid)
+      );
+    }
+  }
 
-  submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.getRawValue();
-
-    return cfEntityCatalog.spaceQuota.api.create<RequestInfoState>(formValues.name, this.cfGuid, {
-      orgGuid: this.orgGuid,
-      createQuota: formValues
-    }).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.creating && !newV.creating),
-      map(([, newV]) => newV),
-      map(requestInfo => ({
-        success: !requestInfo.error,
-        redirect: !requestInfo.error,
-        message: requestInfo.error ? `Failed to create space quota: ${requestInfo.message}` : ''
-      }))
-    );
+  ngOnDestroy() {
+    this.formStatusSub?.unsubscribe();
   }
 }

@@ -88,4 +88,41 @@ describe('handle-multi-endpoint-pipe', () => {
     expect(handled.successes[1].entities[0].data2).toBe(endpoint4Res.entities[0].data2);
     expect(handled.successes[1].entities[0].__stratosEndpointGuid__).toBe(endpoint4Guid);
   });
+
+  it('runs getEntitiesFromResponse on a single (non-array) response so V3-native flat resources get wrapped pre-normalize', () => {
+    // V3-native single-resource: handler returns a flat object, no resources/pagination envelope.
+    const cnsi = 'endpoint1';
+    const resData = {
+      [cnsi]: { guid: 'org-1', name: 'opensource', status: 'active' }
+    } as JetstreamResponse;
+    const wrappedSentinel = { metadata: { guid: 'org-1', url: '' }, entity: { guid: 'org-1', name: 'opensource' } };
+    const handled = handleJetstreamResponsePipeFactory('url123', {
+      // Adapter mirrors v3EntitiesFromResponse: wrap a flat resource with .guid into Stratos shape.
+      getEntitiesFromResponse: (resp) => resp?.guid ? [wrappedSentinel] : [],
+      getTotalEntities: () => 1,
+      getTotalPages: () => 1,
+      getPaginationParameters: () => ({ page: '1' }),
+      canIgnoreMaxedState: () => of(false),
+      maxedStateStartAt: () => null,
+    })(resData);
+    expect(handled.errors.length).toBe(0);
+    expect(handled.successes.length).toBe(1);
+    expect(handled.successes[0].entities.length).toBe(1);
+    expect(handled.successes[0].entities[0].metadata.guid).toBe('org-1');
+    expect(handled.successes[0].entities[0].entity.name).toBe('opensource');
+    expect(handled.successes[0].entities[0].__stratosEndpointGuid__).toBe(cnsi);
+  });
+
+  it('passes through a single (non-array) response unchanged when no getEntitiesFromResponse adapter is registered (legacy V2 single-resource)', () => {
+    // V2 single-resource arrives already wrapped by the proxy: {metadata, entity}
+    const cnsi = 'endpoint1';
+    const v2Wrapped = { metadata: { guid: 'org-2', url: '' }, entity: { name: 'legacy' } };
+    const resData = { [cnsi]: v2Wrapped } as JetstreamResponse;
+    const handled = handleJetstreamResponsePipeFactory('url123')(resData);
+    expect(handled.successes.length).toBe(1);
+    expect(handled.successes[0].entities.length).toBe(1);
+    expect(handled.successes[0].entities[0].metadata.guid).toBe('org-2');
+    expect(handled.successes[0].entities[0].entity.name).toBe('legacy');
+    expect(handled.successes[0].entities[0].__stratosEndpointGuid__).toBe(cnsi);
+  });
 });

@@ -87,6 +87,14 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
           if (isListCfRoute(route.entity)) {
             return route as APIResource<ListCfRoute>;
           }
+          // Guard: when V3 routes come through this legacy data source they
+          // lack the V2-nested `domain.entity.name` shape. Bail on enrichment
+          // rather than crashing the whole list. The per-app Routes tab is
+          // tracked for signal-migration in task #17 (FWT-…); this keeps the
+          // tab usable until that lands.
+          if (!route.entity || !route.entity.domain || !route.entity.domain.entity) {
+            return route as APIResource<ListCfRoute>;
+          }
           const entity: ListCfRoute = {
             ...route.entity,
             url: getRoute(route.entity.port, route.entity.host, route.entity.path, true, false, route.entity.domain.entity.name),

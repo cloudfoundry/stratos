@@ -1,24 +1,5 @@
-<app-page-sub-nav>
-  @if (addRolesByUsernameLink$ | async; as addRolesByUsernameLink) {
-    <button class="btn btn-ghost"
-      [routerLink]="addRolesByUsernameLink.link" [queryParams]="addRolesByUsernameLink.params">
-      <span class="material-icons">people</span> Manage Roles
-    </button>
+<div class="space-users h-full flex flex-col">
+  @if (listConfig(); as config) {
+    <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
   }
-</app-page-sub-nav>
-
-<ng-template #noEntriesForCurrentFilter>
-  <app-no-content-message [icon]="'people'" [firstLine]="'There are no users for the current filter'" [secondLine]="{
-        text: ''
-      }"></app-no-content-message>
-</ng-template>
-
-<ng-template #noEntries>
-  <app-no-content-message [icon]="'people'" [firstLine]="'There are no users'" [secondLine]="{
-        text: ''
-      }"></app-no-content-message>
-</ng-template>
-
-<app-cf-admin-add-user-warning></app-cf-admin-add-user-warning>
-<app-cloud-foundry-invite-user-link></app-cloud-foundry-invite-user-link>
-<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"></app-list>
+</div>

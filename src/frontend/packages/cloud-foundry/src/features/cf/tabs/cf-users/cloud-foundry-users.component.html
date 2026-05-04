@@ -1,13 +1,5 @@
-<ng-template #noEntriesForCurrentFilter>
-  <app-no-content-message [icon]="'people'" [firstLine]="'There are no users for the current filter'" [secondLine]="{
-    text: ''
-  }"></app-no-content-message>
-</ng-template>
-
-<ng-template #noEntries>
-  <app-no-content-message [icon]="'people'" [firstLine]="'There are no users'" [secondLine]="{
-    text: ''
-  }"></app-no-content-message>
-</ng-template>
-
-<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"></app-list>
+<div class="users h-full flex flex-col">
+  @if (listConfig(); as config) {
+    <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
+  }
+</div>

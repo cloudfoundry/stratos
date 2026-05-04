@@ -2,7 +2,7 @@
   <h1>New Application</h1>
 </app-page-header>
 <app-steppers [cancel]="'/applications'">
-  <app-step [hideNextButton]="true">
+  <app-step [hideNextButton]="true" [signalHandle]="signalHandle">
     <div class="tiles">
       <h3>Select application source</h3>
       <p>To create an application you can either deploy from a specific source or create an application shell. An

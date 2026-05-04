@@ -4,6 +4,51 @@ import { FormControl, NgControl } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { CustomSelectComponent } from '../custom-select/custom-select.component';
 
+/*
+ * FormControl + signal bridge pattern (FWT-956)
+ * ──────────────────────────────────────────────
+ * The signal-native detail / list / stepper primitives consume validity,
+ * value, and disabled state as Angular signals. Forms in this codebase still
+ * use Angular's `FormControl` / `FormGroup` (not switching to a custom
+ * primitive — see design-doc Q4). Bridge between the two using `toSignal`:
+ *
+ *   import { toSignal } from '@angular/core/rxjs-interop';
+ *
+ *   class MyForm {
+ *     form = new FormGroup({
+ *       email: new FormControl('', [Validators.required, Validators.email]),
+ *     });
+ *     // Reactive validity for buttons / step handles / detail actions:
+ *     valid = toSignal(this.form.statusChanges.pipe(map(() => this.form.valid)),
+ *                      { initialValue: this.form.valid });
+ *     // Reactive value when the consumer needs to react (e.g. enabling a
+ *     // dependent field, re-running validators):
+ *     value = toSignal(this.form.valueChanges, { initialValue: this.form.value });
+ *
+ *     // Compose into <app-signal-detail> headerActions / SignalStepHandle:
+ *     headerActions = [{
+ *       label: 'Save',
+ *       primary: true,
+ *       disabled: computed(() => !this.valid()),
+ *       invoke: async () => {
+ *         if (!this.valid()) return;
+ *         await this.service.save(this.form.getRawValue());
+ *       },
+ *     }];
+ *   }
+ *
+ * The bridge is intentionally one-way (form → signal). For two-way binding
+ * the FormControl is still the source of truth — write back via
+ * `formControl.setValue(...)`, not the signal.
+ *
+ * NOTE on `<app-form-field>` itself: this is a Tailwind-styled wrapper that
+ * also shims Material's `<mat-form-field>` / `[matInput]` / `[mat-button]`
+ * selectors so legacy templates continue to compile after Material was
+ * removed. The wrapper does NOT need any signal-handle plumbing — it works
+ * with any `NgControl` (FormControl, NgModel) via the projected content
+ * directive resolution.
+ */
+
 @Component({
   selector: 'app-form-field',
   templateUrl: './custom-form-field.component.html',
@@ -154,6 +199,45 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   get hasPrefix(): boolean {
     // This will be set by parent component if prefix is provided
     return false; // Override in template with content projection check
+  }
+
+  /**
+   * Tailwind class string for prefix and suffix containers. Replaces the
+   * SCSS `.form-field-prefix` / `.form-field-suffix` parent-state-driven
+   * color rules so the same logic lives in one place (the template binding)
+   * instead of being split between SCSS descendant combinators and the host
+   * class list.
+   */
+  get prefixSuffixColorClasses(): string {
+    if (this.isInvalid) return 'text-danger';
+    if (this.isValid)   return 'text-success';
+    if (this.focused)   return 'text-input-focus-border';
+    return 'text-content-muted';
+  }
+
+  /**
+   * Tailwind class string for the underline bar (standard / legacy
+   * appearances). Replaces the SCSS `.form-field-underline` rules.
+   */
+  get underlineColorClasses(): string {
+    if (this.isInvalid) return 'bg-danger';
+    if (this.isValid)   return 'bg-success';
+    if (this.focused)   return 'bg-transparent';
+    return 'bg-input-border';
+  }
+
+  /**
+   * Tailwind class string for the focus-ripple overlay. Replaces the SCSS
+   * `.form-field-ripple` color + scale-on-focus rules.
+   */
+  get rippleColorClasses(): string {
+    const transform = this.focused ? 'scale-x-100' : 'scale-x-0';
+    let bg: string;
+    if (this.isInvalid || this.color === 'warn') bg = 'bg-danger';
+    else if (this.isValid)                       bg = 'bg-success';
+    else if (this.color === 'accent')            bg = 'bg-accent';
+    else                                         bg = 'bg-input-focus-border';
+    return `${bg} ${transform}`;
   }
 
   /**

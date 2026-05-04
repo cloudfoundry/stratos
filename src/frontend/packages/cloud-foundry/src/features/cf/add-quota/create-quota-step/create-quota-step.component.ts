@@ -1,9 +1,10 @@
-import { Component, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '@stratosui/core';
+import { SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
 import { RequestInfoState } from '@stratosui/store';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -24,7 +25,8 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
     QuotaDefinitionFormComponent
   ]
 })
-export class CreateQuotaStepComponent {
+export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
+  private router = inject(Router);
 
   quotasSubscription!: Subscription;
   cfGuid: string;
@@ -33,25 +35,51 @@ export class CreateQuotaStepComponent {
   @ViewChild('form', { static: true })
   form!: QuotaDefinitionFormComponent;
 
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: validity is mirrored from the embedded QuotaDefinitionFormComponent
+   * via a statusChanges subscription wired in ngAfterViewInit. Plain signal
+   * read so the SignalStepHandle.valid contract holds.
+   */
+  private validSignal = signal(false);
+  private formStatusSub?: Subscription;
+
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const formValues = this.form.formGroup.getRawValue();
+      const finalState = await firstValueFrom(
+        cfEntityCatalog.quotaDefinition.api.create<RequestInfoState>(formValues.name, this.cfGuid, formValues).pipe(
+          pairwise(),
+          filter(([oldV, newV]) => oldV.creating && !newV.creating),
+          map(([, newV]) => newV),
+        )
+      );
+      if (finalState.error) {
+        throw new Error(`Failed to create quota: ${finalState.message}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
+
   constructor() {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
   }
 
-  validate = () => !!this.form && this.form.valid();
+  ngAfterViewInit() {
+    if (this.form?.formGroup) {
+      this.validSignal.set(this.form.formGroup.valid);
+      this.formStatusSub = this.form.formGroup.statusChanges.subscribe(
+        () => this.validSignal.set(this.form.formGroup.valid)
+      );
+    }
+  }
 
-  submit: StepOnNextFunction = () => {
-    const formValues = this.form.formGroup.getRawValue();
-    return cfEntityCatalog.quotaDefinition.api.create<RequestInfoState>(formValues.name, this.cfGuid, formValues).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.creating && !newV.creating),
-      map(([, newV]) => newV),
-      map(requestInfo => ({
-        success: !requestInfo.error,
-        redirect: !requestInfo.error,
-        message: requestInfo.error ? `Failed to create quota: ${requestInfo.message}` : ''
-      }))
-    );
+  ngOnDestroy() {
+    this.formStatusSub?.unsubscribe();
   }
 }

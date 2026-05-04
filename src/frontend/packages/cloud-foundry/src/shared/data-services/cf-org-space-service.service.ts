@@ -1,37 +1,24 @@
-import { Injectable, OnDestroy, signal, inject } from '@angular/core';
+import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, defer, Observable, of, Subscription } from 'rxjs';
-import { take,
-  distinctUntilChanged,
-  filter,
-  map,
-  publishReplay,
-  refCount,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter, map, take } from 'rxjs/operators';
 
-import { ListPaginationMultiFilterChange, naturalCompare, safeUnsubscribe, valueOrCommonFalsy } from '@stratosui/core';
+import { ListPaginationMultiFilterChange, naturalCompare, valueOrCommonFalsy } from '@stratosui/core';
 import {
-  APIResource,
   connectedEndpointsOfTypesSelector,
   EndpointModel,
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
   PaginatedAction,
   PaginationEntityState,
   PaginationMonitorFactory,
   PaginationParam,
   ResetPagination,
-  SetParams
+  SetParams,
 } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
-import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { IOrganization, ISpace } from '../../cf-api.types';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
+import { IOrganization, ISpace } from '../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { QParam, QParamJoiners } from '../q-param';
 import { CfOrgSpaceDebug, createCfOrgSpaceDebug } from './cf-org-space-debug';
@@ -58,22 +45,17 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
   };
 }
 
+/**
+ * Legacy CfOrgSpaceItem shape. The `list$` and `loading$` observables, and
+ * the `select` BehaviorSubject, are signal-backed shims kept for consumers
+ * that haven't migrated off rxjs yet. New consumers should read the
+ * service's `orgList`/`spaceList` signals and write to the underlying
+ * signals directly when those become public.
+ */
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  // Signal-based selection with backward compatibility via BehaviorSubject wrapper
   select: BehaviorSubject<string>;
-}
-
-export const enum CfOrgSpaceSelectMode {
-  /**
-   * When a parent selection changes and it contains only one child automatically select it, otherwise clear child selection
-   */
-  FIRST_ONLY = 1,
-  /**
-   * When a parent selection changes and it contains any children automatically select the first one, otherwise clear child selection
-   */
-  ANY = 2
 }
 
 export const createCfOrSpaceMultipleFilterFn = (
@@ -118,7 +100,6 @@ export const createCfOrSpaceMultipleFilterFn = (
       preResetUpdate();
     }
 
-    // Changes of org or space will reset pagination and start a new request. Changes of only cf require a punt
     if (cfGuidChanged && !orgChanged && !spaceChanged) {
       store.dispatch(new ResetPagination(action, action.paginationKey));
     } else if (orgChanged || spaceChanged) {
@@ -132,242 +113,233 @@ export const createCfOrSpaceMultipleFilterFn = (
 interface InitialValues { cf: string; org: string; space: string; }
 
 /**
- * This service relies on OnDestroy, so must be `provided` by a component
+ * Signal-native cf/org/space picker store.
+ *
+ * State of the world:
+ * - Selection (`_cfSelected`, `_orgSelected`, `_spaceSelected`) and data
+ *   (`_orgsByCnsi`, `_spacesByOrg`) are WritableSignals — single source of
+ *   truth.
+ * - Cascade (cf change clears org+space, org change clears space), HTTP
+ *   fetches against V3 native handlers, and singleton auto-pick are all
+ *   `effect()` reactions to those signals. No rxjs operators in the
+ *   control flow.
+ * - The legacy `cf/org/space.{list$, loading$, select}` shape is kept as
+ *   a thin shim — `list$`/`loading$` are `toObservable(signal)` and
+ *   `select` is a BehaviorSubject backed by the underlying signal so
+ *   `select.next(v)` writes the signal and signal updates emit on the
+ *   BehaviorSubject. Existing rxjs consumers keep working until they
+ *   migrate; the shim is the only intentional rxjs surface.
+ * - The connected-CF-endpoint list still comes from the ngrx endpoint
+ *   store via a one-line `toSignal(store.select(...))` bridge — there's
+ *   no signal-based replacement for that store yet.
+ * - The setInitialValuesFromAction path remains rxjs because it reads
+ *   from a caller-supplied ngrx PaginatedAction's persisted client-filter
+ *   state. That bridge retires when services-wall (its only caller)
+ *   migrates to signal-native.
+ *
+ * This service relies on OnDestroy, so must be `provided` by a component.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class CfOrgSpaceDataService implements OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
+  private http = inject(HttpClient);
   paginationMonitorFactory = inject(PaginationMonitorFactory);
 
+  private debug: CfOrgSpaceDebug = createCfOrgSpaceDebug();
 
-  private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
+  // === Selection state (source of truth) ===
+  private _cfSelected = signal<string | null>(null);
+  private _orgSelected = signal<string | null>(null);
+  private _spaceSelected = signal<string | null>(null);
 
+  // === Data state ===
+  private _orgsByCnsi = signal<Record<string, { guid: string; name: string }[]>>({});
+  private _spacesByOrg = signal<Record<string, { guid: string; name: string }[]>>({});
+  private _orgFetching = signal(false);
+  private _spaceFetching = signal(false);
+  private fetchedCnsis = new Set<string>();
+  private fetchedOrgKeys = new Set<string>();
+
+  private _autoSelectEnabled = signal(false);
+
+  // === Connected CF endpoints ===
+  // Leaf rxjs/ngrx bridge: the connected-endpoint store has no signal
+  // replacement yet. One-line conversion, no operators in the control flow.
+  private connectedCfList = toSignal(
+    this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
+      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
+      map(endpoints => Object.values(endpoints)
+        .filter(e => e.cnsi_type === 'cf' && e.connectionStatus === 'connected')
+        .sort((a, b) => naturalCompare(a.name, b.name))
+      ),
+    ),
+    { initialValue: [] as EndpointModel[] }
+  );
+
+  // === Public derived signals ===
+  /** Orgs for the currently-selected cnsi. Empty until fetch resolves. */
+  public orgList: Signal<{ guid: string; name: string }[]> = computed(() => {
+    const cnsi = this._cfSelected();
+    if (!cnsi) { return []; }
+    return this._orgsByCnsi()[cnsi] ?? [];
+  });
+
+  /** Spaces for the currently-selected (cnsi, org). Empty until fetch resolves. */
+  public spaceList: Signal<{ guid: string; name: string }[]> = computed(() => {
+    const cnsi = this._cfSelected();
+    const org = this._orgSelected();
+    if (!cnsi || !org) { return []; }
+    return this._spacesByOrg()[`${cnsi}:${org}`] ?? [];
+  });
+
+  // === Public CfOrgSpaceItem shim API (legacy rxjs surface) ===
   public cf!: CfOrgSpaceItem<EndpointModel>;
   public org!: CfOrgSpaceItem<IOrganization>;
   public space!: CfOrgSpaceItem<ISpace>;
   public isLoading$: Observable<boolean>;
 
-  // FWT-917: per-instance debug channel. Dev-build-only; prod is a no-op.
-  // See cf-org-space-debug.ts and FWT-917 for event-kind vocabulary.
-  private debug: CfOrgSpaceDebug = createCfOrgSpaceDebug();
-
-  public paginationAction = this.createOrgPaginationAction();
-
-  /**
-   * This will contain all org and space data
-   */
-  private allOrgs = this.getAllOrgsObservable();
-
-  private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(
-    pag => getCurrentPageRequestInfo(pag).busy
-  ));
-
-  private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
-  private subs: Subscription[] = [];
-
-  /*
-   * Observable that provides initial values for drop downs, output will be parsed through initialValuesMap before emitted on first
-   */
+  // setInitialValuesFromAction support (services-wall persisted filter)
   public initialValues$!: Observable<any>;
-  /**
-   * Map values from `initialValues$` to supply initial values for drop downs
-   */
   public initialValuesMap!: (param: any) => InitialValues;
 
   constructor() {
     this.debug.log('service:construct');
-    this.createCf();
-    this.createOrg();
-    this.createSpace();
 
-    this.isLoading$ = combineLatest(
-      this.cf.loading$,
-      this.org.loading$,
-      this.space.loading$
-    ).pipe(
-      map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
-    );
-
-  }
-
-  private getAllOrgsObservable() {
-    const obs = getPaginationObservables<APIResource<IOrganization>>({
-      store: this.store,
-      action: this.paginationAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.paginationAction.paginationKey,
-        cfEntityFactory(this.paginationAction.entityType),
-        this.paginationAction.flattenPagination
-      )
-    }, this.paginationAction.flattenPagination);
-
-    // FWT-917: non-invasive diagnostic tap. The tap sits on a forked
-    // entities$ so subscribers to the service see it; pagination$ is
-    // unchanged. Critical for diagnosing H2/H5 (pagination race).
-    return {
-      ...obs,
-      entities$: obs.entities$.pipe(
-        tap(entities => this.debug.log('allOrgs:entities-emit', {
-          count: entities?.length ?? null,
-          isNull: entities == null,
-          isEmptyArray: Array.isArray(entities) && entities.length === 0,
-        })),
-      ),
-    };
-  }
-
-  // Signal-based selection state with BehaviorSubject wrapper for backward compatibility
-  private cfSelectSignal = signal<string | null>(null);
-  private orgSelectSignal = signal<string | null>(null);
-  private spaceSelectSignal = signal<string | null>(null);
-
-  private createCf() {
-    const list$ = this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-      // Ensure we have endpoints
-      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
-      publishReplay(1),
-      refCount(),
-    );
-
-    // Create BehaviorSubject wrapper that updates signal
-    const cfBehaviorSubject = new BehaviorSubject<string | null>(null);
-    cfBehaviorSubject.subscribe(value => {
-      this.cfSelectSignal.set(value);
-      this.debug.log('cf:select-change', { to: value });
-    });
-
+    // Build legacy shims. select is a BehaviorSubject backed by the signal;
+    // list$/loading$ are toObservable(signal).
     this.cf = {
-      list$: list$.pipe(
-        // Filter out non-cf endpoints
-        map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
-        // Ensure we have at least one connected cf
-        filter(cfs => {
-          for (const cf of cfs) {
-            if (cf.connectionStatus === 'connected') {
-              return true;
-            }
-          }
-          return false;
-        }),
-        take(1),
-        map((endpoints: EndpointModel[]) => {
-          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
-        }),
-        tap(endpoints => this.debug.log('cf:list-emit', {
-          count: endpoints.length,
-          guids: endpoints.map(e => e.guid),
-        })),
-      ),
-      loading$: list$.pipe(
-        map(cfs => !cfs)
-      ),
-      select: cfBehaviorSubject // BehaviorSubject wrapper synced with signal
+      list$: toObservable(this.connectedCfList) as Observable<EndpointModel[]>,
+      loading$: toObservable(computed(() => this.connectedCfList().length === 0)),
+      select: this.makeSelectShim(this._cfSelected, 'cf'),
     };
-  }
-
-  private createOrg() {
-    const orgList$ = combineLatest(
-      this.cf.select.asObservable(),
-      this.allOrgs.entities$
-    ).pipe(
-      map(([selectedCF, entities]) => {
-        if (selectedCF && entities) {
-          return entities
-            .map(org => org.entity)
-            .filter(org => org.cfGuid === selectedCF)
-            .sort((a, b) => naturalCompare(a.name, b.name));
-        }
-        return [];
-      }),
-      tap(orgs => this.debug.log('org:list-emit', { resultCount: orgs.length })),
-    );
-
-    // Create BehaviorSubject wrapper that updates signal
-    const orgBehaviorSubject = new BehaviorSubject<string | null>(null);
-    orgBehaviorSubject.subscribe(value => {
-      this.orgSelectSignal.set(value);
-      this.debug.log('org:select-change', { to: value });
-    });
-
     this.org = {
-      list$: orgList$,
-      loading$: this.allOrgsLoading$,
-      select: orgBehaviorSubject // BehaviorSubject wrapper synced with signal
+      list$: toObservable(this.orgList) as Observable<IOrganization[]>,
+      loading$: toObservable(this._orgFetching),
+      select: this.makeSelectShim(this._orgSelected, 'org'),
     };
-  }
-
-  private createSpace() {
-    const spaceList$ = combineLatest(
-      this.org.select.asObservable(),
-      this.allOrgs.entities$
-    ).pipe(
-      map(([selectedOrgGuid, orgs]) => {
-        if (selectedOrgGuid) {
-          const selectedOrg = orgs.find(org => org.metadata.guid === selectedOrgGuid);
-          if (selectedOrg?.entity?.spaces) {
-            return selectedOrg.entity.spaces.map(space => {
-              const entity = { ...space.entity };
-              entity.guid = space.metadata.guid;
-              return entity;
-            }).sort((a, b) => naturalCompare(a.name, b.name));
-          }
-          return [];
-        }
-        // No org selected ("All"): aggregate spaces from every org, deduplicate by GUID
-        // Prefix space name with org name for disambiguation
-        const seen = new Set<string>();
-        const allSpaces: ISpace[] = [];
-        for (const org of orgs) {
-          if (org.entity?.spaces) {
-            for (const space of org.entity.spaces) {
-              if (!seen.has(space.metadata.guid)) {
-                seen.add(space.metadata.guid);
-                const entity = { ...space.entity };
-                entity.guid = space.metadata.guid;
-                entity.name = `${space.entity.name} (${org.entity.name})`;
-                allSpaces.push(entity);
-              }
-            }
-          }
-        }
-        return allSpaces.sort((a, b) => naturalCompare(a.name, b.name));
-      }),
-      tap(spaces => this.debug.log('space:list-emit', { resultCount: spaces.length })),
-    );
-
-    // Create BehaviorSubject wrapper that updates signal
-    const spaceBehaviorSubject = new BehaviorSubject<string | null>(null);
-    spaceBehaviorSubject.subscribe(value => {
-      this.spaceSelectSignal.set(value);
-      this.debug.log('space:select-change', { to: value });
-    });
-
     this.space = {
-      list$: spaceList$,
-      loading$: this.org.loading$,
-      select: spaceBehaviorSubject // BehaviorSubject wrapper synced with signal
+      list$: toObservable(this.spaceList) as Observable<ISpace[]>,
+      loading$: toObservable(this._spaceFetching),
+      select: this.makeSelectShim(this._spaceSelected, 'space'),
     };
-  }
+    this.isLoading$ = toObservable(computed(() =>
+      this.connectedCfList().length === 0 || this._orgFetching() || this._spaceFetching()
+    ));
 
-  private createOrgPaginationAction() {
-    return cfEntityCatalog.org.actions.getMultiple(null, CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, {
-      includeRelations: [
-        createEntityRelationKey(organizationEntityType, spaceEntityType),
-      ],
-      populateMissing: true
+    // === Effects ===
+
+    // V3 orgs fetch on cf change. Each cnsi is fetched once.
+    effect(() => {
+      const cnsi = this._cfSelected();
+      if (!cnsi || this.fetchedCnsis.has(cnsi)) { return; }
+      this.fetchedCnsis.add(cnsi);
+      untracked(() => this._orgFetching.set(true));
+      this.http.get<{ resources: { guid: string; name: string }[] }>(
+        `/pp/v1/cf/orgs/${cnsi}?per_page=500&page=1`,
+      ).subscribe({
+        next: resp => {
+          this._orgsByCnsi.update(m => ({ ...m, [cnsi]: resp.resources ?? [] }));
+          this._orgFetching.set(false);
+        },
+        error: () => this._orgFetching.set(false),
+      });
+    });
+
+    // V3 spaces fetch on org change. Each (cnsi, org) is fetched once.
+    effect(() => {
+      const cnsi = this._cfSelected();
+      const orgGuid = this._orgSelected();
+      if (!cnsi || !orgGuid) { return; }
+      const key = `${cnsi}:${orgGuid}`;
+      if (this.fetchedOrgKeys.has(key)) { return; }
+      this.fetchedOrgKeys.add(key);
+      untracked(() => this._spaceFetching.set(true));
+      this.http.get<{ resources: { guid: string; name: string }[] }>(
+        `/pp/v1/cf/org/${cnsi}/${orgGuid}/spaces?per_page=500&page=1`,
+      ).subscribe({
+        next: resp => {
+          this._spacesByOrg.update(m => ({ ...m, [key]: resp.resources ?? [] }));
+          this._spaceFetching.set(false);
+        },
+        error: () => this._spaceFetching.set(false),
+      });
+    });
+
+    // Cascade: cf change clears org and space — but skip on null→non-null
+    // transition so setInitialValuesFromAction's seed sequence (cf, org,
+    // space written back-to-back) isn't wiped by the cascade firing on a
+    // microtask after the org/space writes.
+    let prevCf: string | null = this._cfSelected();
+    effect(() => {
+      const cf = this._cfSelected();
+      if (cf === prevCf) { return; }
+      const wasNull = prevCf === null;
+      prevCf = cf;
+      if (!wasNull) {
+        untracked(() => {
+          this._orgSelected.set(null);
+          this._spaceSelected.set(null);
+        });
+      }
+    });
+
+    // Cascade: org change clears space — same null→non-null skip rule.
+    let prevOrg: string | null = this._orgSelected();
+    effect(() => {
+      const org = this._orgSelected();
+      if (org === prevOrg) { return; }
+      const wasNull = prevOrg === null;
+      prevOrg = org;
+      if (!wasNull) {
+        untracked(() => this._spaceSelected.set(null));
+      }
+    });
+
+    // Auto-pick: opt-in singleton selection.
+    effect(() => {
+      if (!this._autoSelectEnabled()) { return; }
+      const orgs = this.orgList();
+      if (orgs.length === 1 && !untracked(() => this._orgSelected())) {
+        untracked(() => this._orgSelected.set(orgs[0].guid));
+      }
+    });
+    effect(() => {
+      if (!this._autoSelectEnabled()) { return; }
+      const spaces = this.spaceList();
+      if (spaces.length === 1 && !untracked(() => this._spaceSelected())) {
+        untracked(() => this._spaceSelected.set(spaces[0].guid));
+      }
     });
   }
 
-  public getEndpointOrgs(endpointGuid: string) {
-    return this.allOrgs.entities$.pipe(
-      map(orgs => {
-        return orgs.filter(o => o.entity.cfGuid === endpointGuid);
-      })
-    );
+  /**
+   * Legacy BehaviorSubject shim backed by a WritableSignal. Calling
+   * `.next(v)` writes the signal; the signal is the source of truth for
+   * the cascade and auto-pick effects. Signal updates emit on the
+   * BehaviorSubject so existing `| async` and `.subscribe()` consumers
+   * keep working. Retire this shim when consumers migrate to signals.
+   */
+  private makeSelectShim(sig: WritableSignal<string | null>, kind: 'cf' | 'org' | 'space'): BehaviorSubject<string> {
+    const bs = new BehaviorSubject<string>(sig() as any);
+    const innerNext = bs.next.bind(bs);
+    effect(() => {
+      const v = sig();
+      innerNext(v as any);
+      this.debug.log(`${kind}:select-change`, { to: v });
+    });
+    bs.next = (v: string) => sig.set(v as any);
+    bs.getValue = () => sig() as any;
+    return bs;
   }
 
+  /**
+   * Persisted-filter restoration plumbing for services-wall (and any
+   * other caller of this method). Reads cf/org/space guids out of a
+   * caller-supplied PaginatedAction's client-filter state and seeds the
+   * select signals.
+   */
   public setInitialValuesFromAction(
     paginatedAction: PaginatedAction,
     cfKey: string,
@@ -387,157 +359,37 @@ export class CfOrgSpaceDataService implements OnDestroy {
       filter(p => !!p?.clientPagination?.filter),
     );
 
-    // Sync BehaviorSubjects with persisted store values so
-    // dropdowns and list filtering are consistent from first render
     this.initialValues$.pipe(
       take(1),
       map(this.initialValuesMap),
     ).subscribe(values => {
       this.debug.log('initialValues:resolved', values);
-      if (values.cf) { this.selectSet(this.cf.select, values.cf); }
-      if (values.org) { this.selectSet(this.org.select, values.org); }
-      if (values.space) { this.selectSet(this.space.select, values.space); }
+      if (values.cf) { this._cfSelected.set(values.cf); }
+      if (values.org) { this._orgSelected.set(values.org); }
+      if (values.space) { this._spaceSelected.set(values.space); }
     });
-  }
-
-  private getInitialValues(): Observable<InitialValues> {
-    const initialValues$ = this.initialValues$ || of({ cf: undefined, org: undefined, space: undefined });
-    const defaultMap = (a: any) => a;
-    const initialValuesMap = this.initialValuesMap || defaultMap;
-    return initialValues$.pipe(
-      take(1),
-      map(initialValuesMap) // Map needs to happen at the point the auto selectors are enabled
-    );
-  }
-
-  public enableAutoSelectors() {
-    combineLatest(
-      // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
-      this.org.list$,
-      // Get initial values only after we've given a prod... so first values emitted are the one's we want
-      this.getInitialValues(),
-    ).pipe(take(1)).subscribe(([, initialValues]) => {
-      this.setupAutoSelectors(initialValues.cf, initialValues.org);
-    });
-  }
-
-  private setupAutoSelectors(initialCf: string, initialOrg: string) {
-    this.debug.log('autoSelector:setup', { initialCf, initialOrg });
-
-    // Clear or automatically select org + space given cf
-    let cfTapped = false;
-    const orgResetSub = this.cf.select.asObservable().pipe(
-      startWith(initialCf),
-      distinctUntilChanged(),
-      // FWT-917 H3 diagnostic: log every candidate BEFORE the filter so we
-      // can see when the filter swallows a happy-path emission (cf ===
-      // initialCf on first arrival, cfTapped still false → willFire false).
-      tap(cf => this.debug.log('autoSelector:cf-pre-filter', {
-        cf, initialCf, cfTapped,
-        willFire: cfTapped || cf !== initialCf,
-      })),
-      filter(cf => cfTapped || cf !== initialCf),
-      // FWT-917 H2 fix: previously `withLatestFrom(this.org.list$)` grabbed
-      // org.list$ at the exact instant cf.select fired, which on a cold
-      // cache returned [] because the orgs paginated fetch was still in
-      // flight. The cascade then cleared org.select to undefined, which
-      // never recovered because cf.select doesn't re-fire when the fetch
-      // completes. Now we wait for the pagination state to show a
-      // completed (non-busy, attempted-at-least-once) request, then read
-      // a fresh org.list$ snapshot with real data.
-      switchMap(selectedCF => this.waitForOrgsReady$.pipe(
-        tap(() => this.debug.log('autoSelector:cf-cascade-ready', { selectedCF })),
-        switchMap(() => this.org.list$.pipe(take(1))),
-        map(orgs => [selectedCF, orgs] as const),
-      )),
-      tap(([_selectedCF, orgs]) => {
-        cfTapped = true;
-        const willAutoPick = !!orgs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY));
-        this.debug.log('autoSelector:cf-cascade-fire', {
-          orgCount: orgs.length,
-          willAutoPick,
-          picked: willAutoPick ? orgs[0].guid : null,
-        });
-        if (willAutoPick) {
-          this.selectSet(this.org.select, orgs[0].guid);
-        } else {
-          this.selectSet(this.org.select, undefined);
-          this.selectSet(this.space.select, undefined);
-        }
-      }),
-    ).subscribe();
-    this.subs.push(orgResetSub);
-
-    // Clear or automatically select space given org
-    let orgTapped = false;
-    const spaceResetSub = this.org.select.asObservable().pipe(
-      startWith(initialOrg),
-      distinctUntilChanged(),
-      tap(org => this.debug.log('autoSelector:org-pre-filter', {
-        org, initialOrg, orgTapped,
-        willFire: orgTapped || org !== initialOrg,
-      })),
-      filter(org => orgTapped || org !== initialOrg),
-      // FWT-917 H2 fix: same pattern as the cf cascade. Spaces come back
-      // embedded in the orgs pagination (via includeRelations), so the
-      // same "wait for orgs fetch to complete" gate applies — the space
-      // list is only meaningful once the orgs fetch has finished.
-      switchMap(selectedOrg => this.waitForOrgsReady$.pipe(
-        tap(() => this.debug.log('autoSelector:org-cascade-ready', { selectedOrg })),
-        switchMap(() => this.space.list$.pipe(take(1))),
-        map(spaces => [selectedOrg, spaces] as const),
-      )),
-      tap(([_selectedOrg, spaces]) => {
-        orgTapped = true;
-        const willAutoPick = !!spaces.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY));
-        this.debug.log('autoSelector:org-cascade-fire', {
-          spaceCount: spaces.length,
-          willAutoPick,
-          picked: willAutoPick ? spaces[0].guid : null,
-        });
-        if (willAutoPick) {
-          this.selectSet(this.space.select, spaces[0].guid);
-        } else {
-          this.selectSet(this.space.select, undefined);
-        }
-      })
-    ).subscribe();
-    this.subs.push(spaceResetSub);
   }
 
   /**
-   * FWT-917: Emits once the orgs paginated fetch has transitioned into a
-   * "completed" state — i.e. the current pageRequest entry exists (so the
-   * fetch was actually attempted) AND is not currently busy. This is the
-   * gate the auto-selector cascades wait on before reading org/space lists,
-   * so they see real data instead of an empty array from a still-in-flight
-   * initial load.
+   * Opt-in singleton auto-pick. After this is called, the next-arriving
+   * org list with exactly one entry auto-selects that org; same for
+   * spaces. Used by create-application; the add-service-instance wizard
+   * does not call this so users always pick org/space explicitly.
    *
-   * Subscribes to `allOrgs.entities$` as a side-effect to guarantee the
-   * fetch is triggered (a no-op join if the fetch is already in flight or
-   * completed). Without this trigger, the cascade could deadlock if no
-   * other consumer has subscribed yet.
+   * If a consumer has previously called setInitialValuesFromAction, those
+   * persisted filter values are also seeded here so they take precedence
+   * over the auto-pick (services-wall pattern).
    */
-  private waitForOrgsReady$ = defer(() => {
-    // Trigger the underlying fetch by subscribing to entities$ — fire-and-
-    // forget because we only care about the side effect.
-    this.allOrgs.entities$.pipe(take(1)).subscribe();
-    return this.allOrgs.pagination$.pipe(
-      filter(pag => {
-        const req = pag?.pageRequests?.[pag?.currentPage];
-        return !!req && !req.busy;
-      }),
-      take(1),
-    );
-  });
+  public enableAutoSelectors() {
+    this._autoSelectEnabled.set(true);
 
-  private selectSet(select: BehaviorSubject<string>, newValue: string) {
-    if (select.getValue() !== newValue) {
-      select.next(newValue);
+    if (this.initialValues$) {
+      const map$ = this.initialValuesMap || ((a: any) => a);
+      this.initialValues$.pipe(take(1), map(map$)).subscribe(values => {
+        if (values.cf) { this._cfSelected.set(values.cf); }
+        if (values.org) { this._orgSelected.set(values.org); }
+        if (values.space) { this._spaceSelected.set(values.space); }
+      });
     }
   }
 
@@ -545,10 +397,10 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.destroy();
   }
 
-  destroy() {
-    // OnDestroy will be called when the component the service is provided at is destroyed. In theory this should not need to be called
-    // separately, if you see error's first ensure the service is provided at a component that will be destroyed
-    // Should be called in the OnDestroy of the component where it's provided
-    safeUnsubscribe(...this.subs);
-  }
+  /**
+   * No-op for signal-native consumers — effects auto-clean via Angular's
+   * DestroyRef. Kept on the API surface because legacy callers invoke it
+   * explicitly and removing it would be a separate breaking change.
+   */
+  destroy() { }
 }

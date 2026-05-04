@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import {
@@ -14,7 +14,7 @@ import { ITileConfig } from '../../../../shared/components/tile/tile-selector.ty
 import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoint-tile-manager';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { TileSelectorComponent } from '../../../../shared/components/tile-selector/tile-selector.component';
 
 
@@ -33,6 +33,11 @@ import { TileSelectorComponent } from '../../../../shared/components/tile-select
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
+
+  // FWT-956: signal-native step handle. Endpoint-type tile selector is a
+  // confirmation-style step (no submission, Next button hidden); navigation
+  // happens via the selectedTile setter below.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   set selectedTile(tile: ITileConfig<ICreateEndpointTilesData>) {
     super.selectedTile = tile;

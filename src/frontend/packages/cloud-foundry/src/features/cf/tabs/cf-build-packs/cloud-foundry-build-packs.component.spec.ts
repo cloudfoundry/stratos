@@ -1,6 +1,6 @@
-import { provideHttpClient } from '@angular/common/http';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
@@ -11,14 +11,12 @@ import {
   TEST_CATALOGUE_ENTITIES,
   generateStratosEntities,
   EntityCatalogTestModule,
-  EntityServiceFactory,
   EntityCatalogHelper,
-  EntityCatalogHelpers,
-  PaginationMonitorFactory
+  EntityCatalogHelpers
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
-import { generateCFEntities, generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace } from '@test-framework/cf';
-import { CfBuildpacksListConfigService } from '../../../../shared/components/list/list-types/cf-buildpacks/cf-buildpacks-list-config.service';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryBuildPacksComponent } from './cloud-foundry-build-packs.component';
 
 describe('CloudFoundryBuildPacksComponent', () => {
@@ -49,8 +47,6 @@ describe('CloudFoundryBuildPacksComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
-        PaginationMonitorFactory,
         ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
         {
           provide: ActiveRouteCfOrgSpace,
@@ -60,11 +56,9 @@ describe('CloudFoundryBuildPacksComponent', () => {
             spaceGuid: testSCFEndpointGuid
           }
         },
-        CfBuildpacksListConfigService,
       ]
     }).compileComponents();
 
-    // Initialize EntityCatalogHelper
     const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
 

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -13,10 +14,10 @@ import {
   stratosEntityCatalog,
   entityCatalog,
   ActionState } from '@stratosui/store';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { take, filter, map, pairwise, switchMap } from 'rxjs/operators';
 
-import { StepOnNextFunction, StepComponent, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextFunction, StepComponent, StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
@@ -74,6 +75,11 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   showCACertField = false;
   lastSkipSSLValue = false;
 
+  // Signal-handle exposed to the parent stepper template (FWT-957)
+  signalHandle: SignalStepHandle;
+
+  private router = inject(Router);
+
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
 
@@ -90,6 +96,20 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     this.clientRedirectURI = getSSOClientRedirectURI();
 
     this.validate = this.editEndpoint.statusChanges.pipe(map(() => this.editEndpoint.valid));
+
+    const validSignal = toSignal(this.validate, { initialValue: this.editEndpoint.valid });
+    this.signalHandle = {
+      valid: validSignal,
+      submit: async () => {
+        const result = await firstValueFrom(this.onNext(0, undefined as unknown as StepComponent));
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update endpoint');
+        }
+        // Replace legacy `redirect: true` with explicit navigation back
+        // to the endpoints page (matches the stepper cancel target).
+        await this.router.navigate(['/endpoints']);
+      },
+    };
 
     this.endpointID = getIdFromRoute(activatedRoute, 'id');
 

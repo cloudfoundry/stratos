@@ -3,7 +3,7 @@
 </app-page-header>
 
 <app-steppers cancel="/endpoints" [basePreviousRedirect]="{ path: '/endpoints/backup-restore' }">
-  <app-step title="File" [valid]="service.validFileContent$ | async">
+  <app-step title="File" [signalHandle]="fileStepHandle">
     <div class="space-y-6">
       <div>
         <p class="text-content-text mb-4">Provide the backup file to restore from.</p>
@@ -22,16 +22,16 @@
             @if (!service.unparsableFileContent && (service.validDb$ | async) === false) {
               <div class="alert alert-warning">
                 <div class="flex items-start space-x-3">
-                  <span class="material-icons text-warning-600 mt-0.5">warning</span>
+                  <span class="material-icons text-warning-shade-600 mt-0.5">warning</span>
                   <div class="flex-1">
-                    <p class="text-warning-800 mb-3">
+                    <p class="text-warning-shade-800 mb-3">
                       The database version of <app-product-name></app-product-name>
-                      (<code class="bg-warning-100 px-1 py-0.5 rounded text-xs">{{service.currentDbVersion$ | async}}</code>) and the backup
-                      (<code class="bg-warning-100 px-1 py-0.5 rounded text-xs">{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
+                      (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{service.currentDbVersion$ | async}}</code>) and the backup
+                      (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
                     </p>
                     <label class="flex items-center space-x-2 cursor-pointer">
-                      <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" (change)="onIgnoreDbChange($event)">
-                      <span class="text-sm text-warning-800">Ignore different database versions</span>
+                      <input type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500" (change)="onIgnoreDbChange($event)">
+                      <span class="text-sm text-warning-shade-800">Ignore different database versions</span>
                     </label>
                   </div>
                 </div>
@@ -40,11 +40,11 @@
             @if (!!service.unparsableFileContent) {
               <div class="alert alert-danger">
                 <div class="flex items-start space-x-3">
-                  <span class="material-icons text-danger-600 mt-0.5">warning</span>
+                  <span class="material-icons text-danger-shade-600 mt-0.5">warning</span>
                   <div class="flex-1">
-                    <p class="text-danger-800">
+                    <p class="text-danger-shade-800">
                       Unable to parse file contents. Reason:&nbsp;
-                      <code class="bg-danger-100 px-1 py-0.5 rounded text-xs">{{service.unparsableFileContent}}</code>
+                      <code class="bg-danger-shade-100 px-1 py-0.5 rounded text-xs">{{service.unparsableFileContent}}</code>
                     </p>
                   </div>
                 </div>
@@ -55,7 +55,7 @@
       }
     </div>
   </app-step>
-  <app-step title="Password" finishButtonText="Restore" [onNext]="restore" [valid]="passwordValid$ | async">
+  <app-step title="Password" finishButtonText="Restore" [signalHandle]="passwordStepHandle">
     <div class="space-y-4">
       <p class="text-content-text">Provide the password that was given at the time the backup was created</p>
       <form [formGroup]="passwordForm" class="space-y-4">

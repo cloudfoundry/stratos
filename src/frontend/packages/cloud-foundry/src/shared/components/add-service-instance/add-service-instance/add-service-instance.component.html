@@ -6,54 +6,42 @@
     <app-steppers [cancel]="modeService.cancelUrl">
       @if (serviceType === serviceTypes.SERVICE) {
         @if (modeService.viewDetail.showSelectCf && !isSpaceScoped()) {
-          <app-step title="Cloud Foundry"
-            [onEnter]="resetStoreData" [valid]="selectCF?.validate | async" [onNext]="onNext"
-            [blocked]="cfOrgSpaceService.isLoading$ | async">
+          <app-step title="Cloud Foundry" [signalHandle]="selectCFHandle">
             <app-create-application-step1 [stepperText]="stepperText" [isMarketplaceMode]="inMarketplaceMode" #selectCF>
             </app-create-application-step1>
           </app-step>
         }
         @if (modeService.viewDetail.showSelectService) {
-          <app-step title="Select Service"
-            [valid]="selectService?.validate()" [onNext]="selectService?.onNext"
-            [blocked]="selectService?.isFetching$ | async">
+          <app-step title="Select Service" [signalHandle]="selectServiceHandle">
             <app-select-service #selectService></app-select-service>
           </app-step>
         }
-        <app-step title="Select Plan" [onNext]="selectPlan?.onNext" [blocked]="!inited" [onEnter]="selectPlan?.onEnter"
-          [valid]="selectPlan?.validate()" cancelButtonText="Cancel">
+        <app-step title="Select Plan" [signalHandle]="selectPlanHandle">
           <app-select-plan-step #selectPlan></app-select-plan-step>
         </app-step>
         @if (modeService.viewDetail.showBindApp) {
-          <app-step [title]="bindAppStepperText" [skip]="skipApps$ | async"
-            [onEnter]="bindApp?.onEnter" [onNext]="bindApp?.submit " [valid]="bindApp?.validate()"
-            cancelButtonText="Cancel">
+          <app-step [title]="bindAppStepperText" [signalHandle]="bindAppHandle">
             <app-bind-apps-step #bindApp [boundAppId]="appId" [apps$]="apps$"></app-bind-apps-step>
           </app-step>
         }
-        <app-step title="Service Instance" [onNext]="specifyDetails?.onNext" [onEnter]="specifyDetails?.onEnter"
-          [blocked]="specifyDetails?.serviceInstancesInit$ | async" [valid]="specifyDetails?.validate | async "
-          cancelButtonText="Cancel " nextButtonText="Create ">
+        <app-step title="Service Instance" [signalHandle]="specifyDetailsHandle">
           <app-specify-details-step [appId]="appId" #specifyDetails [showModeSelection]="!!appId">
           </app-specify-details-step>
         </app-step>
       }
       @if (serviceType === serviceTypes.USER_SERVICE) {
         @if (modeService.viewDetail.showSelectCf) {
-          <app-step title="Cloud Foundry" [onEnter]="resetStoreData"
-            [valid]="selectCF?.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
+          <app-step title="Cloud Foundry" [signalHandle]="selectCFHandle">
             <app-create-application-step1 [stepperText]="stepperText" [isMarketplaceMode]="inMarketplaceMode" #selectCF>
             </app-create-application-step1>
           </app-step>
         }
         @if (modeService.viewDetail.showBindApp) {
-          <app-step [title]="bindAppStepperText" [skip]="skipApps$ | async"
-            [onEnter]="bindApp?.onEnter" [onNext]="bindApp?.submit " [valid]="bindApp?.validate()"
-            cancelButtonText="Cancel">
+          <app-step [title]="bindAppStepperText" [signalHandle]="bindAppHandle">
             <app-bind-apps-step #bindApp [boundAppId]="appId" [apps$]="apps$"></app-bind-apps-step>
           </app-step>
         }
-        <app-step title="Service Instance" [onNext]="supd?.onNext" [valid]="supd?.validate()">
+        <app-step title="Service Instance" [signalHandle]="supdHandle">
           <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="cfGuid$ | async"
             [spaceGuid]="spaceGuid$ | async" [serviceInstanceId]="serviceInstanceId" #supd>
           </app-specify-user-provided-details>

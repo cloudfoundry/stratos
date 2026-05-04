@@ -16,7 +16,14 @@ _HIDE := _
 
 # ── Version ───────────────────────────────────────────────────
 VERSION       ?= $(shell node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0-unknown")
-$(_HIDE)SEMVER_VERSION := $(VERSION)
+# Lazy (=) rather than immediate (:=) so consumers re-evaluate at recipe
+# execution time. Important for chains like `make bump dev build ...` where
+# `bump` edits package.json at recipe time — if SEMVER_VERSION were :=, it'd
+# capture the pre-bump value at parse time and the build would stamp the
+# wrong version into build-info.ts and the Go binary. Preserves the two
+# interfaces: VERSION is user-settable input; SEMVER_VERSION is the internal
+# canonical value derived from it.
+$(_HIDE)SEMVER_VERSION = $(VERSION)
 
 # Strip leading 'v' for parsing
 $(_HIDE)V := $(patsubst v%,%,$($(_HIDE)SEMVER_VERSION))
@@ -50,7 +57,9 @@ $(_HIDE)BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{prin
 $(_HIDE)BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
 
 # ── Go ldflags ────────────────────────────────────────────────
-$(_HIDE)GO_LDFLAGS := -X main.appVersion=$($(_HIDE)SEMVER_VERSION) -X main.buildDate=$($(_HIDE)BUILD_DATE) -X main.gitCommit=$($(_HIDE)BUILD_VCS_ID) -X main.gitBranch=$($(_HIDE)BUILD_VCS_BRANCH)
+# Lazy (=) so the backend binary's baked-in version reflects the post-bump
+# value when `bump` and `build` chain in a single Make invocation.
+$(_HIDE)GO_LDFLAGS = -X main.appVersion=$($(_HIDE)SEMVER_VERSION) -X main.buildDate=$($(_HIDE)BUILD_DATE) -X main.gitCommit=$($(_HIDE)BUILD_VCS_ID) -X main.gitBranch=$($(_HIDE)BUILD_VCS_BRANCH)
 
 # ── Frontend build info path ─────────────────────────────────
 $(_HIDE)BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts

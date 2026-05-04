@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SignalStepHandle, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
@@ -40,10 +40,45 @@ interface CreateSpaceForm {
 })
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
+
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Reads validity from validSignal,
+   * dispatches space create, and navigates to the parent-supplied
+   * redirectUrl on success. Replaces legacy onNext + redirect: true.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const id = `${this.orgGuid}-${this.spaceName.value}`;
+      const quotaValue = this.quotaDefinition.value;
+      const finalState = await firstValueFrom(
+        cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
+          createSpace: {
+            name: this.spaceName.value,
+            organization_guid: this.orgGuid,
+            space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
+          },
+          orgGuid: this.orgGuid
+        }).pipe(
+          pairwise(),
+          filter(([oldS, newS]) => oldS.creating && !newS.creating),
+          map(([, newS]) => newS),
+        )
+      );
+      if (finalState.error) {
+        throw new Error(`Failed to create space: ${finalState.message}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
 
   cfUrl!: string;
   createSpaceForm!: FormGroup<CreateSpaceForm>;

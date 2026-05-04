@@ -12,18 +12,6 @@
 </app-page-header>
 <app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 
-<ng-template #noEntriesForCurrentFilter>
-  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications for the current filter'" [secondLine]="{
-  text: ''
-}"></app-no-content-message>
-</ng-template>
-
-<ng-template #noEntries>
-  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications'" [secondLine]="{
-  text: ''
-}"></app-no-content-message>
-</ng-template>
-
 <!-- Show loading indicator -->
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
   <div
@@ -36,8 +24,19 @@
 }
 
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
-  <app-list class="app-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
-    (initialised)="cfOrgSpaceService.enableAutoSelectors()"
-    >
-  </app-list>
+  @if (duplicateEndpointCount$ | async; as dupCount) {
+    <div class="mx-4 mt-3 mb-2 px-3 py-2 rounded border flex items-start gap-2 text-sm"
+         style="background-color: var(--info-bg); border-color: var(--info-border); color: var(--info-text);">
+      <span class="material-icons text-base leading-5">info</span>
+      <span>
+        {{ dupCount }} Cloud Foundry endpoints share a URL. Applications and organizations from each are shown together —
+        use the Cloud Foundry filter to view a single endpoint.
+      </span>
+    </div>
+  }
+  @if (listConfig(); as cfg) {
+    <div class="flex-1 min-h-0 p-4 flex flex-col">
+      <app-signal-list [config]="cfg"></app-signal-list>
+    </div>
+  }
 }

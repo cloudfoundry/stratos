@@ -1,0 +1,816 @@
+// src/jetstream/plugins/cloudfoundry/native_handlers.go
+package cloudfoundry
+
+import (
+	"context"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
+	"github.com/fivetwenty-io/capi/v3/pkg/cfclient"
+	"github.com/labstack/echo/v4"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
+)
+
+const stratosSchemaVersion = "1"
+
+// nativeCFProxy is the narrow set of portal-proxy operations the native handlers need.
+// Defined as an interface so tests can provide a stub without implementing all of api.PortalProxy.
+type nativeCFProxy interface {
+	GetCNSIRecord(guid string) (api.CNSIRecord, error)
+	GetCNSITokenRecord(cnsiGUID string, userGUID string) (api.TokenRecord, bool)
+	GetSessionStringValue(ctx echo.Context, key string) (string, error)
+	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (api.TokenRecord, error)
+	DoProxySingleRequestWithToken(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error)
+}
+
+// getUserGUID extracts the logged-in user GUID from the session.
+func (c *CloudFoundrySpecification) getUserGUID(ctx echo.Context) (string, error) {
+	return c.nativeProxy().GetSessionStringValue(ctx, "user_id")
+}
+
+// nativeProxy returns the portal proxy cast to nativeCFProxy.
+// Allows tests to replace it by setting c.testProxy.
+func (c *CloudFoundrySpecification) nativeProxy() nativeCFProxy {
+	if c.testProxy != nil {
+		return c.testProxy
+	}
+	return c.portalProxy
+}
+
+// newCapiClient creates a capi client authenticated with Jetstream's stored token.
+// Uses cfclient.NewWithToken so no UAA discovery occurs — the token is passed directly.
+//
+// Proactively refreshes the stored token if it has expired before handing it
+// to capi. Without this check, cfclient sends a dead token and CF returns
+// CF-InvalidAuthToken (502 to the caller) — the legacy proxy path
+// (oauth_requests.go OAuthHandlerFunc) handles this via both proactive expiry
+// and reactive 401, but native handlers bypass that wrapper entirely.
+func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID string) (capi.Client, error) {
+	cnsiRecord, err := proxy.GetCNSIRecord(cnsiGUID)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "endpoint not found")
+	}
+	tokenRecord, ok := proxy.GetCNSITokenRecord(cnsiGUID, userGUID)
+	if !ok {
+		return nil, echo.NewHTTPError(http.StatusForbidden, "no token for endpoint")
+	}
+	if tokenRecord.TokenExpiry > 0 && time.Unix(tokenRecord.TokenExpiry, 0).Before(time.Now()) {
+		log.Infof("[diag refresh] newCapiClient proactive refresh cnsi=%s user=%s expiry=%d (age=%s)",
+			cnsiGUID, userGUID, tokenRecord.TokenExpiry, time.Since(time.Unix(tokenRecord.TokenExpiry, 0)))
+		refreshed, refreshErr := proxy.RefreshOAuthToken(
+			cnsiRecord.SkipSSLValidation,
+			cnsiGUID, userGUID,
+			cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint,
+		)
+		if refreshErr != nil {
+			log.Warnf("[diag refresh] CF token refresh FAILED for cnsi=%s user=%s: %v", cnsiGUID, userGUID, refreshErr)
+			return nil, echo.NewHTTPError(http.StatusBadGateway, "token refresh failed: "+refreshErr.Error())
+		}
+		log.Infof("[diag refresh] OK cnsi=%s user=%s new_expiry=%d", cnsiGUID, userGUID, refreshed.TokenExpiry)
+		tokenRecord = refreshed
+	}
+	client, err := cfclient.NewWithToken(ctx, cnsiRecord.APIEndpoint.String(), tokenRecord.AuthToken)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	return client, nil
+}
+
+// normaliseStringMap ensures nil maps are returned as empty maps (not null in JSON).
+func normaliseStringMap(m map[string]string) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return m
+}
+
+// metaLabels/metaAnnotations safely extract labels/annotations from a *capi.Metadata (may be nil).
+func metaLabels(m *capi.Metadata) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return normaliseStringMap(m.Labels)
+}
+
+func metaAnnotations(m *capi.Metadata) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return normaliseStringMap(m.Annotations)
+}
+
+// relationshipGUID safely extracts a GUID from a capi.Relationship whose Data pointer may be nil.
+func relationshipGUID(rel capi.Relationship) string {
+	if rel.Data == nil {
+		return ""
+	}
+	return rel.Data.GUID
+}
+
+// ---- handlers ----
+
+// fullPagePerRequest is the page size used when draining every page of a CF
+// list endpoint. Default 500 so each request completes well under the 30s
+// CAPI client timeout (adepttech /v3/spaces at per_page=5000 clocked
+// ~27s/request). Override via env var STRATOS_CF_PER_PAGE for environments
+// with different CAPI performance characteristics.
+var fullPagePerRequest = envIntWithDefault("STRATOS_CF_PER_PAGE", 500)
+
+// maxParallelPages bounds the concurrency of the page-2..N fetch after the
+// first page returns TotalPages. Default 5. Override via env var
+// STRATOS_CF_MAX_PARALLEL_PAGES if the CAPI tolerates more/fewer concurrent
+// requests.
+var maxParallelPages = envIntWithDefault("STRATOS_CF_MAX_PARALLEL_PAGES", 5)
+
+// logCapiTiming emits a structured log line for one CAPI list call. Used at
+// every cfClient.X.List() call site in the drain helpers so a future 504
+// can be attributed to a specific page or filter shape (vs guessed at).
+//
+// Format is greppable key=value: `[trace capi] op=<name> page=<n>
+// per_page=<n> filter_orgs=<n> duration=<ms>ms err=<...> rows=<n> total=<n>`.
+//
+// Pass filterOrgs=-1 when the filter doesn't apply to the call. Pass
+// rows/total=-1 when the call errored and no response is available.
+func logCapiTiming(op string, page, perPage, filterOrgs int, start time.Time, err error, rows, total int) {
+	dur := time.Since(start)
+	fields := log.Fields{
+		"op":       op,
+		"page":     page,
+		"per_page": perPage,
+		"duration": dur.String(),
+	}
+	if filterOrgs >= 0 {
+		fields["filter_orgs"] = filterOrgs
+	}
+	if rows >= 0 {
+		fields["rows"] = rows
+	}
+	if total >= 0 {
+		fields["total"] = total
+	}
+	if err != nil {
+		fields["err"] = err.Error()
+		log.WithFields(fields).Warn("[trace capi]")
+		return
+	}
+	log.WithFields(fields).Info("[trace capi]")
+}
+
+// logHandlerTiming emits a structured log line for one handler invocation.
+// Use it via `defer logHandlerTiming("getNativeX", time.Now(), &err, &rows)`
+// at the top of a handler — the deferred call captures total wall-time and
+// completion status. If the handler is cut off mid-flight (e.g., gorouter
+// timeout) this line will not appear, which itself is the diagnostic signal.
+func logHandlerTiming(op, cnsiGUID string, start time.Time, errPtr *error, rowsPtr *int) {
+	dur := time.Since(start)
+	fields := log.Fields{
+		"op":             op,
+		"cnsi":           cnsiGUID,
+		"total_duration": dur.String(),
+	}
+	if rowsPtr != nil {
+		fields["rows"] = *rowsPtr
+	}
+	if errPtr != nil && *errPtr != nil {
+		fields["err"] = (*errPtr).Error()
+		log.WithFields(fields).Warn("[trace handler]")
+		return
+	}
+	log.WithFields(fields).Info("[trace handler]")
+}
+
+// envIntWithDefault reads a positive integer from the named env var, falling
+// back to the supplied default on unset, non-numeric, or non-positive values.
+// Logs the resolved value at info level so operators can confirm what's in
+// effect after cf set-env + restage.
+func envIntWithDefault(name string, def int) int {
+	raw := os.Getenv(name)
+	if raw == "" {
+		log.Infof("%s unset, using default %d", name, def)
+		return def
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n <= 0 {
+		log.Warnf("%s=%q is not a positive integer, using default %d", name, raw, def)
+		return def
+	}
+	log.Infof("%s=%d (overrides default %d)", name, n, def)
+	return n
+}
+
+// (drain helpers listAllOrgs / listAllApps / listAllSpaces removed in the
+// paging-only sweep — every list handler now forwards the caller's per_page
+// directly to a single CAPI page. listAllRoutes is retained because the
+// non-counts branch of getNativeRouteCount still needs the full route set
+// to populate destinations.)
+
+func toStOrg(r capi.Organization) StOrg {
+	quotaGUID := ""
+	if r.Relationships != nil {
+		quotaGUID = relationshipGUID(r.Relationships.Quota)
+	}
+	return StOrg{
+		GUID:        r.GUID,
+		Name:        r.Name,
+		Status:      "active",
+		QuotaGUID:   quotaGUID,
+		Labels:      metaLabels(r.Metadata),
+		Annotations: metaAnnotations(r.Metadata),
+		CreatedAt:   r.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   r.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func toStApp(r capi.App) StApp {
+	// V3's lifecycle.data is a free-form map; for buildpack lifecycle
+	// (the common case) it carries `stack` as a string. Other lifecycles
+	// (docker) leave it absent — StackName stays empty and is omitted
+	// from the wire payload via the omitempty tag.
+	stackName, _ := r.Lifecycle.Data["stack"].(string)
+	return StApp{
+		GUID:      r.GUID,
+		Name:      r.Name,
+		State:     r.State,
+		SpaceGUID: relationshipGUID(r.Relationships.Space),
+		StackName: stackName,
+		Routes:    []StAppRoute{},
+		CreatedAt: r.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+func toStSpace(r capi.Space) StSpace {
+	return StSpace{
+		GUID:      r.GUID,
+		Name:      r.Name,
+		OrgGUID:   relationshipGUID(r.Relationships.Organization),
+		CreatedAt: r.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+// getNativeOrgs dispatches on ?return=
+//   - counts: per_page=1, totalResults only
+//   - (default): single CAPI page passthrough, Stratos paged envelope.
+//     Caller's per_page/page forward verbatim to /v3/organizations; absent,
+//     V3 server defaults apply.
+func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		orgs := make([]StOrg, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			orgs = append(orgs, toStOrg(r))
+		}
+		return ctx.JSON(http.StatusOK, StOrgsResponse{Resources: orgs, TotalResults: raw.Pagination.TotalResults})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+
+	// Optional guid-batch filter: ?guids=g1,g2,... forwards as
+	// /v3/organizations?guids=g1,g2 — used by the App Wall visible-row name
+	// resolver (slice 2 step 10 #4) to fill in org names for guids that
+	// fell outside the bounded catalog page. Bounded by visible row count
+	// (~25-100), so it can't time out the way an unbounded drain would.
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+		}
+	}
+
+	raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+	}
+	orgs := make([]StOrg, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		orgs = append(orgs, toStOrg(r))
+	}
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrg]{
+		Resources:  orgs,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
+// getNativeApps dispatches on ?return=
+//   - counts: per_page=1, totalResults only
+//   - recent: per_page=10, order_by=-updated_at (top 10 most recently pushed)
+//   - summary: Stratos-shape paged response with paging/sort/filter params
+//     (WU 3 — see native_apps_summary.go for handler)
+//   - (default): single CAPI page passthrough, Stratos paged envelope.
+//
+// Optional filters (default path only):
+//   - ?guids=g1,g2,...  name-resolution lookup by app guid (Routes tab
+//     Apps-Attached column resolver). Triggers the enrichment-skip path
+//     (no per-app process / space / route fan-out) and returns the flat
+//     StAppsResponse envelope since the caller only needs guid → name.
+func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	switch ctx.QueryParam("return") {
+	case "counts":
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		apps := make([]StApp, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			apps = append(apps, toStApp(r))
+		}
+		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
+
+	case "recent":
+		params := capi.NewQueryParams().WithPerPage(10).WithOrderBy("-updated_at")
+		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		apps := make([]StApp, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			apps = append(apps, toStApp(r))
+		}
+		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
+
+	case "summary":
+		return c.getNativeAppsSummary(ctx, cfClient)
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+
+	// Optional guid-batch filter: ?guids=g1,g2,... forwards as
+	// /v3/apps?guids=g1,g2 — used by the slice-3 Routes tab Apps-Attached
+	// column resolver to fill in app names for the destinations of visible
+	// route rows. Bounded by visible row count so it can't time out the
+	// way an unbounded drain would. When present we skip the per-app
+	// process / space / route enrichment: the resolver only needs guid →
+	// name mapping, and the three extra fan-out calls are unjustifiable
+	// for a name lookup.
+	guidsFilter := false
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+			guidsFilter = true
+		}
+	}
+
+	raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+	}
+
+	if guidsFilter {
+		// Name-resolution lookup path: skip enrichment.
+		apps := make([]StApp, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			apps = append(apps, toStApp(r))
+		}
+		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
+	}
+
+	// Enrich each app with its web-process memory / diskQuota / instances
+	// and its parent space's name. V3 moves the process fields off the app
+	// onto the web process, and the space name was always carried via a
+	// separate /v3/spaces fetch on the client. Stitching both server-side
+	// gives downstream consumers (Memory Usage tile, app-wall Space cell)
+	// rich rows from a single payload.
+	appGUIDs := make([]string, 0, len(raw.Resources))
+	spaceGUIDsSeen := make(map[string]struct{}, len(raw.Resources))
+	spaceGUIDs := make([]string, 0)
+	for _, r := range raw.Resources {
+		appGUIDs = append(appGUIDs, r.GUID)
+		spaceGUID := relationshipGUID(r.Relationships.Space)
+		if spaceGUID != "" {
+			if _, seen := spaceGUIDsSeen[spaceGUID]; !seen {
+				spaceGUIDsSeen[spaceGUID] = struct{}{}
+				spaceGUIDs = append(spaceGUIDs, spaceGUID)
+			}
+		}
+	}
+	processes, _ := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
+	spaces, _ := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
+	// Routes are fetched lazily-non-fatal on the default path — same
+	// pattern as processes/spaces. On error, each row's Routes stays as
+	// the empty slice toStApp seeded; tristate signalling on this path
+	// is intentionally minimal (the summary path carries the full
+	// _meta.unavailable / _meta.errors envelope).
+	routesByApp, _ := fetchRoutesForApps(ctx, cfClient, appGUIDs)
+
+	apps := make([]StApp, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		s := toStApp(r)
+		if proc, ok := processes[r.GUID]; ok {
+			mem := proc.MemoryInMB
+			disk := proc.DiskInMB
+			s.Memory = &mem
+			s.DiskQuota = &disk
+			s.Instances = proc.Instances
+		}
+		if space, ok := spaces[s.SpaceGUID]; ok {
+			s.SpaceName = space.Name
+		}
+		if rts, ok := routesByApp[r.GUID]; ok {
+			s.Routes = rts
+		}
+		apps = append(apps, s)
+	}
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StApp]{
+		Resources:  apps,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
+// getNativeSpaces dispatches on ?return=
+//   - counts: per_page=1, totalResults only (fast path — no list drain)
+//   - (default): single CAPI page passthrough, Stratos paged envelope.
+//     Caller's per_page/page forward verbatim to /v3/spaces; absent, V3
+//     server defaults apply.
+//
+// Optional filters:
+//   - ?guids=g1,g2,...               name-resolution lookup by space guid
+//   - ?organization_guids=g1,g2,...  name-resolution drain scoped to N orgs
+//
+// Either filter triggers the enrichment-skip path (no per-space app/route
+// counts) since the App Wall name resolver only needs name → guid mapping.
+func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error) {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	rows := 0
+	start := time.Now()
+	defer logHandlerTiming("getNativeSpaces", cnsiGUID, start, &err, &rows)
+
+	userGUID, uerr := c.getUserGUID(ctx)
+	if uerr != nil {
+		err = echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+		return err
+	}
+
+	cfClient, cerr := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if cerr != nil {
+		err = cerr
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().WithPerPage(1)
+		cStart := time.Now()
+		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		cRows, cTotal := -1, -1
+		if raw != nil {
+			cRows = len(raw.Resources)
+			cTotal = raw.Pagination.TotalResults
+		}
+		logCapiTiming("getNativeSpaces.counts", 1, 1, -1, cStart, lerr, cRows, cTotal)
+		if lerr != nil {
+			err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return err
+		}
+		spaces := make([]StSpace, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			spaces = append(spaces, toStSpace(r))
+		}
+		rows = len(spaces)
+		return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: raw.Pagination.TotalResults})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+
+	// Optional guid-batch filter: ?guids=g1,g2,... forwards as
+	// /v3/spaces?guids=g1,g2 — used by the App Wall visible-row name
+	// resolver (slice 2 step 10 #4) to fill in space names for guids that
+	// fell outside the bounded catalog page. Bounded by visible row count
+	// (~25-100), so it can't time out the way an unbounded drain would.
+	// When present we skip the per-space app/route count enrichment: the
+	// resolver only needs name → guid mapping, and skipping the two extra
+	// filtered /v3/apps + /v3/routes calls keeps the lookup cheap.
+	//
+	// Optional org-batch filter: ?organization_guids=g1,g2,... forwards as
+	// /v3/spaces?organization_guids=g1,g2 — used by the App Wall name
+	// resolver to drain spaces in priority-ordered org chunks instead of
+	// one unbounded /v3/spaces page. Bounds each request to "spaces of N
+	// orgs" so a CF with thousands of spaces never trips gorouter's 30 s
+	// ceiling. Same enrichment-skip rationale as the guids filter: the
+	// caller only needs name → guid mapping.
+	guidsFilter := ""
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+			guidsFilter = rawGuids
+		}
+	}
+	if rawOrgGuids := ctx.QueryParam("organization_guids"); rawOrgGuids != "" {
+		orgGuids := splitNonEmpty(rawOrgGuids, ",")
+		if len(orgGuids) > 0 {
+			params = params.WithFilter("organization_guids", orgGuids...)
+			guidsFilter = rawOrgGuids
+		}
+	}
+
+	pStart := time.Now()
+	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+	pRows, pTotal := -1, -1
+	if raw != nil {
+		pRows = len(raw.Resources)
+		pTotal = raw.Pagination.TotalResults
+	}
+	logCapiTiming("getNativeSpaces.page", page, perPage, 0, pStart, lerr, pRows, pTotal)
+	if lerr != nil {
+		err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		return err
+	}
+
+	spaces := make([]StSpace, 0, len(raw.Resources))
+	if guidsFilter != "" {
+		// Name-resolution lookup path: skip enrichment.
+		for _, r := range raw.Resources {
+			spaces = append(spaces, toStSpace(r))
+		}
+	} else {
+		// Enrich each space with per-space app + route counts via two filtered
+		// /v3/apps and /v3/routes calls (one each, batched on space_guids).
+		// Lazy-non-fatal: enrichment failures degrade silently to count=0 —
+		// same default-path policy as getNativeApps' process / space joins.
+		spaceGUIDs := make([]string, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			if r.GUID != "" {
+				spaceGUIDs = append(spaceGUIDs, r.GUID)
+			}
+		}
+		appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
+		routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
+		for _, r := range raw.Resources {
+			s := toStSpace(r)
+			s.AppCount = appCounts[r.GUID]
+			s.RouteCount = routeCounts[r.GUID]
+			spaces = append(spaces, s)
+		}
+	}
+	rows = len(spaces)
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
+		Resources:  spaces,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
+// listAllRoutes drains /v3/routes and returns the full set plus the total
+// count. Page 1 synchronous; pages 2..N parallel with bounded concurrency.
+// Mirrors listAllOrgs/listAllSpaces/listAllApps.
+//
+// spaceGUIDs (optional) narrows the drain to routes within the given space
+// guids via CF v3's space_guids filter. Empty string = unfiltered (legacy
+// behavior — drain every route on the cnsi). The slice 3.5 map-routes picker
+// passes the app's space guid here so production tenants with thousands of
+// routes don't get drained client-side.
+func listAllRoutes(ctx context.Context, cfClient capi.Client, spaceGUIDs string) ([]capi.Route, int, error) {
+	withRouteFilters := func(p *capi.QueryParams) *capi.QueryParams {
+		if spaceGUIDs != "" {
+			guids := splitNonEmpty(spaceGUIDs, ",")
+			if len(guids) > 0 {
+				p = p.WithFilter("space_guids", guids...)
+			}
+		}
+		return p
+	}
+
+	firstParams := withRouteFilters(capi.NewQueryParams().WithPerPage(fullPagePerRequest))
+	firstParams.Page = 1
+	first, err := cfClient.Routes().List(ctx, firstParams)
+	if err != nil {
+		return nil, 0, err
+	}
+	totalResults := first.Pagination.TotalResults
+	totalPages := first.Pagination.TotalPages
+	all := make([]capi.Route, 0, totalResults)
+	all = append(all, first.Resources...)
+	if totalPages <= 1 {
+		return all, totalResults, nil
+	}
+
+	pageResources := make([][]capi.Route, totalPages+1)
+	g, gctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelPages)
+	for page := 2; page <= totalPages; page++ {
+		p := page
+		g.Go(func() error {
+			params := withRouteFilters(capi.NewQueryParams().WithPerPage(fullPagePerRequest))
+			params.Page = p
+			raw, err := cfClient.Routes().List(gctx, params)
+			if err != nil {
+				return err
+			}
+			pageResources[p] = raw.Resources
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, 0, err
+	}
+	for p := 2; p <= totalPages; p++ {
+		all = append(all, pageResources[p]...)
+	}
+	return all, totalResults, nil
+}
+
+// getNativeRouteCount dispatches on ?return=
+//   - counts (default legacy path): per_page=1, totalResults only. Kept as
+//     the default because home-page card count + endpoint-data route count
+//     only need the total. Counts is a deliberate fast path: 1 CAPI call,
+//     no destinations fan-out, no marshaling of resources. The data branch
+//     drains every page (per_page=fullPagePerRequest, parallel pages 2..N)
+//     and would be much slower for the count-only consumers.
+//   - (none or any other value): full list, paginated, with each route's
+//     mapped apps read from the inline destinations field on /v3/routes.
+//     Used by the CloudFoundrySpaceRoutesSignalComponent and slice 3.5's
+//     map-routes picker.
+//
+// The query-param dispatch mirrors getNativeOrgs/getNativeApps/getNativeSpaces.
+// "counts" retains the original wire format on the same URL so endpoint-data
+// consumers don't need to change URLs.
+func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	// space_guids forwards CF v3's /v3/routes?space_guids= filter to narrow
+	// the drain. Used by slice 3.5's map-routes picker so production tenants
+	// with thousands of routes across hundreds of spaces don't pay a full
+	// drain when the user only wants routes within one space. Empty = legacy
+	// unfiltered drain (full CF Routes list page).
+	//
+	// Only honored on the full-list branch. The ?return=counts branch is
+	// cnsi-wide by design (home-page card, endpoint-data totals); it has no
+	// consumer that needs space-filtered counts today, so adding the filter
+	// there would be dead code.
+	spaceGUIDs := ctx.QueryParam("space_guids")
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		// Request per_page=1 — we only need the total count, not all resources.
+		params := capi.NewQueryParams().WithPerPage(1)
+		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		}
+		return ctx.JSON(http.StatusOK, StRoutesResponse{
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	resources, totalResults, err := listAllRoutes(ctx.Request().Context(), cfClient, spaceGUIDs)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+	routes := make([]StRoute, 0, len(resources))
+	for _, r := range resources {
+		// Destinations are inline on /v3/routes — toStRoute populates
+		// AppGUIDs from r.Destinations directly. No fan-out needed.
+		routes = append(routes, toStRoute(r, cnsiGUID))
+	}
+	return ctx.JSON(http.StatusOK, StRoutesResponse{
+		Resources:    routes,
+		TotalResults: totalResults,
+	})
+}
+
+func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	orgGUID := ctx.Param("orgGuid")
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	r, err := cfClient.Organizations().Get(ctx.Request().Context(), orgGUID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+
+	detail := StOrgDetail{
+		StOrg:  toStOrg(*r),
+		Spaces: []StSpace{},
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, detail)
+}
+
+// getNativeOrgSpaces handles GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/spaces.
+//
+// Returns spaces for one org as a single CAPI page passthrough. Caller's
+// per_page/page forward verbatim to /v3/spaces?organization_guids={orgGuid};
+// absent, V3 server defaults apply.
+func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	orgGUID := ctx.Param("orgGuid")
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	if ctx.QueryParam("return") == "counts" {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("organization_guids", orgGUID)
+		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, StSpacesResponse{
+			Resources:    []StSpace{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(
+		capi.NewQueryParams().WithFilter("organization_guids", orgGUID),
+		perPage, page, present,
+	)
+	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+	}
+
+	// Enrich with per-space app + route counts (mirror getNativeSpaces).
+	spaceGUIDs := make([]string, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		if r.GUID != "" {
+			spaceGUIDs = append(spaceGUIDs, r.GUID)
+		}
+	}
+	appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
+	routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
+
+	spaces := make([]StSpace, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		s := toStSpace(r)
+		s.AppCount = appCounts[r.GUID]
+		s.RouteCount = routeCounts[r.GUID]
+		spaces = append(spaces, s)
+	}
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StSpace]{
+		Resources:  spaces,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}

@@ -1,4 +1,4 @@
-import { Component, InjectionToken, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 
@@ -10,9 +10,7 @@ import { AppProgressBarComponent } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { TailwindDialogRef } from '@stratosui/core';
 import { DialogErrorComponent } from '@stratosui/core';
-
-// Temporary injection token to replace MAT_DIALOG_DATA
-export const DIALOG_DATA = new InjectionToken<any>('DialogData');
+import { MAT_DIALOG_DATA } from '@stratosui/core';
 import { Observable, Subscription } from 'rxjs';
 import { take,  } from 'rxjs/operators';
 
@@ -40,7 +38,7 @@ export class UserInviteConfigurationDialogComponent {
   userInviteConfigureService = inject(UserInviteConfigureService);
   data = inject<{
     guid: string;
-}>(DIALOG_DATA);
+}>(MAT_DIALOG_DATA);
 
   connecting$!: Observable<boolean>;
   connectingError$!: Observable<boolean>;

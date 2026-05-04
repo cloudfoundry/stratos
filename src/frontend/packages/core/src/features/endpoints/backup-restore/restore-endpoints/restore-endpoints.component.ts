@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Store } from '@ngrx/store';
 import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { take, defaultIfEmpty, map } from 'rxjs/operators';
 
 import { getEventFiles } from '../../../../core/browser-helper';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { RestoreEndpointsService } from '../restore-endpoints.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
@@ -41,12 +43,19 @@ export class RestoreEndpointsComponent {
   private store = inject<Store<GeneralEntityAppState>>(Store);
   service = inject(RestoreEndpointsService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private router = inject(Router);
 
 
   // Step 2
   passwordValid$!: Observable<boolean>;
   passwordForm!: FormGroup;
   show = false;
+
+  // Signal-handles (FWT-957)
+  fileStepHandle: SignalStepHandle = {
+    valid: this.service.validFileContent,
+  };
+  passwordStepHandle!: SignalStepHandle;
 
   constructor() {
     this.setupPasswordStep();
@@ -62,6 +71,12 @@ export class RestoreEndpointsComponent {
         return this.passwordForm.valid;
       })
     );
+
+    const passwordValidSignal = toSignal(this.passwordValid$, { initialValue: this.passwordForm.valid });
+    this.passwordStepHandle = {
+      valid: passwordValidSignal,
+      submit: () => this.runRestore(),
+    };
   }
 
   onFileChange(event: Event) {
@@ -77,46 +92,39 @@ export class RestoreEndpointsComponent {
     this.service.setIgnoreDbVersion(event.checked);
   }
 
-  restore: StepOnNextFunction = () => {
+  private runRestore(): Promise<void> {
     const confirmation = new ConfirmationDialogConfig(
       'Restore',
       'This will overwrite any matching endpoints and connection details.',
       'Continue',
       true
     );
-    const result = new Subject<StepOnNextResult>();
 
-    const userCancelledDialog = () => {
-      result.next({
-        success: false
-      });
-    };
+    return new Promise<void>((resolve, reject) => {
+      const userCancelledDialog = () => {
+        // Match legacy `success: false` cancel behavior — silent.
+        reject(new Error(''));
+      };
 
-    const restoreSuccess = () => {
-      stratosEntityCatalog.endpoint.api.getAll();
-      result.next({
-        success: true,
-        redirect: true,
-      });
-    };
+      const restoreSuccess = () => {
+        stratosEntityCatalog.endpoint.api.getAll();
+        // Replace legacy `redirect: true` with explicit navigation back to
+        // the endpoints page (matches the stepper cancel target).
+        this.router.navigate(['/endpoints']).then(() => resolve());
+      };
 
-    const backupFailure = (err: any) => {
-      const errorMessage = httpErrorResponseToSafeString(err);
-      result.next({
-        success: false,
-        message: `Failed to restore backup` + (errorMessage ? `: ${errorMessage}` : '')
-      });
-      return of(false);
-    };
+      const backupFailure = (err: any) => {
+        const errorMessage = httpErrorResponseToSafeString(err);
+        reject(new Error(`Failed to restore backup` + (errorMessage ? `: ${errorMessage}` : '')));
+      };
 
-    const restoreBackup = () => this.service.restoreBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
-      res => res !== null ? restoreSuccess() : backupFailure('Restore service returned no response'),
-      backupFailure
-    );
+      const restoreBackup = () => this.service.restoreBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
+        res => res !== null ? restoreSuccess() : backupFailure('Restore service returned no response'),
+        backupFailure
+      );
 
-    this.confirmDialog.openWithCancel(confirmation, restoreBackup, userCancelledDialog);
-
-    return result.asObservable();
-  };
+      this.confirmDialog.openWithCancel(confirmation, restoreBackup, userCancelledDialog);
+    });
+  }
 
 }

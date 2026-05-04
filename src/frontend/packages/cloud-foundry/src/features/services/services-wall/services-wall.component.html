@@ -1,44 +1,22 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Services</h1>
-  <div class="page-header-right">
-    @if ((haveConnectedCf$ | async)) {
-      <ng-container *appCfUserPermission="canCreateServiceInstance">
-        <button class="btn btn-primary btn-icon" [routerLink]="'/services/new/'" [queryParams]="location">
-          <span class="material-icons">add</span>
-        </button>
-      </ng-container>
-    }
-  </div>
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
-<ng-template #noEntriesForCurrentFilter>
-  <app-no-content-message iconFont="stratos-icons" icon="service"
-    [firstLine]="'There are no services instances for the current filter'" [secondLine]="{
-  text: ''
-}"></app-no-content-message>
-</ng-template>
 
-<ng-template #noEntries>
-  <app-no-content-message iconFont="stratos-icons" icon="service" [firstLine]="'There are no services instances'"
-    [secondLine]="{
-  text: ''
-}"></app-no-content-message>
-</ng-template>
-
-<!-- Show loading indicator -->
+<!-- Show loading indicator while endpoints resolve -->
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
-  <div
-    class="flex items-center justify-center p-8">
+  <div class="flex items-center justify-center p-8">
     <div class="flex items-center space-x-3 text-content-muted">
       <div class="spinner spinner-primary"></div>
-      <span>Loading services...</span>
+      <span>Loading services…</span>
     </div>
   </div>
 }
 
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
-  <app-list class="services-wall" [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter"
-    (initialised)="cfOrgSpaceService.enableAutoSelectors()"
-    >
-  </app-list>
+  @if (listConfig(); as cfg) {
+    <div class="flex-1 min-h-0 p-4 flex flex-col">
+      <app-signal-list [config]="cfg"></app-signal-list>
+    </div>
+  }
 }

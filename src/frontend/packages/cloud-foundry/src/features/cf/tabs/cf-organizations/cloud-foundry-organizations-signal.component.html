@@ -1,0 +1,13 @@
+<div class="organizations h-full flex flex-col">
+  <app-page-sub-nav>
+    <button class="btn btn-ghost create" name="add-org"
+      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/add-org">
+      <span class="create-button-contents">
+        <span class="material-icons">add</span> Create
+      </span>
+    </button>
+  </app-page-sub-nav>
+  @if (listConfig(); as config) {
+    <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
+  }
+</div>

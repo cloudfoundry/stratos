@@ -1,42 +1,77 @@
-import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideMockStore } from '@ngrx/store/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { TabNavService } from '@stratosui/core';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import {
-  CfSpaceQuotasListConfigService,
-} from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-list-config.service';
-import { CloudFoundryOrganizationSpaceQuotasComponent } from "./cloud-foundry-organization-space-quotas.component";
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { CloudFoundryOrganizationSpaceQuotasComponent } from './cloud-foundry-organization-space-quotas.component';
 
 describe('CloudFoundryOrganizationSpaceQuotasComponent', () => {
   let component: CloudFoundryOrganizationSpaceQuotasComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationSpaceQuotasComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         CloudFoundryOrganizationSpaceQuotasComponent,
       ],
       providers: [
-        provideMockStore(),
-        ...STORE_TEST_PROVIDERS,
-        CfSpaceQuotasListConfigService,
-        generateTestCfEndpointServiceProvider(),
-        TabNavService,
-        DatePipe,
         provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
+        },
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
+        },
       ]
-    });
+    }).compileComponents();
+
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
   });
 
-  // TODO: Fix EntityCatalogHelper initialization to enable component creation test
-  // The component requires EntityCatalogHelper to be initialized, which needs CoreModule
-  // or a proper entity catalog setup. This needs to be addressed in the test framework.
-  it('should be defined', () => {
-    expect(CloudFoundryOrganizationSpaceQuotasComponent).toBeDefined();
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CloudFoundryOrganizationSpaceQuotasComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

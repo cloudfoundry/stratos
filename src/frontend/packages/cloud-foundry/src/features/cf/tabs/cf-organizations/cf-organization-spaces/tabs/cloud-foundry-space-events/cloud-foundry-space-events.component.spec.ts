@@ -1,20 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ListConfig, CoreModule } from '@stratosui/core';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
-import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateActiveRouteCfOrgSpaceMock } from '@test-framework/cf';
-import { generateCFEntities } from '../../../../../../../cf-entity-generator';
-import { CfSpaceEventsConfigService } from '../../../../../../../shared/components/list/list-types/cf-events/types/cf-space-events-config.service';
-import { CloudFoundryUserProvidedServicesService } from '../../../../../../../shared/services/cloud-foundry-user-provided-services.service';
-import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
-import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import {
+  appReducers,
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 import { CloudFoundrySpaceEventsComponent } from './cloud-foundry-space-events.component';
 
 describe('CloudFoundrySpaceEventsComponent', () => {
@@ -24,41 +26,43 @@ describe('CloudFoundrySpaceEventsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        createEmptyStoreModule(),
-        EntityCatalogTestModule,
-        CoreModule,
-        NoopAnimationsModule,
         CloudFoundrySpaceEventsComponent,
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          StoreModule.forRoot(appReducers, {
+            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
+          }),
+          EntityCatalogTestModule
+        ),
         {
           provide: TEST_CATALOGUE_ENTITIES,
           useValue: [
             ...generateStratosEntities(),
-            ...generateCFEntities(),
+            ...generateCFEntities()
           ]
         },
-        EntityCatalogHelper,
-        provideZonelessChangeDetection(),
-        provideRouter([]),
-        provideHttpClient(),
-        generateActiveRouteCfOrgSpaceMock(),
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
         {
-          provide: ListConfig,
-          useClass: CfSpaceEventsConfigService,
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
         },
-        CloudFoundrySpaceService,
-        CloudFoundryEndpointService,
-        CloudFoundryOrganizationService,
-        CloudFoundryUserProvidedServicesService,
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
 
-    // Initialize EntityCatalogHelper manually
-    const helper = TestBed.inject(EntityCatalogHelper);
-    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
   });
 
   beforeEach(() => {

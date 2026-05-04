@@ -2,64 +2,80 @@
   <app-page-header>
     <h1>Delete application</h1>
   </app-page-header>
-  @if (relatedEntities$ | async; as entities) {
-    <app-steppers [cancel]="cancelUrl" [nextButtonProgress]="false">
-      @if (entities.routes && entities.routes.length) {
-        <app-step title="Routes">
-          <div class="app-delete__monitors">
-            <p>Please select any attached application routes you would like to delete.</p>
-            <app-delete-app-routes class="app-delete__step-table" (selected)="setSelectedRoutes($event)">
-            </app-delete-app-routes>
+  <app-steppers [cancel]="cancelUrl">
+    <!-- Steps are always rendered so the stepper captures them at
+         AfterContentInit (its @ContentChildren is a one-shot snapshot
+         and doesn't listen for dynamic additions). We toggle [hidden]
+         on each step — the stepper subscribes to onHidden changes and
+         re-filters its visible step list reactively. -->
+    <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0" [signalHandle]="routesStepHandle">
+      <div class="app-delete__monitors">
+        <p>Please select any attached application routes you would like to delete.</p>
+        <div class="mt-3 rounded border border-content-border p-4">
+          <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
+          <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Routes</h3>
+          <app-routes-picker
+            class="app-delete__step-table"
+            [routes]="appRoutes()"
+            (selectedChange)="setSelectedRoutes($event)">
+          </app-routes-picker>
+        </div>
+      </div>
+    </app-step>
+    <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0" [signalHandle]="bindingsStepHandle">
+      <div class="app-delete__monitors">
+        <p>Please select any attached application service instances you would like to unbind.</p>
+        <div class="mt-3 rounded border border-content-border p-4">
+          <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
+          <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Service Instances</h3>
+          <app-service-bindings-picker
+            class="app-delete__step-table"
+            [bindings]="appBindings()"
+            (selectedChange)="setSelectedServiceBindings($event)">
+          </app-service-bindings-picker>
+        </div>
+      </div>
+    </app-step>
+    <app-step title="Confirm" class="app-delete__monitors" [signalHandle]="confirmStepHandle">
+      <div class="app-delete__monitors">
+        <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceBindings && selectedServiceBindings.length)) {
+          <span
+            >
+          and related entities</span>
+        }:</p>
+        <div class="mt-3 rounded border border-content-border p-4">
+          <div class="flex items-baseline gap-x-2 flex-wrap text-base text-content-text">
+            <strong class="text-lg">{{ appName() || 'Application' }}</strong>
+            <span class="text-content-muted">on</span>
+            <strong>{{ endpointName() }}</strong>
+            <span class="text-content-muted">/</span>
+            <strong>{{ orgName() }}</strong>
+            <span class="text-content-muted">/</span>
+            <strong>{{ spaceName() }}</strong>
           </div>
-        </app-step>
-      }
-      @if (entities.instances && entities.instances.length) {
-        <app-step title="Service Instances">
-          <div class="app-delete__monitors">
-            <p>Please select any attached application service instances you would like to delete.</p>
-            <app-delete-app-instances class="app-delete__step-table" (selected)="setSelectedServiceInstances($event)">
-            </app-delete-app-instances>
-          </div>
-        </app-step>
-      }
-      <app-step title="Confirm" class="app-delete__monitors" [canClose]="!deleteStarted"
-        [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [onNext]="startDelete"
-        [finishButtonText]="deleteStarted ? 'Close' : 'Delete'">
-        <div class="app-delete__monitors">
-          <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceInstances && selectedServiceInstances.length) ) {
-            <span
-              >
-            and related entities</span>
-          }:</p>
-          <h3>Application</h3>
-          <app-action-monitor [columns]="appDeleteColumns" [data$]="selectedApplication$"
-            [entityKey]="appCatalogEntity.entityKey" [schema]="appCatalogEntity.getSchema()"
-            [monitorState]="deletingState" [getId]="getId">
-          </app-action-monitor>
           @if (selectedRoutes && selectedRoutes.length) {
-            <h3>Routes</h3>
-            <app-action-monitor [columns]="routeDeleteColumns" [data$]="selectedRoutes$"
-              [entityKey]="routeCatalogEntity.entityKey" [schema]="routeCatalogEntity.getSchema()"
-              [monitorState]="deletingState" [getId]="getId">
-            </app-action-monitor>
+            <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Routes</h3>
+            <ul class="list-disc list-inside m-0">
+              @for (route of selectedRoutes; track route.guid) {
+                <li data-test="confirm-route">{{ route.url }}</li>
+              }
+            </ul>
           }
-          @if (selectedServiceInstances && selectedServiceInstances.length) {
-            @if ((selectedServiceInstances$ | async).length) {
-              <h3>Services</h3>
-              <app-action-monitor [columns]="instanceDeleteColumns" [data$]="selectedServiceInstances$"
-                [entityKey]="siCatalogEntity.entityKey" [schema]="siCatalogEntity.getSchema()"
-                [monitorState]="deletingState" [getId]="getInstanceId">
-              </app-action-monitor>
-            }
-            @if ((selectedUserServiceInstances$ | async).length) {
-              <h3>User Provided Services</h3>
-              <app-action-monitor [columns]="instanceDeleteColumns" [data$]="selectedUserServiceInstances$"
-                [entityKey]="upsiCatalogEntity.entityKey" [schema]="upsiCatalogEntity.getSchema()"
-              [monitorState]="deletingState" [getId]="getInstanceId"></app-action-monitor>
-            }
+          @if (selectedServiceBindings && selectedServiceBindings.length) {
+            <h3 class="text-sm font-medium text-content-muted mt-3 mb-1 uppercase tracking-wide">Service Instances</h3>
+            <ul class="list-disc list-inside m-0">
+              @for (binding of selectedServiceBindings; track binding.guid) {
+                <li data-test="confirm-binding">
+                  {{ binding.serviceInstanceName }}
+                  @if (binding.serviceInstanceType) {
+                    <span class="text-content-muted"> ({{ binding.serviceInstanceType }})</span>
+                  }
+                </li>
+              }
+            </ul>
           }
         </div>
-      </app-step>
-    </app-steppers>
-  }
+      </div>
+    </app-step>
+  </app-steppers>
 </app-loading-page>

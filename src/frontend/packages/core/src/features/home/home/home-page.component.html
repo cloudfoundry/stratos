@@ -1,23 +1,22 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
   <div class="page-header-right">
-    @if (layouts$ | async; as layouts) {
-      <div class="relative inline-block">
-        <div class="dropdown">
-          <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
-            type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
-            <span class="material-icons">view_week</span>
-            <span class="material-icons">arrow_drop_down</span>
-          </button>
-          <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50 hidden" #dropdownMenu>
-            <div class="py-1">
-              @for (layout of layouts; track layout?.id ?? $index) {
+    <div class="relative inline-block">
+      <div class="dropdown">
+        <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
+          type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
+          <span class="material-icons">view_week</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50 hidden" #dropdownMenu>
+          <div class="py-1">
+            @for (layout of layouts; track layout?.id ?? $index) {
                 <div>
                   @if (layout) {
                     <button (click)="onChangeLayout(layout); closeDropdown(dropdownButton)"
                       class="layout-dropdown__option">
                       <span>{{ layout.title }}</span>
-                      <span class="material-icons text-primary-600"
+                      <span class="material-icons text-brand-600"
                         [class.opacity-100]="layout.id === layoutID"
                       [class.opacity-0]="layout.id !== layoutID">done</span>
                     </button>
@@ -31,25 +30,24 @@
               <button (click)="toggleShowAllEndpoints(); closeDropdown(dropdownButton)"
                 class="layout-dropdown__option">
                 <span>Show connected endpoints</span>
-                <span class="material-icons text-primary-600"
+                <span class="material-icons text-brand-600"
                   [class.opacity-100]="showAllEndpoints"
                 [class.opacity-0]="!showAllEndpoints">done</span>
-              </button>
-            </div>
+            </button>
           </div>
         </div>
       </div>
-    }
+    </div>
   </div>
 </app-page-header>
-@if (haveThingsToShow$ | async ) {
+@if (haveThingsToShow()) {
   <div class="p-6">
     <div class="home-grid"
       [class.columns-1]="columns === 1"
       [class.columns-2]="columns === 2"
       [class.columns-3]="columns === 3"
       #endpointsPanel>
-      @for (ep of endpoints$ | async; track ep?.guid ?? $index) {
+      @for (ep of endpoints(); track ep?.guid ?? $index) {
         <div #endpointElements class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
           <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout()" [endpoint]="ep">
           </app-home-page-endpoint-card>
@@ -58,7 +56,7 @@
     </div>
   </div>
 } @else {
-  @if (haveRegistered$ | async) {
+  @if (haveRegistered()) {
     <div class="p-6">
       <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
       [secondLine]="noneAvailableMsg.secondLine"></app-no-content-message>

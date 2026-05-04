@@ -4,8 +4,10 @@
   <!-- Modal container -->
   <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up">
 
-    <!-- Modal content -->
-    <div class="rounded-2xl shadow-2xl transform transition-all duration-300" style="overflow: visible; background-color: var(--card-bg);">
+    <!-- Modal content. No `transform` class: it would create a containing
+         block for the CustomSelect dropdown's position:fixed panel, breaking
+         its viewport-coordinate math. -->
+    <div class="rounded-2xl shadow-2xl transition-all duration-300" style="overflow: visible; background-color: var(--card-bg);">
 
       <!-- Modal header -->
       <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative overflow-visible rounded-t-2xl">

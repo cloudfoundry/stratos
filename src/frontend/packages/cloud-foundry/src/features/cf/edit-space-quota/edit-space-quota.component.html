@@ -3,8 +3,8 @@
     Edit Space Quota
   </app-page-header>
   <app-steppers [cancel]="cfSpaceQuotaUrl">
-    <app-step title="Edit Space Quota" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Update">
-      <app-edit-space-quota-step #step1></app-edit-space-quota-step>
+    <app-step title="Edit Space Quota" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel" finishButtonText="Update">
+      <app-edit-space-quota-step #step1 [redirectUrl]="cfSpaceQuotaUrl"></app-edit-space-quota-step>
     </app-step>
   </app-steppers>
 </div>

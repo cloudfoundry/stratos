@@ -15,6 +15,10 @@ import {
 } from '@stratosui/core';
 import { GitSCMService } from '@stratosui/git';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
+import { AppLifecycleStateService } from '../../app-lifecycle-state.service';
+import { AppDetailDataService } from '../../app-detail-data.service';
+import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
+import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
@@ -107,6 +111,16 @@ describe('ApplicationTabsBaseComponent', () => {
         { provide: UserFavoriteManager, useValue: mockUserFavoriteManager },
         ApplicationStateService,
         ApplicationEnvVarsHelper,
+        // Slice 1 fallback providers — these used to be supplied at the
+        // tabs-base level itself; they now live on ApplicationBaseComponent
+        // (the parent), so the bare component test must wire them up.
+        AppLifecycleStateService,
+        AppApplicationActionsService,
+        AppLifecycleProgressService,
+        // AppApplicationActionsService injects AppDetailDataService for
+        // the post-op refresh fan-out. Provide a no-op stub so the test
+        // doesn't need to thread the full HTTP-backed service.
+        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve() } },
         provideRouter([]),
         provideZonelessChangeDetection(),
       ]

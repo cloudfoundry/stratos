@@ -56,7 +56,7 @@
                     (click)="configureDashboard()">Configure</button>
                   }
                   @if ((kubeEndpointService.kubeDashboardStatus$ | async) === false) {
-                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500">
+                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-brand-500">
                     </div>
                   }
                 </div>
@@ -71,7 +71,7 @@
               <app-metadata-item label="CaaSP Version">
                 <div class="caasp-version">
                   <div>{{ data.version }}</div>@if (data.versionMismatch) {
-                  <span class="material-icons text-warning-600" title="Nodes report multiple versions">warning</span>
+                  <span class="material-icons text-warning-shade-600" title="Nodes report multiple versions">warning</span>
                 }
               </div>
             </app-metadata-item>

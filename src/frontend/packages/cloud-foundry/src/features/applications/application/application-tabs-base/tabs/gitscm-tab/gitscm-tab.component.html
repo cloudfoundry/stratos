@@ -3,7 +3,7 @@
     @if (hasRepo$ | async; as hasRepo) {
       <app-tile-grid class="gitscm-tab">
         <app-tile-group class="tile-group-3-cols">
-          @if (appService.applicationStratProject$ | async; as stratosProject) {
+          @if (data.stratosProject(); as stratosProject) {
             <app-tile>
               <div class="card">
                 <div class="card-header">

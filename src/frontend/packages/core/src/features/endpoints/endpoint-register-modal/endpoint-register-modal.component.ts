@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -38,6 +38,8 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
   componentRef: ComponentRef<any>;
 
+  private cdr = inject(ChangeDetectorRef);
+
   constructor() {
     const store = inject<Store<GeneralEntityAppState>>(Store);
 
@@ -70,13 +72,15 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   onTileSelected(tile: ITileConfig<ICreateEndpointTilesData>) {
     if (tile) {
-      console.log('Tile selected:', tile);
       this.selectedEndpointInfo = tile;
-      
-      // Load the endpoint registration component in the modal instead of navigating
-      setTimeout(() => {
-        this.loadEndpointRegistrationComponent(tile);
-      }, 100);
+      // Force the @if(selectedEndpointInfo) branch to render synchronously
+      // so the #endpointFormContainer ViewChild is available — then load
+      // the registration component in the same task. The previous code
+      // used setTimeout(..., 100) which left an empty form container
+      // visible for ~100ms, producing a visible blink between tile
+      // selection and the loaded form.
+      this.cdr.detectChanges();
+      this.loadEndpointRegistrationComponent(tile);
     }
   }
 

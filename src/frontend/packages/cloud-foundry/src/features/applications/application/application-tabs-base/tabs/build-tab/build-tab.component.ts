@@ -1,35 +1,26 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { RouterModule } from '@angular/router';
 import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
-import { take, combineLatest, delay, distinct, filter, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { combineLatest, distinct, map, startWith, switchMap } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
 import {
   CurrentUserPermissionsService,
-  ConfirmationDialogConfig,
-  ConfirmationDialogService,
   MetadataItemComponent,
-  PageSubNavComponent,
-  PageSubNavSectionComponent,
   TileComponent,
   TileGridComponent,
   TileGroupComponent,
   MbToHumanSizePipe,
   UptimePipe } from '@stratosui/core';
-import { ResetPagination, getFullEndpointApiUrl, ActionState, EntityInfo } from '@stratosui/store';
-import { AppMetadataTypes } from '../../../../../../actions/app-metadata.actions';
-import { UpdateExistingApplication } from '../../../../../../actions/application.actions';
+import { getFullEndpointApiUrl, EntityInfo } from '@stratosui/store';
 import { IAppSummary } from '../../../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
-import { CfUserPermissionDirective } from '../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
+import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
-import { ApplicationPollComponent } from '../../application-poll/application-poll.component';
 import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
 import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
 import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
@@ -37,28 +28,6 @@ import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.componen
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
-
-// Confirmation dialogs
-const appStopConfirmation = new ConfirmationDialogConfig(
-  'Stop Application',
-  'Are you sure you want to stop this Application?',
-  'Stop'
-);
-const appStartConfirmation = new ConfirmationDialogConfig(
-  'Start Application',
-  'Are you sure you want to start this Application?',
-  'Start'
-);
-const appRestartConfirmation = new ConfirmationDialogConfig(
-  'Restart Application',
-  'Are you sure you want to restart this Application?',
-  'Restart'
-);
-const appRestageConfirmation = new ConfirmationDialogConfig(
-  'Restage Application',
-  'Are you sure you want to restage this Application?',
-  'Restage'
-);
 
 interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   label?: string;
@@ -75,10 +44,6 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
-    PageSubNavSectionComponent,
-    CfUserPermissionDirective,
-    ApplicationPollComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
@@ -96,15 +61,13 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
 })
 export class BuildTabComponent implements OnInit {
   applicationService = inject(ApplicationService);
+  data = inject(AppDetailDataService);
+  // Read inFlight signal from the action service so the status card pulses
+  // while a lifecycle action is in progress — visual feedback right where
+  // the operator is looking, in addition to the bottom-of-page snackbar.
+  actions = inject(AppApplicationActionsService);
   private scmService = inject(GitSCMService);
-  private store = inject<Store<CFAppState>>(Store);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private confirmDialog = inject(ConfirmationDialogService);
   private cups = inject(CurrentUserPermissionsService);
-
-  public isBusyUpdating$!: Observable<{ updating: boolean }>;
-  public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   cardTwoFetching$!: Observable<boolean>;
 
@@ -127,15 +90,6 @@ export class BuildTabComponent implements OnInit {
       map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
-
-    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
-      map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
-        return { updating };
-      }),
-      startWith({ updating: true })
-    );
 
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
@@ -233,10 +187,6 @@ export class BuildTabComponent implements OnInit {
     );
   }
 
-  private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
-  }
-
   private createDockerImageUrl(dockerImage: string): string {
     // https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html
     // Private Registry: MY-PRIVATE-REGISTRY.DOMAIN:PORT/REPO/IMAGE:TAG
@@ -246,106 +196,4 @@ export class BuildTabComponent implements OnInit {
     const res = isDockerHubRegEx.exec(dockerImage);
     return res && res.length === 4 ? `https://hub.docker.com/r/${res[1]}/${res[2]}` : null;
   }
-
-  // -----------
-  // App Actions
-  // -----------
-
-  private dispatchAppStats = () => {
-    const { cfGuid, appGuid } = this.applicationService;
-    cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
-  };
-
-  restartApplication() {
-    this.confirmDialog.open(appRestartConfirmation, () => {
-
-      this.applicationService.application$.pipe(
-        take(1),
-        mergeMap(appData => {
-          this.applicationService.updateApplication({ state: 'STOPPED' }, [], appData.app.entity);
-          return observableCombineLatest(
-            observableOf(appData),
-            this.pollEntityService('stopping', 'STOPPED').pipe(take(1))
-          );
-        }),
-        mergeMap(([appData, _updateData]) => {
-          this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
-          return this.pollEntityService('starting', 'STARTED').pipe(take(1));
-        }),
-      ).subscribe({
-        error: this.dispatchAppStats,
-        complete: this.dispatchAppStats
-      });
-
-    });
-  }
-
-  private confirmAndPollForState(
-    confirmConfig: ConfirmationDialogConfig,
-    onConfirm: (appData: ApplicationData) => void,
-    updateKey: string,
-    requiredAppState: string,
-    onSuccess: () => void) {
-    this.applicationService.application$.pipe(
-      take(1),
-      tap(appData => {
-        this.confirmDialog.open(confirmConfig, () => {
-          onConfirm(appData);
-          this.pollEntityService(updateKey, requiredAppState).pipe(
-            take(1),
-          ).subscribe(onSuccess);
-        });
-      })
-    ).subscribe();
-  }
-
-  private updateApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
-    this.confirmAndPollForState(
-      confirmConfig,
-      appData => this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity),
-      updateKey,
-      requiredAppState,
-      onSuccess
-    );
-  }
-
-  stopApplication() {
-    this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
-      // On app reaching the 'STOPPED' state clear the app's stats pagination section
-      const { cfGuid, appGuid } = this.applicationService;
-      const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
-      this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
-    });
-  }
-
-  restageApplication() {
-    const { cfGuid, appGuid } = this.applicationService;
-    this.confirmAndPollForState(
-      appRestageConfirmation,
-      () => cfEntityCatalog.application.api.restage(appGuid, cfGuid),
-      'starting',
-      'STARTED',
-      () => { }
-    );
-  }
-
-  pollEntityService(state: any, stateString: string): Observable<any> {
-    return this.applicationService.entityService
-      .poll(1000, state).pipe(
-        delay(1),
-        filter(({ resource }) => {
-          return resource.entity.state === stateString;
-        }),
-      );
-  }
-
-  startApplication() {
-    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => { });
-  }
-
-  redirectToDeletePage() {
-    this.router.navigate(['../delete'], { relativeTo: this.route });
-  }
-
-
 }

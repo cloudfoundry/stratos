@@ -6,6 +6,7 @@ import { Store } from '@ngrx/store';
 import {
   getFullEndpointApiUrl,
   entityCatalog,
+  endpointEntitiesSelector,
   MenuItem,
   StratosStatus,
   StratosCatalogEndpointEntity,
@@ -76,6 +77,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public rowObs = new ReplaySubject<EndpointModel>();
   public favorite?: UserFavoriteEndpoint;
   public address!: string;
+  public isDuplicate$!: Observable<boolean>;
   public cardMenu!: MenuItem[];
   public endpointCatalogEntity!: StratosCatalogEndpointEntity;
   public hasDetails = true;
@@ -108,6 +110,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
+    this.isDuplicate$ = this.store.select(endpointEntitiesSelector).pipe(
+      map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === this.address).length > 1)
+    );
     this.rowObs.next(row);
     if (this.endpointCatalogEntity?.definition) {
       this.endpointLink = row.connectionStatus === 'connected' || this.endpointCatalogEntity.definition.unConnectable ?

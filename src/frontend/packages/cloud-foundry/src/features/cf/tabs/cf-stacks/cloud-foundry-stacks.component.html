@@ -1,3 +1,5 @@
-<div class="stacks">
-  <app-list></app-list>
+<div class="stacks h-full flex flex-col">
+  @if (listConfig(); as cfg) {
+    <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
+  }
 </div>

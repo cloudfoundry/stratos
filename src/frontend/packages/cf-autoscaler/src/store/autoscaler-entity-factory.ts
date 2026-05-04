@@ -1,6 +1,6 @@
 import { Schema, schema } from 'normalizr';
 
-import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
+import { getCFCompositeEntityId } from '../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema, metricEntityType } from '@stratosui/store';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
@@ -38,40 +38,40 @@ export class AutoscalerEntitySchema extends EntitySchema {
 entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
   appAutoscalerInfoEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 entityCache[appAutoscalerCredentialEntityType] = new AutoscalerEntitySchema(
   appAutoscalerCredentialEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 entityCache[appAutoscalerPolicyEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 entityCache[appAutoscalerPolicyTriggerEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyTriggerEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 entityCache[appAutoscalerHealthEntityType] = new AutoscalerEntitySchema(
   appAutoscalerHealthEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 entityCache[appAutoscalerScalingHistoryEntityType] = new AutoscalerEntitySchema(
   appAutoscalerScalingHistoryEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 entityCache[appAutoscalerAppMetricEntityType] = new AutoscalerEntitySchema(
   appAutoscalerAppMetricEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 const MetricSchema = new AutoscalerEntitySchema(metricEntityType);

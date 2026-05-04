@@ -1,16 +1,21 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
+  SignalStepHandle,
   StepComponent,
-  StepOnNextFunction,
-  StepOnNextResult,
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
@@ -30,7 +35,6 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     ChartValuesEditorComponent,
     ListComponent,
     PageHeaderComponent,
@@ -51,7 +55,7 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
     ...createMonocularProviders()
   ]
 })
-export class UpgradeReleaseComponent {
+export class UpgradeReleaseComponent implements OnDestroy {
 
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
 
@@ -71,12 +75,56 @@ export class UpgradeReleaseComponent {
   private store = inject(Store<any>);
   public helper = inject(HelmReleaseHelperService);
   private chartsService = inject(ChartsService);
+  private router = inject(Router);
 
+  // FWT-959 Part 2: signal-native step handles.
+  //
+  // - versionStepHandle: validity tracks "exactly one version selected" via
+  //   a signal mirror of the listConfig's selectedRows$ stream. submit()
+  //   replaces the legacy onNext — fetches release+chart-version metadata
+  //   and primes `this.config` for the editor.
+  // - overridesStepHandle: submit() runs the upgrade and on success
+  //   navigates back to the release detail page (legacy `redirect: true`
+  //   + redirectPayload = cancelUrl).
+  //
+  // The list-config + validate$ stream are set asynchronously inside the
+  // hasUpgrade() subscribe, so the version-handle's `valid` signal starts
+  // false and is fed by a subscription wired in the same subscribe block.
+  private versionValid = signal<boolean>(false);
+  private validateSub: Subscription;
 
+  versionStepHandle: SignalStepHandle = {
+    valid: this.versionValid.asReadonly(),
+    submit: async () => {
+      await firstValueFrom(this.fetchVersionDetails$());
+    },
+  };
+
+  overridesStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    finishButtonText: signal('Upgrade').asReadonly(),
+    onEnter: () => {
+      this.editor.resizeEditor();
+    },
+    submit: async () => {
+      // showAdvancedOptions branching from the legacy doUpgrade is preserved
+      // for parity even though the advanced step is currently commented out
+      // of the template. If/when it returns, this branch keeps the second-
+      // step submit a no-op (the upgrade fires from the advanced step).
+      if (this.showAdvancedOptions) {
+        return;
+      }
+      const result = await firstValueFrom(this.doUpgrade$());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to upgrade release');
+      }
+      // Legacy { redirect: true, redirectPayload: { path: cancelUrl } }
+      // navigated back to the release detail. Make explicit.
+      await this.router.navigate([this.cancelUrl]);
+    },
+  };
 
   constructor() {
-
-
     this.cancelUrl = `/workloads/${this.helper.guid}`;
 
     this.helper.hasUpgrade(true).pipe(
@@ -102,22 +150,20 @@ export class UpgradeReleaseComponent {
           return false;
         })
       );
+
+      // Mirror validate$ into the version-step handle's signal so the
+      // signal-handle valid() flips reactively as the user picks a row.
+      this.validateSub = this.validate$.subscribe(v => this.versionValid.set(!!v));
     });
-
-
   }
 
-  // Ensure the editor is resized when the overrides step becomes visible
-  onEnterOverrides = () => {
-    this.editor.resizeEditor();
-  };
-
-  // Update the editor with the chosen version when the user moves to the next step
-  onNext = (): Observable<StepOnNextResult> => {
+  // Update the editor with the chosen version when the user moves to the
+  // next step. Returns void on success — the side-effect is priming
+  // `this.config` so the editor can render the right schema/values.
+  private fetchVersionDetails$(): Observable<void> {
     const chart = this.version.relationships.chart.data;
     const version = this.version.attributes.version;
     const endpointID = this.monocularEndpointId || stratosMonocularEndpointGuid;
-
 
     // Fetch the release metadata so that we have the values used to install the current release
     return combineLatest(
@@ -136,23 +182,18 @@ export class UpgradeReleaseComponent {
           releaseValues: release.config
         };
       }),
-      map(() => {
-        return { success: true };
-      })
+      map((): void => undefined)
     );
-  };
+  }
 
   // Hide/show the advanced options step
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 
-  doUpgrade: StepOnNextFunction = (index: number, _step: StepComponent) => {
-    // If we are showing the advanced options, don't upgrade if we aer not on the last step
-    if (this.showAdvancedOptions && index === 1) {
-      return of({ success: true });
-    }
-
+  // Returns the legacy ActionState shape so the caller can decide
+  // success/failure + redirect explicitly.
+  private doUpgrade$(): Observable<{ success: boolean; message?: string }> {
     // Add the chart url into the values
     const values: HelmUpgradeValues = {
       values: JSON.stringify(this.editor.getValues()),
@@ -176,12 +217,12 @@ export class UpgradeReleaseComponent {
         map(([, newVal]) => newVal),
         map((result: ActionState) => ({
           success: !result.error,
-          redirect: !result.error,
-          redirectPayload: {
-            path: !result.error ? this.cancelUrl : ''
-          },
-          message: !result.error ? '' : result.message
+          message: result.error ? result.message : undefined,
         }))
       );
-  };
+  }
+
+  ngOnDestroy(): void {
+    this.validateSub?.unsubscribe();
+  }
 }

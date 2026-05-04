@@ -47,21 +47,25 @@ export class CliInfoApplicationComponent implements OnInit {
   private setupObservables(cfGuid: string) {
     this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(cfGuid);
 
+    // V3 IApp.entity carries `space_guid` only — the legacy `space`
+    // relation (and nested organization) isn't populated by the adapter.
+    // Read the wrapped APIResource shapes from the data-service-backed
+    // observables instead so we get name fields without relying on
+    // inline relations.
     this.context$ = combineLatest(
       this.applicationService.application$,
+      this.applicationService.appSpace$,
+      this.applicationService.appOrg$,
       this.cfEndpointEntityService.waitForEntity$
     ).pipe(
-      filter(([app, ep]) => !!app && !!ep),
-      map(([app, ep]) => {
-        const space = app.app.entity.space;
-        return {
-          appName: app.app.entity.name,
-          spaceName: typeof space !== 'string' ? space.entity.name : space,
-          orgName: typeof space !== 'string' ? space.entity.organization.entity.name : '',
-          apiEndpoint: getFullEndpointApiUrl(ep.entity),
-          username: ep.entity.user ? ep.entity.user.name : ''
-        };
-      }),
+      filter(([app, space, org, ep]) => !!app && !!space && !!org && !!ep),
+      map(([app, space, org, ep]) => ({
+        appName: app.app.entity.name,
+        spaceName: space.entity.name,
+        orgName: org.entity.name,
+        apiEndpoint: getFullEndpointApiUrl(ep.entity),
+        username: ep.entity.user ? ep.entity.user.name : ''
+      })),
       take(1)
     );
   }

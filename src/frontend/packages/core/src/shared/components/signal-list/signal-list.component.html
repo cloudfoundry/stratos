@@ -1,0 +1,527 @@
+<div class="flex flex-col h-full min-h-0 border border-content-border rounded bg-content-bg">
+
+  <!-- Toolbar -->
+  <div class="flex items-center gap-3 px-4 py-2 border-b border-content-border flex-wrap">
+
+    <!-- Page-level action buttons (Create / Invite / Manage Roles / etc.).
+         Rendered as a leading group so they sit left of the filter dropdowns,
+         visually matching the legacy `<app-page-sub-nav>` placement. Hidden
+         entirely when no actions configured. -->
+    @if (visibleHeaderActions().length > 0) {
+      <div data-test="header-actions" class="flex items-center gap-2">
+        @for (act of visibleHeaderActions(); track act.label) {
+          <button
+            data-test="header-action"
+            type="button"
+            [disabled]="isHeaderActionDisabled(act)"
+            [title]="act.tooltip ?? act.label"
+            (click)="invokeHeaderAction(act, $event)"
+            [class]="headerActionClasses(act)">
+            @if (act.icon) {
+              <span class="material-icons text-base leading-5">{{ act.icon }}</span>
+            }
+            <span>{{ act.label }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    @if (config.filterDropdowns) {
+      @for (dd of config.filterDropdowns; track dd.label) {
+        <label class="flex items-center gap-2 text-sm text-content-muted" [attr.data-test]="'dropdown-' + dd.label">
+          <span>{{ dd.label }}:</span>
+          <select
+            [disabled]="dd.disabled ? dd.disabled() : false"
+            (change)="onDropdownChange(dd, $any($event.target).value)"
+            class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text disabled:opacity-40 disabled:cursor-not-allowed">
+            @for (opt of dd.options(); track opt.value ?? opt.label) {
+              <option [value]="opt.value ?? ''" [selected]="(opt.value ?? '') === (dd.selected() ?? '')">{{ opt.label }}</option>
+            }
+          </select>
+        </label>
+      }
+    }
+
+    <div class="flex-1"></div>
+
+    @if (config.nameFilter) {
+      @if (showFilterFieldSelector()) {
+        <select
+          data-test="filter-field"
+          (change)="onFilterFieldChange($any($event.target).value)"
+          title="Filter by"
+          class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text">
+          @for (col of filterableColumns(); track col.key) {
+            <option [value]="columnKey(col)" [selected]="config.filterField!() === columnKey(col)">{{ col.header }}</option>
+          }
+        </select>
+      }
+      <input
+        type="text"
+        [placeholder]="filterPlaceholder()"
+        [value]="config.nameFilter()"
+        (input)="config.nameFilter!.set($any($event.target).value)"
+        class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
+    }
+
+    @if (config.onClear) {
+      <button
+        data-test="clear-filters"
+        type="button"
+        (click)="config.onClear!()"
+        [disabled]="!hasActiveFilter()"
+        title="Clear filters and sort"
+        class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+        <span class="material-icons text-base leading-5">highlight_off</span>
+      </button>
+    }
+
+    @if (config.viewMode && config.viewMode!() === 'card' && config.sort && sortableColumns().length > 0) {
+      <div data-test="sort-controls" class="flex items-center gap-1 text-sm text-content-muted">
+        <span>Sort:</span>
+        <select
+          (change)="onSortFieldChange($any($event.target).value)"
+          class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
+          @for (col of sortableColumns(); track col.key) {
+            <option [value]="columnKey(col)" [selected]="config.sort!().field === columnKey(col)">{{ col.header }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          (click)="toggleSortDirection()"
+          [title]="config.sort!().direction === 'asc' ? 'Ascending' : 'Descending'"
+          class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+          <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'asc'">sort</span>
+        </button>
+      </div>
+    }
+
+    @if (config.viewMode) {
+      <button
+        data-test="view-toggle"
+        type="button"
+        (click)="setViewMode(config.viewMode!() === 'table' ? 'card' : 'table')"
+        [title]="config.viewMode!() === 'table' ? 'Card view' : 'Table view'"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span class="material-icons text-base leading-5">{{ config.viewMode!() === 'table' ? 'grid_on' : 'list' }}</span>
+      </button>
+    }
+
+    @if (config.onRefresh) {
+      <button
+        type="button"
+        (click)="config.onRefresh!()"
+        title="Refresh"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <span class="material-icons text-base leading-5">refresh</span>
+      </button>
+    }
+  </div>
+
+  <!-- Refresh-in-progress indicator (subtle, shown only when data is already present) -->
+  @if (config.isAnyLoading() && config.totalFilteredResults() > 0) {
+    <div data-test="refresh-loading" class="px-4 py-1 text-sm text-content-muted border-b border-content-border flex items-center gap-2">
+      <div class="spinner spinner-primary h-3 w-3"></div>
+      <span>Refreshing…</span>
+    </div>
+  }
+  @if (config.errorsByCnsi().size > 0) {
+    <div data-test="errors" class="px-4 py-1 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
+      @for (entry of config.errorsByCnsi() | keyvalue; track entry.key) {
+        <div>{{ entry.key }}: failed to load</div>
+      }
+    </div>
+  }
+
+  <!-- Body: loading / empty state / table -->
+  <div #scrollBody class="relative flex-1 overflow-auto">
+    @if (config.isAnyLoading() && config.totalFilteredResults() === 0) {
+      <div data-test="loading" class="flex items-center justify-center p-8 h-full">
+        <div class="flex items-center space-x-3 text-content-muted">
+          <div class="spinner spinner-primary"></div>
+          <span>{{ config.loadingMessage ?? 'Loading…' }}</span>
+        </div>
+      </div>
+    } @else if (config.totalFilteredResults() === 0) {
+      @if (hasActiveFilter()) {
+        <div data-test="empty-filtered" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+          <span class="material-icons text-6xl opacity-30">filter_list_off</span>
+          <span class="text-base">{{ config.emptyFilterMessage ?? 'No items match the current filters' }}</span>
+        </div>
+      } @else {
+        <div data-test="empty" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+          <span class="material-icons text-6xl opacity-30">apps</span>
+          <span class="text-base">{{ config.emptyMessage ?? 'There are no items' }}</span>
+        </div>
+      }
+    } @else if (config.viewMode && config.viewMode!() === 'card') {
+      <div data-test="card-grid"
+           class="grid gap-3 p-3"
+           style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
+        @for (row of config.pagedItems(); track trackByRow($index, row)) {
+          <div data-test="card"
+               class="border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow relative">
+            @if (config.cardAccentColor) {
+              <div data-test="card-accent"
+                   [class]="'h-1.5 rounded-t ' + accentBarClass(cardAccentFor(row))"></div>
+            }
+            <div class="p-3">
+              @for (col of config.columns; track col.key; let first = $first) {
+                @if (first) {
+                  <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
+                    <span class="truncate min-w-0" [attr.title]="col.render(row)">
+                      @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                        <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                      } @else {
+                        {{ col.render(row) }}
+                      }
+                    </span>
+                    <div class="flex items-center gap-0 shrink-0">
+                      @if (favoriteColumn(); as fc) {
+                        <button
+                          data-test="favorite-star"
+                          type="button"
+                          (click)="onToggleFavorite(fc, row, $event)"
+                          [title]="isFavorite(fc, row) ? 'Remove from favorites' : 'Add to favorites'"
+                          class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                          <span class="material-icons text-xl leading-none" [class.text-accent]="isFavorite(fc, row)">
+                            {{ isFavorite(fc, row) ? 'star' : 'star_border' }}
+                          </span>
+                        </button>
+                      }
+                      @if (actionsColumn(); as ac) {
+                        <div class="relative inline-block">
+                          <button
+                            data-test="row-actions"
+                            type="button"
+                            (click)="toggleRowActions(row, $event)"
+                            title="Actions"
+                            class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                            <span class="material-icons text-xl leading-none">more_vert</span>
+                          </button>
+                          @if (openActionsRowKey() === config.getRowKey(row)) {
+                            <div
+                              data-test="row-actions-menu"
+                              (click)="$event.stopPropagation()"
+                              class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-2">
+                              @for (act of ac.actions!(row); track act.label) {
+                                <button
+                                  type="button"
+                                  [disabled]="act.disabled"
+                                  (click)="invokeAction(act, row, $event)"
+                                  class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                                  [class.text-red-600]="act.danger"
+                                  [class.dark:text-red-400]="act.danger">
+                                  @if (act.icon) {
+                                    <span class="material-icons text-base leading-none">{{ act.icon }}</span>
+                                  }
+                                  <span>{{ act.label }}</span>
+                                </button>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                } @else if (col.kind === 'favorite' || col.kind === 'actions') {
+                  <!-- Suppressed: star + kebab are attached to the Name row above -->
+                } @else if (col.kind === 'radio' && col.radio) {
+                  <div class="flex justify-between items-center gap-2 text-sm py-0.5">
+                    <span class="text-content-muted">{{ col.header }}</span>
+                    <input
+                      data-test="row-radio"
+                      type="radio"
+                      [name]="'signal-list-radio-card-' + (col.key ?? col.header)"
+                      [checked]="isRadioSelected(col, row)"
+                      [disabled]="isRadioDisabled(col, row)"
+                      (click)="onSelectRadio(col, row, $event)"
+                      [class.cursor-pointer]="!isRadioDisabled(col, row)"
+                      [class.cursor-not-allowed]="isRadioDisabled(col, row)"
+                      [class.opacity-40]="isRadioDisabled(col, row)" />
+                  </div>
+                } @else if (col.kind === 'gauge' && col.gauge) {
+                  <div class="flex items-center gap-2 text-sm py-0.5" data-test="row-gauge">
+                    <span class="text-content-muted shrink-0">{{ col.header }}</span>
+                    <div class="grow min-w-0">
+                      <app-usage-gauge
+                        [barOnly]="false"
+                        [value]="col.gauge.value(row)"
+                        [valueText]="col.gauge.valueText ? col.gauge.valueText(row) : ''"
+                        [warningAt]="col.gauge.warningAt!"
+                        [errorAt]="col.gauge.errorAt!" />
+                    </div>
+                  </div>
+                } @else if (col.kind === 'compound' && col.compound) {
+                  <div class="flex items-start justify-between gap-2 text-sm py-0.5">
+                    <span class="text-content-muted shrink-0">{{ col.header }}</span>
+                    <div class="flex flex-col items-end leading-tight text-right min-w-0">
+                      @for (seg of visibleCompoundSegments(col, row); track $index) {
+                        @if (seg.link) {
+                          <a [routerLink]="seg.link" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</a>
+                        } @else {
+                          <span class="truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</span>
+                        }
+                      }
+                      @if (hiddenCompoundCount(col, row) > 0) {
+                        <button
+                          data-test="compound-expand"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer mt-0.5">
+                          {{ collapsedLabelFor(col, hiddenCompoundCount(col, row)) }}
+                        </button>
+                      } @else if (col.maxVisible !== undefined && isCompoundExpanded(col, row) && col.compound(row).length > col.maxVisible) {
+                        <button
+                          data-test="compound-collapse"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer mt-0.5">
+                          …show fewer
+                        </button>
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <div class="flex justify-between items-center gap-2 text-sm py-0.5">
+                    <span class="text-content-muted">{{ col.header }}</span>
+                    <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
+                      @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                        <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                      } @else if (col.kind === 'pill') {
+                        <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
+                      } @else if (col.kind === 'dot') {
+                        <span class="inline-flex items-center gap-2">
+                          <span [class]="dotClasses(colorFor(col, row))"></span>
+                          <span>{{ col.render(row) }}</span>
+                        </span>
+                      } @else {
+                        {{ col.render(row) }}
+                      }
+                    </span>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <table class="min-w-full border-collapse" style="table-layout: fixed;">
+        <colgroup>
+          @for (col of config.columns; track col.key) {
+            <col [style.width]="col.widthHint ?? null">
+          }
+        </colgroup>
+        <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
+          <tr>
+            @for (col of config.columns; track col.key) {
+              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
+                @if (isSortable(col)) {
+                  <button
+                    type="button"
+                    (click)="onHeaderSort(col)"
+                    class="inline-flex items-center gap-1 hover:text-content-muted">
+                    <span>{{ col.header }}</span>
+                    @if (sortDirectionFor(col) === 'asc') {
+                      <span class="material-icons text-base opacity-60 rotate-180">sort</span>
+                    } @else if (sortDirectionFor(col) === 'desc') {
+                      <span class="material-icons text-base opacity-60">sort</span>
+                    } @else {
+                      <span class="material-icons text-base opacity-40">sort</span>
+                    }
+                  </button>
+                } @else {
+                  {{ col.header }}
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of config.pagedItems(); track trackByRow($index, row)) {
+            <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
+              @for (col of config.columns; track col.key) {
+                <td class="px-3 py-2 text-sm text-content-text"
+                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'gauge'"
+                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge'"
+                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge' ? null : col.render(row)">
+                  @if (col.kind === 'link' && col.link) {
+                    @if (col.link(row); as target) {
+                      <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                    } @else {
+                      {{ col.render(row) }}
+                    }
+                  } @else if (col.kind === 'pill') {
+                    <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
+                  } @else if (col.kind === 'dot') {
+                    <span class="inline-flex items-center gap-2">
+                      <span [class]="dotClasses(colorFor(col, row))"></span>
+                      <span class="truncate">{{ col.render(row) }}</span>
+                    </span>
+                  } @else if (col.kind === 'compound' && col.compound) {
+                    <div class="flex flex-col leading-tight">
+                      @for (seg of visibleCompoundSegments(col, row); track $index) {
+                        @if (seg.link) {
+                          <a [routerLink]="seg.link" class="text-accent hover:underline truncate" [attr.title]="seg.text">{{ seg.text }}</a>
+                        } @else {
+                          <span class="truncate" [attr.title]="seg.text">{{ seg.text }}</span>
+                        }
+                      }
+                      @if (hiddenCompoundCount(col, row) > 0) {
+                        <button
+                          data-test="compound-expand"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer self-start mt-0.5">
+                          {{ collapsedLabelFor(col, hiddenCompoundCount(col, row)) }}
+                        </button>
+                      } @else if (col.maxVisible !== undefined && isCompoundExpanded(col, row) && col.compound(row).length > col.maxVisible) {
+                        <button
+                          data-test="compound-collapse"
+                          type="button"
+                          (click)="toggleCompoundExpanded(col, row, $event)"
+                          class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer self-start mt-0.5">
+                          …show fewer
+                        </button>
+                      }
+                    </div>
+                  } @else if (col.kind === 'favorite' && col.favorite) {
+                    <button
+                      data-test="favorite-star"
+                      type="button"
+                      (click)="onToggleFavorite(col, row, $event)"
+                      [title]="isFavorite(col, row) ? 'Remove from favorites' : 'Add to favorites'"
+                      class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                      <span class="material-icons text-xl leading-none" [class.text-accent]="isFavorite(col, row)">
+                        {{ isFavorite(col, row) ? 'star' : 'star_border' }}
+                      </span>
+                    </button>
+                  } @else if (col.kind === 'actions' && col.actions) {
+                    <div class="relative inline-block">
+                      <button
+                        data-test="row-actions"
+                        type="button"
+                        (click)="toggleRowActions(row, $event)"
+                        title="Actions"
+                        class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                        <span class="material-icons text-xl leading-none">more_vert</span>
+                      </button>
+                      @if (openActionsRowKey() === config.getRowKey(row)) {
+                        <div
+                          data-test="row-actions-menu"
+                          (click)="$event.stopPropagation()"
+                          class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-2">
+                          @for (act of col.actions(row); track act.label) {
+                            <button
+                              type="button"
+                              [disabled]="act.disabled"
+                              (click)="invokeAction(act, row, $event)"
+                              class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                              [class.text-red-600]="act.danger"
+                              [class.dark:text-red-400]="act.danger">
+                              @if (act.icon) {
+                                <span class="material-icons text-base leading-none">{{ act.icon }}</span>
+                              }
+                              <span>{{ act.label }}</span>
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else if (col.kind === 'radio' && col.radio) {
+                    <input
+                      data-test="row-radio"
+                      type="radio"
+                      [name]="'signal-list-radio-' + (col.key ?? col.header)"
+                      [checked]="isRadioSelected(col, row)"
+                      [disabled]="isRadioDisabled(col, row)"
+                      (click)="onSelectRadio(col, row, $event)"
+                      [class.cursor-pointer]="!isRadioDisabled(col, row)"
+                      [class.cursor-not-allowed]="isRadioDisabled(col, row)"
+                      [class.opacity-40]="isRadioDisabled(col, row)" />
+                  } @else if (col.kind === 'gauge' && col.gauge) {
+                    <app-usage-gauge
+                      data-test="row-gauge"
+                      [barOnly]="false"
+                      [value]="col.gauge.value(row)"
+                      [valueText]="col.gauge.valueText ? col.gauge.valueText(row) : ''"
+                      [warningAt]="col.gauge.warningAt!"
+                      [errorAt]="col.gauge.errorAt!" />
+                  } @else {
+                    {{ col.render(row) }}
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Scroll fade: sibling of body so it never moves with the data. Takes 0
+       flex space (h-10 cancels -mt-10) and overlays the bottom 2.5rem of the
+       scroll area. Dark fade on white bg, light fade on dark bg — always
+       contrasts. Only shown when content actually overflows. -->
+  @if (hasOverflow() && config.totalFilteredResults() > 0) {
+    <div data-test="scroll-fade"
+         aria-hidden="true"
+         class="pointer-events-none relative z-20 h-10 -mt-10 bg-gradient-to-t from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>
+  }
+
+  <!-- Pagination bar -->
+  <div class="flex items-center justify-between gap-3 px-4 py-2 border-t border-content-border bg-content-bg text-sm flex-wrap">
+
+    <!-- Items per page -->
+    <div class="flex items-center gap-2 text-content-muted">
+      <span>Items per page:</span>
+      <select
+        (change)="onPageSizeChange($any($event.target).value)"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
+        @for (opt of pageSizeOptions(); track opt) {
+          <option [value]="opt" [selected]="opt === config.pageSize()">{{ opt }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Range counter -->
+    <span class="text-content-muted">{{ rangeText() }}</span>
+
+    <!-- First / prev / next / last -->
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() === 0"
+        (click)="config.pageIndex.set(0)"
+        title="First page">
+        <span class="material-icons text-base leading-5">first_page</span>
+      </button>
+      <button
+        type="button"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() === 0"
+        (click)="config.pageIndex.set(config.pageIndex() - 1)"
+        title="Previous page">
+        <span class="material-icons text-base leading-5">chevron_left</span>
+      </button>
+      <button
+        type="button"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() + 1 >= Math.max(1, config.totalPages())"
+        (click)="config.pageIndex.set(config.pageIndex() + 1)"
+        title="Next page">
+        <span class="material-icons text-base leading-5">chevron_right</span>
+      </button>
+      <button
+        type="button"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="config.pageIndex() + 1 >= Math.max(1, config.totalPages())"
+        (click)="config.pageIndex.set(Math.max(0, config.totalPages() - 1))"
+        title="Last page">
+        <span class="material-icons text-base leading-5">last_page</span>
+      </button>
+    </div>
+  </div>
+</div>

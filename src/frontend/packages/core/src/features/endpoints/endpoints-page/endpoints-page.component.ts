@@ -16,25 +16,18 @@ import {
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import {
-  EndpointsListConfigService } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
-import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { ListComponent } from '../../../shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
+import { EndpointsSignalListComponent } from './endpoints-signal-list.component';
 
 @Component({
   selector: 'app-endpoints-page',
   templateUrl: './endpoints-page.component.html',
   styleUrls: ['./endpoints-page.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: EndpointsListConfigService }, EndpointListHelper],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -42,7 +35,7 @@ import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpo
     RouterModule,
     CustomTooltipDirective,
     PageHeaderComponent,
-    ListComponent,
+    EndpointsSignalListComponent,
     EndpointsMissingComponent,
     EndpointRegisterModalComponent
   ]
@@ -68,7 +61,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public isInitialised$: Observable<boolean>;
 
   @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
-  @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
   customContentComponentRef!: ComponentRef<any>;
 
   private snackBarText = {

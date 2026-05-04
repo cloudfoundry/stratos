@@ -237,11 +237,17 @@ export class TailwindDialogService {
     // Dialog panel
     const dialog = document.createElement('div');
 
-    // Base classes - only include essentials, let config override sizing/overflow
+    // Base classes - only include essentials, let config override sizing/overflow.
+    // Note: deliberately NO `transform` / `scale-95` here. A non-`none` transform
+    // on the panel creates a CSS containing block, which causes any
+    // `position: fixed` overlay inside the dialog (e.g. CustomSelect's option
+    // dropdown) to resolve coordinates against the dialog rather than the
+    // viewport — breaking the dropdown's getBoundingClientRect-based
+    // positioning. Open animation is opacity-only as a result.
     let panelClasses = [
       'bg-content-bg', 'rounded-lg', 'shadow-xl',
-      'transform', 'transition-all', 'duration-300', 'ease-out',
-      'scale-95', 'opacity-0'
+      'transition-opacity', 'duration-300', 'ease-out',
+      'opacity-0'
     ];
 
     // Add default sizing only if not provided in config
@@ -307,9 +313,9 @@ export class TailwindDialogService {
       if (pos.bottom) dialog.style.bottom = pos.bottom;
     }
 
-    // Trigger scale-in and fade-in animation
+    // Trigger opacity fade-in. Scale animation deliberately omitted; see
+    // panelClasses note above re: containing-block side-effect.
     requestAnimationFrame(() => {
-      dialog.style.transform = 'scale(1)';
       dialog.style.opacity = '1';
     });
 

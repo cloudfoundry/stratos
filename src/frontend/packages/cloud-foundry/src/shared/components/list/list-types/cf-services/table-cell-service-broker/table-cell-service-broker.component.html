@@ -1,7 +1,7 @@
-@if ((broker$ | async)) {
+@if ((broker$ | async); as broker) {
   <div class="service-broker">
     @if (config?.mode === 'NAME') {
-      {{(broker$ | async).entity.name}}
+      {{ broker.name }}
     }
     @if (config?.mode === 'SCOPE') {
       <div>

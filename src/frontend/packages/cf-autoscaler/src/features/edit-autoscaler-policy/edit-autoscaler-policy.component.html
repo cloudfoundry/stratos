@@ -9,19 +9,16 @@
     </div>
   </app-page-header>
   <app-steppers cancel="{{parentUrl}}">
-    <app-step [title]="'Default Instance Limits'" [valid]="step1.editLimitForm.valid" [onNext]="step1.onNext">
+    <app-step [title]="'Default Instance Limits'" [signalHandle]="step1Handle">
       <app-edit-autoscaler-policy-step1 #step1></app-edit-autoscaler-policy-step1>
     </app-step>
-    <app-step [title]="'Scaling Rules'" [disablePrevious]="step2.editIndex !== -1" [valid]="step2.editIndex === -1"
-      [onNext]="step2.onNext">
+    <app-step [title]="'Scaling Rules'" [signalHandle]="step2Handle">
       <app-edit-autoscaler-policy-step2 #step2></app-edit-autoscaler-policy-step2>
     </app-step>
-    <app-step [title]="'Recurring Schedules'" [disablePrevious]="step3.editIndex !== -1" [valid]="step3.editIndex === -1"
-      [onNext]="step3.onNext">
+    <app-step [title]="'Recurring Schedules'" [signalHandle]="step3Handle">
       <app-edit-autoscaler-policy-step3 #step3></app-edit-autoscaler-policy-step3>
     </app-step>
-    <app-step [title]="'Specific Dates'" [disablePrevious]="step4.editIndex !== -1" [onNext]="step4.updatePolicy"
-      [valid]="step4.editIndex === -1">
+    <app-step [title]="'Specific Dates'" [signalHandle]="step4Handle">
       <app-edit-autoscaler-policy-step4 #step4></app-edit-autoscaler-policy-step4>
     </app-step>
   </app-steppers>

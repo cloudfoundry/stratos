@@ -1,14 +1,26 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest as obsCombineLatest, Observable, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map, startWith } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
-import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import {
+  SignalStepHandle,
+  StepComponent,
+} from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { AppState } from '../../../../../../store/src/app-state';
 import {
@@ -44,13 +56,15 @@ selector: 'app-remove-user',
     UsersRolesConfirmComponent
   ]
 })
-export class RemoveUserComponent implements OnDestroy {
+export class RemoveUserComponent implements AfterViewInit, OnDestroy {
   private store = inject<Store<AppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfUserService = inject(CfUserService);
   private cfRolesService = inject(CfRolesService);
   private route = inject(ActivatedRoute);
   private userPerms = inject(CurrentUserPermissionsService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   initialUsers$!: Observable<CfUser[]>;
   singleUser$!: Observable<CfUser>;
@@ -58,9 +72,58 @@ export class RemoveUserComponent implements OnDestroy {
   cfGuid!: string;
   orgGuid!: string;
   spaceGuid!: string;
-  applyStarted = false;
+  // FWT-959 Part 2: applyStarted promoted to a signal so the confirm step's
+  // canClose / disablePrevious / destructiveStep / finishButtonText handle
+  // fields can be `computed()` over it. The legacy boolean read/write API
+  // is kept via a getter/setter pair so the existing imperative call-sites
+  // (e.g. inside `submit`) don't need to learn signal syntax.
+  applyStartedSignal = signal<boolean>(false);
+  get applyStarted(): boolean { return this.applyStartedSignal(); }
+  set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   onlySpaces = false;
   isBlocked$!: Observable<boolean>;
+
+  // FWT-959 Part 2: SignalStepHandle for the single Confirm step.
+  //
+  // Two-click apply semantic preserved via submit():
+  //   1st click (applyStarted == false) — dispatch UsersRolesExecuteChanges,
+  //     flip applyStarted, return { ignoreSuccess: true } so the stepper
+  //     does NOT auto-advance / does NOT pop a success snackbar.
+  //   2nd click (applyStarted == true) — return void after explicit
+  //     Router.navigate to the cancel URL (replaces legacy redirect: true).
+  //
+  // canClose / destructiveStep / finishButtonText are computed() over the
+  // applyStartedSignal so the bottom bar flips reactively as soon as the
+  // first click lands.
+  @ViewChild('confirm', { static: false }) confirm!: UsersRolesConfirmComponent;
+
+  private isBlockedSig = signal<boolean>(true);
+  private isBlockedSub?: Subscription;
+
+  confirmStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    blocked: this.isBlockedSig.asReadonly(),
+    canClose: computed(() => !this.applyStartedSignal()),
+    disablePrevious: computed(() => this.applyStartedSignal()),
+    destructiveStep: computed(() => !this.applyStartedSignal()),
+    finishButtonText: computed(() => this.applyStartedSignal() ? 'Close' : 'Apply'),
+    onEnter: () => this.confirm?.onEnter(),
+    submit: async () => {
+      if (this.applyStartedSignal()) {
+        // Second click — close the wizard. Replaces legacy { redirect: true }
+        // (no payload), which the stepper handled by navigating to its
+        // cancel URL. We do that explicitly here.
+        await this.router.navigateByUrl(this.defaultCancelUrl);
+        return;
+      }
+      this.applyStartedSignal.set(true);
+      this.store.dispatch(new UsersRolesExecuteChanges());
+      // First click — apply has started; suppress auto-advance and the
+      // success snackbar so the user can see the per-row monitor while
+      // the dispatched changes settle.
+      return { ignoreSuccess: true };
+    },
+  };
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
@@ -117,7 +180,19 @@ export class RemoveUserComponent implements OnDestroy {
     });
   }
 
+  ngAfterViewInit(): void {
+    // Bridge isBlocked$ into a signal so the handle's `blocked` field
+    // re-evaluates reactively once the store data is ready. OnPush parent
+    // → signal read inside the handle gives us the same gating behaviour
+    // the legacy `[blocked]="isBlocked$ | async"` template binding had.
+    this.isBlockedSub = this.isBlocked$.subscribe(v => {
+      this.isBlockedSig.set(!!v);
+      this.cdr.markForCheck();
+    });
+  }
+
   ngOnDestroy(): void {
+    this.isBlockedSub?.unsubscribe();
     this.store.dispatch(new UsersRolesClear());
   }
 
@@ -214,14 +289,5 @@ export class RemoveUserComponent implements OnDestroy {
     }
     route += `/users`;
     return route;
-  }
-
-  startApply: StepOnNextFunction = () => {
-    if (this.applyStarted) {
-      return observableOf({ success: true, redirect: true });
-    }
-    this.applyStarted = true;
-    this.store.dispatch(new UsersRolesExecuteChanges());
-    return observableOf({ success: true, ignoreSuccess: true });
   }
 }

@@ -1,87 +1,178 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-
 import {
-  CurrentUserPermissionsService,
-  ListComponent,
-  ListConfig,
-  NoContentMessageComponent,
-  PageSubNavComponent
+  SignalListComponent,
+  SignalListConfig,
+  SignalListHeaderAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
-import { CFFeatureFlagTypes } from '../../../../../../../cf-api.types';
-import { CFAppState } from '../../../../../../../cf-app-state';
-import {
-  CfSpaceUsersListConfigService,
-} from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
-import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
-import { CfAdminAddUserWarningComponent } from '../../../../cf-admin-add-user-warning/cf-admin-add-user-warning.component';
-import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
-import { createCfOrgSpaceSteppersUrl, someFeatureFlags, waitForCFPermissions } from '../../../../../cf.helpers';
-import { CloudFoundryInviteUserLinkComponent } from '../../../../cf-organizations/cf-invite-user-link/cloud-foundry-invite-user-link.component';
 
+import { CfUsersSignalConfigService } from '../../../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
+import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import type { StUser, StUserSpaceRole } from '../../../../../../../services/endpoint-data/stratos-types';
+
+// Signal-native replacement for the legacy CloudFoundrySpaceUsersComponent.
+// Scoped to one space under one org under one CF endpoint. Reuses the
+// CF-level page's CfUsersSignalConfigService via initializeForSpace, which
+// pins the lockedSpaceGuid so the user list narrows to users with at least
+// one role in the target space.
+//
+// Columns trim the CF-level shape:
+// - No Org Roles column (the page is space-scoped — every visible user
+//   already holds a role in this org by definition).
+// - Space Roles column shows only THIS space's roles (filtered from the
+//   full spaceRoles[] bucket).
+// - Username, Origin, Created retained.
+//
+// Manage Roles + Remove User flows stay on the legacy stepper paths
+// (/users/manage, /users/remove) — same scope contract as the CF-level
+// page commit. The legacy page-sub-nav "Manage Roles" button is dropped
+// here for parity with the CF-level signal-native page; future work can
+// reintroduce it as a SignalListConfig.headerActions binding.
 @Component({
   selector: 'app-cloud-foundry-space-users',
   templateUrl: './cloud-foundry-space-users.component.html',
-  providers: [{
-    provide: ListConfig,
-    useClass: CfSpaceUsersListConfigService
-  }],
+  styleUrls: ['./cloud-foundry-space-users.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
-    NoContentMessageComponent,
-    ListComponent,
-    CfAdminAddUserWarningComponent,
-    CloudFoundryInviteUserLinkComponent
-  ]
+    SignalListComponent,
+  ],
 })
 export class CloudFoundrySpaceUsersComponent {
-  public addRolesByUsernameLink$: Observable<{
-    link: string,
-    params: { [name: string]: any }
-  }>;
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
+  cfSpaceService = inject(CloudFoundrySpaceService);
+  private usersConfig = inject(CfUsersSignalConfigService);
+  private snackBar = inject(TailwindSnackBarService);
+
+  public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
-    const userPerms = inject(CurrentUserPermissionsService);
-    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const cfGuid = this.cfEndpointService.cfGuid;
+    const spaceGuid = this.cfSpaceService.spaceGuid;
+    this.usersConfig.initializeForSpace(cfGuid, spaceGuid);
 
-    const requiredFeatureFlags = [
-      CFFeatureFlagTypes.set_roles_by_username,
-      CFFeatureFlagTypes.unset_roles_by_username
+    const renderUsername = (u: StUser): string =>
+      u.username && u.username.length > 0 ? u.username : (u.presentationName ?? u.guid);
+
+    const renderOrigin = (u: StUser): string =>
+      u.origin && u.origin.length > 0 ? u.origin : '—';
+
+    // Filter the user's spaceRoles[] down to grants in THIS space, then
+    // join the (already prefix-stripped) role names. Page is scoped, so
+    // there's only ever one matching bucket per row in practice — but the
+    // .filter handles the edge case of duplicate role grants gracefully.
+    const renderSpaceRoles = (u: StUser): string => {
+      const roles = (u.spaceRoles ?? [])
+        .filter((sr: StUserSpaceRole) => sr.spaceGuid === spaceGuid)
+        .flatMap(sr => sr.roles ?? []);
+      return roles.length === 0 ? '—' : roles.join(', ');
+    };
+
+    const renderCreated = (u: StUser): string =>
+      CloudFoundrySpaceUsersComponent.formatDate(u.createdAt);
+
+    // PLACEHOLDER header actions — proves the SignalListConfig.headerActions
+    // slot wires through correctly. Manage Roles + Invite User flows stay
+    // on the legacy stepper paths under /users/manage and /users/invite for
+    // this round (matches the CF-level page commit). When those flows
+    // migrate signal-native, swap each invoke() to navigate to the real
+    // route. The stub click intentionally surfaces the slot in the live UI
+    // without claiming a half-shipped flow.
+    const headerActions: readonly SignalListHeaderAction[] = [
+      {
+        label: 'Manage Roles',
+        icon: 'people',
+        tooltip: 'Manage user roles for this space (legacy flow — not yet migrated)',
+        invoke: () => {
+          this.snackBar.open(
+            'Manage Roles flow not yet migrated — open via legacy users page',
+            'Dismiss',
+            { duration: 5000 },
+          );
+        },
+      },
+      {
+        label: 'Invite User',
+        icon: 'person_add',
+        tooltip: 'Invite a user (legacy flow — not yet migrated)',
+        invoke: () => {
+          this.snackBar.open(
+            'Invite User flow not yet migrated — open via legacy users page',
+            'Dismiss',
+            { duration: 5000 },
+          );
+        },
+      },
     ];
-    this.addRolesByUsernameLink$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
-      switchMap(() => combineLatest([
-        someFeatureFlags(requiredFeatureFlags, activeRouteCfOrgSpace.cfGuid, store, userPerms),
-        userPerms.can(
-          CfCurrentUserPermissions.SPACE_CHANGE_ROLES,
-          activeRouteCfOrgSpace.cfGuid,
-          activeRouteCfOrgSpace.orgGuid,
-          activeRouteCfOrgSpace.spaceGuid
-        )
-      ])),
-      map(([canSetRolesByUsername, canChangeOrgRole]) => {
-        if (canSetRolesByUsername && canChangeOrgRole) {
-          return {
-            link: createCfOrgSpaceSteppersUrl(
-              activeRouteCfOrgSpace.cfGuid,
-              `/users/manage`,
-              activeRouteCfOrgSpace.orgGuid,
-              activeRouteCfOrgSpace.spaceGuid
-            ),
-            params: { setByUsername: true }
-          };
-        }
-      }),
-    );
+
+    this.listConfig.set({
+      pagedItems: this.usersConfig.view.pagedItems,
+      totalFilteredResults: this.usersConfig.view.totalFilteredResults,
+      totalPages: this.usersConfig.view.totalPages,
+      pageIndex: this.usersConfig.pageIndex,
+      pageSize: this.usersConfig.pageSize,
+      isAnyLoading: signal(false),
+      errorsByCnsi: signal(new Map()),
+      columns: [
+        {
+          header: 'Username', key: 'username', sortField: 'username',
+          kind: 'text',
+          render: renderUsername,
+          widthHint: '16rem',
+        },
+        {
+          header: 'Origin', key: 'origin', sortField: renderOrigin,
+          kind: 'text',
+          render: renderOrigin,
+          widthHint: '8rem',
+        },
+        {
+          header: 'Space Roles', key: 'spaceRoles', sortField: renderSpaceRoles,
+          kind: 'text',
+          render: renderSpaceRoles,
+          widthHint: '18rem',
+        },
+        {
+          header: 'Created', key: 'createdAt', sortField: 'createdAt',
+          render: renderCreated,
+          widthHint: '12rem',
+        },
+      ],
+      getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
+      emptyMessage: 'There are no users in this space',
+      emptyFilterMessage: 'No users match the current filters',
+      loadingMessage: 'Loading users…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.usersConfig.nameFilter,
+      onRefresh: () => this.usersConfig.refresh(),
+      onClear: () => this.usersConfig.clearFilters(),
+      viewMode: this.usersConfig.viewMode,
+      sort: this.usersConfig.sort,
+      headerActions,
+    });
+
+    this.usersConfig.registerSortExtractor('origin', renderOrigin);
+    this.usersConfig.registerSortExtractor('spaceRoles', renderSpaceRoles);
   }
 
+  static formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
+  }
 }

@@ -54,6 +54,7 @@ import { SharedModule } from './shared/shared.module';
 import { TabNavService } from './tab-nav.service';
 import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';
+import { cfApiInterceptor } from '@stratosui/cloud-foundry';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -166,7 +167,7 @@ class AppStoreDebugModule { }
     provideCharts(withDefaultRegisterables()),
     // HTTP Client with functional interceptors (Angular 20 pattern)
     provideHttpClient(
-      withInterceptors([xsrfInterceptor])
+      withInterceptors([xsrfInterceptor, cfApiInterceptor])
     ),
     { provide: HttpXsrfTokenExtractor, useClass: HttpXsrfHeaderExtractor }
   ],

@@ -1,24 +1,29 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { Observable, Subscription } from 'rxjs';
-import { filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import {
-  safeUnsubscribe,
   MetaCardComponent,
   MetaCardItemComponent,
   MetaCardKeyComponent,
   MetaCardValueComponent,
   MetaCardTitleComponent,
   BooleanIndicatorComponent,
-  ClickStopPropagationDirective
+  ClickStopPropagationDirective,
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { IServiceBroker } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { ServiceCatalogDataService } from '../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceBroker } from '../../../../services/endpoint-data/stratos-types';
+import { TristateValueComponent } from '../../tristate-value/tristate-value.component';
+
+interface BrokerSpaceLink {
+  name: string;
+  link: string[];
+}
 
 @Component({
   selector: 'app-service-broker-card',
@@ -34,47 +39,51 @@ import { cfEntityCatalog } from '../../../../cf-entity-catalog';
     MetaCardKeyComponent,
     MetaCardValueComponent,
     BooleanIndicatorComponent,
-    ClickStopPropagationDirective
-  ]
+    ClickStopPropagationDirective,
+    TristateValueComponent,
+  ],
 })
-export class ServiceBrokerCardComponent implements OnDestroy {
+export class ServiceBrokerCardComponent {
   private servicesService = inject(ServicesService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
 
-
-  spaceName!: string;
-  spaceLink!: string[];
-  serviceBroker$: Observable<APIResource<IServiceBroker>>;
-  subs: Subscription[] = [];
+  broker$: Observable<StServiceBroker | null>;
+  spaceLink$: Observable<BrokerSpaceLink | null>;
 
   constructor() {
-    const servicesService = this.servicesService;
+    const cfGuid = this.servicesService.cfGuid;
 
-    this.serviceBroker$ = this.servicesService.serviceBroker$;
-    this.subs.push(this.serviceBroker$.pipe(
-      filter(o => !!o && !!o.entity),
-      map(o => o.entity.space_guid),
-      take(1),
-      filter(o => !!o),
-      // Broker is space scoped
-      switchMap(spaceGuid => {
-        return cfEntityCatalog.space.store.getEntityService(spaceGuid, this.servicesService.cfGuid).waitForEntity$;
+    this.broker$ = this.servicesService.service$.pipe(
+      map(service => service.entity.service_broker_guid),
+      filter((brokerGuid): brokerGuid is string => !!brokerGuid),
+      distinctUntilChanged(),
+      switchMap(brokerGuid => this.serviceCatalog.serviceBroker(cfGuid, brokerGuid)),
+    );
+
+    // Space lookup remains on the legacy ngrx surface — matches the
+    // already-shipped table-cell-service-broker pattern; will move when the
+    // space-detail migration lands.
+    this.spaceLink$ = this.broker$.pipe(
+      switchMap<StServiceBroker | null, Observable<BrokerSpaceLink | null>>(broker => {
+        if (!broker || !broker.spaceGuid) {
+          return of(null);
+        }
+        return cfEntityCatalog.space.store.getEntityService(broker.spaceGuid, cfGuid).waitForEntity$.pipe(
+          filter(e => !!e && !!e.entity && !!e.entity.entity && !!e.entity.metadata),
+          map(e => ({
+            name: e.entity.entity.name,
+            link: [
+              '/cloud-foundry',
+              cfGuid,
+              'organizations',
+              e.entity.entity.organization_guid,
+              'spaces',
+              e.entity.metadata.guid,
+              'summary',
+            ],
+          })),
+        );
       }),
-      filter(space => !!space && !!space.entity && !!space.entity.entity && !!space.entity.metadata),
-      tap(space => {
-        this.spaceLink = ['/cloud-foundry',
-          servicesService.cfGuid,
-          'organizations',
-          space.entity.entity.organization_guid,
-          'spaces',
-          space.entity.metadata.guid,
-          'summary'
-        ];
-        this.spaceName = space.entity.entity.name;
-      })
-    ).subscribe());
-  }
-
-  ngOnDestroy() {
-    safeUnsubscribe(...this.subs);
+    );
   }
 }

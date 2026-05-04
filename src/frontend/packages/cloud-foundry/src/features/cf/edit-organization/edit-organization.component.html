@@ -3,8 +3,8 @@
     Edit Organization
   </app-page-header>
   <app-steppers [cancel]="orgUrl">
-    <app-step title="Edit Organization" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Update">
-      <app-edit-organization-step #step1></app-edit-organization-step>
+    <app-step title="Edit Organization" [signalHandle]="step1.signalHandle" cancelButtonText="Cancel" finishButtonText="Update">
+      <app-edit-organization-step #step1 [redirectUrl]="orgUrl"></app-edit-organization-step>
     </app-step>
   </app-steppers>
 </div>

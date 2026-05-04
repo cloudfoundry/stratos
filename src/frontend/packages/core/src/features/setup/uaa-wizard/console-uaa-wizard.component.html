@@ -5,7 +5,7 @@
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
     <app-steppers>
-      <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
+      <app-step title="UAA Endpoint" [signalHandle]="uaaFormStepHandle">
         <div class="space-y-6">
           <p class="text-content-text">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
           with
@@ -17,7 +17,7 @@
               <input id="apiUrl" class="input" formControlName="apiUrl" placeholder="UAA Endpoint URL">
             </div>
             <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" formControlName="skipSSL">
+              <input type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500" formControlName="skipSSL">
               <span class="text-sm text-content-text">Skip SSL validation for the UAA</span>
             </label>
             <div class="form-field">
@@ -69,15 +69,15 @@
             <p class="text-content-text mb-4">UAA Single Sign On (SSO)</p>
             <div class="space-y-4">
               <label class="flex items-start space-x-2 cursor-pointer">
-                <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-0.5" formControlName="useSSO">
+                <input type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500 mt-0.5" formControlName="useSSO">
                 <span class="text-sm text-content-text">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
               login UI)</span>
             </label>
             @if (uaaForm.value.useSSO) {
               <div class="alert alert-info">
-                <p class="text-info-800">You must ensure that the client specified
+                <p class="text-info-shade-800">You must ensure that the client specified
                   above has its 'redirect_uri' configured to include the <app-product-name></app-product-name> SSO Callback URL:
-                  <code class="bg-info-100 px-1 py-0.5 rounded text-xs">{{ clientRedirectURI }}</code>
+                  <code class="bg-info-shade-100 px-1 py-0.5 rounded text-xs">{{ clientRedirectURI }}</code>
                 </p>
               </div>
             }
@@ -86,7 +86,7 @@
       </form>
     </div>
   </app-step>
-  <app-step title="Admin Scope" [onNext]="uaaScopeNext">
+  <app-step title="Admin Scope" [signalHandle]="uaaScopeStepHandle">
     <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">

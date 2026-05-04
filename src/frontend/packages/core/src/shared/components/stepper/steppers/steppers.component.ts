@@ -120,6 +120,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private filterSteps() {
     this.steps = this.allSteps.filter((step => !step.hidden));
+    // Under zoneless CD, reassigning this.steps doesn't mark the view
+    // dirty. Without markForCheck the template keeps rendering the step
+    // list as it was at ngAfterContentInit, so steps whose [hidden]
+    // later flips to false (e.g. Routes once fetch resolves) never
+    // appear in the stepper bar.
+    this.cdr.markForCheck();
   }
 
   goNext(): void {
@@ -132,17 +138,19 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       const step = this.steps[this.currentIndex];
       step.busy = true;
 
-      // Defensive: step.onNext may throw synchronously (runtime error before
-      // it returns an observable). Without a try/catch, the throw escapes
-      // goNext, step.busy stays true, and the Next/Finish button is stuck
-      // as a spinner forever. Catch, surface via snackbar, reset busy.
+      // Defensive: step.invokeNext may throw synchronously (runtime error
+      // before it returns an observable, or signal-handle.submit() throwing
+      // sync). Without a try/catch, the throw escapes goNext, step.busy
+      // stays true, and the Next/Finish button is stuck as a spinner
+      // forever. Catch, surface via snackbar, reset busy.
       let obs$: Observable<StepOnNextResult> | unknown;
       try {
-        obs$ = step.onNext(this.currentIndex, step);
+        obs$ = step.invokeNext(this.currentIndex);
       } catch (err) {
         console.error('Stepper onNext threw synchronously:', err);
         step.busy = false;
         this.showNextButtonProgress = false;
+        this.cdr.markForCheck();
         this.snackBarRef = this.snackBar.open(
           `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
           'Dismiss',
@@ -160,6 +168,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // at true even though navigation was effectively complete/no-op.
       if (!(obs$ instanceof Observable)) {
         step.busy = false;
+        this.cdr.markForCheck();
         return;
       }
 
@@ -182,6 +191,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
+          // OnPush + zoneless: bare assignments don't mark the stepper view
+          // dirty, so the Connect/Next button stays in its spinner state and
+          // remains disabled after a failed submit. Without this the user
+          // can't retry — bad creds path leaves the dialog frozen.
+          this.cdr.markForCheck();
           this.enterData = data;
           if (success && !ignoreSuccess) {
             if (redirect) {
@@ -208,6 +222,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         finalize(() => {
           step.busy = false;
           this.showNextButtonProgress = false;
+          this.cdr.markForCheck();
         })
       ).subscribe();
     }
@@ -238,13 +253,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (!this.canGoto(index)) {
       if (index === 0) {
         if (this.allSteps && this.allSteps.length > 0) {
-          // Execute `onEnter` for the first step as soon as step is unblocked
+          // Execute `onEnter` for the first step as soon as step is unblocked.
+          // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
+          // wizards) receive the enter callback — the legacy onEnter @Input
+          // defaults to a no-op so a raw step.onEnter call swallows
+          // signalHandle.onEnter.
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
               this.allSteps[index].active = true;
-              if (this.allSteps[index].onEnter) {
-                this.allSteps[index].onEnter(this.enterData);
-              }
+              this.allSteps[index].pOnEnter(this.enterData);
               clearInterval(timer);
             }
           }, 5);
@@ -255,7 +272,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
     // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
     const isNextDirection = index > this.currentIndex;
-    this.steps[this.currentIndex].onLeave(isNextDirection);
+    this.steps[this.currentIndex].invokeLeave(isNextDirection);
 
     // 2) Determine if the required step is ok (and if not find the next/previous valid step)
     index = this.findValidStep(index, isNextDirection);
@@ -269,9 +286,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       s.active = i === index;
     });
     this.currentIndex = index;
-    if (this.steps[this.currentIndex].onEnter) {
-      this.steps[this.currentIndex].onEnter(this.enterData);
-    }
+    // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
+    // wizards) receive the enter callback — see comment above for rationale.
+    this.steps[this.currentIndex].pOnEnter(this.enterData);
     this.enterData = undefined;
 
     // Trigger change detection for OnPush strategy
