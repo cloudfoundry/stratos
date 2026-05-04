@@ -207,6 +207,17 @@ export class AppApplicationActionsService {
     void action({ onProgress })
       .then(() => {
         this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
+        // Eagerly drop the deleted app's row from the app-wall orchestrator
+        // so the post-delete window doesn't leave the gone-app's
+        // (cnsi, appGuid) keys in `allItems`. Without this the stats
+        // poller's effect refires on the deleted row's keys and emits 1-2
+        // transient 404s before the next refresh catches up. The
+        // orchestrator is only built once the app-wall mounts; on direct
+        // detail-page navigation it stays undefined — optional-chain plus
+        // the wave-1 idempotent removeItem keeps this safe in every path.
+        if (verb === 'delete') {
+          this.apps.orchestrator?.removeRow(cfGuid, appGuid);
+        }
         // Skip post-success refreshes for delete — the app is gone, so
         // GET /apps/:guid 404s and stats fetches return empty. The
         // onAfter callback handles navigation to /applications instead.

@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -92,9 +92,27 @@ export class CfAppsSignalConfigService {
   // is the expected visual cue.
   private readonly _orgsByCnsi = signal<Map<string, StOrg[]>>(new Map());
   private readonly _spacesByCnsi = signal<Map<string, StSpace[]>>(new Map());
-  // Flattened guid → name lookups derived from the per-CNSI catalogs.
-  // Consumers like the app-wall CF/Org/Space column read these directly
-  // and don't need to know which CF a particular guid came from.
+  // Visible-row resolver overlay: org/space names looked up by guid for
+  // rows currently visible in the view but whose guid wasn't in the
+  // bounded /pp/v1/cf/orgs|spaces catalog page (which caps at ~500
+  // resources to avoid 30s gorouter timeouts on large CFs). Populated by
+  // an effect over view.pagedItems(); merged into orgNames/spaceNames so
+  // the cell renderer reads a single map. Catalog wins on duplicates
+  // (no real conflict expected — same backend, same V3 resource).
+  // Keyed cnsiGuid → guid → name to mirror the catalog shape.
+  private readonly _resolvedOrgsByCnsi = signal<Map<string, Map<string, string>>>(new Map());
+  private readonly _resolvedSpacesByCnsi = signal<Map<string, Map<string, string>>>(new Map());
+  // In-flight + already-attempted guid sets keyed `${cnsiGuid}:${guid}`.
+  // Dedup concurrent triggers from rapid pagedItems changes (page nav,
+  // filter, sort). Once a guid resolves (or its batch fails) the key
+  // stays in the set so we don't retry every effect tick — a fresh
+  // initialize() resets these via clearResolverState().
+  private readonly resolverInFlight = new Set<string>();
+  private readonly resolverAttempted = new Set<string>();
+  // Flattened guid → name lookups derived from the per-CNSI catalogs
+  // unioned with the resolver overlay. Consumers like the app-wall
+  // CF/Org/Space column read these directly and don't need to know
+  // which CF a particular guid came from.
   readonly orgNames: Signal<Map<string, string>>;
   readonly spaceNames: Signal<Map<string, string>>;
   // endpoint guid → endpoint name, derived from the connected endpoints list.
@@ -146,8 +164,16 @@ export class CfAppsSignalConfigService {
 
     // Flatten the per-CNSI catalog signals into global guid → name maps
     // for downstream consumers (e.g., app-wall CF/Org/Space column).
+    // Merge in the resolver overlay so guids that fell outside the
+    // bounded catalog page (the original "—" bug) still resolve once
+    // the visible-row resolver fills them in. Catalog values win on
+    // duplicates — both come from the same backend so they should
+    // agree, but the catalog is the dropdown's source of truth.
     this.orgNames = computed(() => {
       const m = new Map<string, string>();
+      for (const byGuid of this._resolvedOrgsByCnsi().values()) {
+        for (const [guid, name] of byGuid) m.set(guid, name);
+      }
       for (const orgs of this._orgsByCnsi().values()) {
         for (const o of orgs) m.set(o.guid, o.name);
       }
@@ -155,6 +181,9 @@ export class CfAppsSignalConfigService {
     });
     this.spaceNames = computed(() => {
       const m = new Map<string, string>();
+      for (const byGuid of this._resolvedSpacesByCnsi().values()) {
+        for (const [guid, name] of byGuid) m.set(guid, name);
+      }
       for (const spaces of this._spacesByCnsi().values()) {
         for (const s of spaces) m.set(s.guid, s.name);
       }
@@ -275,6 +304,12 @@ export class CfAppsSignalConfigService {
     // it — losing the filter across navigation. The effect re-fires once
     // loadAll() completes and options are real.
     this._hasLoadedOnce.set(false);
+    // Reset the visible-row resolver state so a fresh navigation re-
+    // resolves any guid (the underlying space/org might have been renamed
+    // or replaced since the previous mount). The overlay maps are dropped
+    // alongside the dedup sets so previously-resolved names don't bleed
+    // across initialize() calls.
+    this.clearResolverState();
     const sources = cnsiGuids.map(guid => new CnsiAppsSource(guid, this.http));
     this.orchestrator = new MergeOrchestrator<StApp>(sources);
     this.view = new ViewPipeline<StApp>(
@@ -297,6 +332,11 @@ export class CfAppsSignalConfigService {
     // to guid for that CF's items, which is preferable to blocking the
     // whole app-wall on a slow or broken CF.
     void this.loadNames(cnsiGuids);
+    // Wire the visible-row resolver: every time view.pagedItems changes
+    // (page navigation, sort, filter), collect the (cnsi, orgGuid) and
+    // (cnsi, spaceGuid) pairs that aren't already resolved (catalog or
+    // overlay) and aren't already in flight, then guid-batch fetch them.
+    this.startVisibleRowResolver();
   }
 
   // Per-space tab variant. Pins the scope to one CF + one space; the
@@ -315,14 +355,30 @@ export class CfAppsSignalConfigService {
     this._lockedSpaceGuid = '';
   }
 
+  // Bumped on every initialize() so any in-flight name-resolution chunk
+  // belonging to a previous mount can detect it's stale (its captured
+  // generation no longer matches) and skip the merge step. Without this,
+  // a navigate-away-then-back during a slow CF's drain would let the
+  // stale chunk's spaces leak into the new mount's overlay.
+  private _initGen = 0;
+
+  // Org chunk size: 20 keeps URL length comfortably under common 4-8K
+  // limits (20 × 36-char UUID + commas ≈ 740 chars), each chunk's
+  // failure scope small, and the total request count tractable on CFs
+  // with hundreds of orgs.
+  private static readonly ORGS_PER_SPACES_CHUNK = 20;
+  // Per-CNSI concurrency cap: 3 chunks in flight × 2 CFs = 6 max in
+  // flight, well under browser per-host connection limits and the gorouter
+  // budget. Higher concurrency wouldn't help — CAPI is the bottleneck —
+  // and risks compounding 504s under load.
+  private static readonly SPACES_CHUNK_CONCURRENCY = 3;
+
   private async loadNames(cnsiGuids: readonly string[]): Promise<void> {
-    // Use the bounded ?per_page passthrough so each CF's name fetch is one
-    // CAPI page (not a full drain). Slow CFs would otherwise hit gorouter's
-    // 30 s ceiling on the unbounded /v3/orgs and /v3/spaces drains, surfacing
-    // as 504s when the user navigates away mid-fetch. 500 covers most CFs in
-    // a single page; if a CF has more rows the dropdown shows the first 500
-    // — accepted trade-off pending a guid-batch lookup pattern keyed on
-    // currently-visible app rows.
+    const gen = ++this._initGen;
+    // Orgs are <500 in practice so a single bounded page is enough. Spaces
+    // are the problem (CFs with thousands → page 1 misses anything past
+    // #500 → "—" in the CF/Org/Space cell), so spaces are fetched per-org-
+    // batch below once orgs are known.
     const namePerPage = 500;
     const fetchOrgs = (guid: string) =>
       firstValueFrom(this.http.get<StOrgsResponse>(
@@ -330,25 +386,279 @@ export class CfAppsSignalConfigService {
       ))
         .then(r => ({ guid, orgs: r.resources as StOrg[] }))
         .catch(() => ({ guid, orgs: [] as StOrg[] }));
-    const fetchSpaces = (guid: string) =>
-      firstValueFrom(this.http.get<StSpacesResponse>(
-        `/pp/v1/cf/spaces/${guid}?per_page=${namePerPage}&page=1`,
-      ))
-        .then(r => ({ guid, spaces: r.resources as StSpace[] }))
-        .catch(() => ({ guid, spaces: [] as StSpace[] }));
 
-    const [orgResults, spaceResults] = await Promise.all([
-      Promise.all(cnsiGuids.map(fetchOrgs)),
-      Promise.all(cnsiGuids.map(fetchSpaces)),
-    ]);
+    const orgResults = await Promise.all(cnsiGuids.map(fetchOrgs));
+    if (gen !== this._initGen) return;
 
     const orgMap = new Map<string, StOrg[]>();
     for (const { guid, orgs } of orgResults) orgMap.set(guid, orgs);
     this._orgsByCnsi.set(orgMap);
 
-    const spaceMap = new Map<string, StSpace[]>();
-    for (const { guid, spaces } of spaceResults) spaceMap.set(guid, spaces);
-    this._spacesByCnsi.set(spaceMap);
+    // Reset the spaces map up-front so a re-initialize() doesn't render
+    // last mount's stale list while the new drain is still in flight.
+    this._spacesByCnsi.set(new Map());
+
+    // Per CNSI: order orgs priority-first (orgs holding apps on the first
+    // ~2 pages of the wall come first so visible "—"s flip immediately),
+    // then chunk into ORGS_PER_SPACES_CHUNK groups, then drain with the
+    // priority chunk awaited and the rest fired-and-forget. The priority
+    // chunk's RTT is bounded (≤20 orgs of spaces) so awaiting it yields
+    // a brief, predictable initial-mount delay in exchange for visible
+    // names on first paint.
+    const drainPromises = cnsiGuids.map(cnsi => {
+      const orgs = orgMap.get(cnsi) ?? [];
+      const orderedOrgGuids = this.orderOrgsForCnsi(cnsi, orgs);
+      return this.drainSpacesByOrgChunks(cnsi, orderedOrgGuids, gen);
+    });
+    // Each drain awaits its own priority chunk internally before
+    // returning. A failure of one CF's drain shouldn't block the others,
+    // hence allSettled.
+    await Promise.allSettled(drainPromises);
+  }
+
+  // Returns the cnsi's orgs ordered with "priority" orgs first (those
+  // whose guids appear in the first pageSize() * 2 entries of allItems
+  // for this cnsi) followed by the rest. Priority orgs only matter while
+  // the apps catalog has loaded enough rows to peek at — if allItems is
+  // still empty (initial mount race), the natural orderMap order falls
+  // back gracefully.
+  private orderOrgsForCnsi(cnsi: string, orgs: readonly StOrg[]): string[] {
+    if (!orgs.length) return [];
+    const priority = new Set<string>();
+    if (this.orchestrator) {
+      const all = this.orchestrator.allItems();
+      const peekCount = Math.max(this.pageSize() * 2, 0);
+      let seen = 0;
+      for (const app of all) {
+        if (seen >= peekCount) break;
+        if (app.cnsiGuid !== cnsi) continue;
+        if (app.orgGuid) priority.add(app.orgGuid);
+        seen++;
+      }
+    }
+    const head: string[] = [];
+    const tail: string[] = [];
+    for (const o of orgs) {
+      if (priority.has(o.guid)) head.push(o.guid);
+      else tail.push(o.guid);
+    }
+    return [...head, ...tail];
+  }
+
+  // Drains `/pp/v1/cf/spaces/{cnsi}?organization_guids=g1,g2,...` for
+  // the given priority-ordered orgs in chunks of ORGS_PER_SPACES_CHUNK,
+  // bounded to SPACES_CHUNK_CONCURRENCY in flight. Awaits the FIRST
+  // chunk so callers (loadNames → initialize) can synchronise the
+  // initial render against priority results landing; the remaining
+  // chunks are fire-and-forget. Pagination per chunk is handled inline
+  // (most chunks will fit one page since 20 orgs × ≤500 spaces is rare).
+  private async drainSpacesByOrgChunks(cnsi: string, orderedOrgGuids: readonly string[], gen: number): Promise<void> {
+    if (!orderedOrgGuids.length) return;
+    const chunkSize = CfAppsSignalConfigService.ORGS_PER_SPACES_CHUNK;
+    const chunks: string[][] = [];
+    for (let i = 0; i < orderedOrgGuids.length; i += chunkSize) {
+      chunks.push(orderedOrgGuids.slice(i, i + chunkSize));
+    }
+
+    const runChunk = async (chunk: string[]): Promise<void> => {
+      let page = 1;
+      const perPage = 500;
+      // Per-chunk pagination loop: break when no `next` link. Most chunks
+      // exit after one iteration on real CFs.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const url = `/pp/v1/cf/spaces/${cnsi}?organization_guids=${chunk.join(',')}&per_page=${perPage}&page=${page}`;
+        const resp = await firstValueFrom(this.http.get<StSpacesResponse>(url))
+          .catch((): StSpacesResponse | null => null);
+        if (gen !== this._initGen) return;
+        const resources = (resp?.resources ?? []) as StSpace[];
+        if (resources.length) {
+          this._spacesByCnsi.update(curr => {
+            const next = new Map(curr);
+            const existing = next.get(cnsi) ?? [];
+            // Dedup by guid in case pagination overlaps with a previous
+            // chunk's result for the same org (shouldn't happen with
+            // disjoint org chunks, but cheap insurance).
+            const seen = new Set(existing.map(s => s.guid));
+            const merged = existing.slice();
+            for (const s of resources) {
+              if (s.guid && !seen.has(s.guid)) {
+                merged.push(s);
+                seen.add(s.guid);
+              }
+            }
+            next.set(cnsi, merged);
+            return next;
+          });
+        }
+        const nextLink = (resp as unknown as { pagination?: { next?: unknown } } | null)?.pagination?.next;
+        if (!nextLink) return;
+        page++;
+      }
+    };
+
+    // Await the first (priority) chunk before returning so the caller
+    // can rely on priority orgs being in _spacesByCnsi when initialize
+    // resolves. Remaining chunks queue with a concurrency cap and run
+    // in the background.
+    await runChunk(chunks[0]);
+
+    const remaining = chunks.slice(1);
+    if (!remaining.length) return;
+    const cap = CfAppsSignalConfigService.SPACES_CHUNK_CONCURRENCY;
+    // Simple worker-pool drain. `cursor` is the shared index into
+    // `remaining`; up to `cap` workers each pull-and-run sequentially.
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      while (cursor < remaining.length) {
+        if (gen !== this._initGen) return;
+        const idx = cursor++;
+        await runChunk(remaining[idx]);
+      }
+    };
+    const workerCount = Math.min(cap, remaining.length);
+    // Don't await — let the wall paint immediately; chunks merge into
+    // _spacesByCnsi as they land and the spaceNames computed signal
+    // pushes through to the cell renderer.
+    const workers: Promise<void>[] = [];
+    for (let i = 0; i < workerCount; i++) workers.push(worker());
+    void Promise.allSettled(workers);
+  }
+
+  // Resets the visible-row resolver overlay + dedup state. Called from
+  // initialize() so a navigation re-fetches any guid that needs resolving
+  // (catches the rename / replace case — see resolverInFlight comment for
+  // the staleness window inside one mount).
+  private clearResolverState(): void {
+    this._resolvedOrgsByCnsi.set(new Map());
+    this._resolvedSpacesByCnsi.set(new Map());
+    this.resolverInFlight.clear();
+    this.resolverAttempted.clear();
+  }
+
+  // Watches view.pagedItems for (cnsi, orgGuid) and (cnsi, spaceGuid)
+  // pairs that aren't already resolved. Fetches missing names via
+  // /pp/v1/cf/orgs/{cnsi}?guids=... and /pp/v1/cf/spaces/{cnsi}?guids=...
+  // batched per CNSI, capped at GUIDS_PER_BATCH per request to keep URLs
+  // under reasonable browser/server limits. Bounded by visible row count
+  // per page (~25-100), so it can't time out on large CFs the way the
+  // original bulk-drain fetch did.
+  //
+  // Idempotent: in-flight + already-attempted guid keys (cnsi:guid) are
+  // tracked to dedupe rapid pagedItems changes (page navigation, filter,
+  // sort). `attempted` retains keys after success/failure so we don't
+  // refetch every effect tick — the next initialize() resets the set.
+  private resolverEffect?: EffectRef;
+  private startVisibleRowResolver(): void {
+    // Tear down any previous mount's effect so re-initialize() (e.g. on
+    // route re-entry) doesn't stack one resolver per visit.
+    this.resolverEffect?.destroy();
+    runInInjectionContext(this.injector, () => {
+      this.resolverEffect = effect(() => {
+        const visible = this.view.pagedItems();
+        if (!visible.length) return;
+        // Build per-CNSI sets of org/space guids referenced by visible rows
+        // that aren't already in the catalog, the overlay, in-flight, or
+        // previously attempted in this initialize() cycle.
+        const knownOrgs = this.orgNames();
+        const knownSpaces = this.spaceNames();
+        const orgsToFetch = new Map<string, Set<string>>();
+        const spacesToFetch = new Map<string, Set<string>>();
+        for (const row of visible) {
+          const cnsi = row.cnsiGuid;
+          if (!cnsi) continue;
+          const orgGuid = row.orgGuid;
+          if (orgGuid && !knownOrgs.has(orgGuid)) {
+            const key = `${cnsi}:${orgGuid}`;
+            if (!this.resolverInFlight.has(key) && !this.resolverAttempted.has(key)) {
+              const set = orgsToFetch.get(cnsi) ?? new Set<string>();
+              set.add(orgGuid);
+              orgsToFetch.set(cnsi, set);
+            }
+          }
+          const spaceGuid = row.spaceGuid;
+          if (spaceGuid && !knownSpaces.has(spaceGuid)) {
+            const key = `${cnsi}:${spaceGuid}`;
+            if (!this.resolverInFlight.has(key) && !this.resolverAttempted.has(key)) {
+              const set = spacesToFetch.get(cnsi) ?? new Set<string>();
+              set.add(spaceGuid);
+              spacesToFetch.set(cnsi, set);
+            }
+          }
+        }
+        for (const [cnsi, guids] of orgsToFetch) {
+          void this.resolveOrgs(cnsi, Array.from(guids));
+        }
+        for (const [cnsi, guids] of spacesToFetch) {
+          void this.resolveSpaces(cnsi, Array.from(guids));
+        }
+      });
+    });
+  }
+
+  // URL length safety: 100 guids × 36-char UUID + commas ≈ 3700 chars.
+  // Most servers accept 4-8K URLs, so 100 is a comfortable cap that also
+  // keeps a single failure scope small. Larger sets paginate.
+  private static readonly GUIDS_PER_BATCH = 100;
+
+  private async resolveOrgs(cnsi: string, guids: string[]): Promise<void> {
+    if (!guids.length) return;
+    for (const g of guids) this.resolverInFlight.add(`${cnsi}:${g}`);
+    try {
+      for (let i = 0; i < guids.length; i += CfAppsSignalConfigService.GUIDS_PER_BATCH) {
+        const batch = guids.slice(i, i + CfAppsSignalConfigService.GUIDS_PER_BATCH);
+        const url = `/pp/v1/cf/orgs/${cnsi}?guids=${batch.join(',')}&per_page=${batch.length}`;
+        const resp = await firstValueFrom(this.http.get<StOrgsResponse>(url))
+          .catch((): StOrgsResponse | null => null);
+        if (resp?.resources?.length) {
+          this._resolvedOrgsByCnsi.update(curr => {
+            const next = new Map(curr);
+            const byGuid = new Map(next.get(cnsi) ?? []);
+            for (const o of resp.resources as StOrg[]) {
+              if (o.guid && o.name) byGuid.set(o.guid, o.name);
+            }
+            next.set(cnsi, byGuid);
+            return next;
+          });
+        }
+      }
+    } finally {
+      for (const g of guids) {
+        const key = `${cnsi}:${g}`;
+        this.resolverInFlight.delete(key);
+        this.resolverAttempted.add(key);
+      }
+    }
+  }
+
+  private async resolveSpaces(cnsi: string, guids: string[]): Promise<void> {
+    if (!guids.length) return;
+    for (const g of guids) this.resolverInFlight.add(`${cnsi}:${g}`);
+    try {
+      for (let i = 0; i < guids.length; i += CfAppsSignalConfigService.GUIDS_PER_BATCH) {
+        const batch = guids.slice(i, i + CfAppsSignalConfigService.GUIDS_PER_BATCH);
+        const url = `/pp/v1/cf/spaces/${cnsi}?guids=${batch.join(',')}&per_page=${batch.length}`;
+        const resp = await firstValueFrom(this.http.get<StSpacesResponse>(url))
+          .catch((): StSpacesResponse | null => null);
+        if (resp?.resources?.length) {
+          this._resolvedSpacesByCnsi.update(curr => {
+            const next = new Map(curr);
+            const byGuid = new Map(next.get(cnsi) ?? []);
+            for (const s of resp.resources as StSpace[]) {
+              if (s.guid && s.name) byGuid.set(s.guid, s.name);
+            }
+            next.set(cnsi, byGuid);
+            return next;
+          });
+        }
+      }
+    } finally {
+      for (const g of guids) {
+        const key = `${cnsi}:${g}`;
+        this.resolverInFlight.delete(key);
+        this.resolverAttempted.add(key);
+      }
+    }
   }
 
   async loadAll(): Promise<void> {

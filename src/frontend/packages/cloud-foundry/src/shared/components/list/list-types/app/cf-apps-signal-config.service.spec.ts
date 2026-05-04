@@ -361,4 +361,386 @@ describe('CfAppsSignalConfigService', () => {
     expect(opts).toContainEqual({ label: 'Primary CF', value: 'cf-1' });
     expect(opts).toContainEqual({ label: 'Secondary CF', value: 'cf-2' });
   });
+
+  // --- Visible-row resolver (slice 2 step 10 #4) ----------------------
+  // The resolver fills in space/org names for rows whose guid fell
+  // outside the bounded /pp/v1/cf/orgs|spaces?per_page=500&page=1
+  // catalog page (the original "—" bug for spaces beyond #500).
+
+  // Seeds the merge-orchestrator's first source with the given apps so
+  // view.pagedItems() has rows the resolver can iterate. Bypasses the
+  // private `_items` signal — same approach used in the merge-orchestrator
+  // spec to drive the pipeline without going through CnsiAppsSource.load().
+  function seedApps(svc: CfAppsSignalConfigService, apps: StApp[]) {
+    const src = svc.orchestrator.sources[0] as unknown as { _items: { set: (v: StApp[]) => void } };
+    src._items.set(apps);
+  }
+
+  it('resolver fetches names for visible-row guids that are NOT in the catalog', async () => {
+    // Catalog (per_page=500&page=1) returns NO spaces — simulating the
+    // overflow case where the visible row's space lives beyond page 1.
+    // Resolver hits the same URL with `?guids=...` and gets the missing name.
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?guids=space-overflow')) {
+          return of({
+            resources: [
+              { guid: 'space-overflow', name: 'overflow-space', orgGuid: 'org-1', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1?guids=org-overflow')) {
+          return of({
+            resources: [
+              { guid: 'org-overflow', name: 'overflow-org', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        // Catalog fetches return empty (overflow case).
+        return of({ resources: [], pagination: {} });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    seedApps(svc, [{
+      guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cnsi-1',
+      orgGuid: 'org-overflow', spaceGuid: 'space-overflow',
+      instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp]);
+    TestBed.tick();
+    // Allow the async resolver chain to drain.
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    TestBed.tick();
+
+    expect(svc.spaceNames().get('space-overflow')).toBe('overflow-space');
+    expect(svc.orgNames().get('org-overflow')).toBe('overflow-org');
+  });
+
+  it('resolver does NOT re-fetch guids already in the catalog', async () => {
+    const calls: string[] = [];
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        calls.push(url);
+        // The org-batched spaces drain is the new catalog source — answer
+        // its `?organization_guids=...` request with the known space so
+        // the visible-row resolver finds it pre-populated and skips its
+        // own `?guids=...` lookup.
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?organization_guids=')) {
+          return of({
+            resources: [
+              { guid: 'space-known', name: 'known', orgGuid: 'org-known', cnsiGuid: 'cnsi-1' },
+            ],
+            pagination: { next: null },
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1') && !/[?&]guids=/.test(url)) {
+          return of({
+            resources: [
+              { guid: 'org-known', name: 'known-org', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        return of({ resources: [], pagination: {} });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    // Wait for orgs catalog → org-batched spaces drain to populate the
+    // catalog signals.
+    for (let i = 0; i < 8; i++) { await Promise.resolve(); TestBed.tick(); }
+    seedApps(svc, [{
+      guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cnsi-1',
+      orgGuid: 'org-known', spaceGuid: 'space-known',
+      instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp]);
+    TestBed.tick();
+    for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
+
+    // The visible-row `?guids=...` resolver path must not have fired —
+    // the catalog (orgs page-1 + org-batched spaces drain) already
+    // resolved both names. Match exactly `?guids=` / `&guids=` to
+    // exclude the `?organization_guids=` catalog drain.
+    const resolverCalls = calls.filter(u => /[?&]guids=/.test(u));
+    expect(resolverCalls).toEqual([]);
+  });
+
+  it('resolver dedupes concurrent triggers for the same guid', async () => {
+    let spaceGuidCalls = 0;
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.includes('/pp/v1/cf/spaces/cnsi-1') && url.includes('guids=')) {
+          spaceGuidCalls++;
+          return of({
+            resources: [
+              { guid: 'space-x', name: 'x-space', orgGuid: 'o', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        return of({ resources: [], pagination: {} });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    const row = {
+      guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cnsi-1',
+      orgGuid: 'o', spaceGuid: 'space-x',
+      instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp;
+    // Trigger the effect three times by re-seeding back-to-back.
+    seedApps(svc, [row]);
+    TestBed.tick();
+    seedApps(svc, [row]);
+    TestBed.tick();
+    seedApps(svc, [row]);
+    TestBed.tick();
+    await Promise.resolve();
+    await Promise.resolve();
+    TestBed.tick();
+    expect(spaceGuidCalls).toBe(1);
+  });
+
+  it('resolver issues no fetch when there are no visible rows', async () => {
+    const httpMock = {
+      get: vi.fn(() => of({ resources: [], pagination: {} })),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    await Promise.resolve();
+    await Promise.resolve();
+    TestBed.tick();
+    const guidCalls = (httpMock.get as ReturnType<typeof vi.fn>).mock.calls.filter(
+      ([u]) => typeof u === 'string' && u.includes('guids='),
+    );
+    expect(guidCalls.length).toBe(0);
+  });
+
+  it('resolver overlay merges into spaceNames/orgNames; catalog wins on duplicates', async () => {
+    // Catalog returns name "from-catalog" for space-dup. The resolver,
+    // even if it ran, wouldn't fetch space-dup because it's already in
+    // the catalog. Verify catalog name surfaces.
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        // The bulk-catalog path is now the org-batched drain. Match both
+        // the legacy `?per_page=...&page=1` shape (no longer issued) and
+        // the new `?organization_guids=...` shape.
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1') && !/[?&]guids=/.test(url)) {
+          return of({
+            resources: [{ guid: 'space-dup', name: 'from-catalog', orgGuid: 'o', cnsiGuid: 'cnsi-1' }],
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1') && !/[?&]guids=/.test(url)) {
+          return of({
+            resources: [{ guid: 'o', name: 'org-o', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' }],
+          });
+        }
+        return of({ resources: [], pagination: {} });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    for (let i = 0; i < 6; i++) { await Promise.resolve(); TestBed.tick(); }
+    expect(svc.spaceNames().get('space-dup')).toBe('from-catalog');
+  });
+
+  // --- Org-batched space-name resolver (slice 2 step 10 #4) ---------
+  // The original bulk fetch (`/pp/v1/cf/spaces/{cnsi}?per_page=500&page=1`)
+  // missed any space beyond the first 500 → "—" in the App Wall column.
+  // The new resolver fetches spaces in priority-ordered org chunks of
+  // ORGS_PER_SPACES_CHUNK with SPACES_CHUNK_CONCURRENCY in flight per CF.
+
+  function spacesResp(spaces: Array<{ guid: string; name: string; orgGuid?: string }>) {
+    return of({
+      resources: spaces.map(s => ({
+        guid: s.guid, name: s.name, orgGuid: s.orgGuid ?? 'org-x', cnsiGuid: 'cnsi-1',
+        createdAt: '', updatedAt: '',
+      })),
+      pagination: { totalResults: spaces.length, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
+    });
+  }
+
+  it('priority orgs (those holding apps on the first ~2 pages) come first in the chunk order', async () => {
+    // Build 30+ orgs so priority orgs visibly precede tail orgs in the
+    // very first chunk. With chunk size 20, having 30 orgs splits into
+    // [priority...tail-fillers, more-tail]; we assert the head of chunk-0
+    // contains the priority orgs and tail orgs follow.
+    const allOrgGuids = Array.from({ length: 30 }, (_, i) => `org-${String(i).padStart(2,'0')}`);
+    // Visible apps reference orgs 25, 26, 27 — the LAST three by alphabetical
+    // catalog order, so without priority ordering they'd land in chunk 1, not
+    // chunk 0. With priority ordering they MUST appear at the head of chunk 0.
+    const priorityOrgs = ['org-25', 'org-26', 'org-27'];
+    const apps: StApp[] = priorityOrgs.flatMap(o =>
+      Array.from({ length: 8 }, (_, i) => ({
+        guid: `${o}-app-${i}`, name: `${o}-app-${i}`, state: 'STARTED', cnsiGuid: 'cnsi-1',
+        orgGuid: o, spaceGuid: `${o}-sp-${i}`, instances: 1, routes: [], createdAt: '', updatedAt: '',
+      } as StApp)),
+    );
+
+    const spacesUrls: string[] = [];
+    let orgsResolveSubject: Subject<unknown> | null = null;
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1')) {
+          // Hold the orgs response open so the test can seed apps into the
+          // orchestrator BEFORE loadNames computes the priority set. This
+          // mirrors the realistic order: orgs catalog races the apps load,
+          // and the apps load tends to win for slow CFs because /v3/orgs
+          // is filtered by user-permission joins.
+          orgsResolveSubject = new Subject<unknown>();
+          return orgsResolveSubject.asObservable();
+        }
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?organization_guids=')) {
+          spacesUrls.push(url);
+          return spacesResp([]);
+        }
+        return of({ resources: [], pagination: { next: null } });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+
+    svc.initialize(['cnsi-1']);
+    seedApps(svc, apps);
+    // Now release the orgs catalog so loadNames computes priority + drains.
+    expect(orgsResolveSubject).not.toBeNull();
+    orgsResolveSubject!.next({
+      resources: allOrgGuids.map(g => ({ guid: g, name: g, status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' })),
+    });
+    orgsResolveSubject!.complete();
+    for (let i = 0; i < 8; i++) { await Promise.resolve(); TestBed.tick(); }
+
+    expect(spacesUrls.length).toBeGreaterThan(0);
+    const firstChunk = spacesUrls[0].match(/organization_guids=([^&]+)/)![1].split(',');
+    // Chunk size 20: priority head (3) + tail fillers (17) = 20.
+    expect(firstChunk.length).toBe(20);
+    // Priority orgs must occupy the head of chunk 0.
+    expect(firstChunk.slice(0, 3).sort()).toEqual([...priorityOrgs].sort());
+  });
+
+  it('chunks remaining orgs into ORGS_PER_SPACES_CHUNK groups after the priority chunk', async () => {
+    // 45 orgs, no visible apps (priority set empty) → all orgs are tail
+    // → expect ceil(45/20) = 3 chunks total, all of size ≤ 20.
+    const orgList = Array.from({ length: 45 }, (_, i) => `org-${String(i).padStart(2,'0')}`);
+    const spacesUrls: string[] = [];
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1')) {
+          return of({
+            resources: orgList.map(g => ({ guid: g, name: g, status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' })),
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?organization_guids=')) {
+          spacesUrls.push(url);
+          return spacesResp([]);
+        }
+        return of({ resources: [], pagination: { next: null } });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    for (let i = 0; i < 12; i++) { await Promise.resolve(); TestBed.tick(); }
+
+    expect(spacesUrls.length).toBe(3);
+    for (const u of spacesUrls) {
+      const guids = u.match(/organization_guids=([^&]+)/)![1].split(',');
+      expect(guids.length).toBeLessThanOrEqual(20);
+    }
+  });
+
+  it('caps concurrent in-flight chunks at SPACES_CHUNK_CONCURRENCY per CNSI', async () => {
+    // 9 chunks (180 orgs) — 1 priority + 8 remaining → with cap 3 only
+    // 3 should be in flight at any given moment after the priority lands.
+    const orgList = Array.from({ length: 180 }, (_, i) => `o${String(i).padStart(3,'0')}`);
+    let inFlight = 0;
+    let peakInFlight = 0;
+    let priorityResolved = false;
+    const subjects: Array<Subject<unknown>> = [];
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1')) {
+          return of({
+            resources: orgList.map(g => ({ guid: g, name: g, status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' })),
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?organization_guids=')) {
+          inFlight++;
+          if (priorityResolved) peakInFlight = Math.max(peakInFlight, inFlight);
+          const subj = new Subject<unknown>();
+          subjects.push(subj);
+          return subj.asObservable();
+        }
+        return of({ resources: [], pagination: { next: null } });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    // Drain microtasks until the priority chunk request is open.
+    for (let i = 0; i < 6; i++) { await Promise.resolve(); TestBed.tick(); }
+    expect(subjects.length).toBe(1); // only priority is in flight before resolution
+
+    // Resolve the priority request → background workers spin up (cap 3).
+    subjects[0].next({ resources: [], pagination: { next: null } });
+    subjects[0].complete();
+    inFlight--;
+    priorityResolved = true;
+    for (let i = 0; i < 6; i++) { await Promise.resolve(); TestBed.tick(); }
+    // 3 background workers should now each be in flight on a chunk.
+    expect(peakInFlight).toBeLessThanOrEqual(3);
+    expect(subjects.length - 1).toBeLessThanOrEqual(3);
+
+    // Drain the rest so vitest doesn't hang on dangling subscriptions.
+    for (let i = 1; i < subjects.length; i++) {
+      subjects[i].next({ resources: [], pagination: { next: null } });
+      subjects[i].complete();
+    }
+  });
+
+  it('reentrancy: a second initialize() while drains are in flight skips merging stale chunks', async () => {
+    const subjects: Array<Subject<unknown>> = [];
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1')) {
+          return of({
+            resources: [{ guid: 'org-stale', name: 'stale', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' }],
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?organization_guids=')) {
+          const subj = new Subject<unknown>();
+          subjects.push(subj);
+          return subj.asObservable();
+        }
+        return of({ resources: [], pagination: { next: null } });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
+    expect(subjects.length).toBe(1);
+
+    // Second initialize() bumps the generation; the still-pending gen-1
+    // chunk must NOT merge into _spacesByCnsi when it eventually resolves.
+    svc.initialize(['cnsi-1']);
+    for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
+
+    // Resolve the stale request with a space that would otherwise leak in.
+    subjects[0].next({
+      resources: [{ guid: 'space-stale', name: 'stale-space', orgGuid: 'org-stale', cnsiGuid: 'cnsi-1' }],
+      pagination: { next: null },
+    });
+    subjects[0].complete();
+    for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
+
+    // Stale chunk's merge was skipped — the new generation's _spacesByCnsi
+    // does not contain space-stale.
+    expect(svc.spaceNames().get('space-stale')).toBeUndefined();
+  });
 });

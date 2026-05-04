@@ -634,3 +634,76 @@ func TestGetNativeOrgSpaces_CountsFastPath(t *testing.T) {
 	assert.Equal(t, 23, resp.TotalResults)
 	assert.Empty(t, resp.Resources)
 }
+
+// TestGetNativeSpaces_OrganizationGuidsFilter verifies the spaces handler
+// forwards ?organization_guids=g1,g2 verbatim as the V3 filter — the
+// transport piece of the App Wall org-batched name resolver. Skipping
+// per-space app/route enrichment is implicit (the resolver only needs
+// names) so the test asserts no /v3/apps or /v3/routes traffic happened.
+func TestGetNativeSpaces_OrganizationGuidsFilter(t *testing.T) {
+	var spacesQuery url.Values
+	var sawApps, sawRoutes bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/spaces":
+			spacesQuery = r.URL.Query()
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "sp-a", "name": "alpha",
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+					},
+					{
+						"guid": "sp-b", "name": "beta",
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-2"}},
+						},
+					},
+				},
+			})
+		case "/v3/apps":
+			sawApps = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		case "/v3/routes":
+			sawRoutes = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1?organization_guids=org-1,org-2&per_page=500&page=1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeSpaces(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "org-1,org-2", spacesQuery.Get("organization_guids"))
+	assert.False(t, sawApps, "name-resolution path must skip app-count enrichment")
+	assert.False(t, sawRoutes, "name-resolution path must skip route-count enrichment")
+
+	var resp StratosPagedResponse[StSpace]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Len(t, resp.Resources, 2)
+	assert.Equal(t, "sp-a", resp.Resources[0].GUID)
+	assert.Equal(t, "sp-b", resp.Resources[1].GUID)
+}

@@ -70,11 +70,27 @@ function makeAppsStub() {
       await new Promise<void>((r) => resolvers.push(r));
     });
   }
+  // Stub the wave-1 orchestrator surface used by the post-delete row-evict
+  // wire-in. Tests assert removeRow is called on success and not on failure.
+  const removeRow = vi.fn();
   return {
     startApp: makeAction('startApp'),
     stopApp: makeAction('stopApp'),
     restartApp: makeAction('restartApp'),
     restageApp: makeAction('restageApp'),
+    // deleteWithCleanup orchestrates routes/bindings/app deletes serially.
+    // Each is a thenable; tests resolve them via _resolveAll.
+    deleteApp: vi.fn(async (_cnsi: string, _app: string) => {
+      await new Promise<void>((r) => resolvers.push(r));
+    }),
+    deleteRoute: vi.fn(async (_cnsi: string, _routeGuid: string) => {
+      await new Promise<void>((r) => resolvers.push(r));
+    }),
+    deleteServiceBinding: vi.fn(async (_cnsi: string, _bindingGuid: string) => {
+      await new Promise<void>((r) => resolvers.push(r));
+    }),
+    orchestrator: { removeRow },
+    _removeRow: removeRow,
     _resolveAll: () => { resolvers.splice(0).forEach(r => r()); },
   };
 }
@@ -135,7 +151,10 @@ describe('AppApplicationActionsService', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
-        provideRouter([]),
+        // Register a stub /applications route so deleteWithCleanup's
+        // post-success router.navigate(['/applications']) doesn't throw
+        // NG04002 (no matching route) on the unhandled-rejection channel.
+        provideRouter([{ path: 'applications', children: [] }]),
         AppApplicationActionsService,
         AppLifecycleStateService,
         { provide: ApplicationService, useValue: makeAppServiceStub() },
@@ -412,5 +431,45 @@ describe('AppApplicationActionsService', () => {
 
   it('progress() is null when idle (before any action)', () => {
     expect(svc.progress()).toBeNull();
+  });
+
+  // -------------------------------------------------------------------------
+  // Delete success path: orchestrator.removeRow eviction (slice-2 sweep #3)
+  // -------------------------------------------------------------------------
+
+  it('delete success path: calls orchestrator.removeRow with (cfGuid, appGuid)', async () => {
+    void svc.deleteWithCleanup([], []);
+    await tick();
+
+    expect(svc.verb()).toBe('DELETING');
+    expect(appsStub._removeRow).not.toHaveBeenCalled();
+
+    appsStub._resolveAll();
+    await tick(8);
+
+    expect(appsStub._removeRow).toHaveBeenCalledTimes(1);
+    expect(appsStub._removeRow).toHaveBeenCalledWith('cf-1', 'app-1');
+  });
+
+  it('delete failure path: does NOT call orchestrator.removeRow', async () => {
+    appsStub.deleteApp.mockImplementationOnce(async () => {
+      throw { job: { errors: [{ code: 'CF-AppDeleteFailed', message: 'boom' }] } };
+    });
+
+    void svc.deleteWithCleanup([], []);
+    await tick(8);
+
+    const log = svc.log();
+    expect(log.find(e => e.event === 'fail')).toBeDefined();
+    expect(appsStub._removeRow).not.toHaveBeenCalled();
+  });
+
+  it('non-delete success paths: do NOT call orchestrator.removeRow', async () => {
+    void svc.restage();
+    await tick();
+    appsStub._resolveAll();
+    await tick(8);
+
+    expect(appsStub._removeRow).not.toHaveBeenCalled();
   });
 });

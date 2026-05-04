@@ -290,6 +290,19 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 
 	perPage, page, present := parsePerPageAndPage(ctx)
 	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+
+	// Optional guid-batch filter: ?guids=g1,g2,... forwards as
+	// /v3/organizations?guids=g1,g2 — used by the App Wall visible-row name
+	// resolver (slice 2 step 10 #4) to fill in org names for guids that
+	// fell outside the bounded catalog page. Bounded by visible row count
+	// (~25-100), so it can't time out the way an unbounded drain would.
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+		}
+	}
+
 	raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
 	if lerr != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
@@ -417,6 +430,13 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 //   - (default): single CAPI page passthrough, Stratos paged envelope.
 //     Caller's per_page/page forward verbatim to /v3/spaces; absent, V3
 //     server defaults apply.
+//
+// Optional filters:
+//   - ?guids=g1,g2,...               name-resolution lookup by space guid
+//   - ?organization_guids=g1,g2,...  name-resolution drain scoped to N orgs
+//
+// Either filter triggers the enrichment-skip path (no per-space app/route
+// counts) since the App Wall name resolver only needs name → guid mapping.
 func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error) {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	rows := 0
@@ -462,6 +482,38 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 	perPage, page, present := parsePerPageAndPage(ctx)
 	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
+	// Optional guid-batch filter: ?guids=g1,g2,... forwards as
+	// /v3/spaces?guids=g1,g2 — used by the App Wall visible-row name
+	// resolver (slice 2 step 10 #4) to fill in space names for guids that
+	// fell outside the bounded catalog page. Bounded by visible row count
+	// (~25-100), so it can't time out the way an unbounded drain would.
+	// When present we skip the per-space app/route count enrichment: the
+	// resolver only needs name → guid mapping, and skipping the two extra
+	// filtered /v3/apps + /v3/routes calls keeps the lookup cheap.
+	//
+	// Optional org-batch filter: ?organization_guids=g1,g2,... forwards as
+	// /v3/spaces?organization_guids=g1,g2 — used by the App Wall name
+	// resolver to drain spaces in priority-ordered org chunks instead of
+	// one unbounded /v3/spaces page. Bounds each request to "spaces of N
+	// orgs" so a CF with thousands of spaces never trips gorouter's 30 s
+	// ceiling. Same enrichment-skip rationale as the guids filter: the
+	// caller only needs name → guid mapping.
+	guidsFilter := ""
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+			guidsFilter = rawGuids
+		}
+	}
+	if rawOrgGuids := ctx.QueryParam("organization_guids"); rawOrgGuids != "" {
+		orgGuids := splitNonEmpty(rawOrgGuids, ",")
+		if len(orgGuids) > 0 {
+			params = params.WithFilter("organization_guids", orgGuids...)
+			guidsFilter = rawOrgGuids
+		}
+	}
+
 	pStart := time.Now()
 	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
 	pRows, pTotal := -1, -1
@@ -475,25 +527,31 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		return err
 	}
 
-	// Enrich each space with per-space app + route counts via two filtered
-	// /v3/apps and /v3/routes calls (one each, batched on space_guids).
-	// Lazy-non-fatal: enrichment failures degrade silently to count=0 —
-	// same default-path policy as getNativeApps' process / space joins.
-	spaceGUIDs := make([]string, 0, len(raw.Resources))
-	for _, r := range raw.Resources {
-		if r.GUID != "" {
-			spaceGUIDs = append(spaceGUIDs, r.GUID)
-		}
-	}
-	appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
-	routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
-
 	spaces := make([]StSpace, 0, len(raw.Resources))
-	for _, r := range raw.Resources {
-		s := toStSpace(r)
-		s.AppCount = appCounts[r.GUID]
-		s.RouteCount = routeCounts[r.GUID]
-		spaces = append(spaces, s)
+	if guidsFilter != "" {
+		// Name-resolution lookup path: skip enrichment.
+		for _, r := range raw.Resources {
+			spaces = append(spaces, toStSpace(r))
+		}
+	} else {
+		// Enrich each space with per-space app + route counts via two filtered
+		// /v3/apps and /v3/routes calls (one each, batched on space_guids).
+		// Lazy-non-fatal: enrichment failures degrade silently to count=0 —
+		// same default-path policy as getNativeApps' process / space joins.
+		spaceGUIDs := make([]string, 0, len(raw.Resources))
+		for _, r := range raw.Resources {
+			if r.GUID != "" {
+				spaceGUIDs = append(spaceGUIDs, r.GUID)
+			}
+		}
+		appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
+		routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
+		for _, r := range raw.Resources {
+			s := toStSpace(r)
+			s.AppCount = appCounts[r.GUID]
+			s.RouteCount = routeCounts[r.GUID]
+			spaces = append(spaces, s)
+		}
 	}
 	rows = len(spaces)
 
