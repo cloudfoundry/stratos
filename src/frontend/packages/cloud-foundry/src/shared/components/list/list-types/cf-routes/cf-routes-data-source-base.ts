@@ -93,7 +93,7 @@ export abstract class CfRoutesDataSourceBase extends CFListDataSource<APIResourc
           // tracked for signal-migration in task #17 (FWT-…); this keeps the
           // tab usable until that lands.
           if (!route.entity || !route.entity.domain || !route.entity.domain.entity) {
-            return route;
+            return route as APIResource<ListCfRoute>;
           }
           const entity: ListCfRoute = {
             ...route.entity,
