@@ -191,14 +191,22 @@ describe('AppDetailDataService', () => {
   // url() derived signal
   // -------------------------------------------------------------------------
 
-  it('url() returns first route url from appDetail', () => {
+  it('url() prepends https:// to bare CF v3 route url so it is a clickable absolute URL', () => {
     svc['_appDetail'].set(MOCK_APP_DETAIL);
-    expect(svc.url()).toBe('my-app.example.com');
+    expect(svc.url()).toBe('https://my-app.example.com');
   });
 
   it('url() returns null when no routes', () => {
     svc['_appDetail'].set({ ...MOCK_APP_DETAIL, app: { ...MOCK_APP_DETAIL.app, routes: [] } });
     expect(svc.url()).toBeNull();
+  });
+
+  it('url() leaves a fully-qualified URL alone (does not double-prepend)', () => {
+    svc['_appDetail'].set({
+      ...MOCK_APP_DETAIL,
+      app: { ...MOCK_APP_DETAIL.app, routes: [{ guid: 'r-fq', url: 'http://insecure.example.com' }] },
+    });
+    expect(svc.url()).toBe('http://insecure.example.com');
   });
 
   // -------------------------------------------------------------------------

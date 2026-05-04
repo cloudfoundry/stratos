@@ -156,16 +156,25 @@ export class AppDetailDataService {
   readonly running = computed(() => this._appDetail()?.app.state === 'STARTED');
 
   /**
-   * First route URL from the composed StAppDetail. The list-shape
-   * `StAppRoute` carries the rendered URL (CF composes host + domain
-   * server-side) — no per-route port to filter TCP from HTTP, so we
-   * return whatever the first route is. If the app has no routes,
-   * returns null. Slice 2's StRoute carries port; if a future template
-   * needs the TCP filter back, that's the shape to read from.
+   * First route URL from the composed StAppDetail, prepended with the
+   * `https://` scheme so consumers (action-bar Visit button) can use it
+   * directly as an `<a href>`. CF v3's rendered route URL is bare
+   * (`host.domain[/path]` or `domain:port` for TCP) — without a scheme
+   * the browser treats the value as a relative path and navigates back
+   * to Stratos. The list-shape `StAppRoute` doesn't carry a port, so we
+   * can't reliably filter TCP from HTTP here; if the URL already has a
+   * scheme we leave it alone, otherwise we assume HTTPS (modern CF
+   * deployments serve HTTP routes over TLS). Slice 2's StRoute carries
+   * port; if a future template needs the TCP filter back, that's the
+   * shape to read from.
    */
   readonly url = computed((): string | null => {
     const routes = this._appDetail()?.app.routes ?? [];
-    return routes[0]?.url ?? null;
+    const raw = routes[0]?.url;
+    if (!raw) {
+      return null;
+    }
+    return /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
   });
 
   /**
