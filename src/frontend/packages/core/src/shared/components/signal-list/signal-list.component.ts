@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
+import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -23,6 +24,22 @@ export interface SignalListCompoundSegment {
 export interface SignalListFavoriteBinding<T> {
   readonly keys: Signal<ReadonlySet<string>>;
   readonly toggle: (row: T) => void;
+}
+
+// Binding for a `kind: 'gauge'` column. Renders an `<app-usage-gauge>` per
+// row showing a 0..1 fraction as a horizontal bar that turns yellow at
+// `warningAt` and red at `errorAt`. Restores the legacy Memory/Disk/CPU
+// gauges that the V2 instances list rendered via `<app-table-cell-usage>`
+// — kept as text-only when slice-2 first migrated to the signal list, now
+// reinstated as a first-class kind so other usage-style columns (autoscaler
+// metrics, quota cells) can adopt the gauge without bespoke renderers.
+// `value` returns 0..1; `valueText` is an optional override for the label
+// (e.g. "14 / 128 MB" instead of the default percentage).
+export interface SignalListGaugeBinding<T> {
+  readonly value: (row: T) => number;
+  readonly valueText?: (row: T) => string;
+  readonly warningAt?: number;
+  readonly errorAt?: number;
 }
 
 // Binding for a `kind: 'radio'` column. Single-row selection: the
@@ -82,7 +99,7 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions' | 'radio';
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions' | 'radio' | 'gauge';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
@@ -124,6 +141,12 @@ export interface SignalListColumn<T> {
   // dismisses. Card mode treats the kebab identically to the favorite
   // star and lifts it onto the Name row.
   actions?: (row: T) => readonly SignalListRowAction<T>[];
+  // Required when kind === 'gauge'. See SignalListGaugeBinding. The cell
+  // renders an `<app-usage-gauge>` showing the value as a horizontal bar
+  // with optional warning/error color thresholds, plus a label (default:
+  // value formatted as percentage). Restores the legacy V2-instances
+  // Mem/Disk/CPU gauges that slice-2 lost when migrating to plain text.
+  gauge?: SignalListGaugeBinding<T>;
   // Required when kind === 'radio'. See SignalListRadioBinding.
   // The cell renders a single radio input bound to the consumer's
   // selectedKey signal; clicking sets it to the row's key (or unsets
@@ -219,7 +242,7 @@ export interface SignalListConfig<T> {
 @Component({
   selector: 'app-signal-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, UsageGaugeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },

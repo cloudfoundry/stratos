@@ -125,22 +125,42 @@ export class CfAppInstancesSignalConfigService {
       },
       {
         header: 'Memory', key: 'memory',
-        render: (row) => this.utils.usageBytes([
-          row.usage?.mem ?? 0,
-          row.memQuota ?? 0,
-        ]),
-        sortField: (row) => row.usage?.mem ?? 0,
+        kind: 'gauge',
+        gauge: {
+          value: (row) => this.usageFraction(row.usage?.mem, row.memQuota),
+          valueText: (row) => this.utils.usageBytes([row.usage?.mem ?? 0, row.memQuota ?? 0]),
+          warningAt: 0.8,
+          errorAt: 0.9,
+        },
+        // Render-as-string still required for filter/title fallback even
+        // though the cell renders the gauge component, not text.
+        render: (row) => this.utils.usageBytes([row.usage?.mem ?? 0, row.memQuota ?? 0]),
+        sortField: (row) => this.usageFraction(row.usage?.mem, row.memQuota),
       },
       {
         header: 'Disk', key: 'disk',
-        render: (row) => this.utils.usageBytes([
-          row.usage?.disk ?? 0,
-          row.diskQuota ?? 0,
-        ]),
-        sortField: (row) => row.usage?.disk ?? 0,
+        kind: 'gauge',
+        gauge: {
+          value: (row) => this.usageFraction(row.usage?.disk, row.diskQuota),
+          valueText: (row) => this.utils.usageBytes([row.usage?.disk ?? 0, row.diskQuota ?? 0]),
+          warningAt: 0.8,
+          errorAt: 0.9,
+        },
+        render: (row) => this.utils.usageBytes([row.usage?.disk ?? 0, row.diskQuota ?? 0]),
+        sortField: (row) => this.usageFraction(row.usage?.disk, row.diskQuota),
       },
       {
         header: 'CPU', key: 'cpu',
+        kind: 'gauge',
+        gauge: {
+          // CPU usage from CF is already a 0..1 fraction (e.g. 0.0183 for
+          // 1.83%) so no quota division needed. Cap at 1 so the bar
+          // doesn't overflow on noisy >100% readings.
+          value: (row) => Math.min(row.usage?.cpu ?? 0, 1),
+          valueText: (row) => this.utils.percent(row.usage?.cpu ?? 0),
+          warningAt: 0.8,
+          errorAt: 0.9,
+        },
         render: (row) => this.utils.percent(row.usage?.cpu ?? 0),
         sortField: (row) => row.usage?.cpu ?? 0,
       },
@@ -209,5 +229,13 @@ export class CfAppInstancesSignalConfigService {
   // default no-confirm path.
   private async killInstance(index: number, _isThisRow: boolean): Promise<void> {
     await this.actionsService.killInstance(index);
+  }
+
+  // Bytes-of-quota → 0..1 fraction for the Memory/Disk gauges. Returns 0
+  // when the quota is unknown or zero so the bar doesn't render at NaN%
+  // width. Sort uses the same value so ordering matches the visual.
+  private usageFraction(used: number | undefined, quota: number | undefined): number {
+    if (!quota || quota <= 0) return 0;
+    return Math.min(Math.max((used ?? 0) / quota, 0), 1);
   }
 }

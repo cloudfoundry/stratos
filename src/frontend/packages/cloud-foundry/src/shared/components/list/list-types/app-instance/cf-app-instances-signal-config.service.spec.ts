@@ -166,6 +166,46 @@ describe('CfAppInstancesSignalConfigService', () => {
     expect(typeof actionsCol.actions).toBe('function');
   });
 
+  it('Memory/Disk/CPU columns are gauges with 0..1 fractions and 0.8/0.9 thresholds', () => {
+    const { svc } = configure();
+    const cols = svc.buildColumns();
+    const mem = cols.find(c => c.key === 'memory')!;
+    const disk = cols.find(c => c.key === 'disk')!;
+    const cpu = cols.find(c => c.key === 'cpu')!;
+
+    expect(mem.kind).toBe('gauge');
+    expect(disk.kind).toBe('gauge');
+    expect(cpu.kind).toBe('gauge');
+
+    const u = (mem: number, disk: number, cpu: number) =>
+      ({ time: '2026-05-04T00:00:00Z', mem, disk, cpu });
+
+    // Fraction = used/quota for memory + disk, capped to [0,1]
+    expect(mem.gauge!.value(makeStat({ usage: u(64, 0, 0), memQuota: 128, diskQuota: 1024 }))).toBeCloseTo(0.5);
+    expect(disk.gauge!.value(makeStat({ usage: u(0, 256, 0), memQuota: 128, diskQuota: 1024 }))).toBeCloseTo(0.25);
+
+    // CPU usage already arrives as 0..1 from CF; cap protects against >100% spikes
+    expect(cpu.gauge!.value(makeStat({ usage: u(0, 0, 0.42), memQuota: 128, diskQuota: 1024 }))).toBeCloseTo(0.42);
+    expect(cpu.gauge!.value(makeStat({ usage: u(0, 0, 1.5), memQuota: 128, diskQuota: 1024 }))).toBe(1);
+
+    // 0.8 / 0.9 match the legacy <app-table-cell-usage> thresholds.
+    expect(mem.gauge!.warningAt).toBe(0.8);
+    expect(mem.gauge!.errorAt).toBe(0.9);
+    expect(disk.gauge!.warningAt).toBe(0.8);
+    expect(disk.gauge!.errorAt).toBe(0.9);
+    expect(cpu.gauge!.warningAt).toBe(0.8);
+    expect(cpu.gauge!.errorAt).toBe(0.9);
+  });
+
+  it('Memory/Disk gauge value is 0 when quota is missing or zero (avoid NaN bar)', () => {
+    const { svc } = configure();
+    const cols = svc.buildColumns();
+    const mem = cols.find(c => c.key === 'memory')!;
+    const u = { time: '2026-05-04T00:00:00Z', mem: 64, disk: 0, cpu: 0 };
+    expect(mem.gauge!.value(makeStat({ usage: u, memQuota: 0 }))).toBe(0);
+    expect(mem.gauge!.value(makeStat({ usage: u, memQuota: undefined }))).toBe(0);
+  });
+
   // ---------------------------------------------------------------------------
   // Kill row action
   // ---------------------------------------------------------------------------

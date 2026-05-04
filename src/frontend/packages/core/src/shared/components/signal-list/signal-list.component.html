@@ -240,6 +240,18 @@
                       [class.cursor-not-allowed]="isRadioDisabled(col, row)"
                       [class.opacity-40]="isRadioDisabled(col, row)" />
                   </div>
+                } @else if (col.kind === 'gauge' && col.gauge) {
+                  <div class="flex items-center gap-2 text-sm py-0.5" data-test="row-gauge">
+                    <span class="text-content-muted shrink-0">{{ col.header }}</span>
+                    <div class="grow min-w-0">
+                      <app-usage-gauge
+                        [barOnly]="false"
+                        [value]="col.gauge.value(row)"
+                        [valueText]="col.gauge.valueText ? col.gauge.valueText(row) : ''"
+                        [warningAt]="col.gauge.warningAt!"
+                        [errorAt]="col.gauge.errorAt!" />
+                    </div>
+                  </div>
                 } @else if (col.kind === 'compound' && col.compound) {
                   <div class="flex items-start justify-between gap-2 text-sm py-0.5">
                     <span class="text-content-muted shrink-0">{{ col.header }}</span>
@@ -331,9 +343,9 @@
             <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
               @for (col of config.columns; track col.key) {
                 <td class="px-3 py-2 text-sm text-content-text"
-                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio'"
-                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio'"
-                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' ? null : col.render(row)">
+                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'gauge'"
+                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge'"
+                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge' ? null : col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
@@ -428,6 +440,14 @@
                       [class.cursor-pointer]="!isRadioDisabled(col, row)"
                       [class.cursor-not-allowed]="isRadioDisabled(col, row)"
                       [class.opacity-40]="isRadioDisabled(col, row)" />
+                  } @else if (col.kind === 'gauge' && col.gauge) {
+                    <app-usage-gauge
+                      data-test="row-gauge"
+                      [barOnly]="false"
+                      [value]="col.gauge.value(row)"
+                      [valueText]="col.gauge.valueText ? col.gauge.valueText(row) : ''"
+                      [warningAt]="col.gauge.warningAt!"
+                      [errorAt]="col.gauge.errorAt!" />
                   } @else {
                     {{ col.render(row) }}
                   }
