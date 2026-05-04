@@ -516,6 +516,40 @@ export class AppDetailDataService {
     this._routes.set(next);
   }
 
+  /**
+   * Append a freshly-attached route to the local cache without re-fetching.
+   * Called from `AppRouteActionsService` after a successful attach or
+   * create-and-attach. Mutates BOTH route signals so each consumer view
+   * updates synchronously:
+   *
+   *   - `_routes` — drives the per-app Routes tab list (slice 3 read path)
+   *   - `_appDetail.app.routes` — drives the build-tab Routes count
+   *     metadata-item (consumer-audit row)
+   *
+   * Mutating only one would leave the other view stale until the next
+   * full refresh. Idempotent on guid match per signal (no signal tick when
+   * the route is already present). Each signal updates independently so
+   * a partial pre-existing state (route in one signal but not the other)
+   * still converges. No-op on `_appDetail.app.routes` when `_appDetail()`
+   * is null; no-op on `_routes` when `_routes()` is null.
+   */
+  addRoute(route: StRoute): void {
+    this._appDetail.update(detail => {
+      if (!detail) {
+        return detail;
+      }
+      const existing = detail.app.routes ?? [];
+      if (existing.some(r => r.guid === route.guid)) {
+        return detail;
+      }
+      return { ...detail, app: { ...detail.app, routes: [...existing, route] } };
+    });
+    const currentRoutes = this._routes();
+    if (currentRoutes && !currentRoutes.some(r => r.guid === route.guid)) {
+      this._routes.set([...currentRoutes, route]);
+    }
+  }
+
   private async fetchDomains(): Promise<void> {
     const orgGuid = this._org()?.metadata?.guid;
     if (!orgGuid) {

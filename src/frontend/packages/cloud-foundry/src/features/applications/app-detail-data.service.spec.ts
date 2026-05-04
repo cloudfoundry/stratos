@@ -9,7 +9,7 @@ import { AppDetailPrefs } from './app-detail-prefs.service';
 import { AppApplicationActionsService } from '../../shared/services/application-actions.service';
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService } from '../../shared/services/application-state.service';
-import { StAppDetail } from '../../services/endpoint-data/stratos-types';
+import { StAppDetail, StRoute } from '../../services/endpoint-data/stratos-types';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -622,6 +622,137 @@ describe('AppDetailDataService', () => {
 
     expect(svc.routes()).toHaveLength(2);
     expect(svc.routes()!.map(r => r.guid)).toEqual(['r-1', 'r-2']);
+  });
+
+  // -------------------------------------------------------------------------
+  // addRoute() — slice-3.5 mutation hook for attach + create-and-attach
+  // -------------------------------------------------------------------------
+
+  const MOCK_NEW_ROUTE: StRoute = {
+    guid: 'r-new',
+    url: 'new.example.com',
+    host: 'new',
+    path: '',
+    port: undefined,
+    domainGuid: 'd-1',
+    spaceGuid: 'sp-1',
+    cnsiGuid: CNSI,
+    createdAt: '2024-01-03T00:00:00Z',
+    updatedAt: '2024-01-03T00:00:00Z',
+  };
+
+  it('addRoute(stRoute) appends to appDetail().app.routes', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    expect(svc.appDetail()!.app.routes).toHaveLength(1);
+
+    svc.addRoute(MOCK_NEW_ROUTE);
+
+    expect(svc.appDetail()!.app.routes).toHaveLength(2);
+    expect(svc.appDetail()!.app.routes[1].guid).toBe('r-new');
+    expect(svc.appDetail()!.app.routes[1].url).toBe('new.example.com');
+  });
+
+  it('addRoute(stRoute) is idempotent on guid match (no-op, same reference)', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    svc.addRoute(MOCK_NEW_ROUTE);
+    const before = svc.appDetail();
+    expect(before!.app.routes).toHaveLength(2);
+
+    // Second call with the same guid is a no-op — same detail reference
+    // proves no signal write occurred.
+    svc.addRoute(MOCK_NEW_ROUTE);
+    expect(svc.appDetail()).toBe(before);
+    expect(svc.appDetail()!.app.routes).toHaveLength(2);
+  });
+
+  it('addRoute(stRoute) when appDetail is null is a no-op (does not throw)', () => {
+    expect(svc.appDetail()).toBeUndefined();
+    expect(() => svc.addRoute(MOCK_NEW_ROUTE)).not.toThrow();
+    expect(svc.appDetail()).toBeUndefined();
+  });
+
+  it('addRoute(stRoute) preserves other detail fields immutably', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    const before = svc.appDetail()!;
+
+    svc.addRoute(MOCK_NEW_ROUTE);
+
+    const after = svc.appDetail()!;
+    // New top-level + new app objects (immutable update).
+    expect(after).not.toBe(before);
+    expect(after.app).not.toBe(before.app);
+    // Untouched siblings preserved by reference (no copy beyond app).
+    expect(after.process).toBe(before.process);
+    expect(after.droplet).toBe(before.droplet);
+    expect(after.pkg).toBe(before.pkg);
+    expect(after.build).toBe(before.build);
+    // Untouched app fields preserved by value.
+    expect(after.app.guid).toBe(before.app.guid);
+    expect(after.app.name).toBe(before.app.name);
+    expect(after.app.state).toBe(before.app.state);
+    expect(after.app.spaceGuid).toBe(before.app.spaceGuid);
+    expect(after.app.instances).toBe(before.app.instances);
+    expect(after.sshEnabled).toBe(before.sshEnabled);
+  });
+
+  // Both signal mutations — the build-tab Routes count and the Routes tab
+  // list each read from a different signal. Mutating only one would leave
+  // the other view stale until the next full refresh.
+
+  it('addRoute(stRoute) appends to _routes signal (Routes tab list)', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    svc['_routes'].set([]);
+    expect(svc.routes()).toEqual([]);
+
+    svc.addRoute(MOCK_NEW_ROUTE);
+
+    expect(svc.routes()).toHaveLength(1);
+    expect(svc.routes()![0].guid).toBe('r-new');
+  });
+
+  it('addRoute(stRoute) is idempotent on _routes signal too', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    svc['_routes'].set([MOCK_NEW_ROUTE]);
+    const before = svc.routes();
+
+    svc.addRoute(MOCK_NEW_ROUTE);
+
+    // Same reference proves no signal write.
+    expect(svc.routes()).toBe(before);
+    expect(svc.routes()).toHaveLength(1);
+  });
+
+  it('addRoute(stRoute) is no-op on _routes when _routes is null', () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    // _routes starts as null — addRoute should leave it null rather than
+    // ticking it to [route] (the slice 3 list hasn't drained yet, so
+    // initializing it here would race the drain that's about to land).
+    expect(svc.routes()).toBeNull();
+
+    svc.addRoute(MOCK_NEW_ROUTE);
+
+    expect(svc.routes()).toBeNull();
+    // But _appDetail.app.routes still updates regardless.
+    expect(svc.appDetail()!.app.routes).toHaveLength(2);
+  });
+
+  it('addRoute(stRoute) converges partial state (route in only one signal)', () => {
+    // Precondition: route already in _appDetail.app.routes but _routes
+    // doesn't have it yet (could happen if backend returns it embedded but
+    // /cf/apps/.../routes drain hasn't merged). addRoute should add to the
+    // missing signal without double-adding to the present one.
+    const detailWithNewRoute = {
+      ...MOCK_APP_DETAIL,
+      app: { ...MOCK_APP_DETAIL.app, routes: [...MOCK_APP_DETAIL.app.routes, MOCK_NEW_ROUTE] },
+    };
+    svc['_appDetail'].set(detailWithNewRoute);
+    svc['_routes'].set([]);
+
+    svc.addRoute(MOCK_NEW_ROUTE);
+
+    expect(svc.appDetail()!.app.routes).toHaveLength(2);
+    expect(svc.routes()).toHaveLength(1);
+    expect(svc.routes()![0].guid).toBe('r-new');
   });
 
   // -------------------------------------------------------------------------
