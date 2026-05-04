@@ -379,11 +379,13 @@ func (c *CloudFoundrySpecification) composeAppDetails(reqCtx context.Context, cf
 		pkg        *capi.Package
 		build      *capi.Build
 		sshEnabled bool
+		routes     []StAppRoute
 		procErr    error
 		dropletErr error
 		pkgErr     error
 		buildErr   error
 		sshErr     error
+		routesErr  error
 	)
 
 	g, gctx := errgroup.WithContext(reqCtx)
@@ -405,6 +407,10 @@ func (c *CloudFoundrySpecification) composeAppDetails(reqCtx context.Context, cf
 	})
 	g.Go(func() error {
 		sshEnabled, sshErr = fetchSSHEnabledForApp(gctx, cfClient, appGUID)
+		return nil
+	})
+	g.Go(func() error {
+		routes, routesErr = fetchAppRoutesForDetail(gctx, cfClient, appGUID)
 		return nil
 	})
 	_ = g.Wait()
@@ -450,11 +456,39 @@ func (c *CloudFoundrySpecification) composeAppDetails(reqCtx context.Context, cf
 	if sshErr != nil {
 		unavailable = append(unavailable, detailSSHFields...)
 	}
+	if routesErr == nil && len(routes) > 0 {
+		out.App.Routes = routes
+	}
 
 	if len(unavailable) > 0 {
 		out.Meta = &StratosMeta{Unavailable: unavailable}
 	}
 	return out
+}
+
+// fetchAppRoutesForDetail returns the routes mapped to a single app as
+// flat StAppRoute records (GUID + URL). Mirrors the apps-list helper
+// fetchRoutesForApps but takes a context.Context (not echo.Context) and
+// scopes to one app — the detail handler's hot path. Server-rendered
+// URL is what the Visit button needs; no port/host parsing required.
+func fetchAppRoutesForDetail(ctx context.Context, cfClient capi.Client, appGUID string) ([]StAppRoute, error) {
+	out := []StAppRoute{}
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+		params.Page = page
+		params.Filters["app_guids"] = []string{appGUID}
+		raw, err := cfClient.Routes().List(ctx, params)
+		if err != nil {
+			return nil, err
+		}
+		for _, r := range raw.Resources {
+			out = append(out, StAppRoute{GUID: r.GUID, URL: r.URL})
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return out, nil
 }
 
 // getNativeAppEnv handles GET /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/env.

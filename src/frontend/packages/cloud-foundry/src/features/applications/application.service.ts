@@ -2,7 +2,7 @@ import { Injectable, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, map, pairwise, publishReplay, refCount, take } from 'rxjs/operators';
+import { filter, map, pairwise, publishReplay, refCount, take, withLatestFrom } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
@@ -270,7 +270,8 @@ export class ApplicationService {
     filter(data => !!data.app),
     // Attach the endpoint model from the ngrx store so cf?.guid / cf?.name work.
     // This keeps the legacy consumer API intact without adding endpoint HTTP fetches.
-    map(data => data),
+    withLatestFrom(this.store.select(endpointEntitiesSelector)),
+    map(([data, endpoints]) => ({ ...data, cf: endpoints?.[this.cfGuid] ?? null })),
     publishReplay(1),
     refCount(),
   );

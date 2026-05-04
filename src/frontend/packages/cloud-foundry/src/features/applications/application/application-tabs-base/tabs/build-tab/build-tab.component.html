@@ -69,7 +69,7 @@
             <div class="card-body">
               <app-metadata-item icon="title" label="Name">
                 <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid]"
-                  title="CF Endpoint">{{ applicationService.cfGuid }}</a>
+                  title="CF Endpoint">{{ (applicationService.application$ | async)?.cf?.name || applicationService.cfGuid }}</a>
               </app-metadata-item>
               <!-- Organization and Space rows render unconditionally so the
                    Cloud Foundry card always disambiguates which (cnsi, org,
