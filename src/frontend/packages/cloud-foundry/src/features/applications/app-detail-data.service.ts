@@ -10,13 +10,15 @@ import { APIResource } from '@stratosui/store';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   StAppDetail,
+  StAppRoutesResponse,
   StAppStat,
   StEnvVars,
+  StRoute,
   StratosError,
 } from '../../services/endpoint-data/stratos-types';
 import { stToLegacy } from '../../services/v3-to-legacy-adapter';
 
-export type EntityKind = 'app' | 'stats' | 'envVars' | 'space' | 'org' | 'domains';
+export type EntityKind = 'app' | 'stats' | 'envVars' | 'space' | 'org' | 'domains' | 'routes';
 
 interface StAppStatsResponse {
   instances: StAppStat[];
@@ -61,13 +63,17 @@ export class AppDetailDataService {
   private readonly _org = signal<APIResource<IOrganization> | undefined>(undefined);
   private readonly _domains = signal<IDomain[]>([]);
 
+  // Per-app routes — V3-shaped via the native handler. Null until first load
+  // so consumers can distinguish "haven't fetched yet" from "fetched, empty".
+  private readonly _routes = signal<StRoute[] | null>(null);
+
   private readonly _loading = signal<Record<EntityKind, boolean>>({
     app: false, stats: false, envVars: false,
-    space: false, org: false, domains: false,
+    space: false, org: false, domains: false, routes: false,
   });
   private readonly _errors = signal<Record<EntityKind, StratosError | null>>({
     app: null, stats: null, envVars: null,
-    space: null, org: null, domains: null,
+    space: null, org: null, domains: null, routes: null,
   });
 
   // lastPolledAt — consumed by card-app-status "updating…" threshold.
@@ -110,6 +116,16 @@ export class AppDetailDataService {
   readonly loading: Signal<Record<EntityKind, boolean>> = this._loading.asReadonly();
   readonly errors: Signal<Record<EntityKind, StratosError | null>> = this._errors.asReadonly();
   readonly lastPolledAt: Signal<Date | null> = this._lastPolledAt.asReadonly();
+
+  /**
+   * Per-app routes signal. Null until the first fetch resolves so the
+   * Routes tab can render a "loading" affordance distinct from "no routes".
+   * Mutations land via `removeRoute(guid)` — single-CNSI, in-memory cache
+   * eviction called from `AppRouteActionsService` on verb success (slice 3).
+   */
+  readonly routes: Signal<StRoute[] | null> = this._routes.asReadonly();
+  readonly routesLoading: Signal<boolean> = computed(() => this._loading().routes);
+  readonly routesError: Signal<unknown | null> = computed(() => this._errors().routes);
 
   /**
    * Legacy `APIResource<IApp>` view computed via the V3→legacy adapter.
@@ -287,6 +303,7 @@ export class AppDetailDataService {
         space:   () => this.fetchSpace(),
         org:     () => this.fetchOrg(),
         domains: () => this.fetchDomains(),
+        routes:  () => this.fetchRoutes(),
       };
       await fetchers[scope]();
     }
@@ -312,6 +329,10 @@ export class AppDetailDataService {
 
   private nativeAppStatsUrl(): string {
     return `/pp/v1/cf/app-stats/${this.cnsiGuid}/${this.appGuid}`;
+  }
+
+  private nativeAppRoutesUrl(): string {
+    return `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/routes`;
   }
 
   private spaceUrl(spaceGuid: string): string {
@@ -458,6 +479,41 @@ export class AppDetailDataService {
     } finally {
       this._loading.update(m => ({ ...m, org: false }));
     }
+  }
+
+  private async fetchRoutes(): Promise<void> {
+    this._loading.update(m => ({ ...m, routes: true }));
+    this._errors.update(m => ({ ...m, routes: null }));
+    const t0 = performance.now();
+    const url = this.nativeAppRoutesUrl();
+    try {
+      const value = await firstValueFrom(this.http.get<StAppRoutesResponse>(url));
+      this._routes.set(value?.resources ?? []);
+      this.debugTrace('routes', url, 'ok', performance.now() - t0);
+    } catch (err: unknown) {
+      this._errors.update(m => ({ ...m, routes: this.toStratosError('routes', err) }));
+      this.debugTrace('routes', url, 'err', performance.now() - t0, err);
+    } finally {
+      this._loading.update(m => ({ ...m, routes: false }));
+    }
+  }
+
+  /**
+   * Remove a route from the local cache without re-fetching. Called from
+   * `AppRouteActionsService` after a successful unmap or delete so the
+   * Routes tab updates synchronously. Idempotent: removing an absent guid
+   * is a no-op (no signal tick) so concurrent verbs don't double-emit.
+   */
+  removeRoute(guid: string): void {
+    const current = this._routes();
+    if (!current) {
+      return;
+    }
+    const next = current.filter(r => r.guid !== guid);
+    if (next.length === current.length) {
+      return;
+    }
+    this._routes.set(next);
   }
 
   private async fetchDomains(): Promise<void> {

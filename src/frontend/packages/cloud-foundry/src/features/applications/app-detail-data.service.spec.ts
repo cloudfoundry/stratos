@@ -19,6 +19,23 @@ const APP_GUID = 'app-1';
 const DETAIL_URL = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}?return=details`;
 const ENV_URL    = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}/env`;
 const STATS_URL  = `/pp/v1/cf/app-stats/${CNSI}/${APP_GUID}`;
+const ROUTES_URL = `/pp/v1/cf/apps/${CNSI}/${APP_GUID}/routes`;
+
+const MOCK_ROUTES_RESPONSE = {
+  resources: [
+    {
+      guid: 'r-1', url: 'a.example.com', host: 'a', path: '', port: undefined,
+      domainGuid: 'd-1', spaceGuid: 'sp-1', cnsiGuid: CNSI,
+      createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
+    },
+    {
+      guid: 'r-2', url: 'b.example.com', host: 'b', path: '', port: undefined,
+      domainGuid: 'd-1', spaceGuid: 'sp-1', cnsiGuid: CNSI,
+      createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
+    },
+  ],
+  totalResults: 2,
+};
 
 // V3-shape composed envelope. Wire matches what
 // /pp/v1/cf/apps/{cnsi}/{appGuid}?return=details returns.
@@ -521,6 +538,90 @@ describe('AppDetailDataService', () => {
 
     releaseB();
     expect(svc['_focusPriority']().has('stats')).toBe(false);
+  });
+
+  // -------------------------------------------------------------------------
+  // routes() — slice-3 per-app routes signal + removeRoute() mutation hook
+  // -------------------------------------------------------------------------
+
+  it('routes() is null before first load', () => {
+    expect(svc.routes()).toBeNull();
+    expect(svc.routesLoading()).toBe(false);
+    expect(svc.routesError()).toBeNull();
+  });
+
+  it('refresh("routes") populates routes() with the resources array', async () => {
+    const promise = svc.refresh('routes');
+    expect(svc.routesLoading()).toBe(true);
+
+    await tick();
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await promise;
+
+    expect(svc.routes()).toHaveLength(2);
+    expect(svc.routes()![0].guid).toBe('r-1');
+    expect(svc.routesLoading()).toBe(false);
+    expect(svc.routesError()).toBeNull();
+  });
+
+  it('HTTP error on routes fetch populates routesError and leaves routes() null', async () => {
+    const promise = svc.refresh('routes');
+
+    await tick();
+    httpMock.expectOne(ROUTES_URL).flush('Server Error', { status: 500, statusText: 'Server Error' });
+    await promise;
+
+    expect(svc.routes()).toBeNull();
+    expect(svc.routesError()).not.toBeNull();
+    expect(svc.routesLoading()).toBe(false);
+  });
+
+  it('removeRoute(guid) removes the row synchronously from routes()', async () => {
+    const promise = svc.refresh('routes');
+    await tick();
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await promise;
+
+    expect(svc.routes()).toHaveLength(2);
+    svc.removeRoute('r-1');
+    expect(svc.routes()).toHaveLength(1);
+    expect(svc.routes()![0].guid).toBe('r-2');
+  });
+
+  it('removeRoute(guid) for a non-existent guid is a no-op (no exception, same reference)', async () => {
+    const promise = svc.refresh('routes');
+    await tick();
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await promise;
+
+    const before = svc.routes();
+    expect(() => svc.removeRoute('does-not-exist')).not.toThrow();
+    // Same array reference proves no signal write occurred (no tick).
+    expect(svc.routes()).toBe(before);
+  });
+
+  it('removeRoute(guid) before any load is a no-op', () => {
+    expect(svc.routes()).toBeNull();
+    expect(() => svc.removeRoute('r-1')).not.toThrow();
+    expect(svc.routes()).toBeNull();
+  });
+
+  it('removeRoute followed by refresh repopulates from server', async () => {
+    const p1 = svc.refresh('routes');
+    await tick();
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await p1;
+
+    svc.removeRoute('r-1');
+    expect(svc.routes()).toHaveLength(1);
+
+    const p2 = svc.refresh('routes');
+    await tick();
+    httpMock.expectOne(ROUTES_URL).flush(MOCK_ROUTES_RESPONSE);
+    await p2;
+
+    expect(svc.routes()).toHaveLength(2);
+    expect(svc.routes()!.map(r => r.guid)).toEqual(['r-1', 'r-2']);
   });
 
   // -------------------------------------------------------------------------
