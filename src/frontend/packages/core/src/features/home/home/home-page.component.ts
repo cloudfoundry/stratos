@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ScrollDispatcher } from '@angular/cdk/scrolling';
-import { ChangeDetectionStrategy, AfterViewInit, Component, computed, ElementRef, HostListener, Injector, OnDestroy, OnInit, QueryList, Signal, ViewChild, ViewChildren, effect, signal, inject } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   IUserFavoritesGroups,
   EndpointModel,
   entityCatalog,
   UserFavoriteManager } from '@stratosui/store';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { take, debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import { SessionService } from '../../../core/session.service';
@@ -51,13 +50,12 @@ const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
+export class HomePageComponent implements OnInit {
   endpointsService = inject(EndpointsService);
   private router = inject(Router);
   private sessionService = inject(SessionService);
   private prefs = inject(DashboardPreferencesService);
   userFavoriteManager = inject(UserFavoriteManager);
-  private scrollDispatcher = inject(ScrollDispatcher);
   private registry = inject(EndpointDataRegistry);
   private injector = inject(Injector);
 
@@ -120,25 +118,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
   noneAvailableMsg = noFavoritesMsg(0, 0);
 
-  @ViewChild('endpointsPanel', { static: false }) endpointsPanel: ElementRef;
-  @ViewChildren(HomePageEndpointCardComponent) endpointCards: QueryList<HomePageEndpointCardComponent>;
-  @ViewChildren('endpointElements') endpointElements!: QueryList<ElementRef>;
-
-  notLoadedCardIndices: number[] = [];
-  cardsToLoad: HomePageEndpointCardComponent[] = [];
-  // Tracks which CNSI guids have already been dispatched to card.load().
-  // Prevents duplicate wrapper.load() → cfhome.load() invocations when
-  // QueryList.changes fires repeatedly. Registry.acquire() is also
-  // idempotent on duplicate guid, but this set avoids the redundant chain.
-  private dispatchedGuids = new Set<string>();
-
-  private viewMonitorSub!: Subscription;
-  private cardChangesSub!: Subscription;
-  private _checkLayout = signal<number>(0);
-  private check$ = toObservable(this._checkLayout).pipe(
-    debounceTime(100) // Debounce the check signal itself
-  );
-
   private redirectChecked = false;
   private layoutInitialized = false;
 
@@ -197,7 +176,9 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
   private concurrencyConfigured = false;
 
   ngOnInit() {
-    // Wire EndpointDataRegistry concurrency from backend session config (one-shot)
+    // Wire EndpointDataRegistry concurrency from backend session config (one-shot).
+    // Each card self-triggers load() in its own ngOnInit; the registry's
+    // mergeMap(maxConcurrentCards) throttles the actual HTTP fan-out.
     effect(() => {
       const config = this.sessionService.config();
       if (!config || this.concurrencyConfigured) {
@@ -209,132 +190,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
       }
       this.concurrencyConfigured = true;
     }, { injector: this.injector });
-
-    const scroll$ = this.scrollDispatcher.scrolled().pipe(
-      map((e: any) => {
-        const el = e.elementRef.nativeElement;
-        return el.scrollTop;
-      }),
-      debounceTime(100), // Debounce scroll events
-      startWith(0)
-    );
-
-    // Load cards as they come into view
-    this.viewMonitorSub = combineLatest([scroll$, this.check$]).pipe(
-      debounceTime(150) // Reduce debounce time for better responsiveness
-    ).subscribe(([scrollTop]) => {
-      // Skip if no cards to check
-      if (this.notLoadedCardIndices.length === 0) {
-        return;
-      }
-
-      // User has scrolled - check the remaining cards that have not been loaded to see if any are now visible
-      const remaining: number[] = [];
-      const cardsArray = this.endpointElements.toArray();
-      const cardsComponentArray = this.endpointCards.toArray();
-
-      // Early exit if arrays are empty or mismatched
-      if (cardsArray.length === 0 || cardsComponentArray.length === 0) {
-        return;
-      }
-
-      const panelParent = this.endpointsPanel?.nativeElement?.offsetParent;
-      if (!panelParent) {
-        return;
-      }
-
-      const height = panelParent.offsetHeight;
-      const scrollBottom = scrollTop + height;
-
-      for (const index of this.notLoadedCardIndices) {
-        const cardElement = cardsArray[index];
-        if (!cardElement) {
-          continue;
-        }
-
-        const cardTop = cardElement.nativeElement.offsetTop;
-        const cardBottom = cardTop + cardElement.nativeElement.offsetHeight;
-
-        // Check if the card is in view - either its top or bottom must be within the visible scroll area
-        if ((cardTop >= scrollTop && cardTop <= scrollBottom) || (cardBottom >= scrollTop && cardBottom <= scrollBottom)) {
-          const card = cardsComponentArray[index];
-          if (card) {
-            this.cardsToLoad.push(card);
-          }
-        } else {
-          remaining.push(index);
-        }
-      }
-
-      this.notLoadedCardIndices = remaining;
-      this.processCardsToLoad();
-    });
-  }
-
-  processCardsToLoad() {
-    // No mutex — EndpointDataRegistry controls concurrency via mergeMap(N).
-    while (this.cardsToLoad.length > 0) {
-      const card = this.cardsToLoad.shift();
-      if (card) {
-        card.load();
-      }
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.viewMonitorSub) {
-      this.viewMonitorSub.unsubscribe();
-    }
-    if (this.cardChangesSub) {
-      this.cardChangesSub.unsubscribe();
-    }
-  }
-
-  ngAfterViewInit(): void {
-    this.cardChangesSub = this.endpointElements.changes.subscribe(cards => this.setCardsToLoad(cards));
-    if (this.endpointElements.toArray().length > 0) {
-      this.setCardsToLoad(this.endpointElements.toArray());
-    }
-  }
-
-  setCardsToLoad(_cards: ElementRef[]) {
-    // Viewport gating reliably stranded below-fold cards because no scroll
-    // event fires on first render, so the gate never re-checks. Dispatch
-    // every card directly — the registry's mergeMap(maxConcurrentCards)
-    // enforces bounded concurrency, and dispatchedGuids prevents duplicate
-    // wrapper.load() calls when QueryList.changes re-emits.
-    this.notLoadedCardIndices = [];
-    const cardsArr = this.endpointCards?.toArray() ?? [];
-    let dispatched = 0;
-    for (const card of cardsArr) {
-      const guid = (card as any)?.endpoint?.guid;
-      if (!guid || this.dispatchedGuids.has(guid)) { continue; }
-      this.dispatchedGuids.add(guid);
-      this.cardsToLoad.push(card);
-      dispatched++;
-    }
-    if (dispatched > 0) {
-      this.processCardsToLoad();
-    }
-  }
-
-  // This is called after a card has loaded - we call the scroll handler again
-  // to check if there are more cards that are visible and thus can be loaded
-  cardLoaded() {
-    if (this.notLoadedCardIndices.length > 0 && this.cardsToLoad.length === 0) {
-      this.checkCardsInView();
-    }
-  }
-
-  @HostListener('window:resize')
-  onResize() {
-    // If we resize the window and make it larger then new cards may come into view
-    this.checkCardsInView();
-  }
-
-  // Check the cards in view
-  checkCardsInView() {
-    this._checkLayout.update(v => v + 1);
   }
 
   public toggleShowAllEndpoints() {
@@ -352,10 +207,6 @@ export class HomePageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     // Persist the state
     this.prefs.setHomeLayout(this.layoutID);
-
-    // Ensure we check again if any cards are now visible
-    // Schedule the check so it happens after the cards have been laid out
-    setTimeout(() => this.checkCardsInView(), 1);
   }
 
   // Order the endpoint cards:
