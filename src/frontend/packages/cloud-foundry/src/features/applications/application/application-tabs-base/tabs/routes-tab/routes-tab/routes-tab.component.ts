@@ -9,6 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 
 import {
   ConfirmationDialogConfig,
@@ -16,6 +17,7 @@ import {
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
+  SignalListHeaderAction,
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -60,6 +62,7 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
   private routesConfig = inject(CfAppRoutesSignalConfigService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
 
   /** Loading projection for the signal-list framework. */
   private readonly _isAnyLoading: Signal<boolean> = computed(() => this.dataService.loading().routes);
@@ -79,6 +82,21 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
       }
       return col;
     });
+
+    const headerActions: readonly SignalListHeaderAction[] = [
+      {
+        label: 'Add Route',
+        icon: 'add',
+        invoke: () => {
+          void this.router.navigate([
+            '/applications',
+            this.dataService.cnsiGuid,
+            this.dataService.appGuid,
+            'add-route',
+          ]);
+        },
+      },
+    ];
 
     this.listConfig = {
       pagedItems: this.routesConfig.view.pagedItems,
@@ -102,6 +120,7 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
       onClear: () => this.routesConfig.clearFilters(),
       viewMode: this.routesConfig.viewMode,
       sort: this.routesConfig.sort,
+      headerActions,
     };
   }
 
