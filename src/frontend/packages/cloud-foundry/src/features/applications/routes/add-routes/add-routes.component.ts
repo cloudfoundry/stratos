@@ -27,6 +27,7 @@ import {
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
+  SignalListSort,
   SignalStepHandle,
 } from '@stratosui/core';
 import { RouterNav, APIResource } from '@stratosui/store';
@@ -156,26 +157,38 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   readonly hostCollision!: Signal<StRoute | null>;
 
   /**
-   * Render mode for the "Already attached to this app" section. Three
-   * states keyed off the count of attached routes so the section stays
-   * out of the user's way when there's nothing to show, inlines for
-   * small counts where the list is comfortable to read at a glance, and
-   * collapses behind an accordion for larger counts so the create form
-   * stays above the fold.
-   *
-   *   0 routes  → 'hidden'   (section not rendered)
-   *   1-3       → 'inline'   (rows visible, no accordion)
-   *   4+        → 'collapsed' (accordion summary "Already attached (N)")
+   * Local override for the accordion's open state. `null` means "follow the
+   * count-driven default" (`attachedListOpen` reads the count and decides);
+   * once the user toggles the accordion, this becomes a bool and sticks.
    */
-  readonly attachedDisplayMode: Signal<'hidden' | 'inline' | 'collapsed'> = computed(() => {
+  readonly attachedListExpanded: WritableSignal<boolean | null> = signal(null);
+
+  /**
+   * Effective open state for the "Already attached" accordion. The accordion
+   * is always rendered so the user can find the list regardless of count.
+   * Initial open state is count-driven: if the list is small enough to read
+   * at a glance (≤3 rows) we open it by default; otherwise we collapse so
+   * the form and picker stay above the fold. User toggles win once set.
+   */
+  readonly attachedListOpen: Signal<boolean> = computed(() => {
+    const explicit = this.attachedListExpanded();
+    if (explicit !== null) return explicit;
     const n = this.mapRoutesConfig.attachedRoutes().length;
-    if (n === 0) return 'hidden';
-    if (n <= 3) return 'inline';
-    return 'collapsed';
+    return n > 0 && n <= 3;
   });
 
-  /** Local accordion-open state for the collapsed mode. */
-  readonly attachedListExpanded: WritableSignal<boolean> = signal(false);
+  /** Sort spec for the attached list — independent of the picker's sort. */
+  readonly attachedSort: WritableSignal<SignalListSort> = signal({
+    field: 'host', direction: 'asc',
+  });
+
+  /**
+   * Sorted attached routes. Drives the read-only "Already attached" list.
+   * Sort key is looked up against the column array's `sortField` so headers
+   * + the card-mode dropdown both work without extra wiring. Falls back to
+   * a stable property lookup when the field isn't a column we know about.
+   */
+  readonly sortedAttachedRoutes!: Signal<StRoute[]>;
 
   // Signal-native step handle exposed to the parent stepper template.
   signalHandle!: SignalStepHandle;
@@ -304,19 +317,44 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       onClear: () => this.mapRoutesConfig.clearFilters(),
       viewMode: this.mapRoutesConfig.viewMode,
       sort: this.mapRoutesConfig.sort,
+      // Compact picker — paginator only when the list overflows page 1.
+      hidePagerWhenSingle: true,
     };
 
     // Read-only "Already attached" list. Reuses the picker's column shape
     // minus the radio (no action) and feeds directly off the
-    // `attachedRoutes` signal — no pagination/filter pipeline.
+    // `attachedRoutes` signal — sort applied locally so headers stay
+    // interactive without a separate filter/page pipeline.
     const attachedColumns = columns.filter(c => c.kind !== 'radio');
     const attachedRoutesSignal = this.mapRoutesConfig.attachedRoutes;
+    (this as { sortedAttachedRoutes: Signal<StRoute[]> }).sortedAttachedRoutes = computed(() => {
+      const items = [...attachedRoutesSignal()];
+      const s = this.attachedSort();
+      const col = attachedColumns.find(c => (c.key ?? c.header) === s.field);
+      const sf = col?.sortField;
+      const getValue: (row: StRoute) => unknown = typeof sf === 'function'
+        ? sf
+        : (typeof sf === 'string'
+          ? (row: StRoute) => (row as unknown as Record<string, unknown>)[sf as string]
+          : (row: StRoute) => (row as unknown as Record<string, unknown>)[s.field]);
+      const sign = s.direction === 'asc' ? 1 : -1;
+      return items.sort((a, b) => {
+        const av = getValue(a), bv = getValue(b);
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sign;
+        return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
+      });
+    });
+    const attachedPageIndex = signal(0);
+    const attachedPageSize = signal(100);
     this.attachedListConfig = {
-      pagedItems: attachedRoutesSignal,
+      pagedItems: this.sortedAttachedRoutes,
       totalFilteredResults: computed(() => attachedRoutesSignal().length),
       totalPages: computed(() => 1),
-      pageIndex: signal(0),
-      pageSize: signal(100),
+      pageIndex: attachedPageIndex,
+      pageSize: attachedPageSize,
       isAnyLoading: signal(false).asReadonly(),
       errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
       columns: attachedColumns,
@@ -324,12 +362,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       emptyMessage: '',
       emptyFilterMessage: '',
       loadingMessage: 'Loading…',
-      // Hide the paginator when the list is small.
       pageSizeOptions: {
         table: [100],
         card: [100],
       },
       viewMode: signal('table'),
+      sort: this.attachedSort,
+      hidePagerWhenSingle: true,
     };
   }
 

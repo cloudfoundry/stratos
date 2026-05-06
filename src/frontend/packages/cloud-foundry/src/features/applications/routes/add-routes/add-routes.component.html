@@ -78,23 +78,15 @@
     <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
   </div>
 
-  @if (attachedDisplayMode() === 'inline') {
-    <div class="add-route__section add-route__section--secondary" data-test="attached-routes">
-      <div class="add-route__section-title">Already attached to this app</div>
+  <details class="add-route__section add-route__section--secondary add-route__accordion"
+           data-test="attached-routes"
+           [open]="attachedListOpen()"
+           (toggle)="attachedListExpanded.set($any($event.target).open)">
+    <summary class="add-route__accordion-summary">
+      Already attached to this app ({{ attachedListConfig.totalFilteredResults() }})
+    </summary>
+    <div class="add-route__accordion-body">
       <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
     </div>
-  }
-  @if (attachedDisplayMode() === 'collapsed') {
-    <details class="add-route__section add-route__section--secondary add-route__accordion"
-             data-test="attached-routes"
-             [open]="attachedListExpanded()"
-             (toggle)="attachedListExpanded.set($any($event.target).open)">
-      <summary class="add-route__accordion-summary">
-        Already attached to this app ({{ attachedListConfig.totalFilteredResults() }})
-      </summary>
-      <div class="add-route__accordion-body">
-        <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
-      </div>
-    </details>
-  }
+  </details>
 </div>

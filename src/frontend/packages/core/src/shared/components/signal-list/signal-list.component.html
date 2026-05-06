@@ -470,7 +470,9 @@
          class="pointer-events-none relative z-20 h-10 -mt-10 bg-gradient-to-t from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>
   }
 
-  <!-- Pagination bar -->
+  <!-- Pagination bar (suppressed when hidePagerWhenSingle is set and list
+       fits in one page — compact callers like the Add Route stepper opt in). -->
+  @if (!config.hidePagerWhenSingle || config.totalPages() > 1) {
   <div class="flex items-center justify-between gap-3 px-4 py-2 border-t border-content-border bg-content-bg text-sm flex-wrap">
 
     <!-- Items per page -->
@@ -524,4 +526,5 @@
       </button>
     </div>
   </div>
+  }
 </div>

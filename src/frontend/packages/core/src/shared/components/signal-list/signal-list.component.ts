@@ -237,6 +237,12 @@ export interface SignalListConfig<T> {
   // omit, set to undefined, or pass an empty array to render nothing
   // (zero visual change for existing pages). See SignalListHeaderAction.
   readonly headerActions?: readonly SignalListHeaderAction[];
+  // Optional — when true, hide the pagination bar (page-size selector,
+  // range counter, page nav buttons) when the list fits on a single page
+  // (totalPages <= 1). Lets compact embedded lists (e.g. an attached-routes
+  // panel inside a stepper) skip the paginator chrome until it actually has
+  // a job to do. Default false preserves existing behavior.
+  readonly hidePagerWhenSingle?: boolean;
 }
 
 @Component({

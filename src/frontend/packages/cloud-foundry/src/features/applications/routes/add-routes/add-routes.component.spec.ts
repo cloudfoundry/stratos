@@ -164,18 +164,21 @@ describe('AddRoutesComponent', () => {
     expect(html.querySelector('input[formcontrolname="path"]')).toBeTruthy();
   });
 
-  it('does not render the attached-list section when no routes are attached to this app', () => {
+  it('always renders the attached-list accordion (closed when no attached routes)', () => {
     pickerRoutes.set([
       makeRoute({ guid: 'detached-1', appGuids: [] }),
       makeRoute({ guid: 'other-app', appGuids: ['other'] }),
     ]);
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.querySelector('[data-test="attached-routes"]')).toBeFalsy();
-    expect(component.attachedDisplayMode()).toBe('hidden');
+    const section = html.querySelector('[data-test="attached-routes"]') as HTMLDetailsElement;
+    expect(section).toBeTruthy();
+    expect(section.tagName.toLowerCase()).toBe('details');
+    expect(section.open).toBe(false);
+    expect(component.attachedListOpen()).toBe(false);
   });
 
-  it('renders the attached-list inline when 1-3 routes are attached', () => {
+  it('opens the accordion by default when 1-3 routes are attached', () => {
     pickerRoutes.set([
       makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
       makeRoute({ guid: 'mine-2', appGuids: ['mockAppGuid'] }),
@@ -183,12 +186,14 @@ describe('AddRoutesComponent', () => {
     ]);
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.querySelector('[data-test="attached-routes"]')).toBeTruthy();
-    expect(html.querySelector('[data-test="attached-routes"] details')).toBeFalsy();
-    expect(component.attachedDisplayMode()).toBe('inline');
+    const section = html.querySelector('[data-test="attached-routes"]') as HTMLDetailsElement;
+    expect(section).toBeTruthy();
+    expect(section.tagName.toLowerCase()).toBe('details');
+    expect(section.open).toBe(true);
+    expect(component.attachedListOpen()).toBe(true);
   });
 
-  it('renders the attached-list as a collapsed accordion when 4+ routes are attached', () => {
+  it('keeps the accordion closed by default when 4+ routes are attached', () => {
     pickerRoutes.set([
       makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
       makeRoute({ guid: 'mine-2', appGuids: ['mockAppGuid'] }),
@@ -197,13 +202,24 @@ describe('AddRoutesComponent', () => {
     ]);
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
-    const section = html.querySelector('[data-test="attached-routes"]');
+    const section = html.querySelector('[data-test="attached-routes"]') as HTMLDetailsElement;
     expect(section).toBeTruthy();
-    expect(section!.tagName.toLowerCase()).toBe('details');
-    expect((section as HTMLDetailsElement).open).toBe(false);
+    expect(section.tagName.toLowerCase()).toBe('details');
+    expect(section.open).toBe(false);
     expect(html.querySelector('[data-test="attached-routes"] summary')!.textContent)
       .toContain('Already attached to this app (4)');
-    expect(component.attachedDisplayMode()).toBe('collapsed');
+    expect(component.attachedListOpen()).toBe(false);
+  });
+
+  it('user toggle of the accordion overrides the count-driven default', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
+    ]);
+    fixture.detectChanges();
+    expect(component.attachedListOpen()).toBe(true); // 1-3 routes → open by default
+    component.attachedListExpanded.set(false);
+    fixture.detectChanges();
+    expect(component.attachedListOpen()).toBe(false); // user override wins
   });
 
   it('eagerly refreshes the picker on init (no radio toggle required)', () => {
