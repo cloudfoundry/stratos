@@ -24,16 +24,22 @@
   &__section {
     display: flex;
     flex-direction: column;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+
+    // Primary section (Create a new route) carries the focal weight —
+    // larger margin so the picker below sits at a clear secondary level.
+    &--primary {
+      margin-bottom: 24px;
+    }
+    // Secondary section (attached list) gets a softer top boundary so it
+    // reads as reference material, not a competing action surface.
+    &--secondary {
+      margin-top: 8px;
+    }
   }
   &__section-title {
     font-weight: 600;
     margin-bottom: 6px;
-  }
-  &__section-hint {
-    color: var(--color-content-text-secondary, #666);
-    font-size: 0.875rem;
-    margin-bottom: 8px;
   }
   &__collision {
     margin-top: 8px;
@@ -42,6 +48,32 @@
     background: var(--color-warn-bg, rgba(217, 119, 6, 0.08));
     color: var(--color-content-text, inherit);
     font-size: 0.875rem;
+  }
+  &__accordion {
+    > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 6px 0;
+      font-weight: 600;
+      user-select: none;
+
+      &::-webkit-details-marker { display: none; }
+      &::before {
+        content: '▸';
+        display: inline-block;
+        width: 1em;
+        transition: transform 120ms ease;
+      }
+    }
+    &[open] > summary::before {
+      transform: rotate(90deg);
+    }
+  }
+  &__accordion-summary {
+    // Aligns with section title sizing.
+  }
+  &__accordion-body {
+    padding-top: 8px;
   }
   &__form {
     display: flex;

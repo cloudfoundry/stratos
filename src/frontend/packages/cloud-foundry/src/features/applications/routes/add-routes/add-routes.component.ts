@@ -7,6 +7,7 @@ import {
   inject,
   computed,
   Signal,
+  WritableSignal,
 } from '@angular/core';
 import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -154,6 +155,28 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
    */
   readonly hostCollision!: Signal<StRoute | null>;
 
+  /**
+   * Render mode for the "Already attached to this app" section. Three
+   * states keyed off the count of attached routes so the section stays
+   * out of the user's way when there's nothing to show, inlines for
+   * small counts where the list is comfortable to read at a glance, and
+   * collapses behind an accordion for larger counts so the create form
+   * stays above the fold.
+   *
+   *   0 routes  → 'hidden'   (section not rendered)
+   *   1-3       → 'inline'   (rows visible, no accordion)
+   *   4+        → 'collapsed' (accordion summary "Already attached (N)")
+   */
+  readonly attachedDisplayMode: Signal<'hidden' | 'inline' | 'collapsed'> = computed(() => {
+    const n = this.mapRoutesConfig.attachedRoutes().length;
+    if (n === 0) return 'hidden';
+    if (n <= 3) return 'inline';
+    return 'collapsed';
+  });
+
+  /** Local accordion-open state for the collapsed mode. */
+  readonly attachedListExpanded: WritableSignal<boolean> = signal(false);
+
   // Signal-native step handle exposed to the parent stepper template.
   signalHandle!: SignalStepHandle;
 
@@ -268,9 +291,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       emptyMessage: 'No routes available to map in this space',
       emptyFilterMessage: 'No routes match the current filter',
       loadingMessage: 'Loading routes…',
+      // Smallest option matches the picker's default page size — the
+      // stepper sits between a form and the attached list, so we want
+      // compact-by-default with room to grow. Larger options still on
+      // hand for spaces with many routes.
       pageSizeOptions: {
-        table: [10, 25, 50, 100],
-        card: [6, 12, 24, 48, 96],
+        table: [5, 10, 25, 50],
+        card: [6, 12, 24, 48],
       },
       nameFilter: this.mapRoutesConfig.nameFilter,
       onRefresh: () => this.mapRoutesConfig.refresh(),

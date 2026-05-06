@@ -1,19 +1,6 @@
 <div class="add-route">
-  @if (attachedListConfig.totalFilteredResults() > 0) {
-    <div class="add-route__section" data-test="attached-routes">
-      <div class="add-route__section-title">Already attached to this app</div>
-      <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
-    </div>
-  }
-
-  <div class="add-route__section" data-test="available-routes">
-    <div class="add-route__section-title">Available routes in this space</div>
-    <div class="add-route__section-hint">Pick a route below to attach it, or fill the form to create a new one.</div>
-    <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
-  </div>
-
-  <div class="add-route__section" data-test="create-route-form">
-    <div class="add-route__section-title">Or create a new route</div>
+  <div class="add-route__section add-route__section--primary" data-test="create-route-form">
+    <div class="add-route__section-title">Create a new route</div>
     <form class="stepper-form" [formGroup]="domainFormGroup">
       <app-form-field>
         <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains">
@@ -78,11 +65,36 @@
       <div class="add-route__collision" role="alert" data-test="host-collision-warning">
         A route with these values already exists in this space
         @if ((hostCollision()!.appGuids ?? []).length === 0) {
-          (currently detached). Pick it from the list above to attach it instead.
+          (currently detached). Pick it from the list below to attach it instead.
         } @else {
-          (attached to another app). Pick it from the list above to attach it to this app as well, or choose different values.
+          (attached to another app). Pick it from the list below to attach it to this app as well, or choose different values.
         }
       </div>
     }
   </div>
+
+  <div class="add-route__section" data-test="available-routes">
+    <div class="add-route__section-title">Or attach an existing route</div>
+    <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
+  </div>
+
+  @if (attachedDisplayMode() === 'inline') {
+    <div class="add-route__section add-route__section--secondary" data-test="attached-routes">
+      <div class="add-route__section-title">Already attached to this app</div>
+      <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
+    </div>
+  }
+  @if (attachedDisplayMode() === 'collapsed') {
+    <details class="add-route__section add-route__section--secondary add-route__accordion"
+             data-test="attached-routes"
+             [open]="attachedListExpanded()"
+             (toggle)="attachedListExpanded.set($any($event.target).open)">
+      <summary class="add-route__accordion-summary">
+        Already attached to this app ({{ attachedListConfig.totalFilteredResults() }})
+      </summary>
+      <div class="add-route__accordion-body">
+        <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
+      </div>
+    </details>
+  }
 </div>

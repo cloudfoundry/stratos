@@ -47,7 +47,11 @@ export class CfMapRoutesSignalConfigService {
 
   private readonly state = inject(ListStateStore).bind('cf-map-routes', {
     viewMode: 'table',
-    pageSize: [25, 25],
+    // Smaller default than other signal-list pickers — the Add Route
+    // stepper renders this picker between a form (above) and the
+    // attached-list (below); five table rows keeps both visible
+    // on typical 1080p windows. ModeTuple convention is [card, table].
+    pageSize: [6, 5],
     pageIndex: [0, 0],
     // Default sort mirrors slice 3: most recent route first via
     // metadata.created_at -> StRoute.createdAt.

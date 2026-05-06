@@ -172,15 +172,38 @@ describe('AddRoutesComponent', () => {
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
     expect(html.querySelector('[data-test="attached-routes"]')).toBeFalsy();
+    expect(component.attachedDisplayMode()).toBe('hidden');
   });
 
-  it('renders the attached-list section when routes are attached to this app', () => {
+  it('renders the attached-list inline when 1-3 routes are attached', () => {
     pickerRoutes.set([
       makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-2', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-3', appGuids: ['mockAppGuid'] }),
     ]);
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
     expect(html.querySelector('[data-test="attached-routes"]')).toBeTruthy();
+    expect(html.querySelector('[data-test="attached-routes"] details')).toBeFalsy();
+    expect(component.attachedDisplayMode()).toBe('inline');
+  });
+
+  it('renders the attached-list as a collapsed accordion when 4+ routes are attached', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-2', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-3', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-4', appGuids: ['mockAppGuid'] }),
+    ]);
+    fixture.detectChanges();
+    const html = fixture.nativeElement as HTMLElement;
+    const section = html.querySelector('[data-test="attached-routes"]');
+    expect(section).toBeTruthy();
+    expect(section!.tagName.toLowerCase()).toBe('details');
+    expect((section as HTMLDetailsElement).open).toBe(false);
+    expect(html.querySelector('[data-test="attached-routes"] summary')!.textContent)
+      .toContain('Already attached to this app (4)');
+    expect(component.attachedDisplayMode()).toBe('collapsed');
   });
 
   it('eagerly refreshes the picker on init (no radio toggle required)', () => {
