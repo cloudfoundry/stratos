@@ -21,6 +21,28 @@
       }
     }
   }
+  &__section {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+  &__section-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  &__section-hint {
+    color: var(--color-content-text-secondary, #666);
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+  }
+  &__collision {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-left: 3px solid var(--color-warn, #d97706);
+    background: var(--color-warn-bg, rgba(217, 119, 6, 0.08));
+    color: var(--color-content-text, inherit);
+    font-size: 0.875rem;
+  }
   &__form {
     display: flex;
     flex-direction: column;

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore, SignalListColumn, SignalListCompoundSegment } from '@stratosui/core';
@@ -80,6 +80,15 @@ export class CfMapRoutesSignalConfigService {
   readonly routes!: Signal<StRoute[]>;
   private readonly _routes: WritableSignal<StRoute[]> = signal([]);
 
+  // Split views derived from `_routes`, keyed off the current app's GUID.
+  // The redesigned single-screen Add Route stepper renders these as two
+  // lists: a small read-only "already attached to this app" list and the
+  // actionable "available in this space" picker. Splitting at the service
+  // layer rather than per-component keeps the filter rule (which is also
+  // used by the radio's `isDisabled` predicate) in one place.
+  readonly attachedRoutes!: Signal<StRoute[]>;
+  readonly availableRoutes!: Signal<StRoute[]>;
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StRoute) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StRoute>;
@@ -87,8 +96,25 @@ export class CfMapRoutesSignalConfigService {
   constructor() {
     (this as { routes: Signal<StRoute[]> }).routes = this._routes.asReadonly();
 
+    // Read appGuid lazily inside the computed — at construction time the
+    // ApplicationService GUID may not yet be primed for unit-test isolation.
+    const appGuidOf = () => this.appService.appGuid;
+    (this as { attachedRoutes: Signal<StRoute[]> }).attachedRoutes = computed(() => {
+      const myGuid = appGuidOf();
+      if (!myGuid) return [];
+      return this._routes().filter(r => (r.appGuids ?? []).includes(myGuid));
+    });
+    (this as { availableRoutes: Signal<StRoute[]> }).availableRoutes = computed(() => {
+      const myGuid = appGuidOf();
+      return this._routes().filter(r => !myGuid || !(r.appGuids ?? []).includes(myGuid));
+    });
+
+    // The picker view drives the "Available routes in this space" list, so
+    // it now reads from `availableRoutes` rather than the unfiltered
+    // `routes` signal — already-attached rows live in their own read-only
+    // list, not interleaved with the actionable picker.
     this.view = new ViewPipeline<StRoute>(
-      this.routes,
+      this.availableRoutes,
       this.filter,
       this.sort,
       this.pageSize,

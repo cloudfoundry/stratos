@@ -17,7 +17,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CFAppState } from '../../../../cf-app-state';
 import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import { RouteMode } from '../../../../store/types/route.types';
 import {
   CustomFormFieldComponent,
   CustomSelectComponent,
@@ -47,30 +46,45 @@ const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 
 /**
- * AddRoutesComponent — slice 3.5 signal-native rebuild.
+ * AddRoutesComponent — single-screen redesign.
  *
- * Replaces the legacy ngrx-backed verbs (`cfEntityCatalog.route.api.create`,
- * `cfEntityCatalog.application.api.assignRoute`) with direct calls into
- * `AppRouteActionsService.createAndAttachRoute(...)` / `attachRoute(...)`.
+ * Renders three sections in one pane:
+ *   1. "Already attached to this app" — read-only list of routes whose
+ *      destinations include this app. Hidden when empty.
+ *   2. "Available routes in this space" — picker over routes the user
+ *      could attach (detached + attached-to-other-apps). Single-row
+ *      radio select.
+ *   3. "Or create a new route" — the existing domain/host/path/port
+ *      form, branched on the selected domain's router_group_type.
  *
- * Replaces `<app-map-routes>` (which itself wrapped `<app-list>` driven by
- * `CfAppMapRoutesListConfigService`) with `<app-signal-list>` driven by the
- * tab-scoped `CfMapRoutesSignalConfigService`. Stepper UX is preserved
- * exactly — the same form layout, same Cancel/Finish buttons, same
- * `signalHandle.valid` / `signalHandle.submit` contract that wires into
- * `<app-step>`.
+ * Both lists drain from the same `GET /pp/v1/cf/routes/{cnsi}?space_guids=`
+ * call (eager on stepper mount via ngOnInit). The split between attached
+ * and available is computed at the picker service layer, keyed off the
+ * current app's GUID.
  *
- * On verb success, calls `dataService.addRoute(returnedStRoute)` then
- * dispatches `RouterNav` back to the Routes tab. The `addRoute` mutation
- * hook updates BOTH the per-app routes signal and the appDetail.app.routes
- * compose so the returning Routes tab + build-tab Routes count rerender
- * synchronously.
+ * Submit dispatch:
+ *   - Row selected in the available list → attachRoute(guid)
+ *   - Otherwise (and form valid) → createAndAttachRoute(req)
+ *   The two paths are mutually exclusive at the validate() layer.
+ *
+ * Client-side collision detection: as the user types host/path (HTTP) or
+ * port (TCP), `hostCollision` checks the loaded available-routes signal
+ * for a match on (host, domainGuid, path) for HTTP or (domainGuid, port)
+ * for TCP. A match disables submit and surfaces an inline message
+ * pointing at the existing row — covers the 99%+ of conflicts that live
+ * in the same space (the only space the user can act on anyway).
+ *
+ * 422 classification on submit: cross-space collisions and other
+ * uniqueness errors return as 422 with CF error codes 210003/210004/
+ * 210005. We translate those to a generic "Route name is unavailable"
+ * message; other 422s pass through CF's `detail` verbatim. No cross-space
+ * lookup — RBAC blind spots make precise topology messaging impossible
+ * without info leaks.
  *
  * Orphan-on-attach-fail (create succeeds, attach fails): the action
  * service throws an error whose message names the orphan route GUID + URL
- * verbatim. We let the rejection propagate up through `signalHandle.submit`
- * to the stepper which surfaces it via the existing snackbar plumbing.
- * No auto-delete — the user manually cleans up.
+ * verbatim; the rejection propagates up through signalHandle.submit to
+ * the stepper which surfaces it via the existing snackbar plumbing.
  */
 @Component({
   selector: 'app-add-routes',
@@ -117,32 +131,28 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   selectedDomain!: APIResource<IDomain>;
   appUrl: string;
 
-  // Map-vs-create radio modes. Backed by a signal so the SignalStepHandle.valid
-  // computed reruns when the user toggles.
-  addRouteModes: RouteMode[] = [
-    { id: 'create', label: 'Create and map new route', submitLabel: 'Create' },
-    { id: 'map', label: 'Map existing route', submitLabel: 'Map' },
-  ];
-  private _addRouteMode = signal<RouteMode | null>(null);
-  get addRouteMode(): RouteMode { return this._addRouteMode()!; }
-  set addRouteMode(v: RouteMode) {
-    this._addRouteMode.set(v);
-    // Drain the picker on first transition into 'map'. Idempotent — safe to
-    // call repeatedly; the service replaces `_routes` on each successful
-    // response.
-    if (v?.id === 'map') {
-      void this.mapRoutesConfig.refresh();
-    }
-  }
   useRandomPort = false;
 
-  /** SignalListConfig built from the tab-scoped picker config service. */
+  /** Picker config for the "Available routes in this space" list. */
   readonly mapListConfig: SignalListConfig<StRoute>;
+  /** Read-only config for the "Already attached to this app" list. */
+  readonly attachedListConfig: SignalListConfig<StRoute>;
 
-  /** True when in 'map' mode the user has picked a row. */
+  /** True when the user has clicked a row in the available list. */
   readonly hasSelectedRoute: Signal<boolean> = computed(
     () => this.mapRoutesConfig.selectedKey() !== null,
   );
+
+  /**
+   * Client-side collision check. Returns the matching `StRoute` from the
+   * loaded available-in-space list when the form's host/path/port/domain
+   * combination collides with an existing detached or other-app route.
+   * `null` when no collision (or when the form isn't filled enough to
+   * compare). Catches the 99%+ same-space conflict cases without an extra
+   * round trip; cross-space conflicts still surface via 422 classification
+   * at submit time.
+   */
+  readonly hostCollision!: Signal<StRoute | null>;
 
   // Signal-native step handle exposed to the parent stepper template.
   signalHandle!: SignalStepHandle;
@@ -152,7 +162,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
-    this.addRouteMode = this.addRouteModes[0];
 
     this.domainFormGroup = new FormGroup({
       domain: new FormControl<APIResource<IDomain> | ''>('', {
@@ -190,13 +199,51 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     const domainStatus = toSignal(this.domainFormGroup.statusChanges.pipe(startWith(this.domainFormGroup.status)),
       { initialValue: this.domainFormGroup.status });
 
+    // Form value signals so `hostCollision` recomputes on every keystroke.
+    const httpVal = toSignal(this.addHTTPRoute.valueChanges.pipe(startWith(this.addHTTPRoute.value)),
+      { initialValue: this.addHTTPRoute.value });
+    const tcpVal = toSignal(this.addTCPRoute.valueChanges.pipe(startWith(this.addTCPRoute.value)),
+      { initialValue: this.addTCPRoute.value });
+    const domainVal = toSignal(this.domainFormGroup.controls.domain.valueChanges.pipe(
+      startWith(this.domainFormGroup.controls.domain.value)),
+      { initialValue: this.domainFormGroup.controls.domain.value });
+
+    (this as { hostCollision: Signal<StRoute | null> }).hostCollision = computed(() => {
+      const domain = domainVal();
+      if (!domain || typeof domain === 'string') return null;
+      const domainGuid = domain.metadata.guid;
+      const isTcp = domain.entity.router_group_type === 'tcp';
+      const available = this.mapRoutesConfig.availableRoutes();
+      if (!available.length) return null;
+
+      if (isTcp) {
+        const v = tcpVal();
+        if (v?.useRandomPort) return null; // can't predict random
+        const portStr = (v?.port ?? '').trim();
+        if (!portStr) return null;
+        const port = parseInt(portStr, 10);
+        if (isNaN(port)) return null;
+        return available.find(r => r.domainGuid === domainGuid && (r.port ?? 0) === port) ?? null;
+      }
+
+      const v = httpVal();
+      const host = (v?.host ?? '').trim();
+      if (!host) return null;
+      let path = v?.path ?? '';
+      if (path && path.length && path[0] !== '/') path = '/' + path;
+      return available.find(r =>
+        r.domainGuid === domainGuid
+        && (r.host ?? '') === host
+        && (r.path ?? '') === path,
+      ) ?? null;
+    });
+
     this.signalHandle = {
       valid: computed(() => {
         // Touch every reactive source so the signal graph re-runs on any
         // input/form transition, then defer to validate().
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        httpStatus(); tcpStatus(); domainStatus();
-        this._addRouteMode(); this.hasSelectedRoute();
+        void httpStatus(); void tcpStatus(); void domainStatus();
+        void this.hasSelectedRoute(); void this.hostCollision();
         return this.validate();
       }),
       submit: async () => {
@@ -205,9 +252,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       blocked: computed(() => this.actions.inFlight()),
     };
 
-    // Build the signal-list config off the picker service. Sort and view-mode
-    // are owned by the picker service's tab-scoped state; pagination is
-    // local to the picker too.
+    // Build the picker (Available routes) config from the picker service.
+    // Sort/view-mode/pagination are owned by the service's tab-scoped state.
     const columns: SignalListColumn<StRoute>[] = this.mapRoutesConfig.buildColumns();
     this.mapListConfig = {
       pagedItems: this.mapRoutesConfig.view.pagedItems,
@@ -231,6 +277,32 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       onClear: () => this.mapRoutesConfig.clearFilters(),
       viewMode: this.mapRoutesConfig.viewMode,
       sort: this.mapRoutesConfig.sort,
+    };
+
+    // Read-only "Already attached" list. Reuses the picker's column shape
+    // minus the radio (no action) and feeds directly off the
+    // `attachedRoutes` signal — no pagination/filter pipeline.
+    const attachedColumns = columns.filter(c => c.kind !== 'radio');
+    const attachedRoutesSignal = this.mapRoutesConfig.attachedRoutes;
+    this.attachedListConfig = {
+      pagedItems: attachedRoutesSignal,
+      totalFilteredResults: computed(() => attachedRoutesSignal().length),
+      totalPages: computed(() => 1),
+      pageIndex: signal(0),
+      pageSize: signal(100),
+      isAnyLoading: signal(false).asReadonly(),
+      errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+      columns: attachedColumns,
+      getRowKey: (row: StRoute) => row.guid,
+      emptyMessage: '',
+      emptyFilterMessage: '',
+      loadingMessage: 'Loading…',
+      // Hide the paginator when the list is small.
+      pageSizeOptions: {
+        table: [100],
+        card: [100],
+      },
+      viewMode: signal('table'),
     };
   }
 
@@ -297,15 +369,40 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Eagerly drain the space's routes for both lists. The two-list
+    // single-screen redesign needs this on entry rather than gated on a
+    // radio toggle. Idempotent: refresh() returns early until appDetail
+    // resolves, so calling here-and-now is safe even before the app
+    // entity has populated.
+    void this.mapRoutesConfig.refresh();
+    // Re-drain when appDetail.spaceGuid first lands (covers the cold-load
+    // race where ngOnInit fires before the cnsi+space are bound).
+    this.subscriptions.push(
+      this.applicationService.waitForAppEntity$.pipe(
+        filter(app => !!app?.entity?.entity?.space_guid),
+      ).subscribe(() => { void this.mapRoutesConfig.refresh(); }),
+    );
   }
 
+  /**
+   * The submit gate. The user has two mutually exclusive intents:
+   *   - Pick a row from the available list → attach.
+   *   - Fill the form → create-and-attach.
+   * If a row is selected, the form's validity doesn't matter. If no row
+   * is selected, the active form (HTTP vs TCP) must be valid AND there
+   * must be no client-side host/port collision against the available
+   * list.
+   */
   validate(): boolean {
-    if (this.addRouteMode && this.addRouteMode.id === 'create') {
-      return this.isTCPRouteCreation()
-        ? this.addTCPRoute.valid
-        : this.addHTTPRoute.valid;
+    if (this.hasSelectedRoute()) {
+      return true;
     }
-    return this.hasSelectedRoute();
+    const formValid = this.isTCPRouteCreation()
+      ? this.addTCPRoute.valid
+      : this.addHTTPRoute.valid;
+    if (!formValid) return false;
+    return this.hostCollision() === null;
   }
 
   isTCPRouteCreation(): boolean {
@@ -314,15 +411,16 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Submit dispatch: route to create-and-attach or attach-existing based on
-   * the current mode. Resolves on success (signalHandle.submit unwraps),
-   * rejects with an Error to surface the message via stepper snackbar.
+   * Submit dispatch. Row-selected wins over the form (validate() ensures
+   * the two intents don't both produce valid=true). Resolves on success
+   * (signalHandle.submit unwraps), rejects with an Error to surface the
+   * message via stepper snackbar.
    */
   async runSubmit(): Promise<void> {
-    if (this.addRouteMode && this.addRouteMode.id === 'create') {
-      await this.runCreateAndAttach();
-    } else {
+    if (this.hasSelectedRoute()) {
       await this.runAttachExisting();
+    } else {
+      await this.runCreateAndAttach();
     }
   }
 
@@ -366,14 +464,55 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     try {
       created = await this.actions.createAndAttachRoute(req);
     } catch (err) {
-      // Pass the message through verbatim — orphan-on-attach-fail messages
-      // already include the orphan route GUID + URL, formatted by the
-      // action service. The stepper surfaces this in the snackbar.
-      const msg = (err as Error)?.message ?? 'Failed to add route';
-      throw new Error(msg);
+      // Translate uniqueness errors (CF v3 codes 210003 RouteHostTaken /
+      // 210004 RoutePathTaken / 210005 RoutePortTaken) into a generic
+      // "name unavailable" message — the typical case is a same-tuple
+      // route in another space we can't surface details on without
+      // info-leak. Same-space cases are caught client-side via
+      // hostCollision and never reach this branch. Other 422 details
+      // (invalid host, quota exceeded, etc.) pass through verbatim;
+      // orphan-on-attach-fail messages too.
+      throw new Error(this.classifyCreateError(err));
     }
     this.dataService.addRoute(created);
     this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
+  }
+
+  /**
+   * Map a thrown error from createAndAttachRoute into a user-facing
+   * message. CF v3 returns 422 with `errors[].code` for uniqueness
+   * conflicts (210003/210004/210005); we translate those without leaking
+   * the colliding route's space/org. Any other shape passes the original
+   * message through.
+   */
+  private classifyCreateError(err: unknown): string {
+    const e = err as { message?: string; status?: number; error?: unknown };
+    const status = e?.status ?? 0;
+    if (status === 422) {
+      const code = this.extractCfErrorCode(e?.error);
+      if (code === 210003 || code === 210004 || code === 210005) {
+        return 'Route name is unavailable. Please choose another.';
+      }
+    }
+    return e?.message ?? 'Failed to add route';
+  }
+
+  /**
+   * CF v3 error envelopes nest as `{ errors: [{ code, title, detail }] }`.
+   * Stratos's HttpClient surfaces this on `HttpErrorResponse.error`,
+   * sometimes already parsed and sometimes as a JSON string depending on
+   * the route through Jetstream's proxy. Tolerate both.
+   */
+  private extractCfErrorCode(payload: unknown): number | null {
+    if (!payload) return null;
+    let body: unknown = payload;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch { return null; }
+    }
+    const arr = (body as { errors?: { code?: number }[] })?.errors;
+    if (!Array.isArray(arr) || !arr.length) return null;
+    const code = arr[0]?.code;
+    return typeof code === 'number' ? code : null;
   }
 
   /** Attach an existing route (the row currently selected in the picker). */
