@@ -192,6 +192,11 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
         };
       })
     );
+
+    // Self-trigger load now that @Input endpoint is bound. This used to be
+    // driven by the parent's QueryList walk, which raced with input
+    // bindings and stranded cards on the showMode=false render path.
+    this.load();
   }
 
   ngOnDestroy() {

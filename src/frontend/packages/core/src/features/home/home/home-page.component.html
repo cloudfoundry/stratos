@@ -45,11 +45,10 @@
     <div class="home-grid"
       [class.columns-1]="columns === 1"
       [class.columns-2]="columns === 2"
-      [class.columns-3]="columns === 3"
-      #endpointsPanel>
+      [class.columns-3]="columns === 3">
       @for (ep of endpoints(); track ep?.guid ?? $index) {
-        <div #endpointElements class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
-          <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout()" [endpoint]="ep">
+        <div class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
+          <app-home-page-endpoint-card [layout]="layout()" [endpoint]="ep">
           </app-home-page-endpoint-card>
         </div>
       }
