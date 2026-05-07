@@ -1,6 +1,7 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
-    <app-list [addForm]="addForm">
+    <app-list-sub-nav title="Total Variables" [count]="totalVariables" [addAction]="addVariableAction"></app-list-sub-nav>
+    <app-list [addForm]="addForm" [suppressAddButton]="true">
       <div app-table-add class="variables-tab__env-table--add-form">
         <form #addForm="ngForm" novalidate>
           <div class="form-field">

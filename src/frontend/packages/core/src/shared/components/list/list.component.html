@@ -157,8 +157,11 @@
               </button>
             }
           </div>
-          <!-- Global actions (those not applied to specific rows) -->
-          @if ((isAddingOrSelecting$ | async) === false && globalActions?.length > 0) {
+          <!-- Global actions (those not applied to specific rows).
+               Suppressed when the page hosts an `<app-list-sub-nav>` above
+               the list (suppressAddButton=true) — the L5 row owns the
+               create affordance and showing it here too would duplicate. -->
+          @if (!suppressAddButton && (isAddingOrSelecting$ | async) === false && globalActions?.length > 0) {
             <div>
               @for (action of globalActions; track $index) {
                 @if (action.visible$ | async) {
@@ -185,8 +188,9 @@
               </button>
             </div>
           }
-          <!-- Add form button -->
-          @if (addForm && (isAddingOrSelecting$ | async) === false) {
+          <!-- Add form button — suppressed when an L5 sub-nav above the
+               list owns the trigger (see suppressAddButton). -->
+          @if (!suppressAddButton && addForm && (isAddingOrSelecting$ | async) === false) {
             <div>
               <button class="btn btn-icon" [disabled]="(dataSource.isLoadingPage$ | async)"
                 (click)="addForm?.reset();dataSource.startAdd();">

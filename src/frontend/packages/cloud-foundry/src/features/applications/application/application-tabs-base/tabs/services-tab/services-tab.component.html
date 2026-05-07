@@ -2,9 +2,10 @@
   <app-no-content-message iconFont="stratos-icons" icon="service" [firstLine]="'This application has no bound service instances'" [secondLine]="{
       text: ''
     }"></app-no-content-message>
-  <!-- 
+  <!--
     Set text to once we can bind services in the app:
       text: 'To bind this application to services please visit the Service Catalog'
    -->
 </ng-template>
-<app-list [noEntries]="noEntries"></app-list>
+<app-list-sub-nav title="Total Services" [count]="totalServices" [addAction]="bindServiceAction"></app-list-sub-nav>
+<app-list [noEntries]="noEntries" [suppressAddButton]="true"></app-list>
