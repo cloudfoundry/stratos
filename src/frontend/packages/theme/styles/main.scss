@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Restore page-title typography on bare <h1> elements.
+ *
+ * `@tailwind base` enables Preflight, which strips browser default
+ * font-size + font-weight from h1/h2/h3 (everything renders at the
+ * body's `1rem`/`400`). Page templates in Stratos use a bare
+ * `<h1>Applications</h1>` etc. inside `<app-page-header>`; before the
+ * Tailwind migration browser defaults gave those a visible title size
+ * and weight. Add a `@layer base` rule so the restored size doesn't
+ * fight Tailwind utility classes (utilities live in a higher layer and
+ * still win on h1s that opt out, e.g. in-card subheadings that set
+ * their own text-lg). */
+@layer base {
+  h1 { @apply text-2xl font-semibold; }
+  h2 { @apply text-xl  font-semibold; }
+  h3 { @apply text-lg  font-semibold; }
+  h4 { @apply text-base font-semibold; }
+}
+
 /* Icon font styles - supports both material-icons and custom icon fonts */
 .material-icons,
 .custom-icon,
