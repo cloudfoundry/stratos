@@ -4,10 +4,16 @@
   </div>
   <div class="page-header-right">
     <ng-container *appCfUserPermission="canCreateServiceInstance">
-      <button class="btn btn-primary btn-icon" name="add-service-instance" [routerLink]="addServiceInstanceLink"
-        [queryParams]="isServiceSpaceScoped$ | async" [disabled]="(hasVisiblePlans$ | async) === false"
-        [title]="toolTipText$ | async">
-        <span class="material-icons">add</span>
+      <button name="add-service-instance" type="button"
+        [routerLink]="addServiceInstanceLink"
+        [queryParams]="isServiceSpaceScoped$ | async"
+        [disabled]="(hasVisiblePlans$ | async) === false"
+        [title]="toolTipText$ | async"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
+               bg-primary text-white hover:bg-opacity-90 transition-all duration-150
+               disabled:opacity-50 disabled:cursor-not-allowed">
+        <span class="material-icons text-base leading-5">add</span>
+        <span>Add Service Instance</span>
       </button>
     </ng-container>
   </div>

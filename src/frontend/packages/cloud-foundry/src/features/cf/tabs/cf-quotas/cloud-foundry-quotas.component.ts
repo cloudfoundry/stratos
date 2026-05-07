@@ -66,7 +66,7 @@ export class CloudFoundryQuotasComponent {
     (this as { totalQuotas: Signal<number> }).totalQuotas =
       this.quotasConfig.view.totalFilteredResults;
     this.createQuotaAction = {
-      label: 'Create Quota',
+      label: 'Create Organization Quota',
       icon: 'add',
       visible: this.canAddQuota,
       invoke: () => router.navigate(['/cloud-foundry', cfGuid, 'add-quota']),
