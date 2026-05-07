@@ -1,14 +1,7 @@
 <div class="quotas">
-  <app-page-sub-nav>
-    @if (canAddQuota$ | async) {
-      <button class="btn btn-ghost create" name="add-quota"
-        routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-quota">
-        <span class="create-button-contents">
-          <span class="material-icons">add</span> Create
-        </span>
-      </button>
-    }
-  </app-page-sub-nav>
+  <app-list-sub-nav title="Total Quotas"
+                    [count]="totalQuotas"
+                    [addAction]="createQuotaAction"></app-list-sub-nav>
   @if (listConfig(); as cfg) {
     <app-signal-list [config]="cfg" />
   }

@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
-  PageSubNavComponent,
+  CurrentUserPermissionsService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
@@ -22,6 +24,7 @@ import {
 } from '@stratosui/store';
 
 import { CfOrgsSignalConfigService } from '../../../../shared/components/list/list-types/org/cf-orgs-signal-config.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
 
@@ -40,7 +43,7 @@ import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -78,9 +81,36 @@ export class CloudFoundryOrganizationsSignalComponent {
 
   public listConfig: WritableSignal<SignalListConfig<StOrg> | undefined> = signal(undefined);
 
+  /** Total org count for the L5 sub-nav. Assigned in the constructor
+   *  once orgsConfig.initialize() has populated `view`. */
+  public totalOrganizations!: Signal<number>;
+
+  /** Reactive permission flag for the L5 button. Mirrors the legacy
+   *  `*appCfUserPermission="canAddOrg"` gate that was lost when this
+   *  page was migrated to signal-list — the legacy template asked the
+   *  same question via `canAddOrg$ | async`. */
+  public canCreateOrganization!: Signal<boolean>;
+
+  /** L5 primary action — navigates to the add-org stepper. */
+  public createOrgAction!: ListSubNavAddAction;
+
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
+    const router = inject(Router);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     this.orgsConfig.initialize(cfGuid);
+    (this as { totalOrganizations: Signal<number> }).totalOrganizations =
+      this.orgsConfig.view.totalFilteredResults;
+    this.canCreateOrganization = toSignal(
+      currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, cfGuid),
+      { initialValue: false },
+    );
+    this.createOrgAction = {
+      label: 'Create Organization',
+      icon: 'add',
+      visible: this.canCreateOrganization,
+      invoke: () => router.navigate(['/cloud-foundry', cfGuid, 'add-org']),
+    };
 
     const statusColor = (org: StOrg): SignalListPillColor => {
       const s = (org.status ?? '').toLowerCase();

@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterModule } from '@angular/router';
 
-import { SignalListComponent, SignalListConfig } from '@stratosui/core';
+import {
+  ListSubNavAddAction,
+  ListSubNavComponent,
+  SignalListComponent,
+  SignalListConfig,
+} from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 
 import { CfOrgQuotasSignalConfigService } from '../../../../shared/components/list/list-types/cf-quotas/cf-org-quotas-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -26,7 +30,7 @@ import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-type
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -34,19 +38,39 @@ export class CloudFoundryQuotasComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private quotasConfig = inject(CfOrgQuotasSignalConfigService);
 
-  public canAddQuota$: Observable<boolean>;
   public listConfig: WritableSignal<SignalListConfig<StOrgQuota> | undefined> = signal(undefined);
+
+  /** Total quota count for the L5 sub-nav. Assigned in the constructor
+   *  once quotasConfig.initialize() has populated `view`. */
+  public totalQuotas!: Signal<number>;
+
+  /** Reactive permission flag for the L5 button. Mirrors the legacy
+   *  `(canAddQuota$ | async)` template gate. */
+  public canAddQuota!: Signal<boolean>;
+
+  /** L5 primary action — navigates to the legacy add-quota wizard. */
+  public createQuotaAction!: ListSubNavAddAction;
 
   constructor() {
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
-    this.canAddQuota$ = currentUserPermissionsService.can(
-      CfCurrentUserPermissions.QUOTA_CREATE,
-      this.cfEndpointService.cfGuid,
+    const router = inject(Router);
+    const cfGuid = this.cfEndpointService.cfGuid;
+
+    this.canAddQuota = toSignal(
+      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid),
+      { initialValue: false },
     );
 
-    const cfGuid = this.cfEndpointService.cfGuid;
     this.quotasConfig.initialize(cfGuid);
     void this.quotasConfig.loadAll();
+    (this as { totalQuotas: Signal<number> }).totalQuotas =
+      this.quotasConfig.view.totalFilteredResults;
+    this.createQuotaAction = {
+      label: 'Create Quota',
+      icon: 'add',
+      visible: this.canAddQuota,
+      invoke: () => router.navigate(['/cloud-foundry', cfGuid, 'add-quota']),
+    };
 
     this.listConfig.set({
       pagedItems: this.quotasConfig.view.pagedItems,
