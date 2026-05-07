@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, ViewChild, computed, inject, Signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
@@ -58,15 +59,15 @@ export class VariablesTabComponent implements OnInit {
   private data = inject(AppDetailDataService);
   private listConfig = inject<ListConfig<ListAppEnvVar>>(ListConfig);
 
-  /** Reference to the inline add form (template ref var #addForm). Used by
-   *  the L5 sub-nav's add action to reset the form before opening it. */
-  @ViewChild('addForm') addForm?: NgForm;
+  /** Data source supplied by the legacy ListConfig. Initialized via field
+   *  initializer (not the constructor) so subsequent field initializers
+   *  that depend on it (e.g. `totalVariables`) can reference it directly. */
+  envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar> = this.listConfig.getDataSource();
+  allEnvVars$!: Observable<VariableTabAllEnvVarType[] | any[]>;
 
-  constructor() {
-    const listConfig = this.listConfig;
-
-    this.envVarsDataSource = listConfig.getDataSource();
-  }
+  /** Pass-through of the data source's adding signal for the L5 sub-nav,
+   *  which swaps the +Add Variable button for the inline form when true. */
+  readonly isAdding: Signal<boolean> = this.envVarsDataSource.isAdding;
 
   /** Signal: names of user-defined environment variables from the app entity. */
   readonly envVarNames: Signal<string[]> = computed(() => {
@@ -74,25 +75,34 @@ export class VariablesTabComponent implements OnInit {
     return envJson ? Object.keys(envJson) : [];
   });
 
-  /** Reactive count for the L5 sub-nav (mirrors envVarNames length). */
-  readonly totalVariables: Signal<number> = computed(() => this.envVarNames().length);
+  /** Reactive count for the L5 sub-nav. Mirrors what the legacy paginated
+   *  list shows in its "X of Y" pager — sourced from the data source's
+   *  pagination state, which is the authoritative count of user-defined
+   *  env vars after filtering. envVarNames() (used by the input's
+   *  [appUnique] validator) reads from the app entity's
+   *  environment_json — that field isn't always populated by the legacy
+   *  app() adapter, so it can't be used for the count. */
+  readonly totalVariables: Signal<number> = toSignal(
+    this.envVarsDataSource.pagination$.pipe(
+      map(p => p?.totalResults ?? 0),
+      startWith(0),
+    ),
+    { initialValue: 0 },
+  );
 
   /**
    * L5 add action — opens the inline add-row form managed by the legacy
-   * `<app-list>`. Same dispatch the in-toolbar `+` used to do; the legacy
-   * button is suppressed via `[suppressAddButton]="true"`.
+   * `<app-list>`. Trusts the data source's startAdd() to reset state
+   * (it calls getEmptyType() to clear addItem). The form's NgModel
+   * controls re-bind to the empty addItem when the form re-attaches, so
+   * an explicit form.reset() isn't needed and avoids interacting with
+   * a previously-disposed NgForm reference.
    */
   readonly addVariableAction: ListSubNavAddAction = {
     label: 'Add Variable',
     icon: 'add',
-    invoke: () => {
-      this.addForm?.reset();
-      this.envVarsDataSource.startAdd();
-    },
+    invoke: () => this.envVarsDataSource.startAdd(),
   };
-
-  envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;
-  allEnvVars$!: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
     // appEnvVars is the paginator-backed ngrx path for all env var sections —

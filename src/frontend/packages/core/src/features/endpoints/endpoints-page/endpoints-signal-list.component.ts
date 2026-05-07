@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -18,6 +18,10 @@ import {
 
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import {
+  ListSubNavAddAction,
+  ListSubNavComponent,
+} from '../../../shared/components/list-sub-nav/list-sub-nav.component';
 import {
   SignalListColumn,
   SignalListComponent,
@@ -42,7 +46,7 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
   styleUrls: ['./endpoints-signal-list.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, SignalListComponent],
+  imports: [CommonModule, ListSubNavComponent, SignalListComponent],
 })
 export class EndpointsSignalListComponent {
   private store = inject<Store<AppState>>(Store);
@@ -51,6 +55,20 @@ export class EndpointsSignalListComponent {
   private confirmDialog = inject(ConfirmationDialogService);
   private tailwindDialog = inject(TailwindDialogService);
   private snackBar = inject(SnackBarService);
+
+  /**
+   * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
+   * the list. Provided by the parent <app-endpoints-page>, which owns the
+   * register-modal lifecycle (visibility gated on permission, invoke opens
+   * the modal). Optional so consumers without registration capability can
+   * mount the list with count-only.
+   */
+  @Input() addAction?: ListSubNavAddAction;
+
+  /** Reactive count for the L5 sub-nav row. Wired in the constructor —
+   *  `endpointsConfig.view` is built by initialize() and isn't available
+   *  at field-initializer time. */
+  readonly totalEndpoints!: Signal<number>;
 
   // Endpoint favorites in rowKey format. Endpoints are top-level (no parent
   // CNSI), so both the favorite endpointId and entityId are the endpoint guid
@@ -91,6 +109,7 @@ export class EndpointsSignalListComponent {
 
   constructor() {
     this.endpointsConfig.initialize();
+    (this as { totalEndpoints: Signal<number> }).totalEndpoints = this.endpointsConfig.view.totalFilteredResults;
 
     const typeLabel = (ep: EndpointModel): string => {
       const def = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);

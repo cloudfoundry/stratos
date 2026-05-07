@@ -97,9 +97,13 @@
               </div>
             </div>
           }
-          <!-- Filter by text input -->
+          <!-- Filter by text input. When the host page suppresses the
+               in-toolbar add affordance (suppressAddButton=true) the inline
+               add form lives on the L5 sub-nav above the list, so the
+               filter no longer needs to hide on isAdding. Legacy
+               consumers (no L5) keep the historic hide-on-add behavior. -->
           <div class="filter" id="listFilterSelect"
-            [hidden]="filterColumns.length < 1 || !config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
+            [hidden]="filterColumns.length < 1 || !config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (!suppressAddButton && (dataSource.isAdding$ | async)) || (dataSource.maxedResults$ | async)">
             <div class="form-field">
               <label class="label" for="listFilterSelection">Filter Selection</label>
               <select class="select" id="listFilterSelection" [(ngModel)]="filterSelected" (change)="updateListFilter(filterSelected)">
@@ -112,7 +116,7 @@
             </div>
           </div>
           <div class="filter" id="listSearchFilter"
-            [hidden]="!config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (dataSource.isAdding$ | async) || (dataSource.maxedResults$ | async)">
+            [hidden]="!config.enableTextFilter || ((hasRows$ | async) === false && !filter) || (!suppressAddButton && (dataSource.isAdding$ | async)) || (dataSource.maxedResults$ | async)">
             <div class="form-field list-component__header__right-filter">
               <div class="relative">
                 <input type="text" class="input pr-8" [ngModel]="filterString" #filter="ngModel"
@@ -173,8 +177,9 @@
               }
             </div>
           }
-          <!-- Add new row form -->
-          @if (addForm && (dataSource.isAdding$ | async) && (dataSource.isSelecting$ | async) === false) {
+          <!-- Add new row form. Suppressed when an L5 sub-nav above the
+               list owns the inline form (see suppressAddButton). -->
+          @if (!suppressAddButton && addForm && (dataSource.isAdding$ | async) && (dataSource.isSelecting$ | async) === false) {
             <div
               class="add-container">
               <div class="spacer"></div>

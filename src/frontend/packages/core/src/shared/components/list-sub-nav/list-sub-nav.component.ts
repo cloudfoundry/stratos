@@ -44,11 +44,20 @@ export interface ListSubNavAddAction {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div data-test="list-sub-nav"
-         class="flex items-center justify-between px-6 py-3 bg-content-bg border-b border-content-border">
-      <div class="text-base font-semibold text-content-text" data-test="list-sub-nav-title">
+         class="flex items-center justify-between gap-3 px-6 py-3 bg-content-bg border-b border-content-border">
+      <div class="text-base font-semibold text-content-text whitespace-nowrap" data-test="list-sub-nav-title">
         {{ title }}: <span class="text-content-muted font-medium">{{ count() }}</span>
       </div>
-      @if (addAction && isAddVisible()) {
+      @if (isAdding && isAdding()) {
+        <!-- Inline add-form slot. When the consumer flips its isAdding signal
+             true, the right side of the row swaps the add button for the
+             projected form. Used by Variables (Name/Value inputs + save/
+             cancel) and any future page that wants the add form inline
+             rather than below the list. -->
+        <div data-test="list-sub-nav-form" class="flex items-center gap-2 flex-1 justify-end">
+          <ng-content select="[subNavForm]"></ng-content>
+        </div>
+      } @else if (addAction && isAddVisible()) {
         <button
           data-test="list-sub-nav-add"
           type="button"
@@ -76,6 +85,12 @@ export class ListSubNavComponent {
 
   /** Optional primary action. Omit for read-only lists. */
   @Input() addAction?: ListSubNavAddAction;
+
+  /** When set and emits true, swaps the right-side add button for a
+   *  projected `[subNavForm]` slot — lets pages with an inline add form
+   *  (Variables) host it on the same row as the title rather than as a
+   *  separate row. */
+  @Input() isAdding?: Signal<boolean>;
 
   protected readonly isAddVisible = computed(() => {
     const v = this.addAction?.visible;

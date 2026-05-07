@@ -2,17 +2,10 @@
   <h1>Endpoints</h1>
   <div class="page-header-right">
     <div class="flex items-center space-x-2">
-      @if (canRegisterEndpoint()) {
-        <button
-          id="stratos-add-endpoint"
-          class="btn btn-icon bg-primary text-white hover:bg-opacity-90 transition-all duration-200 hover:scale-105"
-          type="button"
-          (click)="openRegisterModal()"
-          matTooltip="Register Endpoint"
-          >
-          <span class="material-icons">add</span>
-        </button>
-      }
+      <!-- Register Endpoint moved to the L5 sub-nav above the endpoints
+           list (see endpoints-signal-list template). Backup/Restore stays
+           here because it's page-level admin, not a "create new endpoint"
+           verb. -->
       @if (canBackupRestore$ | async) {
         <button id="stratos-restore-backup" class="btn btn-icon" type="button"
           [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
@@ -37,7 +30,7 @@
 <div class="endpoints-content flex flex-col flex-1 min-h-0">
   @if (isInitialised$ | async) {
     @if ((endpointsService.haveRegistered$ | async)) {
-      <app-endpoints-signal-list class="flex-1"></app-endpoints-signal-list>
+      <app-endpoints-signal-list [addAction]="registerEndpointAction" class="flex-1"></app-endpoints-signal-list>
     } @else {
       @if (!customizations.noEndpointsComponent) {
         <app-endpoints-missing

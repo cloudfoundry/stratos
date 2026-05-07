@@ -56,6 +56,21 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public canRegisterEndpoint = signal<boolean>(false);
   private healthCheckTimeout!: number;
 
+  /**
+   * Primary "Register Endpoint" action wired to the L5 sub-nav above the
+   * endpoints list. The L5 row lives inside <app-endpoints-signal-list>;
+   * this object is passed via [addAction] so the inner component renders
+   * the button while the outer keeps ownership of the modal lifecycle.
+   * Visibility tracks `canRegisterEndpoint` so the button hides when the
+   * user lacks the permission.
+   */
+  public registerEndpointAction = {
+    label: 'Register Endpoint',
+    icon: 'add',
+    visible: this.canRegisterEndpoint,
+    invoke: () => this.openRegisterModal(),
+  };
+
   public canBackupRestore$: Observable<boolean>;
   public showRegisterModal = false;
   public isInitialised$: Observable<boolean>;
