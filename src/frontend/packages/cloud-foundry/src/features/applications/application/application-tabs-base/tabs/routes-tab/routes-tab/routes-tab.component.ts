@@ -14,10 +14,11 @@ import { Router } from '@angular/router';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
-  SignalListHeaderAction,
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -50,6 +51,7 @@ import { AppDetailDataService } from '../../../../../app-detail-data.service';
   standalone: true,
   imports: [
     SignalListComponent,
+    ListSubNavComponent,
   ],
   providers: [
     AppRouteActionsService,
@@ -70,6 +72,23 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
 
   readonly listConfig: SignalListConfig<StRoute>;
 
+  /** Reactive total surfaced to the L5 sub-nav row above the list. */
+  readonly totalRoutes: Signal<number>;
+
+  /** Primary "create new route" affordance for the L5 sub-nav row. */
+  readonly addRouteAction: ListSubNavAddAction = {
+    label: 'Add Route',
+    icon: 'add',
+    invoke: () => {
+      void this.router.navigate([
+        '/applications',
+        this.dataService.cnsiGuid,
+        this.dataService.appGuid,
+        'add-route',
+      ]);
+    },
+  };
+
   constructor() {
     // Build columns from the wave-2 config service, then replace the
     // actions column's factory with our confirm-wrapped version. The
@@ -82,21 +101,6 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
       }
       return col;
     });
-
-    const headerActions: readonly SignalListHeaderAction[] = [
-      {
-        label: 'Add Route',
-        icon: 'add',
-        invoke: () => {
-          void this.router.navigate([
-            '/applications',
-            this.dataService.cnsiGuid,
-            this.dataService.appGuid,
-            'add-route',
-          ]);
-        },
-      },
-    ];
 
     this.listConfig = {
       pagedItems: this.routesConfig.view.pagedItems,
@@ -120,8 +124,9 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
       onClear: () => this.routesConfig.clearFilters(),
       viewMode: this.routesConfig.viewMode,
       sort: this.routesConfig.sort,
-      headerActions,
     };
+
+    this.totalRoutes = this.routesConfig.view.totalFilteredResults;
   }
 
   ngOnInit(): void {
