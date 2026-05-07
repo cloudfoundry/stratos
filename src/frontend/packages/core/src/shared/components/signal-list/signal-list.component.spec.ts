@@ -159,107 +159,12 @@ describe('SignalListComponent', () => {
     expect(btn.disabled).toBe(true);
   });
 
-  it('renders no header actions row when headerActions is omitted', () => {
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-test="header-actions"]')).toBeNull();
-  });
-
-  it('renders no header actions row when headerActions is empty', () => {
-    const fixture = TestBed.createComponent(Host);
-    fixture.componentInstance.config = {
-      ...fixture.componentInstance.config,
-      headerActions: [],
-    };
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-test="header-actions"]')).toBeNull();
-  });
-
-  it('renders a button per visible header action with optional icon', () => {
-    const fixture = TestBed.createComponent(Host);
-    fixture.componentInstance.config = {
-      ...fixture.componentInstance.config,
-      headerActions: [
-        { label: 'Invite User', icon: 'person_add', invoke: () => { /* no-op */ } },
-        { label: 'Create', primary: true, invoke: () => { /* no-op */ } },
-      ],
-    };
-    fixture.detectChanges();
-    const buttons = fixture.nativeElement.querySelectorAll('[data-test="header-action"]');
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].textContent).toContain('Invite User');
-    expect(buttons[0].querySelector('.material-icons')?.textContent).toBe('person_add');
-    expect(buttons[1].textContent).toContain('Create');
-    // Primary button uses the accent class.
-    expect(buttons[1].className).toContain('bg-accent');
-    // Secondary button does NOT use accent fill.
-    expect(buttons[0].className).not.toContain('bg-accent ');
-  });
-
-  it('hides header actions whose visible signal returns false', () => {
-    const fixture = TestBed.createComponent(Host);
-    const visible = signal(false);
-    fixture.componentInstance.config = {
-      ...fixture.componentInstance.config,
-      headerActions: [
-        { label: 'Manage Roles', visible: visible.asReadonly(), invoke: () => { /* no-op */ } },
-        { label: 'Always Shown', invoke: () => { /* no-op */ } },
-      ],
-    };
-    fixture.detectChanges();
-    let buttons = fixture.nativeElement.querySelectorAll('[data-test="header-action"]');
-    expect(buttons.length).toBe(1);
-    expect(buttons[0].textContent).toContain('Always Shown');
-    visible.set(true);
-    fixture.detectChanges();
-    buttons = fixture.nativeElement.querySelectorAll('[data-test="header-action"]');
-    expect(buttons.length).toBe(2);
-  });
-
-  it('disables header action buttons whose disabled signal returns true', () => {
-    const fixture = TestBed.createComponent(Host);
-    const disabled = signal(true);
-    fixture.componentInstance.config = {
-      ...fixture.componentInstance.config,
-      headerActions: [
-        { label: 'Maybe', disabled: disabled.asReadonly(), invoke: () => { /* no-op */ } },
-      ],
-    };
-    fixture.detectChanges();
-    const btn = fixture.nativeElement.querySelector('[data-test="header-action"]');
-    expect(btn.disabled).toBe(true);
-    disabled.set(false);
-    fixture.detectChanges();
-    expect(btn.disabled).toBe(false);
-  });
-
-  it('clicking a header action invokes its handler', () => {
-    const fixture = TestBed.createComponent(Host);
-    const invoke = vi.fn();
-    fixture.componentInstance.config = {
-      ...fixture.componentInstance.config,
-      headerActions: [{ label: 'Click Me', invoke }],
-    };
-    fixture.detectChanges();
-    const btn = fixture.nativeElement.querySelector('[data-test="header-action"]');
-    btn.click();
-    expect(invoke).toHaveBeenCalledOnce();
-  });
-
-  it('does not invoke a disabled header action', () => {
-    const fixture = TestBed.createComponent(Host);
-    const invoke = vi.fn();
-    fixture.componentInstance.config = {
-      ...fixture.componentInstance.config,
-      headerActions: [{ label: 'Locked', disabled: signal(true).asReadonly(), invoke }],
-    };
-    fixture.detectChanges();
-    const btn = fixture.nativeElement.querySelector('[data-test="header-action"]');
-    // Programmatic click bypasses the [disabled] attribute, so the
-    // component's invokeHeaderAction must short-circuit on its own.
-    btn.click();
-    expect(invoke).not.toHaveBeenCalled();
-  });
+  // Note: SignalListConfig.headerActions was removed (see commit
+  // "Sweep remaining headerActions consumers; remove the field"). The
+  // 7 tests that asserted on header-action rendering, visibility,
+  // disabled state, click handling, and accent styling were dropped
+  // along with the field. The replacement page-level "+ Add" pattern
+  // is now driven by ListSubNavComponent and tested per-consumer.
 
   it('onDropdownChange updates selected and resets pageIndex', () => {
     const fixture = TestBed.createComponent(Host);

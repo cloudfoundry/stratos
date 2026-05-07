@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
@@ -12,6 +12,7 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {ApplicationService, generateCFEntities, ServiceActionHelperService,
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock, generateActiveRouteCfOrgSpaceMock, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { ServicesTabComponent } from './services-tab.component';
 
 describe('ServicesTabComponent', () => {
@@ -50,6 +51,12 @@ describe('ServicesTabComponent', () => {
         ServiceActionHelperService,
         ...cfCurrentUserPermissionsService,
         Store,
+        // The component reads `dataService.summary()` for its bound-services
+        // count. AppDetailDataService is normally provided at the app-detail
+        // route component (ApplicationBaseComponent); supply a minimal stub
+        // here so the tab's L5 binding resolves without dragging the whole
+        // app-detail provider chain into the spec.
+        { provide: AppDetailDataService, useValue: { summary: signal(null) } },
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),

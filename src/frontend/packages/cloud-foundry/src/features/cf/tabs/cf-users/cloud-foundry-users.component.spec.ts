@@ -124,17 +124,9 @@ describe('CloudFoundryUsersComponent', () => {
     expect(text).toContain('developer');
   });
 
-  it('exposes a placeholder Invite User header action', () => {
-    const cfg = component.listConfig();
-    expect(cfg!.headerActions).toBeDefined();
-    expect(cfg!.headerActions!.length).toBe(1);
-    const invite = cfg!.headerActions![0];
-    expect(invite.label).toBe('Invite User');
-    expect(invite.icon).toBe('person_add');
-    // Placeholder click is a no-throw stub that opens a snackbar — just
-    // verify it doesn't blow up when invoked outside the live snackbar
-    // host (the service's open() works against document.body, which jsdom
-    // provides).
-    expect(() => invite.invoke()).not.toThrow();
-  });
+  // Note: a previous test asserted on `cfg.headerActions` for an "Invite
+  // User" placeholder action. SignalListConfig.headerActions was removed
+  // (see commit "Sweep remaining headerActions consumers"); a framework
+  // slot for non-add page-level actions is tracked separately. The test
+  // is dropped along with the field.
 });
