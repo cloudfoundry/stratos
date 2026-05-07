@@ -25,7 +25,12 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
     RouterModule,
     DotContentComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // The internal `.steppers-wrapper` uses `flex: 1; min-height: 0` to fill
+  // the host and let `.steppers-contents` overflow-y:auto scroll while the
+  // navigation row stays pinned. Establishing a flex column on the host
+  // gives that wrapper a constrained parent to expand into.
+  host: { class: 'flex flex-1 flex-col min-h-0' },
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private steppersService = inject(SteppersService);

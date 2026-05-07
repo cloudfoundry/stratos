@@ -1,87 +1,92 @@
 <div class="add-route">
-  <div>Create a new route or map an existing one. </div>
-  <div class="flex flex-col gap-3 my-4">
-    @for (mode of addRouteModes; track mode) {
-      <label class="inline-flex items-center cursor-pointer">
-        <input type="radio" [(ngModel)]="addRouteMode" [value]="mode" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
-        <span class="ml-2 text-sm font-medium text-content-text">{{ mode.label }}</span>
-      </label>
+  <div class="add-route__section add-route__section--primary" data-test="create-route-form">
+    <div class="add-route__section-title">Create a new route</div>
+    <form class="stepper-form w-1/2" [formGroup]="domainFormGroup">
+      <app-form-field [fitContent]="true">
+        <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains">
+          @for (domain of domains; track domain) {
+            <app-option [value]="domain">{{domain?.entity?.name}}</app-option>
+          }
+        </app-select>
+      </app-form-field>
+    </form>
+
+    @if (selectedDomain?.entity?.router_group_type !== 'tcp') {
+      <form [formGroup]="addHTTPRoute" class="stepper-form w-1/2">
+        <div class="add-route__form-prompt">
+          This is an HTTP Domain - an HTTP Route will be created
+        </div>
+        <div class="add-route__form-fields">
+          <div>
+            <app-form-field>
+              <input appInput formControlName="host" placeholder="Host" required class="w-full">
+              @if (addHTTPRoute.controls['host'].errors?.pattern) {
+                <app-error>Invalid Hostname</app-error>
+              }
+              @if (addHTTPRoute.controls['host'].errors?.maxlength) {
+                <app-error>Host cannot exceed 63 characters</app-error>
+              }
+            </app-form-field>
+          </div>
+          <div>
+            <app-form-field>
+              <input appInput formControlName="path" placeholder="Path" class="w-full">
+              @if (addHTTPRoute.controls['path'].errors?.pattern) {
+                <app-error>Invalid Path</app-error>
+              }
+              @if (addHTTPRoute.controls['path'].errors?.maxlength) {
+                <app-error>Path cannot exceed 128 characters</app-error>
+              }
+            </app-form-field>
+          </div>
+        </div>
+      </form>
+    }
+    @if (selectedDomain?.entity?.router_group_type === 'tcp') {
+      <form [formGroup]="addTCPRoute" class="stepper-form w-1/2">
+        <div class="add-route__form-prompt">
+          This is a TCP Domain - a TCP Route will be created
+        </div>
+        <div class="add-route__form-fields">
+          <div>
+            <app-checkbox formControlName="useRandomPort">Use a random port</app-checkbox>
+            <app-form-field>
+              <input type="number" appInput formControlName="port" placeholder="Port" required class="w-full">
+              @if (addTCPRoute.controls['port'].errors?.pattern) {
+                <app-error>Invalid Port</app-error>
+              }
+            </app-form-field>
+          </div>
+        </div>
+      </form>
+    }
+
+    @if (hostCollision()) {
+      <div class="add-route__collision" role="alert" data-test="host-collision-warning">
+        A route with these values already exists in this space
+        @if ((hostCollision()!.appGuids ?? []).length === 0) {
+          (currently detached). Pick it from the list below to attach it instead.
+        } @else {
+          (attached to another app). Pick it from the list below to attach it to this app as well, or choose different values.
+        }
+      </div>
     }
   </div>
-  @if (addRouteMode?.id === 'create') {
-    <div class="add-route__form">
-      <div>
-        Please specify details for the new route.
-      </div>
-      <form class="stepper-form" [formGroup]="domainFormGroup">
-        <app-form-field>
-          <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains">
-            @for (domain of domains; track domain) {
-              <app-option [value]="domain">{{domain?.entity?.name}}</app-option>
-            }
-          </app-select>
-        </app-form-field>
-      </form>
-      @if (selectedDomain?.entity?.router_group_type !== 'tcp') {
-        <form [formGroup]="addHTTPRoute" class="stepper-form">
-          <div class="add-route__form-prompt">
-            This is an HTTP Domain - an HTTP Route will be created
-          </div>
-          <div class="add-route__form-fields">
-            <div>
-              <app-form-field>
-                <input appInput formControlName="host" placeholder="Host" required>
-                @if (addHTTPRoute.controls['host'].errors?.pattern) {
-                  <app-error>Invalid Hostname</app-error>
-                }
-                @if (addHTTPRoute.controls['host'].errors?.maxlength) {
-                  <app-error>Host cannot exceed 63 characters</app-error>
-                }
-              </app-form-field>
-            </div>
-            <div>
-              <app-form-field>
-                <input appInput formControlName="path" placeholder="Path">
-                @if (addHTTPRoute.controls['path'].errors?.pattern) {
-                  <app-error>Invalid Path</app-error>
-                }
-                @if (addHTTPRoute.controls['path'].errors?.maxlength) {
-                  <app-error>Path cannot exceed 128 characters</app-error>
-                }
-              </app-form-field>
-            </div>
-          </div>
-        </form>
-      }
-      @if (selectedDomain?.entity?.router_group_type === 'tcp') {
-        <form [formGroup]="addTCPRoute" class="stepper-form">
-          <div class="add-route__form-prompt">
-            This is a TCP Domain - a TCP Route will be created
-          </div>
-          <div class="add-route__form-fields">
-            <div>
-              <app-checkbox formControlName="useRandomPort">Use a random port</app-checkbox>
-              <app-form-field>
-                <input type="number" appInput formControlName="port" placeholder="Port" required>
-                @if (addTCPRoute.controls['port'].errors?.pattern) {
-                  <app-error>Invalid Port</app-error>
-                }
-              </app-form-field>
-            </div>
-          </div>
-        </form>
-      }
-    </div>
-  }
 
-  @if (addRouteMode?.id === 'map') {
-    <div class="add-route__form">
-      <div class="add-route__form-message">
-        Please select the route you wish to map
-      </div>
-      <div class="add-route__form-maptable" data-test="map-routes-picker">
-        <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
-      </div>
+  <div class="add-route__section" data-test="available-routes">
+    <div class="add-route__section-title">Or attach an existing route</div>
+    <app-signal-list [config]="mapListConfig" class="flex-1 min-h-0"></app-signal-list>
+  </div>
+
+  <details class="add-route__section add-route__section--secondary add-route__accordion"
+           data-test="attached-routes"
+           [open]="attachedListOpen()"
+           (toggle)="attachedListExpanded.set($any($event.target).open)">
+    <summary class="add-route__accordion-summary">
+      Already attached to this app ({{ attachedListConfig.totalFilteredResults() }})
+    </summary>
+    <div class="add-route__accordion-body">
+      <app-signal-list [config]="attachedListConfig" class="flex-1 min-h-0"></app-signal-list>
     </div>
-  }
+  </details>
 </div>

@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterModule } from '@angular/router';
 
-import { SignalListComponent, SignalListConfig } from '@stratosui/core';
+import {
+  ListSubNavAddAction,
+  ListSubNavComponent,
+  SignalListComponent,
+  SignalListConfig,
+} from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { PageSubNavComponent } from '../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 
 import { CfSpaceQuotasSignalConfigService } from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -33,7 +37,7 @@ import type { StSpaceQuota } from '../../../../services/endpoint-data/stratos-ty
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -42,17 +46,31 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private quotasConfig = inject(CfSpaceQuotasSignalConfigService);
 
-  public canAddQuota$: Observable<boolean>;
   public listConfig: WritableSignal<SignalListConfig<StSpaceQuota> | undefined> = signal(undefined);
+
+  /** Total space-quota count for the L5 sub-nav. Assigned in the
+   *  constructor once quotasConfig.initialize() has populated `view`. */
+  public totalSpaceQuotas!: Signal<number>;
+
+  /** Reactive permission flag for the L5 button. Mirrors the legacy
+   *  `(canAddQuota$ | async)` template gate. */
+  public canAddSpaceQuota!: Signal<boolean>;
+
+  /** L5 primary action — navigates to the legacy add-space-quota wizard. */
+  public createSpaceQuotaAction!: ListSubNavAddAction;
 
   constructor() {
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const router = inject(Router);
 
     const { cfGuid, orgGuid } = this.activeRouteCfOrgSpace;
-    this.canAddQuota$ = currentUserPermissionsService.can(
-      CfCurrentUserPermissions.SPACE_QUOTA_CREATE,
-      cfGuid,
-      orgGuid,
+    this.canAddSpaceQuota = toSignal(
+      currentUserPermissionsService.can(
+        CfCurrentUserPermissions.SPACE_QUOTA_CREATE,
+        cfGuid,
+        orgGuid,
+      ),
+      { initialValue: false },
     );
 
     // Set basePredicate before initialize so the auto-filter effect picks
@@ -60,6 +78,16 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     this.quotasConfig.basePredicate.set((q: StSpaceQuota) => q.organizationGuid === orgGuid);
     this.quotasConfig.initialize(cfGuid);
     void this.quotasConfig.loadAll();
+    (this as { totalSpaceQuotas: Signal<number> }).totalSpaceQuotas =
+      this.quotasConfig.view.totalFilteredResults;
+    this.createSpaceQuotaAction = {
+      label: 'Create Space Quota',
+      icon: 'add',
+      visible: this.canAddSpaceQuota,
+      invoke: () => router.navigate([
+        '/cloud-foundry', cfGuid, 'organizations', orgGuid, 'add-space-quota',
+      ]),
+    };
 
     this.listConfig.set({
       pagedItems: this.quotasConfig.view.pagedItems,

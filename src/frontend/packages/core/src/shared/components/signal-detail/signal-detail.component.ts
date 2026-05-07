@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
-// Mirrors SignalListHeaderAction shape (see signal-list.component.ts) so that
-// page-level actions (Edit, Delete, custom verbs) compose identically across
-// list and detail surfaces. Kept as a separate type so the two component
-// trees can evolve independently if the patterns diverge.
+// Page-level action button rendered above a signal-detail surface (Edit /
+// Delete / custom verbs). On list surfaces the equivalent slot lives in the
+// L5 sub-nav (`<app-list-sub-nav>`'s `addAction`); detail surfaces keep the
+// in-component header-actions pattern because they don't have a sibling list
+// row to host the affordance.
 export interface SignalDetailHeaderAction {
   readonly label: string;
   readonly icon?: string;
@@ -51,9 +52,8 @@ export interface SignalDetailConfig {
   // updates when the entity's last operation finishes (e.g. async-job
   // succeeded/failed).
   readonly status?: Signal<SignalDetailStatus | undefined>;
-  // Header actions rendered on the right side of the toolbar. Same shape
-  // as SignalListConfig.headerActions — see invokeHeaderAction below for
-  // error-handling contract.
+  // Header actions rendered on the right side of the toolbar — see
+  // invokeHeaderAction below for the error-handling contract.
   readonly headerActions?: readonly SignalDetailHeaderAction[];
   // Tab nav entries. When undefined / empty the tab nav row is skipped
   // (single-page detail). When provided the consumer is expected to mount

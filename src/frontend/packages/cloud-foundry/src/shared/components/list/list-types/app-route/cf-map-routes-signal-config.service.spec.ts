@@ -383,6 +383,62 @@ describe('CfMapRoutesSignalConfigService', () => {
     expect(svc.pageIndex()).toBe(0);
   });
 
+  // ---------------------------------------------------------------------------
+  // Split signals — attached vs available
+  // ---------------------------------------------------------------------------
+
+  it('attachedRoutes filters _routes to those whose appGuids include the current appGuid', async () => {
+    const data = makeDataServiceStub({ cnsiGuid: 'cnsi-1', spaceGuid: 'space-1' });
+    const { svc, ctrl } = configure({ data });
+    const promise = svc.refresh();
+    ctrl.expectOne('/pp/v1/cf/routes/cnsi-1?space_guids=space-1').flush({
+      resources: [
+        makeRoute({ guid: 'mine-1', appGuids: ['app-1'] }),
+        makeRoute({ guid: 'other', appGuids: ['app-2'] }),
+        makeRoute({ guid: 'detached' }),
+      ],
+      totalResults: 3,
+    } satisfies StRoutesResponse);
+    await promise;
+    TestBed.tick();
+    expect(svc.attachedRoutes().map(r => r.guid)).toEqual(['mine-1']);
+  });
+
+  it('availableRoutes excludes routes attached to the current app', async () => {
+    const data = makeDataServiceStub({ cnsiGuid: 'cnsi-1', spaceGuid: 'space-1' });
+    const { svc, ctrl } = configure({ data });
+    const promise = svc.refresh();
+    ctrl.expectOne('/pp/v1/cf/routes/cnsi-1?space_guids=space-1').flush({
+      resources: [
+        makeRoute({ guid: 'mine-1', appGuids: ['app-1'] }),
+        makeRoute({ guid: 'other', appGuids: ['app-2'] }),
+        makeRoute({ guid: 'detached' }),
+      ],
+      totalResults: 3,
+    } satisfies StRoutesResponse);
+    await promise;
+    TestBed.tick();
+    const guids = svc.availableRoutes().map(r => r.guid).sort();
+    expect(guids).toEqual(['detached', 'other']);
+  });
+
+  it('view.pagedItems shows only available routes (drives the redesigned picker)', async () => {
+    const data = makeDataServiceStub({ cnsiGuid: 'cnsi-1', spaceGuid: 'space-1' });
+    const { svc, ctrl } = configure({ data });
+    const promise = svc.refresh();
+    ctrl.expectOne('/pp/v1/cf/routes/cnsi-1?space_guids=space-1').flush({
+      resources: [
+        makeRoute({ guid: 'mine', appGuids: ['app-1'] }),
+        makeRoute({ guid: 'available', appGuids: [] }),
+      ],
+      totalResults: 2,
+    } satisfies StRoutesResponse);
+    await promise;
+    TestBed.tick();
+    const guids = svc.view.pagedItems().map(r => r.guid);
+    expect(guids).toEqual(['available']);
+  });
+
   it('nameFilter narrows the view by URL substring', async () => {
     const data = makeDataServiceStub({ cnsiGuid: 'cnsi-1', spaceGuid: 'space-1' });
     const { svc, ctrl } = configure({ data });

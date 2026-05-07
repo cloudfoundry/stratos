@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
+  ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
-  SignalListHeaderAction,
-  TailwindSnackBarService,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -42,6 +41,7 @@ import type { StUser, StUserSpaceRole } from '../../../../../../../services/endp
   imports: [
     CommonModule,
     RouterModule,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -50,14 +50,19 @@ export class CloudFoundrySpaceUsersComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   cfSpaceService = inject(CloudFoundrySpaceService);
   private usersConfig = inject(CfUsersSignalConfigService);
-  private snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
+
+  /** Reactive count for the L5 sub-nav. Wired in the constructor — the
+   *  underlying `usersConfig.view` is built by initializeForSpace() and
+   *  isn't available at field-initializer time. */
+  readonly totalUsers!: Signal<number>;
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.usersConfig.initializeForSpace(cfGuid, spaceGuid);
+    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalFilteredResults;
 
     const renderUsername = (u: StUser): string =>
       u.username && u.username.length > 0 ? u.username : (u.presentationName ?? u.guid);
@@ -79,39 +84,11 @@ export class CloudFoundrySpaceUsersComponent {
     const renderCreated = (u: StUser): string =>
       CloudFoundrySpaceUsersComponent.formatDate(u.createdAt);
 
-    // PLACEHOLDER header actions — proves the SignalListConfig.headerActions
-    // slot wires through correctly. Manage Roles + Invite User flows stay
-    // on the legacy stepper paths under /users/manage and /users/invite for
-    // this round (matches the CF-level page commit). When those flows
-    // migrate signal-native, swap each invoke() to navigate to the real
-    // route. The stub click intentionally surfaces the slot in the live UI
-    // without claiming a half-shipped flow.
-    const headerActions: readonly SignalListHeaderAction[] = [
-      {
-        label: 'Manage Roles',
-        icon: 'people',
-        tooltip: 'Manage user roles for this space (legacy flow — not yet migrated)',
-        invoke: () => {
-          this.snackBar.open(
-            'Manage Roles flow not yet migrated — open via legacy users page',
-            'Dismiss',
-            { duration: 5000 },
-          );
-        },
-      },
-      {
-        label: 'Invite User',
-        icon: 'person_add',
-        tooltip: 'Invite a user (legacy flow — not yet migrated)',
-        invoke: () => {
-          this.snackBar.open(
-            'Invite User flow not yet migrated — open via legacy users page',
-            'Dismiss',
-            { duration: 5000 },
-          );
-        },
-      },
-    ];
+    // The L5 sub-nav row above this list shows "Total Users: N" with no
+    // add affordance — Manage Roles and Invite User stay on the legacy
+    // stepper paths (/users/manage, /users/invite). When those flows
+    // migrate signal-native, wire an `addAction` onto the L5 row in the
+    // template instead of reintroducing in-toolbar buttons.
 
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
@@ -159,7 +136,6 @@ export class CloudFoundrySpaceUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
-      headerActions,
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);

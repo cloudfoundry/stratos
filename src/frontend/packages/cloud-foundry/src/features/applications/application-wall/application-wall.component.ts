@@ -2,7 +2,7 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -10,6 +10,9 @@ import { filter, map, take } from 'rxjs/operators';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   PageHeaderComponent,
   SignalListComponent,
   SignalListCompoundSegment,
@@ -30,7 +33,6 @@ import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
@@ -46,8 +48,8 @@ import type { StApp } from '../../../services/endpoint-data/stratos-types';
     RouterModule,
     PageHeaderComponent,
     SignalListComponent,
+    ListSubNavComponent,
     CfEndpointsMissingComponent,
-    CfUserPermissionDirective
   ],
   animations: [
     trigger(
@@ -165,7 +167,29 @@ export class ApplicationWallComponent implements OnInit {
 
   public cfIds$!: Observable<string[]>;
 
-  public canCreateApplication!: string;
+  /**
+   * Reactive permission flag for the L5 "+ Create Application" button.
+   * Mirrors the previous *appCfUserPermission directive check, but
+   * exposed as a signal so the L5 sub-nav can hide/show the button via
+   * its `visible` input without depending on directive timing.
+   */
+  public canCreateApplication = signal<boolean>(false);
+
+  /**
+   * Total app count for the L5 sub-nav. Assigned in ngOnInit once
+   * appsConfig.initialize() has populated the view; declared with `!`
+   * so consumers can read it as a Signal<number> without optional
+   * chaining (it's always set before the template binds).
+   */
+  public totalApplications!: Signal<number>;
+
+  /**
+   * Primary action shown on the L5 sub-nav. Visibility tracks
+   * canCreateApplication; invoke navigates to the new-application
+   * stepper. Replaces the old *appCfUserPermission-gated `+` button
+   * that used to live in the page-header right slot.
+   */
+  public createApplicationAction!: ListSubNavAddAction;
 
   public haveConnectedCf$!: Observable<boolean>;
 
@@ -187,6 +211,8 @@ export class ApplicationWallComponent implements OnInit {
   constructor() {
     const cloudFoundryService = this.cloudFoundryService;
     const activatedRoute = inject(ActivatedRoute);
+    const router = inject(Router);
+    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
     // If we have an endpoint ID, select it and redirect
     const { endpointId } = activatedRoute.snapshot.params;
@@ -199,7 +225,20 @@ export class ApplicationWallComponent implements OnInit {
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
-    this.canCreateApplication = CfCurrentUserPermissions.APPLICATION_CREATE;
+
+    // Resolve APPLICATION_CREATE for the current user; mirror the previous
+    // directive call (no endpoint/org/space scope — true if any connected
+    // CF allows it). Push the result into a signal the L5 button reads.
+    currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE).subscribe({
+      next: can => this.canCreateApplication.set(can),
+      error: err => console.error('Error resolving create-application permission:', err),
+    });
+    this.createApplicationAction = {
+      label: 'Create Application',
+      icon: 'add',
+      visible: this.canCreateApplication,
+      invoke: () => router.navigate(['/applications/new/']),
+    };
 
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)
@@ -227,6 +266,10 @@ export class ApplicationWallComponent implements OnInit {
     // so the wall's filter predicate covers every connected CF.
     this.appsConfig.clearLockedSpace();
     this.appsConfig.initialize(cnsiGuids);
+    // appsConfig.view exists only after initialize(); assign here so the
+    // L5 sub-nav can read totalFilteredResults as a stable Signal.
+    (this as { totalApplications: Signal<number> }).totalApplications =
+      this.appsConfig.view.totalFilteredResults;
     const dropdowns: SignalListDropdown[] = [
       {
         label: 'Cloud Foundry',

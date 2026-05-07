@@ -41,5 +41,11 @@ import {
     AppRouteActionsService,
     CfMapRoutesSignalConfigService,
   ],
+  // Establish a flex-column container that fills the routed view so the
+  // steppers wrapper's `flex: 1` actually has a constrained parent to
+  // expand into. Without this, the stepper can grow taller than the
+  // viewport and the Cancel / Map buttons in `.steppers-navigation`
+  // get pushed below the fold.
+  host: { class: 'flex flex-1 flex-col min-h-0 h-full' },
 })
 export class AddRouteStepperComponent { }

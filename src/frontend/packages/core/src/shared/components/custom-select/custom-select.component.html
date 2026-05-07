@@ -16,13 +16,21 @@
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
-    <span class="flex-1"
-      [class.select-trigger-placeholder]="!displayValue || displayValue === ''"
-      [class.select-trigger-value]="displayValue && displayValue !== ''">
-      {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
-      @if (required && (!displayValue || displayValue === '')) {
-        <span class="text-red-500 dark:text-red-400 ml-0.5 font-medium" aria-label="required">*</span>
-      }
+    <!-- Trigger label area. Grid-stacks an invisible sizer (longest
+         option text) and the visible selected value in the same cell so
+         the trigger width matches the widest option once options arrive
+         and stays stable across selection changes. -->
+    <span class="flex-1 min-w-0 grid items-center">
+      <span class="invisible whitespace-nowrap col-start-1 row-start-1 pointer-events-none pr-1"
+            aria-hidden="true">{{ longestOptionText || ' ' }}</span>
+      <span class="col-start-1 row-start-1 truncate"
+        [class.select-trigger-placeholder]="!displayValue || displayValue === ''"
+        [class.select-trigger-value]="displayValue && displayValue !== ''">
+        {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
+        @if (required && (!displayValue || displayValue === '')) {
+          <span class="text-red-500 dark:text-red-400 ml-0.5 font-medium" aria-label="required">*</span>
+        }
+      </span>
     </span>
     <div class="flex items-center gap-1 ml-2">
       <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"

@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
-  PageSubNavComponent,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListRowAction,
@@ -37,7 +38,7 @@ import type { StSpace } from '../../../../../services/endpoint-data/stratos-type
   imports: [
     CommonModule,
     RouterModule,
-    PageSubNavComponent,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -75,14 +76,35 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
 
   public listConfig: WritableSignal<SignalListConfig<StSpace> | undefined> = signal(undefined);
 
+  /** Total space count for the L5 sub-nav. Assigned in the constructor
+   *  once spacesConfig.initialize() has populated `view`. */
+  public totalSpaces!: Signal<number>;
+
+  /** Primary action shown on the L5 sub-nav — navigates to the
+   *  add-space stepper for the org currently in scope. */
+  public createSpaceAction!: ListSubNavAddAction;
+
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     const orgGuid = this.cfOrgService.orgGuid;
+    const router = inject(Router);
     this.spacesConfig.initialize(cfGuid, orgGuid);
+    (this as { totalSpaces: Signal<number> }).totalSpaces =
+      this.spacesConfig.view.totalFilteredResults;
+    this.createSpaceAction = {
+      label: 'Create Space',
+      icon: 'add',
+      invoke: () => router.navigate([
+        '/cloud-foundry', cfGuid, 'organizations', orgGuid, 'add-space',
+      ]),
+    };
 
+    // appCount is enriched server-side by getNativeOrgSpaces (one
+    // /v3/apps batch on space_guids) so the Apps column reads it
+    // directly off the row instead of joining a per-CNSI app cache.
     const renderApps = (space: StSpace): string => {
       if (!this.spacesConfig.hasLoadedOnce()) return '—';
-      return String(this.spacesConfig.appCountBySpaceGuid().get(space.guid) ?? 0);
+      return String(space.appCount ?? 0);
     };
 
     this.listConfig.set({
@@ -144,9 +166,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
       sort: this.spacesConfig.sort,
     });
 
-    this.spacesConfig.registerSortExtractor('apps', (s: StSpace) => {
-      return this.spacesConfig.appCountBySpaceGuid().get(s.guid) ?? 0;
-    });
+    this.spacesConfig.registerSortExtractor('apps', (s: StSpace) => s.appCount ?? 0);
   }
 
   private toggleSpaceFavorite(space: StSpace): void {

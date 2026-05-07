@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
+  ListSubNavComponent,
   SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
-  SignalListHeaderAction,
-  TailwindSnackBarService,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -32,19 +31,25 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../service
   imports: [
     CommonModule,
     RouterModule,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
 export class CloudFoundryUsersComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private usersConfig = inject(CfUsersSignalConfigService);
-  private snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
+
+  /** Reactive count for the L5 sub-nav. Wired in the constructor — the
+   *  underlying `usersConfig.view` is built by initialize() and isn't
+   *  available at field-initializer time. */
+  readonly totalUsers!: Signal<number>;
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.usersConfig.initialize(cfGuid);
+    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalFilteredResults;
 
     // Cell renderers. Each role-bucket cell resolves org/space names via
     // the config service's lookup signals (which read EndpointDataService
@@ -114,27 +119,11 @@ export class CloudFoundryUsersComponent {
     const renderCreated = (u: StUser): string =>
       CloudFoundryUsersComponent.formatDate(u.createdAt);
 
-    // PLACEHOLDER header actions — proves the SignalListConfig.headerActions
-    // slot wires through correctly. The Manage Users / Invite User flows
-    // remain on the legacy stepper paths under /users/manage and
-    // /users/invite. When those flows migrate signal-native, swap each
-    // invoke() to navigate to the real route. The stub click is
-    // intentional: it surfaces the slot in the live UI without lying about
-    // a half-shipped flow.
-    const headerActions: readonly SignalListHeaderAction[] = [
-      {
-        label: 'Invite User',
-        icon: 'person_add',
-        tooltip: 'Invite a user (legacy flow — not yet migrated)',
-        invoke: () => {
-          this.snackBar.open(
-            'Invite User flow not yet migrated — open via legacy users page',
-            'Dismiss',
-            { duration: 5000 },
-          );
-        },
-      },
-    ];
+    // The L5 sub-nav row above this list shows "Total Users: N" with no
+    // add affordance — Invite User and Manage Users still go through the
+    // legacy stepper routes (/users/manage, /users/invite). When those
+    // flows migrate signal-native, wire an `addAction` onto the L5 row in
+    // the template instead of reintroducing in-toolbar buttons.
 
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
@@ -204,7 +193,6 @@ export class CloudFoundryUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
-      headerActions,
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);

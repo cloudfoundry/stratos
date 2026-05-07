@@ -66,7 +66,18 @@ const makeActionsStub = () => {
 const makeMapConfigStub = () => {
   pickerRoutes = signal<StRoute[]>([]);
   pickerSelectedKey = signal<string | null>(null);
-  const filtered = computed(() => pickerRoutes());
+  // Tests can drive `pickerRoutes` directly. Available/attached splits read
+  // off it through computed signals so test setup mirrors the runtime
+  // service shape — including the redesigned single-screen flow's two
+  // derived views.
+  const myAppGuid = 'mockAppGuid';
+  const attachedRoutes = computed(() =>
+    pickerRoutes().filter(r => (r.appGuids ?? []).includes(myAppGuid)),
+  );
+  const availableRoutes = computed(() =>
+    pickerRoutes().filter(r => !(r.appGuids ?? []).includes(myAppGuid)),
+  );
+  const filtered = availableRoutes; // picker view shows only available rows now
   const view = {
     pagedItems: filtered,
     totalFilteredResults: computed(() => filtered().length),
@@ -76,6 +87,8 @@ const makeMapConfigStub = () => {
   return {
     view,
     routes: pickerRoutes.asReadonly(),
+    attachedRoutes,
+    availableRoutes,
     selectedKey: pickerSelectedKey.asReadonly(),
     pageIndex: signal(0),
     pageSize: signal(25),
@@ -141,27 +154,76 @@ describe('AddRoutesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders the create form (Domain dropdown + host/path inputs) by default', () => {
-    expect(component.addRouteMode.id).toBe('create');
+  it('renders both lists and the create form on load', () => {
     const html = fixture.nativeElement as HTMLElement;
+    expect(html.querySelector('[data-test="available-routes"]')).toBeTruthy();
+    expect(html.querySelector('[data-test="create-route-form"]')).toBeTruthy();
+    // Create-form fields present.
     expect(html.querySelector('app-select')).toBeTruthy();
-    // The host and path appear inside their HTTP form (default selectedDomain undefined → http branch shown).
     expect(html.querySelector('input[formcontrolname="host"]')).toBeTruthy();
     expect(html.querySelector('input[formcontrolname="path"]')).toBeTruthy();
   });
 
-  it('renders <app-signal-list> picker when mode toggles to map', () => {
-    component.addRouteMode = component.addRouteModes[1];
+  it('always renders the attached-list accordion (closed when no attached routes)', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'detached-1', appGuids: [] }),
+      makeRoute({ guid: 'other-app', appGuids: ['other'] }),
+    ]);
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.querySelector('[data-test="map-routes-picker"]')).toBeTruthy();
-    expect(html.querySelector('app-signal-list')).toBeTruthy();
+    const section = html.querySelector('[data-test="attached-routes"]') as HTMLDetailsElement;
+    expect(section).toBeTruthy();
+    expect(section.tagName.toLowerCase()).toBe('details');
+    expect(section.open).toBe(false);
+    expect(component.attachedListOpen()).toBe(false);
   });
 
-  it('refreshes the picker when toggling into map mode', () => {
-    expect(mapRefresh).not.toHaveBeenCalled();
-    component.addRouteMode = component.addRouteModes[1];
-    expect(mapRefresh).toHaveBeenCalledTimes(1);
+  it('opens the accordion by default when 1-3 routes are attached', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-2', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-3', appGuids: ['mockAppGuid'] }),
+    ]);
+    fixture.detectChanges();
+    const html = fixture.nativeElement as HTMLElement;
+    const section = html.querySelector('[data-test="attached-routes"]') as HTMLDetailsElement;
+    expect(section).toBeTruthy();
+    expect(section.tagName.toLowerCase()).toBe('details');
+    expect(section.open).toBe(true);
+    expect(component.attachedListOpen()).toBe(true);
+  });
+
+  it('keeps the accordion closed by default when 4+ routes are attached', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-2', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-3', appGuids: ['mockAppGuid'] }),
+      makeRoute({ guid: 'mine-4', appGuids: ['mockAppGuid'] }),
+    ]);
+    fixture.detectChanges();
+    const html = fixture.nativeElement as HTMLElement;
+    const section = html.querySelector('[data-test="attached-routes"]') as HTMLDetailsElement;
+    expect(section).toBeTruthy();
+    expect(section.tagName.toLowerCase()).toBe('details');
+    expect(section.open).toBe(false);
+    expect(html.querySelector('[data-test="attached-routes"] summary')!.textContent)
+      .toContain('Already attached to this app (4)');
+    expect(component.attachedListOpen()).toBe(false);
+  });
+
+  it('user toggle of the accordion overrides the count-driven default', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'mine-1', appGuids: ['mockAppGuid'] }),
+    ]);
+    fixture.detectChanges();
+    expect(component.attachedListOpen()).toBe(true); // 1-3 routes → open by default
+    component.attachedListExpanded.set(false);
+    fixture.detectChanges();
+    expect(component.attachedListOpen()).toBe(false); // user override wins
+  });
+
+  it('eagerly refreshes the picker on init (no radio toggle required)', () => {
+    expect(mapRefresh).toHaveBeenCalled();
   });
 
   it('submit in HTTP create mode calls createAndAttachRoute with host/path + relationships (no port)', async () => {
@@ -245,41 +307,110 @@ describe('AddRoutesComponent', () => {
     expect(dispatched).toBeUndefined();
   });
 
-  it('submit in map mode: looks up selectedRow, calls attachRoute, then dataService.addRoute then RouterNav', async () => {
-    const r1 = makeRoute({ guid: 'pick-1' });
-    const r2 = makeRoute({ guid: 'pick-2' });
+  it('on 422 RouteHostTaken: surfaces generic name-unavailable message', async () => {
+    component.spaceGuid = 'mockSpaceGuid';
+    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.addHTTPRoute.patchValue({ host: 'taken', path: '' });
+
+    const httpErr = Object.assign(new Error('Http failure response'), {
+      status: 422,
+      error: { errors: [{ code: 210003, title: 'CF-RouteHostTaken', detail: 'Host is taken' }] },
+    });
+    createAndAttach.mockRejectedValueOnce(httpErr);
+
+    await expect(component.runSubmit()).rejects.toThrow(/Route name is unavailable/);
+  });
+
+  it('on 422 with non-uniqueness code: passes CF detail through', async () => {
+    component.spaceGuid = 'mockSpaceGuid';
+    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.addHTTPRoute.patchValue({ host: 'invalid', path: '' });
+
+    const httpErr = Object.assign(new Error('Quota exceeded'), {
+      status: 422,
+      error: { errors: [{ code: 10008, title: 'CF-QuotaExceeded', detail: 'Quota exceeded' }] },
+    });
+    createAndAttach.mockRejectedValueOnce(httpErr);
+
+    await expect(component.runSubmit()).rejects.toThrow(/Quota exceeded/);
+  });
+
+  it('row selected: runSubmit dispatches attach and skips create', async () => {
+    const r1 = makeRoute({ guid: 'pick-1', appGuids: [] });
+    const r2 = makeRoute({ guid: 'pick-2', appGuids: [] });
     pickerRoutes.set([r1, r2]);
     pickerSelectedKey.set('pick-2');
 
-    component.addRouteMode = component.addRouteModes[1];
     await component.runSubmit();
 
     expect(attachRoute).toHaveBeenCalledWith('pick-2');
+    expect(createAndAttach).not.toHaveBeenCalled();
     expect(addRoute).toHaveBeenCalledWith(r2);
     const dispatched = storeDispatch.mock.calls.find(call => call[0] instanceof RouterNav);
     expect(dispatched).toBeTruthy();
   });
 
-  it('submit button disabled when form invalid (signalHandle.valid = false)', () => {
-    // Default state: no domain selected, no host entered → invalid.
+  it('submit gate: invalid form + no selection → not valid', () => {
     expect(component.signalHandle.valid()).toBe(false);
   });
 
-  it('signalHandle.valid recomputes when host/domain change in create mode', () => {
+  it('submit gate: valid form + no collision → valid', () => {
     component.spaceGuid = 'mockSpaceGuid';
     component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
-    component.addHTTPRoute.patchValue({ host: 'valid', path: '' });
+    component.addHTTPRoute.patchValue({ host: 'unique', path: '' });
+    fixture.detectChanges();
+    expect(component.hostCollision()).toBeNull();
+    expect(component.signalHandle.valid()).toBe(true);
+  });
+
+  it('submit gate: valid form + collision → not valid', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'taken-1', host: 'taken', path: '', domainGuid: 'domain-http', appGuids: [] }),
+    ]);
+    component.spaceGuid = 'mockSpaceGuid';
+    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.addHTTPRoute.patchValue({ host: 'taken', path: '' });
+    fixture.detectChanges();
+    expect(component.hostCollision()?.guid).toBe('taken-1');
+    expect(component.signalHandle.valid()).toBe(false);
+  });
+
+  it('submit gate: row selected → valid regardless of form', () => {
+    const r = makeRoute({ guid: 'pick-only', appGuids: [] });
+    pickerRoutes.set([r]);
+    pickerSelectedKey.set('pick-only');
     fixture.detectChanges();
     expect(component.signalHandle.valid()).toBe(true);
   });
 
-  it('signalHandle.valid in map mode tracks selectedKey', () => {
-    component.addRouteMode = component.addRouteModes[1];
+  it('TCP collision: detects (domain, port) match', () => {
+    pickerRoutes.set([
+      makeRoute({ guid: 'tcp-taken', domainGuid: 'domain-tcp', host: '', path: '', port: 5555, appGuids: [] }),
+    ]);
+    component.spaceGuid = 'mockSpaceGuid';
+    component.selectedDomain = { metadata: { guid: 'domain-tcp' }, entity: { router_group_type: 'tcp' } } as any;
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.addTCPRoute.patchValue({ port: '5555', useRandomPort: false });
     fixture.detectChanges();
-    expect(component.signalHandle.valid()).toBe(false);
-    pickerSelectedKey.set('any');
+    expect(component.hostCollision()?.guid).toBe('tcp-taken');
+  });
+
+  it('collision detection ignores routes already attached to this app (those live in the attached list)', () => {
+    // A route attached to THIS app would only show in the attached list
+    // and shouldn't trigger a "name in use" warning when the user types
+    // a host that matches it — they're already using it, after all.
+    pickerRoutes.set([
+      makeRoute({ guid: 'mine', host: 'myhost', path: '', domainGuid: 'domain-http', appGuids: ['mockAppGuid'] }),
+    ]);
+    component.spaceGuid = 'mockSpaceGuid';
+    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.addHTTPRoute.patchValue({ host: 'myhost', path: '' });
     fixture.detectChanges();
-    expect(component.signalHandle.valid()).toBe(true);
+    expect(component.hostCollision()).toBeNull();
   });
 });

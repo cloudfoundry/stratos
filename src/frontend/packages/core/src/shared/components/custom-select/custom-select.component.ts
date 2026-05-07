@@ -97,6 +97,23 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   isOpen = false;
   selectedValues: any[] = [];
   displayValue = '';
+
+  /**
+   * Longest projected option text by character count. Rendered as an
+   * invisible sizer in the trigger so the trigger width stays stable
+   * once the option list is populated — picking a shorter value won't
+   * shrink the control. Char-count is a proxy for pixel-width: fine for
+   * proportional fonts when options are similar in style.
+   */
+  get longestOptionText(): string {
+    if (!this.options || this.options.length === 0) return '';
+    let longest = '';
+    this.options.forEach(opt => {
+      const t = opt.displayText ?? '';
+      if (t.length > longest.length) longest = t;
+    });
+    return longest;
+  }
   dropdownTop = '0px';
   dropdownLeft = '0px';
   dropdownWidth = '0px';

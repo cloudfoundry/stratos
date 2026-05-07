@@ -54,6 +54,7 @@ export { SteppersComponent } from './shared/components/stepper/steppers/steppers
 export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
+export { ListSubNavComponent, ListSubNavAddAction } from './shared/components/list-sub-nav/list-sub-nav.component';
 export { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 
 // Custom Material Replacement Components
@@ -142,7 +143,7 @@ export { AppActionMonitorComponent } from './shared/components/app-action-monito
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
-export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction } from './shared/components/signal-list/signal-list.component';
+export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction } from './shared/components/signal-list/signal-list.component';
 export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } from './shared/components/signal-list/list-state-store.service';
 export { ListViewComponent } from './shared/components/list/list-generics/list-view/list-view.component';
 export { TableComponent } from './shared/components/list/list-table/table.component';

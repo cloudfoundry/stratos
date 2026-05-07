@@ -1,9 +1,26 @@
 :host {
-  flex: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .add-route {
   position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+
+  // Steppers `.steppers-form { max-width: 600px }` clamps every form
+  // descendant inside a stepper. The Add Route stepper renders its form
+  // alongside two route lists (picker + attached). Width is now driven
+  // by Tailwind classes on the form/field elements themselves; just lift
+  // the upstream max-width cap so 50%-of-content can win.
+  .stepper-form {
+    max-width: none;
+  }
+
   > *[hidden] {
     display: none;
   }
@@ -20,6 +37,77 @@
         margin-left: 24px;
       }
     }
+  }
+  &__section {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+    // Sections are intrinsic-height by default; the picker section opts
+    // into flex-grow below so it absorbs leftover vertical space and
+    // scrolls internally instead of pushing the stepper navigation
+    // (Cancel / Map) below the viewport.
+    flex-shrink: 0;
+
+    // Primary section (Create a new route) carries the focal weight —
+    // larger margin so the picker below sits at a clear secondary level.
+    &--primary {
+      margin-bottom: 24px;
+    }
+    // Secondary section (attached list) gets a softer top boundary so it
+    // reads as reference material, not a competing action surface.
+    &--secondary {
+      margin-top: 8px;
+    }
+  }
+  // Picker section grows to fill available vertical space; its internal
+  // signal-list manages its own scrolling. Keeps the create form anchored
+  // at the top and the attached-list accordion + stepper buttons in view.
+  > [data-test="available-routes"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    > app-signal-list {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+  &__section-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  &__collision {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-left: 3px solid var(--color-warn, #d97706);
+    background: var(--color-warn-bg, rgba(217, 119, 6, 0.08));
+    color: var(--color-content-text, inherit);
+    font-size: 0.875rem;
+  }
+  &__accordion {
+    > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 6px 0;
+      font-weight: 600;
+      user-select: none;
+
+      &::-webkit-details-marker { display: none; }
+      &::before {
+        content: '▸';
+        display: inline-block;
+        width: 1em;
+        transition: transform 120ms ease;
+      }
+    }
+    &[open] > summary::before {
+      transform: rotate(90deg);
+    }
+  }
+  &__accordion-summary {
+    // Aligns with section title sizing.
+  }
+  &__accordion-body {
+    padding-top: 8px;
   }
   &__form {
     display: flex;

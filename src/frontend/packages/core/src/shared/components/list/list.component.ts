@@ -140,6 +140,16 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
 
   @Input() addForm: NgForm;
 
+  /**
+   * When true, suppress this list's own toolbar `+` (both the `addForm`
+   * trigger and any global add actions). Use when the page hosts an
+   * `<app-list-sub-nav>` above the list — the L5 row owns the create
+   * affordance and the in-toolbar `+` would be a duplicate. The inline
+   * add-row UI (Save / Cancel after `dataSource.startAdd()`) still
+   * renders normally; only the trigger button is hidden.
+   */
+  @Input() suppressAddButton = false;
+
   @Input() customFilters: TemplateRef<any>;
 
   @Input() noEntries: TemplateRef<any>;
