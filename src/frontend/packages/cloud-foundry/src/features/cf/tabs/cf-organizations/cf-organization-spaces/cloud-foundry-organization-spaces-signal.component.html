@@ -1,12 +1,7 @@
 <div class="spaces h-full flex flex-col">
-  <app-page-sub-nav>
-    <button class="btn btn-ghost create" name="add-space"
-      routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space">
-      <span class="create-button-contents">
-        <span class="material-icons">add</span> Create
-      </span>
-    </button>
-  </app-page-sub-nav>
+  <app-list-sub-nav title="Total Spaces"
+                    [count]="totalSpaces"
+                    [addAction]="createSpaceAction"></app-list-sub-nav>
   @if (listConfig(); as config) {
     <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
   }

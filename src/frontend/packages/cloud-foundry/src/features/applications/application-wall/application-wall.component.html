@@ -1,14 +1,5 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Applications</h1>
-  @if (haveConnectedCf$ | async) {
-    <div class="page-header-right">
-      <ng-container *appCfUserPermission="canCreateApplication">
-        <button id="appwall-create-application" class="btn btn-primary btn-icon" [routerLink]="'/applications/new/'">
-          <span class="material-icons">add</span>
-        </button>
-      </ng-container>
-    </div>
-  }
 </app-page-header>
 <app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 
@@ -35,6 +26,9 @@
     </div>
   }
   @if (listConfig(); as cfg) {
+    <app-list-sub-nav title="Total Applications"
+                      [count]="totalApplications"
+                      [addAction]="createApplicationAction"></app-list-sub-nav>
     <div class="flex-1 min-h-0 p-4 flex flex-col">
       <app-signal-list [config]="cfg"></app-signal-list>
     </div>
