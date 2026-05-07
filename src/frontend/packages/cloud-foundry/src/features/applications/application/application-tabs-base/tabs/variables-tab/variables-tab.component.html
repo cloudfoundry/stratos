@@ -7,10 +7,10 @@
           <div class="form-field">
             <input class="input" id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name"
               [(ngModel)]="envVarsDataSource.addItem.name" required [appUnique]="envVarNames()">
-            @if (envVarName.errors && envVarName.errors.required) {
+            @if (envVarName.errors?.required && (envVarName.touched || envVarName.dirty)) {
               <div class="text-red-500 text-sm mt-1">Name is required</div>
             }
-            @if (envVarName.errors && envVarName.errors.appUnique) {
+            @if (envVarName.errors?.appUnique && (envVarName.touched || envVarName.dirty)) {
               <div class="text-red-500 text-sm mt-1">{{envVarName.errors.appUnique.message}}
               </div>
             }
