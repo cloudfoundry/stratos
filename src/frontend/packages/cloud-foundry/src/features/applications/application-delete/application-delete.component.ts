@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -34,7 +33,6 @@ import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
