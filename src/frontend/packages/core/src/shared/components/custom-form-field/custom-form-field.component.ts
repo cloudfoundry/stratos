@@ -65,6 +65,15 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   @Input() hideRequiredMarker = false;
   @Input() hintLabel = '';
 
+  /**
+   * When true, the prefix/infix/suffix flex row shrinks to its content
+   * (`w-max`) instead of filling the host (`w-full`). The underline below
+   * the row keeps the host's width — so a consumer can set e.g.
+   * `<app-form-field class="w-1/2" [fitContent]="true">` to get a
+   * content-width trigger sitting above a 50% underline.
+   */
+  @Input() fitContent = false;
+
   @ContentChild(forwardRef(() => AppInputDirective), { read: ElementRef, static: false }) inputElement!: ElementRef;
   @ContentChild(CustomSelectComponent, { static: false }) selectComponent!: CustomSelectComponent;
   @ContentChild(NgControl, { static: false }) ngControl!: NgControl;

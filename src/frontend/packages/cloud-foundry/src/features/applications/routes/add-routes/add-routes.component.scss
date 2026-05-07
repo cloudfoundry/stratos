@@ -14,16 +14,11 @@
 
   // Steppers `.steppers-form { max-width: 600px }` clamps every form
   // descendant inside a stepper. The Add Route stepper renders its form
-  // alongside two route lists (picker + attached) where the natural visual
-  // anchor is the section divider — not 600px in. Override here so the
-  // domain/host/path/port inputs stretch to the section's full width.
+  // alongside two route lists (picker + attached). Width is now driven
+  // by Tailwind classes on the form/field elements themselves; just lift
+  // the upstream max-width cap so 50%-of-content can win.
   .stepper-form {
     max-width: none;
-    width: 100%;
-  }
-  app-form-field {
-    display: block;
-    width: 100%;
   }
 
   > *[hidden] {

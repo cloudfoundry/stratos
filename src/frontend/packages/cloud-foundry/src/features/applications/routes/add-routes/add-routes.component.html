@@ -1,8 +1,8 @@
 <div class="add-route">
   <div class="add-route__section add-route__section--primary" data-test="create-route-form">
     <div class="add-route__section-title">Create a new route</div>
-    <form class="stepper-form" [formGroup]="domainFormGroup">
-      <app-form-field>
+    <form class="stepper-form w-1/2" [formGroup]="domainFormGroup">
+      <app-form-field [fitContent]="true">
         <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains">
           @for (domain of domains; track domain) {
             <app-option [value]="domain">{{domain?.entity?.name}}</app-option>
@@ -12,14 +12,14 @@
     </form>
 
     @if (selectedDomain?.entity?.router_group_type !== 'tcp') {
-      <form [formGroup]="addHTTPRoute" class="stepper-form">
+      <form [formGroup]="addHTTPRoute" class="stepper-form w-1/2">
         <div class="add-route__form-prompt">
           This is an HTTP Domain - an HTTP Route will be created
         </div>
         <div class="add-route__form-fields">
           <div>
             <app-form-field>
-              <input appInput formControlName="host" placeholder="Host" required>
+              <input appInput formControlName="host" placeholder="Host" required class="w-full">
               @if (addHTTPRoute.controls['host'].errors?.pattern) {
                 <app-error>Invalid Hostname</app-error>
               }
@@ -30,7 +30,7 @@
           </div>
           <div>
             <app-form-field>
-              <input appInput formControlName="path" placeholder="Path">
+              <input appInput formControlName="path" placeholder="Path" class="w-full">
               @if (addHTTPRoute.controls['path'].errors?.pattern) {
                 <app-error>Invalid Path</app-error>
               }
@@ -43,7 +43,7 @@
       </form>
     }
     @if (selectedDomain?.entity?.router_group_type === 'tcp') {
-      <form [formGroup]="addTCPRoute" class="stepper-form">
+      <form [formGroup]="addTCPRoute" class="stepper-form w-1/2">
         <div class="add-route__form-prompt">
           This is a TCP Domain - a TCP Route will be created
         </div>
@@ -51,7 +51,7 @@
           <div>
             <app-checkbox formControlName="useRandomPort">Use a random port</app-checkbox>
             <app-form-field>
-              <input type="number" appInput formControlName="port" placeholder="Port" required>
+              <input type="number" appInput formControlName="port" placeholder="Port" required class="w-full">
               @if (addTCPRoute.controls['port'].errors?.pattern) {
                 <app-error>Invalid Port</app-error>
               }

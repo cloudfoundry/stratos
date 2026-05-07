@@ -18,7 +18,10 @@
   <div class="form-field-wrapper relative">
 
     <!-- Main form field flex container -->
-    <div class="form-field-flex flex items-baseline box-border w-full relative transition-all duration-200">
+    <div class="form-field-flex flex items-baseline box-border relative transition-all duration-200"
+         [class.w-full]="!fitContent"
+         [class.w-max]="fitContent"
+         [class.max-w-full]="fitContent">
 
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
@@ -28,9 +31,17 @@
         </div>
       }
 
-      <!-- Input infix with floating label -->
-      <div class="form-field-infix block relative flex-auto min-w-0"
-        style="padding: 0.25em 0; min-width: 180px;">
+      <!-- Input infix with floating label.
+           Default flex-auto + 180px min-width gives a comfortable
+           input width inside a full-width form-field. fitContent mode
+           shrinks the infix to its content so the trigger fits the
+           value (e.g. select showing "run.adepttech.ca"). -->
+      <div class="form-field-infix block relative min-w-0"
+           [class.flex-auto]="!fitContent"
+           [class.flex-none]="fitContent"
+           [class.w-max]="fitContent"
+           [style.padding]="'0.25em 0'"
+           [style.min-width.px]="fitContent ? null : 180">
 
         <!-- Input content -->
         <ng-content select="input, textarea, select, app-select"></ng-content>
