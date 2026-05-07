@@ -2,7 +2,6 @@ import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetection
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
@@ -68,25 +67,6 @@ export interface SignalListRowAction<T> {
   readonly disabled?: boolean;
   readonly danger?: boolean;
   readonly invoke: (row: T) => void | Promise<void>;
-}
-
-// Page-level action button rendered in the toolbar's leading group, ABOVE
-// any row-level controls. Used to host the page-level actions that the
-// legacy `<app-page-sub-nav>` exposed (Create Org, Invite User, Manage
-// Roles, etc.) so signal-native pages don't have to drop these on
-// migration. Visibility/disabled are signals so callers can gate them on
-// permission/feature-flag observables without re-rebuilding the config.
-// `invoke` may return a promise — async errors are caught and surfaced
-// via TailwindSnackBarService so callers don't have to wire their own
-// try/catch (mirrors the row-actions kebab pattern).
-export interface SignalListHeaderAction {
-  readonly label: string;
-  readonly icon?: string;                    // material icon name
-  readonly disabled?: Signal<boolean>;       // reactive disabled state
-  readonly visible?: Signal<boolean>;        // optional visibility gate (omitted = always visible)
-  readonly primary?: boolean;                // emphasis style (filled vs outlined button)
-  readonly tooltip?: string;
-  readonly invoke: () => void | Promise<void>;
 }
 
 export interface SignalListColumn<T> {
@@ -232,11 +212,6 @@ export interface SignalListConfig<T> {
   // card-mode sort dropdown are wired to this signal. Columns are
   // sortable iff they declare a sortField.
   readonly sort?: WritableSignal<SignalListSort>;
-  // Optional — page-level action buttons rendered as a leading group in
-  // the toolbar (left of filter dropdowns). Each entry becomes a button;
-  // omit, set to undefined, or pass an empty array to render nothing
-  // (zero visual change for existing pages). See SignalListHeaderAction.
-  readonly headerActions?: readonly SignalListHeaderAction[];
   // Optional — when true, hide the pagination bar (page-size selector,
   // range counter, page nav buttons) when the list fits on a single page
   // (totalPages <= 1). Lets compact embedded lists (e.g. an attached-routes
@@ -270,8 +245,6 @@ export class SignalListComponent<T> implements AfterViewInit {
   private resizeObserver?: ResizeObserver;
   private mutationObserver?: MutationObserver;
   private onScroll = () => this.measureOverflow();
-
-  private snackBar = inject(TailwindSnackBarService);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -644,53 +617,4 @@ export class SignalListComponent<T> implements AfterViewInit {
     this.config.pageIndex.set(0);
   }
 
-  // Header actions ------------------------------------------------------
-
-  // Visible header actions in declaration order. Filters out entries
-  // whose `visible` signal returns false; entries without `visible` are
-  // always shown. The template iterates this list rather than the raw
-  // config array so the visibility predicate runs once per change-
-  // detection pass instead of per render check.
-  visibleHeaderActions(): readonly SignalListHeaderAction[] {
-    const all = this.config.headerActions;
-    if (!all || all.length === 0) return [];
-    return all.filter(a => (a.visible ? a.visible() : true));
-  }
-
-  isHeaderActionDisabled(act: SignalListHeaderAction): boolean {
-    return act.disabled ? act.disabled() : false;
-  }
-
-  // Click handler for a header action. Mirrors the row-actions kebab
-  // contract: short-circuit if disabled, fire-and-forget the invoke, and
-  // surface async errors via TailwindSnackBarService so callers don't
-  // need their own try/catch around every page-level action.
-  invokeHeaderAction(act: SignalListHeaderAction, ev: Event): void {
-    ev.stopPropagation();
-    if (this.isHeaderActionDisabled(act)) return;
-    try {
-      const result = act.invoke();
-      if (result && typeof (result as Promise<void>).then === 'function') {
-        (result as Promise<void>).catch((err: unknown) => {
-          const msg = err instanceof Error ? err.message : String(err);
-          this.snackBar.open(`${act.label} failed: ${msg}`, 'Dismiss');
-        });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      this.snackBar.open(`${act.label} failed: ${msg}`, 'Dismiss');
-    }
-  }
-
-  // Tailwind classes for a header-action button. Primary = filled accent,
-  // secondary (default) = outlined ghost button. Matches the legacy
-  // `<app-page-sub-nav>` button styling: subtle by default, filled only
-  // when the action is the page's primary affordance.
-  headerActionClasses(act: SignalListHeaderAction): string {
-    const base = 'inline-flex items-center gap-1.5 px-3 py-1 text-sm rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
-    if (act.primary) {
-      return `${base} bg-accent border-accent text-white hover:bg-accent/90`;
-    }
-    return `${base} bg-content-bg border-content-border text-content-text hover:bg-gray-100 dark:hover:bg-gray-700`;
-  }
 }

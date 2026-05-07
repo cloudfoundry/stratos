@@ -143,7 +143,7 @@ export { AppActionMonitorComponent } from './shared/components/app-action-monito
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
-export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction } from './shared/components/signal-list/signal-list.component';
+export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction } from './shared/components/signal-list/signal-list.component';
 export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } from './shared/components/signal-list/list-state-store.service';
 export { ListViewComponent } from './shared/components/list/list-generics/list-view/list-view.component';
 export { TableComponent } from './shared/components/list/list-table/table.component';

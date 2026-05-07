@@ -3,29 +3,6 @@
   <!-- Toolbar -->
   <div class="flex items-center gap-3 px-4 py-2 border-b border-content-border flex-wrap">
 
-    <!-- Page-level action buttons (Create / Invite / Manage Roles / etc.).
-         Rendered as a leading group so they sit left of the filter dropdowns,
-         visually matching the legacy `<app-page-sub-nav>` placement. Hidden
-         entirely when no actions configured. -->
-    @if (visibleHeaderActions().length > 0) {
-      <div data-test="header-actions" class="flex items-center gap-2">
-        @for (act of visibleHeaderActions(); track act.label) {
-          <button
-            data-test="header-action"
-            type="button"
-            [disabled]="isHeaderActionDisabled(act)"
-            [title]="act.tooltip ?? act.label"
-            (click)="invokeHeaderAction(act, $event)"
-            [class]="headerActionClasses(act)">
-            @if (act.icon) {
-              <span class="material-icons text-base leading-5">{{ act.icon }}</span>
-            }
-            <span>{{ act.label }}</span>
-          </button>
-        }
-      </div>
-    }
-
     @if (config.filterDropdowns) {
       @for (dd of config.filterDropdowns; track dd.label) {
         <label class="flex items-center gap-2 text-sm text-content-muted" [attr.data-test]="'dropdown-' + dd.label">
