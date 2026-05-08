@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject, Signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -17,7 +17,6 @@ import {
   ListSubNavAddAction,
   ListSubNavComponent,
 } from '../../../../../../../../core/src/shared/components/list-sub-nav/list-sub-nav.component';
-import { UniqueDirective } from '../../../../../../../../core/src/shared/components/unique.directive';
 import { stratosEndpointGuidKey } from '../../../../../../../../store/src/entity-request-pipeline/pipeline.types';
 import {
   ListAppEnvVar,
@@ -49,7 +48,6 @@ export interface VariableTabAllEnvVarType {
     ListComponent,
     ListSubNavComponent,
     CodeBlockComponent,
-    UniqueDirective,
   ]
 })
 export class VariablesTabComponent implements OnInit {
@@ -102,6 +100,51 @@ export class VariablesTabComponent implements OnInit {
     icon: 'add',
     invoke: () => this.envVarsDataSource.startAdd(),
   };
+
+  /**
+   * Validation error for the Name input — populated by validateAndSave()
+   * when the user clicks the ✓ button with an invalid Name. Empty string
+   * = no error to display. Cleared on every keystroke so the user sees
+   * the error disappear as they correct the input.
+   *
+   * Validation runs on submit, not reactively per-keystroke, to keep the
+   * L5 row pixel-stable: error sits in the row's top padding via absolute
+   * positioning and only renders after the user attempts to save.
+   */
+  readonly nameError: WritableSignal<string> = signal('');
+
+  /** CF env var names follow shell-variable convention: must start with a
+   *  letter or underscore, and contain only letters, digits, and
+   *  underscores. */
+  private static readonly NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+  /** Validate the Add Variable form and either save or surface an error
+   *  in the absolute-positioned slot above the Name input. */
+  validateAndSave(): void {
+    const name = (this.envVarsDataSource.addItem?.name ?? '').trim();
+    if (!name) {
+      this.nameError.set('Name is required');
+      return;
+    }
+    if (!VariablesTabComponent.NAME_PATTERN.test(name)) {
+      this.nameError.set('Use letters, digits, and underscores only; must start with a letter or underscore');
+      return;
+    }
+    if (this.envVarNames().includes(name)) {
+      this.nameError.set(`'${name}' is already in use`);
+      return;
+    }
+    this.nameError.set('');
+    this.envVarsDataSource.saveAdd();
+  }
+
+  /** Clear any pending validation error so it doesn't linger as the user
+   *  edits. Bound to the Name input's (input) event. */
+  clearNameError(): void {
+    if (this.nameError()) {
+      this.nameError.set('');
+    }
+  }
 
   ngOnInit() {
     // appEnvVars is the paginator-backed ngrx path for all env var sections —

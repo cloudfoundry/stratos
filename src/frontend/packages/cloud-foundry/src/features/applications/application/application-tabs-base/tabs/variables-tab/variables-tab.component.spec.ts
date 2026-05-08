@@ -56,4 +56,55 @@ describe('VariablesTabComponent', () => {
   it('envVarNames returns empty array when app signal is undefined', () => {
     expect(component.envVarNames()).toEqual([]);
   });
+
+  describe('validateAndSave()', () => {
+    beforeEach(() => {
+      // The data source's addItem is the model the form binds to. Stub it
+      // so validateAndSave can read .name without dragging in the full
+      // legacy paginator pipeline.
+      (component.envVarsDataSource as any).addItem = { name: '', value: '' };
+    });
+
+    it('flags Name is required when the name is empty', () => {
+      (component.envVarsDataSource as any).addItem.name = '';
+      component.validateAndSave();
+      expect(component.nameError()).toBe('Name is required');
+    });
+
+    it('flags Name is required when the name is whitespace-only', () => {
+      (component.envVarsDataSource as any).addItem.name = '   ';
+      component.validateAndSave();
+      expect(component.nameError()).toBe('Name is required');
+    });
+
+    it('flags an invalid pattern when the name contains spaces', () => {
+      (component.envVarsDataSource as any).addItem.name = 'bad name';
+      component.validateAndSave();
+      expect(component.nameError()).toMatch(/letters, digits, and underscores/i);
+    });
+
+    it('flags an invalid pattern when the name starts with a digit', () => {
+      (component.envVarsDataSource as any).addItem.name = '1FOO';
+      component.validateAndSave();
+      expect(component.nameError()).toMatch(/letters, digits, and underscores/i);
+    });
+
+    it('accepts a valid name and clears any prior error', () => {
+      component.nameError.set('Name is required');
+      (component.envVarsDataSource as any).addItem.name = 'MY_VAR';
+      // The legacy data source's saveAdd dispatches ngrx actions; stub it
+      // so the test stays scoped to validation behavior.
+      (component.envVarsDataSource as any).saveAdd = () => undefined;
+      component.validateAndSave();
+      expect(component.nameError()).toBe('');
+    });
+  });
+
+  describe('clearNameError()', () => {
+    it('resets the error signal when called', () => {
+      component.nameError.set('Name is required');
+      component.clearNameError();
+      expect(component.nameError()).toBe('');
+    });
+  });
 });
