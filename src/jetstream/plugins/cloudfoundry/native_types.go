@@ -147,39 +147,46 @@ type StSpacesResponse struct {
 	TotalResults int       `json:"totalResults"`
 }
 
-// StServiceOffering is the Stratos-shaped DTO for a CF service offering — i.e.
-// a catalog entry advertised by a service broker, NOT an instantiated service.
+// StServiceOffering is the Stratos-shaped DTO for a CF service offering —
+// the catalog entry advertised by a broker, NOT an instantiated service.
 // Drives the marketplace list page.
 //
-// Public is sourced from CF's `available` field — the legacy term used in the
-// 481 Stratos UI was "Public" (the offering is visible/usable across the
-// foundation). BrokerName is populated by a second-pass batch fetch of
-// /v3/service_brokers filtered on the collected broker GUIDs (mirrors the
-// service-bindings join). Tags retain the broker-provided list verbatim;
-// the UI joins them as comma-separated text.
+// Tier semantics, mirrored exactly by the frontend type at
+// src/frontend/packages/cloud-foundry/src/services/endpoint-data/stratos-types.ts:
+//   - base:    guid + cnsiGuid + name + createdAt
+//   - summary: + description + tags + available (legacy UI label "Public")
+//              + broker.{guid,name}
+//   - details: + requires + documentationUrl + brokerCatalogMetadata +
+//              shareable + broker fully expanded (URL etc.)
+//
+// `Available` and `Shareable` are *bool so callers can distinguish "false"
+// from "not populated at this tier" — base mode emits neither, summary
+// emits Available, details emits both.
+//
+// Broker is the nested ref shape (StServiceBrokerRef) populated at
+// summary+ via the v3 `?include=service_broker` chain; at base it's nil
+// and consumers can resolve via the broker GUID carried on the underlying
+// v3 relationship if needed (broker.guid alone is omitted at base since
+// the wire-shape already strips relationships).
 type StServiceOffering struct {
-	GUID              string   `json:"guid"`
-	Name              string   `json:"name"`
-	Description       string   `json:"description"`
-	BrokerName        string   `json:"brokerName"`
-	ServiceBrokerGUID string   `json:"serviceBrokerGuid,omitempty"`
-	Tags              []string `json:"tags"`
-	Public            bool     `json:"public"`
-	DocumentationURL  string   `json:"documentationUrl,omitempty"`
-	// BrokerCatalogMetadata mirrors v3's broker_catalog.metadata — a
-	// flexible map populated by each broker. Stratos's legacy `extra` JSON
-	// blob carried the same data (longDescription, providerDisplayName,
-	// supportUrl, displayName, etc.); surface it as a parsed map so the
-	// frontend doesn't redo JSON.parse on the wire payload.
-	BrokerCatalogMetadata map[string]interface{} `json:"brokerCatalogMetadata,omitempty"`
+	GUID                  string                 `json:"guid"`
 	CnsiGUID              string                 `json:"cnsiGuid"`
-	CreatedAt             string                 `json:"createdAt"`
-	UpdatedAt             string                 `json:"updatedAt"`
-}
+	Name                  string                 `json:"name"`
+	Description           string                 `json:"description,omitempty"`
+	Tags                  []string               `json:"tags,omitempty"`
+	Available             *bool                  `json:"available,omitempty"`
+	Shareable             *bool                  `json:"shareable,omitempty"`
+	Requires              []string               `json:"requires,omitempty"`
+	DocumentationURL      string                 `json:"documentationUrl,omitempty"`
+	BrokerCatalogMetadata map[string]interface{} `json:"brokerCatalogMetadata,omitempty"`
 
-type StServiceOfferingsResponse struct {
-	Resources    []StServiceOffering `json:"resources"`
-	TotalResults int                 `json:"totalResults"`
+	Broker *StServiceBrokerRef `json:"broker,omitempty"`
+
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+	CreatedAt   string            `json:"createdAt"`
+	UpdatedAt   string            `json:"updatedAt,omitempty"`
+	Meta        *StratosMeta      `json:"_meta,omitempty"`
 }
 
 // StServicePlan is the Stratos-shaped DTO for a CF service plan — a

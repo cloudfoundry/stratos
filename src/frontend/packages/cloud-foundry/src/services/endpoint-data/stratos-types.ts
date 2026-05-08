@@ -159,7 +159,7 @@ export interface StAppSummary {
   diskQuota: number;
   instances: number;
   routes: StAppRoute[];
-  services: StServiceBinding[];
+  services: StServiceCredentialBinding[];
   buildpack?: string;
   detectedBuildpack?: string;
   stackName?: string;
@@ -287,26 +287,162 @@ export interface StAppRoutesResponse {
   totalResults: number;
 }
 
-// Mirror of backend StServiceBinding (native_types.go). Populated by the
-// two-step join in /pp/v1/cf/apps/{cnsi}/{app}/service_bindings —
-// `serviceInstanceName` and `serviceInstanceType` come from a batch fetch of
-// /v3/service_instances; they fall back to the binding's own name when the
-// name-lookup fails.
-export interface StServiceBinding {
+// ---------------------------------------------------------------------------
+// Services-domain refs (services-domain signal+V3 slice). All five service
+// entity types use nested-ref form. `guid` is always populated; `name` and
+// chain-leaf joins populate at `?return=summary`; extended fields populate
+// at `?return=details`. Refs nest to mirror v3's include-relation tree
+// (`servicePlan.serviceOffering.broker`, `space.organization`).
+// ---------------------------------------------------------------------------
+
+export interface StAppRef {
   guid: string;
-  name: string;
-  bindingType: string; // "app" or "key"
-  appGuid?: string;
-  serviceInstanceGuid: string;
-  serviceInstanceName: string;
-  serviceInstanceType: string; // "managed" | "user-provided"
-  createdAt: string;
-  updatedAt: string;
+  name?: string;
 }
 
-export interface StAppServiceBindingsResponse {
-  resources: StServiceBinding[];
-  totalResults: number;
+export interface StOrgRef {
+  guid: string;
+  name?: string;
+}
+
+export interface StSpaceRef {
+  guid: string;
+  name?: string;
+  organization?: StOrgRef;
+}
+
+// StServiceBrokerRef — guid-only at base; name at summary+; url + space at
+// details. `_meta` carries design-time tristate (notably `authUsername`,
+// which v3 never returns on read by spec).
+export interface StServiceBrokerRef {
+  guid: string;
+  name?: string;
+  url?: string;
+  space?: StSpaceRef;
+  _meta?: StratosMeta;
+}
+
+// StServiceOfferingRef — guid+name at summary+; broker populated at
+// summary+ via the v3 include chain. Extended fields are details-only.
+export interface StServiceOfferingRef {
+  guid: string;
+  name?: string;
+  broker?: StServiceBrokerRef;
+  description?: string;
+  tags?: string[];
+  requires?: string[];
+  documentationUrl?: string;
+  brokerCatalogMetadata?: { [k: string]: unknown };
+  available?: boolean;
+  shareable?: boolean;
+}
+
+// StServicePlanRef — guid+name+free at summary+; serviceOffering chain at
+// summary+; description/visibility/costs/schemas at details.
+export interface StServicePlanRef {
+  guid: string;
+  name?: string;
+  free?: boolean;
+  serviceOffering?: StServiceOfferingRef;
+  description?: string;
+  visibilityType?: string;
+  available?: boolean;
+  costs?: StServicePlanCost[];
+  schemas?: StPlanSchemas;
+}
+
+// StServiceInstanceRef — guid at base; name+type at summary+. Used from
+// credential bindings and route bindings to refer back to an instance.
+export interface StServiceInstanceRef {
+  guid: string;
+  name?: string;
+  type?: string; // 'managed' | 'user-provided'
+}
+
+// StLastOperation mirrors v3's last_operation block on instances and
+// bindings. Empty struct when the upstream resource has no operation
+// recorded.
+export interface StLastOperation {
+  type?: string;
+  state?: string;
+  description?: string;
+  updatedAt?: string;
+  createdAt?: string;
+}
+
+// StMaintenanceInfo mirrors v3's maintenance_info field on plans and
+// instances. Drives upgrade-available prompts.
+export interface StMaintenanceInfo {
+  version?: string;
+  description?: string;
+}
+
+// StPlanSchemas mirrors v3's plan `schemas` — broker-advertised JSON-Schema
+// blobs for create / update / bind parameter validation. Surfaced at
+// `?return=details` only; bind stepper reads these to drive parameter
+// form generation.
+export interface StPlanSchemas {
+  serviceInstance?: StPlanSchemaInstance;
+  serviceBinding?: StPlanSchemaBinding;
+}
+
+export interface StPlanSchemaInstance {
+  create?: StPlanSchemaParams;
+  update?: StPlanSchemaParams;
+}
+
+export interface StPlanSchemaBinding {
+  create?: StPlanSchemaParams;
+}
+
+export interface StPlanSchemaParams {
+  parameters?: { [k: string]: unknown };
+}
+
+// ---------------------------------------------------------------------------
+// StServiceCredentialBinding (renamed from legacy StServiceBinding).
+// Mirrors v3's `service_credential_binding` resource, which unifies what v2
+// split into `service_binding` (type=app) and `service_key` (type=key).
+//
+// Tier semantics:
+// - base:    guid + cnsiGuid + type + serviceInstance{guid} + (app{guid}
+//            for type=app)
+// - summary: + serviceInstance.{name,type}, app.name (for type=app),
+//            lastOperation, syslogDrainUrl
+// - details: + servicePlan, serviceOffering, broker (B-fallback batches —
+//            v3 service_credential_binding `include` only reaches
+//            `app, service_instance`)
+//
+// Lazy: parameters are fetched separately via
+// /v3/service_credential_bindings/:guid/parameters; credentials via
+// /v3/service_credential_bindings/:guid/details/credentials (sensitive).
+// ---------------------------------------------------------------------------
+export interface StServiceCredentialBinding {
+  guid: string;
+  cnsiGuid: string;
+  type: string; // 'app' | 'key'
+  name?: string; // required for type=key; v3 standardised on bindings too
+
+  serviceInstance: StServiceInstanceRef;
+  app?: StAppRef; // type=app only
+
+  lastOperation?: StLastOperation;
+  syslogDrainUrl?: string;
+
+  // Details-only — not reachable via v3 include chain on bindings:
+  servicePlan?: StServicePlanRef;
+  serviceOffering?: StServiceOfferingRef;
+  broker?: StServiceBrokerRef;
+
+  createdAt: string;
+  updatedAt?: string;
+  _meta?: StratosMeta;
+}
+
+export interface StServiceCredentialBindingsResponse {
+  resources: StServiceCredentialBinding[];
+  totalResults?: number;
+  pagination?: { totalResults?: number };
 }
 
 export interface StOrgDetailResponse extends StOrgDetail {}
@@ -316,33 +452,38 @@ export interface StSpacesResponse {
   totalResults: number;
 }
 
-// Mirror of the backend StServiceOffering DTO
-// (native_service_offerings_reads.go). One row per CF service offering — the
-// catalog entry advertised by a broker, NOT an instantiated service. Drives
-// the marketplace list page.
+// Mirror of the backend StServiceOffering DTO. One row per CF service
+// offering — the catalog entry advertised by a broker, NOT an instantiated
+// service. Drives the marketplace list page.
 //
-// `public` corresponds to CF v3's `available` boolean (legacy Stratos UI
-// labelled it "Public"). `brokerName` is populated by the backend via a
-// batch fetch of /v3/service_brokers; falls back to '' on broker-list error.
-// `tags` is normalised to a non-null array on the backend so consumers can
+// Tier semantics:
+// - base:    guid + cnsiGuid + name + createdAt
+// - summary: + description + tags + available (`public` in legacy UI) +
+//            broker.{guid,name}
+// - details: + requires + documentationUrl + brokerCatalogMetadata +
+//            shareable + broker fully expanded
+//
+// `tags` is normalised to a non-null array by the backend so consumers can
 // `.join(',')` without a null guard.
 export interface StServiceOffering {
   guid: string;
-  name: string;
-  description: string;
-  brokerName: string;
-  serviceBrokerGuid?: string;
-  tags: string[];
-  public: boolean;
-  documentationUrl?: string;
-  // brokerCatalogMetadata mirrors v3's broker_catalog.metadata — broker-
-  // populated extras like longDescription, providerDisplayName, supportUrl.
-  // Replaces the legacy v2 `extra` JSON blob (already pre-parsed on the
-  // backend).
-  brokerCatalogMetadata?: { [k: string]: unknown };
   cnsiGuid: string;
+  name: string;
+  description?: string;
+  tags?: string[];
+  available?: boolean;            // v3 `available` (legacy UI label "Public")
+  shareable?: boolean;
+  requires?: string[];
+  documentationUrl?: string;
+  brokerCatalogMetadata?: { [k: string]: unknown };
+
+  broker?: StServiceBrokerRef;
+
+  labels?: { [k: string]: string };
+  annotations?: { [k: string]: string };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  _meta?: StratosMeta;
 }
 
 export interface StServiceOfferingsResponse {
@@ -350,40 +491,47 @@ export interface StServiceOfferingsResponse {
   totalResults: number;
 }
 
-// Mirror of the backend StServiceInstance DTO
-// (native_service_instances_reads.go). One row per CF service instance —
-// `type` discriminates managed vs user-provided. Drives the /services
-// list page.
+// Mirror of the backend StServiceInstance DTO. One row per CF service
+// instance — `type` discriminates managed vs user-provided. Drives the
+// /services list page.
 //
-// `serviceOfferingName` is populated by a two-step join (service_plan ->
-// service_offering) on the backend for managed instances. User-provided
-// instances have neither plan nor offering and the name stays empty —
-// the UI labels the row "User Provided" instead. `lastOpState` mirrors
-// CF's last_operation.state (e.g. "succeeded", "in progress", "failed");
-// `tags` is normalised to a non-null array on the backend so consumers
-// can `.join(',')` without a guard.
+// Tier semantics:
+// - base:    guid + cnsiGuid + name + type + tags + lastOperation +
+//            space.{guid} + (servicePlan.{guid} for managed) + createdAt
+// - summary: + dashboardUrl/syslogDrainUrl/routeServiceUrl as applicable;
+//            space.{name,organization{guid,name}};
+//            servicePlan.{name,free,serviceOffering{guid,name,broker{guid,name}}}
+// - details: + maintenanceInfo + upgradeAvailable + servicePlan/offering/broker
+//            fully expanded with extended fields
+//
+// UPS rows omit `servicePlan` (genuinely doesn't apply for `type=user-provided`).
+// `tags` is normalised to a non-null array.
+//
+// Cross-entity counts (e.g. bindingsCount) are NOT wire fields — the
+// frontend derives them from the loaded credential-bindings signal
+// filtered per instance.
 export interface StServiceInstance {
   guid: string;
-  name: string;
-  type: string; // "managed" | "user-provided"
   cnsiGuid: string;
-  spaceGuid?: string;
-  servicePlanGuid?: string;
-  servicePlanName?: string;
-  serviceOfferingGuid?: string;
-  serviceOfferingName?: string;
-  // Server-side count of `type=app` service credential bindings on this
-  // instance. Always present; defaults to 0 when no bindings exist or the
-  // bindings fetch failed.
-  boundAppCount: number;
+  name: string;
+  type: string; // 'managed' | 'user-provided'
   tags: string[];
+  lastOperation: StLastOperation;
+
   dashboardUrl?: string;
-  lastOpType?: string;
-  lastOpState?: string;
-  lastOpDescription?: string;
-  lastOpUpdatedAt?: string;
+  syslogDrainUrl?: string;     // UPS-only
+  routeServiceUrl?: string;    // UPS-only
+  maintenanceInfo?: StMaintenanceInfo;
+  upgradeAvailable?: boolean;
+  labels?: { [k: string]: string };
+  annotations?: { [k: string]: string };
+
+  space: StSpaceRef;
+  servicePlan?: StServicePlanRef; // managed only
+
   createdAt: string;
   updatedAt?: string;
+  _meta?: StratosMeta;
 }
 
 export interface StServiceInstancesResponse {
@@ -654,26 +802,37 @@ export interface StAuditEventsResponse {
   totalResults: number;
 }
 
-// Mirror of the backend StServicePlan DTO (native_service_plans_reads.go).
-// Service plan = catalog entry advertised by an offering. `visibilityType`
-// is one of `public`/`admin`/`organization`/`space` and is managed via the
+// Mirror of the backend StServicePlan DTO. Service plan = catalog entry
+// advertised by an offering. `visibilityType` is one of
+// `public`/`admin`/`organization`/`space` and is managed via the
 // /pp/v1/cf/service_plans/:cnsi/:planGuid/visibility endpoints (separate
-// vertical). `spaceGuid` is set only for plans with `visibilityType=space`.
+// vertical). `space` is set only for plans with `visibilityType=space`.
+//
+// Tier semantics:
+// - base:    guid + cnsiGuid + name + serviceOffering.{guid} + createdAt
+// - summary: + description + free + available + visibilityType +
+//            serviceOffering.{name, broker{guid,name}}
+// - details: + costs + schemas + labels + annotations + serviceOffering fully expanded
 export interface StServicePlan {
   guid: string;
-  name: string;
-  description: string;
-  available: boolean;
-  free: boolean;
-  visibilityType: string;
-  serviceOfferingGuid: string;
-  spaceGuid?: string;
-  costs: StServicePlanCost[];
-  labels: { [k: string]: string };
-  annotations: { [k: string]: string };
   cnsiGuid: string;
+  name: string;
+  description?: string;
+  free?: boolean;
+  available?: boolean;
+  visibilityType?: string;
+  costs?: StServicePlanCost[];
+  schemas?: StPlanSchemas;
+  maintenanceInfo?: StMaintenanceInfo;
+
+  serviceOffering?: StServiceOfferingRef;
+  space?: StSpaceRef; // visibilityType=space only
+
+  labels?: { [k: string]: string };
+  annotations?: { [k: string]: string };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  _meta?: StratosMeta;
 }
 
 export interface StServicePlanCost {
@@ -707,24 +866,33 @@ export interface StServicePlanVisibilitySpace {
   name?: string;
 }
 
-// Mirror of the backend StServiceBroker DTO (native_service_brokers_reads.go).
-// `url` is the broker endpoint Cloud Controller talks to (NOT a Stratos URL).
-// `spaceGuid` is set only for space-scoped brokers; empty for global ones.
-// `authUsername` is tristate-bearing: V3 read responses do not expose it
-// (write-only by CAPI design), V2 returns it. Until the broker handler grows
-// a V2 fallback, this field is always listed in `_meta.unavailable` — see
-// the synthesis in ServiceCatalogDataService.serviceBroker().
+// Mirror of the backend StServiceBroker DTO. `url` is the broker endpoint
+// Cloud Controller talks to (NOT a Stratos URL). `space` is set only for
+// space-scoped brokers; absent for global ones.
+//
+// Tier semantics:
+// - base:    guid + cnsiGuid + name + createdAt
+// - summary: + url + space.{guid,name}
+// - details: + labels + annotations + space fully expanded
+//
+// `_meta.unavailable: ['authUsername']` is emitted by the backend handler
+// on every V3 read because v3's API never returns broker auth credentials
+// (write-only by spec). Drives the tristate "Not Available" rendering on
+// the broker detail card.
 export interface StServiceBroker {
   guid: string;
-  name: string;
-  url: string;
-  spaceGuid?: string;
-  authUsername?: string;
-  labels: { [k: string]: string };
-  annotations: { [k: string]: string };
   cnsiGuid: string;
+  name: string;
+  url?: string;
+
+  space?: StSpaceRef;
+
+  authUsername?: string; // tristate via _meta.unavailable
+
+  labels?: { [k: string]: string };
+  annotations?: { [k: string]: string };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   _meta?: StratosMeta;
 }
 
