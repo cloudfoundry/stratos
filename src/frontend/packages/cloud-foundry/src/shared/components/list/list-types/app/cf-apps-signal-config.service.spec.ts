@@ -259,16 +259,21 @@ describe('CfAppsSignalConfigService', () => {
     expect(httpMock.get).toHaveBeenCalledWith(expectedUrl);
   });
 
-  it('fetchAppServiceBindings hits the native service_bindings endpoint', async () => {
-    const expectedUrl = '/pp/v1/cf/apps/cnsi-1/app-1/service_bindings';
+  it('fetchAppServiceBindings hits the native service_bindings endpoint with ?return=summary', async () => {
+    const expectedUrl = '/pp/v1/cf/apps/cnsi-1/app-1/service_bindings?return=summary';
     const httpMock = {
       get: vi.fn((url: string) => {
         if (url === expectedUrl) {
           return of({
             resources: [
-              { guid: 'b-1', name: 'x', bindingType: 'app', serviceInstanceGuid: 'si-1', serviceInstanceName: 'db', serviceInstanceType: 'managed', createdAt: '', updatedAt: '' },
+              {
+                guid: 'b-1', cnsiGuid: 'cnsi-1', name: 'x', type: 'app',
+                serviceInstance: { guid: 'si-1', name: 'db', type: 'managed' },
+                app: { guid: 'app-1' },
+                createdAt: '', updatedAt: '',
+              },
             ],
-            totalResults: 1,
+            pagination: { totalResults: 1, totalPages: 1, first: null, last: null, next: null, previous: null },
           });
         }
         return of({ resources: [], pagination: {} });

@@ -14,194 +14,202 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestGetAppServiceBindings_JoinsNamesFromServiceInstances verifies the
-// two-step join: list app-type bindings filtered to the app, then batch-fetch
-// the referenced service instances and populate serviceInstanceName /
-// serviceInstanceType on each StServiceBinding.
-func TestGetAppServiceBindings_JoinsNamesFromServiceInstances(t *testing.T) {
-	bindingsHits := 0
-	instancesHits := 0
-	var bindingsQuery string
-	var instancesQuery string
-	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// bindingsTestServer is a single-fixture v3 stub for every per-tier test
+// in this file. It captures the bindings list query so tests can assert
+// upstream forwarding (per_page, page, app_guids, type, include),
+// counts hits per upstream path, and emits a deterministic two-binding
+// response with the included `apps` + `service_instances` blocks v3
+// returns when ?include=app,service_instance is requested.
+type bindingsTestServer struct {
+	*httptest.Server
+	listHits      int
+	lastListQuery string
+}
+
+func newBindingsTestServer(t *testing.T) *bindingsTestServer {
+	t.Helper()
+	s := &bindingsTestServer{}
+	s.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case r.URL.Path == "/v3":
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_credential_bindings" && r.Method == http.MethodGet:
-			bindingsHits++
-			bindingsQuery = r.URL.RawQuery
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"pagination": {"total_results": 2, "total_pages": 1, "next": null},
-				"resources": [
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/service_credential_bindings":
+			s.listHits++
+			s.lastListQuery = r.URL.RawQuery
+			body := map[string]interface{}{
+				"pagination": map[string]interface{}{
+					"total_results": 2, "total_pages": 1,
+					"first": map[string]interface{}{"href": "/v3/service_credential_bindings?page=1"},
+					"last":  map[string]interface{}{"href": "/v3/service_credential_bindings?page=1"},
+				},
+				"resources": []map[string]interface{}{
 					{
-						"guid": "binding-1",
+						"guid":       "binding-1",
+						"name":       "db-binding",
+						"type":       "app",
 						"created_at": "2026-04-22T12:00:00Z",
 						"updated_at": "2026-04-22T12:00:00Z",
-						"name": "db-binding",
-						"type": "app",
-						"relationships": {
-							"app": {"data": {"guid": "app-1"}},
-							"service_instance": {"data": {"guid": "si-1"}}
-						}
+						"relationships": map[string]interface{}{
+							"app":              map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
+							"service_instance": map[string]interface{}{"data": map[string]interface{}{"guid": "si-1"}},
+						},
 					},
 					{
-						"guid": "binding-2",
+						"guid":       "binding-2",
+						"name":       "cache-binding",
+						"type":       "app",
 						"created_at": "2026-04-22T12:05:00Z",
 						"updated_at": "2026-04-22T12:05:00Z",
-						"name": "cache-binding",
-						"type": "app",
-						"relationships": {
-							"app": {"data": {"guid": "app-1"}},
-							"service_instance": {"data": {"guid": "si-2"}}
-						}
-					}
-				]
-			}`))
-		case r.URL.Path == "/v3/service_instances" && r.Method == http.MethodGet:
-			instancesHits++
-			instancesQuery = r.URL.RawQuery
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{
-				"pagination": {"total_results": 2, "total_pages": 1, "next": null},
-				"resources": [
-					{
-						"guid": "si-1",
-						"created_at": "2026-04-22T11:00:00Z",
-						"updated_at": "2026-04-22T11:00:00Z",
-						"name": "primary-db",
-						"type": "managed",
-						"relationships": {}
+						"relationships": map[string]interface{}{
+							"app":              map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
+							"service_instance": map[string]interface{}{"data": map[string]interface{}{"guid": "si-2"}},
+						},
 					},
-					{
-						"guid": "si-2",
-						"created_at": "2026-04-22T11:10:00Z",
-						"updated_at": "2026-04-22T11:10:00Z",
-						"name": "user-cache",
-						"type": "user-provided",
-						"relationships": {}
-					}
-				]
-			}`))
+				},
+			}
+			// v3 only emits the `included` block when the request asked
+			// for it via ?include=. Mirror that so tests exercise both
+			// the include-aware path and the fallback when no include is
+			// requested.
+			if strings.Contains(r.URL.RawQuery, "include=") {
+				body["included"] = map[string]interface{}{
+					"apps": []map[string]interface{}{
+						{"guid": "app-1", "name": "my-app"},
+					},
+					"service_instances": []map[string]interface{}{
+						{"guid": "si-1", "name": "primary-db", "type": "managed"},
+						{"guid": "si-2", "name": "user-cache", "type": "user-provided"},
+					},
+				}
+			}
+			_ = json.NewEncoder(w).Encode(body)
 		default:
 			http.NotFound(w, r)
 		}
 	}))
-	defer capiServer.Close()
+	return s
+}
 
-	plugin := &CloudFoundrySpecification{
+func newBindingsPlugin(serverURL string) *CloudFoundrySpecification {
+	return &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			userID: "user-1",
+			cnsiRecord: api.CNSIRecord{
+				GUID:        "cnsi-1",
+				APIEndpoint: mustParseURL(serverURL),
+			},
 			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
 		},
 	}
+}
 
+// bindingsInvoke wires up echo.Context for the bindings list handler.
+func bindingsInvoke(plugin *CloudFoundrySpecification, query string) (*httptest.ResponseRecorder, error) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings", nil)
+	url := "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings"
+	if query != "" {
+		url += "?" + query
+	}
+	req := httptest.NewRequest(http.MethodGet, url, nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
 	c.SetParamNames("cnsiGuid", "appGuid")
 	c.SetParamValues("cnsi-1", "app-1")
+	err := plugin.getAppServiceBindings(c)
+	return rec, err
+}
 
-	require.NoError(t, plugin.getAppServiceBindings(c))
+// TestGetAppServiceBindings_Base — default mode (no ?return=) returns
+// base shape: guid + cnsiGuid + type + serviceInstance.{guid} + app.{guid}
+// + createdAt only. No name, no joined fields, no include= forwarded.
+func TestGetAppServiceBindings_Base(t *testing.T) {
+	srv := newBindingsTestServer(t)
+	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
+
+	rec, err := bindingsInvoke(plugin, "")
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 1, bindingsHits)
-	assert.Equal(t, 1, instancesHits)
-	assert.Contains(t, bindingsQuery, "app_guids=app-1")
-	// CF v3 accepts the singular `type` filter on /v3/service_credential_bindings,
-	// not `types`. Regression guard: a plural typo here silently produces a
-	// 400 "Unknown query parameter(s): 'types'" and the picker stays empty.
-	assert.Contains(t, bindingsQuery, "type=app")
-	assert.NotContains(t, bindingsQuery, "types=app")
-	assert.Contains(t, instancesQuery, "guids=")
+	assert.Equal(t, 1, srv.listHits, "exactly one list call")
+	assert.NotContains(t, srv.lastListQuery, "include=", "base mode does NOT forward include")
 
-	var resp StratosPagedResponse[StServiceBinding]
+	var resp StratosPagedResponse[StServiceCredentialBinding]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 2)
-	assert.Equal(t, 2, resp.Pagination.TotalResults)
-
-	byBindingGUID := map[string]StServiceBinding{}
-	for _, b := range resp.Resources {
-		byBindingGUID[b.GUID] = b
-	}
-
-	b1 := byBindingGUID["binding-1"]
-	assert.Equal(t, "app-1", b1.AppGUID)
-	assert.Equal(t, "si-1", b1.ServiceInstanceGUID)
-	assert.Equal(t, "primary-db", b1.ServiceInstanceName)
-	assert.Equal(t, "managed", b1.ServiceInstanceType)
-	assert.Equal(t, "app", b1.BindingType)
-
-	b2 := byBindingGUID["binding-2"]
-	assert.Equal(t, "si-2", b2.ServiceInstanceGUID)
-	assert.Equal(t, "user-cache", b2.ServiceInstanceName)
-	assert.Equal(t, "user-provided", b2.ServiceInstanceType)
+	r0 := resp.Resources[0]
+	assert.Equal(t, "binding-1", r0.GUID)
+	assert.Equal(t, "cnsi-1", r0.CnsiGUID)
+	assert.Equal(t, "app", r0.Type)
+	assert.Equal(t, "si-1", r0.ServiceInstance.GUID)
+	require.NotNil(t, r0.App)
+	assert.Equal(t, "app-1", r0.App.GUID)
+	// Base omits the optional fields.
+	assert.Empty(t, r0.Name)
+	assert.Empty(t, r0.ServiceInstance.Name)
+	assert.Empty(t, r0.ServiceInstance.Type)
+	assert.Empty(t, r0.App.Name)
 }
 
-// TestGetAppServiceBindings_EmptyReturnsEmptyArray ensures no bindings
-// yields `"resources":[]` (not null) — the frontend iterates without a
-// nil guard.
-func TestGetAppServiceBindings_EmptyReturnsEmptyArray(t *testing.T) {
-	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.URL.Path == "/v3":
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_credential_bindings" && r.Method == http.MethodGet:
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":1,"next":null},"resources":[]}`))
-		default:
-			http.NotFound(w, r)
-		}
-	}))
-	defer capiServer.Close()
+// TestGetAppServiceBindings_Summary — ?return=summary forwards
+// ?include=app,service_instance, reads brokers+SI from the response's
+// included block, and populates name + serviceInstance.{name,type} +
+// app.name on each row.
+func TestGetAppServiceBindings_Summary(t *testing.T) {
+	srv := newBindingsTestServer(t)
+	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
-
-	require.NoError(t, plugin.getAppServiceBindings(c))
+	rec, err := bindingsInvoke(plugin, "return=summary&per_page=25&page=1")
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.True(t, strings.Contains(rec.Body.String(), `"resources":[]`), "expected empty array, got: %s", rec.Body.String())
+	assert.Equal(t, 1, srv.listHits, "summary mode is one CAPI call (include= inline)")
+	assert.Contains(t, srv.lastListQuery, "include=app%2Cservice_instance",
+		"summary mode must forward include=app,service_instance")
+
+	var resp StratosPagedResponse[StServiceCredentialBinding]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Len(t, resp.Resources, 2)
+
+	byGUID := map[string]StServiceCredentialBinding{}
+	for _, b := range resp.Resources {
+		byGUID[b.GUID] = b
+	}
+
+	b1 := byGUID["binding-1"]
+	assert.Equal(t, "db-binding", b1.Name)
+	assert.Equal(t, "si-1", b1.ServiceInstance.GUID)
+	assert.Equal(t, "primary-db", b1.ServiceInstance.Name)
+	assert.Equal(t, "managed", b1.ServiceInstance.Type)
+	require.NotNil(t, b1.App)
+	assert.Equal(t, "app-1", b1.App.GUID)
+	assert.Equal(t, "my-app", b1.App.Name)
+
+	b2 := byGUID["binding-2"]
+	assert.Equal(t, "user-cache", b2.ServiceInstance.Name)
+	assert.Equal(t, "user-provided", b2.ServiceInstance.Type)
 }
 
-// TestGetAppServiceBindings_SoftFallbackWhenInstanceFetchFails verifies the
-// picker still renders even when the service-instance batch fetch fails —
-// each StServiceBinding falls back to the binding's own Name.
-func TestGetAppServiceBindings_SoftFallbackWhenInstanceFetchFails(t *testing.T) {
-	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// TestGetAppServiceBindings_SoftFallbackWhenIncludedMissing — when the
+// upstream omits the included block (or it's malformed), summary mode
+// falls back to the binding's own Name on the serviceInstance ref so
+// rows still render.
+func TestGetAppServiceBindings_SoftFallbackWhenIncludedMissing(t *testing.T) {
+	// Custom server that omits the included block even when ?include=
+	// is forwarded — simulates an upstream gap.
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case r.URL.Path == "/v3":
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_credential_bindings" && r.Method == http.MethodGet:
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/service_credential_bindings":
+			_, _ = w.Write([]byte(`{
 				"pagination": {"total_results": 1, "total_pages": 1, "next": null},
 				"resources": [
 					{
-						"guid": "binding-1",
-						"created_at": "2026-04-22T12:00:00Z",
-						"updated_at": "2026-04-22T12:00:00Z",
-						"name": "db-binding",
-						"type": "app",
+						"guid": "binding-1", "name": "db-binding", "type": "app",
+						"created_at": "2026-04-22T12:00:00Z", "updated_at": "2026-04-22T12:00:00Z",
 						"relationships": {
 							"app": {"data": {"guid": "app-1"}},
 							"service_instance": {"data": {"guid": "si-1"}}
@@ -209,162 +217,97 @@ func TestGetAppServiceBindings_SoftFallbackWhenInstanceFetchFails(t *testing.T) 
 					}
 				]
 			}`))
-		case r.URL.Path == "/v3/service_instances" && r.Method == http.MethodGet:
-			// Upstream error on the name-lookup leg. The handler should still
-			// return 200 for the bindings and fall back to the binding name.
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"errors":[{"code":500,"title":"CF-Boom","detail":"nope"}]}`))
 		default:
 			http.NotFound(w, r)
 		}
 	}))
-	defer capiServer.Close()
+	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
-
-	require.NoError(t, plugin.getAppServiceBindings(c))
+	rec, err := bindingsInvoke(plugin, "return=summary")
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	var resp StratosPagedResponse[StServiceBinding]
+	var resp StratosPagedResponse[StServiceCredentialBinding]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 1)
-	// Fallback uses the binding's own Name when SI fetch fails.
-	assert.Equal(t, "db-binding", resp.Resources[0].ServiceInstanceName)
-	assert.Equal(t, "", resp.Resources[0].ServiceInstanceType)
+	r0 := resp.Resources[0]
+	// Fall back to binding's own name when SI lookup misses.
+	assert.Equal(t, "db-binding", r0.ServiceInstance.Name)
+	assert.Empty(t, r0.ServiceInstance.Type)
+}
+
+// TestGetAppServiceBindings_EmptyReturnsEmptyArray — no bindings yields
+// `"resources":[]` (not null) — frontend iterates without a nil guard.
+func TestGetAppServiceBindings_EmptyReturnsEmptyArray(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/service_credential_bindings":
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":1,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
+
+	rec, err := bindingsInvoke(plugin, "")
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"resources":[]`)
 }
 
 // TestGetAppServiceBindings_PerPagePassthrough verifies the primary
 // fetch is a single-page passthrough: caller's per_page+page forward
 // verbatim to /v3/service_credential_bindings.
 func TestGetAppServiceBindings_PerPagePassthrough(t *testing.T) {
-	var hits int
-	var lastPerPage, lastPage string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.URL.Path {
-		case "/v3":
-			_, _ = w.Write([]byte(`{"links":{}}`))
-		case "/v3/service_credential_bindings":
-			hits++
-			lastPerPage = r.URL.Query().Get("per_page")
-			lastPage = r.URL.Query().Get("page")
-			_, _ = w.Write([]byte(`{"pagination":{"total_results":7,"total_pages":1},"resources":[]}`))
-		default:
-			http.NotFound(w, r)
-		}
-	}))
+	srv := newBindingsTestServer(t)
 	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings?per_page=25&page=2", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
-
-	require.NoError(t, plugin.getAppServiceBindings(c))
+	rec, err := bindingsInvoke(plugin, "per_page=25&page=2")
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 1, hits)
-	assert.Equal(t, "25", lastPerPage)
-	assert.Equal(t, "2", lastPage)
-
-	var resp StratosPagedResponse[StServiceBinding]
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
-	assert.Equal(t, 7, resp.Pagination.TotalResults)
+	assert.Equal(t, 1, srv.listHits)
+	assert.Contains(t, srv.lastListQuery, "per_page=25")
+	assert.Contains(t, srv.lastListQuery, "page=2")
 }
 
 // TestGetAppServiceBindings_OmitsPagingWhenAbsent — V3-default contract.
 func TestGetAppServiceBindings_OmitsPagingWhenAbsent(t *testing.T) {
-	var sawPerPage, sawPage bool
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.URL.Path {
-		case "/v3":
-			_, _ = w.Write([]byte(`{"links":{}}`))
-		case "/v3/service_credential_bindings":
-			_, sawPerPage = r.URL.Query()["per_page"]
-			_, sawPage = r.URL.Query()["page"]
-			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
-		default:
-			http.NotFound(w, r)
-		}
-	}))
+	srv := newBindingsTestServer(t)
 	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
-
-	require.NoError(t, plugin.getAppServiceBindings(c))
-	assert.False(t, sawPerPage)
-	assert.False(t, sawPage)
+	_, err := bindingsInvoke(plugin, "")
+	require.NoError(t, err)
+	assert.NotContains(t, srv.lastListQuery, "per_page=")
+	assert.NotContains(t, srv.lastListQuery, "page=")
 }
 
 // TestGetAppServiceBindings_CountsFastPath verifies ?return=counts:
-// per_page=1 plus the app_guids+type=app filters.
+// per_page=1 plus the app_guids+type=app filters, returning the legacy
+// flat envelope shape (preserved for existing counts probes).
 func TestGetAppServiceBindings_CountsFastPath(t *testing.T) {
 	srv, q := newCountsCapiServer(t, "/v3/service_credential_bindings", 4, "app_guids", "type")
 	defer srv.Close()
+	plugin := newBindingsPlugin(srv.URL)
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings?return=counts", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
-
-	require.NoError(t, plugin.getAppServiceBindings(c))
+	rec, err := bindingsInvoke(plugin, "return=counts")
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, "1", q.PerPage)
 	assert.Equal(t, "app-1", q.Filters["app_guids"])
 	assert.Equal(t, "app", q.Filters["type"])
 
-	var resp StAppServiceBindingsResponse
+	// Counts ships the legacy flat envelope shape.
+	var resp struct {
+		Resources    []StServiceCredentialBinding `json:"resources"`
+		TotalResults int                          `json:"totalResults"`
+	}
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	assert.Equal(t, 4, resp.TotalResults)
 	assert.Empty(t, resp.Resources)

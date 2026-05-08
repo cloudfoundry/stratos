@@ -2,29 +2,42 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
 )
 
-// getAppServiceBindings handles GET /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/service_bindings.
+// getAppServiceBindings handles
 //
-// Returns every app-type service credential binding currently attached to
-// the app, joined with the referenced service instance's name and type.
-// Used by the signal-native delete stepper's AppServiceBindingsPickerComponent
-// to let the user opt into unbinding services alongside the app delete.
+//	GET /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/service_bindings
 //
-// Two-step join:
-//  1. /v3/service_credential_bindings?app_guids={app}&types=app — drain all pages.
-//  2. /v3/service_instances?guids={…collected unique GUIDs…} — one batched
-//     fetch. CF v3 ListResponse doesn't model the `included` response field,
-//     so an include= query won't help; we issue a follow-up filter-by-guids
-//     call instead.
+// Returns the app's service-credential bindings (type=app only).
+// Drives the app-detail Services tab + the delete-app picker.
 //
-// If the bindings fetch succeeds but the service-instance fetch fails, the
-// picker still renders — names fall back to the binding's own Name (or
-// GUID) so the user isn't blocked from completing the unbind.
+// Four wire-shape tiers selected by ?return=:
+//
+//   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
+//                Existing legacy shape preserved verbatim — counts probes
+//                already wired across the frontend rely on it.
+//   - base     — entity fields only; relationship refs are guid-only.
+//                One CAPI call.
+//   - summary  — base + serviceInstance.{name,type} + app.{name?} via
+//                a single CAPI call with ?include=app,service_instance.
+//                The included resources arrive on the v3 ListResponse
+//                via ListResponse[T].Included (per the fork fix in
+//                v3.216.4-fix-apps-delete.10).
+//   - details  — TODO: B-fallback batch lookups for service_plan +
+//                service_offering + service_broker (v3's binding
+//                include only reaches `app, service_instance`, so the
+//                broker chain needs a follow-up SI fetch with the full
+//                include chain). Today details degrades to summary;
+//                no consumer requests details on bindings yet.
+//
+// Soft-fail on the include join: a malformed entry is skipped and the
+// row falls back to the binding's own name; the response still ships
+// rather than 502'ing the whole tab.
 func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
@@ -44,7 +57,9 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 
-	if ctx.QueryParam("return") == "counts" {
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
 		params := capi.NewQueryParams().
 			WithPerPage(1).
 			WithFilter("app_guids", appGUID).
@@ -53,17 +68,17 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 		if lerr != nil {
 			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		return ctx.JSON(http.StatusOK, StAppServiceBindingsResponse{
-			Resources:    []StServiceBinding{},
+		// Legacy flat envelope — preserved for ?return=counts callers.
+		return ctx.JSON(http.StatusOK, struct {
+			Resources    []StServiceCredentialBinding `json:"resources"`
+			TotalResults int                          `json:"totalResults"`
+		}{
+			Resources:    []StServiceCredentialBinding{},
 			TotalResults: raw.Pagination.TotalResults,
 		})
 	}
 
 	reqCtx := ctx.Request().Context()
-
-	// Wire-contract passthrough on the primary fetch: forward client
-	// per_page+page to a single /v3/service_credential_bindings call. When
-	// the caller omits per_page, V3 server defaults apply.
 	perPage, page, present := parsePerPageAndPage(ctx)
 	primaryParams := applyPagingParams(
 		capi.NewQueryParams().
@@ -71,75 +86,132 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 			WithFilter("type", "app"),
 		perPage, page, present,
 	)
+	// summary+ asks v3 to include `app, service_instance` so the joined
+	// resources come back inline on the same call.
+	if mode == ReturnSummary || mode == ReturnDetails {
+		primaryParams = primaryParams.WithInclude("app", "service_instance")
+	}
+
 	rawBindings, listErr := cfClient.ServiceCredentialBindings().List(reqCtx, primaryParams)
 	if listErr != nil {
 		return handleCapiError(ctx, listErr)
 	}
 	bindings := rawBindings.Resources
 
-	// Collect the unique service-instance GUIDs referenced by this page of
-	// bindings. The follow-up SI fetch is naturally bounded by perPage.
-	siGUIDSet := make(map[string]struct{}, len(bindings))
+	// Decode the included joined resources for summary+.
+	siByGUID := map[string]capi.ServiceInstance{}
+	appByGUID := map[string]capi.App{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		siByGUID = serviceInstancesFromIncluded(rawBindings.Included)
+		appByGUID = appsFromIncluded(rawBindings.Included)
+	}
+
+	out := make([]StServiceCredentialBinding, 0, len(bindings))
 	for _, b := range bindings {
-		if guid := relationshipGUID(b.Relationships.ServiceInstance); guid != "" {
-			siGUIDSet[guid] = struct{}{}
-		}
-	}
-	siGUIDs := make([]string, 0, len(siGUIDSet))
-	for g := range siGUIDSet {
-		siGUIDs = append(siGUIDs, g)
+		out = append(out, toStServiceCredentialBinding(b, cnsiGUID, siByGUID, appByGUID, mode))
 	}
 
-	// Batch-fetch service instances so the picker can display names + types.
-	// Failure here is soft — fall back to rendering the binding's own name.
-	siByGUID := make(map[string]capi.ServiceInstance, len(siGUIDs))
-	if len(siGUIDs) > 0 {
-		siParams := capi.NewQueryParams().
-			WithPerPage(len(siGUIDs)).
-			WithFilter("guids", siGUIDs...)
-		if raw, sListErr := cfClient.ServiceInstances().List(reqCtx, siParams); sListErr == nil {
-			for _, si := range raw.Resources {
-				siByGUID[si.GUID] = si
-			}
-		}
-	}
-
-	out := make([]StServiceBinding, 0, len(bindings))
-	for _, b := range bindings {
-		out = append(out, toStServiceBinding(b, siByGUID))
-	}
-
-	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceBinding]{
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceCredentialBinding]{
 		Resources:  out,
 		Pagination: BuildPaginationMeta(ctx, page, perPage, rawBindings.Pagination.TotalResults),
 	})
 }
 
-func toStServiceBinding(b capi.ServiceCredentialBinding, siByGUID map[string]capi.ServiceInstance) StServiceBinding {
-	var appGUID string
-	if b.Relationships.App != nil {
-		appGUID = relationshipGUID(*b.Relationships.App)
+// serviceInstancesFromIncluded decodes v3's `included.service_instances`
+// block into a guid-keyed map. Set on summary+ requests via
+// ?include=service_instance. Soft-fail on malformed entries.
+func serviceInstancesFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServiceInstance {
+	out := map[string]capi.ServiceInstance{}
+	if included == nil {
+		return out
 	}
+	raws, ok := included["service_instances"]
+	if !ok {
+		return out
+	}
+	for _, raw := range raws {
+		var si capi.ServiceInstance
+		if err := json.Unmarshal(raw, &si); err == nil && si.GUID != "" {
+			out[si.GUID] = si
+		}
+	}
+	return out
+}
+
+// appsFromIncluded decodes v3's `included.apps` block into a guid-keyed
+// map. Set on summary+ requests via ?include=app. Soft-fail on malformed
+// entries.
+func appsFromIncluded(included map[string][]json.RawMessage) map[string]capi.App {
+	out := map[string]capi.App{}
+	if included == nil {
+		return out
+	}
+	raws, ok := included["apps"]
+	if !ok {
+		return out
+	}
+	for _, raw := range raws {
+		var app capi.App
+		if err := json.Unmarshal(raw, &app); err == nil && app.GUID != "" {
+			out[app.GUID] = app
+		}
+	}
+	return out
+}
+
+// toStServiceCredentialBinding maps a capi.ServiceCredentialBinding onto
+// the Stratos-shape DTO at the requested tier. Tier policy mirrors the
+// frontend type:
+//
+//   - base:    guid + cnsiGuid + type + serviceInstance.{guid} +
+//              (app.{guid} for type=app) + createdAt
+//   - summary: + name + serviceInstance.{name,type} + app.{name?} +
+//              lastOperation + syslogDrainUrl
+//   - details: + servicePlan / serviceOffering / broker (TODO — not
+//              implemented; degrades to summary today).
+func toStServiceCredentialBinding(
+	b capi.ServiceCredentialBinding,
+	cnsiGUID string,
+	siByGUID map[string]capi.ServiceInstance,
+	appByGUID map[string]capi.App,
+	mode ReturnMode,
+) StServiceCredentialBinding {
 	siGUID := relationshipGUID(b.Relationships.ServiceInstance)
-	siName := ""
-	siType := ""
+	out := StServiceCredentialBinding{
+		GUID:            b.GUID,
+		CnsiGUID:        cnsiGUID,
+		Type:            b.Type,
+		ServiceInstance: StServiceInstanceRef{GUID: siGUID},
+		CreatedAt:       b.CreatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if b.Relationships.App != nil {
+		appGUID := relationshipGUID(*b.Relationships.App)
+		if appGUID != "" {
+			out.App = &StAppRef{GUID: appGUID}
+		}
+	}
+	if mode == ReturnBase {
+		return out
+	}
+
+	// summary+ adds the optional fields.
+	out.Name = b.Name
+	out.UpdatedAt = b.UpdatedAt.Format("2006-01-02T15:04:05Z")
+
 	if si, ok := siByGUID[siGUID]; ok {
-		siName = si.Name
-		siType = si.Type
+		out.ServiceInstance.Name = si.Name
+		out.ServiceInstance.Type = si.Type
 	}
-	// Fall back to the binding's own name if the SI name lookup failed.
-	if siName == "" {
-		siName = b.Name
+	// Fall back to the binding's own name when the SI lookup fails so
+	// the row still renders something the user can read.
+	if out.ServiceInstance.Name == "" {
+		out.ServiceInstance.Name = b.Name
 	}
-	return StServiceBinding{
-		GUID:                b.GUID,
-		Name:                b.Name,
-		BindingType:         b.Type,
-		AppGUID:             appGUID,
-		ServiceInstanceGUID: siGUID,
-		ServiceInstanceName: siName,
-		ServiceInstanceType: siType,
-		CreatedAt:           b.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:           b.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+
+	if out.App != nil {
+		if app, ok := appByGUID[out.App.GUID]; ok {
+			out.App.Name = app.Name
+		}
 	}
+	return out
 }
