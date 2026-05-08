@@ -13,7 +13,6 @@
 // same commit set as the type rewrite (pilot end-to-end).
 
 import type {
-  StServiceBroker,
   StServiceInstance,
   StServicePlan,
 } from './stratos-types';
@@ -126,48 +125,10 @@ export function legacyToStServicePlan(raw: LegacyServicePlan): StServicePlan {
   return out;
 }
 
-// -----------------------------------------------------------------------------
-// Service Broker — legacy flat shape → new nested-ref shape. spaceGuid
-// nests under space.guid; authUsername stays as a flat tristate-bearing
-// field on the entity (frontend `_meta.unavailable` synthesis remains
-// until the broker handler rework emits backend `_meta`).
-// -----------------------------------------------------------------------------
-
-interface LegacyServiceBroker {
-  guid: string;
-  cnsiGuid: string;
-  name: string;
-  url?: string;
-  spaceGuid?: string;
-  authUsername?: string;
-  labels?: { [k: string]: string };
-  annotations?: { [k: string]: string };
-  createdAt: string;
-  updatedAt?: string;
-  _meta?: { unavailable?: string[] };
-}
-
-export function legacyToStServiceBroker(raw: LegacyServiceBroker): StServiceBroker {
-  const out: StServiceBroker = {
-    guid: raw.guid,
-    cnsiGuid: raw.cnsiGuid,
-    name: raw.name,
-    url: raw.url,
-    authUsername: raw.authUsername,
-    labels: raw.labels,
-    annotations: raw.annotations,
-    createdAt: raw.createdAt,
-    updatedAt: raw.updatedAt,
-  };
-  if (raw.spaceGuid) {
-    out.space = { guid: raw.spaceGuid };
-  }
-  if (raw._meta) {
-    out._meta = { unavailable: raw._meta.unavailable };
-  }
-  return out;
-}
-
+// (Service Broker adapter retired: the /pp/v1/cf/service_brokers/{cnsi}
+// handler now emits the nested-ref shape natively across all tiers and
+// stamps `_meta.unavailable: ['authUsername']` on every non-counts row.)
+//
 // (Service Credential Binding adapter retired: the
 // /pp/v1/cf/apps/{cnsi}/{app}/service_bindings handler now emits the
 // nested-ref shape natively at ?return=summary; consumers read the wire

@@ -68,36 +68,37 @@ describe('ServiceCatalogDataService', () => {
     expect(plans[0].guid).toBe('plan-1');
   });
 
-  it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid and synthesizes authUsername unavailable', async () => {
+  it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid?return=details and reads nested-ref shape', async () => {
     const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'broker-7').subscribe(resolve));
 
-    const req = httpMock.expectOne('/pp/v1/cf/service_brokers/cnsi-1/broker-7');
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_brokers/cnsi-1/broker-7' && r.params.get('return') === 'details');
     expect(req.request.method).toBe('GET');
-    req.flush({ guid: 'broker-7', name: 'global', url: 'https://b.example', spaceGuid: '', labels: {}, annotations: {}, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' });
-
-    const broker = await promise;
-    expect(broker.guid).toBe('broker-7');
-    expect(broker._meta?.unavailable).toContain('authUsername');
-  });
-
-  it('serviceBroker preserves backend-emitted _meta.unavailable without duplicating', async () => {
-    const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'broker-7').subscribe(resolve));
-
-    const req = httpMock.expectOne('/pp/v1/cf/service_brokers/cnsi-1/broker-7');
+    // Backend emits the nested-ref shape natively at every non-counts tier
+    // and stamps `_meta.unavailable: ['authUsername']` design-time.
     req.flush({
-      guid: 'broker-7', name: 'global', url: 'https://b.example', spaceGuid: '',
-      labels: {}, annotations: {}, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '',
+      guid: 'broker-7',
+      cnsiGuid: 'cnsi-1',
+      name: 'global',
+      url: 'https://b.example',
+      space: { guid: 'space-1', name: 'alpha' },
+      labels: { team: 'platform' },
+      annotations: {},
+      createdAt: '',
+      updatedAt: '',
       _meta: { unavailable: ['authUsername'] },
     });
 
     const broker = await promise;
+    expect(broker.guid).toBe('broker-7');
+    expect(broker.space?.guid).toBe('space-1');
+    expect(broker.space?.name).toBe('alpha');
     expect(broker._meta?.unavailable).toEqual(['authUsername']);
   });
 
   it('serviceBroker returns null on 404', async () => {
     const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'missing').subscribe(resolve));
 
-    const req = httpMock.expectOne('/pp/v1/cf/service_brokers/cnsi-1/missing');
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_brokers/cnsi-1/missing');
     req.flush({}, { status: 404, statusText: 'Not Found' });
 
     const res = await promise;

@@ -14,9 +14,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// serviceBrokersTestServer returns an httptest.Server that serves
-// enough CF v3 JSON to exercise the service-brokers handler.
-func serviceBrokersTestServer(t *testing.T) *httptest.Server {
+// brokersTestServer returns an httptest.Server that serves enough CF v3
+// JSON to exercise the four ?return= modes plus the guids-batch and
+// counts fast paths. When the request carries `include=space`, the
+// server emits a top-level `included.spaces` block so the handler's
+// spacesFromIncluded decoder can resolve space refs in one round-trip.
+func brokersTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -26,6 +29,7 @@ func serviceBrokersTestServer(t *testing.T) *httptest.Server {
 		case "/v3/service_brokers":
 			perPage := r.URL.Query().Get("per_page")
 			guids := r.URL.Query().Get("guids")
+			include := r.URL.Query().Get("include")
 
 			if perPage == "1" {
 				_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -48,7 +52,7 @@ func serviceBrokersTestServer(t *testing.T) *httptest.Server {
 				return
 			}
 
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			payload := map[string]interface{}{
 				"pagination": map[string]interface{}{
 					"total_results": 4,
 					"total_pages":   2,
@@ -59,10 +63,29 @@ func serviceBrokersTestServer(t *testing.T) *httptest.Server {
 				"resources": []map[string]interface{}{
 					brokerResource("broker-1", "global-broker", "https://broker.example", ""),
 					brokerResource("broker-2", "space-broker", "https://space-broker.example", "space-99"),
+					brokerResource("broker-3", "labelled-broker", "https://labelled.example", "space-77"),
 				},
-			})
+			}
+			if strings.Contains(include, "space") {
+				payload["included"] = map[string]interface{}{
+					"spaces": []map[string]interface{}{
+						{"guid": "space-99", "name": "alpha"},
+						{"guid": "space-77", "name": "beta"},
+					},
+				}
+			}
+			_ = json.NewEncoder(w).Encode(payload)
 		case "/v3/service_brokers/broker-77":
-			_ = json.NewEncoder(w).Encode(brokerResource("broker-77", "single", "https://single-broker.example", ""))
+			res := brokerResource("broker-77", "single", "https://single-broker.example", "space-77")
+			res["metadata"] = map[string]interface{}{
+				"labels":      map[string]interface{}{"team": "platform"},
+				"annotations": map[string]interface{}{"owner": "alice"},
+			}
+			_ = json.NewEncoder(w).Encode(res)
+		case "/v3/spaces/space-77":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "space-77", "name": "beta",
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -110,8 +133,8 @@ func newServiceBrokersPlugin(serverURL string) *CloudFoundrySpecification {
 	}
 }
 
-func TestGetNativeServiceBrokers_DefaultPaginatedPage(t *testing.T) {
-	ts := serviceBrokersTestServer(t)
+func TestGetNativeServiceBrokers_Base(t *testing.T) {
+	ts := brokersTestServer(t)
 	defer ts.Close()
 
 	e := echo.New()
@@ -124,18 +147,110 @@ func TestGetNativeServiceBrokers_DefaultPaginatedPage(t *testing.T) {
 	var resp StratosPagedResponse[StServiceBroker]
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 
-	assert.Len(t, resp.Resources, 2, "default path returns a single CAPI page")
+	require.Len(t, resp.Resources, 3)
 	assert.Equal(t, 4, resp.Pagination.TotalResults)
-	assert.Equal(t, "broker-1", resp.Resources[0].GUID)
-	assert.Equal(t, "global-broker", resp.Resources[0].Name)
-	assert.Equal(t, "https://broker.example", resp.Resources[0].URL)
-	assert.Equal(t, "", resp.Resources[0].SpaceGUID, "global brokers have no space relationship")
-	assert.Equal(t, "test-cnsi", resp.Resources[0].CnsiGUID)
-	assert.Equal(t, "space-99", resp.Resources[1].SpaceGUID, "space-scoped brokers carry SpaceGUID")
+	first := resp.Resources[0]
+	assert.Equal(t, "broker-1", first.GUID)
+	assert.Equal(t, "global-broker", first.Name)
+	assert.Equal(t, "https://broker.example", first.URL)
+	assert.Equal(t, "test-cnsi", first.CnsiGUID)
+	assert.Nil(t, first.Space, "base tier does not populate space ref")
+	assert.Empty(t, first.Labels, "base tier does not populate labels")
+	require.NotNil(t, first.Meta, "base tier carries _meta.unavailable for authUsername")
+	assert.Equal(t, []string{"authUsername"}, first.Meta.Unavailable)
+}
+
+func TestGetNativeServiceBrokers_Summary(t *testing.T) {
+	ts := brokersTestServer(t)
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceBrokersContext(e, "/pp/v1/cf/service_brokers/test-cnsi?return=summary")
+	plugin := newServiceBrokersPlugin(ts.URL)
+
+	require.NoError(t, plugin.getNativeServiceBrokers(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StServiceBroker]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 3)
+	// Global broker has no space relationship — Space stays nil.
+	assert.Nil(t, resp.Resources[0].Space)
+	// Space-scoped brokers populate Space.{guid,name} from the included block.
+	require.NotNil(t, resp.Resources[1].Space)
+	assert.Equal(t, "space-99", resp.Resources[1].Space.GUID)
+	assert.Equal(t, "alpha", resp.Resources[1].Space.Name)
+	require.NotNil(t, resp.Resources[2].Space)
+	assert.Equal(t, "space-77", resp.Resources[2].Space.GUID)
+	assert.Equal(t, "beta", resp.Resources[2].Space.Name)
+	// _meta.unavailable still present at summary
+	require.NotNil(t, resp.Resources[0].Meta)
+	assert.Equal(t, []string{"authUsername"}, resp.Resources[0].Meta.Unavailable)
+}
+
+func TestGetNativeServiceBrokers_SoftFallbackWhenIncludedMissing(t *testing.T) {
+	// Same server but strip the included block on the include path so we
+	// exercise the "?include= asked, no included block returned" branch.
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/service_brokers":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					brokerResource("broker-1", "space-broker", "https://broker.example", "space-missing"),
+				},
+				// no included block
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceBrokersContext(e, "/pp/v1/cf/service_brokers/test-cnsi?return=summary")
+	plugin := newServiceBrokersPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceBrokers(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StServiceBroker]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 1)
+	require.NotNil(t, resp.Resources[0].Space, "GUID-only space ref still emitted")
+	assert.Equal(t, "space-missing", resp.Resources[0].Space.GUID)
+	assert.Empty(t, resp.Resources[0].Space.Name, "name absent when included block is missing")
+}
+
+func TestGetNativeServiceBrokers_Details(t *testing.T) {
+	ts := brokersTestServer(t)
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceBrokersContext(e, "/pp/v1/cf/service_brokers/test-cnsi?return=details")
+	plugin := newServiceBrokersPlugin(ts.URL)
+
+	require.NoError(t, plugin.getNativeServiceBrokers(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StServiceBroker]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 3)
+	// details inherits everything summary populates plus labels/annotations.
+	require.NotNil(t, resp.Resources[2].Space)
+	assert.Equal(t, "beta", resp.Resources[2].Space.Name)
+	require.NotNil(t, resp.Resources[2].Meta)
+	assert.Equal(t, []string{"authUsername"}, resp.Resources[2].Meta.Unavailable)
 }
 
 func TestGetNativeServiceBrokers_GuidsFilter(t *testing.T) {
-	ts := serviceBrokersTestServer(t)
+	ts := brokersTestServer(t)
 	defer ts.Close()
 
 	e := echo.New()
@@ -148,13 +263,13 @@ func TestGetNativeServiceBrokers_GuidsFilter(t *testing.T) {
 	var resp StratosPagedResponse[StServiceBroker]
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 
-	assert.Len(t, resp.Resources, 2)
+	require.Len(t, resp.Resources, 2)
 	guids := []string{resp.Resources[0].GUID, resp.Resources[1].GUID}
 	assert.ElementsMatch(t, []string{"a", "b"}, guids)
 }
 
 func TestGetNativeServiceBrokers_CountsFastPath(t *testing.T) {
-	ts := serviceBrokersTestServer(t)
+	ts := brokersTestServer(t)
 	defer ts.Close()
 
 	e := echo.New()
@@ -171,12 +286,12 @@ func TestGetNativeServiceBrokers_CountsFastPath(t *testing.T) {
 	assert.Empty(t, resp.Resources)
 }
 
-func TestGetNativeServiceBrokerDetail(t *testing.T) {
-	ts := serviceBrokersTestServer(t)
+func TestGetNativeServiceBrokerDetail_Details(t *testing.T) {
+	ts := brokersTestServer(t)
 	defer ts.Close()
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_brokers/test-cnsi/broker-77", nil)
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_brokers/test-cnsi/broker-77?return=details", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	ctx.SetParamNames("cnsiGuid", "brokerGuid")
@@ -193,6 +308,13 @@ func TestGetNativeServiceBrokerDetail(t *testing.T) {
 	assert.Equal(t, "single", resp.Name)
 	assert.Equal(t, "https://single-broker.example", resp.URL)
 	assert.Equal(t, "test-cnsi", resp.CnsiGUID)
+	require.NotNil(t, resp.Space, "details tier resolves space via single-resource Spaces.Get")
+	assert.Equal(t, "space-77", resp.Space.GUID)
+	assert.Equal(t, "beta", resp.Space.Name)
+	assert.Equal(t, map[string]string{"team": "platform"}, resp.Labels)
+	assert.Equal(t, map[string]string{"owner": "alice"}, resp.Annotations)
+	require.NotNil(t, resp.Meta)
+	assert.Equal(t, []string{"authUsername"}, resp.Meta.Unavailable)
 }
 
 // TestGetNativeServiceBrokers_PerPagePassthrough verifies single-page

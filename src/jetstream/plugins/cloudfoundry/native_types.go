@@ -280,20 +280,29 @@ type StServicePlanVisibilityRequest struct {
 // StServiceBroker is the Stratos-shape DTO for a CF v3 service broker —
 // the broker process that registers offerings/plans into the
 // marketplace. URL is the broker endpoint Cloud Controller talks to
-// (NOT the Stratos-facing URL). SpaceGUID is set only for
-// space-scoped brokers (visible inside one space rather than to the
-// whole platform); empty for global brokers. Auth credentials are not
-// surfaced — those live behind the broker write surface.
+// (NOT the Stratos-facing URL). Space is the nested ref shape
+// (StSpaceRef) populated at summary+ via `?include=space`; nil for
+// global brokers. AuthUsername is always tristate-unavailable on read
+// (CF v3 never returns broker credentials) — handlers emit
+// `_meta.unavailable: ['authUsername']` on every non-counts response
+// so the frontend renders "Not Available" with a V3 tooltip.
+//
+// Tier policy:
+//   - base:    guid + cnsiGuid + name + url + createdAt
+//   - summary: + space.{guid,name} + updatedAt
+//   - details: + labels + annotations
 type StServiceBroker struct {
-	GUID        string            `json:"guid"`
-	Name        string            `json:"name"`
-	URL         string            `json:"url"`
-	SpaceGUID   string            `json:"spaceGuid,omitempty"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-	CnsiGUID    string            `json:"cnsiGuid"`
-	CreatedAt   string            `json:"createdAt"`
-	UpdatedAt   string            `json:"updatedAt"`
+	GUID         string            `json:"guid"`
+	CnsiGUID     string            `json:"cnsiGuid"`
+	Name         string            `json:"name"`
+	URL          string            `json:"url,omitempty"`
+	Space        *StSpaceRef       `json:"space,omitempty"`
+	AuthUsername string            `json:"authUsername,omitempty"`
+	Labels       map[string]string `json:"labels,omitempty"`
+	Annotations  map[string]string `json:"annotations,omitempty"`
+	CreatedAt    string            `json:"createdAt"`
+	UpdatedAt    string            `json:"updatedAt,omitempty"`
+	Meta         *StratosMeta      `json:"_meta,omitempty"`
 }
 
 // StServiceBrokersResponse is the legacy flat envelope kept for the
