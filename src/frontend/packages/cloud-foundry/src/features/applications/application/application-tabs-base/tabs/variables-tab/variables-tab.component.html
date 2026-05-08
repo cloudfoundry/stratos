@@ -6,29 +6,29 @@
            Replaces the +Add Variable button. Uses the same data-source
            model bindings the legacy in-toolbar form used; save/cancel
            call dataSource methods directly. -->
-      <div subNavForm class="variables-tab__env-table--add-form flex items-center gap-2">
+      <div subNavForm class="flex items-center gap-2">
         <form #addForm="ngForm" novalidate class="flex items-center gap-2">
-          <div class="form-field">
-            <input class="input" id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name"
+          <div class="flex flex-col">
+            <input class="bg-white rounded-md border border-gray-300 px-3 py-2 text-base text-slate-800 placeholder:text-gray-400 placeholder:opacity-70 focus:outline-none focus:ring-1 focus:ring-primary" id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name"
               [(ngModel)]="envVarsDataSource.addItem.name" required [appUnique]="envVarNames()">
             @if (envVarName.errors?.required && envVarName.dirty) {
-              <div class="text-red-500 text-sm mt-1">Name is required</div>
+              <div class="text-red-500 text-xs mt-0.5">Name is required</div>
             }
             @if (envVarName.errors?.appUnique && envVarName.dirty) {
-              <div class="text-red-500 text-sm mt-1">{{envVarName.errors.appUnique.message}}</div>
+              <div class="text-red-500 text-xs mt-0.5">{{envVarName.errors.appUnique.message}}</div>
             }
           </div>
-          <div class="form-field">
-            <input class="input" id="envVarValue" name="envVarValue" placeholder="Value"
+          <div class="flex flex-col">
+            <input class="bg-white rounded-md border border-gray-300 px-3 py-2 text-base text-slate-800 placeholder:text-gray-400 placeholder:opacity-70 focus:outline-none focus:ring-1 focus:ring-primary" id="envVarValue" name="envVarValue" placeholder="Value"
               [(ngModel)]="envVarsDataSource.addItem.value">
           </div>
         </form>
-        <button id="addFormButtonAdd" class="btn btn-icon btn-success"
+        <button id="addFormButtonAdd" class="btn btn-icon btn-success h-9"
                 type="button"
                 (click)="envVarsDataSource.saveAdd()" [disabled]="!addForm.valid">
           <span class="material-icons">done</span>
         </button>
-        <button id="addFormButtonCancel" class="btn btn-icon"
+        <button id="addFormButtonCancel" class="btn btn-icon h-9"
                 type="button"
                 (click)="envVarsDataSource.cancelAdd()">
           <span class="material-icons">clear</span>

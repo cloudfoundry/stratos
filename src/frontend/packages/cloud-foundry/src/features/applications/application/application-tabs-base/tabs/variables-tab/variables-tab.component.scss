@@ -15,12 +15,4 @@
       }
     }
   }
-  &__env-table--add-form {
-    form {
-      @apply flex flex-row;
-    }
-    .form-field {
-      @apply pr-2.5;
-    }
-  }
 }

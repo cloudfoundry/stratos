@@ -44,7 +44,7 @@ export interface ListSubNavAddAction {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div data-test="list-sub-nav"
-         class="flex items-center justify-between gap-3 px-6 py-3 bg-content-bg border-b border-content-border">
+         [class]="rowClasses">
       <div class="text-base font-semibold text-content-text whitespace-nowrap" data-test="list-sub-nav-title">
         {{ title }}: <span class="text-content-muted font-medium">{{ count() }}</span>
       </div>
@@ -96,6 +96,15 @@ export class ListSubNavComponent {
     const v = this.addAction?.visible;
     return v ? v() : true;
   });
+
+  /** Row classes. When the consumer wires `isAdding` (i.e., plans to host
+   *  an inline form), reserve enough height to accommodate the form so
+   *  the row doesn't shift between closed and open states. Pages without
+   *  an inline form keep the natural compact button-row height. */
+  protected get rowClasses(): string {
+    const base = 'flex items-center justify-between gap-3 px-6 py-3 bg-content-bg border-b border-content-border';
+    return this.isAdding ? `${base} min-h-[4.25rem]` : base;
+  }
 
   protected readonly isAddDisabled = computed(() => {
     const d = this.addAction?.disabled;
