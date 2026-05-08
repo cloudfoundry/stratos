@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Signal, computed, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, Signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { switchMap } from 'rxjs/operators';
@@ -50,19 +50,27 @@ import { CFAppState } from '../../../../../../cf-app-state';
     NoContentMessageComponent,
   ],
 })
-export class ServicesTabComponent {
+export class ServicesTabComponent implements OnInit {
   private readonly dataService = inject(AppDetailDataService);
   private readonly appService = inject(ApplicationService);
   private readonly store = inject<Store<CFAppState>>(Store);
   private readonly permissions = inject(CurrentUserPermissionsService);
 
-  /** Reactive count of attached service bindings, sourced from the
-   *  legacy IAppSummary view. The composed StAppDetail envelope doesn't
-   *  expose service bindings directly; the summary adapter manufactures
-   *  the legacy `services` array on demand. */
-  readonly totalServices: Signal<number> = computed(() => {
-    return this.dataService.summary()?.services?.length ?? 0;
-  });
+  /** Reactive count of attached service bindings — derived from the
+   *  signal-native bindings list AppDetailDataService loads from the
+   *  /pp/v1/cf/apps/{cnsi}/{app}/service_bindings?return=summary
+   *  endpoint. Fixes the L5 sub-nav count bug where the legacy
+   *  appDetailToLegacySummary() stubbed `services: []` and the count
+   *  always rendered as 0. */
+  readonly totalServices: Signal<number> = this.dataService.serviceBindingsCount;
+
+  ngOnInit(): void {
+    // Kick off the bindings load on tab mount. Idempotent — re-mounting
+    // the tab while already loaded just refreshes; the component-scoped
+    // AppDetailDataService keeps results across nav within the same app
+    // detail.
+    void this.dataService.refresh('serviceBindings');
+  }
 
   /**
    * Permission-gated visibility for the Bind Service action. Mirrors the
