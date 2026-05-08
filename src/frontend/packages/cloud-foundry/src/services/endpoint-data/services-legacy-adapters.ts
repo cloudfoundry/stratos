@@ -12,10 +12,7 @@
 // Offerings does NOT have an adapter — its handler is reworked in the
 // same commit set as the type rewrite (pilot end-to-end).
 
-import type {
-  StServiceInstance,
-  StServicePlan,
-} from './stratos-types';
+import type { StServiceInstance } from './stratos-types';
 
 // -----------------------------------------------------------------------------
 // Service Instance — legacy flat shape (what /cf/service_instances/{cnsi}
@@ -77,54 +74,11 @@ export function legacyToStServiceInstance(raw: LegacyServiceInstance): StService
   return out;
 }
 
-// -----------------------------------------------------------------------------
-// Service Plan — legacy flat shape → new nested-ref shape. Plan today
-// emits serviceOfferingGuid as a flat field; new shape nests it under
-// serviceOffering.guid (name resolves at summary+ via the rework's include
-// chain).
-// -----------------------------------------------------------------------------
-
-interface LegacyServicePlan {
-  guid: string;
-  cnsiGuid: string;
-  name: string;
-  description?: string;
-  available?: boolean;
-  free?: boolean;
-  visibilityType?: string;
-  serviceOfferingGuid?: string;
-  spaceGuid?: string;
-  costs?: Array<{ amount: number; currency: string; unit: string }>;
-  labels?: { [k: string]: string };
-  annotations?: { [k: string]: string };
-  createdAt: string;
-  updatedAt?: string;
-}
-
-export function legacyToStServicePlan(raw: LegacyServicePlan): StServicePlan {
-  const out: StServicePlan = {
-    guid: raw.guid,
-    cnsiGuid: raw.cnsiGuid,
-    name: raw.name,
-    description: raw.description,
-    free: raw.free,
-    available: raw.available,
-    visibilityType: raw.visibilityType,
-    costs: raw.costs,
-    labels: raw.labels,
-    annotations: raw.annotations,
-    createdAt: raw.createdAt,
-    updatedAt: raw.updatedAt,
-  };
-  if (raw.serviceOfferingGuid) {
-    out.serviceOffering = { guid: raw.serviceOfferingGuid };
-  }
-  if (raw.spaceGuid) {
-    out.space = { guid: raw.spaceGuid };
-  }
-  return out;
-}
-
+// (Service Plan adapter retired: the /pp/v1/cf/service_plans/{cnsi}
+// handler now emits the nested-ref shape natively across all tiers
+// with the v3 include chain resolving offering + broker refs in one
+// round-trip at ?return=summary+.)
+//
 // (Service Broker adapter retired: the /pp/v1/cf/service_brokers/{cnsi}
 // handler now emits the nested-ref shape natively across all tiers and
 // stamps `_meta.unavailable: ['authUsername']` on every non-counts row.)

@@ -9,7 +9,6 @@ import {
   StServicePlan,
   StServicePlanVisibility,
 } from './stratos-types';
-import { legacyToStServicePlan } from './services-legacy-adapters';
 
 interface PagedResp<T> {
   resources: T[];
@@ -34,11 +33,13 @@ export class ServiceCatalogDataService {
   }
 
   servicePlansForOffering(cnsiGuid: string, offeringGuid: string): Observable<StServicePlan[]> {
-    const params = new HttpParams().set('service_offering', offeringGuid);
-    return this.http.get<PagedResp<any>>(
+    const params = new HttpParams()
+      .set('service_offering', offeringGuid)
+      .set('return', 'summary');
+    return this.http.get<PagedResp<StServicePlan>>(
       `/pp/v1/cf/service_plans/${cnsiGuid}`,
       { params },
-    ).pipe(map(resp => (resp?.resources ?? []).map(r => legacyToStServicePlan(r))));
+    ).pipe(map(resp => resp?.resources ?? []));
   }
 
   serviceBroker(cnsiGuid: string, brokerGuid: string): Observable<StServiceBroker | null> {
@@ -52,23 +53,6 @@ export class ServiceCatalogDataService {
     return this.http.get<StServicePlanVisibility>(
       `/pp/v1/cf/service_plans/${cnsiGuid}/${planGuid}/visibility`,
     );
-  }
-
-  private markBrokerUnavailable(resp: StServiceBroker): StServiceBroker {
-    if (!resp) {
-      return resp;
-    }
-    const existing = resp._meta?.unavailable ?? [];
-    if (existing.includes('authUsername')) {
-      return resp;
-    }
-    return {
-      ...resp,
-      _meta: {
-        ...resp._meta,
-        unavailable: [...existing, 'authUsername'],
-      },
-    };
   }
 
   private catchAs404Null<T>() {
