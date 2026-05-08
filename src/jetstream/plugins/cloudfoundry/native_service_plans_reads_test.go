@@ -428,3 +428,144 @@ func TestGetNativeServicePlans_OmitsPagingWhenAbsent(t *testing.T) {
 	assert.False(t, q.PerPagePresent)
 	assert.False(t, q.PagePresent)
 }
+
+// scopedPlansServer captures the service_broker_guids filter on /v3/service_plans
+// so tests can assert path-derived broker scoping.
+type scopedPlansCapture struct {
+	BrokerGUIDs   []string
+	OfferingGUIDs []string
+	Hits          int
+}
+
+func newScopedPlansServer(t *testing.T, capture *scopedPlansCapture) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/service_plans":
+			capture.Hits++
+			capture.BrokerGUIDs = splitCSV(r.URL.Query().Get("service_broker_guids"))
+			capture.OfferingGUIDs = splitCSV(r.URL.Query().Get("service_offering_guids"))
+			perPage := r.URL.Query().Get("per_page")
+			if perPage == "1" {
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 4, "total_pages": 4},
+					"resources":  []interface{}{},
+				})
+				return
+			}
+			payload := map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					planResource("plan-1", "small", "off-1"),
+				},
+			}
+			if include := r.URL.Query().Get("include"); strings.Contains(include, "service_offering") {
+				payload["included"] = map[string]interface{}{
+					"service_offerings": []map[string]interface{}{
+						{
+							"guid": "off-1", "name": "redis",
+							"relationships": map[string]interface{}{
+								"service_broker": map[string]interface{}{"data": map[string]interface{}{"guid": "broker-1"}},
+							},
+						},
+					},
+					"service_brokers": []map[string]interface{}{
+						{"guid": "broker-1", "name": "alpha-broker", "url": "https://broker.example"},
+					},
+				}
+			}
+			_ = json.NewEncoder(w).Encode(payload)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+}
+
+func TestGetNativeServicePlansForBroker_AppliesBrokerFilter(t *testing.T) {
+	capture := &scopedPlansCapture{}
+	srv := newScopedPlansServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi/broker-1/plans?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "brokerGuid")
+	ctx.SetParamValues("test-cnsi", "broker-1")
+	plugin := newServicePlansPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServicePlansForBroker(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, []string{"broker-1"}, capture.BrokerGUIDs)
+	assert.Equal(t, 1, capture.Hits, "summary mode is one CAPI call (include chain decoded server-side)")
+
+	var resp StratosPagedResponse[StServicePlan]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 1)
+	first := resp.Resources[0]
+	require.NotNil(t, first.ServiceOffering)
+	assert.Equal(t, "redis", first.ServiceOffering.Name, "include chain populated offering name")
+	require.NotNil(t, first.ServiceOffering.Broker)
+	assert.Equal(t, "alpha-broker", first.ServiceOffering.Broker.Name)
+}
+
+func TestGetNativeServicePlansForBroker_ComposesWithOfferingFilter(t *testing.T) {
+	capture := &scopedPlansCapture{}
+	srv := newScopedPlansServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi/broker-1/plans?service_offering=off-1,off-2", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "brokerGuid")
+	ctx.SetParamValues("test-cnsi", "broker-1")
+	plugin := newServicePlansPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServicePlansForBroker(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, []string{"broker-1"}, capture.BrokerGUIDs)
+	assert.ElementsMatch(t, []string{"off-1", "off-2"}, capture.OfferingGUIDs, "broker scope and offering filter compose")
+}
+
+func TestGetNativeServicePlansForBroker_Counts(t *testing.T) {
+	capture := &scopedPlansCapture{}
+	srv := newScopedPlansServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi/broker-1/plans?return=counts", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "brokerGuid")
+	ctx.SetParamValues("test-cnsi", "broker-1")
+	plugin := newServicePlansPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServicePlansForBroker(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, []string{"broker-1"}, capture.BrokerGUIDs)
+
+	var resp StServicePlansResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 4, resp.TotalResults)
+	assert.Empty(t, resp.Resources)
+}
+
+func TestGetNativeServicePlansForBroker_RequiresBrokerGUID(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi//plans", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "brokerGuid")
+	ctx.SetParamValues("test-cnsi", "")
+	plugin := newServicePlansPlugin("http://unused")
+
+	err := plugin.getNativeServicePlansForBroker(ctx)
+	require.Error(t, err)
+	httpErr, ok := err.(*echo.HTTPError)
+	require.True(t, ok)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+}
