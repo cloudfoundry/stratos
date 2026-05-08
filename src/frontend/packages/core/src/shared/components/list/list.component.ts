@@ -364,12 +364,19 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
     }
     this.multiFilterManagers = this.getMultiFilterManagers();
 
-    // Create convenience observables that make the html clearer
+    // Create convenience observables that make the html clearer.
+    //
+    // When `suppressAddButton` is set the inline add form lives outside
+    // the list (in an L5 sub-nav above it), so `isAdding$` here means
+    // "the upstream form is open" — it should NOT collapse the list's
+    // own toolbar (title, filter row, sort/view/refresh). `isSelecting$`
+    // still does, because multi-select replaces the toolbar with batch
+    // actions in-place.
     this.isAddingOrSelecting$ = observableCombineLatest(
       this.dataSource.isAdding$,
       this.dataSource.isSelecting$
     ).pipe(
-      map(([isAdding, isSelecting]) => isAdding || isSelecting)
+      map(([isAdding, isSelecting]) => isSelecting || (isAdding && !this.suppressAddButton))
     );
     // Set up an observable containing the current view (card/table)
     this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
