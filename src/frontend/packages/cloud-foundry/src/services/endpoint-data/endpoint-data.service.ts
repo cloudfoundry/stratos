@@ -1,10 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, merge, Observable, ReplaySubject } from 'rxjs';
+import { EMPTY, firstValueFrom, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataShim } from './endpoint-data.shim';
-import { StApp, StEndpointData, StError, StOrg, StSpace } from './stratos-types';
+import {
+  StApp,
+  StEndpointData,
+  StError,
+  StOrg,
+  StServiceBroker,
+  StServiceCredentialBinding,
+  StServiceInstance,
+  StServiceOffering,
+  StServicePlan,
+  StSpace,
+} from './stratos-types';
 
 export class EndpointDataService {
   // Counts + recent apps populated by load() (home card fast path).
@@ -24,6 +35,26 @@ export class EndpointDataService {
   private readonly _lastFetched = signal<Date | null>(null);
   private readonly _detailsLastFetched = signal<Date | null>(null);
 
+  // Services-domain entities (signal+V3 slice). Counts populated by
+  // loadServicesCounts() (home-card fast path); full lists populated by
+  // per-entity load methods added per handler rework. List signals remain
+  // empty until their handler is reworked end-to-end. Bindings are app-
+  // scoped on the wire so no CNSI-level binding count is computed here —
+  // bindings counts derive from the loaded list filtered per app.
+  private readonly _serviceInstancesCount = signal<number>(0);
+  private readonly _serviceOfferingsCount = signal<number>(0);
+  private readonly _servicePlansCount = signal<number>(0);
+  private readonly _serviceBrokersCount = signal<number>(0);
+
+  private readonly _serviceInstances = signal<StServiceInstance[]>([]);
+  private readonly _serviceOfferings = signal<StServiceOffering[]>([]);
+  private readonly _servicePlans = signal<StServicePlan[]>([]);
+  private readonly _serviceBrokers = signal<StServiceBroker[]>([]);
+  private readonly _serviceCredentialBindings = signal<StServiceCredentialBinding[]>([]);
+
+  private readonly _isLoadingServicesCounts = signal<boolean>(false);
+  private readonly _servicesCountsLastFetched = signal<Date | null>(null);
+
   readonly orgs: Signal<StOrg[]> = this._orgs.asReadonly();
   readonly apps: Signal<StApp[]> = this._apps.asReadonly();
   readonly recentApps: Signal<StApp[]> = this._recentApps.asReadonly();
@@ -36,6 +67,18 @@ export class EndpointDataService {
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
   readonly detailsLastFetched: Signal<Date | null> = this._detailsLastFetched.asReadonly();
+
+  readonly serviceInstances: Signal<StServiceInstance[]> = this._serviceInstances.asReadonly();
+  readonly serviceOfferings: Signal<StServiceOffering[]> = this._serviceOfferings.asReadonly();
+  readonly servicePlans: Signal<StServicePlan[]> = this._servicePlans.asReadonly();
+  readonly serviceBrokers: Signal<StServiceBroker[]> = this._serviceBrokers.asReadonly();
+  readonly serviceCredentialBindings: Signal<StServiceCredentialBinding[]> = this._serviceCredentialBindings.asReadonly();
+  readonly serviceInstancesCount: Signal<number> = this._serviceInstancesCount.asReadonly();
+  readonly serviceOfferingsCount: Signal<number> = this._serviceOfferingsCount.asReadonly();
+  readonly servicePlansCount: Signal<number> = this._servicePlansCount.asReadonly();
+  readonly serviceBrokersCount: Signal<number> = this._serviceBrokersCount.asReadonly();
+  readonly isLoadingServicesCounts: Signal<boolean> = this._isLoadingServicesCounts.asReadonly();
+  readonly servicesCountsLastFetched: Signal<Date | null> = this._servicesCountsLastFetched.asReadonly();
 
   // ReplaySubject(1) — late subscribers (e.g. the home card's async pipe
   // subscribing after the HTTP has already completed) immediately receive the
@@ -158,6 +201,48 @@ export class EndpointDataService {
         this.detailsLoaded$.next();
       }),
     ) as Observable<void>;
+  }
+
+  // loadServicesCounts() fetches the four cnsi-scoped services-domain counts
+  // in parallel via the existing `?return=counts` convention. Used by the
+  // home-card services tile and by anywhere else that needs cheap totals
+  // before the full lists are loaded. Per-entity errors are captured but
+  // do not block the other counts. Returns Promise<void> rather than
+  // Observable<void> — no legacy consumer needs the Observable wrapper
+  // (services slice convention).
+  //
+  // Bindings are app-scoped on the wire (no cnsi-scoped credential-bindings
+  // endpoint exists) so no binding count is computed here. Bindings counts
+  // derive from the per-app loaded list as needed.
+  async loadServicesCounts(): Promise<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadServicesCounts' });
+    this._isLoadingServicesCounts.set(true);
+
+    type CountsResp = { totalResults: number };
+    const fetch = (path: string, errKey: string): Promise<CountsResp> => firstValueFrom(
+      this.http.get<CountsResp>(path).pipe(
+        catchError(err => {
+          this.addError(errKey, err);
+          return of({ totalResults: 0 } as CountsResp);
+        }),
+      ),
+    );
+
+    try {
+      const [insts, offerings, plans, brokers] = await Promise.all([
+        fetch(`/pp/v1/cf/service_instances/${this.guid}?return=counts`, 'service-instances-counts'),
+        fetch(`/pp/v1/cf/service_offerings/${this.guid}?return=counts`, 'service-offerings-counts'),
+        fetch(`/pp/v1/cf/service_plans/${this.guid}?return=counts`, 'service-plans-counts'),
+        fetch(`/pp/v1/cf/service_brokers/${this.guid}?return=counts`, 'service-brokers-counts'),
+      ]);
+      this._serviceInstancesCount.set(insts.totalResults);
+      this._serviceOfferingsCount.set(offerings.totalResults);
+      this._servicePlansCount.set(plans.totalResults);
+      this._serviceBrokersCount.set(brokers.totalResults);
+    } finally {
+      this._isLoadingServicesCounts.set(false);
+      this._servicesCountsLastFetched.set(new Date());
+    }
   }
 
   currentData(): StEndpointData {
