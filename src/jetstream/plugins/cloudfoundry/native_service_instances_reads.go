@@ -2,6 +2,7 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -11,22 +12,35 @@ import (
 
 // getNativeServiceInstances handles GET /pp/v1/cf/service_instances/{cnsiGuid}.
 //
-// Single-page passthrough over /v3/service_instances. Caller's per_page/page
-// forward verbatim to one CAPI call; absent, V3 server defaults apply.
-// Returns flat instance rows wrapped in a Stratos paged envelope.
+// Single-page passthrough over /v3/service_instances with four wire-shape
+// tiers selected by ?return=:
 //
-// CF v3 returns both managed and user-provided instances in the same list,
-// each carrying a `type` discriminator. The handler stamps the type onto
-// the row so the UI can label/colour them differently.
+//   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
+//   - base     — guid + cnsiGuid + name + type + tags + lastOperation +
+//                space.{guid} + servicePlan.{guid} (managed) + createdAt.
+//                One CAPI call, no include chain.
+//   - summary  — base + dashboardUrl/syslogDrainUrl/routeServiceUrl as
+//                applicable + space.{name, organization{guid,name}} +
+//                servicePlan.{name, free, serviceOffering{guid, name,
+//                broker{guid,name}}} + updatedAt. One CAPI call with
+//                ?include=service_plan,service_plan.service_offering,
+//                service_plan.service_offering.service_broker,space,
+//                space.organization; everything resolves from the v3
+//                included block in a single round-trip.
+//   - details  — summary + maintenanceInfo + upgradeAvailable + labels +
+//                annotations + servicePlan / offering / broker fully
+//                expanded.
 //
-// Per-page two-step join — service_plan → service_offering — resolves the
-// offering NAME (e.g. "redis") for managed instances on the current page
-// only. The join fetches are bounded by the page size (one CAPI call each
-// for the plans and offerings referenced by this page's instances). Both
-// fetches are soft-fail: if either errors, the offering name renders empty
-// rather than 502'ing the whole page. User-provided instances never carry
-// a plan/offering and always render with empty offering name (the UI
-// labels them "User Provided" instead).
+// CF v3 returns both managed and user-provided instances in the same list.
+// The handler stamps the type discriminator onto the row so the UI can
+// label/colour them differently. UPS rows omit `servicePlan` (genuinely
+// doesn't apply for `type=user-provided`).
+//
+// Cross-entity counts (e.g. bound-app count) are NOT wire fields — the
+// frontend derives them from the loaded credential-bindings signal
+// filtered per instance. The pre-slice handler ran a paginated drain over
+// /v3/service_credential_bindings to populate boundAppCount; that drain
+// is retired here in favour of the contracted derivation.
 func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -45,11 +59,13 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 
-	if ctx.QueryParam("return") == "counts" {
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return handleCapiError(ctx, lerr)
 		}
 		return ctx.JSON(http.StatusOK, StServiceInstancesResponse{
 			Resources:    []StServiceInstance{},
@@ -58,214 +74,316 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 	}
 
 	perPage, page, present := parsePerPageAndPage(ctx)
-	siParams := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
-	rawSIs, listErr := cfClient.ServiceInstances().List(ctx.Request().Context(), siParams)
-	if listErr != nil {
-		return handleCapiError(ctx, listErr)
-	}
-	instances := rawSIs.Resources
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
-	// Collect unique service-plan GUIDs from this page's managed instances.
-	planGUIDSet := make(map[string]struct{}, len(instances))
-	for _, si := range instances {
-		if si.Relationships.ServicePlan == nil {
-			continue
-		}
-		if guid := relationshipGUID(*si.Relationships.ServicePlan); guid != "" {
-			planGUIDSet[guid] = struct{}{}
-		}
-	}
-	planGUIDs := make([]string, 0, len(planGUIDSet))
-	for g := range planGUIDSet {
-		planGUIDs = append(planGUIDs, g)
+	if mode == ReturnSummary || mode == ReturnDetails {
+		params = params.WithInclude(
+			"service_plan",
+			"service_plan.service_offering",
+			"service_plan.service_offering.service_broker",
+			"space",
+			"space.organization",
+		)
 	}
 
-	// Batch-fetch service plans so we can resolve plan -> offering. Bounded
-	// by len(planGUIDs) (one CAPI call). Soft-fail: if the plan-list errors,
-	// managed instances render with empty offering name rather than 502'ing.
-	planByGUID := make(map[string]capi.ServicePlan, len(planGUIDs))
-	if len(planGUIDs) > 0 {
-		planParams := capi.NewQueryParams().
-			WithPerPage(len(planGUIDs)).
-			WithFilter("guids", planGUIDs...)
-		if raw, lerr := cfClient.ServicePlans().List(ctx.Request().Context(), planParams); lerr == nil {
-			for _, p := range raw.Resources {
-				planByGUID[p.GUID] = p
-			}
-		}
+	raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return handleCapiError(ctx, lerr)
 	}
 
-	// Collect the unique offering GUIDs referenced by the plans we resolved.
-	offeringGUIDSet := make(map[string]struct{}, len(planByGUID))
-	for _, p := range planByGUID {
-		if guid := relationshipGUID(p.Relationships.ServiceOffering); guid != "" {
-			offeringGUIDSet[guid] = struct{}{}
-		}
-	}
-	offeringGUIDs := make([]string, 0, len(offeringGUIDSet))
-	for g := range offeringGUIDSet {
-		offeringGUIDs = append(offeringGUIDs, g)
-	}
+	resolved := resolveInstanceIncludes(raw.Included, mode)
 
-	// Batch-fetch offerings to grab the name. Same bounded + soft-fail.
-	offeringByGUID := make(map[string]capi.ServiceOffering, len(offeringGUIDs))
-	if len(offeringGUIDs) > 0 {
-		offeringParams := capi.NewQueryParams().
-			WithPerPage(len(offeringGUIDs)).
-			WithFilter("guids", offeringGUIDs...)
-		if raw, lerr := cfClient.ServiceOfferings().List(ctx.Request().Context(), offeringParams); lerr == nil {
-			for _, o := range raw.Resources {
-				offeringByGUID[o.GUID] = o
-			}
-		}
-	}
-
-	// Per-page bound-app-count fetch. Drains
-	// /v3/service_credential_bindings?service_instance_guids=<csv>&types=app
-	// across pages and groups by service_instance.guid. Soft-fail: counts
-	// default to 0 if the bindings list errors — symmetrical to the plan +
-	// offering fetches above.
-	siGUIDs := make([]string, 0, len(instances))
-	for _, si := range instances {
-		siGUIDs = append(siGUIDs, si.GUID)
-	}
-	boundCounts, _ := fetchBoundAppCountsForInstances(ctx, cfClient, siGUIDs)
-
-	out := make([]StServiceInstance, 0, len(instances))
-	for _, si := range instances {
-		out = append(out, toStServiceInstance(si, cnsiGUID, planByGUID, offeringByGUID, boundCounts))
+	out := make([]StServiceInstance, 0, len(raw.Resources))
+	for _, si := range raw.Resources {
+		out = append(out, toStServiceInstance(si, cnsiGUID, resolved, mode))
 	}
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
 		Resources:  out,
-		Pagination: BuildPaginationMeta(ctx, page, perPage, rawSIs.Pagination.TotalResults),
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
 }
 
-// fetchBoundAppCountsForInstances drains
-// /v3/service_credential_bindings?service_instance_guids=<csv>&types=app
-// across all pages and returns a map service_instance_guid → count. Only
-// type=app bindings are counted — that's the "this instance has N bound
-// apps" UI semantic. Service-key bindings are a separate concept and are
-// not surfaced as a count here.
-func fetchBoundAppCountsForInstances(ctx echo.Context, cfClient capi.Client, instanceGUIDs []string) (map[string]int, error) {
-	if len(instanceGUIDs) == 0 {
-		return map[string]int{}, nil
-	}
-	counts := make(map[string]int, len(instanceGUIDs))
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["service_instance_guids"] = instanceGUIDs
-		params.Filters["type"] = []string{"app"}
-
-		raw, err := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
-		}
-		for _, b := range raw.Resources {
-			if guid := relationshipGUID(b.Relationships.ServiceInstance); guid != "" {
-				counts[guid]++
-			}
-		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
-	}
-	return counts, nil
+// instanceIncludes bundles the four guid-keyed maps decoded from the
+// v3 `included` block on a service-instances list response. Empty
+// maps when the include chain is absent (base mode) or when the
+// upstream returns nothing — toStServiceInstance falls back to
+// guid-only refs.
+type instanceIncludes struct {
+	plans     map[string]capi.ServicePlan
+	offerings map[string]capi.ServiceOffering
+	brokers   map[string]capi.ServiceBroker
+	spaces    map[string]capi.Space
+	orgs      map[string]capi.Organization
 }
 
-// toStServiceInstance maps a capi.ServiceInstance onto the Stratos-shape DTO,
-// resolving offering name via the plan -> offering chain. cnsiGUID is stamped
-// onto the row so multi-CNSI rows + favorites/links can be keyed by
-// (cnsi, instance) without threading the endpoint through every closure.
+func resolveInstanceIncludes(included map[string][]json.RawMessage, mode ReturnMode) instanceIncludes {
+	out := instanceIncludes{
+		plans:     map[string]capi.ServicePlan{},
+		offerings: map[string]capi.ServiceOffering{},
+		brokers:   map[string]capi.ServiceBroker{},
+		spaces:    map[string]capi.Space{},
+		orgs:      map[string]capi.Organization{},
+	}
+	if mode == ReturnBase || included == nil {
+		return out
+	}
+	out.plans = plansFromIncluded(included)
+	out.offerings = offeringsFromIncluded(included)
+	out.brokers = brokersFromIncluded(included)
+	out.spaces = spacesFromIncluded(included)
+	out.orgs = orgsFromIncluded(included)
+	return out
+}
+
+// getNativeServiceInstanceDetail handles GET /pp/v1/cf/service_instances/{cnsiGuid}/{instanceGuid}.
+// Single-resource sibling for detail views.
 //
-// Tags is normalised to a non-nil slice so JSON marshals as `[]` rather than
-// `null` for instances the broker tagged with nothing — same convention as
-// StServiceOffering.
-func toStServiceInstance(
-	si capi.ServiceInstance,
-	cnsiGUID string,
-	planByGUID map[string]capi.ServicePlan,
-	offeringByGUID map[string]capi.ServiceOffering,
-	boundCounts map[string]int,
-) StServiceInstance {
-	spaceGUID := relationshipGUID(si.Relationships.Space)
-	planGUID := ""
-	if si.Relationships.ServicePlan != nil {
-		planGUID = relationshipGUID(*si.Relationships.ServicePlan)
+// Single-resource Get can't carry ?include= via the typed CAPI API today,
+// so summary+ resolves the chain via per-detail follow-up Gets. Each
+// follow-up is soft-fail: errors leave the corresponding ref in
+// guid-only form rather than 502'ing the whole response.
+func (c *CloudFoundrySpecification) getNativeServiceInstanceDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	instanceGUID := ctx.Param("instanceGuid")
+	if cnsiGUID == "" || instanceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and instanceGuid are required")
 	}
 
-	offeringGUID := ""
-	offeringName := ""
-	planName := ""
-	if planGUID != "" {
-		if plan, ok := planByGUID[planGUID]; ok {
-			planName = plan.Name
-			offeringGUID = relationshipGUID(plan.Relationships.ServiceOffering)
-			if offering, ok := offeringByGUID[offeringGUID]; ok {
-				offeringName = offering.Name
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	si, gerr := cfClient.ServiceInstances().Get(ctx.Request().Context(), instanceGUID)
+	if gerr != nil {
+		return handleCapiError(ctx, gerr)
+	}
+
+	mode := parseReturnMode(ctx)
+	if mode == ReturnCounts {
+		mode = ReturnBase
+	}
+
+	resolved := instanceIncludes{
+		plans:     map[string]capi.ServicePlan{},
+		offerings: map[string]capi.ServiceOffering{},
+		brokers:   map[string]capi.ServiceBroker{},
+		spaces:    map[string]capi.Space{},
+		orgs:      map[string]capi.Organization{},
+	}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		// space → org chain
+		if guid := relationshipGUID(si.Relationships.Space); guid != "" {
+			if s, sErr := cfClient.Spaces().Get(ctx.Request().Context(), guid); sErr == nil {
+				resolved.spaces[guid] = *s
+				if og := relationshipGUID(s.Relationships.Organization); og != "" {
+					if o, oErr := cfClient.Organizations().Get(ctx.Request().Context(), og); oErr == nil {
+						resolved.orgs[og] = *o
+					}
+				}
+			}
+		}
+		// plan → offering → broker chain (managed only)
+		if si.Relationships.ServicePlan != nil {
+			if pg := relationshipGUID(*si.Relationships.ServicePlan); pg != "" {
+				if p, pErr := cfClient.ServicePlans().Get(ctx.Request().Context(), pg); pErr == nil {
+					resolved.plans[pg] = *p
+					if og := relationshipGUID(p.Relationships.ServiceOffering); og != "" {
+						if o, oErr := cfClient.ServiceOfferings().Get(ctx.Request().Context(), og); oErr == nil {
+							resolved.offerings[og] = *o
+							if bg := relationshipGUID(o.Relationships.ServiceBroker); bg != "" {
+								if b, bErr := cfClient.ServiceBrokers().Get(ctx.Request().Context(), bg); bErr == nil {
+									resolved.brokers[bg] = *b
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, toStServiceInstance(*si, cnsiGUID, resolved, mode))
+}
+
+// plansFromIncluded decodes v3's `included.service_plans` block.
+func plansFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServicePlan {
+	out := map[string]capi.ServicePlan{}
+	if included == nil {
+		return out
+	}
+	rawPlans, ok := included["service_plans"]
+	if !ok {
+		return out
+	}
+	for _, raw := range rawPlans {
+		var p capi.ServicePlan
+		if err := json.Unmarshal(raw, &p); err == nil && p.GUID != "" {
+			out[p.GUID] = p
+		}
+	}
+	return out
+}
+
+// orgsFromIncluded decodes v3's `included.organizations` block.
+func orgsFromIncluded(included map[string][]json.RawMessage) map[string]capi.Organization {
+	out := map[string]capi.Organization{}
+	if included == nil {
+		return out
+	}
+	rawOrgs, ok := included["organizations"]
+	if !ok {
+		return out
+	}
+	for _, raw := range rawOrgs {
+		var o capi.Organization
+		if err := json.Unmarshal(raw, &o); err == nil && o.GUID != "" {
+			out[o.GUID] = o
+		}
+	}
+	return out
+}
+
+// toStServiceInstance maps a capi.ServiceInstance onto the Stratos-shape
+// DTO at the requested tier.
+//
+// Tier policy mirrors the doc on StServiceInstance.
+func toStServiceInstance(si capi.ServiceInstance, cnsiGUID string, inc instanceIncludes, mode ReturnMode) StServiceInstance {
 	tags := si.Tags
 	if tags == nil {
 		tags = []string{}
 	}
 
-	dashboardURL := ""
-	if si.DashboardURL != nil {
-		dashboardURL = *si.DashboardURL
+	out := StServiceInstance{
+		GUID:          si.GUID,
+		CnsiGUID:      cnsiGUID,
+		Name:          si.Name,
+		Type:          si.Type,
+		Tags:          tags,
+		LastOperation: mapLastOperation(si.LastOperation),
+		CreatedAt:     si.CreatedAt.Format(time.RFC3339),
 	}
 
-	syslogDrainURL := ""
-	if si.SyslogDrainURL != nil {
-		syslogDrainURL = *si.SyslogDrainURL
+	if guid := relationshipGUID(si.Relationships.Space); guid != "" {
+		out.Space = &StSpaceRef{GUID: guid}
 	}
-	routeServiceURL := ""
-	if si.RouteServiceURL != nil {
-		routeServiceURL = *si.RouteServiceURL
-	}
-
-	lastOpType := ""
-	lastOpState := ""
-	lastOpDescription := ""
-	lastOpUpdatedAt := ""
-	if si.LastOperation != nil {
-		lastOpType = si.LastOperation.Type
-		lastOpState = si.LastOperation.State
-		lastOpDescription = si.LastOperation.Description
-		if si.LastOperation.UpdatedAt != nil {
-			lastOpUpdatedAt = si.LastOperation.UpdatedAt.Format(time.RFC3339)
+	if si.Relationships.ServicePlan != nil {
+		if guid := relationshipGUID(*si.Relationships.ServicePlan); guid != "" {
+			out.ServicePlan = &StServicePlanRef{GUID: guid}
 		}
 	}
 
-	updatedAt := ""
-	if !si.UpdatedAt.IsZero() {
-		updatedAt = si.UpdatedAt.Format(time.RFC3339)
+	if mode == ReturnBase {
+		return out
 	}
 
-	return StServiceInstance{
-		GUID:                si.GUID,
-		Name:                si.Name,
-		Type:                si.Type,
-		CnsiGUID:            cnsiGUID,
-		SpaceGUID:           spaceGUID,
-		ServicePlanGUID:     planGUID,
-		ServicePlanName:     planName,
-		ServiceOfferingGUID: offeringGUID,
-		ServiceOfferingName: offeringName,
-		BoundAppCount:       boundCounts[si.GUID],
-		Tags:                tags,
-		DashboardURL:        dashboardURL,
-		SyslogDrainURL:      syslogDrainURL,
-		RouteServiceURL:     routeServiceURL,
-		LastOpType:          lastOpType,
-		LastOpState:         lastOpState,
-		LastOpDescription:   lastOpDescription,
-		LastOpUpdatedAt:     lastOpUpdatedAt,
-		CreatedAt:           si.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:           updatedAt,
+	// summary tier
+	if !si.UpdatedAt.IsZero() {
+		out.UpdatedAt = si.UpdatedAt.Format(time.RFC3339)
 	}
+	if si.DashboardURL != nil {
+		out.DashboardURL = *si.DashboardURL
+	}
+	if si.SyslogDrainURL != nil {
+		out.SyslogDrainURL = *si.SyslogDrainURL
+	}
+	if si.RouteServiceURL != nil {
+		out.RouteServiceURL = *si.RouteServiceURL
+	}
+
+	if out.Space != nil {
+		if s, ok := inc.spaces[out.Space.GUID]; ok {
+			out.Space.Name = s.Name
+			if og := relationshipGUID(s.Relationships.Organization); og != "" {
+				ref := &StOrgRef{GUID: og}
+				if o, ok := inc.orgs[og]; ok {
+					ref.Name = o.Name
+				}
+				out.Space.Organization = ref
+			}
+		}
+	}
+
+	if out.ServicePlan != nil {
+		if p, ok := inc.plans[out.ServicePlan.GUID]; ok {
+			out.ServicePlan.Name = p.Name
+			free := p.Free
+			out.ServicePlan.Free = &free
+			if og := relationshipGUID(p.Relationships.ServiceOffering); og != "" {
+				offRef := &StServiceOfferingRef{GUID: og}
+				if o, ok := inc.offerings[og]; ok {
+					offRef.Name = o.Name
+					if bg := relationshipGUID(o.Relationships.ServiceBroker); bg != "" {
+						brokerRef := &StServiceBrokerRef{GUID: bg}
+						if b, ok := inc.brokers[bg]; ok {
+							brokerRef.Name = b.Name
+						}
+						offRef.Broker = brokerRef
+					}
+				}
+				out.ServicePlan.ServiceOffering = offRef
+			}
+		}
+	}
+
+	if mode == ReturnSummary {
+		return out
+	}
+
+	// details tier
+	if si.MaintenanceInfo != nil {
+		out.MaintenanceInfo = &StMaintenanceInfo{
+			Version: si.MaintenanceInfo.Version, Description: si.MaintenanceInfo.Description,
+		}
+	}
+	upgrade := si.UpgradeAvailable
+	out.UpgradeAvailable = &upgrade
+	if si.Metadata != nil {
+		out.Labels = normaliseStringMap(si.Metadata.Labels)
+		out.Annotations = normaliseStringMap(si.Metadata.Annotations)
+	}
+
+	// Expand offering / broker / space refs the include chain didn't fill.
+	if out.ServicePlan != nil && out.ServicePlan.ServiceOffering != nil {
+		if o, ok := inc.offerings[out.ServicePlan.ServiceOffering.GUID]; ok {
+			if o.Description != "" {
+				out.ServicePlan.ServiceOffering.Description = o.Description
+			}
+			if len(o.Tags) > 0 {
+				out.ServicePlan.ServiceOffering.Tags = o.Tags
+			}
+		}
+		if out.ServicePlan.ServiceOffering.Broker != nil {
+			if b, ok := inc.brokers[out.ServicePlan.ServiceOffering.Broker.GUID]; ok {
+				out.ServicePlan.ServiceOffering.Broker.URL = b.URL
+			}
+		}
+	}
+
+	return out
+}
+
+func mapLastOperation(lo *capi.ServiceInstanceLastOperation) *StLastOperation {
+	if lo == nil {
+		return nil
+	}
+	out := &StLastOperation{
+		Type:        lo.Type,
+		State:       lo.State,
+		Description: lo.Description,
+	}
+	if lo.UpdatedAt != nil {
+		out.UpdatedAt = lo.UpdatedAt.Format(time.RFC3339)
+	}
+	if lo.CreatedAt != nil {
+		out.CreatedAt = lo.CreatedAt.Format(time.RFC3339)
+	}
+	return out
 }

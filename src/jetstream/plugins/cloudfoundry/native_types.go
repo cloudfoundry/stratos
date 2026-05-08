@@ -362,42 +362,42 @@ type StDomainsResponse struct {
 // catalog entry or a user-provided instance representing an external service
 // the platform doesn't manage. Drives the /services list page.
 //
-// Type carries the CF v3 discriminator ("managed" or "user-provided"). For
-// managed instances the handler runs a two-step join (service_plan ->
-// service_offering) to populate ServiceOfferingName so the UI can render
-// the offering name (e.g. "redis") instead of a plan GUID. User-provided
-// instances have neither plan nor offering — those fields stay empty and
-// the UI labels the row "User Provided" instead.
+// Type carries the CF v3 discriminator ("managed" or "user-provided").
+// User-provided instances omit `servicePlan` (genuinely doesn't apply).
 //
-// LastOp* mirrors CF's last_operation block; the UI surfaces State as a
-// pill (succeeded / in progress / failed). Tags is normalised to a non-nil
-// slice so the JSON payload always emits `[]` rather than `null` and the
-// frontend can `.join(',')` without a guard.
+// Cross-entity counts (e.g. bound-app count) are NOT wire fields — the
+// frontend derives them from the loaded credential-bindings signal
+// filtered per instance. Removed in the slice rework along with the
+// per-page bindings drain.
+//
+// Tier policy:
+//   - base:    guid + cnsiGuid + name + type + tags + lastOperation +
+//              space.{guid} + servicePlan.{guid} (managed) + createdAt
+//   - summary: + dashboardUrl/syslogDrainUrl/routeServiceUrl as applicable
+//              + space.{name, organization{guid,name}}
+//              + servicePlan.{name, free, serviceOffering{guid,name,broker{guid,name}}}
+//              + updatedAt
+//   - details: + maintenanceInfo + upgradeAvailable + labels + annotations
+//              + servicePlan / offering / broker fully expanded
 type StServiceInstance struct {
-	GUID                string   `json:"guid"`
-	Name                string   `json:"name"`
-	Type                string   `json:"type"`
-	CnsiGUID            string   `json:"cnsiGuid"`
-	SpaceGUID           string   `json:"spaceGuid,omitempty"`
-	ServicePlanGUID     string   `json:"servicePlanGuid,omitempty"`
-	ServicePlanName     string   `json:"servicePlanName,omitempty"`
-	ServiceOfferingGUID string   `json:"serviceOfferingGuid,omitempty"`
-	ServiceOfferingName string   `json:"serviceOfferingName,omitempty"`
-	// BoundAppCount is the number of `type=app` service credential bindings
-	// attached to this instance. Always emitted (default 0) so the UI can
-	// render "Bound Apps: 0" without null-guarding. Service-key bindings are
-	// a separate concept and not folded in here.
-	BoundAppCount       int      `json:"boundAppCount"`
-	Tags                []string `json:"tags"`
-	DashboardURL        string   `json:"dashboardUrl,omitempty"`
-	SyslogDrainURL      string   `json:"syslogDrainUrl,omitempty"`
-	RouteServiceURL     string   `json:"routeServiceUrl,omitempty"`
-	LastOpType          string   `json:"lastOpType,omitempty"`
-	LastOpState         string   `json:"lastOpState,omitempty"`
-	LastOpDescription   string   `json:"lastOpDescription,omitempty"`
-	LastOpUpdatedAt     string   `json:"lastOpUpdatedAt,omitempty"`
-	CreatedAt           string   `json:"createdAt"`
-	UpdatedAt           string   `json:"updatedAt,omitempty"`
+	GUID            string             `json:"guid"`
+	CnsiGUID        string             `json:"cnsiGuid"`
+	Name            string             `json:"name"`
+	Type            string             `json:"type"`
+	Tags            []string           `json:"tags"`
+	LastOperation   *StLastOperation   `json:"lastOperation,omitempty"`
+	Space           *StSpaceRef        `json:"space,omitempty"`
+	ServicePlan     *StServicePlanRef  `json:"servicePlan,omitempty"`
+	DashboardURL    string             `json:"dashboardUrl,omitempty"`
+	SyslogDrainURL  string             `json:"syslogDrainUrl,omitempty"`
+	RouteServiceURL string             `json:"routeServiceUrl,omitempty"`
+	MaintenanceInfo *StMaintenanceInfo `json:"maintenanceInfo,omitempty"`
+	UpgradeAvailable *bool             `json:"upgradeAvailable,omitempty"`
+	Labels          map[string]string  `json:"labels,omitempty"`
+	Annotations     map[string]string  `json:"annotations,omitempty"`
+	CreatedAt       string             `json:"createdAt"`
+	UpdatedAt       string             `json:"updatedAt,omitempty"`
+	Meta            *StratosMeta       `json:"_meta,omitempty"`
 }
 
 // StUserProvidedServiceRequest is the inbound write shape for both
