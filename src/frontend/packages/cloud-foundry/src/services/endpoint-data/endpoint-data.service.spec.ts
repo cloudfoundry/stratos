@@ -14,6 +14,11 @@ const ORGS_FULL_URL = '/pp/v1/cf/orgs/test-cnsi-guid?per_page=500&page=1';
 const APPS_FULL_URL = '/pp/v1/cf/apps/test-cnsi-guid?per_page=500&page=1';
 const SPACES_FULL_URL = '/pp/v1/cf/spaces/test-cnsi-guid?per_page=500&page=1';
 
+const SERVICE_INSTANCES_COUNTS_URL = '/pp/v1/cf/service_instances/test-cnsi-guid?return=counts';
+const SERVICE_OFFERINGS_COUNTS_URL = '/pp/v1/cf/service_offerings/test-cnsi-guid?return=counts';
+const SERVICE_PLANS_COUNTS_URL = '/pp/v1/cf/service_plans/test-cnsi-guid?return=counts';
+const SERVICE_BROKERS_COUNTS_URL = '/pp/v1/cf/service_brokers/test-cnsi-guid?return=counts';
+
 describe('EndpointDataService', () => {
   let httpMock: HttpTestingController;
   let shimSpy: { write: ReturnType<typeof vi.fn> };
@@ -202,5 +207,64 @@ describe('EndpointDataService', () => {
     const hit = snap.counters['cache-hit']?.find(c => c.dimensions.method === 'load');
     expect(miss?.count).toBe(1);
     expect(hit?.count).toBe(1);
+  });
+
+  // -------------------------------------------------------------------------
+  // Services-domain extension (services-domain signal+V3 slice, step 3)
+  // -------------------------------------------------------------------------
+
+  it('starts with empty service signals and 0 counts', () => {
+    expect(service.serviceInstances()).toEqual([]);
+    expect(service.serviceOfferings()).toEqual([]);
+    expect(service.servicePlans()).toEqual([]);
+    expect(service.serviceBrokers()).toEqual([]);
+    expect(service.serviceCredentialBindings()).toEqual([]);
+    expect(service.serviceInstancesCount()).toBe(0);
+    expect(service.serviceOfferingsCount()).toBe(0);
+    expect(service.servicePlansCount()).toBe(0);
+    expect(service.serviceBrokersCount()).toBe(0);
+    expect(service.isLoadingServicesCounts()).toBeFalsy();
+    expect(service.servicesCountsLastFetched()).toBeNull();
+  });
+
+  it('loadServicesCounts() populates all four count signals in parallel', async () => {
+    const promise = service.loadServicesCounts();
+    expect(service.isLoadingServicesCounts()).toBeTruthy();
+    httpMock.expectOne(SERVICE_INSTANCES_COUNTS_URL).flush({ totalResults: 17 });
+    httpMock.expectOne(SERVICE_OFFERINGS_COUNTS_URL).flush({ totalResults: 42 });
+    httpMock.expectOne(SERVICE_PLANS_COUNTS_URL).flush({ totalResults: 87 });
+    httpMock.expectOne(SERVICE_BROKERS_COUNTS_URL).flush({ totalResults: 5 });
+    await promise;
+    expect(service.serviceInstancesCount()).toBe(17);
+    expect(service.serviceOfferingsCount()).toBe(42);
+    expect(service.servicePlansCount()).toBe(87);
+    expect(service.serviceBrokersCount()).toBe(5);
+    expect(service.isLoadingServicesCounts()).toBeFalsy();
+    expect(service.servicesCountsLastFetched()).not.toBeNull();
+  });
+
+  it('loadServicesCounts() one failed call does not break the others', async () => {
+    const promise = service.loadServicesCounts();
+    httpMock.expectOne(SERVICE_INSTANCES_COUNTS_URL).flush({ totalResults: 17 });
+    httpMock.expectOne(SERVICE_OFFERINGS_COUNTS_URL).error(new ErrorEvent('Network error'));
+    httpMock.expectOne(SERVICE_PLANS_COUNTS_URL).flush({ totalResults: 87 });
+    httpMock.expectOne(SERVICE_BROKERS_COUNTS_URL).flush({ totalResults: 5 });
+    await promise;
+    expect(service.serviceInstancesCount()).toBe(17);
+    expect(service.serviceOfferingsCount()).toBe(0);
+    expect(service.servicePlansCount()).toBe(87);
+    expect(service.serviceBrokersCount()).toBe(5);
+    const err = service.errors().find(e => e.resource === 'service-offerings-counts');
+    expect(err).toBeDefined();
+    expect(service.isLoadingServicesCounts()).toBeFalsy();
+  });
+
+  it('loadServicesCounts() returns Promise<void>, not Observable', () => {
+    const result = service.loadServicesCounts();
+    expect(result).toBeInstanceOf(Promise);
+    httpMock.expectOne(SERVICE_INSTANCES_COUNTS_URL).flush({ totalResults: 0 });
+    httpMock.expectOne(SERVICE_OFFERINGS_COUNTS_URL).flush({ totalResults: 0 });
+    httpMock.expectOne(SERVICE_PLANS_COUNTS_URL).flush({ totalResults: 0 });
+    httpMock.expectOne(SERVICE_BROKERS_COUNTS_URL).flush({ totalResults: 0 });
   });
 });
