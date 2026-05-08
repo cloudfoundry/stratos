@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   update-docs-internal-versions:
     if: github.repository == 'cloudfoundry/stratos'
