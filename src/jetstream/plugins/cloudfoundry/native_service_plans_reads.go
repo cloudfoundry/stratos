@@ -301,6 +301,91 @@ func mapPlanSchemas(s capi.ServicePlanSchemas) *StPlanSchemas {
 	return out
 }
 
+// getNativeServicePlansForBroker handles
+//
+//	GET /pp/v1/cf/brokers/{cnsiGuid}/{brokerGuid}/plans.
+//
+// Same wire-shape and tier dispatch as the CF-scoped plans handler — the only
+// difference is the path-derived `?service_broker_guids=<guid>` filter. CF v3
+// supports the filter natively on `/v3/service_plans`, so this is a single
+// round trip (plus the `?include=service_offering[,service_offering.service_broker]`
+// chain at summary+).
+//
+// `?service_offering=<csv>` from the existing query layer also composes when
+// callers want plans for a specific (offering ∩ broker) tuple.
+func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	brokerGUID := ctx.Param("brokerGuid")
+	if cnsiGUID == "" || brokerGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and brokerGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("service_broker_guids", brokerGUID)
+		raw, lerr := cfClient.ServicePlans().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return handleCapiError(ctx, lerr)
+		}
+		return ctx.JSON(http.StatusOK, StServicePlansResponse{
+			Resources:    []StServicePlan{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present).
+		WithFilter("service_broker_guids", brokerGUID)
+
+	if rawOfferings := ctx.QueryParam("service_offering"); rawOfferings != "" {
+		offerings := splitNonEmpty(rawOfferings, ",")
+		if len(offerings) > 0 {
+			params = params.WithFilter("service_offering_guids", offerings...)
+		}
+	}
+
+	if mode == ReturnSummary || mode == ReturnDetails {
+		params = params.WithInclude("service_offering", "service_offering.service_broker")
+	}
+
+	raw, lerr := cfClient.ServicePlans().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return handleCapiError(ctx, lerr)
+	}
+
+	offeringByGUID := map[string]capi.ServiceOffering{}
+	brokerByGUID := map[string]capi.ServiceBroker{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		offeringByGUID = offeringsFromIncluded(raw.Included)
+		brokerByGUID = brokersFromIncluded(raw.Included)
+	}
+
+	resources := make([]StServicePlan, 0, len(raw.Resources))
+	for _, p := range raw.Resources {
+		resources = append(resources, toStServicePlan(p, cnsiGUID, offeringByGUID, brokerByGUID, mode))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServicePlan]{
+		Resources:  resources,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
 // splitNonEmpty splits s on sep and drops empty tokens — used by the
 // `?guids=` / `?service_offering=` parsers so trailing/double commas
 // don't translate into empty filter values that CAPI would reject.

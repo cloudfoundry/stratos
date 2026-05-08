@@ -80,4 +80,13 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.PATCH("/cf/service_instances/:cnsiGuid/:siGuid", c.updateManagedServiceInstance)
 	echoGroup.POST("/cf/roles/:cnsiGuid", c.createNativeRole)
 	echoGroup.DELETE("/cf/roles/:cnsiGuid/:roleGuid", c.deleteNativeRole)
+
+	// Services-domain scoped reads (slice 5: services-domain signal+V3).
+	// Path-derived filters layer on top of the existing CF-scoped handlers'
+	// ?return= dispatch — see the corresponding handler godoc for tier
+	// semantics and CAPI filter mappings.
+	echoGroup.GET("/cf/spaces/:cnsiGuid/:spaceGuid/service_instances", c.getNativeServiceInstancesForSpace)
+	echoGroup.GET("/cf/brokers/:cnsiGuid/:brokerGuid/service_instances", c.getNativeServiceInstancesForBroker)
+	echoGroup.GET("/cf/brokers/:cnsiGuid/:brokerGuid/plans", c.getNativeServicePlansForBroker)
+	echoGroup.GET("/cf/brokers/:cnsiGuid/:brokerGuid/offerings", c.getNativeServiceOfferingsForBroker)
 }

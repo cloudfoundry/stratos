@@ -370,6 +370,215 @@ func toStServiceInstance(si capi.ServiceInstance, cnsiGUID string, inc instanceI
 	return out
 }
 
+// getNativeServiceInstancesForSpace handles
+//
+//	GET /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}/service_instances.
+//
+// Same wire-shape and tier dispatch as the CF-scoped list handler — the only
+// differences are the path-derived `?space_guids=<guid>` filter and the
+// validation of `spaceGuid`. CF v3 supports the filter natively on
+// `/v3/service_instances` so this is a single round trip (plus the `?include=`
+// chain at summary+).
+//
+// `?guids=<csv>` and `type=` query filters layer on top of the path filter
+// when callers narrow further (e.g. managed-only on a space-services tab).
+func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	spaceGUID := ctx.Param("spaceGuid")
+	if cnsiGUID == "" || spaceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and spaceGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
+		params := capi.NewQueryParams().WithPerPage(1).WithFilter("space_guids", spaceGUID)
+		raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return handleCapiError(ctx, lerr)
+		}
+		return ctx.JSON(http.StatusOK, StServiceInstancesResponse{
+			Resources:    []StServiceInstance{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present).
+		WithFilter("space_guids", spaceGUID)
+
+	if mode == ReturnSummary || mode == ReturnDetails {
+		params = params.WithInclude(
+			"service_plan",
+			"service_plan.service_offering",
+			"service_plan.service_offering.service_broker",
+			"space",
+			"space.organization",
+		)
+	}
+
+	raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return handleCapiError(ctx, lerr)
+	}
+
+	resolved := resolveInstanceIncludes(raw.Included, mode)
+
+	out := make([]StServiceInstance, 0, len(raw.Resources))
+	for _, si := range raw.Resources {
+		out = append(out, toStServiceInstance(si, cnsiGUID, resolved, mode))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
+// getNativeServiceInstancesForBroker handles
+//
+//	GET /pp/v1/cf/brokers/{cnsiGuid}/{brokerGuid}/service_instances.
+//
+// Managed-only by construction (UPS instances aren't bound to a broker). CF
+// v3's `/v3/service_instances` doesn't model a `service_broker_guids` filter
+// directly — the path traversal is broker → plans → instances. So this
+// handler runs a two-step composition:
+//
+//  1. List `/v3/service_plans?service_broker_guids=<broker>&per_page=5000`
+//     to collect the broker's plan GUIDs (ID-only, no include chain).
+//  2. List `/v3/service_instances?service_plan_guids=<csv>&include=…` at the
+//     requested tier.
+//
+// Soft-fail on the plan probe: if the broker has no plans, the response is
+// an empty page (no instances possible). The plan probe never paginates —
+// brokers with > 5000 plans are pathological; we accept that bound.
+//
+// TODO(capi-fork): a `service_broker_guids` filter on `/v3/service_instances`
+// would collapse this to one CAPI call. Worth probing CF v3 server-side as a
+// generic improvement (see KS reference_capi_openapi_spec_include.md).
+func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	brokerGUID := ctx.Param("brokerGuid")
+	if cnsiGUID == "" || brokerGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and brokerGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	mode := parseReturnMode(ctx)
+
+	planGUIDs, plansErr := listPlanGUIDsForBroker(ctx, cfClient, brokerGUID)
+	if plansErr != nil {
+		return handleCapiError(ctx, plansErr)
+	}
+
+	if mode == ReturnCounts {
+		if len(planGUIDs) == 0 {
+			return ctx.JSON(http.StatusOK, StServiceInstancesResponse{
+				Resources:    []StServiceInstance{},
+				TotalResults: 0,
+			})
+		}
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("service_plan_guids", planGUIDs...)
+		raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return handleCapiError(ctx, lerr)
+		}
+		return ctx.JSON(http.StatusOK, StServiceInstancesResponse{
+			Resources:    []StServiceInstance{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+
+	if len(planGUIDs) == 0 {
+		return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
+			Resources:  []StServiceInstance{},
+			Pagination: BuildPaginationMeta(ctx, page, perPage, 0),
+		})
+	}
+
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present).
+		WithFilter("service_plan_guids", planGUIDs...)
+
+	if mode == ReturnSummary || mode == ReturnDetails {
+		params = params.WithInclude(
+			"service_plan",
+			"service_plan.service_offering",
+			"service_plan.service_offering.service_broker",
+			"space",
+			"space.organization",
+		)
+	}
+
+	raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
+	if lerr != nil {
+		return handleCapiError(ctx, lerr)
+	}
+
+	resolved := resolveInstanceIncludes(raw.Included, mode)
+
+	out := make([]StServiceInstance, 0, len(raw.Resources))
+	for _, si := range raw.Resources {
+		out = append(out, toStServiceInstance(si, cnsiGUID, resolved, mode))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
+// listPlanGUIDsForBroker fetches the plan GUIDs owned by a broker via
+// `/v3/service_plans?service_broker_guids=<broker>`. Used by
+// getNativeServiceInstancesForBroker to translate the broker scope into a
+// `service_plan_guids` filter on instances.
+//
+// per_page=5000 caps the probe at one page — pathologically large brokers
+// would need pagination, but in practice broker plan counts are well under
+// 100. Returns an empty slice (not error) when the broker has no plans.
+func listPlanGUIDsForBroker(ctx echo.Context, cfClient capi.Client, brokerGUID string) ([]string, error) {
+	params := capi.NewQueryParams().
+		WithPerPage(5000).
+		WithFilter("service_broker_guids", brokerGUID)
+	raw, err := cfClient.ServicePlans().List(ctx.Request().Context(), params)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(raw.Resources))
+	for _, p := range raw.Resources {
+		if p.GUID != "" {
+			out = append(out, p.GUID)
+		}
+	}
+	return out, nil
+}
+
 func mapLastOperation(lo *capi.ServiceInstanceLastOperation) *StLastOperation {
 	if lo == nil {
 		return nil

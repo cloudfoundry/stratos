@@ -165,6 +165,81 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Cont
 	return ctx.JSON(http.StatusOK, toStServiceOffering(*offering, cnsiGUID, brokerByGUID, mode))
 }
 
+// getNativeServiceOfferingsForBroker handles
+//
+//	GET /pp/v1/cf/brokers/{cnsiGuid}/{brokerGuid}/offerings.
+//
+// Same wire-shape and tier dispatch as the CF-scoped offerings handler — the
+// only difference is the path-derived `?service_broker_guids=<guid>` filter.
+// CF v3 supports the filter natively on `/v3/service_offerings`, so this is a
+// single round trip (plus the `?include=service_broker` join at summary+).
+func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	brokerGUID := ctx.Param("brokerGuid")
+	if cnsiGUID == "" || brokerGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and brokerGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("service_broker_guids", brokerGUID)
+		raw, lerr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, struct {
+			Resources    []StServiceOffering `json:"resources"`
+			TotalResults int                 `json:"totalResults"`
+		}{
+			Resources:    []StServiceOffering{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present).
+		WithFilter("service_broker_guids", brokerGUID)
+
+	if mode == ReturnSummary || mode == ReturnDetails {
+		params = params.WithInclude("service_broker")
+	}
+
+	raw, listErr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+
+	brokerByGUID := map[string]capi.ServiceBroker{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		brokerByGUID = brokersFromIncluded(raw.Included)
+	}
+
+	out := make([]StServiceOffering, 0, len(raw.Resources))
+	for _, o := range raw.Resources {
+		out = append(out, toStServiceOffering(o, cnsiGUID, brokerByGUID, mode))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceOffering]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
+	})
+}
+
 // brokersFromIncluded decodes v3's `included.service_brokers` block (set
 // by `?include=service_broker` on the offerings list) into a guid-keyed
 // map. Soft-fail: malformed entries are skipped silently rather than
