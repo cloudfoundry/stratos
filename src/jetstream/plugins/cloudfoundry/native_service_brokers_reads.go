@@ -2,7 +2,9 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -10,15 +12,24 @@ import (
 
 // getNativeServiceBrokers handles GET /pp/v1/cf/service_brokers/{cnsiGuid}.
 //
-// Mirrors the service-plans reads vertical: bounded pagination with a
-// single CAPI call per request, ?guids= as a first-class batch branch,
-// and a ?return=counts fast path. No auto-drain.
+// Single-page passthrough over /v3/service_brokers with four wire-shape
+// tiers selected by ?return=:
 //
-//   - ?return=counts                — per_page=1, total only.
-//   - ?guids=<comma-list>           — single CAPI call with v3 `guids`
-//     filter; returns just those brokers.
-//   - ?per_page=N&page=M (default)  — single CAPI page; per_page defaults
-//     to 50 and page to 1 when absent.
+//   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
+//                Existing legacy shape preserved verbatim.
+//   - base     — guid + cnsiGuid + name + url + createdAt. No include chain.
+//   - summary  — base + space.{guid,name} + updatedAt. One CAPI call with
+//                ?include=space; the included spaces are decoded from the
+//                v3 `included` block (no second round-trip).
+//   - details  — summary + labels + annotations.
+//
+// All non-counts modes emit `_meta.unavailable: ['authUsername']` per row
+// because CF v3 never returns broker auth credentials on read — design-time
+// tristate that drives the frontend's "Not Available" rendering.
+//
+// `?guids=<csv>` is a first-class batch branch on top of the tier dispatch
+// — used by lazy-fetch consumers that already know the broker GUIDs they
+// want. Tier still applies inside the batch branch.
 func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -37,7 +48,9 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 
-	if ctx.QueryParam("return") == "counts" {
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.ServiceBrokers().List(ctx.Request().Context(), params)
 		if lerr != nil {
@@ -59,14 +72,26 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 		}
 	}
 
+	// `?include=space` brings space refs back in v3's `included` block at
+	// summary+. Empty result sets stay empty — the include is harmless on
+	// global-only deployments.
+	if mode == ReturnSummary || mode == ReturnDetails {
+		params = params.WithInclude("space")
+	}
+
 	raw, lerr := cfClient.ServiceBrokers().List(ctx.Request().Context(), params)
 	if lerr != nil {
 		return handleCapiError(ctx, lerr)
 	}
 
+	spaceByGUID := map[string]capi.Space{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		spaceByGUID = spacesFromIncluded(raw.Included)
+	}
+
 	resources := make([]StServiceBroker, 0, len(raw.Resources))
 	for _, b := range raw.Resources {
-		resources = append(resources, toStServiceBroker(b, cnsiGUID))
+		resources = append(resources, toStServiceBroker(b, cnsiGUID, spaceByGUID, mode))
 	}
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceBroker]{
@@ -77,6 +102,11 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 
 // getNativeServiceBrokerDetail handles GET /pp/v1/cf/service_brokers/{cnsiGuid}/{brokerGuid}.
 // Single-resource sibling for detail views and guid-keyed lazy fetches.
+//
+// Single-resource Get can't carry ?include= via the typed CAPI API, so
+// summary+ resolves the space ref via a follow-up Spaces.Get rather than
+// the included-block decode the list path uses. One extra round trip,
+// soft-fails to a guid-only space ref if the spaces fetch errors.
 func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	brokerGUID := ctx.Param("brokerGuid")
@@ -99,27 +129,94 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx echo.Contex
 		return handleCapiError(ctx, gerr)
 	}
 
+	mode := parseReturnMode(ctx)
+	if mode == ReturnCounts {
+		// Counts on a single resource doesn't make sense; treat as base.
+		mode = ReturnBase
+	}
+
+	spaceByGUID := map[string]capi.Space{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		if broker.Relationships.Space != nil {
+			if guid := relationshipGUID(*broker.Relationships.Space); guid != "" {
+				if s, sErr := cfClient.Spaces().Get(ctx.Request().Context(), guid); sErr == nil {
+					spaceByGUID[guid] = *s
+				}
+			}
+		}
+	}
+
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, toStServiceBroker(*broker, cnsiGUID))
+	return ctx.JSON(http.StatusOK, toStServiceBroker(*broker, cnsiGUID, spaceByGUID, mode))
 }
 
-// toStServiceBroker flattens a capi.ServiceBroker into the Stratos-shape DTO.
-// Drops nested relationships and metadata in favour of flat fields per
-// the wire-contract baseline.
-func toStServiceBroker(b capi.ServiceBroker, cnsiGUID string) StServiceBroker {
-	spaceGUID := ""
+// spacesFromIncluded decodes v3's `included.spaces` block into a guid-keyed
+// map. Soft-fail: malformed entries are skipped silently rather than 502'ing
+// the whole response — mirrors brokersFromIncluded.
+func spacesFromIncluded(included map[string][]json.RawMessage) map[string]capi.Space {
+	out := map[string]capi.Space{}
+	if included == nil {
+		return out
+	}
+	rawSpaces, ok := included["spaces"]
+	if !ok {
+		return out
+	}
+	for _, raw := range rawSpaces {
+		var s capi.Space
+		if err := json.Unmarshal(raw, &s); err == nil && s.GUID != "" {
+			out[s.GUID] = s
+		}
+	}
+	return out
+}
+
+// toStServiceBroker maps a capi.ServiceBroker onto the Stratos-shape DTO at
+// the requested tier.
+//
+// Tier policy:
+//   - base:    guid + cnsiGuid + name + url + createdAt
+//   - summary: + space.{guid,name} + updatedAt
+//   - details: + labels + annotations
+//
+// All non-base tiers also stamp `_meta.unavailable: ['authUsername']` —
+// design-time tristate (CF v3 never returns broker auth on read).
+func toStServiceBroker(b capi.ServiceBroker, cnsiGUID string, spaceByGUID map[string]capi.Space, mode ReturnMode) StServiceBroker {
+	out := StServiceBroker{
+		GUID:      b.GUID,
+		CnsiGUID:  cnsiGUID,
+		Name:      b.Name,
+		URL:       b.URL,
+		CreatedAt: b.CreatedAt.Format(time.RFC3339),
+	}
+
+	if mode == ReturnBase {
+		out.Meta = &StratosMeta{Unavailable: []string{"authUsername"}}
+		return out
+	}
+
+	// summary tier
+	out.UpdatedAt = b.UpdatedAt.Format(time.RFC3339)
 	if b.Relationships.Space != nil {
-		spaceGUID = relationshipGUID(*b.Relationships.Space)
+		if guid := relationshipGUID(*b.Relationships.Space); guid != "" {
+			ref := &StSpaceRef{GUID: guid}
+			if s, ok := spaceByGUID[guid]; ok {
+				ref.Name = s.Name
+			}
+			out.Space = ref
+		}
 	}
-	return StServiceBroker{
-		GUID:        b.GUID,
-		Name:        b.Name,
-		URL:         b.URL,
-		SpaceGUID:   spaceGUID,
-		Labels:      metaLabels(b.Metadata),
-		Annotations: metaAnnotations(b.Metadata),
-		CnsiGUID:    cnsiGUID,
-		CreatedAt:   b.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   b.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+
+	if mode == ReturnSummary {
+		out.Meta = &StratosMeta{Unavailable: []string{"authUsername"}}
+		return out
 	}
+
+	// details tier
+	if b.Metadata != nil {
+		out.Labels = normaliseStringMap(b.Metadata.Labels)
+		out.Annotations = normaliseStringMap(b.Metadata.Annotations)
+	}
+	out.Meta = &StratosMeta{Unavailable: []string{"authUsername"}}
+	return out
 }
