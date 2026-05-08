@@ -6,6 +6,9 @@ on:
   push:
     branches: [master]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   build-docs:
     if: github.event_name != 'push' && github.repository == 'cloudfoundry/stratos'
