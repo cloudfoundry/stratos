@@ -37,7 +37,6 @@ export interface VariableTabAllEnvVarType {
 @Component({
   selector: 'app-variables-tab',
   templateUrl: './variables-tab.component.html',
-  styleUrls: ['./variables-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{

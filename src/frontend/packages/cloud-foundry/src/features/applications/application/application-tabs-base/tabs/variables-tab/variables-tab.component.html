@@ -1,5 +1,5 @@
-<div class="variables-tab">
-  <div class="variables-tab__env-table">
+<div>
+  <div>
     <app-list-sub-nav title="Total Variables" [count]="totalVariables"
                       [addAction]="addVariableAction" [isAdding]="isAdding">
       <!-- Inline add form rendered on the L5 row when isAdding is true.
@@ -38,24 +38,23 @@
     <app-list [addForm]="addForm" [suppressAddButton]="true"></app-list>
   </div>
 
-  <div class="variables-tab__env-code-block">
+  <div class="pt-5">
     <div class="card">
       <div class="card-header">
         <div>All Variables</div>
       </div>
-      <div class="card-body">
+      <div class="card-body pt-5">
         <app-code-block>
           @for (envVar of (allEnvVars$ | async); track $index) {
-            <div class="variables-tab__env-code-block--line"
-              [ngClass]="{'variables-tab__env-code-block--section': envVar.section}">
+            <div [class]="envVar.section ? '[&:not(:first-of-type)]:pt-[15px]' : ''">
               @if (envVar.section) {
-                <pre>{{envVar.name}}</pre>
+                <pre class="m-0 whitespace-pre-wrap">{{envVar.name}}</pre>
               } @else {
-                <pre>{{envVar.name}}=@if (!isObject(envVar.value)) {
+                <pre class="m-0 whitespace-pre-wrap">{{envVar.name}}=@if (!isObject(envVar.value)) {
                   <span>{{envVar.value}}</span>
                 }</pre>
                 @if (isObject(envVar.value)) {
-                  <pre>{{ envVar.value | json }}</pre>
+                  <pre class="m-0 whitespace-pre-wrap">{{ envVar.value | json }}</pre>
                 }
               }
             </div>
