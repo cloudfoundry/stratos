@@ -199,31 +199,44 @@ type StServiceOffering struct {
 
 // StServicePlan is the Stratos-shaped DTO for a CF service plan — a
 // catalog entry advertised by a service offering, NOT an instantiated
-// service. Drives the marketplace plan list and admin views that need
-// to surface plan-level visibility / cost / availability.
+// service.
 //
 // VisibilityType mirrors CF v3's plan visibility discriminator: one of
 // `public`, `admin`, `organization`, or `space` — managed via the
 // /v3/service_plans/{guid}/visibility endpoint, surfaced as a separate
-// vertical. Free is the broker-declared cost flag; Costs carries the
-// optional structured cost list. ServiceOfferingGUID is the parent
-// offering relation (always present); SpaceGUID is the space the plan
-// is scoped to (only set for plans with `visibility_type=space`).
+// vertical. Free / Available are *bool so callers can distinguish
+// "false" from "not populated at this tier" (base mode emits neither).
+//
+// ServiceOffering is the nested ref shape (StServiceOfferingRef)
+// populated at summary+ via the v3 `?include=service_offering,
+// service_offering.service_broker` chain. At base it carries guid only.
+// Space nests under StSpaceRef and is set only for plans with
+// `visibility_type=space`.
+//
+// Tier policy:
+//   - base:    guid + cnsiGuid + name + serviceOffering.{guid} + createdAt
+//   - summary: + description + free + available + visibilityType +
+//              serviceOffering.{name, broker{guid,name}} + updatedAt
+//   - details: + costs + schemas + labels + annotations + serviceOffering
+//              expanded (broker.url, etc.)
 type StServicePlan struct {
-	GUID                string              `json:"guid"`
-	Name                string              `json:"name"`
-	Description         string              `json:"description"`
-	Available           bool                `json:"available"`
-	Free                bool                `json:"free"`
-	VisibilityType      string              `json:"visibilityType"`
-	ServiceOfferingGUID string              `json:"serviceOfferingGuid"`
-	SpaceGUID           string              `json:"spaceGuid,omitempty"`
-	Costs               []StServicePlanCost `json:"costs"`
-	Labels              map[string]string   `json:"labels"`
-	Annotations         map[string]string   `json:"annotations"`
-	CnsiGUID            string              `json:"cnsiGuid"`
-	CreatedAt           string              `json:"createdAt"`
-	UpdatedAt           string              `json:"updatedAt"`
+	GUID            string                `json:"guid"`
+	CnsiGUID        string                `json:"cnsiGuid"`
+	Name            string                `json:"name"`
+	Description     string                `json:"description,omitempty"`
+	Free            *bool                 `json:"free,omitempty"`
+	Available       *bool                 `json:"available,omitempty"`
+	VisibilityType  string                `json:"visibilityType,omitempty"`
+	ServiceOffering *StServiceOfferingRef `json:"serviceOffering,omitempty"`
+	Space           *StSpaceRef           `json:"space,omitempty"`
+	Costs           []StServicePlanCost   `json:"costs,omitempty"`
+	Schemas         *StPlanSchemas        `json:"schemas,omitempty"`
+	MaintenanceInfo *StMaintenanceInfo    `json:"maintenanceInfo,omitempty"`
+	Labels          map[string]string     `json:"labels,omitempty"`
+	Annotations     map[string]string     `json:"annotations,omitempty"`
+	CreatedAt       string                `json:"createdAt"`
+	UpdatedAt       string                `json:"updatedAt,omitempty"`
+	Meta            *StratosMeta          `json:"_meta,omitempty"`
 }
 
 // StServicePlanCost mirrors CAPI's plan cost row verbatim — amount per

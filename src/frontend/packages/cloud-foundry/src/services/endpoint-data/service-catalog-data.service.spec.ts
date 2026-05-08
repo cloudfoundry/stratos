@@ -51,14 +51,25 @@ describe('ServiceCatalogDataService', () => {
     expect(res).toBeNull();
   });
 
-  it('servicePlansForOffering filters via ?service_offering', async () => {
+  it('servicePlansForOffering filters via ?service_offering and requests summary tier', async () => {
     const promise = new Promise<any>(resolve => service.servicePlansForOffering('cnsi-1', 'off-1').subscribe(resolve));
 
-    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_plans/cnsi-1' && r.params.get('service_offering') === 'off-1');
+    const req = httpMock.expectOne(r =>
+      r.url === '/pp/v1/cf/service_plans/cnsi-1'
+      && r.params.get('service_offering') === 'off-1'
+      && r.params.get('return') === 'summary',
+    );
     expect(req.request.method).toBe('GET');
+    // Backend emits the nested-ref shape natively at summary+; offering
+    // ref carries name + broker via the v3 include chain.
     req.flush({
       resources: [
-        { guid: 'plan-1', name: 'small', description: '', available: true, free: false, visibilityType: 'public', serviceOfferingGuid: 'off-1', costs: [], labels: {}, annotations: {}, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' },
+        {
+          guid: 'plan-1', cnsiGuid: 'cnsi-1', name: 'small', description: 'small plan',
+          free: false, available: true, visibilityType: 'public',
+          serviceOffering: { guid: 'off-1', name: 'redis', broker: { guid: 'broker-1', name: 'alpha' } },
+          createdAt: '', updatedAt: '',
+        },
       ],
       pagination: { totalResults: 1 },
     });
@@ -66,6 +77,8 @@ describe('ServiceCatalogDataService', () => {
     const plans = await promise;
     expect(plans).toHaveLength(1);
     expect(plans[0].guid).toBe('plan-1');
+    expect(plans[0].serviceOffering?.name).toBe('redis');
+    expect(plans[0].serviceOffering?.broker?.name).toBe('alpha');
   });
 
   it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid?return=details and reads nested-ref shape', async () => {
