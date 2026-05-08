@@ -19,7 +19,7 @@ class ServiceCatalogDataServiceStub {
     guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
     name: 'app-autoscaler',
     url: 'https://app-autoscaler-broker.cf-dev.io',
-    spaceGuid: undefined,
+    space: undefined,
     labels: {},
     annotations: {},
     cnsiGuid: 'test-cf-guid',

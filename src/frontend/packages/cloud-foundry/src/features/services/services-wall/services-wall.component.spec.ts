@@ -126,7 +126,8 @@ describe('ServicesWallComponent', () => {
     expect(serviceCol).toBeDefined();
     const managed: any = {
       cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed',
-      serviceOfferingName: 'redis', tags: [], createdAt: '',
+      servicePlan: { guid: 'plan-1', serviceOffering: { guid: 'off-1', name: 'redis' } },
+      tags: [], createdAt: '',
     };
     const ups: any = {
       cnsiGuid: 'cnsi-1', guid: 'si-2', name: 'legacy-db', type: 'user-provided',

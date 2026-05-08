@@ -94,10 +94,10 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
       return tags.length === 0 ? '—' : tags.join(', ');
     };
 
-    const renderLastOp = (si: StServiceInstance): string => si.lastOpState ?? '';
+    const renderLastOp = (si: StServiceInstance): string => si.lastOperation.state ?? '';
 
     const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOpState ?? '').toLowerCase();
+      const state = (si.lastOperation.state ?? '').toLowerCase();
       if (state === 'succeeded') return 'success';
       if (state === 'in progress') return 'warning';
       if (state === 'failed') return 'danger';

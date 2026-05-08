@@ -49,9 +49,9 @@ export class TableCellServiceBrokerComponent extends
       // for this V2-cutover step. Drops the broker.entity.* wrapper for
       // the V3-flat StServiceBroker.spaceGuid / cnsiGuid shape.
       this.spaceLink$ = this.broker$.pipe(
-        filter((broker): broker is StServiceBroker => !!broker && !!broker.spaceGuid),
+        filter((broker): broker is StServiceBroker => !!broker && !!broker.space?.guid),
         switchMap(broker => cfEntityCatalog.space.store.getWithOrganization.getEntityService(
-          broker.spaceGuid!,
+          broker.space!.guid,
           broker.cnsiGuid,
         ).waitForEntity$
         ),

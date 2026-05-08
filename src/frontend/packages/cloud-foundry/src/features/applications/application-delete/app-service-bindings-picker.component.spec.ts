@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 
 import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker.component';
-import type { StServiceBinding } from '../../../services/endpoint-data/stratos-types';
+import type { StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
 
 @Component({
   standalone: true,
@@ -11,33 +11,39 @@ import type { StServiceBinding } from '../../../services/endpoint-data/stratos-t
   template: `<app-service-bindings-picker [bindings]="bindings()" (selectedChange)="onSelected($event)" />`,
 })
 class Host {
-  bindings = signal<StServiceBinding[]>([]);
-  lastSelected: StServiceBinding[] = [];
-  onSelected(s: StServiceBinding[]) {
+  bindings = signal<StServiceCredentialBinding[]>([]);
+  lastSelected: StServiceCredentialBinding[] = [];
+  onSelected(s: StServiceCredentialBinding[]) {
     this.lastSelected = s;
   }
 }
 
-const managed: StServiceBinding = {
+const managed: StServiceCredentialBinding = {
   guid: 'b-managed',
+  cnsiGuid: 'cnsi-1',
   name: 'db-binding',
-  bindingType: 'app',
-  appGuid: 'app-1',
-  serviceInstanceGuid: 'si-1',
-  serviceInstanceName: 'primary-db',
-  serviceInstanceType: 'managed',
+  type: 'app',
+  app: { guid: 'app-1' },
+  serviceInstance: {
+    guid: 'si-1',
+    name: 'primary-db',
+    type: 'managed',
+  },
   createdAt: '',
   updatedAt: '',
 };
 
-const userProvided: StServiceBinding = {
+const userProvided: StServiceCredentialBinding = {
   guid: 'b-ups',
+  cnsiGuid: 'cnsi-1',
   name: 'cache-binding',
-  bindingType: 'app',
-  appGuid: 'app-1',
-  serviceInstanceGuid: 'si-2',
-  serviceInstanceName: 'user-cache',
-  serviceInstanceType: 'user-provided',
+  type: 'app',
+  app: { guid: 'app-1' },
+  serviceInstance: {
+    guid: 'si-2',
+    name: 'user-cache',
+    type: 'user-provided',
+  },
   createdAt: '',
   updatedAt: '',
 };
@@ -60,7 +66,7 @@ describe('AppServiceBindingsPickerComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('user-cache');
   });
 
-  it('shows a type badge when serviceInstanceType is populated', () => {
+  it('shows a type badge when serviceInstance.type is populated', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.bindings.set([managed, userProvided]);
     fixture.detectChanges();

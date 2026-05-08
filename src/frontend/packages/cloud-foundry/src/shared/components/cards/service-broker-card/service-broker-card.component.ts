@@ -65,10 +65,10 @@ export class ServiceBrokerCardComponent {
     // space-detail migration lands.
     this.spaceLink$ = this.broker$.pipe(
       switchMap<StServiceBroker | null, Observable<BrokerSpaceLink | null>>(broker => {
-        if (!broker || !broker.spaceGuid) {
+        if (!broker || !broker.space?.guid) {
           return of(null);
         }
-        return cfEntityCatalog.space.store.getEntityService(broker.spaceGuid, cfGuid).waitForEntity$.pipe(
+        return cfEntityCatalog.space.store.getEntityService(broker.space.guid, cfGuid).waitForEntity$.pipe(
           filter(e => !!e && !!e.entity && !!e.entity.entity && !!e.entity.metadata),
           map(e => ({
             name: e.entity.entity.name,

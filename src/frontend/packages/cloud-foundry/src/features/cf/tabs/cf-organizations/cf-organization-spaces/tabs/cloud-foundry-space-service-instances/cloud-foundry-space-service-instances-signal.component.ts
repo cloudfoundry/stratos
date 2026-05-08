@@ -88,17 +88,17 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.instancesConfig.initializeForSpace(cfGuid, spaceGuid, 'managed');
 
-    const renderService = (si: StServiceInstance): string => si.serviceOfferingName ?? '';
+    const renderService = (si: StServiceInstance): string => si.servicePlan?.serviceOffering?.name ?? '';
 
     const renderTags = (si: StServiceInstance): string => {
       const tags = si.tags ?? [];
       return tags.length === 0 ? '—' : tags.join(', ');
     };
 
-    const renderLastOp = (si: StServiceInstance): string => si.lastOpState ?? '';
+    const renderLastOp = (si: StServiceInstance): string => si.lastOperation.state ?? '';
 
     const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOpState ?? '').toLowerCase();
+      const state = (si.lastOperation.state ?? '').toLowerCase();
       if (state === 'succeeded') return 'success';
       if (state === 'in progress') return 'warning';
       if (state === 'failed') return 'danger';

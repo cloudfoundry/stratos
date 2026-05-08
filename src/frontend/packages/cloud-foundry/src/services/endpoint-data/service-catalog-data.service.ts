@@ -9,6 +9,10 @@ import {
   StServicePlan,
   StServicePlanVisibility,
 } from './stratos-types';
+import {
+  legacyToStServiceBroker,
+  legacyToStServicePlan,
+} from './services-legacy-adapters';
 
 interface PagedResp<T> {
   resources: T[];
@@ -34,16 +38,19 @@ export class ServiceCatalogDataService {
 
   servicePlansForOffering(cnsiGuid: string, offeringGuid: string): Observable<StServicePlan[]> {
     const params = new HttpParams().set('service_offering', offeringGuid);
-    return this.http.get<PagedResp<StServicePlan>>(
+    return this.http.get<PagedResp<any>>(
       `/pp/v1/cf/service_plans/${cnsiGuid}`,
       { params },
-    ).pipe(map(resp => resp?.resources ?? []));
+    ).pipe(map(resp => (resp?.resources ?? []).map(r => legacyToStServicePlan(r))));
   }
 
   serviceBroker(cnsiGuid: string, brokerGuid: string): Observable<StServiceBroker | null> {
-    return this.http.get<StServiceBroker>(
+    return this.http.get<any>(
       `/pp/v1/cf/service_brokers/${cnsiGuid}/${brokerGuid}`,
     ).pipe(
+      // Wire-boundary adapter: backend still emits the legacy flat shape
+      // (spaceGuid, etc.) until the broker handler rework lands.
+      map(resp => resp ? legacyToStServiceBroker(resp) : resp),
       // TODO(v2-v3-tristate): remove this synthesis once the Jetstream
       // V3-native broker handler grows a V2 fallback or starts emitting
       // `_meta.unavailable` itself. The DTO contract (StServiceBroker._meta)

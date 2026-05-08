@@ -149,7 +149,7 @@ export class ServicesWallComponent implements OnInit {
     const renderService = (si: StServiceInstance): string =>
       si.type === 'user-provided'
         ? 'User Provided'
-        : (si.serviceOfferingName ?? '');
+        : (si.servicePlan?.serviceOffering?.name ?? '');
 
     const renderTags = (si: StServiceInstance): string => {
       const tags = si.tags ?? [];
@@ -166,10 +166,10 @@ export class ServicesWallComponent implements OnInit {
       si.type === 'user-provided' ? 'warning' : 'neutral';
 
     const renderLastOp = (si: StServiceInstance): string =>
-      si.lastOpState ?? '';
+      si.lastOperation.state ?? '';
 
     const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOpState ?? '').toLowerCase();
+      const state = (si.lastOperation.state ?? '').toLowerCase();
       if (state === 'succeeded') return 'success';
       if (state === 'in progress') return 'warning';
       if (state === 'failed') return 'danger';

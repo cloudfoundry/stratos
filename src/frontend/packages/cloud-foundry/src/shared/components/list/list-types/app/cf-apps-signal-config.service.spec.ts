@@ -277,7 +277,7 @@ describe('CfAppsSignalConfigService', () => {
     const svc = makeSvc(httpMock);
     const bindings = await svc.fetchAppServiceBindings('cnsi-1', 'app-1');
     expect(bindings.length).toBe(1);
-    expect(bindings[0].serviceInstanceName).toBe('db');
+    expect(bindings[0].serviceInstance.name).toBe('db');
     expect(httpMock.get).toHaveBeenCalledWith(expectedUrl);
   });
 

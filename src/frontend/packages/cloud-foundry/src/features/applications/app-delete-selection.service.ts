@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import type { StRoute, StServiceBinding } from '../../services/endpoint-data/stratos-types';
+import type { StRoute, StServiceCredentialBinding } from '../../services/endpoint-data/stratos-types';
 
 /**
  * Resolved display names the wizard already had on hand when the user
@@ -37,7 +37,7 @@ export interface PendingDeleteTarget {
 @Injectable({ providedIn: 'root' })
 export class AppDeleteSelectionService {
   private readonly _routes = signal<StRoute[]>([]);
-  private readonly _bindings = signal<StServiceBinding[]>([]);
+  private readonly _bindings = signal<StServiceCredentialBinding[]>([]);
   private readonly _requested = signal<boolean>(false);
   private readonly _forAppGuid = signal<string | null>(null);
   private readonly _target = signal<PendingDeleteTarget | null>(null);
@@ -66,7 +66,7 @@ export class AppDeleteSelectionService {
     appGuid: string,
     target: PendingDeleteTarget,
     routes: StRoute[],
-    bindings: StServiceBinding[],
+    bindings: StServiceCredentialBinding[],
   ): void {
     this._forAppGuid.set(appGuid);
     this._target.set(target);

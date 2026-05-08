@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import type { StServiceBinding } from '../../../services/endpoint-data/stratos-types';
+import type { StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
 
 // Signal-native picker for the delete-app "Service Instances" step. Takes a
 // list of service credential bindings attached to the app and lets the user
@@ -44,13 +44,13 @@ import type { StServiceBinding } from '../../../services/endpoint-data/stratos-t
                 [attr.data-guid]="binding.guid"
                 [checked]="isSelected(binding.guid)"
                 (change)="toggle(binding.guid)" />
-              <span class="flex-1 text-content-text truncate" [attr.title]="binding.serviceInstanceName">
-                {{ binding.serviceInstanceName }}
+              <span class="flex-1 text-content-text truncate" [attr.title]="binding.serviceInstance.name">
+                {{ binding.serviceInstance.name }}
               </span>
-              @if (binding.serviceInstanceType) {
+              @if (binding.serviceInstance.type) {
                 <span data-test="binding-type"
                       class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                  {{ binding.serviceInstanceType }}
+                  {{ binding.serviceInstance.type }}
                 </span>
               }
             </li>
@@ -61,8 +61,8 @@ import type { StServiceBinding } from '../../../services/endpoint-data/stratos-t
   `,
 })
 export class AppServiceBindingsPickerComponent {
-  readonly bindings = input.required<StServiceBinding[]>();
-  readonly selectedChange = output<StServiceBinding[]>();
+  readonly bindings = input.required<StServiceCredentialBinding[]>();
+  readonly selectedChange = output<StServiceCredentialBinding[]>();
 
   private readonly selectedGuids = signal<Set<string>>(new Set());
 

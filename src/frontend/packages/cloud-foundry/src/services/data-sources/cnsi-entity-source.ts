@@ -50,6 +50,15 @@ export abstract class CnsiEntitySource<T> {
 
   protected urlForOne?(guid: string): string;
 
+  /**
+   * Optional wire-boundary adapter. When present, applied to each raw
+   * resource fetched from the handler before the cnsiGuid stamp. Used by
+   * subclasses whose handler still emits a legacy flat shape that needs
+   * transformation to the new nested-ref T (services-domain slice).
+   * Subclasses leave this undefined when the handler natively returns T.
+   */
+  protected adaptResource?(raw: unknown, cnsiGuid: string): T;
+
   async load(): Promise<void> {
     if (this._inFlight) return this._inFlight;
     this._inFlight = this._doLoad();
@@ -74,8 +83,12 @@ export abstract class CnsiEntitySource<T> {
         // Stamp cnsiGuid on each resource — the backend's Stratos-shape DTOs
         // don't carry it (the source route already identifies the endpoint),
         // but downstream filters/joins need it once items from multiple
-        // sources are merged in MergeOrchestrator.
-        const stamped = resp.resources.map(r => ({ ...r, cnsiGuid: this.cnsiGuid }) as unknown as T);
+        // sources are merged in MergeOrchestrator. Subclasses that need to
+        // transform the wire shape provide adaptResource (services-domain
+        // slice) — adapter does cnsiGuid stamping itself.
+        const stamped = this.adaptResource
+          ? (resp.resources as unknown[]).map(r => this.adaptResource!(r, this.cnsiGuid))
+          : resp.resources.map(r => ({ ...r, cnsiGuid: this.cnsiGuid }) as unknown as T);
         this._items.update(curr => curr.concat(stamped));
         this._totalResults.set(resp.pagination.totalResults);
         this._fetchedPages.set(page);
@@ -120,7 +133,9 @@ export abstract class CnsiEntitySource<T> {
     }
     const url = this.urlForOne(guid);
     const item = await firstValueFrom(this.http.get<T>(url));
-    const stamped = { ...item, cnsiGuid: this.cnsiGuid } as unknown as T;
+    const stamped = this.adaptResource
+      ? this.adaptResource(item, this.cnsiGuid)
+      : ({ ...item, cnsiGuid: this.cnsiGuid } as unknown as T);
     this._items.update(curr => {
       const idx = curr.findIndex(i => (i as { guid?: string }).guid === guid);
       if (idx >= 0) {
