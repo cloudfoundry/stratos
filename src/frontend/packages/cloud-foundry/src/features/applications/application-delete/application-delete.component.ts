@@ -20,7 +20,7 @@ import {
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { AppDetailDataService } from '../app-detail-data.service';
-import type { StRoute, StServiceBinding } from '../../../services/endpoint-data/stratos-types';
+import type { StRoute, StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
 import { AppDeleteSelectionService } from '../app-delete-selection.service';
 import { AppRoutesPickerComponent } from './app-routes-picker.component';
 import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker.component';
@@ -77,11 +77,11 @@ export class ApplicationDeleteComponent {
   // endpoints in the constructor.
   public appRoutes = signal<StRoute[]>([]);
   public routesLoaded = signal<boolean>(false);
-  public appBindings = signal<StServiceBinding[]>([]);
+  public appBindings = signal<StServiceCredentialBinding[]>([]);
   public bindingsLoaded = signal<boolean>(false);
 
   public selectedRoutes: StRoute[] = [];
-  public selectedServiceBindings: StServiceBinding[] = [];
+  public selectedServiceBindings: StServiceCredentialBinding[] = [];
   // fetchingApplicationData$ drives the top-level loading spinner. Resolves
   // once the app's own fetch completes — the routes + bindings fetches run
   // in parallel and their load flags gate their respective stepper steps.
@@ -191,7 +191,7 @@ export class ApplicationDeleteComponent {
     );
   }
 
-  public setSelectedServiceBindings(selected: StServiceBinding[]) {
+  public setSelectedServiceBindings(selected: StServiceCredentialBinding[]) {
     this.selectedServiceBindings = selected;
   }
 

@@ -143,7 +143,7 @@ export class CfServiceInstancesSignalConfigService {
       const typeFilter = this._typeFilter();
       this.filter.set((si: StServiceInstance) => {
         if (cnsi && si.cnsiGuid !== cnsi) return false;
-        if (spaceGuid && si.spaceGuid !== spaceGuid) return false;
+        if (spaceGuid && si.space.guid !== spaceGuid) return false;
         if (typeFilter) {
           const isUps = si.type === 'user-provided';
           if (typeFilter === 'user-provided' && !isUps) return false;

@@ -6,7 +6,8 @@ import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../../services/data-sources/cnsi-apps-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StApp, StAppRoutesResponse, StAppServiceBindingsResponse, StOrg, StOrgsResponse, StRoute, StServiceBinding, StSpace, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
+import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StSpace, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
+import { legacyToStServiceCredentialBinding } from '../../../../../services/endpoint-data/services-legacy-adapters';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 import type { StratosJob } from '../../../../../services/async-jobs/async-job.types';
@@ -808,11 +809,16 @@ export class CfAppsSignalConfigService {
   //
   // Returns an empty array on 404 / error rather than throwing — a broken
   // service-binding list shouldn't block the user from deleting the app.
-  async fetchAppServiceBindings(cnsiGuid: string, appGuid: string): Promise<StServiceBinding[]> {
+  async fetchAppServiceBindings(cnsiGuid: string, appGuid: string): Promise<StServiceCredentialBinding[]> {
+    // The /pp/v1/cf/apps/{cnsi}/{app}/service_bindings handler still emits
+    // the legacy flat shape (bindingType / serviceInstanceGuid / etc.); adapt
+    // at the wire boundary until the handler rework lands. Step 9 (cleanup)
+    // will retire this adapter call.
     const resp = await firstValueFrom(
-      this.http.get<StAppServiceBindingsResponse>(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/service_bindings`),
-    ).catch((): StAppServiceBindingsResponse | null => null);
-    return resp?.resources ?? [];
+      this.http.get<{ resources: any[] } | null>(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/service_bindings`),
+    ).catch((): { resources: any[] } | null => null);
+    const raw = resp?.resources ?? [];
+    return raw.map(r => legacyToStServiceCredentialBinding(r, cnsiGuid));
   }
 
   // Deletes a service credential binding through the async-job contract.

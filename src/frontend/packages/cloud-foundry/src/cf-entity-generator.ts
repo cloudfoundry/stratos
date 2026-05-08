@@ -763,9 +763,12 @@ function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionD
 // consumers read `broker_url`/`auth_username`/`space_guid`. authUsername is
 // V3 write-only on read responses (see KS v2-v3 tristate doc) — `_meta`
 // flags it; broker_url comes from V3's `url`.
+//
+// Nested-ref read paths (services-domain slice): space.guid replaces the
+// flat spaceGuid. readPath splits on '.' and walks the chain.
 const serviceBrokerV3ToV2Renames: Record<string, string> = {
   url: 'broker_url',
-  spaceGuid: 'space_guid',
+  'space.guid': 'space_guid',
   authUsername: 'auth_username',
 };
 
@@ -916,12 +919,13 @@ function generateCFServiceEntity(endpointDefinition: StratosEndpointExtensionDef
 }
 
 // V3 StServicePlan → V2 IServicePlan key aliases. V2 consumers read
-// `service_guid` (parent service offering). V3 surfaces the parent as
-// `serviceOfferingGuid`; alias as `service_guid` so the legacy filter
+// `service_guid` (parent service offering). The nested-ref shape
+// (services-domain slice) carries the parent as
+// `serviceOffering.guid`; alias as `service_guid` so the legacy filter
 // logic in services-helper.ts and services.service.ts keeps matching.
 // See A6 for native depth-2 (plan → service) walk.
 const servicePlanV3ToV2Renames: Record<string, string> = {
-  serviceOfferingGuid: 'service_guid',
+  'serviceOffering.guid': 'service_guid',
 };
 
 function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
@@ -965,16 +969,18 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
 // V3 StServiceInstance → V2 IServiceInstance key aliases. V2 consumers
 // read `service_plan_guid`, `service_guid`, `space_guid`, `dashboard_url`
 // across services-helper.ts, services.service.ts, services-wall cards,
-// and add-service-instance flows. V3's StServiceInstance surfaces these
-// as camelCase plus `serviceOfferingGuid` (V3's parent-of-plan). The
-// legacy "service" relation (depth-2: SI → plan → service) is read via
-// `service_guid` on the SI row in V2 — alias `serviceOfferingGuid`
-// straight to `service_guid` so list-filter logic keeps working without
-// the depth-2 relation walk. See A6 for native depth-2 handling.
+// and add-service-instance flows. The nested-ref shape (services-domain
+// slice) surfaces these as servicePlan.guid /
+// servicePlan.serviceOffering.guid / space.guid (with dashboardUrl still
+// flat). The legacy "service" relation (depth-2: SI → plan → service)
+// reads via `service_guid` on the SI row in V2 — alias the deep
+// serviceOffering chain straight to `service_guid` so list-filter logic
+// keeps working without the depth-2 relation walk. See A6 for native
+// depth-2 handling.
 const serviceInstanceV3ToV2Renames: Record<string, string> = {
-  servicePlanGuid: 'service_plan_guid',
-  serviceOfferingGuid: 'service_guid',
-  spaceGuid: 'space_guid',
+  'servicePlan.guid': 'service_plan_guid',
+  'servicePlan.serviceOffering.guid': 'service_guid',
+  'space.guid': 'space_guid',
   dashboardUrl: 'dashboard_url',
 };
 

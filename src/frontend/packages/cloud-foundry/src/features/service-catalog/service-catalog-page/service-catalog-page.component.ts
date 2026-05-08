@@ -158,8 +158,9 @@ export class ServiceCatalogPageComponent implements OnInit {
           widthHint: '24rem',
         },
         {
-          header: 'Broker', key: 'brokerName', sortField: 'brokerName',
-          render: (o: StServiceOffering) => o.brokerName ?? '',
+          header: 'Broker', key: 'broker',
+          sortField: (o: StServiceOffering) => o.broker?.name ?? '',
+          render: (o: StServiceOffering) => o.broker?.name ?? '',
           widthHint: '12rem',
         },
         {
@@ -199,7 +200,7 @@ export class ServiceCatalogPageComponent implements OnInit {
       nameFilter: this.offeringsConfig.nameFilter,
       // Filter columns enable the toolbar's "filter by:" dropdown so the
       // text input can target Name, Description, Tags, or Broker.
-      filterColumns: ['name', 'description', 'tags', 'brokerName'],
+      filterColumns: ['name', 'description', 'tags', 'broker'],
       filterField: this.offeringsConfig.filterField,
       filterDropdowns: dropdowns,
       onRefresh: () => this.offeringsConfig.refresh(),
@@ -213,7 +214,7 @@ export class ServiceCatalogPageComponent implements OnInit {
     this.offeringsConfig.registerFilterExtractor('name', (o: StServiceOffering) => o.name ?? '');
     this.offeringsConfig.registerFilterExtractor('description', (o: StServiceOffering) => o.description ?? '');
     this.offeringsConfig.registerFilterExtractor('tags', renderTags);
-    this.offeringsConfig.registerFilterExtractor('brokerName', (o: StServiceOffering) => o.brokerName ?? '');
+    this.offeringsConfig.registerFilterExtractor('broker', (o: StServiceOffering) => o.broker?.name ?? '');
 
     if (cnsiGuids.length > 0) {
       void this.offeringsConfig.loadAll();

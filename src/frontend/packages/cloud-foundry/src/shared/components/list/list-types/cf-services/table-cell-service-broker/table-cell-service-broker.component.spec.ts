@@ -21,7 +21,7 @@ describe('TableCellServiceBrokerComponent', () => {
           guid: brokerGuid,
           name: 'global-broker',
           url: 'https://b.example',
-          spaceGuid: '',
+          space: undefined,
           labels: {},
           annotations: {},
           cnsiGuid,

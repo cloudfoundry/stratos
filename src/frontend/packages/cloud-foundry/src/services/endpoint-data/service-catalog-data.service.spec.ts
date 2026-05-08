@@ -34,11 +34,11 @@ describe('ServiceCatalogDataService', () => {
 
     const req = httpMock.expectOne('/pp/v1/cf/service_offerings/cnsi-1/off-1');
     expect(req.request.method).toBe('GET');
-    req.flush({ guid: 'off-1', name: 'premium', description: 'd', brokerName: 'b1', tags: [], public: true, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' });
+    req.flush({ guid: 'off-1', name: 'premium', description: 'd', broker: { guid: 'b-1', name: 'b1' }, tags: [], available: true, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' });
 
     const res = await promise;
     expect(res.guid).toBe('off-1');
-    expect(res.brokerName).toBe('b1');
+    expect(res.broker?.name).toBe('b1');
   });
 
   it('serviceOffering returns null on 404', async () => {
