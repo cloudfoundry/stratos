@@ -1,24 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult } from '@stratosui/core';
 import { PaginationMonitorFactory, APIResource } from '@stratosui/store';
-import { SetCreateServiceInstanceServiceGuid } from '../../../actions/create-service-instance.actions';
 import { IService } from '../../../cf-api-svc.types';
-import { CFAppState } from '../../../cf-app-state';
 import { cfEntityFactory } from '../../../cf-entity-factory';
 import { serviceEntityType } from '../../../cf-entity-types';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
-import {
-  selectCreateServiceInstanceCfGuid,
-  selectCreateServiceInstanceSpaceGuid,
-} from '../../../store/selectors/create-service-instance.selectors';
 import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
+import { CsiStateService } from '../add-service-instance/csi-state.service';
 
 /**
  * Typed form interface for service selection
@@ -48,10 +43,12 @@ interface SelectServiceForm {
   ]
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
-  private store = inject(Store<CFAppState>);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private csiGuidService = inject(CsiGuidsService);
+  private csiState = inject(CsiStateService);
   private servicesWallService = inject(ServicesWallService);
+  // toObservable() must run inside an injection context — lift to a class field.
+  private csiState$ = toObservable(this.csiState.state);
 
   cfGuid!: string;
   services$: Observable<APIResource<IService>[]>;
@@ -76,14 +73,11 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       service: new FormControl<string>('', { validators: [Validators.required], nonNullable: true }),
     });
 
-    const cfSpaceGuid$ =
-      combineLatest([
-        this.store.select(selectCreateServiceInstanceCfGuid),
-        this.store.select(selectCreateServiceInstanceSpaceGuid)
-      ]).pipe(
-        filter(([p, q]) => !!p && !!q),
-        takeUntil(this.destroyed$)
-      );
+    const cfSpaceGuid$ = this.csiState$.pipe(
+      map(s => [s.cfGuid, s.spaceGuid] as const),
+      filter(([p, q]) => !!p && !!q),
+      takeUntil(this.destroyed$),
+    );
 
     const schema = cfEntityFactory(serviceEntityType);
     this.isFetching$ = cfSpaceGuid$.pipe(
@@ -139,7 +133,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
   onNext = (): Observable<StepOnNextResult> => {
     const serviceGuid = this.stepperForm.controls.service.value;
-    this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+    this.csiState.setServiceGuid(serviceGuid);
     this.csiGuidService.serviceGuid = serviceGuid;
     this.csiGuidService.cfGuid = this.cfGuid;
     return observableOf({ success: true });

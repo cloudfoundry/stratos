@@ -8,6 +8,7 @@ import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CsiStateService } from '../csi-state.service';
 import { SpecifyUserProvidedDetailsComponent } from "./specify-user-provided-details.component";
 
 describe('SpecifyUserProvidedDetailsComponent', () => {
@@ -28,6 +29,7 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
           generateCfBaseTestModulesNoShared(),
         ),
         CsiModeService,
+        CsiStateService,
         CloudFoundryUserProvidedServicesService,
       ]
     }).compileComponents();

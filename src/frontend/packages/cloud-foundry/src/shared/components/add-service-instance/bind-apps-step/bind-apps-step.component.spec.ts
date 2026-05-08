@@ -8,6 +8,7 @@ import { ServicesService } from '../../../../features/service-catalog/services.s
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiStateService } from '../csi-state.service';
 import { BindAppsStepComponent } from './bind-apps-step.component';
 
 describe('BindAppsStepComponent', () => {
@@ -27,6 +28,7 @@ describe('BindAppsStepComponent', () => {
         }),
         { provide: ServicesService, useClass: ServicesServiceMock },
         CsiGuidsService,
+        CsiStateService,
       ]
     });
   });

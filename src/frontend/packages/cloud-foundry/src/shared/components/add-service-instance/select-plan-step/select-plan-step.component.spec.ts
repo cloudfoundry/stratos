@@ -9,6 +9,7 @@ import { ServicePlanPublicComponent } from '../../service-plan-public/service-pl
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CsiStateService } from '../csi-state.service';
 import { SelectPlanStepComponent } from "./select-plan-step.component";
 
 describe('SelectPlanStepComponent', () => {
@@ -38,6 +39,7 @@ describe('SelectPlanStepComponent', () => {
         },
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
+        CsiStateService,
         PaginationMonitorFactory,
         CsiModeService,
         provideZonelessChangeDetection(),

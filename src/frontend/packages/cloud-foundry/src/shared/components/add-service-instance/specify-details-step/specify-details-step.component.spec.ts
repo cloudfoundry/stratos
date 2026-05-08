@@ -12,6 +12,7 @@ import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CsiStateService } from '../csi-state.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 
 describe('SpecifyDetailsStepComponent', () => {
@@ -36,6 +37,7 @@ describe('SpecifyDetailsStepComponent', () => {
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         CsiModeService,
+        CsiStateService,
         LongRunningCfOperationsService,
       ]
     })

@@ -1,16 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
-import { SetCreateServiceInstanceApp } from '../../../../actions/create-service-instance.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import { IServicePlan } from '../../../../cf-api-svc.types';
 import { IApp } from '../../../../cf-api.types';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
+import { CsiStateService } from '../csi-state.service';
 
 interface BindAppsForm {
   apps: FormControl<string | null>;
@@ -33,7 +31,7 @@ interface BindAppsForm {
   ]
 })
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private csiState = inject(CsiStateService);
   private fb = inject(FormBuilder);
 
 
@@ -116,7 +114,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   submit = (): Observable<StepOnNextResult> => {
-    this.store.dispatch(new SetCreateServiceInstanceApp(this.apps.value, this.bindingParams));
+    this.csiState.setApp(this.apps.value, this.bindingParams);
     return observableOf({
       success: true,
       data: this.selectedServicePlan

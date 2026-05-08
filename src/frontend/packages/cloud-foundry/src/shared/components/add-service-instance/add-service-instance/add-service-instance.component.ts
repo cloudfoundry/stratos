@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { defer, Observable, of as observableOf, Subject, Subscription, firstValueFrom } from 'rxjs';
 import {
   catchError,
@@ -27,16 +26,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import {
-  ResetCreateServiceInstanceOrgAndSpaceState,
-  ResetCreateServiceInstanceState,
-  SetCreateServiceInstance,
-  SetCreateServiceInstanceCFDetails,
-  SetCreateServiceInstanceServiceGuid,
-  SetCreateServiceInstanceServicePlan,
-  SetServiceInstanceGuid,
-} from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
@@ -48,9 +37,6 @@ import {
 import {
   CfOrgSpaceDataService,
 } from '../../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
-import {
-  selectCreateServiceInstance,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -66,6 +52,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CsiStateService } from '../csi-state.service';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
@@ -80,6 +67,7 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
     TitleCasePipe,
     CsiGuidsService,
     CsiModeService,
+    CsiStateService,
     CfOrgSpaceDataService
   ],
   standalone: true,
@@ -101,9 +89,9 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
 export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private activatedRoute = inject(ActivatedRoute);
-  private store = inject<Store<CFAppState>>(Store);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private csiGuidsService = inject(CsiGuidsService);
+  private csiState = inject(CsiStateService);
   modeService = inject(CsiModeService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -123,7 +111,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   public inMarketplaceMode: boolean;
   public serviceType: SERVICE_INSTANCE_TYPES;
   public serviceTypes = SERVICE_INSTANCE_TYPES;
-  private cfDetails$ = this.store.select(selectCreateServiceInstance);
+  private cfDetails$ = toObservable(this.csiState.state);
   // Lifecycle management for subscriptions - must be declared before use in property initializers
   private destroyed$ = new Subject<void>();
   // Loading state for applications - used to track async app fetching
@@ -146,9 +134,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // FWT-959 Part 2 (Partition B): SignalStepHandle wiring for the
   // add-service-instance flow (up to 5 steps across two service-type
   // branches: managed service vs user-provided service). Cross-step
-  // state continues to live in CsiGuidsService + CsiModeService +
-  // ngrx (SetCreateServiceInstance*) — children read/write through
-  // those existing services.
+  // state lives in CsiStateService (signal-driven), CsiGuidsService
+  // (route-derived guids), and CsiModeService (mode + cancelUrl).
+  // Children read state via signals on CsiStateService and mutate via
+  // its imperative setters.
   //
   // The steppers component renders only the active step's content
   // template at any given time (steppers.component.html line 71:
@@ -458,7 +447,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     });
 
     // Initialize apps$ and skipApps$ observables for the stepper
-    this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
+    this.apps$ = this.cfDetails$.pipe(
       filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
       tap(() => this._appsLoading.set(true)),
@@ -521,7 +510,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         return observableOf({ success: false });
       }
 
-      this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfGuid, orgGuid, spaceGuid));
+      this.csiState.setCFDetails(cfGuid, orgGuid, spaceGuid);
     } catch (error) {
       console.error('onNext: Error dispatching CF details', error);
       this.errorMessage = 'Failed to save Cloud Foundry details';
@@ -544,9 +533,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   resetStoreData = () => {
     try {
       if (this.inMarketplaceMode) {
-        this.store.dispatch(new ResetCreateServiceInstanceOrgAndSpaceState());
+        this.csiState.resetOrgAndSpace();
       } else if (this.modeService.isServicesWallMode()) {
-        this.store.dispatch(new ResetCreateServiceInstanceState());
+        this.csiState.reset();
       }
     } catch (error) {
       console.error('resetStoreData: Error resetting store state', error);
@@ -593,8 +582,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
           console.error('setupForAppServiceMode: Space GUID missing from application entity', app.entity);
           throw new Error('Space GUID is missing from application');
         }
-        this.store.dispatch(
-          new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid)
+        this.csiState.setCFDetails(
+          cfId,
+          spaceEntity.entity.organization_guid,
+          app.entity.entity.space_guid,
         );
         // Use setTimeout to schedule title update outside current change detection cycle
         setTimeout(() => {
@@ -674,15 +665,15 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
           this.csiGuidsService.serviceGuid = serviceGuid;
           this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceGuid);
-          this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-          this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
-          this.store.dispatch(new SetCreateServiceInstance(
+          this.csiState.setServiceGuid(serviceGuid);
+          this.csiState.setServiceInstanceGuid(serviceInstance.entity.metadata.guid);
+          this.csiState.setAll(
             serviceInstanceEntity.name,
             serviceInstanceEntity.space_guid,
             serviceInstanceEntity.tags,
-            ''
-          ));
-          this.store.dispatch(new SetCreateServiceInstanceServicePlan(serviceInstanceEntity.service_plan_guid));
+            '',
+          );
+          this.csiState.setServicePlan(serviceInstanceEntity.service_plan_guid);
 
           // Chain the space entity fetch instead of nested subscribe
           return cfEntityCatalog.space.store.getEntityService(serviceInstanceEntity.space_guid, endpointId).waitForEntity$.pipe(
@@ -702,10 +693,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
                 });
                 throw new Error('Space metadata GUID is missing from space entity');
               }
-              this.store.dispatch(new SetCreateServiceInstanceCFDetails(
+              this.csiState.setCFDetails(
                 endpointId,
                 spaceEntity.entity.entity.organization_guid,
-                spaceEntity.entity.metadata.guid)
+                spaceEntity.entity.metadata.guid,
               );
             }),
             take(1),
@@ -746,9 +737,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     this.skipAppsSub?.unsubscribe();
     this.initialisedSub?.unsubscribe();
     try {
-      this.store.dispatch(new ResetCreateServiceInstanceState());
+      this.csiState.reset();
     } catch (error) {
-      console.error('ngOnDestroy: Error dispatching reset state action', error);
+      console.error('ngOnDestroy: Error resetting CSI state', error);
       // Non-critical during cleanup, just log
     }
   }
@@ -774,13 +765,16 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       this.csiGuidsService.cfGuid = endpointId;
       this.csiGuidsService.serviceGuid = serviceId;
       this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceId);
-      const cfDetails = new SetCreateServiceInstanceCFDetails(endpointId);
       if (this.modeService.spaceScopedDetails.isSpaceScoped) {
-        cfDetails.spaceGuid = this.modeService.spaceScopedDetails.spaceGuid;
-        cfDetails.orgGuid = this.modeService.spaceScopedDetails.orgGuid;
+        this.csiState.setCFDetails(
+          endpointId,
+          this.modeService.spaceScopedDetails.orgGuid,
+          this.modeService.spaceScopedDetails.spaceGuid,
+        );
+      } else {
+        this.csiState.setCFDetails(endpointId);
       }
-      this.store.dispatch(cfDetails);
-      this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
+      this.csiState.setServiceGuid(serviceId);
     } catch (error) {
       console.error('initialiseForMarketplaceMode: Error during service configuration', {
         endpointId,
