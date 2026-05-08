@@ -116,30 +116,38 @@ type StAppRoutesResponse struct {
 	TotalResults int       `json:"totalResults"`
 }
 
-// StServiceBinding is the Stratos-shaped DTO for a CF service credential
-// binding attached to an app. Used by the delete-app picker and future
-// service-binding management UIs.
+// StServiceCredentialBinding mirrors v3's service_credential_binding
+// resource — type discriminates app bindings from service keys. Drives
+// the app-detail Services tab, the delete-app picker, and the
+// service-key management UI.
 //
-// `serviceInstanceName` is populated by a second fetch of /v3/service_instances
-// filtered on the collected SI GUIDs — the frontend displays the instance
-// name, not the GUID, so the picker can render "database-primary" instead of
-// "3f9a2b1c-...". `serviceInstanceType` ("managed" or "user-provided") lets
-// the UI display a badge or warn about broker-dependent unbind timing.
-type StServiceBinding struct {
-	GUID                string `json:"guid"`
-	Name                string `json:"name"`
-	BindingType         string `json:"bindingType"` // "app" or "key" — picker only lists "app"
-	AppGUID             string `json:"appGuid,omitempty"`
-	ServiceInstanceGUID string `json:"serviceInstanceGuid"`
-	ServiceInstanceName string `json:"serviceInstanceName"`
-	ServiceInstanceType string `json:"serviceInstanceType"` // "managed" or "user-provided"
-	CreatedAt           string `json:"createdAt"`
-	UpdatedAt           string `json:"updatedAt"`
-}
+// Tier semantics:
+//   - base:    guid + cnsiGuid + type + serviceInstance.{guid} + (app.{guid}
+//              for type=app)
+//   - summary: + name + serviceInstance.{name,type} + app.{name?} +
+//              lastOperation + syslogDrainUrl
+//   - details: + servicePlan / serviceOffering / broker via batched lookups
+//              (v3's include on credential_bindings only reaches `app,
+//              service_instance`, so plan/offering/broker need a follow-up
+//              fetch).
+type StServiceCredentialBinding struct {
+	GUID            string                `json:"guid"`
+	CnsiGUID        string                `json:"cnsiGuid"`
+	Type            string                `json:"type"` // 'app' | 'key'
+	Name            string                `json:"name,omitempty"`
+	ServiceInstance StServiceInstanceRef  `json:"serviceInstance"`
+	App             *StAppRef             `json:"app,omitempty"` // type=app only
+	LastOperation   *StLastOperation      `json:"lastOperation,omitempty"`
+	SyslogDrainURL  string                `json:"syslogDrainUrl,omitempty"`
 
-type StAppServiceBindingsResponse struct {
-	Resources    []StServiceBinding `json:"resources"`
-	TotalResults int                `json:"totalResults"`
+	// Details-only — not reachable via v3 include chain on bindings:
+	ServicePlan     *StServicePlanRef     `json:"servicePlan,omitempty"`
+	ServiceOffering *StServiceOfferingRef `json:"serviceOffering,omitempty"`
+	Broker          *StServiceBrokerRef   `json:"broker,omitempty"`
+
+	CreatedAt string       `json:"createdAt"`
+	UpdatedAt string       `json:"updatedAt,omitempty"`
+	Meta      *StratosMeta `json:"_meta,omitempty"`
 }
 
 type StSpacesResponse struct {

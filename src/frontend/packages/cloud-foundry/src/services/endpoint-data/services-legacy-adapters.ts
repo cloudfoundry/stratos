@@ -14,7 +14,6 @@
 
 import type {
   StServiceBroker,
-  StServiceCredentialBinding,
   StServiceInstance,
   StServicePlan,
 } from './stratos-types';
@@ -169,44 +168,7 @@ export function legacyToStServiceBroker(raw: LegacyServiceBroker): StServiceBrok
   return out;
 }
 
-// -----------------------------------------------------------------------------
-// Service Credential Binding — legacy flat shape (bindingType /
-// serviceInstanceGuid / serviceInstanceName / serviceInstanceType /
-// appGuid) → new nested-ref shape (type / serviceInstance.{guid,name,type} /
-// app.guid).
-// -----------------------------------------------------------------------------
-
-interface LegacyServiceBinding {
-  guid: string;
-  name: string;
-  bindingType: string;
-  appGuid?: string;
-  serviceInstanceGuid: string;
-  serviceInstanceName: string;
-  serviceInstanceType: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export function legacyToStServiceCredentialBinding(
-  raw: LegacyServiceBinding,
-  cnsiGuid: string,
-): StServiceCredentialBinding {
-  const out: StServiceCredentialBinding = {
-    guid: raw.guid,
-    cnsiGuid,
-    type: raw.bindingType,
-    name: raw.name,
-    serviceInstance: {
-      guid: raw.serviceInstanceGuid,
-      name: raw.serviceInstanceName,
-      type: raw.serviceInstanceType,
-    },
-    createdAt: raw.createdAt,
-    updatedAt: raw.updatedAt,
-  };
-  if (raw.appGuid) {
-    out.app = { guid: raw.appGuid };
-  }
-  return out;
-}
+// (Service Credential Binding adapter retired: the
+// /pp/v1/cf/apps/{cnsi}/{app}/service_bindings handler now emits the
+// nested-ref shape natively at ?return=summary; consumers read the wire
+// shape directly.)
