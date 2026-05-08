@@ -11,14 +11,36 @@ import (
 
 // getNativeServiceOfferings handles GET /pp/v1/cf/service_offerings/{cnsiGuid}.
 //
-// Single-page passthrough over /v3/service_offerings. Caller's per_page/page
-// forward verbatim to one CAPI call; absent, V3 server defaults apply.
-// Returns flat offering rows wrapped in a Stratos paged envelope.
+// Single-page passthrough over /v3/service_offerings with four wire-shape
+// tiers selected by ?return=:
+//
+//   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
+//                Existing legacy shape preserved verbatim — counts probes
+//                already wired across the frontend rely on it.
+//   - base     — entity fields only; no broker ref. One CAPI call.
+//   - summary  — base + broker.{guid,name}. Today: one /v3/service_offerings
+//                call plus one batched /v3/service_brokers?guids=… draw
+//                because the capi/v3 client doesn't surface the v3
+//                response's `included` block (TODO below). When that's
+//                fixed the broker join collapses into the same single call
+//                via ?include=service_broker.
+//   - details  — summary + offering extended fields (description, tags,
+//                requires, documentationUrl, brokerCatalogMetadata,
+//                shareable) and broker ref expanded with URL. Same
+//                two-call shape as summary today.
 //
 // Per-page broker join: the unique broker GUIDs referenced by THIS page's
 // offerings are resolved with one batched /v3/service_brokers?guids=… call
 // (bounded by the page's broker-set size). Soft-fail: a broker-list error
-// leaves BrokerName empty rather than 502'ing the whole marketplace.
+// leaves Broker nil rather than 502'ing the whole marketplace.
+//
+// TODO(capi-fork): the upstream capi/v3 ListResponse[T] type drops the
+// `included` block from v3 responses, so ?include=service_broker can't
+// substitute for the per-page batch broker fetch yet. See KS memory
+// project_capi_fork_reference.md and reference_capi_openapi_spec_include.md
+// for the fork plan; once the spec/types model `included`, the broker
+// drain here collapses into a single CAPI call and the broker batch goes
+// away.
 func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -37,13 +59,20 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 
-	if ctx.QueryParam("return") == "counts" {
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
 		if lerr != nil {
 			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 		}
-		return ctx.JSON(http.StatusOK, StServiceOfferingsResponse{
+		// Legacy flat-envelope shape kept identical to pre-rework — the
+		// frontend counts probe still consumes `{resources, totalResults}`.
+		return ctx.JSON(http.StatusOK, struct {
+			Resources    []StServiceOffering `json:"resources"`
+			TotalResults int                 `json:"totalResults"`
+		}{
 			Resources:    []StServiceOffering{},
 			TotalResults: raw.Pagination.TotalResults,
 		})
@@ -51,40 +80,29 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 
 	perPage, page, present := parsePerPageAndPage(ctx)
 	listParams := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	// ?include=service_broker is forwarded so v3 emits the broker block
+	// in the response's `included` array. Today the capi/v3 client drops
+	// `included`, so we still issue the batched broker fetch below — but
+	// sending `include` ahead of that means flipping to native consumption
+	// is a one-line change once the client surfaces it.
+	if mode == ReturnSummary || mode == ReturnDetails {
+		listParams = listParams.WithInclude("service_broker")
+	}
 	rawOfferings, listErr := cfClient.ServiceOfferings().List(ctx.Request().Context(), listParams)
 	if listErr != nil {
 		return handleCapiError(ctx, listErr)
 	}
 	offerings := rawOfferings.Resources
 
-	// Collect the unique broker GUIDs referenced by this page's offerings.
-	brokerGUIDSet := make(map[string]struct{}, len(offerings))
-	for _, o := range offerings {
-		if guid := relationshipGUID(o.Relationships.ServiceBroker); guid != "" {
-			brokerGUIDSet[guid] = struct{}{}
-		}
-	}
-	brokerGUIDs := make([]string, 0, len(brokerGUIDSet))
-	for g := range brokerGUIDSet {
-		brokerGUIDs = append(brokerGUIDs, g)
-	}
-
-	// Batch-fetch brokers so the picker can display names. Soft-fail.
-	brokerByGUID := make(map[string]capi.ServiceBroker, len(brokerGUIDs))
-	if len(brokerGUIDs) > 0 {
-		brokerParams := capi.NewQueryParams().
-			WithPerPage(len(brokerGUIDs)).
-			WithFilter("guids", brokerGUIDs...)
-		if raw, berr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); berr == nil {
-			for _, b := range raw.Resources {
-				brokerByGUID[b.GUID] = b
-			}
-		}
+	// Broker join only applies for summary+ — base ships without refs.
+	brokerByGUID := map[string]capi.ServiceBroker{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		brokerByGUID = drainBrokersForOfferings(ctx, cfClient, offerings)
 	}
 
 	out := make([]StServiceOffering, 0, len(offerings))
 	for _, o := range offerings {
-		out = append(out, toStServiceOffering(o, cnsiGUID, brokerByGUID))
+		out = append(out, toStServiceOffering(o, cnsiGUID, brokerByGUID, mode))
 	}
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceOffering]{
@@ -97,10 +115,13 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 //
 //	GET /pp/v1/cf/service_offerings/{cnsiGuid}/{offeringGuid}.
 //
-// Single-resource sibling for the catalog detail page. Joins the broker
-// name like the list does so the detail view doesn't need a second
-// frontend fetch. Broker join is soft — failure leaves BrokerName empty
-// rather than failing the whole detail load.
+// Single-resource sibling for the catalog detail page. Same ?return=
+// dispatch as the list handler; the detail screen typically requests
+// `details` but `summary` and `base` are honored too. Counts mode is not
+// meaningful on a single resource; falling back to base behaviour.
+//
+// Broker join uses the same one-shot batch fetch as the list path (single
+// guid) until the capi/v3 client surfaces `included` (see TODO above).
 func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	offeringGUID := ctx.Param("offeringGuid")
@@ -123,53 +144,121 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Cont
 		return handleCapiError(ctx, gerr)
 	}
 
-	brokerByGUID := make(map[string]capi.ServiceBroker, 1)
-	if brokerGUID := relationshipGUID(offering.Relationships.ServiceBroker); brokerGUID != "" {
-		brokerParams := capi.NewQueryParams().WithPerPage(1).WithFilter("guids", brokerGUID)
-		if raw, listErr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); listErr == nil {
-			for _, b := range raw.Resources {
-				brokerByGUID[b.GUID] = b
-			}
-		}
+	// Single-resource Get can't carry ?include= via the typed API, so
+	// summary+ keeps the per-detail batched broker fetch. When the
+	// fork lands include surfacing on Get too, this collapses.
+	mode := parseReturnMode(ctx)
+	if mode == ReturnCounts {
+		// Counts on a single resource doesn't make sense; treat as base
+		// so the response is at least well-formed.
+		mode = ReturnBase
+	}
+
+	brokerByGUID := map[string]capi.ServiceBroker{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		brokerByGUID = drainBrokersForOfferings(ctx, cfClient, []capi.ServiceOffering{*offering})
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, toStServiceOffering(*offering, cnsiGUID, brokerByGUID))
+	return ctx.JSON(http.StatusOK, toStServiceOffering(*offering, cnsiGUID, brokerByGUID, mode))
 }
 
-// toStServiceOffering maps a capi.ServiceOffering onto the Stratos-shape DTO.
-// cnsiGUID is stamped into each row so the frontend can compose multi-CNSI
-// rows + key favorites/links by (cnsi, offering) without threading the
-// endpoint through every closure — same convention as the other St* DTOs.
+// drainBrokersForOfferings batch-fetches the unique brokers referenced by
+// the given offerings. Soft-fail: returns whatever it can resolve; an
+// error leaves the map empty and offerings ship with Broker=nil rather
+// than 502'ing the whole response.
+func drainBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings []capi.ServiceOffering) map[string]capi.ServiceBroker {
+	brokerGUIDSet := make(map[string]struct{}, len(offerings))
+	for _, o := range offerings {
+		if guid := relationshipGUID(o.Relationships.ServiceBroker); guid != "" {
+			brokerGUIDSet[guid] = struct{}{}
+		}
+	}
+	brokerByGUID := make(map[string]capi.ServiceBroker, len(brokerGUIDSet))
+	if len(brokerGUIDSet) == 0 {
+		return brokerByGUID
+	}
+	brokerGUIDs := make([]string, 0, len(brokerGUIDSet))
+	for g := range brokerGUIDSet {
+		brokerGUIDs = append(brokerGUIDs, g)
+	}
+	brokerParams := capi.NewQueryParams().
+		WithPerPage(len(brokerGUIDs)).
+		WithFilter("guids", brokerGUIDs...)
+	if raw, berr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); berr == nil {
+		for _, b := range raw.Resources {
+			brokerByGUID[b.GUID] = b
+		}
+	}
+	return brokerByGUID
+}
+
+// toStServiceOffering maps a capi.ServiceOffering onto the Stratos-shape
+// DTO at the requested tier. cnsiGUID is stamped into each row so the
+// frontend can compose multi-CNSI rows + favorites/links keyed by
+// (cnsi, offering) without threading the endpoint through every closure
+// — same convention as the other St* DTOs.
 //
-// Tags is normalised to a non-nil slice so JSON marshals as `[]` rather than
-// `null` for offerings the broker tagged with nothing.
-func toStServiceOffering(o capi.ServiceOffering, cnsiGUID string, brokerByGUID map[string]capi.ServiceBroker) StServiceOffering {
+// Tier policy mirrors the frontend type:
+//   - base:    guid + cnsiGuid + name + createdAt
+//   - summary: + description + tags + available + broker.{guid,name}
+//   - details: + requires + documentationUrl + brokerCatalogMetadata +
+//              shareable + broker fully expanded (URL etc.)
+func toStServiceOffering(o capi.ServiceOffering, cnsiGUID string, brokerByGUID map[string]capi.ServiceBroker, mode ReturnMode) StServiceOffering {
+	out := StServiceOffering{
+		GUID:      o.GUID,
+		CnsiGUID:  cnsiGUID,
+		Name:      o.Name,
+		CreatedAt: o.CreatedAt.Format(time.RFC3339),
+	}
+
+	if mode == ReturnBase {
+		return out
+	}
+
+	// summary tier
+	out.UpdatedAt = o.UpdatedAt.Format(time.RFC3339)
+	out.Description = o.Description
+	if o.Tags != nil {
+		out.Tags = o.Tags
+	}
+	available := o.Available
+	out.Available = &available
+
 	brokerGUID := relationshipGUID(o.Relationships.ServiceBroker)
-	brokerName := ""
-	if b, ok := brokerByGUID[brokerGUID]; ok {
-		brokerName = b.Name
+	if brokerGUID != "" {
+		ref := &StServiceBrokerRef{GUID: brokerGUID}
+		if b, ok := brokerByGUID[brokerGUID]; ok {
+			ref.Name = b.Name
+		}
+		out.Broker = ref
 	}
-	tags := o.Tags
-	if tags == nil {
-		tags = []string{}
+
+	if mode == ReturnSummary {
+		return out
 	}
-	documentationURL := ""
+
+	// details tier — expand offering and broker ref
+	if o.Requires != nil {
+		out.Requires = o.Requires
+	}
 	if o.DocumentationURL != nil {
-		documentationURL = *o.DocumentationURL
+		out.DocumentationURL = *o.DocumentationURL
 	}
-	return StServiceOffering{
-		GUID:                  o.GUID,
-		Name:                  o.Name,
-		Description:           o.Description,
-		BrokerName:            brokerName,
-		ServiceBrokerGUID:     brokerGUID,
-		Tags:                  tags,
-		Public:                o.Available,
-		DocumentationURL:      documentationURL,
-		BrokerCatalogMetadata: o.BrokerCatalog.Metadata,
-		CnsiGUID:              cnsiGUID,
-		CreatedAt:             o.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:             o.UpdatedAt.Format(time.RFC3339),
+	out.BrokerCatalogMetadata = o.BrokerCatalog.Metadata
+	shareable := o.Shareable
+	out.Shareable = &shareable
+
+	if out.Broker != nil {
+		if b, ok := brokerByGUID[out.Broker.GUID]; ok {
+			out.Broker.URL = b.URL
+		}
 	}
+
+	if o.Metadata != nil {
+		out.Labels = normaliseStringMap(o.Metadata.Labels)
+		out.Annotations = normaliseStringMap(o.Metadata.Annotations)
+	}
+
+	return out
 }
