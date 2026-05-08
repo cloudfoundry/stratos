@@ -26,10 +26,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import {
-  SetCreateServiceInstanceOrg,
-  SetServiceInstanceGuid,
-} from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
 import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
@@ -40,17 +36,13 @@ import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { serviceInstancesEntityType } from '../../../../cf-entity-types';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../store/selectors/api.selectors';
-import {
-  selectCreateServiceInstance,
-  selectCreateServiceInstanceSpaceGuid,
-} from '../../../../store/selectors/create-service-instance.selectors';
-import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
+import { CsiState, CsiStateService } from '../csi-state.service';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -74,15 +66,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private store = inject<Store<CFAppState>>(Store);
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private csiGuidsService = inject(CsiGuidsService);
+  private csiState = inject(CsiStateService);
   modeService = inject(CsiModeService);
   longRunningOpService = inject(LongRunningCfOperationsService);
-
+  // toObservable() must run inside an injection context — lift to a class
+  // field. Reused by selectCreateInstance$ and onNext below.
+  private csiState$ = toObservable(this.csiState.state);
 
   serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
   serviceInstanceName!: string;
   serviceInstanceGuid!: string;
-  selectCreateInstance$: Observable<CreateServiceInstanceState>;
+  selectCreateInstance$: Observable<CsiState>;
   formModes = [
     {
       label: 'Create and Bind to a new Service Instance',
@@ -139,7 +134,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   constructor() {
     this.setupForms();
 
-    this.selectCreateInstance$ = this.store.select(selectCreateServiceInstance).pipe(
+    this.selectCreateInstance$ = this.csiState$.pipe(
       filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
       share(),
     );
@@ -217,7 +212,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.formMode = CreateServiceFormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
-      this.store.select(selectCreateServiceInstance).pipe(
+      this.csiState$.pipe(
         take(1),
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
@@ -258,22 +253,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private setupFormValidatorData(): Subscription {
     return this.allServiceInstances$.pipe(
-      combineLatest(this.store.select(selectCreateServiceInstance)),
-      switchMap(([instances, state]) => {
-        return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
-          filter(p => !!p),
-          map(spaceGuid => instances.filter(s => {
-            let filterSelf = false;
-            if (this.modeService.isEditServiceInstanceMode()) {
-              filterSelf = s.entity.name === state.name;
-            }
-            return (s.entity.space_guid === spaceGuid) && !filterSelf;
-
-          }
-          )), tap(o => {
-            this.allServiceInstanceNames = o.map(s => s.entity.name);
-          }));
-      })
+      combineLatest(this.csiState$),
+      filter(([, state]) => !!state.spaceGuid),
+      map(([instances, state]) => instances.filter(s => {
+        let filterSelf = false;
+        if (this.modeService.isEditServiceInstanceMode()) {
+          filterSelf = s.entity.name === state.name;
+        }
+        return s.entity.space_guid === state.spaceGuid && !filterSelf;
+      })),
+      tap(o => {
+        this.allServiceInstanceNames = o.map(s => s.entity.name);
+      }),
     ).subscribe();
   }
 
@@ -290,7 +281,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     });
   }
 
-  setOrg = (guid: string) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
+  setOrg = (guid: string) => this.csiState.setOrg(guid);
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
@@ -300,7 +291,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
-  private handleUpdateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
+  private handleUpdateServiceResult(request: RequestInfoState, state: CsiState): Observable<StepOnNextResult> {
     const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
     if (!updatingInfo) {
       // This isn't an update
@@ -313,7 +304,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
   }
 
-  private handleCreateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
+  private handleCreateServiceResult(request: RequestInfoState, state: CsiState): Observable<StepOnNextResult> {
     const bindApp = !!state.bindAppGuid;
 
     if (this.longRunningOpService.isLongRunning(request)) {
@@ -329,7 +320,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     } else if (bindApp) {
       // The request has succeeded and we now need to bind an app to the new service instance
       const serviceInstanceGuid = this.setServiceInstanceGuid(request);
-      this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
+      this.csiState.setServiceInstanceGuid(serviceInstanceGuid);
       return this.modeService.createApplicationServiceBinding(
         serviceInstanceGuid,
         state.cfGuid,
@@ -350,7 +341,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   onNext = (): Observable<StepOnNextResult> => {
-    return this.store.select(selectCreateServiceInstance).pipe(
+    return this.csiState$.pipe(
       filter(p => !!p),
       switchMap(p => {
         if (this.bindExistingInstance) {
@@ -361,7 +352,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         }
       }),
       filter(s => !s.creating && !s.fetching),
-      combineLatest(this.store.select(selectCreateServiceInstance)),
+      combineLatest(this.csiState$),
       take(1),
       switchMap(([request, state]) => {
 
@@ -464,7 +455,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   }
 
-  createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
+  createServiceInstance(createServiceInstance: CsiState): Observable<RequestInfoState> {
 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;

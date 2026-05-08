@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, signal, ViewChild, ViewC
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take,
   catchError,
@@ -19,19 +19,12 @@ import { take,
 } from 'rxjs/operators';
 
 import {
-  SetCreateServiceInstanceServicePlan,
-} from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
   canShowServicePlanCosts,
   getPlanAccessibilityV3,
   getServicePlanName,
   populateServicePlanExtraTyped,
 } from '../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServiceCatalogDataService } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
-import {
-  selectCreateServiceInstance,
-} from '../../../../../../cloud-foundry/src/store/selectors/create-service-instance.selectors';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
@@ -45,6 +38,7 @@ import { ServicePlanPublicComponent } from '../../service-plan-public/service-pl
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
+import { CsiStateService } from '../csi-state.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 
 interface SelectPlanForm {
@@ -76,10 +70,13 @@ interface SelectPlanForm {
 ]
 })
 export class SelectPlanStepComponent implements OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private modeService = inject(CsiModeService);
   private serviceCatalog = inject(ServiceCatalogDataService);
+  private csiState = inject(CsiStateService);
+  // toObservable() must run inside an injection context — lift the
+  // bridge to a class field so downstream pipes can subscribe later.
+  private csiState$ = toObservable(this.csiState.state);
 
   selectedPlan$!: Observable<APIResource<IServicePlan>>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
@@ -108,7 +105,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       this.validate.set(this.stepperForm.valid);
     });
 
-    this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
+    this.servicePlans$ = this.csiState$.pipe(
       filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
       distinctUntilChanged((x, y) => {
         return (x.cfGuid === y.cfGuid && x.spaceGuid === y.spaceGuid && x.orgGuid === y.orgGuid && x.serviceGuid === y.serviceGuid);
@@ -167,7 +164,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   onEnter = () => {
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
-      withLatestFrom(this.store.select(selectCreateServiceInstance)),
+      withLatestFrom(this.csiState$),
       tap(([servicePlans, createServiceInstanceState]) => {
         if (this.modeService.isEditServiceInstanceMode()) {
           this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid ?? '');
@@ -181,7 +178,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   onNext = (): Observable<StepOnNextResult> => {
-    this.store.dispatch(new SetCreateServiceInstanceServicePlan(this.stepperForm.controls.servicePlans.value));
+    this.csiState.setServicePlan(this.stepperForm.controls.servicePlans.value);
     return this.selectedPlan$.pipe(
       map((selectedServicePlan: APIResource<IServicePlan>) => ({
         success: true,

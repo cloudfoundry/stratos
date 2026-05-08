@@ -22,6 +22,7 @@ interface BindExistingInstanceForm {
 import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { APIResource } from '@stratosui/store';
@@ -32,14 +33,13 @@ import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import {
-  selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { AppServiceBindingDataSource } from '../../list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
+import { CsiStateService } from './../csi-state.service';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 @Component({
@@ -66,6 +66,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private upsService = inject(CloudFoundryUserProvidedServicesService);
   modeService = inject(CsiModeService);
   private store = inject<Store<CFAppState>>(Store);
+  private csiState = inject(CsiStateService);
+  // toObservable() must run inside an injection context — lift to a class field.
+  private csiState$ = toObservable(this.csiState.state);
 
 
   constructor() {
@@ -189,7 +192,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   };
 
   private serviceInstancesForApplication() {
-    return this.store.select(selectCreateServiceInstance).pipe(
+    return this.csiState$.pipe(
       filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
       take(1),
       switchMap(p => this.upsService.getUserProvidedServices(
@@ -269,7 +272,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       guid,
       data as IUserProvidedServiceInstanceData,
     ).pipe(
-      withLatestFrom(this.store.select(selectCreateServiceInstance)),
+      withLatestFrom(this.csiState$),
       switchMap(([result, state]) => {
         if (!result.success) {
           return observableOf({
@@ -287,7 +290,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
   private onNextBind(): Observable<StepOnNextResult> {
-    return this.store.select(selectCreateServiceInstance).pipe(
+    return this.csiState$.pipe(
       switchMap(data => this.createApplicationServiceBinding(this.bindExistingInstance.controls.serviceInstances.value, data))
     );
   }
