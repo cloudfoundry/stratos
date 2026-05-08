@@ -51,12 +51,21 @@ describe('ServicesTabComponent', () => {
         ServiceActionHelperService,
         ...cfCurrentUserPermissionsService,
         Store,
-        // The component reads `dataService.summary()` for its bound-services
-        // count. AppDetailDataService is normally provided at the app-detail
-        // route component (ApplicationBaseComponent); supply a minimal stub
-        // here so the tab's L5 binding resolves without dragging the whole
-        // app-detail provider chain into the spec.
-        { provide: AppDetailDataService, useValue: { summary: signal(null) } },
+        // The component reads `dataService.serviceBindingsCount` for its
+        // bound-services count and calls `refresh('serviceBindings')` on
+        // mount. AppDetailDataService is normally provided at the app-
+        // detail route component (ApplicationBaseComponent); supply a
+        // minimal stub here so the tab's L5 binding resolves without
+        // dragging the whole app-detail provider chain into the spec.
+        {
+          provide: AppDetailDataService,
+          useValue: {
+            summary: signal(null),
+            serviceBindings: signal(null),
+            serviceBindingsCount: signal(0),
+            refresh: () => Promise.resolve(),
+          },
+        },
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),

@@ -14,11 +14,13 @@ import {
   StAppStat,
   StEnvVars,
   StRoute,
+  StServiceCredentialBinding,
+  StServiceCredentialBindingsResponse,
   StratosError,
 } from '../../services/endpoint-data/stratos-types';
 import { stToLegacy } from '../../services/v3-to-legacy-adapter';
 
-export type EntityKind = 'app' | 'stats' | 'envVars' | 'space' | 'org' | 'domains' | 'routes';
+export type EntityKind = 'app' | 'stats' | 'envVars' | 'space' | 'org' | 'domains' | 'routes' | 'serviceBindings';
 
 interface StAppStatsResponse {
   instances: StAppStat[];
@@ -67,13 +69,18 @@ export class AppDetailDataService {
   // so consumers can distinguish "haven't fetched yet" from "fetched, empty".
   private readonly _routes = signal<StRoute[] | null>(null);
 
+  // Per-app service credential bindings (type=app only) — populated by
+  // loadServiceBindings(). Null until first load so consumers can
+  // distinguish "haven't fetched yet" from "fetched, empty".
+  private readonly _serviceBindings = signal<StServiceCredentialBinding[] | null>(null);
+
   private readonly _loading = signal<Record<EntityKind, boolean>>({
     app: false, stats: false, envVars: false,
-    space: false, org: false, domains: false, routes: false,
+    space: false, org: false, domains: false, routes: false, serviceBindings: false,
   });
   private readonly _errors = signal<Record<EntityKind, StratosError | null>>({
     app: null, stats: null, envVars: null,
-    space: null, org: null, domains: null, routes: null,
+    space: null, org: null, domains: null, routes: null, serviceBindings: null,
   });
 
   // lastPolledAt — consumed by card-app-status "updating…" threshold.
@@ -126,6 +133,15 @@ export class AppDetailDataService {
   readonly routes: Signal<StRoute[] | null> = this._routes.asReadonly();
   readonly routesLoading: Signal<boolean> = computed(() => this._loading().routes);
   readonly routesError: Signal<unknown | null> = computed(() => this._errors().routes);
+
+  /** Per-app service credential bindings. Null = not yet fetched. */
+  readonly serviceBindings: Signal<StServiceCredentialBinding[] | null> = this._serviceBindings.asReadonly();
+  readonly serviceBindingsLoading: Signal<boolean> = computed(() => this._loading().serviceBindings);
+  readonly serviceBindingsError: Signal<unknown | null> = computed(() => this._errors().serviceBindings);
+  /** Reactive count of attached service bindings — drives the L5 sub-nav
+   *  "Total Services" pill on the app-detail Services tab. Defaults to 0
+   *  while the bindings haven't loaded so the cell renders cleanly. */
+  readonly serviceBindingsCount: Signal<number> = computed(() => this._serviceBindings()?.length ?? 0);
 
   /**
    * Legacy `APIResource<IApp>` view computed via the V3→legacy adapter.
@@ -306,13 +322,14 @@ export class AppDetailDataService {
       await this.fetchDomains();
     } else {
       const fetchers: Record<EntityKind, () => Promise<void>> = {
-        app:     () => this.fetchAppDetail(),
-        stats:   () => this.shouldFetchStats() ? this.fetchStats() : (this._stats.set([]), Promise.resolve()),
-        envVars: () => this.fetchEnvVars(),
-        space:   () => this.fetchSpace(),
-        org:     () => this.fetchOrg(),
-        domains: () => this.fetchDomains(),
-        routes:  () => this.fetchRoutes(),
+        app:             () => this.fetchAppDetail(),
+        stats:           () => this.shouldFetchStats() ? this.fetchStats() : (this._stats.set([]), Promise.resolve()),
+        envVars:         () => this.fetchEnvVars(),
+        space:           () => this.fetchSpace(),
+        org:             () => this.fetchOrg(),
+        domains:         () => this.fetchDomains(),
+        routes:          () => this.fetchRoutes(),
+        serviceBindings: () => this.fetchServiceBindings(),
       };
       await fetchers[scope]();
     }
@@ -505,6 +522,42 @@ export class AppDetailDataService {
     } finally {
       this._loading.update(m => ({ ...m, routes: false }));
     }
+  }
+
+  // Per-app service credential bindings (type=app only). Backend handler
+  // returns ?return=summary so serviceInstance.{name,type} + app.name
+  // come back inline via v3's `included` block — one CAPI call.
+  private async fetchServiceBindings(): Promise<void> {
+    this._loading.update(m => ({ ...m, serviceBindings: true }));
+    this._errors.update(m => ({ ...m, serviceBindings: null }));
+    const t0 = performance.now();
+    const url = `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/service_bindings?return=summary`;
+    try {
+      const value = await firstValueFrom(this.http.get<StServiceCredentialBindingsResponse>(url));
+      this._serviceBindings.set(value?.resources ?? []);
+      this.debugTrace('serviceBindings', url, 'ok', performance.now() - t0);
+    } catch (err: unknown) {
+      this._errors.update(m => ({ ...m, serviceBindings: this.toStratosError('serviceBindings', err) }));
+      this.debugTrace('serviceBindings', url, 'err', performance.now() - t0, err);
+    } finally {
+      this._loading.update(m => ({ ...m, serviceBindings: false }));
+    }
+  }
+
+  /**
+   * Remove a service binding from the local cache without re-fetching.
+   * Called from the unbind action after async-job resolves. Idempotent.
+   */
+  removeServiceBinding(guid: string): void {
+    const current = this._serviceBindings();
+    if (!current) {
+      return;
+    }
+    const next = current.filter(b => b.guid !== guid);
+    if (next.length === current.length) {
+      return;
+    }
+    this._serviceBindings.set(next);
   }
 
   /**
