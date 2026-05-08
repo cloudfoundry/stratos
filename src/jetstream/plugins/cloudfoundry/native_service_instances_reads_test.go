@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -13,39 +14,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestGetNativeServiceInstances_PerPagePassthrough verifies the handler
-// is a single-page passthrough: caller's per_page+page forward verbatim
-// to /v3/service_instances and the response is a V3-shape paged
-// envelope. The per-page plan→offering join only resolves names for the
-// instances on the current page (one bounded plans + one bounded
-// offerings call).
-func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
-	var siHits, planHits, offHits, bindingHits int
-	var lastPerPage, lastPage string
+// instancesTestServer serves enough CF v3 JSON to exercise the four
+// ?return= modes. When the request carries the include chain
+// (`include=service_plan,service_plan.service_offering,
+// service_plan.service_offering.service_broker,space,space.organization`)
+// the server emits a top-level `included` block populated for plans,
+// offerings, brokers, spaces, and organizations.
+func instancesTestServer(t *testing.T) (*httptest.Server, *int) {
+	t.Helper()
+	siHits := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case "/v3/service_credential_bindings":
-			bindingHits++
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1, "next": nil},
-				"resources": []map[string]interface{}{
-					{
-						"guid": "scb-1", "type": "app", "name": "binding-1",
-						"relationships": map[string]interface{}{
-							"service_instance": map[string]interface{}{"data": map[string]interface{}{"guid": "si-1"}},
-							"app":              map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
-						},
-					},
-				},
-			})
 		case "/v3/service_instances":
 			siHits++
-			lastPerPage = r.URL.Query().Get("per_page")
-			lastPage = r.URL.Query().Get("page")
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			perPage := r.URL.Query().Get("per_page")
+			include := r.URL.Query().Get("include")
+			if perPage == "1" {
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 17, "total_pages": 17},
+					"resources":  []interface{}{},
+				})
+				return
+			}
+
+			payload := map[string]interface{}{
 				"pagination": map[string]interface{}{
 					"total_results": 17, "total_pages": 2,
 					"first": map[string]interface{}{"href": "/v3/service_instances?page=1"},
@@ -53,165 +48,360 @@ func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
 					"next":  map[string]interface{}{"href": "/v3/service_instances?page=2"},
 				},
 				"resources": []map[string]interface{}{
-					{
-						"guid": "si-1", "name": "redis-instance", "type": "managed",
-						"relationships": map[string]interface{}{
-							"space":        map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
-							"service_plan": map[string]interface{}{"data": map[string]interface{}{"guid": "plan-1"}},
+					instanceResource("si-1", "redis-instance", "managed", "space-1", "plan-1", nil),
+					instanceResource("si-2", "external-db", "user-provided", "space-1", "", &upsBlock{
+						SyslogDrainURL:  "https://drain.example",
+						RouteServiceURL: "https://route.example",
+					}),
+				},
+			}
+			if strings.Contains(include, "service_plan") {
+				payload["included"] = map[string]interface{}{
+					"service_plans": []map[string]interface{}{
+						{
+							"guid": "plan-1", "name": "small", "free": true,
+							"relationships": map[string]interface{}{
+								"service_offering": map[string]interface{}{"data": map[string]interface{}{"guid": "off-1"}},
+							},
 						},
 					},
-				},
-			})
-		case "/v3/service_plans":
-			planHits++
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
-				"resources": []map[string]interface{}{
-					{
-						"guid": "plan-1", "name": "small",
-						"relationships": map[string]interface{}{
-							"service_offering": map[string]interface{}{"data": map[string]interface{}{"guid": "off-1"}},
+					"service_offerings": []map[string]interface{}{
+						{
+							"guid": "off-1", "name": "redis", "description": "in-memory store",
+							"relationships": map[string]interface{}{
+								"service_broker": map[string]interface{}{"data": map[string]interface{}{"guid": "broker-1"}},
+							},
 						},
 					},
-				},
-			})
-		case "/v3/service_offerings":
-			offHits++
+					"service_brokers": []map[string]interface{}{
+						{"guid": "broker-1", "name": "alpha-broker", "url": "https://broker.example"},
+					},
+					"spaces": []map[string]interface{}{
+						{
+							"guid": "space-1", "name": "engineering",
+							"relationships": map[string]interface{}{
+								"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+							},
+						},
+					},
+					"organizations": []map[string]interface{}{
+						{"guid": "org-1", "name": "acme"},
+					},
+				}
+			}
+			_ = json.NewEncoder(w).Encode(payload)
+		case "/v3/service_instances/si-77":
+			res := instanceResource("si-77", "premium-db", "managed", "space-1", "plan-2", nil)
+			res["metadata"] = map[string]interface{}{
+				"labels":      map[string]interface{}{"tier": "gold"},
+				"annotations": map[string]interface{}{"owner": "alice"},
+			}
+			res["upgrade_available"] = true
+			res["maintenance_info"] = map[string]interface{}{"version": "1.2.3", "description": "fix"}
+			_ = json.NewEncoder(w).Encode(res)
+		case "/v3/service_plans/plan-2":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
-				"resources": []map[string]interface{}{
-					{"guid": "off-1", "name": "redis"},
+				"guid": "plan-2", "name": "premium", "free": false,
+				"relationships": map[string]interface{}{
+					"service_offering": map[string]interface{}{"data": map[string]interface{}{"guid": "off-2"}},
 				},
 			})
+		case "/v3/service_offerings/off-2":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "off-2", "name": "postgres",
+				"relationships": map[string]interface{}{
+					"service_broker": map[string]interface{}{"data": map[string]interface{}{"guid": "broker-2"}},
+				},
+			})
+		case "/v3/service_brokers/broker-2":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "broker-2", "name": "beta-broker", "url": "https://broker2.example",
+			})
+		case "/v3/spaces/space-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "space-1", "name": "engineering",
+				"relationships": map[string]interface{}{
+					"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+				},
+			})
+		case "/v3/organizations/org-1":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"guid": "org-1", "name": "acme"})
 		default:
 			http.NotFound(w, r)
 		}
 	}))
-	defer srv.Close()
+	return srv, &siHits
+}
 
-	plugin := &CloudFoundrySpecification{
+type upsBlock struct {
+	SyslogDrainURL  string
+	RouteServiceURL string
+}
+
+func instanceResource(guid, name, instanceType, spaceGUID, planGUID string, ups *upsBlock) map[string]interface{} {
+	res := map[string]interface{}{
+		"guid":       guid,
+		"name":       name,
+		"type":       instanceType,
+		"tags":       []string{"redis", "cache"},
+		"created_at": "2024-01-01T00:00:00Z",
+		"updated_at": "2024-01-02T00:00:00Z",
+		"last_operation": map[string]interface{}{
+			"type":        "create",
+			"state":       "succeeded",
+			"description": "ok",
+			"updated_at":  "2024-01-02T00:00:00Z",
+			"created_at":  "2024-01-01T00:00:00Z",
+		},
+		"relationships": map[string]interface{}{
+			"space": map[string]interface{}{"data": map[string]interface{}{"guid": spaceGUID}},
+		},
+	}
+	if planGUID != "" {
+		res["relationships"].(map[string]interface{})["service_plan"] = map[string]interface{}{
+			"data": map[string]interface{}{"guid": planGUID},
+		}
+	}
+	if ups != nil {
+		res["syslog_drain_url"] = ups.SyslogDrainURL
+		res["route_service_url"] = ups.RouteServiceURL
+	} else {
+		res["dashboard_url"] = "https://dashboard.example/" + guid
+	}
+	return res
+}
+
+func newServiceInstancesContext(e *echo.Echo, target string) (echo.Context, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest(http.MethodGet, target, nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+	return ctx, rec
+}
+
+func newServiceInstancesPlugin(serverURL string) *CloudFoundrySpecification {
+	return &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
 			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(serverURL)},
 			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
 		},
 	}
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1?per_page=25&page=2", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
-
-	require.NoError(t, plugin.getNativeServiceInstances(c))
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 1, siHits, "single-page passthrough must issue exactly one /v3/service_instances call")
-	assert.Equal(t, "25", lastPerPage)
-	assert.Equal(t, "2", lastPage)
-	assert.Equal(t, 1, planHits, "per-page plan join expected")
-	assert.Equal(t, 1, offHits, "per-page offering join expected")
-	assert.Equal(t, 1, bindingHits, "per-page bound-app-count fetch expected")
-
-	var resp StratosPagedResponse[StServiceInstance]
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
-	require.Len(t, resp.Resources, 1)
-	assert.Equal(t, "redis", resp.Resources[0].ServiceOfferingName)
-	assert.Equal(t, "small", resp.Resources[0].ServicePlanName)
-	assert.Equal(t, 1, resp.Resources[0].BoundAppCount)
-	assert.Equal(t, 17, resp.Pagination.TotalResults)
 }
 
-// TestGetNativeServiceInstances_OmitsPagingWhenAbsent verifies the
-// V3-default behaviour: with no caller-supplied per_page/page, the
-// upstream URL has neither.
-func TestGetNativeServiceInstances_OmitsPagingWhenAbsent(t *testing.T) {
-	var sawPerPage, sawPage bool
+func TestGetNativeServiceInstances_Base(t *testing.T) {
+	srv, siHits := instancesTestServer(t)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, *siHits, "base mode is one CAPI call (no include drain)")
+
+	var resp StratosPagedResponse[StServiceInstance]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 2)
+	first := resp.Resources[0]
+	assert.Equal(t, "si-1", first.GUID)
+	assert.Equal(t, "redis-instance", first.Name)
+	assert.Equal(t, "managed", first.Type)
+	assert.Equal(t, []string{"redis", "cache"}, first.Tags)
+	require.NotNil(t, first.Space, "base tier emits guid-only space ref")
+	assert.Equal(t, "space-1", first.Space.GUID)
+	assert.Empty(t, first.Space.Name, "name reserved for summary+")
+	require.NotNil(t, first.ServicePlan)
+	assert.Equal(t, "plan-1", first.ServicePlan.GUID)
+	assert.Empty(t, first.ServicePlan.Name)
+	assert.Empty(t, first.DashboardURL, "dashboardUrl deferred to summary+")
+	assert.Empty(t, first.SyslogDrainURL, "syslogDrainUrl deferred to summary+")
+	require.NotNil(t, first.LastOperation)
+	assert.Equal(t, "succeeded", first.LastOperation.State)
+
+	// UPS row has no servicePlan
+	ups := resp.Resources[1]
+	assert.Equal(t, "user-provided", ups.Type)
+	assert.Nil(t, ups.ServicePlan, "UPS rows must not carry servicePlan")
+}
+
+func TestGetNativeServiceInstances_Summary(t *testing.T) {
+	srv, _ := instancesTestServer(t)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=summary")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StServiceInstance]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 2)
+	first := resp.Resources[0]
+	require.NotNil(t, first.Space)
+	assert.Equal(t, "space-1", first.Space.GUID)
+	assert.Equal(t, "engineering", first.Space.Name)
+	require.NotNil(t, first.Space.Organization)
+	assert.Equal(t, "org-1", first.Space.Organization.GUID)
+	assert.Equal(t, "acme", first.Space.Organization.Name)
+	require.NotNil(t, first.ServicePlan)
+	assert.Equal(t, "small", first.ServicePlan.Name)
+	require.NotNil(t, first.ServicePlan.Free)
+	assert.True(t, *first.ServicePlan.Free)
+	require.NotNil(t, first.ServicePlan.ServiceOffering)
+	assert.Equal(t, "redis", first.ServicePlan.ServiceOffering.Name)
+	require.NotNil(t, first.ServicePlan.ServiceOffering.Broker)
+	assert.Equal(t, "alpha-broker", first.ServicePlan.ServiceOffering.Broker.Name)
+	assert.Empty(t, first.ServicePlan.ServiceOffering.Broker.URL, "broker URL reserved for details")
+	assert.Equal(t, "https://dashboard.example/si-1", first.DashboardURL)
+
+	ups := resp.Resources[1]
+	assert.Equal(t, "https://drain.example", ups.SyslogDrainURL)
+	assert.Equal(t, "https://route.example", ups.RouteServiceURL)
+	assert.Empty(t, ups.DashboardURL, "UPS rows have no broker dashboard")
+}
+
+func TestGetNativeServiceInstances_SoftFallbackWhenIncludedMissing(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
 		case "/v3/service_instances":
-			_, sawPerPage = r.URL.Query()["per_page"]
-			_, sawPage = r.URL.Query()["page"]
-			_, _ = w.Write([]byte(`{"pagination": {"total_results": 0, "total_pages": 0, "next": null},"resources":[]}`))
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					instanceResource("si-1", "redis", "managed", "space-1", "plan-1", nil),
+				},
+				// no included block
+			})
 		default:
 			http.NotFound(w, r)
 		}
 	}))
 	defer srv.Close()
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=summary")
+	plugin := newServiceInstancesPlugin(srv.URL)
 
-	require.NoError(t, plugin.getNativeServiceInstances(c))
-	assert.False(t, sawPerPage)
-	assert.False(t, sawPage)
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StServiceInstance]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 1)
+	first := resp.Resources[0]
+	require.NotNil(t, first.Space, "guid-only ref still emitted")
+	assert.Equal(t, "space-1", first.Space.GUID)
+	assert.Empty(t, first.Space.Name, "name absent without included block")
+	assert.Nil(t, first.Space.Organization, "organization ref absent without included block")
+	require.NotNil(t, first.ServicePlan)
+	assert.Empty(t, first.ServicePlan.Name)
+	assert.Nil(t, first.ServicePlan.ServiceOffering, "offering ref absent without included block")
 }
 
-// TestGetNativeServiceInstances_CountsFastPath verifies ?return=counts:
-// per_page=1 only on /v3/service_instances; the plan/offering joins
-// don't run on the counts path.
 func TestGetNativeServiceInstances_CountsFastPath(t *testing.T) {
-	planHits, offHits := 0, 0
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.URL.Path {
-		case "/v3":
-			w.Write([]byte(`{"links":{}}`))
-		case "/v3/service_instances":
-			perPage := r.URL.Query().Get("per_page")
-			body := `{"pagination":{"total_results":18,"total_pages":1,"next":null},"resources":[],"_per_page_seen":"` + perPage + `"}`
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(body))
-		case "/v3/service_plans":
-			planHits++
-			http.NotFound(w, r)
-		case "/v3/service_offerings":
-			offHits++
-			http.NotFound(w, r)
-		default:
-			http.NotFound(w, r)
-		}
-	}))
+	srv, _ := instancesTestServer(t)
 	defer srv.Close()
 
-	plugin := &CloudFoundrySpecification{
-		testProxy: &mockNativeCFProxy{
-			userID:      "user-1",
-			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
-			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
-		},
-	}
-
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1?return=counts", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/pp/v1/cf/service_instances/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=counts")
+	plugin := newServiceInstancesPlugin(srv.URL)
 
-	require.NoError(t, plugin.getNativeServiceInstances(c))
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 0, planHits, "counts path must skip the plan join")
-	assert.Equal(t, 0, offHits, "counts path must skip the offering join")
 
 	var resp StServiceInstancesResponse
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
-	assert.Equal(t, 18, resp.TotalResults)
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 17, resp.TotalResults)
 	assert.Empty(t, resp.Resources)
+}
+
+func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
+	body := []byte(`{
+		"pagination": {
+			"total_results": 60, "total_pages": 3,
+			"first":{"href":"/v3/service_instances?page=1"},
+			"last":{"href":"/v3/service_instances?page=3"},
+			"next":{"href":"/v3/service_instances?page=3"},
+			"previous":{"href":"/v3/service_instances?page=1"}
+		},
+		"resources": [{"guid":"si-1","name":"x","type":"managed","tags":[],"last_operation":{"state":"succeeded"},"relationships":{"space":{"data":{"guid":"sp-1"}}}}]
+	}`)
+	srv, q := newPagingCapiServer(t, "/v3/service_instances", body)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?per_page=25&page=2")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, q.Hits, "base mode is single-page passthrough")
+	assert.Equal(t, "25", q.PerPage)
+	assert.Equal(t, "2", q.Page)
+
+	var resp StratosPagedResponse[StServiceInstance]
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, 60, resp.Pagination.TotalResults)
+}
+
+func TestGetNativeServiceInstances_OmitsPagingWhenAbsent(t *testing.T) {
+	body := []byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`)
+	srv, q := newPagingCapiServer(t, "/v3/service_instances", body)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.False(t, q.PerPagePresent)
+	assert.False(t, q.PagePresent)
+}
+
+func TestGetNativeServiceInstanceDetail_Details(t *testing.T) {
+	srv, _ := instancesTestServer(t)
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-77?return=details", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "instanceGuid")
+	ctx.SetParamValues("cnsi-1", "si-77")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstanceDetail(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StServiceInstance
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	assert.Equal(t, "si-77", resp.GUID)
+	assert.Equal(t, "premium-db", resp.Name)
+	require.NotNil(t, resp.MaintenanceInfo)
+	assert.Equal(t, "1.2.3", resp.MaintenanceInfo.Version)
+	require.NotNil(t, resp.UpgradeAvailable)
+	assert.True(t, *resp.UpgradeAvailable)
+	assert.Equal(t, map[string]string{"tier": "gold"}, resp.Labels)
+	require.NotNil(t, resp.Space)
+	assert.Equal(t, "engineering", resp.Space.Name)
+	require.NotNil(t, resp.Space.Organization)
+	assert.Equal(t, "acme", resp.Space.Organization.Name)
+	require.NotNil(t, resp.ServicePlan)
+	assert.Equal(t, "premium", resp.ServicePlan.Name)
+	require.NotNil(t, resp.ServicePlan.ServiceOffering)
+	assert.Equal(t, "postgres", resp.ServicePlan.ServiceOffering.Name)
+	require.NotNil(t, resp.ServicePlan.ServiceOffering.Broker)
+	assert.Equal(t, "https://broker2.example", resp.ServicePlan.ServiceOffering.Broker.URL, "details tier expands broker URL")
 }
