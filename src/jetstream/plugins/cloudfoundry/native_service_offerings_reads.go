@@ -2,6 +2,7 @@
 package cloudfoundry
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -80,11 +81,10 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 
 	perPage, page, present := parsePerPageAndPage(ctx)
 	listParams := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
-	// ?include=service_broker is forwarded so v3 emits the broker block
-	// in the response's `included` array. Today the capi/v3 client drops
-	// `included`, so we still issue the batched broker fetch below — but
-	// sending `include` ahead of that means flipping to native consumption
-	// is a one-line change once the client surfaces it.
+	// `?include=service_broker` brings the joined brokers back in v3's
+	// top-level `included` block; capi/v3 surfaces it via
+	// ListResponse[T].Included so the entire list+broker join is one
+	// CAPI call.
 	if mode == ReturnSummary || mode == ReturnDetails {
 		listParams = listParams.WithInclude("service_broker")
 	}
@@ -97,7 +97,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 	// Broker join only applies for summary+ — base ships without refs.
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		brokerByGUID = drainBrokersForOfferings(ctx, cfClient, offerings)
+		brokerByGUID = brokersFromIncluded(rawOfferings.Included)
 	}
 
 	out := make([]StServiceOffering, 0, len(offerings))
@@ -120,8 +120,10 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 // `details` but `summary` and `base` are honored too. Counts mode is not
 // meaningful on a single resource; falling back to base behaviour.
 //
-// Broker join uses the same one-shot batch fetch as the list path (single
-// guid) until the capi/v3 client surfaces `included` (see TODO above).
+// Single-resource Get can't carry ?include= via the typed API today, so
+// summary+ keeps a single-guid broker fetch via drainBrokersForOfferings.
+// Cheap (one extra round trip) and worth keeping until the capi/v3
+// client grows include= on Get too.
 func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	offeringGUID := ctx.Param("offeringGuid")
@@ -163,10 +165,35 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Cont
 	return ctx.JSON(http.StatusOK, toStServiceOffering(*offering, cnsiGUID, brokerByGUID, mode))
 }
 
+// brokersFromIncluded decodes v3's `included.service_brokers` block (set
+// by `?include=service_broker` on the offerings list) into a guid-keyed
+// map. Soft-fail: malformed entries are skipped silently rather than
+// 502'ing the whole response — same defensive posture as the broker
+// drain it replaced.
+func brokersFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServiceBroker {
+	out := map[string]capi.ServiceBroker{}
+	if included == nil {
+		return out
+	}
+	rawBrokers, ok := included["service_brokers"]
+	if !ok {
+		return out
+	}
+	for _, raw := range rawBrokers {
+		var b capi.ServiceBroker
+		if err := json.Unmarshal(raw, &b); err == nil && b.GUID != "" {
+			out[b.GUID] = b
+		}
+	}
+	return out
+}
+
 // drainBrokersForOfferings batch-fetches the unique brokers referenced by
 // the given offerings. Soft-fail: returns whatever it can resolve; an
 // error leaves the map empty and offerings ship with Broker=nil rather
-// than 502'ing the whole response.
+// than 502'ing the whole response. Used only by the single-resource
+// detail handler today — the list path reads brokers from v3's
+// `included` block via brokersFromIncluded instead.
 func drainBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings []capi.ServiceOffering) map[string]capi.ServiceBroker {
 	brokerGUIDSet := make(map[string]struct{}, len(offerings))
 	for _, o := range offerings {

@@ -36,7 +36,11 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 		case r.URL.Path == "/v3/service_offerings":
 			s.listHits++
 			s.lastListQuery = r.URL.RawQuery
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			// v3 emits the `included` block only when the request asked
+			// for it via ?include=. Mirror that so tests exercise the
+			// handler's include-aware code path rather than the empty-
+			// included fallback.
+			body := map[string]interface{}{
 				"pagination": map[string]interface{}{
 					"total_results": 2, "total_pages": 1,
 					"first": map[string]interface{}{"href": "/v3/service_offerings?page=1"},
@@ -66,11 +70,11 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 						},
 					},
 					{
-						"guid":         "offering-2",
-						"name":         "postgres",
-						"available":    true,
-						"created_at":   "2024-01-03T00:00:00Z",
-						"updated_at":   "2024-01-04T00:00:00Z",
+						"guid":       "offering-2",
+						"name":       "postgres",
+						"available":  true,
+						"created_at": "2024-01-03T00:00:00Z",
+						"updated_at": "2024-01-04T00:00:00Z",
 						"relationships": map[string]interface{}{
 							"service_broker": map[string]interface{}{
 								"data": map[string]interface{}{"guid": "broker-2"},
@@ -78,7 +82,16 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 						},
 					},
 				},
-			})
+			}
+			if strings.Contains(r.URL.RawQuery, "include=service_broker") {
+				body["included"] = map[string]interface{}{
+					"service_brokers": []map[string]interface{}{
+						{"guid": "broker-1", "name": "redis-broker", "url": "https://broker-1.example"},
+						{"guid": "broker-2", "name": "pg-broker", "url": "https://broker-2.example"},
+					},
+				}
+			}
+			_ = json.NewEncoder(w).Encode(body)
 		case r.URL.Path == "/v3/service_offerings/offering-1":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"guid":              "offering-1",
@@ -228,7 +241,7 @@ func TestGetNativeServiceOfferings_Summary(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, 1, srv.listHits, "exactly one list call")
-	assert.Equal(t, 1, srv.brokerHits, "summary mode batches broker join")
+	assert.Equal(t, 0, srv.brokerHits, "summary mode reads brokers from included; no second call")
 	assert.Contains(t, srv.lastListQuery, "include=service_broker", "summary mode must request include")
 
 	var resp StratosPagedResponse[StServiceOffering]
@@ -263,7 +276,7 @@ func TestGetNativeServiceOfferings_Details(t *testing.T) {
 	rec, err := listInvoke(plugin, "return=details&per_page=25&page=1")
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 1, srv.brokerHits, "details mode batches broker join")
+	assert.Equal(t, 0, srv.brokerHits, "details mode reads brokers from included; no second call")
 	assert.Contains(t, srv.lastListQuery, "include=service_broker")
 
 	var resp StratosPagedResponse[StServiceOffering]
