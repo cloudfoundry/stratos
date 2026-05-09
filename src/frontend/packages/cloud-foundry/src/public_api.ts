@@ -13,7 +13,6 @@ export { ApplicationMonitorService } from './features/applications/application-m
 export { ApplicationStateService, ApplicationStateData } from './shared/services/application-state.service';
 export { ApplicationEnvVarsHelper } from './features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 export { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
-export { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
 export { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
 
