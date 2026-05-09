@@ -29,8 +29,12 @@ import (
 // The capi client's Create returns interface{} (either *ServiceCredentialBinding
 // for synchronous broker responses, 201 Created, or *Job for asynchronous ones,
 // 202 Accepted). We surface 201 Created on the sync path (binding body) and
-// 202 Accepted on the async path (job body). Upstream errors flow through
-// handleCapiError to preserve CF's error envelope classification.
+// drive the async path through RunFastPath so the handoff body is a StratosJob
+// matching the frontend writeWithJob contract — same shape as
+// deleteServiceBinding.
+//
+// Graceful fallback: if the stratosjobs plugin isn't wired, async creates
+// return bare 202 (frontend 404-on-poll treats that as UNKNOWN).
 func (cf *CloudFoundrySpecification) createServiceBinding(c echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -47,22 +51,50 @@ func (cf *CloudFoundrySpecification) createServiceBinding(c echo.Context) error 
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	cfClient, err := newCapiClient(c.Request().Context(), cf.nativeProxy(), cnsiGUID, userGUID)
+	reqCtx := c.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, cf.nativeProxy(), cnsiGUID, userGUID)
 	if err != nil {
 		return err
 	}
 
-	result, createErr := cfClient.ServiceCredentialBindings().Create(c.Request().Context(), &req)
+	result, createErr := cfClient.ServiceCredentialBindings().Create(reqCtx, &req)
 	if createErr != nil {
 		return handleCapiError(c, createErr)
 	}
 
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	// Async broker returns a Job; sync returns the binding directly.
-	if _, isJob := result.(*capi.Job); isJob {
-		return c.JSON(http.StatusAccepted, result)
+
+	// Sync path: managed-broker-without-async or user-provided returned the
+	// binding body directly. Surface 201 Created with the binding payload.
+	job, isJob := result.(*capi.Job)
+	if !isJob {
+		return c.JSON(http.StatusCreated, result)
 	}
-	return c.JSON(http.StatusCreated, result)
+
+	// Async path: managed binding returned 202 + Location; drive RunFastPath.
+	if cf.asyncTracker == nil || cf.asyncTranslator == nil {
+		c.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, cf.asyncTracker, cf.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.service_binding.create",
+	})
+
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return c.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return c.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
 // deleteServiceBinding handles DELETE /pp/v1/cf/service_bindings/{cnsiGuid}/{bindingGuid}

@@ -1,11 +1,13 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { Observable, from, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { StratosJobError } from '../../../services/async-jobs/async-job.types';
+import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -59,6 +61,7 @@ const defaultViewDetail = {
 })
 export class CsiModeService {
   private activatedRoute = inject(ActivatedRoute);
+  private http = inject(HttpClient);
 
 
   private mode!: string;
@@ -160,25 +163,38 @@ export class CsiModeService {
   isEditServiceInstanceMode = () => this.mode === CreateServiceInstanceMode.EDIT_SERVICE_INSTANCE_MODE;
 
 
-  public createApplicationServiceBinding(serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: object) {
-
-    const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    return cfEntityCatalog.serviceBinding.api.create<RequestInfoState>(
-      guid,
-      cfGuid,
-      { applicationGuid: appGuid, serviceInstanceGuid, params }
-    ).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.creating && !newS.creating),
-      map(([, newS]) => newS),
-      map(req => {
-        if (req.error) {
-          return { success: false, message: `Failed to create service instance binding: ${req.message}` };
-        }
-        return { success: true };
-      })
+  public createApplicationServiceBinding(
+    serviceInstanceGuid: string,
+    cfGuid: string,
+    appGuid: string,
+    params: object,
+  ): Observable<{ success: boolean; message?: string }> {
+    const body: Record<string, unknown> = {
+      type: 'app',
+      relationships: {
+        app: { data: { guid: appGuid } },
+        service_instance: { data: { guid: serviceInstanceGuid } },
+      },
+    };
+    if (params && Object.keys(params).length > 0) {
+      body['parameters'] = params;
+    }
+    const call = this.http.post(
+      `/pp/v1/cf/service_bindings/${cfGuid}`,
+      body,
+      { observe: 'response' },
+    );
+    // UNKNOWN resolves optimistically: a CF replica may not know the job
+    // (HA-degradation), but the binding write itself was accepted; callers
+    // refetch to reveal the truth. Treating UNKNOWN as failure would block
+    // the stepper on a write that probably succeeded.
+    return from(writeWithJob<unknown>(this.http, call)).pipe(
+      map(() => ({ success: true })),
+      catchError((err: unknown) => of({ success: false, message: extractErrorMessage(err) })),
     );
   }
+
+
 
   private updateCancelUrl(
     activatedRoute: ActivatedRoute,
@@ -209,4 +225,22 @@ export class CsiModeService {
     }
   }
 
+}
+
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof StratosJobError) return err.message;
+  if (err instanceof HttpErrorResponse) {
+    const body = err.error;
+    if (body && typeof body === 'object') {
+      const errors = (body as { errors?: Array<{ detail?: string; title?: string }> }).errors;
+      const first = errors?.[0];
+      if (first?.detail) return first.detail;
+      if (first?.title) return first.title;
+      const msg = (body as { message?: string }).message;
+      if (msg) return msg;
+    }
+    return err.message || `HTTP ${err.status}`;
+  }
+  if (err instanceof Error) return err.message;
+  return 'unknown error';
 }
