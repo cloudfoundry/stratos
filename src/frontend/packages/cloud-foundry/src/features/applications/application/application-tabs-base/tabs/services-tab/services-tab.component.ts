@@ -92,10 +92,10 @@ export class ServicesTabComponent implements OnInit {
    *  AppDetailDataService.serviceBindingsCount). */
   readonly totalServices: Signal<number> = this.dataService.serviceBindingsCount;
 
-  /** Permission-gated visibility for the Bind Service action. Mirrors
-   *  the legacy `listActionAdd.visible$` predicate from
-   *  AppServiceBindingListConfigService — bindings need
-   *  SERVICE_INSTANCE_CREATE permission on the app's space. */
+  /** Permission-gated visibility for the Bind Service action. Bindings
+   *  require SERVICE_INSTANCE_CREATE permission on the app's space —
+   *  same predicate the legacy ngrx list-config exposed before it was
+   *  retired in Stage 9d. */
   private readonly canBindSignal: Signal<boolean> = toSignal(
     this.appService.waitForAppEntity$.pipe(
       switchMap(app => this.permissions.can(
