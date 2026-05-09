@@ -116,14 +116,33 @@ func collectCFJobErrors(job *capi.Job) []stratosjobs.StratosError {
 }
 
 // translateCFJobResult returns the v3 job as the result payload on COMPLETE.
-// For a delete, the interesting information is "done" — we still return the
-// job so diagnostics have access to the operation / GUID when they need it.
+// For a delete the interesting information is "done"; for a create/update
+// the interesting information is the new resource's identity, which CF
+// surfaces on the job via `links.<resource>.href`. We pass the link map
+// through so consumers can extract the resource guid without refetching.
+//
+// Generic across operations: every async create/update/delete job CF emits
+// has a stable Links map (empty for delete). Including it unconditionally
+// keeps the contract symmetric with the fast-path body shape — both fast
+// and slow resolve paths now expose enough to identify the resource.
 func translateCFJobResult(job *capi.Job) interface{} {
 	if job.State != "COMPLETE" {
 		return nil
 	}
-	return map[string]interface{}{
+	out := map[string]interface{}{
 		"jobGuid":   job.GUID,
 		"operation": job.Operation,
 	}
+	if len(job.Links) > 0 {
+		links := make(map[string]string, len(job.Links))
+		for k, v := range job.Links {
+			if v.Href != "" {
+				links[k] = v.Href
+			}
+		}
+		if len(links) > 0 {
+			out["links"] = links
+		}
+	}
+	return out
 }

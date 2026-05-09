@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
+  from,
   Observable,
-  of as observableOf,
   Subscription,
 } from 'rxjs';
 import {
@@ -28,15 +28,10 @@ import {
 
 import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { NormalizedResponse } from '../../../../../../store/src/types/api.types';
-import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { serviceInstancesEntityType } from '../../../../cf-entity-types';
-import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
-import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
+import { AsyncJobResult, StratosJobError } from '../../../../services/async-jobs/async-job.types';
+import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -63,12 +58,11 @@ import { CsiState, CsiStateService } from '../csi-state.service';
   ]
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
-  private store = inject<Store<CFAppState>>(Store);
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private csiGuidsService = inject(CsiGuidsService);
   private csiState = inject(CsiStateService);
   modeService = inject(CsiModeService);
-  longRunningOpService = inject(LongRunningCfOperationsService);
+  private http = inject(HttpClient);
   // toObservable() must run inside an injection context — lift to a class
   // field. Reused by selectCreateInstance$ and onNext below.
   private csiState$ = toObservable(this.csiState.state);
@@ -270,83 +264,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
-  private handleUpdateServiceResult(request: RequestInfoState, state: CsiState): Observable<StepOnNextResult> {
-    const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
-    if (!updatingInfo) {
-      // This isn't an update
-    } else if (this.longRunningOpService.isLongRunning(updatingInfo)) {
-      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
-      this.longRunningOpService.handleLongRunningUpdateService(state.serviceInstanceGuid, state.cfGuid);
-    } else if (updatingInfo.error) {
-      // The request has errored, report this back
-      return observableOf({ success: false, message: `Failed to update service instance: ${updatingInfo.message}` });
-    }
-  }
-
-  private handleCreateServiceResult(request: RequestInfoState, state: CsiState): Observable<StepOnNextResult> {
-    const bindApp = !!state.bindAppGuid;
-
-    if (this.longRunningOpService.isLongRunning(request)) {
-      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
-      this.longRunningOpService.handleLongRunningCreateService(bindApp);
-      // Return to app page instead of falling through to service page
-      if (bindApp) {
-        return observableOf(this.routeToServices());
-      }
-    } else if (request.error) {
-      // The request has errored, report this back
-      return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
-    } else if (bindApp) {
-      // The request has succeeded and we now need to bind an app to the new service instance
-      const serviceInstanceGuid = this.setServiceInstanceGuid(request);
-      this.csiState.setServiceInstanceGuid(serviceInstanceGuid);
-      return this.modeService.createApplicationServiceBinding(
-        serviceInstanceGuid,
-        state.cfGuid,
-        state.bindAppGuid,
-        state.bindAppParams
-      ).pipe(
-        map(req => {
-          if (!req.success) {
-            return req;
-          } else {
-            // Refetch env vars for app, since they have been changed by CF
-            cfEntityCatalog.appEnvVar.api.getMultiple(state.bindAppGuid, state.cfGuid);
-            return this.routeToServices();
-          }
-        })
-      );
-    }
-  }
-
+  // Single signal-native write path: POST or PATCH /pp/v1/cf/service_instances
+  // wrapped in writeWithJob. Replaces the prior ngrx
+  // cfEntityCatalog.serviceInstance.actions.create/update pipeline plus the
+  // separate LongRunningCfOperationsService handoff — writeWithJob's
+  // fast-path-then-poll contract is the long-running mechanism now.
   onNext = (): Observable<StepOnNextResult> => {
     return this.csiState$.pipe(
       filter(p => !!p),
-      switchMap(p => {
-        if (this.bindExistingInstance) {
-          // Binding an existing instance, therefore, skip creation by returning a dummy response
-          return observableOf<RequestInfoState>(getDefaultRequestState());
-        } else {
-          return this.createServiceInstance(p);
-        }
-      }),
-      filter(s => !s.creating && !s.fetching),
-      combineLatest(this.csiState$),
       take(1),
-      switchMap(([request, state]) => {
-
-        const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
-        if (handleEditServiceResult) {
-          return handleEditServiceResult;
-        }
-
-        const handleCreateServiceResult = this.handleCreateServiceResult(request, state);
-        if (handleCreateServiceResult) {
-          return handleCreateServiceResult;
-        }
-
-        return observableOf(this.routeToServices());
-      }),
+      switchMap(state => from(this.executeWrite(state))),
     );
   };
 
@@ -358,8 +285,98 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   };
 
-  private setServiceInstanceGuid = (request: RequestInfoState): string | undefined =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstance.value : request.response?.result?.[0];
+  private async executeWrite(state: CsiState): Promise<StepOnNextResult> {
+    // "Bind to existing instance" branch: skip the SI write entirely; the
+    // selected instance already exists. Just trigger the bind flow.
+    if (this.bindExistingInstance) {
+      const existingGuid = this.selectExistingInstanceForm.controls.serviceInstance.value;
+      return this.bindAppIfRequested(existingGuid, state);
+    }
+
+    const isEditMode = this.modeService.isEditServiceInstanceMode();
+    const verb = isEditMode ? 'update' : 'create';
+    const body = this.buildWriteBody(state, isEditMode);
+
+    const url = isEditMode
+      ? `/pp/v1/cf/service_instances/${state.cfGuid}/${state.serviceInstanceGuid}`
+      : `/pp/v1/cf/service_instances/${state.cfGuid}`;
+    const call = isEditMode
+      ? this.http.patch(url, body, { observe: 'response' as const })
+      : this.http.post(url, body, { observe: 'response' as const });
+
+    let result: AsyncJobResult<unknown>;
+    try {
+      result = await writeWithJob<unknown>(this.http, call);
+    } catch (err: unknown) {
+      return {
+        success: false,
+        message: `Failed to ${verb} service instance: ${extractErrorMessage(err)}`,
+      };
+    }
+
+    if (isEditMode) {
+      return this.routeToServices();
+    }
+
+    // Create path: try to extract the new SI's guid for the bind-after-create
+    // follow-up. UNKNOWN (HA-degradation) and slow-async paths without a
+    // resource link both leave the guid undefined — in that case the SI will
+    // appear in the services wall once CF settles and the user binds manually.
+    const newGuid = extractCreatedSiGuid(result);
+    if (newGuid) {
+      this.csiState.setServiceInstanceGuid(newGuid);
+    }
+    return this.bindAppIfRequested(newGuid, state);
+  }
+
+  private async bindAppIfRequested(siGuid: string | undefined, state: CsiState): Promise<StepOnNextResult> {
+    if (!state.bindAppGuid || !siGuid) {
+      return this.routeToServices();
+    }
+    const bindResult = await this.modeService.createApplicationServiceBinding(
+      siGuid,
+      state.cfGuid,
+      state.bindAppGuid,
+      state.bindAppParams,
+    ).pipe(take(1)).toPromise() as { success: boolean; message?: string };
+    if (!bindResult?.success) {
+      return {
+        success: false,
+        message: `Failed to create service instance binding: ${bindResult?.message ?? 'unknown error'}`,
+      };
+    }
+    // Refetch env vars for app, since they have been changed by CF
+    cfEntityCatalog.appEnvVar.api.getMultiple(state.bindAppGuid, state.cfGuid);
+    return this.routeToServices();
+  }
+
+  private buildWriteBody(state: CsiState, isEditMode: boolean): Record<string, unknown> {
+    const name = this.createNewInstanceForm.controls.name.value;
+    const params = this.serviceParams;
+    const tags = this.tags.length > 0 ? [...this.tags] : [];
+
+    if (isEditMode) {
+      // PATCH: only include fields the user can edit. Plan/space relations
+      // stay fixed via the v3 PATCH semantics on managed instances.
+      const body: Record<string, unknown> = { name };
+      if (Object.keys(params).length > 0) body.parameters = params;
+      body.tags = tags;
+      return body;
+    }
+
+    // POST: managed-instance v3 shape.
+    const body: Record<string, unknown> = {
+      type: 'managed',
+      name,
+      relationships: {
+        space: { data: { guid: state.spaceGuid } },
+        service_plan: { data: { guid: state.servicePlanGuid } },
+      },
+    };
+    if (Object.keys(params).length > 0) body.parameters = params;
+    if (tags.length > 0) body.tags = tags;
+    return body;
+  }
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
@@ -375,104 +392,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
       map(() => this._validate.set(this.selectExistingInstanceForm.valid))
     ).subscribe());
-  }
-
-  private getNewServiceGuid(name: string, spaceGuid: string, servicePlanGuid: string) {
-    if (!this.modeService.isEditServiceInstanceMode()) {
-      return name + spaceGuid + servicePlanGuid;
-    } else {
-      return this.serviceInstanceGuid;
-    }
-  }
-
-  private getUpdateObservable(isEditMode: boolean, newServiceInstanceGuid: string) {
-    if (!isEditMode) {
-      return observableOf(null);
-    }
-    const actionState = selectCfUpdateInfo(serviceInstancesEntityType,
-      newServiceInstanceGuid,
-      UpdateServiceInstance.updateServiceInstance
-    );
-    return this.store.select(actionState).pipe(
-      filter(i => !i.busy)
-    );
-  }
-
-  private getAction(
-    cfGuid: string,
-    newServiceInstanceGuid: string,
-    name: string,
-    servicePlanGuid: string,
-    spaceGuid: string,
-    params: {},
-    tagsStr: string[],
-    isEditMode: boolean
-  ) {
-    if (isEditMode) {
-      return cfEntityCatalog.serviceInstance.actions.update(
-        newServiceInstanceGuid,
-        cfGuid,
-        { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
-      );
-    }
-    return cfEntityCatalog.serviceInstance.actions.create(
-      newServiceInstanceGuid,
-      cfGuid,
-      { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
-    );
-  }
-
-  private getIdFromResponseGetter(cfGuid: string, newId: string, isEditMode: boolean) {
-    return (response: NormalizedResponse) => {
-      if (!isEditMode) {
-        // We need to re-fetch the Service Instance in case of creation because the entity returned is incomplete
-        const guid = response.result[0];
-        cfEntityCatalog.serviceInstance.api.get(guid, cfGuid);
-        return guid;
-      }
-      return newId;
-    };
-  }
-
-  createServiceInstance(createServiceInstance: CsiState): Observable<RequestInfoState> {
-
-    const name = this.createNewInstanceForm.controls.name.value;
-    const { spaceGuid, cfGuid } = createServiceInstance;
-    const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = this.serviceParams;
-    const tagsStr: string[] = this.tags.length > 0 ? this.tags : [];
-
-    const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
-
-    const isEditMode = this.modeService.isEditServiceInstanceMode();
-    const checkUpdate$ = this.getUpdateObservable(isEditMode, newServiceInstanceGuid);
-    const action = this.getAction(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr, isEditMode);
-
-    const create$ = this.store.select(selectCfRequestInfo(serviceInstancesEntityType, newServiceInstanceGuid));
-    const getIdFromResponse = this.getIdFromResponseGetter(cfGuid, newServiceInstanceGuid, isEditMode);
-
-    this.store.dispatch(action);
-    return checkUpdate$.pipe(
-      switchMap(_o => create$),
-      filter(a => !a.creating),
-      switchMap(a => {
-        const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
-        if ((isEditMode && !!updating && updating.error) || (a.error)) {
-          return create$;
-        }
-
-        const guid = getIdFromResponse(a.response as NormalizedResponse);
-
-        return this.store.select(selectCfRequestInfo(serviceInstancesEntityType, guid)).pipe(
-          map(ri => ({
-            ...ri,
-            response: {
-              result: [guid]
-            }
-          }))
-        );
-      })
-    );
   }
 
   addTagFromInput(event: KeyboardEvent): void {
@@ -512,4 +431,47 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return true;
   };
 
+}
+
+// Pulls the new service-instance guid out of writeWithJob's terminal result.
+// The fast-path (200) and polled-handoff (202 → COMPLETE) paths produce
+// slightly different shapes — fast-path body is `{state, result: <links>}`,
+// polled body is `<links>` (the unwrapped translateCFJobResult output).
+// translateCFJobResult emits `links.service_instance: '/v3/service_instances/<guid>'`
+// on managed creates, so we look in both candidates and parse the trailing
+// guid out of the href. UNKNOWN status / missing links return undefined and
+// the caller skips auto-bind.
+function extractCreatedSiGuid(result: AsyncJobResult<unknown>): string | undefined {
+  if (result.status !== 'COMPLETE' || !result.state) return undefined;
+  const top = result.state as Record<string, unknown>;
+  const candidates: Array<Record<string, unknown> | undefined> = [
+    top,
+    top.result as Record<string, unknown> | undefined,
+  ];
+  for (const c of candidates) {
+    const href = (c?.links as Record<string, string> | undefined)?.service_instance;
+    if (href) {
+      const m = href.match(/\/([^/]+)\/?$/);
+      if (m?.[1]) return m[1];
+    }
+  }
+  return undefined;
+}
+
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof StratosJobError) return err.message;
+  if (err instanceof HttpErrorResponse) {
+    const body = err.error;
+    if (body && typeof body === 'object') {
+      const errors = (body as { errors?: Array<{ detail?: string; title?: string }> }).errors;
+      const first = errors?.[0];
+      if (first?.detail) return first.detail;
+      if (first?.title) return first.title;
+      const msg = (body as { message?: string }).message;
+      if (msg) return msg;
+    }
+    return err.message || `HTTP ${err.status}`;
+  }
+  if (err instanceof Error) return err.message;
+  return 'unknown error';
 }
