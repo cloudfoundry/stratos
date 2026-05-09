@@ -64,8 +64,9 @@ describe('SpecifyDetailsStepComponent', () => {
 //
 // `extractCreatedSiGuid` parses the new SI guid out of writeWithJob's
 // terminal result so the bind-after-create flow can chain into
-// modeService.createApplicationServiceBinding. Both fast-path and
-// polled-handoff candidate shapes are covered.
+// modeService.createApplicationServiceBinding. writeWithJob normalises
+// fast-path and polled-handoff to the same bare-result shape, so the
+// helper only has to inspect one level.
 describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   function setup(opts: {
     isEditMode?: boolean;

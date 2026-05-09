@@ -434,28 +434,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 }
 
 // Pulls the new service-instance guid out of writeWithJob's terminal result.
-// The fast-path (200) and polled-handoff (202 → COMPLETE) paths produce
-// slightly different shapes — fast-path body is `{state, result: <links>}`,
-// polled body is `<links>` (the unwrapped translateCFJobResult output).
 // translateCFJobResult emits `links.service_instance: '/v3/service_instances/<guid>'`
-// on managed creates, so we look in both candidates and parse the trailing
-// guid out of the href. UNKNOWN status / missing links return undefined and
-// the caller skips auto-bind.
+// on managed creates; writeWithJob normalises both fast-path and polled
+// shapes to that bare-result level. UNKNOWN status / missing links return
+// undefined and the caller skips auto-bind.
 function extractCreatedSiGuid(result: AsyncJobResult<unknown>): string | undefined {
   if (result.status !== 'COMPLETE' || !result.state) return undefined;
-  const top = result.state as Record<string, unknown>;
-  const candidates: Array<Record<string, unknown> | undefined> = [
-    top,
-    top.result as Record<string, unknown> | undefined,
-  ];
-  for (const c of candidates) {
-    const href = (c?.links as Record<string, string> | undefined)?.service_instance;
-    if (href) {
-      const m = href.match(/\/([^/]+)\/?$/);
-      if (m?.[1]) return m[1];
-    }
-  }
-  return undefined;
+  const links = (result.state as { links?: Record<string, string> }).links;
+  const href = links?.service_instance;
+  if (!href) return undefined;
+  const m = href.match(/\/([^/]+)\/?$/);
+  return m?.[1];
 }
 
 function extractErrorMessage(err: unknown): string {
