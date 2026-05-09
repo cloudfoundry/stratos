@@ -1,65 +1,106 @@
-import { DatePipe } from '@angular/common';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { CoreModule } from '@stratosui/core';
-import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
-import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCFEntities } from '../../../cf-entity-generator';
-import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
-import { ServicesService } from '../services.service';
-import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceInstancesComponent } from "./service-instances.component";
+import {
+  ConfirmationDialogService,
+  TailwindSnackBarService,
+} from '@stratosui/core';
 
-describe('ServiceInstancesComponent', () => {
+import { CfServiceInstancesSignalConfigService } from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+import { ServiceInstancesComponent } from './service-instances.component';
+
+describe('ServiceInstancesComponent (signal-native)', () => {
   let component: ServiceInstancesComponent;
   let fixture: ComponentFixture<ServiceInstancesComponent>;
 
+  // Stubs the signal config surface the tab consumes — view pipeline,
+  // page/sort/filter signals, lifecycle methods. Mirrors the per-app
+  // tab spec stubs.
+  const makeConfigStub = () => {
+    const view = {
+      pagedItems: signal<any[]>([]),
+      totalFilteredResults: signal(0),
+      totalPages: signal(1),
+    };
+    return {
+      orchestrator: { isAnyLoading: signal(false) },
+      view,
+      pageIndex: signal(0),
+      pageSize: signal(25),
+      nameFilter: signal(''),
+      sort: signal({ field: 'name', direction: 'asc' }),
+      viewMode: signal<'card' | 'table'>('card'),
+      initializeForOffering: vi.fn(),
+      registerSortExtractor: vi.fn(),
+      registerFilterExtractor: vi.fn(),
+      loadAll: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      clearFilters: vi.fn(),
+      deleteServiceInstance: vi.fn(async () => undefined),
+    };
+  };
+
+  let configStub: ReturnType<typeof makeConfigStub>;
+
   beforeEach(async () => {
+    configStub = makeConfigStub();
     await TestBed.configureTestingModule({
-      imports: [
-        createEmptyStoreModule(),
-        EntityCatalogTestModule,
-        CoreModule,
-        NoopAnimationsModule,
-        ServiceInstancesComponent,
-      ],
+      imports: [ServiceInstancesComponent],
       providers: [
-        ...STORE_TEST_PROVIDERS,
-        {
-          provide: TEST_CATALOGUE_ENTITIES,
-          useValue: [
-            ...generateStratosEntities(),
-            ...generateCFEntities(),
-          ]
-        },
-        EntityCatalogHelper,
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
-        { provide: ServicesService, useClass: ServicesServiceMock },
-        DatePipe,
-        ServiceActionHelperService,
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { params: { endpointId: 'cnsi-1', serviceId: 'svc-1' } },
+            parent: null,
+          },
+        },
+        { provide: CfServiceInstancesSignalConfigService, useValue: configStub },
+        { provide: ConfirmationDialogService, useValue: { open: vi.fn() } },
+        { provide: TailwindSnackBarService, useValue: { open: vi.fn() } },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
 
-    // Initialize EntityCatalogHelper manually
-    const helper = TestBed.inject(EntityCatalogHelper);
-    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
-  });
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(ServiceInstancesComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('initializeForOffering(cnsi, serviceGuid) is called on init from route params', () => {
+    fixture.detectChanges();
+    expect(configStub.initializeForOffering).toHaveBeenCalledWith('cnsi-1', 'svc-1');
+  });
+
+  it('builds a SignalListConfig pointing at the offering view pipeline', () => {
+    fixture.detectChanges();
+    expect(component.listConfig).toBeTruthy();
+    expect(component.listConfig!.pagedItems).toBe(configStub.view.pagedItems);
+    const keys = component.listConfig!.columns.map(c => c.key);
+    expect(keys).toEqual(['name', 'plan', 'lastOp', 'tags', 'createdAt', 'type', 'actions']);
+  });
+
+  it('Delete row action opens confirm and on confirm calls deleteServiceInstance', async () => {
+    fixture.detectChanges();
+    const confirmDialog = TestBed.inject(ConfirmationDialogService) as any;
+    const actionsCol = component.listConfig!.columns.find(c => c.key === 'actions') as any;
+    const row = { guid: 'si-7', cnsiGuid: 'cnsi-1', name: 'redis-cache' };
+    const deleteAction = actionsCol.actions(row).find((a: any) => a.label === 'Delete');
+    expect(deleteAction).toBeTruthy();
+
+    deleteAction.invoke();
+    expect(confirmDialog.open).toHaveBeenCalledTimes(1);
+    const onConfirm = confirmDialog.open.mock.calls[0][1];
+    await onConfirm();
+    expect(configStub.deleteServiceInstance).toHaveBeenCalledWith('cnsi-1', 'si-7');
   });
 });
