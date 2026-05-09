@@ -1,18 +1,60 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { Observable, of } from 'rxjs';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CoreModule, TabNavService } from '@stratosui/core';
-import { EntityServiceFactory, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
-import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCFEntities } from '../../../cf-entity-generator';
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { cfCurrentUserPermissionsService } from '../../../user-permissions/cf-user-permissions-checkers';
-import { ServicesService } from '../services.service';
-import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceTabsBaseComponent } from "./service-tabs-base.component";
+import {
+  EndpointDataRegistry,
+} from '../../../services/endpoint-data/endpoint-data.registry';
+import {
+  ServiceCatalogDataService,
+} from '../../../services/endpoint-data/service-catalog-data.service';
+import {
+  StServiceBroker,
+  StServiceOffering,
+  StServicePlan,
+  StServicePlanVisibility,
+} from '../../../services/endpoint-data/stratos-types';
+import { ServiceTabsBaseComponent } from './service-tabs-base.component';
+
+class FakeEndpointDataService {
+  serviceInstances = () => [];
+  servicePlans = () => [];
+  serviceBrokers = () => [];
+  isLoadingServicesDetails = () => false;
+  servicesDetailsLastFetched = () => new Date();
+  loadServicesDetails = (): Promise<void> => Promise.resolve();
+  loadServicesCounts = (): Promise<void> => Promise.resolve();
+}
+
+class FakeRegistry {
+  acquire(_guid: string): unknown { return new FakeEndpointDataService(); }
+  release(_guid: string): void { /* noop */ }
+}
+
+class FakeCatalog {
+  serviceOffering(_cnsi: string, _guid: string): Observable<StServiceOffering | null> {
+    return of(null);
+  }
+  servicePlansForOffering(_cnsi: string, _guid: string): Observable<StServicePlan[]> {
+    return of([]);
+  }
+  serviceBroker(_cnsi: string, _guid: string): Observable<StServiceBroker | null> {
+    return of(null);
+  }
+  planVisibility(_cnsi: string, _guid: string): Observable<StServicePlanVisibility> {
+    return of({ type: 'admin' });
+  }
+}
 
 describe('ServiceTabsBaseComponent', () => {
   let component: ServiceTabsBaseComponent;
@@ -22,35 +64,24 @@ describe('ServiceTabsBaseComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         ServiceTabsBaseComponent,
-        createEmptyStoreModule(),
-        EntityCatalogTestModule,
         CoreModule,
         NoopAnimationsModule,
       ],
       providers: [
-        ...STORE_TEST_PROVIDERS,
-        {
-          provide: TEST_CATALOGUE_ENTITIES,
-          useValue: [
-            ...generateStratosEntities(),
-            ...generateCFEntities(),
-          ]
-        },
-        EntityCatalogHelper,
-        EntityServiceFactory,
-        { provide: ServicesService, useClass: ServicesServiceMock },
-        TabNavService,
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
-        ...cfCurrentUserPermissionsService
-      ]
-    })
-      .compileComponents();
-
-    // Initialize EntityCatalogHelper manually
-    const helper = TestBed.inject(EntityCatalogHelper);
-    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+        provideHttpClientTesting(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        TabNavService,
+        { provide: EndpointDataRegistry, useClass: FakeRegistry },
+        { provide: ServiceCatalogDataService, useClass: FakeCatalog },
+        ...cfCurrentUserPermissionsService,
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

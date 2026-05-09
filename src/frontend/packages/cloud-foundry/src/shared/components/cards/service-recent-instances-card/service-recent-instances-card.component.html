@@ -1,11 +1,13 @@
+@let serviceInstances = recentInstances();
+
 <app-card class="recent-instances">
   <app-card-header class="recent-instances__header">
     <app-card-title>Recently updated service instances</app-card-title>
-    @if ((serviceInstances$ | async) === null) {
+    @if (serviceInstances === null) {
       <app-stateful-icon [state]="'busy'"></app-stateful-icon>
     }
   </app-card-header>
-  @if (serviceInstances$ | async; as serviceInstances) {
+  @if (serviceInstances) {
     <app-card-content class="recent-instances__content">
       @if (serviceInstances.length === 0) {
         <div>
@@ -14,7 +16,7 @@
       }
       @if (serviceInstances.length > 0) {
         <div class="recent-instances__scroller">
-          @for (serviceInstance of serviceInstances; track serviceInstance) {
+          @for (serviceInstance of serviceInstances; track serviceInstance.guid) {
             <app-compact-service-instance-card [serviceInstance]="serviceInstance"></app-compact-service-instance-card>
           }
         </div>

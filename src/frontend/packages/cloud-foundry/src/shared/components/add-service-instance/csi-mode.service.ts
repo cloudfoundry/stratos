@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, from, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services.service';
+import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';

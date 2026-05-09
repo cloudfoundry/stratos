@@ -4,8 +4,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
 import { provideStore } from '@ngrx/store';
 import { appReducers } from '@stratosui/store';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiStateService } from '../csi-state.service';
@@ -26,7 +24,6 @@ describe('BindAppsStepComponent', () => {
         provideStore(appReducers, {
           runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
         }),
-        { provide: ServicesService, useClass: ServicesServiceMock },
         CsiGuidsService,
         CsiStateService,
       ]

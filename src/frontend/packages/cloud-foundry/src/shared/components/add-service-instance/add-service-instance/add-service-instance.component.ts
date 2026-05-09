@@ -32,9 +32,6 @@ import {
   createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
-  servicesServiceFactoryProvider,
-} from '../../../../../../cloud-foundry/src/features/service-catalog/service-catalog.helpers';
-import {
   CfOrgSpaceDataService,
 } from '../../../../../../cloud-foundry/src/shared/data-services/cf-org-space-service.service';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
@@ -62,7 +59,6 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
   templateUrl: './add-service-instance.component.html',
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
-    servicesServiceFactoryProvider,
     CreateServiceInstanceHelperServiceFactory,
     TitleCasePipe,
     CsiGuidsService,

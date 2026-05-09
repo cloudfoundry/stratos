@@ -24,7 +24,28 @@ import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { organizationEntityType, servicePlanEntityType, spaceEntityType } from '../../cf-entity-types';
 import { QParam, QParamJoiners } from '../../shared/q-param';
 import { fetchTotalResults } from '../cf/cf.helpers';
-import { ServicePlanAccessibility } from './services.service';
+
+// ServicePlanAccessibility — legacy-shape aggregate used by the
+// getServicePlanAccessibility helper below. Lives here (not on the
+// retired ServicesService) so the helper API stays self-contained.
+export interface ServicePlanAccessibility {
+  spaceScoped?: boolean;
+  hasVisibilities?: boolean;
+  isPublic: boolean;
+  guid?: string;
+  spaceGuid?: string;
+}
+
+// SpaceScopedService — describes whether a service offering's broker is
+// space-scoped (and to which space/org). Consumed by the add-service-
+// instance stepper to wire the cancel URL + space context for marketplace
+// mode. Was previously exported from ServicesService; lives here now that
+// the ngrx-coupled service is gone.
+export interface SpaceScopedService {
+  isSpaceScoped: boolean;
+  spaceGuid?: string;
+  orgGuid?: string;
+}
 
 export const getSvcAvailability = (
   servicePlan: APIResource<IServicePlan>,

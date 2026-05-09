@@ -7,8 +7,6 @@ import { InternalEventMonitorFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
@@ -29,7 +27,6 @@ describe('AddServiceInstanceComponent', () => {
         provideHttpClient(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
-        { provide: ServicesService, useClass: ServicesServiceMock },
         CfOrgSpaceDataService,
         InternalEventMonitorFactory,
         CloudFoundryService,

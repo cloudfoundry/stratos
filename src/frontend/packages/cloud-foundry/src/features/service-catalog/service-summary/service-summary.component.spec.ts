@@ -1,84 +1,77 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { EffectsModule } from '@ngrx/effects';
+import { Observable, of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
+import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import {
-  EntityServiceFactory,
-  EntityMonitorFactory,
-  EntityCatalogFeatureModule,
-  CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  entityCatalog,
-  TestEntityCatalog,
-  ENTITY_CATALOG_TOKEN
-} from '@stratosui/store';
-import { createBasicStoreModule } from '@test-framework';
-import { generateCFEntities } from '../../../cf-entity-generator';
+  EndpointDataRegistry,
+} from '../../../services/endpoint-data/endpoint-data.registry';
 import {
-  CompactServiceInstanceCardComponent,
-} from '../../../shared/components/cards/compact-service-instance-card/compact-service-instance-card.component';
+  ServiceCatalogDataService,
+} from '../../../services/endpoint-data/service-catalog-data.service';
 import {
-  ServiceBrokerCardComponent,
-} from '../../../shared/components/cards/service-broker-card/service-broker-card.component';
-import {
-  ServiceRecentInstancesCardComponent,
-} from '../../../shared/components/cards/service-recent-instances-card/service-recent-instances-card.component';
-import {
-  ServiceSummaryCardComponent,
-} from '../../../shared/components/cards/service-summary-card/service-summary-card.component';
-import { ServiceIconComponent } from '../../../shared/components/service-icon/service-icon.component';
-import { ServicesService } from '../services.service';
-import { ServicesServiceMock } from '../services.service.mock';
-import { ServiceSummaryComponent } from "./service-summary.component";
+  StServiceBroker,
+  StServiceOffering,
+  StServicePlan,
+  StServicePlanVisibility,
+} from '../../../services/endpoint-data/stratos-types';
+import { ServiceSummaryComponent } from './service-summary.component';
+
+class FakeEndpointDataService {
+  serviceInstances = () => [];
+  servicePlans = () => [];
+  serviceBrokers = () => [];
+  isLoadingServicesDetails = () => false;
+  servicesDetailsLastFetched = () => new Date();
+  loadServicesDetails = (): Promise<void> => Promise.resolve();
+  loadServicesCounts = (): Promise<void> => Promise.resolve();
+}
+
+class FakeRegistry {
+  acquire(_guid: string): unknown { return new FakeEndpointDataService(); }
+  release(_guid: string): void { /* noop */ }
+}
+
+class FakeCatalog {
+  serviceOffering(_cnsi: string, _guid: string): Observable<StServiceOffering | null> {
+    return of(null);
+  }
+  servicePlansForOffering(_cnsi: string, _guid: string): Observable<StServicePlan[]> {
+    return of([]);
+  }
+  serviceBroker(_cnsi: string, _guid: string): Observable<StServiceBroker | null> {
+    return of(null);
+  }
+  planVisibility(_cnsi: string, _guid: string): Observable<StServicePlanVisibility> {
+    return of({ type: 'admin' });
+  }
+}
 
 describe('ServiceSummaryComponent', () => {
   let component: ServiceSummaryComponent;
   let fixture: ComponentFixture<ServiceSummaryComponent>;
 
   beforeEach(async () => {
-    // Initialize entity catalog before test
-    const testEntityCatalog = entityCatalog as TestEntityCatalog;
-    testEntityCatalog.clear();
-
     await TestBed.configureTestingModule({
-      imports: [
-        ServiceSummaryComponent,
-        ServiceSummaryCardComponent,
-        ServiceBrokerCardComponent,
-        ServiceRecentInstancesCardComponent,
-        ServiceIconComponent,
-        CompactServiceInstanceCardComponent,
-        EntityCatalogFeatureModule,
-        EffectsModule.forRoot([]),
-        createBasicStoreModule(),
-      ],
+      imports: [ServiceSummaryComponent],
       providers: [
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        { provide: ServicesService, useClass: ServicesServiceMock },
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
-        {
-          provide: ENTITY_CATALOG_TOKEN,
-          useValue: entityCatalog
-        },
-        {
-          provide: CATALOGUE_ENTITIES,
-          useFactory: () => {
-            return [
-              ...generateCFEntities(),
-              ...generateStratosEntities(),
-            ];
-          },
-          multi: true
-        },
-      ]
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        { provide: EndpointDataRegistry, useClass: FakeRegistry },
+        { provide: ServiceCatalogDataService, useClass: FakeCatalog },
+      ],
     }).compileComponents();
   });
 
