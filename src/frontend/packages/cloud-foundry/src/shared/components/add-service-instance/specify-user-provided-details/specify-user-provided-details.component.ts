@@ -21,23 +21,21 @@ interface BindExistingInstanceForm {
 
 import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
-import { Store } from '@ngrx/store';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { APIResource } from '@stratosui/store';
 
 import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import {
   serviceBindingEntityType,
   userProvidedServiceInstanceEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
-import { AppServiceBindingDataSource } from '../../list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 import { CsiStateService } from './../csi-state.service';
 
@@ -65,7 +63,11 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private upsService = inject(CloudFoundryUserProvidedServicesService);
   modeService = inject(CsiModeService);
-  private store = inject<Store<CFAppState>>(Store);
+  // AppDetailDataService is provided per app-detail route, not 'root'. When the
+  // UPS edit dialog is reached from outside the app-detail hierarchy (e.g. the
+  // services wall), it isn't available — the v3 binding refresh becomes a no-op
+  // because there's no in-context bindings view to update.
+  private appDetailData = inject(AppDetailDataService, { optional: true });
   private csiState = inject(CsiStateService);
   // toObservable() must run inside an injection context — lift to a class field.
   private csiState$ = toObservable(this.csiState.state);
@@ -317,19 +319,23 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       this.serviceInstanceId,
       updateData
     ).pipe(
-      map(result => {
-        if (result.success) {
-          const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
-          if (appId) {
-            this.store.dispatch(AppServiceBindingDataSource.createGetAllServiceBindings(appId, this.cfGuid));
-          }
-          return { success: true, redirect: true };
+      switchMap(result => {
+        if (!result.success) {
+          return observableOf<StepOnNextResult>({
+            success: false,
+            redirect: false,
+            message: `Failed to update service instance: ${result.message ?? ''}`,
+          });
         }
-        return {
-          success: false,
-          redirect: false,
-          message: `Failed to update service instance: ${result.message ?? ''}`,
-        };
+        // The bound app's denormalized service-instance data (name, tags,
+        // syslog drain url, etc.) is included via ?return=summary on the v3
+        // bindings handler — refreshing pulls in the just-updated UPS shape.
+        // No-op outside the app-detail route hierarchy.
+        const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
+        const refresh = this.appDetailData && appId
+          ? from(this.appDetailData.refresh('serviceBindings'))
+          : observableOf<void>(undefined);
+        return refresh.pipe(map(() => ({ success: true, redirect: true } as StepOnNextResult)));
       })
     );
   }
