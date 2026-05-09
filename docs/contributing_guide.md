@@ -75,6 +75,10 @@ make test              # run all tests
 make test frontend     # frontend tests only (Vitest)
 make test backend      # backend tests only (Go)
 make lint              # check code style
+make audit             # security scan (frontend + backend)
+make audit summary     # high/moderate/low totals only
+make outdated          # list outdated direct deps
+make deps dependabot   # show open dependency PRs (gh)
 make dump version      # show current version info
 ```
 
