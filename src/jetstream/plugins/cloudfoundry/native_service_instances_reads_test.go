@@ -414,6 +414,9 @@ func TestGetNativeServiceInstanceDetail_Details(t *testing.T) {
 type scopedInstancesCapture struct {
 	InstancesSpaceGUIDs []string
 	InstancesPlanGUIDs  []string
+	InstancesOrgGUIDs   []string
+	InstancesGUIDs      []string
+	InstancesType       string
 	PlansBrokerGUIDs    []string
 	PlanGUIDsToReturn   []string
 	InstancesHits       int
@@ -442,6 +445,9 @@ func newScopedInstancesServer(t *testing.T, capture *scopedInstancesCapture) *ht
 			capture.InstancesHits++
 			capture.InstancesSpaceGUIDs = splitCSV(r.URL.Query().Get("space_guids"))
 			capture.InstancesPlanGUIDs = splitCSV(r.URL.Query().Get("service_plan_guids"))
+			capture.InstancesOrgGUIDs = splitCSV(r.URL.Query().Get("organization_guids"))
+			capture.InstancesGUIDs = splitCSV(r.URL.Query().Get("guids"))
+			capture.InstancesType = r.URL.Query().Get("type")
 			perPage := r.URL.Query().Get("per_page")
 			if perPage == "1" {
 				_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -626,4 +632,112 @@ func TestGetNativeServiceInstancesForBroker_RequiresBrokerGUID(t *testing.T) {
 	httpErr, ok := err.(*echo.HTTPError)
 	require.True(t, ok)
 	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+}
+
+// Stage 9e — caller-supplied filters (`?type=`, `?organization_guids=`,
+// `?space_guids=`, `?guids=`) are passed through to CF v3 by both the
+// cnsi-wide and the path-scoped (space) handlers. The UPS-only count
+// paths and the picker rely on this passthrough.
+
+func TestGetNativeServiceInstances_TypeFilterPassthrough_Counts(t *testing.T) {
+	capture := &scopedInstancesCapture{}
+	srv := newScopedInstancesServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=counts&type=user-provided")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "user-provided", capture.InstancesType)
+
+	var resp StServiceInstancesResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 5, resp.TotalResults)
+}
+
+func TestGetNativeServiceInstances_OrgFilterPassthrough_Counts(t *testing.T) {
+	capture := &scopedInstancesCapture{}
+	srv := newScopedInstancesServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=counts&type=user-provided&organization_guids=org-7")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, []string{"org-7"}, capture.InstancesOrgGUIDs)
+	assert.Equal(t, "user-provided", capture.InstancesType)
+}
+
+func TestGetNativeServiceInstances_SpaceFilterPassthrough_List(t *testing.T) {
+	capture := &scopedInstancesCapture{}
+	srv := newScopedInstancesServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=base&space_guids=space-A,space-B")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.ElementsMatch(t, []string{"space-A", "space-B"}, capture.InstancesSpaceGUIDs)
+}
+
+func TestGetNativeServiceInstances_GuidsFilterPassthrough(t *testing.T) {
+	capture := &scopedInstancesCapture{}
+	srv := newScopedInstancesServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=base&guids=si-7,si-8")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.ElementsMatch(t, []string{"si-7", "si-8"}, capture.InstancesGUIDs)
+}
+
+func TestGetNativeServiceInstancesForSpace_TypeFilterLayered_Counts(t *testing.T) {
+	capture := &scopedInstancesCapture{}
+	srv := newScopedInstancesServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/space-A/service_instances?return=counts&type=user-provided", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "spaceGuid")
+	ctx.SetParamValues("cnsi-1", "space-A")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstancesForSpace(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, []string{"space-A"}, capture.InstancesSpaceGUIDs, "path-derived space filter still applied")
+	assert.Equal(t, "user-provided", capture.InstancesType, "type filter layered on top of space scope")
+
+	var resp StServiceInstancesResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 5, resp.TotalResults)
+}
+
+func TestGetNativeServiceInstancesForSpace_TypeFilterLayered_List(t *testing.T) {
+	capture := &scopedInstancesCapture{}
+	srv := newScopedInstancesServer(t, capture)
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/space-A/service_instances?return=summary&type=user-provided", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "spaceGuid")
+	ctx.SetParamValues("cnsi-1", "space-A")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstancesForSpace(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, []string{"space-A"}, capture.InstancesSpaceGUIDs)
+	assert.Equal(t, "user-provided", capture.InstancesType)
 }

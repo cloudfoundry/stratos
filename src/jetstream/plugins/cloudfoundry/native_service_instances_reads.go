@@ -62,7 +62,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 	mode := parseReturnMode(ctx)
 
 	if mode == ReturnCounts {
-		params := capi.NewQueryParams().WithPerPage(1)
+		params := applyServiceInstanceFilters(ctx, capi.NewQueryParams().WithPerPage(1))
 		raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
 		if lerr != nil {
 			return handleCapiError(ctx, lerr)
@@ -74,7 +74,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 	}
 
 	perPage, page, present := parsePerPageAndPage(ctx)
-	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
+	params := applyServiceInstanceFilters(ctx, applyPagingParams(capi.NewQueryParams(), perPage, page, present))
 
 	if mode == ReturnSummary || mode == ReturnDetails {
 		params = params.WithInclude(
@@ -102,6 +102,47 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 		Resources:  out,
 		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
+}
+
+// applyServiceInstanceFilters layers caller-provided list filters onto a
+// service_instances QueryParams. Honored:
+//
+//   - ?type=managed|user-provided — narrows by the CF type discriminator.
+//   - ?guids=g1,g2,…              — single-instance / batch lookup.
+//   - ?space_guids=g1,g2,…        — space scoping (additive to any path-
+//                                    derived space filter the caller already
+//                                    set; CAPI accepts repeated values via
+//                                    WithFilter under the same key).
+//   - ?organization_guids=g1,…    — org scoping; CF v3 supports this filter
+//                                    natively on /v3/service_instances and
+//                                    pushes it down to the space → org join.
+//
+// Used by both the cnsi-wide and the path-scoped (space) handlers so the
+// UPS-only count paths and the picker's "list UPS in space" query can
+// share one wire contract.
+func applyServiceInstanceFilters(ctx echo.Context, params *capi.QueryParams) *capi.QueryParams {
+	if t := ctx.QueryParam("type"); t != "" {
+		params = params.WithFilter("type", t)
+	}
+	if rawGuids := ctx.QueryParam("guids"); rawGuids != "" {
+		guids := splitNonEmpty(rawGuids, ",")
+		if len(guids) > 0 {
+			params = params.WithFilter("guids", guids...)
+		}
+	}
+	if rawSpaceGuids := ctx.QueryParam("space_guids"); rawSpaceGuids != "" {
+		spaceGUIDs := splitNonEmpty(rawSpaceGuids, ",")
+		if len(spaceGUIDs) > 0 {
+			params = params.WithFilter("space_guids", spaceGUIDs...)
+		}
+	}
+	if rawOrgGuids := ctx.QueryParam("organization_guids"); rawOrgGuids != "" {
+		orgGUIDs := splitNonEmpty(rawOrgGuids, ",")
+		if len(orgGUIDs) > 0 {
+			params = params.WithFilter("organization_guids", orgGUIDs...)
+		}
+	}
+	return params
 }
 
 // instanceIncludes bundles the four guid-keyed maps decoded from the
@@ -404,7 +445,8 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.C
 	mode := parseReturnMode(ctx)
 
 	if mode == ReturnCounts {
-		params := capi.NewQueryParams().WithPerPage(1).WithFilter("space_guids", spaceGUID)
+		params := applyServiceInstanceFilters(ctx,
+			capi.NewQueryParams().WithPerPage(1).WithFilter("space_guids", spaceGUID))
 		raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
 		if lerr != nil {
 			return handleCapiError(ctx, lerr)
@@ -416,8 +458,9 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.C
 	}
 
 	perPage, page, present := parsePerPageAndPage(ctx)
-	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present).
-		WithFilter("space_guids", spaceGUID)
+	params := applyServiceInstanceFilters(ctx,
+		applyPagingParams(capi.NewQueryParams(), perPage, page, present).
+			WithFilter("space_guids", spaceGUID))
 
 	if mode == ReturnSummary || mode == ReturnDetails {
 		params = params.WithInclude(
