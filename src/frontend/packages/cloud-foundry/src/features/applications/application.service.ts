@@ -109,8 +109,7 @@ export class ApplicationService {
   private appSummaryEntityService: EntityService<IAppSummary>;
 
   // ---------------------------------------------------------------------------
-  // Legacy ngrx paginator — kept for variables-tab (appEnvVars.entities$) and
-  // app-service-binding-card (appEnvVars.entities$).
+  // Legacy ngrx paginator — kept for variables-tab (appEnvVars.entities$).
   // ---------------------------------------------------------------------------
   appEnvVars: PaginationObservables<APIResource>;
 

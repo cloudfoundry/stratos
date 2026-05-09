@@ -119,10 +119,6 @@ export { cfEntityCatalog } from './cf-entity-catalog';
 // List Configuration Base Class
 export { BaseCfListConfig } from './shared/components/list/list-types/base-cf/base-cf-list-config';
 
-// List Configuration Services
-export { AppServiceBindingListConfigService } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-export { AppServiceBindingDataSource } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
-
 // Components
 export { CfEndpointsMissingComponent } from './shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 export { CfOrgSpaceLinksComponent } from './shared/components/cf-org-space-links/cf-org-space-links.component';
