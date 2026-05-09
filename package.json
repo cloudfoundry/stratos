@@ -96,13 +96,18 @@
     "postcss": "^8.5.14",
     "request": "npm:@cypress/request@^3.0.0",
     "typescript": "^5.9.3",
-    "hono": "^4.12.12",
+    "hono": "^4.12.18",
     "@hono/node-server": "^1.19.13",
     "vite": "^7.3.2",
     "@angular/build": "^21.2.7",
     "@babel/plugin-transform-modules-systemjs": "^7.29.4",
     "serialize-javascript": "^7.0.5",
-    "ip-address": "^10.2.0"
+    "ip-address": "^10.2.0",
+    "picomatch": "^4.0.4",
+    "fast-uri": "^3.1.2",
+    "qs": "^6.15.1",
+    "follow-redirects": "^1.16.0",
+    "@tootallnate/once": "^3.0.1"
   },
   "dependencies": {
     "@angular/animations": "21.2.8",
