@@ -27,9 +27,11 @@ $(_HIDE)FLAG_lint        := $($(_HIDE)WANT_LINT)
 $(_HIDE)FLAG_gate        := $($(_HIDE)WANT_GATE)
 $(_HIDE)FLAG_tests       := $($(_HIDE)WANT_TESTS)
 $(_HIDE)FLAG_coverage    := $($(_HIDE)WANT_COVERAGE)
+$(_HIDE)FLAG_summary     := $($(_HIDE)WANT_SUMMARY)
+$(_HIDE)FLAG_dependabot  := $($(_HIDE)WANT_DEPENDABOT)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions lint gate tests coverage
+$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions lint gate tests coverage summary dependabot
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=

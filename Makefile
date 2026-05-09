@@ -150,6 +150,8 @@ $(_HIDE)WANT_LINT       :=
 $(_HIDE)WANT_GATE       :=
 $(_HIDE)WANT_TESTS      :=
 $(_HIDE)WANT_COVERAGE   :=
+$(_HIDE)WANT_SUMMARY    :=
+$(_HIDE)WANT_DEPENDABOT :=
 
 ifneq ($(filter dist,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CLEAN_DIST := yes
@@ -166,6 +168,12 @@ endif
 ifneq ($(filter coverage,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_COVERAGE := yes
 endif
+ifneq ($(filter summary,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SUMMARY := yes
+endif
+ifneq ($(filter dependabot,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_DEPENDABOT := yes
+endif
 # Default: all checks when none specified
 ifneq ($(filter check,$(MAKECMDGOALS)),)
 ifeq ($($(_HIDE)WANT_LINT)$($(_HIDE)WANT_GATE)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_COVERAGE)$($(_HIDE)WANT_E2E),)
@@ -173,11 +181,18 @@ ifeq ($($(_HIDE)WANT_LINT)$($(_HIDE)WANT_GATE)$($(_HIDE)WANT_TESTS)$($(_HIDE)WAN
   $(_HIDE)WANT_GATE     := yes
 endif
 endif
+# Default: frontend + backend for audit/outdated when no modifier given
+ifneq ($(filter audit outdated,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY),)
+  $(_HIDE)WANT_FRONTEND := yes
+  $(_HIDE)WANT_BACKEND  := yes
+endif
+endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend cf github dist version e2e actions gate tests coverage
-frontend backend cf github dist version e2e actions gate tests coverage:
+.PHONY: frontend backend cf github dist version e2e actions gate tests coverage summary dependabot
+frontend backend cf github dist version e2e actions gate tests coverage summary dependabot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -346,6 +361,70 @@ define check.e2e
 endef
 $(call register, check, e2e)
 
+# ── Audit (security scanning) ────────────────────────────────
+# make audit              — frontend + backend
+# make audit frontend     — bun audit (npm advisory DB)
+# make audit backend      — gosec + trivy + govulncheck
+# make audit summary      — high/moderate/low counts only
+
+define audit.frontend
+	@echo "Running frontend audit (bun audit)..."
+	@bun audit || true
+endef
+$(call register, audit, frontend)
+
+define audit.backend
+	@echo "Running backend security scans..."
+	@which gosec > /dev/null 2>&1 || (echo "gosec not installed. Run: go install github.com/securego/gosec/v2/cmd/gosec@latest" >&2 && exit 1)
+	@which trivy > /dev/null 2>&1 || (echo "trivy not installed. See https://github.com/aquasecurity/trivy" >&2 && exit 1)
+	@which govulncheck > /dev/null 2>&1 || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2 && exit 1)
+	@echo "── gosec ──"
+	cd src/jetstream && gosec -quiet ./... || true
+	@echo "── trivy ──"
+	trivy fs --security-checks vuln,config src/jetstream || true
+	@echo "── govulncheck ──"
+	cd src/jetstream && govulncheck ./... || true
+endef
+$(call register, audit, backend)
+
+define audit.summary
+	@echo "── Frontend (bun audit) ──"
+	@bun audit 2>&1 | grep -E "^[0-9]+ vulnerabilities" || echo "no summary line"
+	@echo "── Backend (govulncheck) ──"
+	@cd src/jetstream && govulncheck ./... 2>&1 | grep -E "^Your code is affected|This scan also found" || echo "no findings"
+endef
+$(call register, audit, summary)
+
+# ── Outdated (upgrade discovery) ─────────────────────────────
+# make outdated           — frontend + backend
+# make outdated frontend  — bun outdated (direct deps with available upgrades)
+# make outdated backend   — go list -m -u all (modules with updates)
+
+define outdated.frontend
+	@echo "Running frontend outdated check (bun outdated)..."
+	@bun outdated || true
+endef
+$(call register, outdated, frontend)
+
+define outdated.backend
+	@echo "Running backend outdated check (go list -m -u all)..."
+	@cd src/jetstream && go list -m -u all 2>&1 | grep '\[' || echo "no module updates available"
+endef
+$(call register, outdated, backend)
+
+# ── Deps (dependency management helpers) ─────────────────────
+# make deps              — defaults to dependabot listing
+# make deps dependabot   — list open dependency PRs from GitHub
+
+define deps.dependabot
+	@which gh > /dev/null 2>&1 || (echo "gh not installed. See https://cli.github.com/" >&2 && exit 1)
+	@echo "Open dependency PRs:"
+	@gh pr list --label dependencies --state open --limit 50 \
+		--json number,title,createdAt,author \
+		--template '{{range .}}  #{{.number}}  {{.title}}  ({{timeago .createdAt}}, {{.author.login}}){{"\n"}}{{end}}'
+endef
+$(call register, deps, dependabot)
+
 # ── CF release ────────────────────────────────────────────────
 
 define release.cf
@@ -393,6 +472,9 @@ $(call declare_verb, test)
 $(call declare_verb, release)
 $(call declare_verb, stamp)
 $(call declare_verb, check)
+$(call declare_verb, audit)
+$(call declare_verb, outdated)
+$(call declare_verb_default, deps, $(_HIDE)deps.dependabot)
 # Skip dev verb declaration when 'dev' is used as a bump modifier
 ifeq ($(filter bump,$(MAKECMDGOALS)),)
 $(call declare_verb, dev)
@@ -448,7 +530,7 @@ BACKEND_PORT  ?= 5443
 FRONTEND_PORT ?= 5440
 
 # ── Simple verbs (no modifiers) ──────────────────────────────
-.PHONY: stage install lint security gosec trivy vuln
+.PHONY: stage install lint
 
 stage:
 	@chmod +x build/install-local.sh
@@ -467,20 +549,6 @@ lint:
 else
 lint: ;@:
 endif
-
-security: gosec trivy vuln
-
-gosec:
-	@which gosec > /dev/null || (echo "gosec not installed. Run: go install github.com/securego/gosec/v2/cmd/gosec@latest" && exit 1)
-	cd src/jetstream && gosec -quiet ./... || true
-
-trivy:
-	@which trivy > /dev/null || (echo "trivy not installed. See https://github.com/aquasecurity/trivy" && exit 1)
-	trivy fs --security-checks vuln,config src/jetstream || true
-
-vuln:
-	@which govulncheck > /dev/null || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" && exit 1)
-	cd src/jetstream && govulncheck ./... || true
 
 # ── Bump (version management) ─────────────────────────────────
 # bump uses its own modifier set not shared with other verbs,
@@ -542,9 +610,18 @@ help:
 	@echo "  make clean backend        Remove backend binaries only"
 	@echo "  make clean dist           Remove everything (including node_modules)"
 	@echo ""
+	@echo "Security & dependencies:"
+	@echo "  make audit                Run audit on frontend + backend"
+	@echo "  make audit frontend       bun audit (npm advisory DB)"
+	@echo "  make audit backend        gosec + trivy + govulncheck"
+	@echo "  make audit summary        High/moderate/low counts only"
+	@echo "  make outdated             List outdated direct deps (frontend + backend)"
+	@echo "  make outdated frontend    bun outdated"
+	@echo "  make outdated backend     go list -m -u all"
+	@echo "  make deps dependabot      List open dependency PRs (gh)"
+	@echo ""
 	@echo "Other:"
 	@echo "  make stamp frontend       Generate build-info.ts with version metadata"
-	@echo "  make security             Run security scans"
 	@echo "  make dump version         Print version and build metadata"
 	@echo ""
 	@echo "Development:"

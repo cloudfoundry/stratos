@@ -20,5 +20,7 @@
 		fe-version)      echo "RENAMED: use 'make stamp frontend'" >&2 ;; \
 		dev-frontend)    echo "RENAMED: use 'make dev frontend'" >&2 ;; \
 		dev-backend)     echo "RENAMED: use 'make dev backend'" >&2 ;; \
+		security)        echo "RENAMED: use 'make audit backend' (or 'make audit' for both stacks)" >&2 ;; \
+		gosec|trivy|vuln) echo "RENAMED: use 'make audit backend' (combined gosec + trivy + govulncheck)" >&2 ;; \
 		*) echo "make: *** No rule to make target '$@'. Stop." >&2; exit 2 ;; \
 	esac

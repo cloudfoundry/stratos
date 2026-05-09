@@ -123,6 +123,27 @@ artifact values produce clear errors from `playwright test` itself.
 | `make clean dist` | Remove everything including `node_modules` |
 | `make clean repo` | Full reset — everything gitignored |
 
+### Security & Dependencies
+
+| Command | What it does |
+|---------|-------------|
+| `make audit` | `bun audit` + backend scans (gosec + trivy + govulncheck) |
+| `make audit frontend` | `bun audit` only — npm advisory DB |
+| `make audit backend` | gosec + trivy + govulncheck only |
+| `make audit summary` | High/moderate/low totals only — fast triage between full runs |
+| `make outdated` | List outdated direct deps in both stacks |
+| `make outdated frontend` | `bun outdated` |
+| `make outdated backend` | `go list -m -u all`, filtered to upgradable lines |
+| `make deps dependabot` | List open dependency PRs (requires `gh` auth + `dependencies` label) |
+
+These wrap the underlying scanners — they do not gate the build. Decide
+which findings to act on by reading the output. See `developer-environment.md`
+for tool installation.
+
+The bare `make security` target was retired in favour of `make audit backend`
+(combined gosec + trivy + govulncheck). The old name now prints a renamed-to
+message via `deprecated.mk`.
+
 ### Version Management
 
 Stratos follows [SemVer 2.0.0](https://semver.org/) with a full prerelease

@@ -34,9 +34,23 @@ configuration. For step-by-step setup, see the
 | OpenSSL | Generate dev certs and encryption keys | Included on macOS/Linux | First-time setup |
 | `zip` | Release packaging | `brew install zip` | `make release` |
 | `swag` | OpenAPI doc generation | `go install github.com/swaggo/swag/cmd/swag@latest` | API docs |
-| `gosec` | Go security scanner | `go install github.com/securego/gosec/v2/cmd/gosec@latest` | `make security` |
-| `trivy` | Vulnerability scanner | [aquasecurity/trivy](https://github.com/aquasecurity/trivy) | `make security` |
-| `govulncheck` | Go vuln database | `go install golang.org/x/vuln/cmd/govulncheck@latest` | `make security` |
+| `gosec` | Go security scanner | `go install github.com/securego/gosec/v2/cmd/gosec@latest` | `make audit backend` |
+| `trivy` | Vulnerability scanner | [aquasecurity/trivy](https://github.com/aquasecurity/trivy) | `make audit backend` |
+| `govulncheck` | Go vuln database | `go install golang.org/x/vuln/cmd/govulncheck@latest` | `make audit backend`, `make audit summary` |
+| `gh` | GitHub CLI | [cli.github.com](https://cli.github.com/) | `make deps dependabot` |
+
+### Audit & dependency commands
+
+| Command | Purpose |
+|---------|---------|
+| `make audit` | Run `bun audit` + backend scans |
+| `make audit frontend` | `bun audit` (npm advisory DB) |
+| `make audit backend` | gosec + trivy + govulncheck |
+| `make audit summary` | High/moderate/low totals only — fast triage |
+| `make outdated` | List outdated direct deps in both stacks |
+| `make outdated frontend` | `bun outdated` |
+| `make outdated backend` | `go list -m -u all` (filtered to upgradable) |
+| `make deps dependabot` | List open dependency PRs (requires `gh` auth) |
 
 ## Container Runtimes
 

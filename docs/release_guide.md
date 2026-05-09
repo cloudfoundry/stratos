@@ -67,9 +67,11 @@ make check gate
 # Or run the full test matrix
 make test
 
-# Check for security issues
-bun audit
-go list -m -u all
+# Check for security issues + dependency drift
+make audit             # bun audit + backend scans (gosec + trivy + govulncheck)
+make audit summary     # totals only — fast triage
+make outdated          # list outdated direct deps in both stacks
+make deps dependabot   # show open dependency PRs awaiting review
 ```
 
 ### Version Management
