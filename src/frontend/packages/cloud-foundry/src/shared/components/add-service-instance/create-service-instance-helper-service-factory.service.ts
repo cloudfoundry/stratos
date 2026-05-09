@@ -1,45 +1,36 @@
-import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Injectable, Injector, inject, runInInjectionContext } from '@angular/core';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { CreateServiceInstanceHelper } from './create-service-instance-helper.service';
 
+/**
+ * Factory for CreateServiceInstanceHelper. Caches helpers by
+ * `${cfGuid}-${serviceGuid}` so re-entry into the stepper for the same
+ * pair reuses the cache (and the warm EndpointDataService cache it
+ * acquires). Wraps construction in runInInjectionContext so the helper
+ * can use toObservable() on its derived signals.
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CreateServiceInstanceHelperServiceFactory {
-  private store = inject<Store<CFAppState>>(Store);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private readonly injector = inject(Injector);
+  private readonly registry = inject(EndpointDataRegistry);
+  private readonly cache: { [key: string]: CreateServiceInstanceHelper } = {};
 
-
-  private serviceInstanceCache: {
-    [key: string]: CreateServiceInstanceHelper
-  } = {};
-
-  create(
-    cfGuid: string,
-    serviceGuid: string,
-  ) {
-    // Validate inputs before creating helper instance
+  create(cfGuid: string, serviceGuid: string): CreateServiceInstanceHelper {
     if (!cfGuid) {
       throw new Error('CreateServiceInstanceHelperServiceFactory.create() requires a valid cfGuid');
     }
     if (!serviceGuid) {
       throw new Error('CreateServiceInstanceHelperServiceFactory.create() requires a valid serviceGuid');
     }
-
     const key = `${cfGuid}-${serviceGuid}`;
-    if (!this.serviceInstanceCache[key]) {
-      const instance = new CreateServiceInstanceHelper(
-        this.store,
-        serviceGuid,
-        cfGuid,
-        this.paginationMonitorFactory
+    if (!this.cache[key]) {
+      this.cache[key] = runInInjectionContext(this.injector, () =>
+        new CreateServiceInstanceHelper(serviceGuid, cfGuid, this.registry),
       );
-      this.serviceInstanceCache[key] = instance;
     }
-    return this.serviceInstanceCache[key];
+    return this.cache[key];
   }
-
 }

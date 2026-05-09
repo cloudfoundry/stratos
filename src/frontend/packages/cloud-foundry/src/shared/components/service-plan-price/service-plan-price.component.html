@@ -1,7 +1,7 @@
-@if (servicePlan && servicePlan.entity.extraTyped) {
-  @for (cost of servicePlan.entity.extraTyped.costs; track cost) {
+@if (servicePlan && servicePlan.costs && servicePlan.costs.length > 0) {
+  @for (cost of servicePlan.costs; track cost.unit) {
     <div>
-      {{ cost.unit | titlecase }}: {{ getCostValue(cost) | currency:getCostCurrency(cost):'symbol-narrow':'1.2-2':getCurrencyLocale(cost, false) }}
+      {{ cost.unit | titlecase }}: {{ getCostValue(cost) | currency:getCostCurrency(cost):'symbol-narrow':'1.2-2':getCurrencyLocale(cost) }}
     </div>
   }
 }

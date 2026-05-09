@@ -4,8 +4,8 @@
     <app-form-field>
       <app-label>Service Plan</app-label>
       <app-select class="form-control" formControlName="servicePlans" [appFocus]="servicePlans$ | async">
-        @for (servicePlan of servicePlans$ | async; track servicePlan) {
-          <app-option [value]="servicePlan.metadata.guid">{{ servicePlan.entity.name }}</app-option>
+        @for (servicePlan of servicePlans$ | async; track servicePlan.guid) {
+          <app-option [value]="servicePlan.guid">{{ servicePlan.name }}</app-option>
         }
       </app-select>
     </app-form-field>
@@ -15,8 +15,8 @@
       @if (selectedPlanAccessibility()) {
         <app-card-status [status]="selectedPlanAccessibility()"></app-card-status>
       }
-      <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
-      <app-metadata-item label="Description"> {{selPlan.entity.description}} </app-metadata-item>
+      <app-metadata-item label="Name"> {{ getDisplayName(selPlan) }} </app-metadata-item>
+      <app-metadata-item label="Description"> {{ selPlan.description }} </app-metadata-item>
       <app-metadata-item label="Public">
         <app-service-plan-public [servicePlan]="selPlan"></app-service-plan-public>
       </app-metadata-item>
@@ -26,16 +26,7 @@
           <app-service-plan-price [servicePlan]="selPlan"></app-service-plan-price>
         </app-metadata-item>
       } @else {
-        <app-metadata-item label="Free"> {{ selPlan.entity.free ? 'Yes' : 'No'}} </app-metadata-item>
-      }
-      @if (selPlan.entity.extraTyped && selPlan.entity.extraTyped.bullets) {
-        <app-metadata-item label="Additional Information">
-          <ul class="select-plan__details__additional">
-            @for (bulletPoint of selPlan.entity.extraTyped.bullets; track bulletPoint) {
-              <li>{{bulletPoint}}</li>
-            }
-          </ul>
-        </app-metadata-item>
+        <app-metadata-item label="Free"> {{ selPlan.free ? 'Yes' : 'No' }} </app-metadata-item>
       }
     </app-card>
   }

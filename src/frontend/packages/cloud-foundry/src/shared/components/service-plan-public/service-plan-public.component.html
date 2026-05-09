@@ -1,5 +1,5 @@
 @if (servicePlan) {
-  {{ servicePlan.entity.public ? 'Yes' : 'No'}}
+  {{ servicePlan.visibilityType === 'public' ? 'Yes' : 'No' }}
 }
 @if ((planAccessibility$ | async) !== 'ok') {
   <span> ({{ planAccessibilityMessage$ | async }})</span>
