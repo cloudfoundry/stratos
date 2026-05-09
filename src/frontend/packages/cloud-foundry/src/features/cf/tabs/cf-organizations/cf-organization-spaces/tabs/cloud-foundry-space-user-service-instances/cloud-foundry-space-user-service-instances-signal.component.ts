@@ -24,7 +24,6 @@ import { CloudFoundryOrganizationService } from '../../../../../services/cloud-f
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
-// Signal-native replacement for CloudFoundrySpaceUserServiceInstancesComponent.
 // Scoped to one space under one org under one CF endpoint, narrowed to
 // type='user-provided' via initializeForSpace. Sibling tab to the
 // per-space Service Instances (managed) page.
