@@ -12,7 +12,10 @@ import { StratosJobError } from './async-job.types';
  * handoff behavior described in the async-job contract:
  *
  *  - 200  → the call resolved server-side within the fast-path window.
- *           Body is the final state payload; resolve AsyncJobResult<T>.
+ *           Body is the canonical fast-path envelope `{state: 'COMPLETE',
+ *           result: T}` (every Stratos handler that calls RunFastPath
+ *           writes that shape); resolve AsyncJobResult<T> with state set
+ *           to the unwrapped result.
  *  - 202  → the server handed off a tracked job. Body is `{id, state,
  *           startedAt}`. Poll /pp/v1/stratos/jobs/{id} with backoff until
  *           the job is terminal, then resolve (COMPLETE) or throw
@@ -32,9 +35,10 @@ import { StratosJobError } from './async-job.types';
  *     entity to determine actual state)
  *
  * Generic parameter T is the shape of the final state on COMPLETE — e.g.,
- * void for delete, StApp for start/stop. When the fast-path lands (HTTP
- * 200) the body is deserialized as T directly. When a 202 handoff resolves
- * COMPLETE, the terminal job's `result` is returned as T.
+ * void for delete, StApp for start/stop. Both paths converge on the same
+ * shape: T is the unwrapped backend result, never an envelope. Bodies
+ * that don't match the envelope (legacy or non-Stratos callers) pass
+ * through verbatim.
  */
 export interface WriteWithJobOptions {
   onProgress?: (job: StratosJob) => void;
@@ -49,9 +53,11 @@ export async function writeWithJob<T>(
 ): Promise<AsyncJobResult<T>> {
   const resp = await firstValueFrom(call);
 
-  // 200-family (including 204): sync-fast. Body is the final state.
+  // 200-family (including 204): sync-fast. Body is the canonical fast-path
+  // envelope `{state: 'COMPLETE', result: T}`; unwrap so the caller sees T
+  // directly, matching the polled-handoff path's shape (job.result → state).
   if (resp.status >= 200 && resp.status < 202) {
-    return { status: 'COMPLETE', state: resp.body as T | undefined };
+    return { status: 'COMPLETE', state: unwrapFastPathBody(resp.body) as T | undefined };
   }
 
   // 202: handoff. Body must be a StratosJob with a stable id.
@@ -75,6 +81,22 @@ export async function writeWithJob<T>(
     updatedAt: new Date().toISOString(),
     errors: [{ code: `http.${resp.status}`, message: resp.statusText || 'request failed' }],
   });
+}
+
+// Recognises the canonical Stratos fast-path 200 envelope and returns
+// the unwrapped result. Anything that isn't a `{state: 'COMPLETE',
+// result: ...}` object passes through verbatim — covers null bodies,
+// 204 No Content, and any non-Stratos handler that bypasses the envelope.
+function unwrapFastPathBody(body: unknown): unknown {
+  if (
+    body !== null
+    && typeof body === 'object'
+    && (body as Record<string, unknown>).state === 'COMPLETE'
+    && 'result' in body
+  ) {
+    return (body as { result: unknown }).result;
+  }
+  return body;
 }
 
 async function pollJob<T>(

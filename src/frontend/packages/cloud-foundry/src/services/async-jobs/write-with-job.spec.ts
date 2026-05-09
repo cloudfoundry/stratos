@@ -29,18 +29,96 @@ describe('writeWithJob', () => {
     }
   };
 
-  it('resolves immediately when the call returns 200 with a body', async () => {
+  it('unwraps the canonical {state, result} envelope on 200 fast-path', async () => {
     const promise = writeWithJob<{ guid: string }>(
       http,
       http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }),
     );
 
-    ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush({ guid: 'app1' }, { status: 200, statusText: 'OK' });
+    // Backend handlers that call RunFastPath always emit this envelope on
+    // a fast-path resolve — see e.g. native_apps_writes.go line 89-91.
+    ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush(
+      { state: 'COMPLETE', result: { guid: 'app1' } },
+      { status: 200, statusText: 'OK' },
+    );
 
     const result = await promise;
     expect(result.status).toBe('COMPLETE');
     expect(result.state).toEqual({ guid: 'app1' });
     expect(result.jobId).toBeUndefined();
+  });
+
+  it('passes a non-envelope 200 body through verbatim', async () => {
+    // Defends against legacy / non-Stratos handlers that don't go through
+    // RunFastPath. The body shape is preserved so existing callers that
+    // never relied on the envelope keep working.
+    const promise = writeWithJob<{ guid: string }>(
+      http,
+      http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }),
+    );
+
+    ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush(
+      { guid: 'app1' },
+      { status: 200, statusText: 'OK' },
+    );
+
+    const result = await promise;
+    expect(result.status).toBe('COMPLETE');
+    expect(result.state).toEqual({ guid: 'app1' });
+  });
+
+  it('resolves with state=undefined when the 200 body is null', async () => {
+    // 204 No Content / void-result deletes land here; callers ignore
+    // state in that case but the shape should be unambiguous.
+    const promise = writeWithJob(
+      http,
+      http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }),
+    );
+
+    ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush(null, { status: 200, statusText: 'OK' });
+
+    const result = await promise;
+    expect(result.status).toBe('COMPLETE');
+    expect(result.state).toBeNull();
+  });
+
+  it('matches polled-path shape: fast-path envelope unwraps to the same T as job.result', async () => {
+    // The whole point of the unwrap: a caller that types AsyncJobResult<T>
+    // sees the same T regardless of which path served the request.
+    interface Created { links: { service_instance: string } }
+    const inner: Created = { links: { service_instance: '/v3/service_instances/abc' } };
+
+    const fastPathPromise = writeWithJob<Created>(
+      http,
+      http.post('/pp/v1/cf/service_instances/cnsi', {}, { observe: 'response' }),
+    );
+    ctrl.expectOne('/pp/v1/cf/service_instances/cnsi').flush(
+      { state: 'COMPLETE', result: inner },
+      { status: 200, statusText: 'OK' },
+    );
+    const fast = await fastPathPromise;
+
+    const polledPromise = writeWithJob<Created>(
+      http,
+      http.post('/pp/v1/cf/service_instances/cnsi2', {}, { observe: 'response' }),
+      noDelay,
+    );
+    ctrl.expectOne('/pp/v1/cf/service_instances/cnsi2').flush(
+      { id: 'job-2', kind: 'cf.si.create', state: 'PROCESSING', startedAt: '', updatedAt: '' } satisfies StratosJob,
+      { status: 202, statusText: 'Accepted' },
+    );
+    await tick();
+    ctrl.expectOne('/pp/v1/stratos/jobs/job-2').flush({
+      id: 'job-2',
+      kind: 'cf.si.create',
+      state: 'COMPLETE',
+      startedAt: '',
+      updatedAt: '',
+      result: inner,
+    } satisfies StratosJob);
+    const polled = await polledPromise;
+
+    expect(fast.state).toEqual(polled.state);
   });
 
   it('polls /stratos/jobs on 202 until COMPLETE and returns result', async () => {
