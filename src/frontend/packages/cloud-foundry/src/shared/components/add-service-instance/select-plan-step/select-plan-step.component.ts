@@ -22,17 +22,15 @@ import {
   canShowServicePlanCosts,
   getPlanAccessibilityV3,
   getServicePlanName,
-  populateServicePlanExtraTyped,
 } from '../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { ServiceCatalogDataService } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
+import { StServicePlan } from '../../../../../../cloud-foundry/src/services/endpoint-data/stratos-types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { APIResource } from '../../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../../store/src/types/shared.types';
-import { IServicePlan } from '../../../../cf-api-svc.types';
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -78,7 +76,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   // bridge to a class field so downstream pipes can subscribe later.
   private csiState$ = toObservable(this.csiState.state);
 
-  selectedPlan$!: Observable<APIResource<IServicePlan>>;
+  selectedPlan$!: Observable<StServicePlan | undefined>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
   selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
   cSIHelperService!: CreateServiceInstanceHelper;
@@ -88,7 +86,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   validate = signal<boolean>(false);
   subscription!: Subscription;
   stepperForm: FormGroup<SelectPlanForm>;
-  servicePlans$: Observable<APIResource<IServicePlan>[]>;
+  servicePlans$: Observable<StServicePlan[]>;
   displayNames: { [guid: string]: string } = {};
 
   constructor() {
@@ -112,7 +110,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       }),
       switchMap(state => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
-        return this.cSIHelperService.getServicePlans();
+        return this.cSIHelperService.servicePlans$;
       }),
       tap(o => {
         if (o.length === 0) {
@@ -126,8 +124,7 @@ export class SelectPlanStepComponent implements OnDestroy {
           this.clearNoPlans();
         }
       }),
-      map(visiblePlans => visiblePlans.map(populateServicePlanExtraTyped)),
-      map(plans => plans.sort((a, b) => this.getDisplayName(a).localeCompare(this.getDisplayName(b)))),
+      map(plans => [...plans].sort((a, b) => this.getDisplayName(a).localeCompare(this.getDisplayName(b)))),
       publishReplay(1),
       refCount(),
     );
@@ -137,13 +134,13 @@ export class SelectPlanStepComponent implements OnDestroy {
       this.servicePlans$).pipe(
         filter(([, servicePlans]) => !!servicePlans && servicePlans.length > 0),
         map(([, servicePlans]) => {
-          return servicePlans.filter(s => s.metadata.guid === this.stepperForm.controls.servicePlans.value)[0];
+          return servicePlans.find(s => s.guid === this.stepperForm.controls.servicePlans.value);
         }),
         filter(selectedServicePlan => !!selectedServicePlan),
         tap(selectedServicePlan => {
-          const cfGuid = selectedServicePlan.entity.cfGuid;
-          const planGuid = selectedServicePlan.metadata.guid;
-          const isPublicPlan = !!selectedServicePlan.entity.public;
+          const cfGuid = selectedServicePlan.cnsiGuid;
+          const planGuid = selectedServicePlan.guid;
+          const isPublicPlan = selectedServicePlan.visibilityType === 'public';
           this.serviceCatalog.planVisibility(cfGuid, planGuid).pipe(
             catchError(() => observableOf(null)),
             map(visibility => getPlanAccessibilityV3(isPublicPlan, visibility)),
@@ -154,11 +151,11 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   }
 
-  getDisplayName = (selectedPlan: APIResource<IServicePlan>) => {
-    if (!this.displayNames[selectedPlan.metadata.guid]) {
-      this.displayNames[selectedPlan.metadata.guid] = getServicePlanName(selectedPlan.entity);
+  getDisplayName = (selectedPlan: StServicePlan) => {
+    if (!this.displayNames[selectedPlan.guid]) {
+      this.displayNames[selectedPlan.guid] = getServicePlanName(selectedPlan);
     }
-    return this.displayNames[selectedPlan.metadata.guid];
+    return this.displayNames[selectedPlan.guid];
   }
 
   onEnter = () => {
@@ -169,7 +166,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         if (this.modeService.isEditServiceInstanceMode()) {
           this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid ?? '');
         } else {
-          this.stepperForm.controls.servicePlans.setValue(servicePlans[0]?.metadata.guid ?? '');
+          this.stepperForm.controls.servicePlans.setValue(servicePlans[0]?.guid ?? '');
         }
         this.stepperForm.updateValueAndValidity();
         this.validate.set(this.stepperForm.valid);
@@ -180,7 +177,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   onNext = (): Observable<StepOnNextResult> => {
     this.csiState.setServicePlan(this.stepperForm.controls.servicePlans.value);
     return this.selectedPlan$.pipe(
-      map((selectedServicePlan: APIResource<IServicePlan>) => ({
+      map((selectedServicePlan: StServicePlan | undefined) => ({
         success: true,
         data: selectedServicePlan
       }))
@@ -192,7 +189,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
 
-  canShowCosts(selectedPlan: APIResource<IServicePlan>): boolean {
+  canShowCosts(selectedPlan: StServicePlan): boolean {
     return canShowServicePlanCosts(selectedPlan);
   }
 

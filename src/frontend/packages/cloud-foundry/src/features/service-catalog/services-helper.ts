@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { take, combineLatest, filter, map, share, switchMap } from 'rxjs/operators';
 
-import { StServicePlanVisibility } from '../../services/endpoint-data/stratos-types';
+import { StServicePlan, StServicePlanVisibility } from '../../services/endpoint-data/stratos-types';
 
 import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
@@ -125,8 +125,52 @@ export const getServicePlans = (
     }));
 };
 
+// Accepts both the V3 nested-ref StServicePlan shape (flat `name`) and the
+// legacy IServicePlan shape (`name` + optional `extraTyped.displayName`).
+// `extraTyped.displayName` carried open-service-broker catalog overrides on
+// the V2 wire; V3 surfaces the same fields under `broker_catalog.metadata`
+// which we don't currently project into StServicePlan — so the V3 path
+// always falls back to `name` until that projection lands.
 export const getServicePlanName = (plan: { name: string, extraTyped?: IServicePlanExtra }): string =>
   plan.extraTyped && plan.extraTyped.displayName ? plan.extraTyped.displayName : plan.name;
+
+/**
+ * Adapter at the offering-detail Plans tab data-source boundary: the legacy
+ * ngrx pagination still emits APIResource<IServicePlan>, but the table cells
+ * and embedded components consume StServicePlan. Maps the legacy V2 entity
+ * shape onto the V3 nested-ref shape one row at a time. Limited to fields
+ * the Plans tab columns and embedded plan-public/plan-price components
+ * actually read — everything else stays unset.
+ *
+ * Retire when the Plans tab migrates to signal-list-config reading from
+ * EndpointDataService.servicePlans() directly.
+ */
+export const apiResourceToStServicePlan = (
+  row: APIResource<IServicePlan>,
+): StServicePlan => {
+  const e = row.entity;
+  const extra = e.extraTyped ?? (e.extra ? safeStringToObj<IServicePlanExtra>(e.extra) : undefined);
+  return {
+    guid: row.metadata.guid,
+    cnsiGuid: e.cfGuid ?? '',
+    name: e.name,
+    description: e.description,
+    free: !!e.free,
+    visibilityType: e.public ? 'public' : 'admin',
+    costs: extra?.costs?.map(c => {
+      // Legacy open-service-broker costs: amount: { [country]: number }.
+      // Pick first currency entry for the V3 typed shape.
+      const country = Object.keys(c.amount ?? {})[0] ?? '';
+      return {
+        amount: country ? c.amount[country] : 0,
+        currency: country.toUpperCase(),
+        unit: c.unit,
+      };
+    }),
+    createdAt: row.metadata.created_at,
+    updatedAt: row.metadata.updated_at,
+  };
+};
 
 export const getServicePlanAccessibility = (
   servicePlan: APIResource<IServicePlan>,
@@ -192,27 +236,17 @@ export const getServicePlanAccessibilityCardStatus = (
 };
 
 /*
-* Show service plan costs if the object is in the open service broker format, otherwise ignore them
-*/
-export const canShowServicePlanCosts = (servicePlan: APIResource<IServicePlan>): boolean => {
-  if (!servicePlan || servicePlan.entity.free) {
+ * Show service plan costs if the V3 plan has a top-level costs[] array
+ * populated (typed flat shape, costs[0].amount). Free plans never show
+ * costs. The legacy open-service-broker `extraTyped.costs` path is
+ * retired; V3 surfaces costs as a typed top-level field on details.
+ */
+export const canShowServicePlanCosts = (servicePlan: StServicePlan | null | undefined): boolean => {
+  if (!servicePlan || servicePlan.free) {
     return false;
   }
-  const extra = servicePlan.entity.extraTyped;
-  return !!extra && !!extra.costs && !!extra.costs[0] && !!extra.costs[0].amount;
-};
-
-export const populateServicePlanExtraTyped = (servicePlan: APIResource<IServicePlan>): APIResource<IServicePlan> => {
-  if (servicePlan.entity.extraTyped) {
-    return servicePlan;
-  }
-  return {
-    ...servicePlan,
-    entity: {
-      ...servicePlan.entity,
-      extraTyped: servicePlan.entity.extra ? safeStringToObj<IServicePlanExtra>(servicePlan.entity.extra) : null
-    }
-  };
+  const costs = servicePlan.costs;
+  return !!costs && costs.length > 0 && typeof costs[0].amount === 'number';
 };
 
 export const getServiceBrokerName = (

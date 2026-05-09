@@ -665,6 +665,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
 
           this.csiGuidsService.serviceGuid = serviceGuid;
           this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceGuid);
+          void this.cSIHelperService.load();
           this.csiState.setServiceGuid(serviceGuid);
           this.csiState.setServiceInstanceGuid(serviceInstance.entity.metadata.guid);
           this.csiState.setAll(
@@ -765,6 +766,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       this.csiGuidsService.cfGuid = endpointId;
       this.csiGuidsService.serviceGuid = serviceId;
       this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceId);
+      void this.cSIHelperService.load();
       if (this.modeService.spaceScopedDetails.isSpaceScoped) {
         this.csiState.setCFDetails(
           endpointId,
@@ -788,7 +790,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     // Subscribe to service name and update title imperatively
     // Use setTimeout to schedule title update outside current change detection cycle
     // This prevents ExpressionChangedAfterItHasBeenCheckedError
-    this.cSIHelperService.getServiceName().pipe(
+    this.cSIHelperService.serviceName$.pipe(
       map(label => `Create Instance: ${label || 'Service'}`),
       catchError(error => {
         console.error('initialiseForMarketplaceMode: Failed to fetch service name', {

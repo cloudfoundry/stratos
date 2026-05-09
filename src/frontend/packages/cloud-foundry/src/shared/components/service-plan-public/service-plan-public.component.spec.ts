@@ -11,7 +11,7 @@ import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { ServicesService } from '../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
-import { StServicePlanVisibility } from '../../../services/endpoint-data/stratos-types';
+import { StServicePlan, StServicePlanVisibility } from '../../../services/endpoint-data/stratos-types';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
 
 class ServiceCatalogDataServiceStub {
@@ -26,11 +26,19 @@ class ServiceCatalogDataServiceStub {
   }
 }
 
+const buildPlan = (overrides: Partial<StServicePlan> = {}): StServicePlan => ({
+  guid: 'plan-1',
+  cnsiGuid: 'cnsi-1',
+  name: 'small',
+  visibilityType: 'public',
+  createdAt: '2024-01-01T00:00:00Z',
+  ...overrides,
+});
+
 describe('ServicePlanPublicComponent', () => {
   let component: ServicePlanPublicComponent;
   let fixture: ComponentFixture<ServicePlanPublicComponent>;
   let element: HTMLElement;
-  let servicesService: ServicesServiceMock;
   let catalogStub: ServiceCatalogDataServiceStub;
 
   beforeEach(async () => {
@@ -48,13 +56,12 @@ describe('ServicePlanPublicComponent', () => {
         { provide: ServicesService, useClass: ServicesServiceMock },
         { provide: ServiceCatalogDataService, useValue: catalogStub },
         { provide: ComponentFixtureAutoDetect, useValue: true },
-      ]
+      ],
     }).compileComponents();
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServicePlanPublicComponent);
-    servicesService = TestBed.inject(ServicesService) as unknown as ServicesServiceMock;
     component = fixture.componentInstance;
     element = fixture.nativeElement;
   });
@@ -64,19 +71,16 @@ describe('ServicePlanPublicComponent', () => {
   });
 
   it('renders Yes when the plan is public', () => {
-    component.servicePlan = servicesService.servicePlan;
+    component.servicePlan = buildPlan({ visibilityType: 'public' });
     fixture.detectChanges();
     fixture.detectChanges();
 
-    expect(component.servicePlan.entity.public).toBe(true);
+    expect(component.servicePlan?.visibilityType).toBe('public');
     expect(element.textContent?.trim()).toContain('Yes');
   });
 
   it('renders No when the plan is not public', () => {
-    component.servicePlan = {
-      ...servicesService.servicePlan,
-      entity: { ...servicesService.servicePlan.entity, public: false },
-    };
+    component.servicePlan = buildPlan({ visibilityType: 'admin' });
     fixture.detectChanges();
     fixture.detectChanges();
 
@@ -85,10 +89,7 @@ describe('ServicePlanPublicComponent', () => {
 
   it('shows "limited visibility" when V3 visibility is organization', () => {
     catalogStub.visibilityResponse = { type: 'organization', organizations: [{ guid: 'o-1' }] };
-    component.servicePlan = {
-      ...servicesService.servicePlan,
-      entity: { ...servicesService.servicePlan.entity, public: false },
-    };
+    component.servicePlan = buildPlan({ visibilityType: 'organization' });
     fixture.detectChanges();
     fixture.detectChanges();
 
@@ -97,10 +98,7 @@ describe('ServicePlanPublicComponent', () => {
 
   it('shows "limited visibility" when V3 visibility is space', () => {
     catalogStub.visibilityResponse = { type: 'space', space: { guid: 's-1' } };
-    component.servicePlan = {
-      ...servicesService.servicePlan,
-      entity: { ...servicesService.servicePlan.entity, public: false },
-    };
+    component.servicePlan = buildPlan({ visibilityType: 'space' });
     fixture.detectChanges();
     fixture.detectChanges();
 
@@ -109,10 +107,7 @@ describe('ServicePlanPublicComponent', () => {
 
   it('shows "no visibility" when V3 visibility is admin-only', () => {
     catalogStub.visibilityResponse = { type: 'admin' };
-    component.servicePlan = {
-      ...servicesService.servicePlan,
-      entity: { ...servicesService.servicePlan.entity, public: false },
-    };
+    component.servicePlan = buildPlan({ visibilityType: 'admin' });
     fixture.detectChanges();
     fixture.detectChanges();
 
@@ -121,10 +116,7 @@ describe('ServicePlanPublicComponent', () => {
 
   it('falls through to "no visibility" when the visibility lookup errors', () => {
     catalogStub.errorOnVisibility = true;
-    component.servicePlan = {
-      ...servicesService.servicePlan,
-      entity: { ...servicesService.servicePlan.entity, public: false },
-    };
+    component.servicePlan = buildPlan({ visibilityType: 'admin' });
     fixture.detectChanges();
     fixture.detectChanges();
 

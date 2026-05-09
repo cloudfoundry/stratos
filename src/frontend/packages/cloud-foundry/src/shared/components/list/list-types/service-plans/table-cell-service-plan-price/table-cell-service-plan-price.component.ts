@@ -1,10 +1,8 @@
-
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServicePlan } from '../../../../../../cf-api-svc.types';
 import { canShowServicePlanCosts } from '../../../../../../features/service-catalog/services-helper';
+import { StServicePlan } from '../../../../../../services/endpoint-data/stratos-types';
 import { ServicePlanPriceComponent } from '../../../../service-plan-price/service-plan-price.component';
 
 @Component({
@@ -13,23 +11,23 @@ import { ServicePlanPriceComponent } from '../../../../service-plan-price/servic
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ServicePlanPriceComponent
-]
+    ServicePlanPriceComponent,
+  ],
 })
-export class TableCellAServicePlanPriceComponent extends TableCellCustom<APIResource<IServicePlan>> {
-  isFree!: boolean;
-  canShowCosts!: boolean;
+export class TableCellAServicePlanPriceComponent extends TableCellCustom<StServicePlan> {
+  isFree = false;
+  canShowCosts = false;
 
   @Input()
-  set row(servicePlan: APIResource<IServicePlan>) {
+  set row(servicePlan: StServicePlan) {
     super.row = servicePlan;
     if (!servicePlan) {
       return;
     }
-    this.isFree = servicePlan.entity.free;
+    this.isFree = !!servicePlan.free;
     this.canShowCosts = canShowServicePlanCosts(servicePlan);
   }
-  get row(): APIResource<IServicePlan> {
+  get row(): StServicePlan {
     return super.row;
   }
 }

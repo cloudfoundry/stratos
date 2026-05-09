@@ -6,10 +6,9 @@ import { catchError, map } from 'rxjs/operators';
 import {
   getPlanAccessibilityV3,
 } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { APIResource } from '../../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../../store/src/types/shared.types';
-import { IServicePlan } from '../../../cf-api-svc.types';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
+import { StServicePlan } from '../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-service-plan-public',
@@ -23,21 +22,21 @@ export class ServicePlanPublicComponent {
 
   planAccessibility$: Observable<StratosStatus>;
   planAccessibilityMessage$: Observable<string>;
-  private pServicePlan: APIResource<IServicePlan>;
+  private pServicePlan: StServicePlan | null = null;
 
   @Input()
-  get servicePlan(): APIResource<IServicePlan> {
+  get servicePlan(): StServicePlan | null {
     return this.pServicePlan;
   }
 
-  set servicePlan(servicePlan: APIResource<IServicePlan>) {
+  set servicePlan(servicePlan: StServicePlan | null) {
     this.pServicePlan = servicePlan;
-    if (!servicePlan || !servicePlan.entity) {
+    if (!servicePlan) {
       return;
     }
-    const cfGuid = servicePlan.entity.cfGuid;
-    const planGuid = servicePlan.metadata.guid;
-    const isPublicPlan = !!servicePlan.entity.public;
+    const cfGuid = servicePlan.cnsiGuid;
+    const planGuid = servicePlan.guid;
+    const isPublicPlan = servicePlan.visibilityType === 'public';
 
     this.planAccessibility$ = this.serviceCatalog.planVisibility(cfGuid, planGuid).pipe(
       // Visibility lookup may legitimately 4xx for plans the caller can't

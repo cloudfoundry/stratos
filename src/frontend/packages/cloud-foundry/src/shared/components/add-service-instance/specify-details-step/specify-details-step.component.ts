@@ -26,16 +26,16 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
+import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
+import { NormalizedResponse } from '../../../../../../store/src/types/api.types';
 import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
-import { IServiceInstance, IServicePlan } from '../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { serviceInstancesEntityType } from '../../../../cf-entity-types';
 import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../store/selectors/api.selectors';
+import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -105,10 +105,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     params: FormControl<object>;
     tags: FormControl<string[]>;
   }>;
-  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$: Observable<StServiceInstance[]>;
+  bindableServiceInstances$: Observable<StServiceInstance[]>;
   cSIHelperService!: CreateServiceInstanceHelper;
-  allServiceInstances$!: Observable<APIResource<IServiceInstance>[]>;
+  allServiceInstances$!: Observable<StServiceInstance[]>;
   private _validate = signal<boolean>(false);
   validate = toObservable(this._validate);
   allServiceInstanceNames!: string[];
@@ -144,11 +144,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       }),
       switchMap(guids => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
-        return this.cSIHelperService.getServiceInstancesForService(
-          guids.servicePlanGuid,
-          guids.spaceGuid,
-          guids.cfGuid
-        );
+        return this.cSIHelperService.serviceInstances$(guids.servicePlanGuid, guids.spaceGuid);
       }),
       publishReplay(1),
       refCount(),
@@ -164,36 +160,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       map(p => p.length > 0),
     );
 
-    this.bindableServiceInstances$ = this.serviceInstances$.pipe(
-      map(svcs => {
-        if (!this.appId) {
-          return svcs;
-        } else {
-          const updated: APIResource<IServiceInstance>[] = [];
-          svcs.forEach(svc => {
-            const alreadyBound = !!svc.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
-            if (alreadyBound) {
-              const updatedSvc: APIResource<IServiceInstance> = {
-                entity: { ...svc.entity },
-                metadata: { ...svc.metadata }
-              };
-              updatedSvc.entity.name += ' (Already bound)';
-              updatedSvc.metadata.guid = null;
-              updated.push(updatedSvc);
-            } else {
-              updated.push(svc);
-            }
-          });
-          return updated;
-        }
-      })
-    );
+    // V3 StServiceInstance doesn't carry inline service_bindings (bindings
+    // are loaded per-app via /cf/apps/:cnsiGuid/:appGuid/service_bindings).
+    // The legacy "(Already bound)" annotation is dropped here; the bind
+    // call surfaces a clear error if the user picks an instance that is
+    // already bound. Re-introduce the annotation when this stepper
+    // integrates with the bindings-per-app signal.
+    this.bindableServiceInstances$ = this.serviceInstances$;
   }
 
-  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+  onEnter = (selectedServicePlan: StServicePlan) => {
     const schema = this.modeService.isEditServiceInstanceMode() ?
-      pathGet('entity.schemas.service_instance.update.parameters', selectedServicePlan) :
-      pathGet('entity.schemas.service_instance.create.parameters', selectedServicePlan);
+      selectedServicePlan?.schemas?.serviceInstance?.update?.parameters :
+      selectedServicePlan?.schemas?.serviceInstance?.create?.parameters;
 
     if (!this.schemaFormConfig) {
       // Create new config
@@ -210,7 +189,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
 
     this.formMode = CreateServiceFormMode.CreateServiceInstance;
-    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
+    this.allServiceInstances$ = this.cSIHelperService.serviceInstances$();
     if (this.modeService.isEditServiceInstanceMode()) {
       this.csiState$.pipe(
         take(1),
@@ -258,12 +237,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       map(([instances, state]) => instances.filter(s => {
         let filterSelf = false;
         if (this.modeService.isEditServiceInstanceMode()) {
-          filterSelf = s.entity.name === state.name;
+          filterSelf = s.name === state.name;
         }
-        return s.entity.space_guid === state.spaceGuid && !filterSelf;
+        return s.space?.guid === state.spaceGuid && !filterSelf;
       })),
       tap(o => {
-        this.allServiceInstanceNames = o.map(s => s.entity.name);
+        this.allServiceInstanceNames = o.map(s => s.name);
       }),
     ).subscribe();
   }

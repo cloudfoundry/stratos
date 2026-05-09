@@ -54,6 +54,8 @@ export class EndpointDataService {
 
   private readonly _isLoadingServicesCounts = signal<boolean>(false);
   private readonly _servicesCountsLastFetched = signal<Date | null>(null);
+  private readonly _isLoadingServicesDetails = signal<boolean>(false);
+  private readonly _servicesDetailsLastFetched = signal<Date | null>(null);
 
   readonly orgs: Signal<StOrg[]> = this._orgs.asReadonly();
   readonly apps: Signal<StApp[]> = this._apps.asReadonly();
@@ -79,6 +81,8 @@ export class EndpointDataService {
   readonly serviceBrokersCount: Signal<number> = this._serviceBrokersCount.asReadonly();
   readonly isLoadingServicesCounts: Signal<boolean> = this._isLoadingServicesCounts.asReadonly();
   readonly servicesCountsLastFetched: Signal<Date | null> = this._servicesCountsLastFetched.asReadonly();
+  readonly isLoadingServicesDetails: Signal<boolean> = this._isLoadingServicesDetails.asReadonly();
+  readonly servicesDetailsLastFetched: Signal<Date | null> = this._servicesDetailsLastFetched.asReadonly();
 
   // ReplaySubject(1) — late subscribers (e.g. the home card's async pipe
   // subscribing after the HTTP has already completed) immediately receive the
@@ -242,6 +246,53 @@ export class EndpointDataService {
     } finally {
       this._isLoadingServicesCounts.set(false);
       this._servicesCountsLastFetched.set(new Date());
+    }
+  }
+
+  // loadServicesDetails() fetches the four cnsi-scoped services-domain lists
+  // (instances, offerings, plans, brokers) at ?return=summary so consumers
+  // get name + ref-chain population in one round-trip per list. Mirrors
+  // loadDetails()'s warm-cache short-circuit + bounded per_page semantics.
+  // Bindings stay app-scoped on the wire — load them per-app where needed.
+  async loadServicesDetails(): Promise<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadServicesDetails' });
+    if (this._servicesDetailsLastFetched() !== null && this._servicePlans().length > 0) {
+      this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadServicesDetails' });
+      return;
+    }
+    this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadServicesDetails' });
+    this._isLoadingServicesDetails.set(true);
+
+    const detailPerPage = 500;
+    type Paged<T> = { resources: T[]; totalResults?: number; pagination?: { totalResults?: number } };
+    const totalOf = <T>(r: Paged<T>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
+    const fetch = <T>(path: string, errKey: string): Promise<Paged<T>> => firstValueFrom(
+      this.http.get<Paged<T>>(path).pipe(
+        catchError(err => {
+          this.addError(errKey, err);
+          return of({ resources: [], totalResults: 0 } as Paged<T>);
+        }),
+      ),
+    );
+
+    try {
+      const [insts, offerings, plans, brokers] = await Promise.all([
+        fetch<StServiceInstance>(`/pp/v1/cf/service_instances/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-instances-full'),
+        fetch<StServiceOffering>(`/pp/v1/cf/service_offerings/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-offerings-full'),
+        fetch<StServicePlan>(`/pp/v1/cf/service_plans/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-plans-full'),
+        fetch<StServiceBroker>(`/pp/v1/cf/service_brokers/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-brokers-full'),
+      ]);
+      this._serviceInstances.set(insts.resources.map(si => ({ ...si, cnsiGuid: this.guid })));
+      this._serviceOfferings.set(offerings.resources.map(o => ({ ...o, cnsiGuid: this.guid })));
+      this._servicePlans.set(plans.resources.map(p => ({ ...p, cnsiGuid: this.guid })));
+      this._serviceBrokers.set(brokers.resources.map(b => ({ ...b, cnsiGuid: this.guid })));
+      this._serviceInstancesCount.set(totalOf(insts));
+      this._serviceOfferingsCount.set(totalOf(offerings));
+      this._servicePlansCount.set(totalOf(plans));
+      this._serviceBrokersCount.set(totalOf(brokers));
+    } finally {
+      this._isLoadingServicesDetails.set(false);
+      this._servicesDetailsLastFetched.set(new Date());
     }
   }
 
