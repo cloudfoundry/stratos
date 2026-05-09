@@ -1,10 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-import { AppChipsComponent, AppChip } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceInstance } from '../../../../cf-api-svc.types';
+import { AppChip, AppChipsComponent } from '@stratosui/core';
+import { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
+/**
+ * CompactServiceInstanceCardComponent — single-row preview of a service
+ * instance (name + tags + updated-at), embedded in the Summary tab's
+ * recent-instances list.
+ *
+ * Stage 9b-2: input shape moved from APIResource<IServiceInstance> to the
+ * V3-native StServiceInstance so the Summary tab can read directly from
+ * EndpointDataService._serviceInstances() without a wire-shape adapter.
+ */
 @Component({
   selector: 'app-compact-service-instance-card',
   templateUrl: './compact-service-instance-card.component.html',
@@ -13,19 +21,22 @@ import { IServiceInstance } from '../../../../cf-api-svc.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    AppChipsComponent
-  ]
+    AppChipsComponent,
+  ],
 })
-export class CompactServiceInstanceCardComponent implements OnInit {
-  serviceInstanceTags: AppChip[];
+export class CompactServiceInstanceCardComponent {
+  serviceInstanceTags: AppChip[] = [];
 
-  @Input() serviceInstance: APIResource<IServiceInstance>;
-  constructor() { }
+  private _serviceInstance: StServiceInstance | null = null;
 
-  ngOnInit() {
-    this.serviceInstanceTags = this.serviceInstance.entity.tags.map(t => ({
-      value: t
-    }));
+  @Input()
+  get serviceInstance(): StServiceInstance | null {
+    return this._serviceInstance;
   }
 
+  set serviceInstance(value: StServiceInstance | null) {
+    this._serviceInstance = value;
+    const tags = value?.tags ?? [];
+    this.serviceInstanceTags = tags.map(t => ({ value: t }));
+  }
 }

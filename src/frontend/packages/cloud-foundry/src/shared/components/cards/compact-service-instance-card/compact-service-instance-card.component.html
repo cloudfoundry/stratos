@@ -1,13 +1,13 @@
 @if (serviceInstance) {
   <div class="compact-service-instance-card">
     <div class="compact-service-instance-card__name ">
-      {{ serviceInstance.entity.name }}
+      {{ serviceInstance.name }}
     </div>
     @if (serviceInstanceTags.length > 0) {
       <div class="compact-service-instance-card__tags">
         <app-chips [chips]="serviceInstanceTags"></app-chips>
       </div>
     }
-    <div class="compact-service-instance-card__updated ">{{ serviceInstance.metadata.updated_at | date:'medium' }}</div>
+    <div class="compact-service-instance-card__updated ">{{ (serviceInstance.updatedAt || serviceInstance.createdAt) | date:'medium' }}</div>
   </div>
 }

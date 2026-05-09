@@ -1,64 +1,47 @@
+@let v = view();
+
 <app-meta-card class="service-summary">
   <app-meta-card-title>
     <div class="service-summary__title">
       <div class="service-summary__title__link">Summary</div>
-      <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
   <app-meta-card-item customStyle="long-text">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
       <span class="service-summary__description">
-        {{ servicesService.getServiceDescription() | async }}
+        {{ v.description }}
       </span>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
-    <app-meta-card-key>Active</app-meta-card-key>
+    <app-meta-card-key>Available</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.active" type="yes-no">
+      <app-boolean-indicator [isTrue]="v.available" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
-    <app-meta-card-key>Bindable</app-meta-card-key>
+    <app-meta-card-key>Shareable</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="(service$ | async)?.entity.bindable" type="yes-no">
+      <app-boolean-indicator [isTrue]="v.shareable" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
-  @if (servicesService.getDocumentationUrl() | async; as documentationUrl) {
+  @if (v.documentationUrl) {
     <app-meta-card-item>
       <app-meta-card-key>Documentation Link</app-meta-card-key>
       <app-meta-card-value>
-        <a [href]="documentationUrl" target="_blank" appClickStopPropagation>
+        <a [href]="v.documentationUrl" target="_blank" appClickStopPropagation>
           <span class="material-icons">launch</span>
         </a>
-      </app-meta-card-value>
-    </app-meta-card-item>
-  }
-  @if (servicesService.getSupportUrl() | async; as supportUrl) {
-    <app-meta-card-item>
-      <app-meta-card-key>Support Link</app-meta-card-key>
-      <app-meta-card-value>
-        <a [href]="supportUrl" target="_blank" appClickStopPropagation>
-          <span class="material-icons">launch</span>
-        </a>
-      </app-meta-card-value>
-    </app-meta-card-item>
-  }
-  @if (servicesService.getServiceProviderName() | async; as providerName) {
-    <app-meta-card-item>
-      <app-meta-card-key>Provider</app-meta-card-key>
-      <app-meta-card-value>
-        {{ servicesService.getServiceProviderName() | async }}
       </app-meta-card-value>
     </app-meta-card-item>
   }
   <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
-      <app-chips [chips]="tags"></app-chips>
+      <app-chips [chips]="v.tags"></app-chips>
     </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

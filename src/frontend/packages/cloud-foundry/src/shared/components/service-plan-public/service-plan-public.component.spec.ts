@@ -8,8 +8,6 @@ import { Observable, of, throwError } from 'rxjs';
 import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
-import { ServicesService } from '../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../features/service-catalog/services.service.mock';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServicePlan, StServicePlanVisibility } from '../../../services/endpoint-data/stratos-types';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
@@ -53,7 +51,6 @@ describe('ServicePlanPublicComponent', () => {
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         EntityServiceFactory,
         EntityMonitorFactory,
-        { provide: ServicesService, useClass: ServicesServiceMock },
         { provide: ServiceCatalogDataService, useValue: catalogStub },
         { provide: ComponentFixtureAutoDetect, useValue: true },
       ],
