@@ -81,8 +81,8 @@
         formControlName="serviceInstances" [autoSelectSingleOption]="false">
         <app-option [value]="null">None</app-option>
         @for (sI of serviceBindingForApplication$ | async; track sI) {
-          <app-option [disabled]="!sI.metadata.guid"
-          [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>
+          <app-option [disabled]="!sI.guid"
+          [value]="sI.guid">{{ sI.name }}</app-option>
         }
       </app-select>
     </app-form-field>
