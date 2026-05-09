@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush
 
-go 1.26.2
+go 1.26.3
 
 replace (
 	github.com/cloudfoundry/cli-plugin-repo => code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e
