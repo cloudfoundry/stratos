@@ -6,14 +6,49 @@
     <app-step title="Unbind Apps" [signalHandle]="detachApps.signalHandle">
       <app-detach-apps #detachApps (selectedApps)="setSelectedBindings($event)"></app-detach-apps>
     </app-step>
-    <app-step title="Confirm" [canClose]="!deleteStarted" [disablePrevious]="deleteStarted"
-      [destructiveStep]="!deleteStarted" [signalHandle]="confirmStepHandle" [finishButtonText]="deleteStarted ? 'Close' : 'Unbind'">
+    <app-step title="Confirm" [canClose]="!deleteStarted()" [disablePrevious]="deleteStarted()"
+      [destructiveStep]="!deleteStarted()" [signalHandle]="confirmStepHandle"
+      [finishButtonText]="deleteStarted() ? 'Close' : 'Unbind'">
       <div class="detach-service-instance__monitor">
         <p>Please confirm that you would like to delete the following service bindings:</p>
-        <app-action-monitor [columns]="confirmColumns" [data$]="selectedBindings$"
-          [entityKey]="siBindingCatalogEntity.entityKey" [schema]="siBindingCatalogEntity.getSchema()"
-          [monitorState]="deletingState" [getId]="getId">
-        </app-action-monitor>
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-content-2 text-sm uppercase tracking-wide">
+              <th class="w-8 py-2" aria-label="Status"></th>
+              <th class="py-2">Name</th>
+              <th class="py-2">Binding Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.guid) {
+              <tr class="border-b border-content-3">
+                <td class="py-2">
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded-full font-semibold"
+                    [ngClass]="{
+                      'bg-content-3 text-content-1': row.status === 'pending',
+                      'bg-info-subtle text-info-strong animate-pulse': row.status === 'busy',
+                      'bg-success-subtle text-success-strong': row.status === 'success',
+                      'bg-danger-subtle text-danger-strong': row.status === 'error'
+                    }"
+                    [attr.aria-label]="row.status"
+                    [attr.title]="row.errorMessage || row.status">
+                    @switch (row.status) {
+                      @case ('pending') { · }
+                      @case ('busy')    { … }
+                      @case ('success') { ✓ }
+                      @case ('error')   { ✗ }
+                    }
+                  </span>
+                </td>
+                <td class="py-2">
+                  <a [href]="'/applications/' + row.appGuid" target="_blank" rel="noopener"
+                    class="text-link hover:underline">{{ row.appName }}</a>
+                </td>
+                <td class="py-2 text-content-2">{{ row.bindingDate }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </app-step>
   </app-steppers>
