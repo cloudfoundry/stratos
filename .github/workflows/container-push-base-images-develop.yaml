@@ -16,16 +16,31 @@ jobs:
       packages: write
 
     steps:
+      - name: 'Check for GHCR credentials'
+        id: check_secrets
+        env:
+          GH_PACKAGES_USER: ${{ secrets.GH_PACKAGES_USER }}
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          if [ -z "$GH_PACKAGES_USER" ] || [ -z "$GH_PACKAGES_TOKEN" ]; then
+            echo "::warning title=Base images push skipped::Stratos containers are not supported at this time."
+            echo "secrets_available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_available=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: 'Log into GHCR'
+        if: steps.check_secrets.outputs.secrets_available == 'true'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{secrets.GH_PACKAGES_USER}}
           password: ${{secrets.GH_PACKAGES_TOKEN}}
       - name: 'Checkout current develop'
+        if: steps.check_secrets.outputs.secrets_available == 'true'
         uses: actions/checkout@v3
         with:
           ref: "develop"
       - name: 'Build stratos base images'
+        if: steps.check_secrets.outputs.secrets_available == 'true'
         run: |
           ./deploy/stratos-base-images/build-base-images.sh -r ghcr.io -o anynines -p -s
