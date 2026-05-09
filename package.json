@@ -187,7 +187,7 @@
     "angular-eslint": "20.7.0",
     "autoprefixer": "^10.4.21",
     "baseline-browser-mapping": "^2.10.8",
-    "browserstack-local": "1.5.8",
+    "browserstack-local": "1.5.13",
     "codecov": "3.8.2",
     "copy-webpack-plugin": "13.0.1",
     "delete": "1.1.0",
