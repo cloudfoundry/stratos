@@ -47,6 +47,10 @@ export class CfServiceInstancesSignalConfigService {
   // undefined = no type constraint (wall). 'managed' / 'user-provided' =
   // per-space tab pre-filter.
   private readonly _typeFilter: WritableSignal<'managed' | 'user-provided' | undefined> = signal(undefined);
+  // Empty string = no offering constraint (wall + per-space). Non-empty =
+  // narrow to instances whose serviceOffering.guid matches. Set via
+  // initializeForOffering — drives the service-offering Instances tab.
+  private readonly _offeringGuid: WritableSignal<string> = signal('');
 
   private readonly state = inject(ListStateStore).bind('cf-service-instances', {
     viewMode: 'card',
@@ -141,6 +145,7 @@ export class CfServiceInstancesSignalConfigService {
       const extractor = this._filterExtractors().get(field);
       const spaceGuid = this._spaceGuid();
       const typeFilter = this._typeFilter();
+      const offeringGuid = this._offeringGuid();
       this.filter.set((si: StServiceInstance) => {
         if (cnsi && si.cnsiGuid !== cnsi) return false;
         if (spaceGuid && si.space.guid !== spaceGuid) return false;
@@ -148,6 +153,13 @@ export class CfServiceInstancesSignalConfigService {
           const isUps = si.type === 'user-provided';
           if (typeFilter === 'user-provided' && !isUps) return false;
           if (typeFilter === 'managed' && isUps) return false;
+        }
+        if (offeringGuid) {
+          // service-offering Instances tab — only instances whose
+          // managed offering ref matches. UPS instances have no offering
+          // ref so they are filtered out by definition (correct: the tab
+          // is "instances of THIS offering"; UPS doesn't have an offering).
+          if (si.servicePlan?.serviceOffering?.guid !== offeringGuid) return false;
         }
         if (q) {
           const hay = (extractor ? extractor(si) : (si.name ?? '')).toLowerCase();
@@ -161,10 +173,11 @@ export class CfServiceInstancesSignalConfigService {
   initialize(cnsiGuids: readonly string[]): void {
     this._hasLoadedOnce.set(false);
     // Resetting on every initialize keeps the wall caller's behaviour
-    // intact regardless of whether a per-space caller previously narrowed
-    // the singleton in this session.
+    // intact regardless of whether a per-space / per-offering caller
+    // previously narrowed the singleton in this session.
     this._spaceGuid.set('');
     this._typeFilter.set(undefined);
+    this._offeringGuid.set('');
     const sources = cnsiGuids.map(guid => new CnsiServiceInstancesSource(guid, this.http));
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.view = new ViewPipeline<StServiceInstance>(
@@ -186,6 +199,30 @@ export class CfServiceInstancesSignalConfigService {
     this._hasLoadedOnce.set(false);
     this._spaceGuid.set(spaceGuid);
     this._typeFilter.set(typeFilter);
+    this._offeringGuid.set('');
+    const sources = [new CnsiServiceInstancesSource(cnsiGuid, this.http)];
+    this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
+    this.view = new ViewPipeline<StServiceInstance>(
+      this.orchestrator.allItems,
+      this.filter,
+      this.sort,
+      this.pageSize,
+      this.pageIndex,
+      this._sortExtractors.asReadonly(),
+    );
+  }
+
+  // Per-offering variant — single CNSI, narrowed to instances of one
+  // service offering (the service-catalog "Instances" tab on a service
+  // offering detail page). UPS instances have no offering ref so they are
+  // excluded by the filter regardless of typeFilter. The toolbar's CF
+  // dropdown is pointless in this context (the consumer elects not to
+  // render it).
+  initializeForOffering(cnsiGuid: string, serviceOfferingGuid: string): void {
+    this._hasLoadedOnce.set(false);
+    this._spaceGuid.set('');
+    this._typeFilter.set(undefined);
+    this._offeringGuid.set(serviceOfferingGuid);
     const sources = [new CnsiServiceInstancesSource(cnsiGuid, this.http)];
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.view = new ViewPipeline<StServiceInstance>(
