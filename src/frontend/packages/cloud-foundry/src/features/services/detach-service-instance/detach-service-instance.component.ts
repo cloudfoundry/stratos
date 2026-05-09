@@ -1,30 +1,33 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
-import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, signal, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { serviceBindingEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import {
-  ServiceActionHelperService,
-} from '../../../../../cloud-foundry/src/shared/data-services/service-action-helper.service';
-import {
-  AppMonitorComponentTypes,
-  ITableColumn,
   PageHeaderComponent,
   SignalStepHandle,
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
-import { AppActionMonitorComponent } from '../../../../../core/src/shared/components/app-action-monitor/app-action-monitor.component';
-import { RouterNav, entityCatalog, APIResource } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../cf-api-svc.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import { StratosJobError } from '../../../services/async-jobs/async-job.types';
+import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
+
+type BindingStatus = 'pending' | 'busy' | 'success' | 'error';
+
+interface BindingRow {
+  guid: string;
+  appName: string;
+  appGuid: string;
+  bindingDate: string;
+  status: BindingStatus;
+  errorMessage?: string;
+}
 
 @Component({
   selector: 'app-detach-service-instance',
@@ -34,75 +37,71 @@ import { DetachAppsComponent } from './detach-apps/detach-apps.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
+    NgClass,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
     DetachAppsComponent,
-    AppActionMonitorComponent
   ],
   providers: [DatePipe]
 })
 export class DetachServiceInstanceComponent {
-  private store = inject<Store<CFAppState>>(Store);
   private datePipe = inject(DatePipe);
-  private serviceActionHelperService = inject(ServiceActionHelperService);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
 
   title$!: Observable<string>;
   cfGuid!: string;
-  selectedBindings!: APIResource<IServiceBinding>[];
-  deleteStarted!: boolean;
-  public siBindingCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, serviceBindingEntityType);
+  deleteStarted = signal(false);
 
-  public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
-    {
-      headerCell: () => 'Name',
-      columnId: 'name',
-      cellDefinition: {
-        getValue: row => row.entity.app.entity.name,
-        getLink: row => `/applications/${row.entity.app.metadata.guid}`,
-        newTab: true,
-      },
-    },
-    {
-      columnId: 'creation',
-      headerCell: () => 'Binding Date',
-      cellDefinition: {
-        getValue: (row: APIResource) => this.datePipe.transform(row.metadata.created_at, 'medium')
-      }
-    }
-  ];
-
-  deletingState = AppMonitorComponentTypes.DELETE;
-
+  // Per-binding write status, keyed by binding guid. Replaces the
+  // ngrx-coupled <app-action-monitor> wiring: writeWithJob promises
+  // resolve into this map and the template re-renders from it.
+  private statusByGuid = signal<Record<string, BindingStatus>>({});
+  private errorByGuid = signal<Record<string, string>>({});
+  // Selected bindings, set by the upstream <app-detach-apps> step.
   private _selectedBindings = signal<APIResource<IServiceBinding>[]>([]);
-  // Convert signal to Observable for component expecting Observable input
-  public selectedBindings$ = toObservable(this._selectedBindings);
 
-  // FWT-957: signal-native confirm-step handle. Always valid (the user
-  // already picked at least one binding upstream); submit fires the same
-  // detachServiceBinding side-effects as the legacy startDelete path then
-  // navigates to /services. The "Close" re-click after deleteStarted is
-  // handled by submit being idempotent.
+  rows = computed<BindingRow[]>(() => {
+    const bindings = this._selectedBindings();
+    const statuses = this.statusByGuid();
+    const errors = this.errorByGuid();
+    return bindings.map(b => ({
+      guid: b.metadata.guid,
+      appName: b.entity.app.entity.name,
+      appGuid: b.entity.app.metadata.guid,
+      bindingDate: this.datePipe.transform(b.metadata.created_at, 'medium') ?? '',
+      status: statuses[b.metadata.guid] ?? 'pending',
+      errorMessage: errors[b.metadata.guid],
+    }));
+  });
+
+  // Always valid: the user already picked ≥1 binding in the prior step.
+  // Submit dispatches one v3 DELETE per binding via writeWithJob, tracking
+  // each row's outcome in `statusByGuid`. Re-click after deleteStarted
+  // navigates to /services.
   confirmStepHandle: SignalStepHandle = {
     valid: signal(true).asReadonly(),
     submit: async () => {
-      if (this.deleteStarted) {
+      if (this.deleteStarted()) {
         await this.router.navigate(['/services']);
         return;
       }
-      this.deleteStarted = true;
-      if (this.selectedBindings && this.selectedBindings.length) {
-        this.selectedBindings.forEach(binding => {
-          this.serviceActionHelperService.detachServiceBinding(
-            [binding], binding.entity.service_instance_guid, this.cfGuid, true,
-          );
-        });
-      }
-      // Mirror the legacy { success: true } (no redirect) — the action-monitor
-      // child shows progress in-place; the user closes via the Close button
-      // that the template flips to once deleteStarted is true.
+      this.deleteStarted.set(true);
+      const bindings = this._selectedBindings();
+      if (bindings.length === 0) return;
+
+      // Mark every row busy up-front so the user sees progress immediately
+      // even if the network is slow.
+      this.statusByGuid.update(prev => {
+        const next = { ...prev };
+        for (const b of bindings) next[b.metadata.guid] = 'busy';
+        return next;
+      });
+
+      // Fire all deletes in parallel; settle whichever way each lands.
+      await Promise.all(bindings.map(b => this.detachOne(b.metadata.guid)));
     },
   };
 
@@ -117,24 +116,27 @@ export class DetachServiceInstanceComponent {
     );
   }
 
-  getId = (el: APIResource) => el.metadata.guid;
   setSelectedBindings = (selectedBindings: APIResource<IServiceBinding>[]) => {
-    this.selectedBindings = selectedBindings;
     this._selectedBindings.set(selectedBindings);
   }
 
-  public startDelete = () => {
-
-    if (this.deleteStarted) {
-      return this.store.dispatch(new RouterNav({ path: '/services' }));
+  private async detachOne(bindingGuid: string): Promise<void> {
+    try {
+      const call = this.http.delete(
+        `/pp/v1/cf/service_bindings/${this.cfGuid}/${bindingGuid}`,
+        { observe: 'response' as const },
+      );
+      await writeWithJob(this.http, call);
+      this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'success' }));
+    } catch (err: unknown) {
+      const message = err instanceof StratosJobError
+        ? err.message
+        : err instanceof Error
+          ? err.message
+          : 'unknown error';
+      this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'error' }));
+      this.errorByGuid.update(prev => ({ ...prev, [bindingGuid]: message }));
     }
-    this.deleteStarted = true;
-    if (this.selectedBindings && this.selectedBindings.length) {
-      this.selectedBindings.forEach(binding => {
-        this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
-      });
-    }
-    return observableOf({ success: true });
   }
 
 }
