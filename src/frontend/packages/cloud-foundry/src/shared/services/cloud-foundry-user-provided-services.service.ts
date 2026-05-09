@@ -1,25 +1,10 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
-import { take, filter, map, catchError, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-import {
-  ClearPaginationOfType,
-  EntityCatalogEntityConfig,
-  PaginationMonitorFactory,
-  APIResource
-} from '@stratosui/store';
-import {
-  getUserProvidedServiceInstanceRelations,
-  IUserProvidedServiceInstanceData } from '../../actions/user-provided-service.actions';
-import { IUserProvidedServiceInstance } from '../../cf-api-svc.types';
-import { CFAppState } from '../../cf-app-state';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
-import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
-import { fetchTotalResults } from '../../features/cf/cf.helpers';
-import { QParam, QParamJoiners } from '../q-param';
+import { IUserProvidedServiceInstanceData } from '../../actions/user-provided-service.actions';
+import { StServiceInstance } from '../../services/endpoint-data/stratos-types';
 
 export interface UpsCreateResult {
   success: boolean;
@@ -32,54 +17,136 @@ export interface UpsUpdateResult {
   message?: string;
 }
 
+interface PagedServiceInstances {
+  resources: StServiceInstance[];
+  totalResults?: number;
+  pagination?: { totalResults?: number };
+}
 
+const totalOf = (resp: PagedServiceInstances): number =>
+  resp.pagination?.totalResults ?? resp.totalResults ?? resp.resources.length;
+
+/**
+ * CloudFoundryUserProvidedServicesService — UPS read/write surface for the
+ * services-domain signal+V3 slice.
+ *
+ * Reads (Stage 9e):
+ *   getUserProvidedServices         — list UPS in a space (or cnsi-wide)
+ *   getUserProvidedService          — single UPS by guid
+ *   fetchUserProvidedServiceInstancesCount — UPS count scoped to cnsi/org/space
+ *
+ * Each read hits a Stratos-shape `/pp/v1/cf/...service_instances` endpoint
+ * with the v3 `?type=user-provided` filter pushed down to CF v3 by Jetstream.
+ * Counts use `?return=counts` (per_page=1 + flat envelope on the wire), lists
+ * use `?return=summary&per_page=5000` so consumers receive name + space ref +
+ * (for managed instances) plan/offering/broker chains in one round trip.
+ *
+ * Writes (Stage 5 — kept):
+ *   createUserProvidedService       — POST /pp/v1/cf/user_provided_service_instances/{cnsi}
+ *   updateUserProvidedService       — PATCH /pp/v1/cf/user_provided_service_instances/{cnsi}/{guid}
+ *
+ * No ngrx state is read or written by this service. The legacy
+ * `clearServiceInstancePagination` dispatch is gone — once the service-instance
+ * list views are themselves migrated off the legacy paginators (Stage 9f
+ * sweep), there's no paginated cache to invalidate. UPS create/update edits
+ * propagate to other views by reloading those views' own signals.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class CloudFoundryUserProvidedServicesService {
-  private store = inject<Store<CFAppState>>(Store);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private http = inject(HttpClient);
 
-
-  public getUserProvidedServices(cfGuid: string, spaceGuid?: string, relations = getUserProvidedServiceInstanceRelations)
-    : Observable<APIResource<IUserProvidedServiceInstance>[]> {
-
-    const pagObs = cfEntityCatalog.userProvidedService.store.getAllInSpace.getPaginationService(
-      cfGuid, spaceGuid, null, relations, true
-    );
-    return combineLatest([
-      pagObs.entities$, // Ensure entities is subbed to the fetch kicks off
-      pagObs.fetchingEntities$
-    ]).pipe(
-      filter(([, fetching]) => !fetching),
-      map(([entities]) => entities)
+  /**
+   * Lists UPS instances for a CF endpoint, optionally narrowed to a single
+   * space. Wire path:
+   *
+   *   space-scoped: GET /pp/v1/cf/spaces/{cnsi}/{spaceGuid}/service_instances
+   *                       ?return=summary&type=user-provided&per_page=5000
+   *   cnsi-wide:    GET /pp/v1/cf/service_instances/{cnsi}
+   *                       ?return=summary&type=user-provided&per_page=5000
+   *
+   * `summary` tier resolves space + (managed) plan/offering/broker chains
+   * via the v3 ?include= block in one call. The picker uses `name` + `guid`;
+   * UPS-only filter ensures managed instances don't pollute the list.
+   *
+   * 5000 covers most CFs in one page; CFs with > 5000 UPS in a single space
+   * are pathological and will be revisited if observed.
+   */
+  public getUserProvidedServices(cfGuid: string, spaceGuid?: string): Observable<StServiceInstance[]> {
+    const path = spaceGuid
+      ? `/pp/v1/cf/spaces/${cfGuid}/${spaceGuid}/service_instances`
+      : `/pp/v1/cf/service_instances/${cfGuid}`;
+    const params = new HttpParams()
+      .set('return', 'summary')
+      .set('type', 'user-provided')
+      .set('per_page', '5000');
+    return this.http.get<PagedServiceInstances>(path, { params }).pipe(
+      map(resp => (resp.resources || []).map(si => ({ ...si, cnsiGuid: cfGuid }))),
     );
   }
 
-  public fetchUserProvidedServiceInstancesCount(cfGuid: string, orgGuid?: string, spaceGuid?: string)
-    : Observable<number> {
-    const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
-    const uniqueKey = spaceGuid || orgGuid || cfGuid;
-
-    const action = cfEntityCatalog.userProvidedService.actions.getMultiple(
-      createEntityRelationPaginationKey(parentSchemaKey, uniqueKey),
-      cfGuid,
-      { includeRelations: [], populateMissing: false }
+  /**
+   * UPS count scoped to a CF endpoint, optionally narrowed by org and/or
+   * space. Wire path uses `?return=counts` so the upstream CF v3 call is a
+   * cheap per_page=1 round trip — only `pagination.total_results` matters.
+   *
+   * Filter precedence on the cnsi-wide handler: type + (organization_guids?)
+   * + (space_guids?). All three layer onto the same /v3/service_instances
+   * call. When only spaceGuid is provided, the path-scoped variant
+   * /pp/v1/cf/spaces/{cnsi}/{space}/service_instances is preferred so the
+   * space scope rides as a path filter rather than a query — same wire
+   * outcome, slightly cleaner URL.
+   *
+   * Errors surface as 0 rather than propagating to the org/space card. The
+   * card needs a number to render and an error in this single tile must
+   * not blank out the rest of the card; the error path is observable via
+   * the browser network tab. Matches the soft-fail semantics of the
+   * EndpointDataService loadServicesCounts() siblings.
+   */
+  public fetchUserProvidedServiceInstancesCount(
+    cfGuid: string,
+    orgGuid?: string,
+    spaceGuid?: string,
+  ): Observable<number> {
+    let params = new HttpParams()
+      .set('return', 'counts')
+      .set('type', 'user-provided');
+    let path: string;
+    if (spaceGuid && !orgGuid) {
+      // Pure space scope — use the path-scoped variant.
+      path = `/pp/v1/cf/spaces/${cfGuid}/${spaceGuid}/service_instances`;
+    } else {
+      path = `/pp/v1/cf/service_instances/${cfGuid}`;
+      if (orgGuid) {
+        params = params.set('organization_guids', orgGuid);
+      }
+      if (spaceGuid) {
+        params = params.set('space_guids', spaceGuid);
+      }
+    }
+    return this.http.get<PagedServiceInstances>(path, { params }).pipe(
+      map(resp => totalOf(resp)),
+      catchError(() => of(0)),
     );
-    action.initialParams.q = [];
-    if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
-    }
-    if (spaceGuid) {
-      action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
-    }
-    return fetchTotalResults(action, this.store, this.paginationMonitorFactory);
   }
 
-  public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<APIResource<IUserProvidedServiceInstance>> {
-    return cfEntityCatalog.userProvidedService.store.getEntityService(upsGuid, cfGuid, {}).waitForEntity$.pipe(
-      map(e => e.entity)
+  /**
+   * Single UPS by guid — used by the UPS edit-mode pre-fill in the Add
+   * Service Instance flow. Wire path:
+   *
+   *   GET /pp/v1/cf/service_instances/{cnsi}/{upsGuid}?return=summary
+   *
+   * Summary tier carries the syslogDrainUrl/routeServiceUrl/tags/credentials-
+   * absent fields the edit form needs to populate without a follow-up call.
+   */
+  public getUserProvidedService(cfGuid: string, upsGuid: string): Observable<StServiceInstance> {
+    const params = new HttpParams().set('return', 'summary');
+    return this.http.get<StServiceInstance>(
+      `/pp/v1/cf/service_instances/${cfGuid}/${upsGuid}`,
+      { params },
+    ).pipe(
+      map(si => ({ ...si, cnsiGuid: cfGuid })),
     );
   }
 
@@ -92,7 +159,6 @@ export class CloudFoundryUserProvidedServicesService {
       `/pp/v1/cf/user_provided_service_instances/${cfGuid}`,
       this.toV3RequestBody(data),
     ).pipe(
-      tap(() => this.clearServiceInstancePagination()),
       map(res => ({ success: true, guid: res.guid } as UpsCreateResult)),
       catchError((err: HttpErrorResponse) => of<UpsCreateResult>({
         success: false,
@@ -139,17 +205,6 @@ export class CloudFoundryUserProvidedServicesService {
       body.routeServiceUrl = data.route_service_url;
     }
     return body;
-  }
-
-  private clearServiceInstancePagination(): void {
-    // Service-instance list mixes managed + UPS rows; flush so the new
-    // row shows up on the next subscription. The legacy entity-catalog
-    // wiring is the source of truth for this dispatch — guard it so the
-    // method survives test environments that don't bootstrap the catalog.
-    const cfg = cfEntityCatalog.serviceInstance?.actions?.getMultiple('', '', {});
-    if (cfg) {
-      this.store.dispatch(new ClearPaginationOfType(cfg as EntityCatalogEntityConfig));
-    }
   }
 
   private extractErrorMessage(err: HttpErrorResponse): string {
