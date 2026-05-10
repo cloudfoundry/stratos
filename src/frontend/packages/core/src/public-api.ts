@@ -10,6 +10,8 @@ export * from './core/extension/extension-service';
 // Utils
 export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString } from './core/utils.service';
 export { naturalCollator, naturalCompare } from './shared/utils/natural-sort';
+export { GlobalEventService, GlobalEventData, endpointEventKey } from './shared/global-events.service';
+export type { IGlobalEvent, IGlobalEventConfig, GlobalEventTypes } from './shared/global-events.service';
 export { environment } from './environments/environment';
 export { isValidJsonValidator } from './shared/form-validators';
 

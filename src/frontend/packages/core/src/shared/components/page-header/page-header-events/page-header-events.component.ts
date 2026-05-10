@@ -13,7 +13,6 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 @Component({
   selector: 'app-page-header-events',
   templateUrl: './page-header-events.component.html',
-  styleUrls: ['./page-header-events.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -47,6 +46,12 @@ export class PageHeaderEventsComponent implements OnInit {
   public simpleErrorMessage = false;
 
   public errorMessage$!: Observable<string>;
+  // Emits the single underlying event when only one endpoint is in
+  // error AND it carries the structured fields (endpointName /
+  // endpointId / detail). Lets the banner render the endpoint
+  // identifier as a title above the error detail. Null for multi-
+  // endpoint or legacy events where structured fields are absent.
+  public singleErrorEvent$!: Observable<IGlobalEvent | null>;
   endpointId: any;
   private events$!: Observable<any>;
 
@@ -100,10 +105,32 @@ export class PageHeaderEventsComponent implements OnInit {
         }),
         share()
       );
+      this.singleErrorEvent$ = this.events$.pipe(
+        map((events: IGlobalEvent[]) => {
+          if (!events || events.length === 0) return null;
+          const endpointErrorKeys = events.reduce(
+            (ids, event) => ids.add(this.getEndpointId(event)),
+            new Set<string>(),
+          );
+          if (endpointErrorKeys.size !== 1) return null;
+          // Only switch to structured rendering when the event carries
+          // the title/body fields; legacy ngrx events fall back to the
+          // flat message string via errorMessage$.
+          const e = events[0];
+          return e.endpointName && e.detail ? e : null;
+        }),
+        share(),
+      );
     }
   }
 
   private getEndpointId(event: IGlobalEvent): string {
-    return event.link.split('/')[2];
+    // Prefer the structured field on signal-published events (no link
+    // is set — the per-endpoint history page renders empty for
+    // signal-only events so the View button is intentionally hidden).
+    // Fall back to legacy /errors/{guid} link parsing for ngrx-derived
+    // events (endpointEventKey config in app.module).
+    if (event.endpointId) return event.endpointId;
+    return event.link?.split('/')[2] ?? '';
   }
 }
