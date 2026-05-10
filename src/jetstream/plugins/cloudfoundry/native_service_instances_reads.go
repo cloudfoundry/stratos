@@ -17,19 +17,19 @@ import (
 //
 //   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
 //   - base     — guid + cnsiGuid + name + type + tags + lastOperation +
-//                space.{guid} + servicePlan.{guid} (managed) + createdAt.
-//                One CAPI call, no include chain.
+//     space.{guid} + servicePlan.{guid} (managed) + createdAt.
+//     One CAPI call, no include chain.
 //   - summary  — base + dashboardUrl/syslogDrainUrl/routeServiceUrl as
-//                applicable + space.{name, organization{guid,name}} +
-//                servicePlan.{name, free, serviceOffering{guid, name,
-//                broker{guid,name}}} + updatedAt. One CAPI call with
-//                ?include=service_plan,service_plan.service_offering,
-//                service_plan.service_offering.service_broker,space,
-//                space.organization; everything resolves from the v3
-//                included block in a single round-trip.
+//     applicable + space.{name, organization{guid,name}} +
+//     servicePlan.{name, free, serviceOffering{guid, name,
+//     broker{guid,name}}} + updatedAt. One CAPI call with
+//     ?include=service_plan,service_plan.service_offering,
+//     service_plan.service_offering.service_broker,space,
+//     space.organization; everything resolves from the v3
+//     included block in a single round-trip.
 //   - details  — summary + maintenanceInfo + upgradeAvailable + labels +
-//                annotations + servicePlan / offering / broker fully
-//                expanded.
+//     annotations + servicePlan / offering / broker fully
+//     expanded.
 //
 // CF v3 returns both managed and user-provided instances in the same list.
 // The handler stamps the type discriminator onto the row so the UI can
@@ -77,13 +77,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 	params := applyServiceInstanceFilters(ctx, applyPagingParams(capi.NewQueryParams(), perPage, page, present))
 
 	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude(
-			"service_plan",
-			"service_plan.service_offering",
-			"service_plan.service_offering.service_broker",
-			"space",
-			"space.organization",
-		)
+		params = applyServiceInstanceIncludeFields(params)
 	}
 
 	raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
@@ -110,12 +104,12 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 //   - ?type=managed|user-provided — narrows by the CF type discriminator.
 //   - ?guids=g1,g2,…              — single-instance / batch lookup.
 //   - ?space_guids=g1,g2,…        — space scoping (additive to any path-
-//                                    derived space filter the caller already
-//                                    set; CAPI accepts repeated values via
-//                                    WithFilter under the same key).
+//     derived space filter the caller already
+//     set; CAPI accepts repeated values via
+//     WithFilter under the same key).
 //   - ?organization_guids=g1,…    — org scoping; CF v3 supports this filter
-//                                    natively on /v3/service_instances and
-//                                    pushes it down to the space → org join.
+//     natively on /v3/service_instances and
+//     pushes it down to the space → org join.
 //
 // Used by both the cnsi-wide and the path-scoped (space) handlers so the
 // UPS-only count paths and the picker's "list UPS in space" query can
@@ -143,6 +137,23 @@ func applyServiceInstanceFilters(ctx echo.Context, params *capi.QueryParams) *ca
 		}
 	}
 	return params
+}
+
+// applyServiceInstanceIncludeFields layers the sparse-fieldset chain that
+// brings the plan→offering→broker and space→org joins back in v3's
+// `included` block on a service-instances list. /v3/service_instances
+// rejects ?include= entirely (3.180.0); fields[] is the only inline-join
+// path so we ask for guid+name+relationship pointers at each hop, which
+// keeps the response small while still resolving the full chain.
+func applyServiceInstanceIncludeFields(params *capi.QueryParams) *capi.QueryParams {
+	return params.
+		WithFields("service_plan", "guid", "name", "relationships.service_offering").
+		WithFields("service_plan.service_offering",
+			"guid", "name", "description", "tags", "documentation_url",
+			"relationships.service_broker").
+		WithFields("service_plan.service_offering.service_broker", "guid", "name").
+		WithFields("space", "guid", "name", "relationships.organization").
+		WithFields("space.organization", "guid", "name")
 }
 
 // instanceIncludes bundles the four guid-keyed maps decoded from the
@@ -463,13 +474,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.C
 			WithFilter("space_guids", spaceGUID))
 
 	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude(
-			"service_plan",
-			"service_plan.service_offering",
-			"service_plan.service_offering.service_broker",
-			"space",
-			"space.organization",
-		)
+		params = applyServiceInstanceIncludeFields(params)
 	}
 
 	raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)
@@ -570,13 +575,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx echo.
 		WithFilter("service_plan_guids", planGUIDs...)
 
 	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude(
-			"service_plan",
-			"service_plan.service_offering",
-			"service_plan.service_offering.service_broker",
-			"space",
-			"space.organization",
-		)
+		params = applyServiceInstanceIncludeFields(params)
 	}
 
 	raw, lerr := cfClient.ServiceInstances().List(ctx.Request().Context(), params)

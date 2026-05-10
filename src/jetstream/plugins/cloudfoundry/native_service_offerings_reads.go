@@ -16,19 +16,19 @@ import (
 // tiers selected by ?return=:
 //
 //   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
-//                Existing legacy shape preserved verbatim — counts probes
-//                already wired across the frontend rely on it.
+//     Existing legacy shape preserved verbatim — counts probes
+//     already wired across the frontend rely on it.
 //   - base     — entity fields only; no broker ref. One CAPI call.
 //   - summary  — base + broker.{guid,name}. Today: one /v3/service_offerings
-//                call plus one batched /v3/service_brokers?guids=… draw
-//                because the capi/v3 client doesn't surface the v3
-//                response's `included` block (TODO below). When that's
-//                fixed the broker join collapses into the same single call
-//                via ?include=service_broker.
+//     call plus one batched /v3/service_brokers?guids=… draw
+//     because the capi/v3 client doesn't surface the v3
+//     response's `included` block (TODO below). When that's
+//     fixed the broker join collapses into the same single call
+//     via ?include=service_broker.
 //   - details  — summary + offering extended fields (description, tags,
-//                requires, documentationUrl, brokerCatalogMetadata,
-//                shareable) and broker ref expanded with URL. Same
-//                two-call shape as summary today.
+//     requires, documentationUrl, brokerCatalogMetadata,
+//     shareable) and broker ref expanded with URL. Same
+//     two-call shape as summary today.
 //
 // Per-page broker join: the unique broker GUIDs referenced by THIS page's
 // offerings are resolved with one batched /v3/service_brokers?guids=… call
@@ -81,12 +81,15 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 
 	perPage, page, present := parsePerPageAndPage(ctx)
 	listParams := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
-	// `?include=service_broker` brings the joined brokers back in v3's
-	// top-level `included` block; capi/v3 surfaces it via
-	// ListResponse[T].Included so the entire list+broker join is one
-	// CAPI call.
+	// `fields[service_broker]=guid,name` brings the brokers back in the
+	// top-level `included.service_brokers` block in a single CAPI call.
+	// The earlier `?include=service_broker` attempt was rejected by
+	// CAPI's /v3/service_offerings endpoint (verified on 3.180.0:
+	// "Unknown query parameter(s): 'include'" — `include` isn't in the
+	// documented param set for this endpoint). `fields` is, and pulls
+	// the same join with a sparse fieldset.
 	if mode == ReturnSummary || mode == ReturnDetails {
-		listParams = listParams.WithInclude("service_broker")
+		listParams = listParams.WithFields("service_broker", "guid", "name")
 	}
 	rawOfferings, listErr := cfClient.ServiceOfferings().List(ctx.Request().Context(), listParams)
 	if listErr != nil {
@@ -215,8 +218,11 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx echo.
 	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present).
 		WithFilter("service_broker_guids", brokerGUID)
 
+	// `fields[service_broker]=guid,name` brings the broker rows back in
+	// `included.service_brokers` in one call; the include= form is rejected
+	// by /v3/service_offerings (3.180.0).
 	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude("service_broker")
+		params = params.WithFields("service_broker", "guid", "name")
 	}
 
 	raw, listErr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
@@ -305,7 +311,7 @@ func drainBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings 
 //   - base:    guid + cnsiGuid + name + createdAt
 //   - summary: + description + tags + available + broker.{guid,name}
 //   - details: + requires + documentationUrl + brokerCatalogMetadata +
-//              shareable + broker fully expanded (URL etc.)
+//     shareable + broker fully expanded (URL etc.)
 func toStServiceOffering(o capi.ServiceOffering, cnsiGUID string, brokerByGUID map[string]capi.ServiceBroker, mode ReturnMode) StServiceOffering {
 	out := StServiceOffering{
 		GUID:      o.GUID,

@@ -31,7 +31,10 @@ func instancesTestServer(t *testing.T) (*httptest.Server, *int) {
 		case "/v3/service_instances":
 			siHits++
 			perPage := r.URL.Query().Get("per_page")
-			include := r.URL.Query().Get("include")
+			// Summary+ now requests sparse fieldsets (?fields[service_plan]=…)
+			// instead of ?include=, since /v3/service_instances rejects
+			// include. Either trigger emits the same `included` block.
+			fieldsRequested := r.URL.Query().Get("fields[service_plan]") != ""
 			if perPage == "1" {
 				_ = json.NewEncoder(w).Encode(map[string]interface{}{
 					"pagination": map[string]interface{}{"total_results": 17, "total_pages": 17},
@@ -55,7 +58,7 @@ func instancesTestServer(t *testing.T) (*httptest.Server, *int) {
 					}),
 				},
 			}
-			if strings.Contains(include, "service_plan") {
+			if fieldsRequested {
 				payload["included"] = map[string]interface{}{
 					"service_plans": []map[string]interface{}{
 						{

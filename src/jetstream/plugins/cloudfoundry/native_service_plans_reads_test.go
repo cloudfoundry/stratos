@@ -97,12 +97,6 @@ func servicePlansTestServer(t *testing.T) *httptest.Server {
 						},
 					},
 				}
-				if strings.Contains(include, "service_broker") {
-					included["service_brokers"] = []map[string]interface{}{
-						{"guid": "broker-1", "name": "alpha-broker", "url": "https://alpha.example"},
-						{"guid": "broker-2", "name": "beta-broker", "url": "https://beta.example"},
-					}
-				}
 				payload["included"] = included
 			}
 			_ = json.NewEncoder(w).Encode(payload)
@@ -119,6 +113,28 @@ func servicePlansTestServer(t *testing.T) *httptest.Server {
 				"relationships": map[string]interface{}{
 					"service_broker": map[string]interface{}{"data": map[string]interface{}{"guid": "broker-2"}},
 				},
+			})
+		case "/v3/service_brokers":
+			// Used by batchFetchBrokersForOfferings — broker URLs come back
+			// here so the details-tier expansion works.
+			brokers := map[string]map[string]string{
+				"broker-1": {"name": "alpha-broker", "url": "https://alpha.example"},
+				"broker-2": {"name": "beta-broker", "url": "https://beta.example"},
+			}
+			wanted := strings.Split(r.URL.Query().Get("guids"), ",")
+			resources := []map[string]interface{}{}
+			for _, g := range wanted {
+				b, ok := brokers[g]
+				if !ok {
+					continue
+				}
+				resources = append(resources, map[string]interface{}{
+					"guid": g, "name": b["name"], "url": b["url"],
+				})
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": len(resources), "total_pages": 1},
+				"resources":  resources,
 			})
 		case "/v3/service_brokers/broker-2":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -472,12 +488,17 @@ func newScopedPlansServer(t *testing.T, capture *scopedPlansCapture) *httptest.S
 							},
 						},
 					},
-					"service_brokers": []map[string]interface{}{
-						{"guid": "broker-1", "name": "alpha-broker", "url": "https://broker.example"},
-					},
 				}
 			}
 			_ = json.NewEncoder(w).Encode(payload)
+		case "/v3/service_brokers":
+			// batchFetchBrokersForOfferings follow-up.
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{"guid": "broker-1", "name": "alpha-broker", "url": "https://broker.example"},
+				},
+			})
 		default:
 			http.NotFound(w, r)
 		}

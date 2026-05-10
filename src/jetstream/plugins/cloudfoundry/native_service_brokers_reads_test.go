@@ -16,9 +16,10 @@ import (
 
 // brokersTestServer returns an httptest.Server that serves enough CF v3
 // JSON to exercise the four ?return= modes plus the guids-batch and
-// counts fast paths. When the request carries `include=space`, the
-// server emits a top-level `included.spaces` block so the handler's
-// spacesFromIncluded decoder can resolve space refs in one round-trip.
+// counts fast paths. /v3/service_brokers itself never includes spaces
+// (CAPI 3.180.0 rejects ?include= and ?fields[] on this endpoint), so
+// summary+ resolves space refs via a follow-up batch List against
+// /v3/spaces?guids=… — handled by the case below.
 func brokersTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,6 @@ func brokersTestServer(t *testing.T) *httptest.Server {
 		case "/v3/service_brokers":
 			perPage := r.URL.Query().Get("per_page")
 			guids := r.URL.Query().Get("guids")
-			include := r.URL.Query().Get("include")
 
 			if perPage == "1" {
 				_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -66,15 +66,25 @@ func brokersTestServer(t *testing.T) *httptest.Server {
 					brokerResource("broker-3", "labelled-broker", "https://labelled.example", "space-77"),
 				},
 			}
-			if strings.Contains(include, "space") {
-				payload["included"] = map[string]interface{}{
-					"spaces": []map[string]interface{}{
-						{"guid": "space-99", "name": "alpha"},
-						{"guid": "space-77", "name": "beta"},
-					},
-				}
-			}
 			_ = json.NewEncoder(w).Encode(payload)
+		case "/v3/spaces":
+			// Used by batchFetchBrokerSpaces. Echoes back whichever guids
+			// were requested with stable test names.
+			wanted := strings.Split(r.URL.Query().Get("guids"), ",")
+			names := map[string]string{"space-99": "alpha", "space-77": "beta"}
+			resources := []map[string]interface{}{}
+			for _, g := range wanted {
+				if g == "" {
+					continue
+				}
+				resources = append(resources, map[string]interface{}{
+					"guid": g, "name": names[g],
+				})
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": len(resources), "total_pages": 1},
+				"resources":  resources,
+			})
 		case "/v3/service_brokers/broker-77":
 			res := brokerResource("broker-77", "single", "https://single-broker.example", "space-77")
 			res["metadata"] = map[string]interface{}{
