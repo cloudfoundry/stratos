@@ -29,10 +29,10 @@ describe('ServiceCatalogDataService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('serviceOffering hits /cf/service_offerings/:cnsi/:offeringGuid', async () => {
+  it('serviceOffering hits /cf/service_offerings/:cnsi/:offeringGuid?return=details', async () => {
     const promise = new Promise<any>(resolve => service.serviceOffering('cnsi-1', 'off-1').subscribe(resolve));
 
-    const req = httpMock.expectOne('/pp/v1/cf/service_offerings/cnsi-1/off-1');
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_offerings/cnsi-1/off-1' && r.params.get('return') === 'details');
     expect(req.request.method).toBe('GET');
     req.flush({ guid: 'off-1', name: 'premium', description: 'd', broker: { guid: 'b-1', name: 'b1' }, tags: [], available: true, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' });
 
@@ -44,7 +44,7 @@ describe('ServiceCatalogDataService', () => {
   it('serviceOffering returns null on 404', async () => {
     const promise = new Promise<any>(resolve => service.serviceOffering('cnsi-1', 'missing').subscribe(resolve));
 
-    const req = httpMock.expectOne('/pp/v1/cf/service_offerings/cnsi-1/missing');
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_offerings/cnsi-1/missing' && r.params.get('return') === 'details');
     req.flush({ message: 'not found' }, { status: 404, statusText: 'Not Found' });
 
     const res = await promise;
