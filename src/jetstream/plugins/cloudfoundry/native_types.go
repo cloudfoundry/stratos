@@ -123,22 +123,22 @@ type StAppRoutesResponse struct {
 //
 // Tier semantics:
 //   - base:    guid + cnsiGuid + type + serviceInstance.{guid} + (app.{guid}
-//              for type=app)
+//     for type=app)
 //   - summary: + name + serviceInstance.{name,type} + app.{name?} +
-//              lastOperation + syslogDrainUrl
+//     lastOperation + syslogDrainUrl
 //   - details: + servicePlan / serviceOffering / broker via batched lookups
-//              (v3's include on credential_bindings only reaches `app,
-//              service_instance`, so plan/offering/broker need a follow-up
-//              fetch).
+//     (v3's include on credential_bindings only reaches `app,
+//     service_instance`, so plan/offering/broker need a follow-up
+//     fetch).
 type StServiceCredentialBinding struct {
-	GUID            string                `json:"guid"`
-	CnsiGUID        string                `json:"cnsiGuid"`
-	Type            string                `json:"type"` // 'app' | 'key'
-	Name            string                `json:"name,omitempty"`
-	ServiceInstance StServiceInstanceRef  `json:"serviceInstance"`
-	App             *StAppRef             `json:"app,omitempty"` // type=app only
-	LastOperation   *StLastOperation      `json:"lastOperation,omitempty"`
-	SyslogDrainURL  string                `json:"syslogDrainUrl,omitempty"`
+	GUID            string               `json:"guid"`
+	CnsiGUID        string               `json:"cnsiGuid"`
+	Type            string               `json:"type"` // 'app' | 'key'
+	Name            string               `json:"name,omitempty"`
+	ServiceInstance StServiceInstanceRef `json:"serviceInstance"`
+	App             *StAppRef            `json:"app,omitempty"` // type=app only
+	LastOperation   *StLastOperation     `json:"lastOperation,omitempty"`
+	SyslogDrainURL  string               `json:"syslogDrainUrl,omitempty"`
 
 	// Details-only — not reachable via v3 include chain on bindings:
 	ServicePlan     *StServicePlanRef     `json:"servicePlan,omitempty"`
@@ -163,9 +163,9 @@ type StSpacesResponse struct {
 // src/frontend/packages/cloud-foundry/src/services/endpoint-data/stratos-types.ts:
 //   - base:    guid + cnsiGuid + name + createdAt
 //   - summary: + description + tags + available (legacy UI label "Public")
-//              + broker.{guid,name}
+//   - broker.{guid,name}
 //   - details: + requires + documentationUrl + brokerCatalogMetadata +
-//              shareable + broker fully expanded (URL etc.)
+//     shareable + broker fully expanded (URL etc.)
 //
 // `Available` and `Shareable` are *bool so callers can distinguish "false"
 // from "not populated at this tier" — base mode emits neither, summary
@@ -216,9 +216,9 @@ type StServiceOffering struct {
 // Tier policy:
 //   - base:    guid + cnsiGuid + name + serviceOffering.{guid} + createdAt
 //   - summary: + description + free + available + visibilityType +
-//              serviceOffering.{name, broker{guid,name}} + updatedAt
+//     serviceOffering.{name, broker{guid,name}} + updatedAt
 //   - details: + costs + schemas + labels + annotations + serviceOffering
-//              expanded (broker.url, etc.)
+//     expanded (broker.url, etc.)
 type StServicePlan struct {
 	GUID            string                `json:"guid"`
 	CnsiGUID        string                `json:"cnsiGuid"`
@@ -372,32 +372,32 @@ type StDomainsResponse struct {
 //
 // Tier policy:
 //   - base:    guid + cnsiGuid + name + type + tags + lastOperation +
-//              space.{guid} + servicePlan.{guid} (managed) + createdAt
+//     space.{guid} + servicePlan.{guid} (managed) + createdAt
 //   - summary: + dashboardUrl/syslogDrainUrl/routeServiceUrl as applicable
-//              + space.{name, organization{guid,name}}
-//              + servicePlan.{name, free, serviceOffering{guid,name,broker{guid,name}}}
-//              + updatedAt
+//   - space.{name, organization{guid,name}}
+//   - servicePlan.{name, free, serviceOffering{guid,name,broker{guid,name}}}
+//   - updatedAt
 //   - details: + maintenanceInfo + upgradeAvailable + labels + annotations
-//              + servicePlan / offering / broker fully expanded
+//   - servicePlan / offering / broker fully expanded
 type StServiceInstance struct {
-	GUID            string             `json:"guid"`
-	CnsiGUID        string             `json:"cnsiGuid"`
-	Name            string             `json:"name"`
-	Type            string             `json:"type"`
-	Tags            []string           `json:"tags"`
-	LastOperation   *StLastOperation   `json:"lastOperation,omitempty"`
-	Space           *StSpaceRef        `json:"space,omitempty"`
-	ServicePlan     *StServicePlanRef  `json:"servicePlan,omitempty"`
-	DashboardURL    string             `json:"dashboardUrl,omitempty"`
-	SyslogDrainURL  string             `json:"syslogDrainUrl,omitempty"`
-	RouteServiceURL string             `json:"routeServiceUrl,omitempty"`
-	MaintenanceInfo *StMaintenanceInfo `json:"maintenanceInfo,omitempty"`
-	UpgradeAvailable *bool             `json:"upgradeAvailable,omitempty"`
-	Labels          map[string]string  `json:"labels,omitempty"`
-	Annotations     map[string]string  `json:"annotations,omitempty"`
-	CreatedAt       string             `json:"createdAt"`
-	UpdatedAt       string             `json:"updatedAt,omitempty"`
-	Meta            *StratosMeta       `json:"_meta,omitempty"`
+	GUID             string             `json:"guid"`
+	CnsiGUID         string             `json:"cnsiGuid"`
+	Name             string             `json:"name"`
+	Type             string             `json:"type"`
+	Tags             []string           `json:"tags"`
+	LastOperation    *StLastOperation   `json:"lastOperation,omitempty"`
+	Space            *StSpaceRef        `json:"space,omitempty"`
+	ServicePlan      *StServicePlanRef  `json:"servicePlan,omitempty"`
+	DashboardURL     string             `json:"dashboardUrl,omitempty"`
+	SyslogDrainURL   string             `json:"syslogDrainUrl,omitempty"`
+	RouteServiceURL  string             `json:"routeServiceUrl,omitempty"`
+	MaintenanceInfo  *StMaintenanceInfo `json:"maintenanceInfo,omitempty"`
+	UpgradeAvailable *bool              `json:"upgradeAvailable,omitempty"`
+	Labels           map[string]string  `json:"labels,omitempty"`
+	Annotations      map[string]string  `json:"annotations,omitempty"`
+	CreatedAt        string             `json:"createdAt"`
+	UpdatedAt        string             `json:"updatedAt,omitempty"`
+	Meta             *StratosMeta       `json:"_meta,omitempty"`
 }
 
 // StUserProvidedServiceRequest is the inbound write shape for both

@@ -82,7 +82,7 @@ func TestAdvanceRollback_HappyPath(t *testing.T) {
 
 			w.WriteHeader(http.StatusAccepted)
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"guid": "dep-1",
+				"guid":  "dep-1",
 				"state": "DEPLOYING",
 				"status": map[string]interface{}{
 					"value":  "ACTIVE",

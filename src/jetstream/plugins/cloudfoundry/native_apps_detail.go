@@ -309,15 +309,15 @@ func fetchSSHEnabledForApp(ctx context.Context, client capi.Client, appGUID stri
 // pages (service-instance, org, space) follow the same convention:
 //
 //   - (default)         — basic Stratos shape, no sub-resource composition.
-//                         One CAPI call: cfClient.Apps().Get.
+//     One CAPI call: cfClient.Apps().Get.
 //   - ?return=summary   — list-page-summary shape: base app + web process
-//                         (memory / disk / instances). Cheap. Mirrors what
-//                         /cf/apps/:cnsi?return=summary returns per row.
+//     (memory / disk / instances). Cheap. Mirrors what
+//     /cf/apps/:cnsi?return=summary returns per row.
 //   - ?return=details   — full composed envelope (StAppDetail): app + web
-//                         process + current droplet + latest package +
-//                         latest build + ssh feature flag. Expensive
-//                         (5 CAPI calls fanned out concurrently). Backs
-//                         the Summary tab.
+//     process + current droplet + latest package +
+//     latest build + ssh feature flag. Expensive
+//     (5 CAPI calls fanned out concurrently). Backs
+//     the Summary tab.
 //
 // Per-source failures in `?return=details` are non-fatal: missing
 // sub-resources surface in `_meta.unavailable`, the envelope still

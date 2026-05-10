@@ -277,7 +277,7 @@ func TestRestageJobTranslator_CurrentStage_MapsLastRecord(t *testing.T) {
 	assert.Equal(t, "BUILD_CREATE", stage.Code)
 	assert.Equal(t, "Creating build", stage.Label)
 	assert.Equal(t, 2, stage.Index) // two records → Index 2
-	assert.Equal(t, 0, stage.Of)   // unknown total
+	assert.Equal(t, 0, stage.Of)    // unknown total
 	assert.Equal(t, startedAt, stage.EnteredAt)
 }
 

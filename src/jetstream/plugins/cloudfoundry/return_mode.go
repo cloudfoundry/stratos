@@ -12,15 +12,15 @@ import (
 // chooses what to compose and what to omit based on the mode.
 //
 //   - ReturnBase    — entity fields only; relationship refs carry guid only.
-//                     One CAPI call per page, no joins.
+//     One CAPI call per page, no joins.
 //   - ReturnCounts  — {totalResults: N}; resources empty; per_page=1
-//                     forwarded upstream. Cheapest mode.
+//     forwarded upstream. Cheapest mode.
 //   - ReturnSummary — base + relationship refs populated to {guid, name}
-//                     (and chain leaves where applicable). One CAPI call
-//                     per page, full v3 include= chain.
+//     (and chain leaves where applicable). One CAPI call
+//     per page, full v3 include= chain.
 //   - ReturnDetails — summary + ref nodes expanded with extended fields
-//                     (description, costs, schemas on plan; description,
-//                     tags, requires, brokerCatalog on offering; etc.).
+//     (description, costs, schemas on plan; description,
+//     tags, requires, brokerCatalog on offering; etc.).
 //
 // Cross-entity aggregation counts (bindingsCount, plansCount, etc.) are
 // NOT a wire-shape concern; they're derived in the frontend over

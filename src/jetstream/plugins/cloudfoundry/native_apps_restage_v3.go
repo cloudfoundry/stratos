@@ -262,7 +262,8 @@ func createBuildForPackage(ctx context.Context, client capi.Client, packageGUID 
 // callers pass an existing droplet GUID for a previous revision.
 //
 // Maps to: PATCH /v3/apps/<a>/relationships/current_droplet
-//          {"data":{"guid":"<droplet>"}}
+//
+//	{"data":{"guid":"<droplet>"}}
 //
 // CF responds 200 OK with the updated relationship; the returned
 // Relationship.Data.GUID matches the requested droplet on success.

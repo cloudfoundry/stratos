@@ -7,8 +7,8 @@
 // a `revision.guid` instead of a `droplet.guid`. The orchestrator
 // therefore only needs two stages:
 //
-//   deployment_create — POST /v3/deployments {revision, app, strategy}
-//   deployment_poll   — GET /v3/deployments/:guid until FINALIZED/DEPLOYED
+//	deployment_create — POST /v3/deployments {revision, app, strategy}
+//	deployment_poll   — GET /v3/deployments/:guid until FINALIZED/DEPLOYED
 //
 // Mirror of native_apps_restage_v3.go (advanceRestage + per-stage
 // helpers); see that file for the broader async-job state-machine
