@@ -27,8 +27,14 @@ export class ServiceCatalogDataService {
   private http = inject(HttpClient);
 
   serviceOffering(cnsiGuid: string, offeringGuid: string): Observable<StServiceOffering | null> {
+    // ?return=details so the Summary card has the offering's
+    // description, tags, available, shareable, documentationUrl, and
+    // broker.url. Without it the handler defaults to ReturnBase which
+    // omits everything except guid + name, leaving "Available: No",
+    // "Shareable: No", empty Tags, empty description on the summary tab.
     return this.http.get<StServiceOffering>(
       `/pp/v1/cf/service_offerings/${cnsiGuid}/${offeringGuid}`,
+      { params: new HttpParams().set('return', 'details') },
     ).pipe(this.catchAs404Null());
   }
 
