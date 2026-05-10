@@ -159,7 +159,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         if (this.snackBarRef) {
           this.snackBarRef.dismiss();
         }
-        this.snackBarRef = this.snackBar.open(`Unable to fetch ${meta.scm.getLabel()} project: ${errorMessage}`, 'Dismiss');
+        this.snackBarRef = this.snackBar.error(`Unable to fetch ${meta.scm.getLabel()} project: ${errorMessage}`);
       });
 
       this.commit$ = blockedOnRepo$.pipe(

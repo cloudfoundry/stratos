@@ -221,7 +221,7 @@ export class CloudFoundrySpaceRoutesSignalComponent {
       try {
         await op();
       } catch (err: any) {
-        this.snackBar.open(`${label} failed: ${err?.message ?? err}`, 'Dismiss');
+        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
     };
     return [

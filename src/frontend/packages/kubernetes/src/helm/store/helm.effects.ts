@@ -293,7 +293,7 @@ export class HelmEffects {
       req.subscribe((_ok: unknown) => {
         this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
       }, (_err: unknown) => {
-        this.snackBar.open(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`, 'Dismiss', { duration: 5000 });
+        this.snackBar.error(`Failed to Synchronize Helm Repository '${action.endpoint.name}'`);
       });
       return [];
     })

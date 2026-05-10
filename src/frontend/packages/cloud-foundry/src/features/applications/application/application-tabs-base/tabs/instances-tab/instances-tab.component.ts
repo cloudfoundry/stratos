@@ -157,7 +157,7 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
             try {
               await this.actionsService.killInstance(row.index);
             } catch (err: any) {
-              this.snackBar.open(`Terminate failed: ${err?.message ?? err}`, 'Dismiss');
+              this.snackBar.error(`Terminate failed: ${err?.message ?? err}`);
             }
           });
         },

@@ -116,7 +116,7 @@ export class UserInviteConfigureService {
         })
       ).subscribe(res => {
         if (res.error) {
-          this.snackBar.open(res.errorMessage, 'Close');
+          this.snackBar.error(res.errorMessage, 'Close');
         }
       });
     });
