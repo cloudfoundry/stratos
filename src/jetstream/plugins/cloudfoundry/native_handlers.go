@@ -392,6 +392,19 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 	}
 
+	// Optional space scoping: ?space_guids=g1,g2,... forwards as
+	// /v3/apps?space_guids=g1,g2 — used by the bind-app dropdown in the
+	// service-instance create wizard (and any other consumer that wants
+	// just the apps in a known space). Composes with the guidsFilter
+	// branch above; the enrichment-skip is only triggered by guids=,
+	// since space_guids= still wants the space-name + memory rows.
+	if rawSpaces := ctx.QueryParam("space_guids"); rawSpaces != "" {
+		spaces := splitNonEmpty(rawSpaces, ",")
+		if len(spaces) > 0 {
+			params = params.WithFilter("space_guids", spaces...)
+		}
+	}
+
 	raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
 	if lerr != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
