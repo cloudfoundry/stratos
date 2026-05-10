@@ -1,27 +1,25 @@
 @if (errorMessage$ | async; as message) {
-  <div class="header-event--error">
-    <div class="header-event__outer">
-      <span class="header-event">
-        <span class="header-event__error-message">
-          <app-custom-icon class="header-event__error-icon">error</app-custom-icon>
-          <div class="header-event__message-wrapper">{{ message }} -
-            @if (!endpointId) {
-              <span>
-                <a class="header-event__details-link" [routerLink]="['/events/endpoints']">view details</a>
-              </span>
-            }
-            @if (endpointId) {
-              <span>
-                <a class="header-event__details-link" [routerLink]="['/errors/', endpointId]">view details</a>
-              </span>
-            }
-          </div>
-        </span>
-        <!-- *ngIf="endpointId"  -->
-        <app-custom-icon class="header-event__error-dismiss" (click)="markEventsAsRead()">
-          clear
-        </app-custom-icon>
-      </span>
+  <div class="px-4 py-2">
+    <div class="inline-flex items-start gap-2 px-3 py-1.5 max-w-full rounded-md bg-danger-shade-50 border border-danger-shade-200 text-danger-shade-700">
+      <app-custom-icon class="text-danger-shade-500 shrink-0 self-center">error</app-custom-icon>
+      @if (singleErrorEvent$ | async; as ev) {
+        <div class="flex flex-col min-w-0 max-w-prose">
+          <h3 class="text-sm font-bold truncate m-0" [title]="ev.endpointName + ' (' + ev.endpointId + ')'">
+            {{ ev.endpointName }} <span class="font-normal text-xs text-danger-shade-500">({{ ev.endpointId }})</span>
+          </h3>
+          <span class="text-xs whitespace-normal break-words mt-1" style="text-wrap: balance">{{ ev.detail }}</span>
+        </div>
+      } @else {
+        <span class="text-sm whitespace-normal break-words self-center max-w-prose" style="text-wrap: balance">{{ message }}</span>
+      }
+      @if (!endpointId) {
+        <a class="text-primary hover:underline font-medium text-sm shrink-0 self-center" [routerLink]="['/events/endpoints']">view details</a>
+      }
+      @if (endpointId) {
+        <a class="text-primary hover:underline font-medium text-sm shrink-0 self-center" [routerLink]="['/errors/', endpointId]">view details</a>
+      }
+      <app-custom-icon class="cursor-pointer text-danger-shade-500 hover:text-danger-shade-800 shrink-0 self-center"
+        (click)="markEventsAsRead()">clear</app-custom-icon>
     </div>
   </div>
 }

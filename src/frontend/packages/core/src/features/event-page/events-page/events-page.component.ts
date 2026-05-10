@@ -10,7 +10,6 @@ import { take, distinctUntilChanged, map, share, switchMap, tap } from 'rxjs/ope
 
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 export const eventReturnUrlParam = 'returnFromEvents';
@@ -31,8 +30,7 @@ export enum EventFilterValues {
     RouterModule,
     CustomIconComponent,
     CustomTooltipDirective,
-    PageHeaderComponent,
-    StatefulIconComponent
+    PageHeaderComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -108,6 +106,17 @@ export class EventsPageComponent implements OnInit {
   }
   updateReadState(event: IGlobalEvent, read: boolean) {
     this.eventService.updateEventReadState(event, read);
+  }
+
+  // Filter selector — wired from the toolbar buttons. Writes through to
+  // the private signal so events$ (driven by selectedFilterSubject$,
+  // toObservable on the same signal) re-runs the switchMap and the row
+  // list updates without a page reload. Was a silent no-op until this
+  // method existed: the template called `selectedFilterSubject.next()`
+  // on a property the component never declared, so clicks landed on
+  // undefined and changed nothing visible.
+  selectFilter(value: EventFilterValues) {
+    this._selectedFilter.set(value);
   }
 
   createQueryParams(urlForward: string): Observable<object> {

@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import type { EndpointModel } from '@stratosui/store';
@@ -7,7 +7,7 @@ import { MergeOrchestrator } from '../../../../../services/data-sources/merge-or
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
-import { ListStateStore } from '@stratosui/core';
+import { GlobalEventService, ListStateStore } from '@stratosui/core';
 import type { SignalListDropdownOption } from '@stratosui/core';
 
 // Marketplace list config — multi-CNSI service offerings catalog. Mirrors
@@ -71,6 +71,16 @@ export class CfServiceOfferingsSignalConfigService {
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
+  private readonly eventService = inject(GlobalEventService);
+  // Effect that publishes orchestrator errors to the page-header banner.
+  // Re-bound on each initialize() to track the new orchestrator's
+  // errorsByCnsi signal; previous binding is destroyed.
+  private _errorEffect: EffectRef | undefined;
+  // Sorted+joined cnsi-guid list of the current orchestrator's sources.
+  // Idempotency guard: initialize() is a no-op when called with the
+  // same set, so the auto-init constructor effect and the marketplace
+  // component's explicit ngOnInit call don't fight each other.
+  private _initializedFor: string | null = null;
 
   constructor() {
     const cfService = inject(CloudFoundryService, { optional: true });
@@ -122,9 +132,13 @@ export class CfServiceOfferingsSignalConfigService {
         return true;
       });
     });
+
   }
 
   initialize(cnsiGuids: readonly string[]): void {
+    const key = [...cnsiGuids].sort().join(',');
+    if (key === this._initializedFor) return;
+    this._initializedFor = key;
     this._hasLoadedOnce.set(false);
     const sources = cnsiGuids.map(guid => new CnsiServiceOfferingsSource(guid, this.http));
     this.orchestrator = new MergeOrchestrator<StServiceOffering>(sources);
@@ -136,6 +150,10 @@ export class CfServiceOfferingsSignalConfigService {
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
+    this._errorEffect?.destroy();
+    this._errorEffect = effect(() => {
+      this.eventService.publishEndpointErrors(this.orchestrator.errorsByCnsi());
+    }, { injector: this.injector });
   }
 
   async loadAll(): Promise<void> {
