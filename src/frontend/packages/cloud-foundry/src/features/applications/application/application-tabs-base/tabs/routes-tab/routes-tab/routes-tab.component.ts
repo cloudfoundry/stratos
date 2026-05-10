@@ -164,7 +164,7 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
               await this.actionsService.unmapRoute(row.guid);
               this.dataService.removeRoute(row.guid);
             } catch (err: any) {
-              this.snackBar.open(`Unmap failed: ${err?.message ?? err}`, 'Dismiss');
+              this.snackBar.error(`Unmap failed: ${err?.message ?? err}`);
             }
           });
         },
@@ -184,7 +184,7 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
               await this.actionsService.deleteRoute(row.guid);
               this.dataService.removeRoute(row.guid);
             } catch (err: any) {
-              this.snackBar.open(`Delete failed: ${err?.message ?? err}`, 'Dismiss');
+              this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
             }
           });
         },

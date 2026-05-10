@@ -209,7 +209,7 @@ export class ServicesTabComponent implements OnInit {
               this.dataService.removeServiceBinding(row.guid);
             } catch (err: unknown) {
               const msg = (err as { message?: string })?.message ?? String(err);
-              this.snackBar.open(`Unbind failed: ${msg}`, 'Dismiss');
+              this.snackBar.error(`Unbind failed: ${msg}`);
             }
           });
         },

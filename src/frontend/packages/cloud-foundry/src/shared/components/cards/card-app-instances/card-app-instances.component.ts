@@ -179,7 +179,7 @@ export class CardAppInstancesComponent implements OnDestroy {
           this.dataService.refresh('stats'),
         ]);
       } catch (err: any) {
-        this.snackBarRef = this.snackBar.open(`Failed to update instance count: ${err?.message ?? err}`, 'Dismiss');
+        this.snackBarRef = this.snackBar.error(`Failed to update instance count: ${err?.message ?? err}`);
       }
     };
     if (value === 0) {

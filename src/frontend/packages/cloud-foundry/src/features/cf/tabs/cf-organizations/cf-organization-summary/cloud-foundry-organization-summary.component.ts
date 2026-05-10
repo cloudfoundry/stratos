@@ -115,7 +115,7 @@ export class CloudFoundryOrganizationSummaryComponent {
                 ]
               }));
             } else if (newV.error) {
-              this.snackBar.open(`Failed to delete space: ${newV.message}`, 'Close');
+              this.snackBar.error(`Failed to delete space: ${newV.message}`, 'Close');
             }
           })
         ).subscribe();

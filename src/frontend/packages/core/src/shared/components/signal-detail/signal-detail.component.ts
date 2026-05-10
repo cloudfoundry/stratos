@@ -116,12 +116,12 @@ export class SignalDetailComponent {
       if (result && typeof (result as Promise<void>).then === 'function') {
         (result as Promise<void>).catch((err: unknown) => {
           const msg = err instanceof Error ? err.message : String(err);
-          this.snackBar.open(`${act.label} failed: ${msg}`, 'Dismiss');
+          this.snackBar.error(`${act.label} failed: ${msg}`);
         });
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      this.snackBar.open(`${act.label} failed: ${msg}`, 'Dismiss');
+      this.snackBar.error(`${act.label} failed: ${msg}`);
     }
   }
 

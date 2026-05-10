@@ -60,6 +60,18 @@ export class TailwindSnackBarService {
   private appRef = inject(ApplicationRef);
   private injector = inject(Injector);
 
+  // Errors must stay on screen until the user dismisses them — the default
+   // 4s auto-dismiss hid broker / 502 / job failures before the operator
+   // could read them. Red panel class signals severity at a glance.
+   error(message: string, action: string = 'Dismiss', config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+    return this.open(message, action, {
+      duration: 0,
+      ...(config ?? {}),
+      panelClass: ['snackbar-error', '!bg-red-700']
+        .concat(config?.panelClass ? (Array.isArray(config.panelClass) ? config.panelClass : [config.panelClass]) : []),
+    });
+  }
+
   open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     const snackbarElement = this.createSnackbarElement(message, action, config);
     const snackbarRef = new TailwindSnackBarRefImpl(() => this.removeSnackbar(snackbarElement));

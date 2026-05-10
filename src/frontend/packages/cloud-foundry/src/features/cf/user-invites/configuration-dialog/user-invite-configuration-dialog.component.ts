@@ -80,7 +80,7 @@ export class UserInviteConfigurationDialogComponent {
         take(1)
       ).subscribe((v: any) => {
         if (v.error) {
-          this.snackBar.open(v.errorMessage, 'Close');
+          this.snackBar.error(v.errorMessage, 'Close');
         } else {
           this.dialogRef.close();
         }
