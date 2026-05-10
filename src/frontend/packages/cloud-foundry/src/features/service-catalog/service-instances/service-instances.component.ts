@@ -27,6 +27,7 @@ import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 
 /**
  * ServiceInstancesComponent — service-catalog Instances tab on a service
@@ -207,8 +208,7 @@ export class ServiceInstancesComponent implements OnInit {
             try {
               await this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid);
             } catch (err: unknown) {
-              const msg = (err as { message?: string })?.message ?? String(err);
-              this.snackBar.open(`Delete failed: ${msg}`, 'Dismiss');
+              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
             }
           });
         },
