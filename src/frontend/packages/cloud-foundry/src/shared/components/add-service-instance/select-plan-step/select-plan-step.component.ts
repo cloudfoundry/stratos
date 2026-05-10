@@ -110,6 +110,12 @@ export class SelectPlanStepComponent implements OnDestroy {
       }),
       switchMap(state => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
+        // Trigger the per-CNSI services-details fetch (idempotent).
+        // Marketplace-mode init calls this elsewhere; bind-service mode
+        // (Applications → Bind Service) skips that init path so the
+        // helper had to drive the load itself or the plan dropdown
+        // would stay empty with "no visible plans".
+        void this.cSIHelperService.load();
         return this.cSIHelperService.servicePlans$;
       }),
       tap(o => {

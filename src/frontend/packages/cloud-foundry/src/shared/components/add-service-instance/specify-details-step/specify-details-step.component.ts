@@ -28,6 +28,7 @@ import {
 
 import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult, StratosJobError } from '../../../../services/async-jobs/async-job.types';
@@ -63,6 +64,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private csiState = inject(CsiStateService);
   modeService = inject(CsiModeService);
   private http = inject(HttpClient);
+  private snackBar = inject(TailwindSnackBarService);
   // toObservable() must run inside an injection context — lift to a class
   // field. Reused by selectCreateInstance$ and onNext below.
   private csiState$ = toObservable(this.csiState.state);
@@ -205,10 +207,23 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   };
 
   setServiceParams(data: any) {
-    this.serviceParams = data;
+    // schema-form emits `null`/`undefined` when the JSON editor is empty,
+    // and buildWriteBody later runs `Object.keys(params)` which throws
+    // "Cannot convert undefined or null to object" on a nullish value.
+    // Coerce to {} so the no-params path is the same as an empty object.
+    this.serviceParams = data ?? {};
   }
 
   setParamsValid(valid: boolean) {
+    // Service-instance params are optional when the plan exposes no
+    // schema (or only optional fields). schema-form's pValidChange seeds
+    // at false and only flips true on a real value change, which never
+    // fires for an empty/no-schema editor. Without this guard the Create
+    // button stays disabled even though the user has nothing to enter.
+    if (!valid && !this.schemaFormConfig?.schema) {
+      this._serviceParamsValid.set(true);
+      return;
+    }
     this._serviceParamsValid.set(valid);
   }
 
@@ -277,7 +292,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   };
 
-  routeToServices = (): StepOnNextResult => {
+  routeToServices = (successMessage?: string): StepOnNextResult => {
+    if (successMessage) {
+      // Stepper redirects on success but doesn't surface a confirmation;
+      // without this snackbar the user sees the wizard "blink" back to
+      // the marketplace with no feedback that the instance / binding
+      // actually succeeded.
+      this.snackBar.open(successMessage, 'Dismiss', { duration: 4000 });
+    }
     return {
       success: true,
       // We should always go back to where we came from, aka 'cancel' location.
@@ -315,7 +337,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
 
     if (isEditMode) {
-      return this.routeToServices();
+      return this.routeToServices(`Service instance "${state.name}" updated.`);
     }
 
     // Create path: try to extract the new SI's guid for the bind-after-create
@@ -330,8 +352,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   private async bindAppIfRequested(siGuid: string | undefined, state: CsiState): Promise<StepOnNextResult> {
+    const siName = state.name || 'Service instance';
     if (!state.bindAppGuid || !siGuid) {
-      return this.routeToServices();
+      return this.routeToServices(`Service instance "${siName}" created.`);
     }
     const bindResult = await this.modeService.createApplicationServiceBinding(
       siGuid,
@@ -347,7 +370,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
     // Refetch env vars for app, since they have been changed by CF
     cfEntityCatalog.appEnvVar.api.getMultiple(state.bindAppGuid, state.cfGuid);
-    return this.routeToServices();
+    return this.routeToServices(`Service instance "${siName}" created and bound.`);
   }
 
   private buildWriteBody(state: CsiState, isEditMode: boolean): Record<string, unknown> {
@@ -452,14 +475,27 @@ function extractErrorMessage(err: unknown): string {
   if (err instanceof HttpErrorResponse) {
     const body = err.error;
     if (body && typeof body === 'object') {
-      const errors = (body as { errors?: Array<{ detail?: string; title?: string }> }).errors;
+      // Backend can respond with three shapes:
+      //  - CF passthrough: { errors: [{ detail, title, code }] }
+      //  - Stratos job envelope: { state, errors: [{ message, code, detail }] }
+      //  - handleCapiError fallback: { error: "..." }
+      // Walk all three so the user sees what actually broke instead of
+      // Angular's generic "Http failure response for ... 502 OK".
+      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
       const first = errors?.[0];
-      if (first?.detail) return first.detail;
-      if (first?.title) return first.title;
-      const msg = (body as { message?: string }).message;
-      if (msg) return msg;
+      if (first) {
+        if (typeof first.detail === 'string' && first.detail) return first.detail;
+        if (first.title) return first.title;
+        if (first.message) return first.message;
+      }
+      const top = body as { message?: string; error?: string };
+      if (top.message) return top.message;
+      if (top.error) return top.error;
     }
-    return err.message || `HTTP ${err.status}`;
+    if (typeof body === 'string' && body) return body;
+    return err.statusText && err.statusText !== 'OK'
+      ? `HTTP ${err.status} ${err.statusText}`
+      : `HTTP ${err.status}`;
   }
   if (err instanceof Error) return err.message;
   return 'unknown error';
