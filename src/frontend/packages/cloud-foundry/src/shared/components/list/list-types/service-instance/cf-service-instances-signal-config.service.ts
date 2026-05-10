@@ -291,6 +291,12 @@ export class CfServiceInstancesSignalConfigService {
   async deleteServiceInstance(cnsiGuid: string, siGuid: string): Promise<void> {
     const call = this.http.delete(`/pp/v1/cf/service_instances/${cnsiGuid}/${siGuid}`, { observe: 'response' });
     await writeWithJob(this.http, call);
+    // Optimistic local removal — CF's async delete + list-query roundtrip
+    // is slower than the page refresh would feel useful, so drop the row
+    // from local cache immediately. The trailing refresh confirms server
+    // state and brings the row back if CF rejected the delete after the
+    // backend's recovery returned 202 RUNNING.
+    this.orchestrator.removeRow(cnsiGuid, siGuid);
     await this.refresh();
   }
 }
