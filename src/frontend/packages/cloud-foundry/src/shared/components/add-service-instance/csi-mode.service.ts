@@ -319,20 +319,20 @@ export class CsiModeService {
 
 }
 
-// Detect CF's "operation in progress" reject — code 10008 with status 422.
-// CF returns this when a bind / update lands while the SI's last_operation
-// is still in progress. Treated as deferred, not failed: the caller polls
-// the SI and retries the bind once last_op = succeeded.
+// Detect CF's "operation in progress" reject. CF returns 422 with the
+// generic CF-UnprocessableEntity title (code 10008) when a bind/update
+// lands while the SI's last_operation is still in progress; the
+// distinguishing signal is the detail message itself, not the code
+// (10008 covers many other cases). Treated as deferred, not failed:
+// the caller polls the SI and retries the bind once last_op = succeeded.
 function isOperationInProgressError(err: unknown): boolean {
   if (!(err instanceof HttpErrorResponse)) return false;
   if (err.status !== 422) return false;
   const body = err.error;
   if (!body || typeof body !== 'object') return false;
-  const errors = (body as { errors?: Array<{ code?: number; detail?: string }> }).errors;
+  const errors = (body as { errors?: Array<{ detail?: string }> }).errors;
   const first = errors?.[0];
-  if (first?.code === 10008) return true;
-  if (typeof first?.detail === 'string' && first.detail.includes('operation in progress')) return true;
-  return false;
+  return typeof first?.detail === 'string' && first.detail.includes('operation in progress');
 }
 
 function extractErrorMessage(err: unknown): string {
