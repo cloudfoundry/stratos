@@ -156,13 +156,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         step.busy = false;
         this.showNextButtonProgress = false;
         this.cdr.markForCheck();
-        this.snackBarRef = this.snackBar.open(
+        this.snackBarRef = this.snackBar.error(
           `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
           'Dismiss',
-          // duration: 0 means "stay open until user clicks Dismiss" (no
-          // auto-dismiss). Matches reference console481 behavior; the
-          // default 4s auto-dismiss hid errors before users could read them.
-          { panelClass: 'stepper-snack-bar', duration: 0 }
+          { panelClass: 'stepper-snack-bar' },
         );
         return;
       }
@@ -210,11 +207,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               this.setActive(this.currentIndex + 1);
             }
           } else if (!success && message) {
-            this.snackBarRef = this.snackBar.open(
+            this.snackBarRef = this.snackBar.error(
               message,
               'Dismiss',
-              // duration: 0 — stay open until user clicks Dismiss.
-              { panelClass: 'stepper-snack-bar', duration: 0 }
+              { panelClass: 'stepper-snack-bar' },
             );
           }
           return observableOf(undefined);

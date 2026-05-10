@@ -274,14 +274,18 @@ export class StepComponent {
     if (submit) {
       return from(
         submit().then(
-          (resolved) => ({
-            success: true,
-            // resolved is `void | { ignoreSuccess?: boolean }`; the void
-            // case (Promise.resolve()) isn't an object so guard before read.
-            ignoreSuccess: typeof resolved === 'object' && resolved !== null
-              ? resolved.ignoreSuccess
-              : undefined,
-          } as StepOnNextResult),
+          (resolved) => {
+            // resolved is `void | Partial<StepOnNextResult>`; void case
+            // (Promise.resolve()) isn't an object so guard before merge.
+            // Without spreading the resolved object the redirect / redirectPayload
+            // flags from routeToServices-style success returns are lost and the
+            // stepper can't navigate the user out of the wizard on completion.
+            const base = { success: true } as StepOnNextResult;
+            if (typeof resolved === 'object' && resolved !== null) {
+              return { ...base, ...resolved } as StepOnNextResult;
+            }
+            return base;
+          },
           (err: unknown) => ({
             success: false,
             message: err instanceof Error ? err.message : String(err),
