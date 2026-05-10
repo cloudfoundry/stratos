@@ -18,15 +18,15 @@ import (
 //
 //   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
 //   - base     — guid + cnsiGuid + name + serviceOffering.{guid} + createdAt.
-//                One CAPI call, no include chain.
+//     One CAPI call, no include chain.
 //   - summary  — base + description + free + available + visibilityType +
-//                updatedAt + serviceOffering.{name, broker{guid,name}}.
-//                One CAPI call with
-//                ?include=service_offering,service_offering.service_broker;
-//                offerings + brokers come back in the v3 included block and
-//                resolve in a single round trip.
+//     updatedAt + serviceOffering.{name, broker{guid,name}}.
+//     One CAPI call with
+//     ?include=service_offering,service_offering.service_broker;
+//     offerings + brokers come back in the v3 included block and
+//     resolve in a single round trip.
 //   - details  — summary + costs + schemas + maintenanceInfo + labels +
-//                annotations + serviceOffering ref expanded (broker.url etc.).
+//     annotations + serviceOffering ref expanded (broker.url etc.).
 //
 // `?service_offering=<csv>` is a first-class filter on top of the tier
 // dispatch — the catalog detail entry that loads plans for one (or a few)
@@ -83,8 +83,12 @@ func (c *CloudFoundrySpecification) getNativeServicePlans(ctx echo.Context) erro
 		}
 	}
 
+	// /v3/service_plans accepts ?include=service_offering but rejects the
+	// `service_offering.service_broker` chain — we resolve broker rows via
+	// a follow-up batch List against /v3/service_brokers?guids=… seeded
+	// from the offerings' service_broker relationships.
 	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude("service_offering", "service_offering.service_broker")
+		params = params.WithInclude("service_offering")
 	}
 
 	raw, lerr := cfClient.ServicePlans().List(ctx.Request().Context(), params)
@@ -96,7 +100,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlans(ctx echo.Context) erro
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
 		offeringByGUID = offeringsFromIncluded(raw.Included)
-		brokerByGUID = brokersFromIncluded(raw.Included)
+		brokerByGUID = batchFetchBrokersForOfferings(ctx, cfClient, offeringByGUID)
 	}
 
 	resources := make([]StServicePlan, 0, len(raw.Resources))
@@ -190,10 +194,10 @@ func offeringsFromIncluded(included map[string][]json.RawMessage) map[string]cap
 // Tier policy:
 //   - base:    guid + cnsiGuid + name + serviceOffering.{guid} + createdAt
 //   - summary: + description + free + available + visibilityType + updatedAt
-//              + serviceOffering.{name, broker{guid,name}}
-//              + space.{guid} (visibilityType=space only)
+//   - serviceOffering.{name, broker{guid,name}}
+//   - space.{guid} (visibilityType=space only)
 //   - details: + costs + schemas + maintenanceInfo + labels + annotations
-//              + serviceOffering ref fully expanded (broker.url etc.)
+//   - serviceOffering ref fully expanded (broker.url etc.)
 func toStServicePlan(p capi.ServicePlan, cnsiGUID string, offeringByGUID map[string]capi.ServiceOffering, brokerByGUID map[string]capi.ServiceBroker, mode ReturnMode) StServicePlan {
 	out := StServicePlan{
 		GUID:      p.GUID,
@@ -359,8 +363,11 @@ func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Cont
 		}
 	}
 
+	// Same /v3/service_plans constraint as the non-broker-scoped path:
+	// `service_offering.service_broker` is rejected; resolve brokers via
+	// follow-up batch List.
 	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude("service_offering", "service_offering.service_broker")
+		params = params.WithInclude("service_offering")
 	}
 
 	raw, lerr := cfClient.ServicePlans().List(ctx.Request().Context(), params)
@@ -372,7 +379,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Cont
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
 		offeringByGUID = offeringsFromIncluded(raw.Included)
-		brokerByGUID = brokersFromIncluded(raw.Included)
+		brokerByGUID = batchFetchBrokersForOfferings(ctx, cfClient, offeringByGUID)
 	}
 
 	resources := make([]StServicePlan, 0, len(raw.Resources))
@@ -384,6 +391,39 @@ func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Cont
 		Resources:  resources,
 		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
+}
+
+// batchFetchBrokersForOfferings collects distinct broker GUIDs referenced by
+// the given offerings and returns a guid-keyed map of resolved brokers. Used
+// when an include chain can't reach broker rows (CAPI rejects
+// `service_offering.service_broker` on /v3/service_plans). Soft-fail: errors
+// return an empty map and toStServicePlan emits guid-only broker refs.
+func batchFetchBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings map[string]capi.ServiceOffering) map[string]capi.ServiceBroker {
+	out := map[string]capi.ServiceBroker{}
+	guids := []string{}
+	seen := map[string]bool{}
+	for _, o := range offerings {
+		g := relationshipGUID(o.Relationships.ServiceBroker)
+		if g == "" || seen[g] {
+			continue
+		}
+		seen[g] = true
+		guids = append(guids, g)
+	}
+	if len(guids) == 0 {
+		return out
+	}
+	params := capi.NewQueryParams().WithPerPage(len(guids)).WithFilter("guids", guids...)
+	raw, err := cfClient.ServiceBrokers().List(ctx.Request().Context(), params)
+	if err != nil {
+		return out
+	}
+	for _, b := range raw.Resources {
+		if b.GUID != "" {
+			out[b.GUID] = b
+		}
+	}
+	return out
 }
 
 // splitNonEmpty splits s on sep and drops empty tokens — used by the

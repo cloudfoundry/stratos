@@ -83,7 +83,7 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 					},
 				},
 			}
-			if strings.Contains(r.URL.RawQuery, "include=service_broker") {
+			if strings.Contains(r.URL.RawQuery, "fields%5Bservice_broker%5D=") {
 				body["included"] = map[string]interface{}{
 					"service_brokers": []map[string]interface{}{
 						{"guid": "broker-1", "name": "redis-broker", "url": "https://broker-1.example"},
@@ -242,7 +242,7 @@ func TestGetNativeServiceOfferings_Summary(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, 1, srv.listHits, "exactly one list call")
 	assert.Equal(t, 0, srv.brokerHits, "summary mode reads brokers from included; no second call")
-	assert.Contains(t, srv.lastListQuery, "include=service_broker", "summary mode must request include")
+	assert.Contains(t, srv.lastListQuery, "fields%5Bservice_broker%5D=", "summary mode must request fields[service_broker]")
 
 	var resp StratosPagedResponse[StServiceOffering]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
@@ -277,7 +277,7 @@ func TestGetNativeServiceOfferings_Details(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, 0, srv.brokerHits, "details mode reads brokers from included; no second call")
-	assert.Contains(t, srv.lastListQuery, "include=service_broker")
+	assert.Contains(t, srv.lastListQuery, "fields%5Bservice_broker%5D=")
 
 	var resp StratosPagedResponse[StServiceOffering]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
@@ -476,7 +476,7 @@ func newScopedOfferingsServer(t *testing.T, capture *scopedOfferingsCapture) *ht
 					},
 				},
 			}
-			if include := r.URL.Query().Get("include"); strings.Contains(include, "service_broker") {
+			if r.URL.Query().Get("fields[service_broker]") != "" {
 				payload["included"] = map[string]interface{}{
 					"service_brokers": []map[string]interface{}{
 						{"guid": "broker-1", "name": "alpha-broker", "url": "https://broker.example"},

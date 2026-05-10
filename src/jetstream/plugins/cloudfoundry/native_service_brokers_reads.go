@@ -16,11 +16,11 @@ import (
 // tiers selected by ?return=:
 //
 //   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
-//                Existing legacy shape preserved verbatim.
+//     Existing legacy shape preserved verbatim.
 //   - base     — guid + cnsiGuid + name + url + createdAt. No include chain.
 //   - summary  — base + space.{guid,name} + updatedAt. One CAPI call with
-//                ?include=space; the included spaces are decoded from the
-//                v3 `included` block (no second round-trip).
+//     ?include=space; the included spaces are decoded from the
+//     v3 `included` block (no second round-trip).
 //   - details  — summary + labels + annotations.
 //
 // All non-counts modes emit `_meta.unavailable: ['authUsername']` per row
@@ -72,12 +72,11 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 		}
 	}
 
-	// `?include=space` brings space refs back in v3's `included` block at
-	// summary+. Empty result sets stay empty — the include is harmless on
-	// global-only deployments.
-	if mode == ReturnSummary || mode == ReturnDetails {
-		params = params.WithInclude("space")
-	}
+	// /v3/service_brokers rejects ?include= and ?fields[] (3.180.0): the
+	// list endpoint exposes no joinable relations. For summary+ we drop
+	// the include and resolve any space refs via a single follow-up
+	// Spaces().List(?guids=…) batch — no-op on the common case where all
+	// brokers are global (relationships.space empty).
 
 	raw, lerr := cfClient.ServiceBrokers().List(ctx.Request().Context(), params)
 	if lerr != nil {
@@ -86,7 +85,7 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 
 	spaceByGUID := map[string]capi.Space{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		spaceByGUID = spacesFromIncluded(raw.Included)
+		spaceByGUID = batchFetchBrokerSpaces(ctx, cfClient, raw.Resources)
 	}
 
 	resources := make([]StServiceBroker, 0, len(raw.Resources))
@@ -148,6 +147,42 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx echo.Contex
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, toStServiceBroker(*broker, cnsiGUID, spaceByGUID, mode))
+}
+
+// batchFetchBrokerSpaces collects distinct space GUIDs referenced by the
+// given brokers and returns a guid-keyed map of resolved spaces. Used when
+// the list endpoint can't carry an include chain (CAPI rejects ?include=
+// on /v3/service_brokers). Soft-fail: errors return an empty map and let
+// toStServiceBroker emit guid-only space refs.
+func batchFetchBrokerSpaces(ctx echo.Context, cfClient capi.Client, brokers []capi.ServiceBroker) map[string]capi.Space {
+	out := map[string]capi.Space{}
+	guids := []string{}
+	seen := map[string]bool{}
+	for _, b := range brokers {
+		if b.Relationships.Space == nil {
+			continue
+		}
+		g := relationshipGUID(*b.Relationships.Space)
+		if g == "" || seen[g] {
+			continue
+		}
+		seen[g] = true
+		guids = append(guids, g)
+	}
+	if len(guids) == 0 {
+		return out
+	}
+	params := capi.NewQueryParams().WithPerPage(len(guids)).WithFilter("guids", guids...)
+	raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
+	if err != nil {
+		return out
+	}
+	for _, s := range raw.Resources {
+		if s.GUID != "" {
+			out[s.GUID] = s
+		}
+	}
+	return out
 }
 
 // spacesFromIncluded decodes v3's `included.spaces` block into a guid-keyed
