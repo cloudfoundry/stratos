@@ -48,6 +48,20 @@
     [style.top]="dropdownTop"
     [style.left]="dropdownLeft"
     [style.min-width]="dropdownWidth">
+    <!-- Type-to-filter input. Shown when the option list is long enough
+         to be tedious to scan (>5 options). Filters case-insensitively
+         on each option's display text via showsOnly applied to wrapper
+         elements; selection logic is unchanged. -->
+    @if (showSearch) {
+      <div class="sticky top-0 z-10 bg-[var(--card-bg,white)] dark:bg-[var(--card-bg,#1e293b)] border-b border-[var(--content-border,#e5e7eb)] dark:border-[var(--content-border,#475569)] p-2">
+        <input #searchInput type="text" placeholder="Filter…"
+          class="w-full px-2 py-1 text-sm border border-[var(--input-border,#d1d5db)] rounded bg-[var(--input-bg)] text-[var(--input-text)] focus:outline-none focus:border-primary"
+          [value]="searchTerm"
+          (input)="onSearchInput($event)"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()" />
+      </div>
+    }
     <div class="options-container" role="listbox" tabindex="-1"
       [id]="'select-listbox-' + (id || name)"
       (click)="onOptionsClick($event)"

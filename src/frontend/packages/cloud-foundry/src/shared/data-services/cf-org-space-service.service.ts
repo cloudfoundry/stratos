@@ -179,19 +179,25 @@ export class CfOrgSpaceDataService implements OnDestroy {
   );
 
   // === Public derived signals ===
-  /** Orgs for the currently-selected cnsi. Empty until fetch resolves. */
+  /** Orgs for the currently-selected cnsi. Empty until fetch resolves.
+   *  Sorted by name (natural compare) so org_2 lands between org_1 and
+   *  org_3, not after org_19. CAPI returns creation order by default
+   *  which is not useful for users scanning a long list. */
   public orgList: Signal<{ guid: string; name: string }[]> = computed(() => {
     const cnsi = this._cfSelected();
     if (!cnsi) { return []; }
-    return this._orgsByCnsi()[cnsi] ?? [];
+    const list = this._orgsByCnsi()[cnsi] ?? [];
+    return [...list].sort((a, b) => naturalCompare(a.name, b.name));
   });
 
-  /** Spaces for the currently-selected (cnsi, org). Empty until fetch resolves. */
+  /** Spaces for the currently-selected (cnsi, org). Empty until fetch
+   *  resolves. Sorted by name for the same reason as orgList. */
   public spaceList: Signal<{ guid: string; name: string }[]> = computed(() => {
     const cnsi = this._cfSelected();
     const org = this._orgSelected();
     if (!cnsi || !org) { return []; }
-    return this._spacesByOrg()[`${cnsi}:${org}`] ?? [];
+    const list = this._spacesByOrg()[`${cnsi}:${org}`] ?? [];
+    return [...list].sort((a, b) => naturalCompare(a.name, b.name));
   });
 
   // === Public CfOrgSpaceItem shim API (legacy rxjs surface) ===
