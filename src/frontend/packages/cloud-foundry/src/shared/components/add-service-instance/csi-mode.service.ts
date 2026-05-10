@@ -1,11 +1,12 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, from, of } from 'rxjs';
+import { Observable, defer, firstValueFrom, from, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 
@@ -62,6 +63,7 @@ const defaultViewDetail = {
 export class CsiModeService {
   private activatedRoute = inject(ActivatedRoute);
   private http = inject(HttpClient);
+  private snackBar = inject(TailwindSnackBarService);
 
 
   private mode!: string;
@@ -169,6 +171,22 @@ export class CsiModeService {
     appGuid: string,
     params: object,
   ): Observable<{ success: boolean; message?: string }> {
+    return defer(() => from(this.bindWithProvisioningWait(serviceInstanceGuid, cfGuid, appGuid, params)));
+  }
+
+  // Bind, with a brief in-line wait (15s) that handles fast brokers without
+  // adding latency. If the SI is still "in progress" past that window we
+  // detach: return success now so the wizard can navigate to /services, and
+  // continue polling+retrying the bind in the background. A sticky snackbar
+  // reports the final outcome (succeeded / failed / give-up after long timeout).
+  private async bindWithProvisioningWait(
+    serviceInstanceGuid: string,
+    cfGuid: string,
+    appGuid: string,
+    params: object,
+    inlineWaitMs = 15_000,
+    backgroundWaitMs = 600_000,
+  ): Promise<{ success: boolean; message?: string }> {
     const body: Record<string, unknown> = {
       type: 'app',
       relationships: {
@@ -179,19 +197,93 @@ export class CsiModeService {
     if (params && Object.keys(params).length > 0) {
       body['parameters'] = params;
     }
-    const call = this.http.post(
-      `/pp/v1/cf/service_bindings/${cfGuid}`,
-      body,
-      { observe: 'response' },
+    const fireBind = () => firstValueFrom(from(writeWithJob<unknown>(
+      this.http,
+      this.http.post(`/pp/v1/cf/service_bindings/${cfGuid}`, body, { observe: 'response' }),
+    )));
+
+    try {
+      await fireBind();
+      return { success: true };
+    } catch (err: unknown) {
+      if (!isOperationInProgressError(err)) {
+        return { success: false, message: extractErrorMessage(err) };
+      }
+    }
+
+    // SI is still provisioning. Try a brief wait first — many brokers settle
+    // in under 15s so we can keep the bind synchronous to the wizard.
+    this.snackBar.open('Service instance is still provisioning — waiting before binding…', undefined, { duration: 10_000 });
+    const settled = await this.waitForServiceInstanceReady(cfGuid, serviceInstanceGuid, inlineWaitMs);
+    if (settled.state === 'failed') {
+      return { success: false, message: settled.detail || 'Service broker rejected the create' };
+    }
+    if (settled.state === 'succeeded') {
+      try {
+        await fireBind();
+        return { success: true };
+      } catch (err: unknown) {
+        return { success: false, message: extractErrorMessage(err) };
+      }
+    }
+    // Slow broker. Detach the bind so the wizard doesn't keep spinning;
+    // background poll + retry bind, and surface the outcome via snackbar
+    // when CF settles. The user is free to navigate away in the meantime.
+    void this.runBindInBackground(serviceInstanceGuid, cfGuid, appGuid, fireBind, backgroundWaitMs);
+    return { success: true };
+  }
+
+  private async runBindInBackground(
+    siGuid: string,
+    cfGuid: string,
+    appGuid: string,
+    fireBind: () => Promise<unknown>,
+    waitMs: number,
+  ): Promise<void> {
+    this.snackBar.open(
+      'Service instance still provisioning. Bind will retry automatically when ready.',
+      undefined,
+      { duration: 10_000 },
     );
-    // UNKNOWN resolves optimistically: a CF replica may not know the job
-    // (HA-degradation), but the binding write itself was accepted; callers
-    // refetch to reveal the truth. Treating UNKNOWN as failure would block
-    // the stepper on a write that probably succeeded.
-    return from(writeWithJob<unknown>(this.http, call)).pipe(
-      map(() => ({ success: true })),
-      catchError((err: unknown) => of({ success: false, message: extractErrorMessage(err) })),
-    );
+    const settled = await this.waitForServiceInstanceReady(cfGuid, siGuid, waitMs);
+    if (settled.state === 'succeeded') {
+      try {
+        await fireBind();
+        this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
+      } catch (err: unknown) {
+        this.snackBar.error(`Service instance ready, but bind failed: ${extractErrorMessage(err)}`);
+      }
+      return;
+    }
+    if (settled.state === 'failed') {
+      this.snackBar.error(`Service instance create failed: ${settled.detail || 'broker rejected the create'}`);
+      return;
+    }
+    this.snackBar.error('Service instance still provisioning after the auto-bind window. Bind it manually from the Services tab.');
+  }
+
+  private async waitForServiceInstanceReady(
+    cfGuid: string,
+    siGuid: string,
+    waitMs: number,
+  ): Promise<{ state: string; detail: string }> {
+    const url = `/pp/v1/cf/service_instances/${cfGuid}/${siGuid}`;
+    const deadline = Date.now() + waitMs;
+    const intervalMs = 3_000;
+    while (Date.now() < deadline) {
+      try {
+        const si = await firstValueFrom(this.http.get<{ lastOperation?: { state?: string; description?: string } }>(url));
+        const op = si?.lastOperation;
+        const state = op?.state ?? '';
+        if (state === 'succeeded' || state === 'failed') {
+          return { state, detail: op?.description ?? '' };
+        }
+      } catch {
+        // Transient — try again until deadline.
+      }
+      await new Promise(r => setTimeout(r, intervalMs));
+    }
+    return { state: 'in progress', detail: '' };
   }
 
 
@@ -227,19 +319,46 @@ export class CsiModeService {
 
 }
 
+// Detect CF's "operation in progress" reject — code 10008 with status 422.
+// CF returns this when a bind / update lands while the SI's last_operation
+// is still in progress. Treated as deferred, not failed: the caller polls
+// the SI and retries the bind once last_op = succeeded.
+function isOperationInProgressError(err: unknown): boolean {
+  if (!(err instanceof HttpErrorResponse)) return false;
+  if (err.status !== 422) return false;
+  const body = err.error;
+  if (!body || typeof body !== 'object') return false;
+  const errors = (body as { errors?: Array<{ code?: number; detail?: string }> }).errors;
+  const first = errors?.[0];
+  if (first?.code === 10008) return true;
+  if (typeof first?.detail === 'string' && first.detail.includes('operation in progress')) return true;
+  return false;
+}
+
 function extractErrorMessage(err: unknown): string {
   if (err instanceof StratosJobError) return err.message;
   if (err instanceof HttpErrorResponse) {
     const body = err.error;
     if (body && typeof body === 'object') {
-      const errors = (body as { errors?: Array<{ detail?: string; title?: string }> }).errors;
+      // Handles three backend shapes: CF passthrough errors[].detail/title,
+      // Stratos job envelope errors[].message, and handleCapiError's
+      // top-level {error}. Without this the user sees Angular's generic
+      // "Http failure response for ... 502 OK" with no clue what broke.
+      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
       const first = errors?.[0];
-      if (first?.detail) return first.detail;
-      if (first?.title) return first.title;
-      const msg = (body as { message?: string }).message;
-      if (msg) return msg;
+      if (first) {
+        if (typeof first.detail === 'string' && first.detail) return first.detail;
+        if (first.title) return first.title;
+        if (first.message) return first.message;
+      }
+      const top = body as { message?: string; error?: string };
+      if (top.message) return top.message;
+      if (top.error) return top.error;
     }
-    return err.message || `HTTP ${err.status}`;
+    if (typeof body === 'string' && body) return body;
+    return err.statusText && err.statusText !== 'OK'
+      ? `HTTP ${err.status} ${err.statusText}`
+      : `HTTP ${err.status}`;
   }
   if (err instanceof Error) return err.message;
   return 'unknown error';

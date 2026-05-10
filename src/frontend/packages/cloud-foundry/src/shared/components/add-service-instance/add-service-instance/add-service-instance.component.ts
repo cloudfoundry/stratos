@@ -1,4 +1,5 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -29,7 +30,6 @@ import {
 import { applicationEntityType, spaceEntityType } from '../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   createEntityRelationKey,
-  createEntityRelationPaginationKey,
 } from '../../../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import {
   CfOrgSpaceDataService,
@@ -90,6 +90,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private csiState = inject(CsiStateService);
   modeService = inject(CsiModeService);
   private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
 
   initialisedService$!: Observable<boolean>;
   apps$!: Observable<APIResource<IApp>[]>;
@@ -367,6 +368,11 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (!result.success) {
         throw new Error(result.message || 'Failed to create service instance');
       }
+      // Return the full result so stepper sees redirect/redirectPayload —
+      // routeToServices sets redirect:true to navigate out of the wizard
+      // post-create. Without returning here, the redirect flag is lost and
+      // the wizard sits on the last step after a successful submit.
+      return result;
     },
   };
 
@@ -442,17 +448,26 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
-    // Initialize apps$ and skipApps$ observables for the stepper
+    // Initialize apps$ and skipApps$ observables for the stepper.
+    // Hits the signal-native /pp/v1/cf/apps/<cnsi>?space_guids=<guid>
+    // handler directly. The legacy ngrx pagination through
+    // cfEntityCatalog.application.store.getAllInSpace stopped firing after
+    // the V3 cutover (the underlying GetAllAppsInSpace dispatch never
+    // reached the wire), leaving the bind-app dropdown empty. The native
+    // handler returns StApp; we map to the {metadata, entity} APIResource
+    // shape the bind-apps-step template still consumes.
     this.apps$ = this.cfDetails$.pipe(
       filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
       tap(() => this._appsLoading.set(true)),
-      switchMap(csi => {
-        const paginationKey = createEntityRelationPaginationKey(spaceEntityType, csi.spaceGuid);
-        return cfEntityCatalog.application.store.getAllInSpace.getPaginationService(
-          csi.spaceGuid, csi.cfGuid, paginationKey
-        ).entities$;
-      }),
+      switchMap(csi => this.http.get<{ resources: Array<{ guid: string; name: string }> }>(
+        `/pp/v1/cf/apps/${csi.cfGuid}?space_guids=${csi.spaceGuid}&per_page=500&page=1`,
+      ).pipe(
+        map(resp => (resp.resources ?? []).map(r => ({
+          metadata: { guid: r.guid, url: '', created_at: '', updated_at: '' },
+          entity: { name: r.name } as IApp,
+        }) as APIResource<IApp>)),
+      )),
       tap(() => this._appsLoading.set(false)),
       catchError(error => {
         console.error('Error fetching applications for space:', error);

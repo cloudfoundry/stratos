@@ -84,24 +84,38 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     });
   }
 
-  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
+  onEnter = (selectedServicePlan: APIResource<IServicePlan> | any) => {
     if (selectedServicePlan) {
       // Don't overwrite if it's null (we've returned to this step from the next)
       this.selectedServicePlan = selectedServicePlan;
     }
 
+    // Plan shape is APIResource<IServicePlan> in the legacy ngrx flow and
+    // StServicePlan in the signal-native flow. The schema lives at
+    // `entity.schemas.…` in the former and `schemas.…` in the latter; try
+    // both. When neither has a schema (e.g. a plan with no
+    // service_binding.create parameters) we leave schema undefined and
+    // mark the step valid below — the binding-params editor is optional.
+    const schema =
+      pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan) ??
+      pathGet('schemas.service_binding.create.parameters', this.selectedServicePlan);
+
     if (!this.schemaFormConfig) {
-      // Create new config
-      this.schemaFormConfig = {
-        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan),
-      };
+      this.schemaFormConfig = { schema };
     } else {
-      // Update existing config (retaining any existing config)
       this.schemaFormConfig = {
         ...this.schemaFormConfig,
         initialData: this.bindingParams,
-        schema: pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan)
+        schema,
       };
+    }
+
+    // Schema-form's pValidChange BehaviorSubject seeds at false and only
+    // flips true once a JSON change or validation pass fires. For plans
+    // with no binding-params schema neither happens, so without this the
+    // Next button would stay disabled forever after picking an app.
+    if (!schema) {
+      this.validate.set(true);
     }
   }
 
@@ -110,6 +124,11 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   setParamValid(valid: boolean) {
+    // Binding params are optional — only let an explicit invalid signal
+    // gate Next when there's actually a schema to violate. Without this,
+    // schema-form's seed `false` on init flips validate off and the Next
+    // button stays disabled even though the user hasn't typed anything.
+    if (!valid && !this.schemaFormConfig?.schema) return;
     this.validate.set(valid);
   }
 
