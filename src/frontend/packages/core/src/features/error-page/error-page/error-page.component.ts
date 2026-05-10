@@ -19,8 +19,8 @@ import { take, map, withLatestFrom } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
-import { MetadataItemComponent } from '../../../shared/components/metadata-item/metadata-item.component';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-error-page',
@@ -31,8 +31,8 @@ import { MetadataItemComponent } from '../../../shared/components/metadata-item/
     CommonModule,
     RouterModule,
     PageHeaderComponent,
-    StatefulIconComponent,
-    MetadataItemComponent
+    CardWrapperComponent,
+    CustomIconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

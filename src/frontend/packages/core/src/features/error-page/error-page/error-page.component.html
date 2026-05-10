@@ -1,81 +1,57 @@
 @if (errorDetails$ | async; as errorDetails) {
   <app-page-header [hideEndpointErrors]="true">
-    <h1>Recent Endpoint Errors</h1>
+    <h1>{{ errorDetails.endpoint.name }} — Errors</h1>
     <div class="page-header-right">
       <span>
-        <button class="btn-icon" title="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
-          <span class="material-icons">close</span>
+        <button class="btn btn-icon" type="button" title="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
+          <app-custom-icon>close</app-custom-icon>
         </button>
       </span>
     </div>
   </app-page-header>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <div>
-        <div class="text-sm font-medium mb-1" style="color: var(--content-muted)">Endpoint name</div>
-        <h2 class="text-2xl font-bold" style="color: var(--content-text)">{{errorDetails.endpoint.name}}</h2>
+  <div class="event-page">
+    @if (errorDetails.errors && errorDetails.errors.length) {
+      <div class="flex items-center gap-2 mt-4 mb-2">
+        <button class="btn btn-primary" type="button" aria-label="Dismiss errors"
+          (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">
+          Dismiss all
+        </button>
+        <a class="btn btn-icon" [href]="jsonDownloadHref$ | async"
+          download="endpoint-errors.json" title="Download endpoint error information"
+          aria-label="Download endpoint error information">
+          <app-custom-icon>cloud_download</app-custom-icon>
+        </a>
       </div>
-      @if (errorDetails.errors && errorDetails.errors.length) {
-        <div>
-          <a class="btn-icon" [href]="jsonDownloadHref$ | async"
-            download="endpoint-errors.json" title="Download endpoint error information"
-            aria-label="Download endpoint error information">
-            <span class="material-icons">cloud_download</span>
-          </a>
-        </div>
-      }
-    </div>
-    @if (errorDetails.errors && errorDetails.errors.length ) {
-      <div>
-        <div class="mb-4">
-          <button class="btn btn-primary" aria-label="Dismiss errors"
-            (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">
-            Dismiss all
-          </button>
-        </div>
+      <div class="event-page__list space-y-2" role="list">
         @for (error of errorDetails.errors; track error) {
-          <div class="space-y-4">
-            <div class="card" style="background-color: var(--danger-bg); border-color: var(--danger-border);">
-              <div class="card-header" style="border-color: var(--danger-border);">
-                <div class="flex items-center space-x-3">
-                  <app-stateful-icon [state]="icon" style="color: var(--danger-text);">
-                  </app-stateful-icon>
-                  <span class="text-lg font-semibold" style="color: var(--danger-text);">{{ error.timestamp | date:'medium' }}</span>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="space-y-4">
-                  @if (error.metadata?.errorResponse?.errorResponse) {
-                    <app-metadata-item label="Endpoint Response">
-                      <div class="p-4 rounded-md overflow-x-auto" style="background-color: var(--code-block-bg); border: 1px solid var(--code-block-border);">
-                        <pre class="text-sm" style="color: var(--code-block-text); margin: 0;">{{ (error.metadata.errorResponse.errorResponse || '-') | json }}</pre>
-                      </div>
-                    </app-metadata-item>
-                  }
-                  <app-metadata-item label="Jetstream Response">{{ error.message }}</app-metadata-item>
-                  <app-metadata-item label="URL">{{ error.metadata.url || '-' }}</app-metadata-item>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @if (error.metadata.httpMethod) {
-                      <div>
-                        <app-metadata-item label="HTTP Method">{{ error.metadata.httpMethod }}</app-metadata-item>
-                      </div>
-                    }
-                    <div>
-                      <app-metadata-item label="HTTP Code">{{ error.eventCode }}</app-metadata-item>
-                    </div>
-                  </div>
-                </div>
+          <app-card class="event-page__event-row-card">
+            <div class="flex items-start gap-4 p-4" role="listitem">
+              <app-custom-icon class="text-danger-shade-500 shrink-0 self-center">error</app-custom-icon>
+              <div class="flex flex-col flex-1 min-w-0 max-w-prose">
+                <h3 class="text-base font-bold m-0">
+                  {{ error.timestamp | date:'medium' }}
+                  <span class="font-normal text-sm text-content-muted">
+                    ({{ error.metadata?.httpMethod || 'GET' }} → {{ error.eventCode }})
+                  </span>
+                </h3>
+                <span class="text-sm text-content-text mt-1.5 break-words" style="text-wrap: balance">{{ error.message }}</span>
+                @if (error.metadata?.url) {
+                  <span class="text-xs text-content-muted mt-1 break-all font-mono">{{ error.metadata.url }}</span>
+                }
+                @if (error.metadata?.errorResponse?.errorResponse) {
+                  <pre class="text-xs mt-2 p-2 rounded-md overflow-x-auto bg-content-canvas border border-content-border text-content-text">{{ (error.metadata.errorResponse.errorResponse) | json }}</pre>
+                }
               </div>
             </div>
-          </div>
+          </app-card>
         }
       </div>
     } @else {
-      <div class="card">
-        <div class="card-body text-center py-8">
-          <div style="color: var(--content-muted);">No recent errors</div>
+      <app-card class="event-page__no-event-message">
+        <div class="p-4 text-center text-sm text-content-muted" role="listitem">
+          No recent errors
         </div>
-      </div>
+      </app-card>
     }
   </div>
 }
