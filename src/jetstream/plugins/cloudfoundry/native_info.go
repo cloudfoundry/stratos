@@ -5,8 +5,8 @@
 //
 //   - /v3/info  → name, build, description, version, cli_version
 //   - /         → unversioned API root with auth/uaa/logging/routing/SSH
-//                 links plus per-link `meta` (host_key_fingerprint,
-//                 oauth_client, cloud_controller_v3 semver)
+//     links plus per-link `meta` (host_key_fingerprint,
+//     oauth_client, cloud_controller_v3 semver)
 //
 // Replaces the legacy /pp/v1/proxy/v2/info passthrough from the
 // frontend's cloud-foundry.effects.ts. The wire shape is preserved

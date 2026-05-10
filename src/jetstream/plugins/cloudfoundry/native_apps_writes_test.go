@@ -847,14 +847,14 @@ func TestRestageApp_RollingFastPathReachesDeployment(t *testing.T) {
 			_, _ = w.Write([]byte(`{"pagination":{"total_results":1,"total_pages":1},"resources":[{"guid":"pkg-1","state":"READY"}]}`))
 		case r.URL.Path == "/v3/builds" && r.Method == http.MethodPost:
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"guid": "build-1",
-				"state": "STAGED",
+				"guid":    "build-1",
+				"state":   "STAGED",
 				"droplet": map[string]string{"guid": "droplet-1"},
 			})
 		case r.URL.Path == "/v3/builds/build-1":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"guid": "build-1",
-				"state": "STAGED",
+				"guid":    "build-1",
+				"state":   "STAGED",
 				"droplet": map[string]string{"guid": "droplet-1"},
 			})
 		case r.URL.Path == "/v3/deployments" && r.Method == http.MethodPost:

@@ -19,21 +19,21 @@ import (
 // Four wire-shape tiers selected by ?return=:
 //
 //   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
-//                Existing legacy shape preserved verbatim — counts probes
-//                already wired across the frontend rely on it.
+//     Existing legacy shape preserved verbatim — counts probes
+//     already wired across the frontend rely on it.
 //   - base     — entity fields only; relationship refs are guid-only.
-//                One CAPI call.
+//     One CAPI call.
 //   - summary  — base + serviceInstance.{name,type} + app.{name?} via
-//                a single CAPI call with ?include=app,service_instance.
-//                The included resources arrive on the v3 ListResponse
-//                via ListResponse[T].Included (per the fork fix in
-//                v3.216.4-fix-apps-delete.10).
+//     a single CAPI call with ?include=app,service_instance.
+//     The included resources arrive on the v3 ListResponse
+//     via ListResponse[T].Included (per the fork fix in
+//     v3.216.4-fix-apps-delete.10).
 //   - details  — TODO: B-fallback batch lookups for service_plan +
-//                service_offering + service_broker (v3's binding
-//                include only reaches `app, service_instance`, so the
-//                broker chain needs a follow-up SI fetch with the full
-//                include chain). Today details degrades to summary;
-//                no consumer requests details on bindings yet.
+//     service_offering + service_broker (v3's binding
+//     include only reaches `app, service_instance`, so the
+//     broker chain needs a follow-up SI fetch with the full
+//     include chain). Today details degrades to summary;
+//     no consumer requests details on bindings yet.
 //
 // Soft-fail on the include join: a malformed entry is skipped and the
 // row falls back to the binding's own name; the response still ships
@@ -164,11 +164,11 @@ func appsFromIncluded(included map[string][]json.RawMessage) map[string]capi.App
 // frontend type:
 //
 //   - base:    guid + cnsiGuid + type + serviceInstance.{guid} +
-//              (app.{guid} for type=app) + createdAt
+//     (app.{guid} for type=app) + createdAt
 //   - summary: + name + serviceInstance.{name,type} + app.{name?} +
-//              lastOperation + syslogDrainUrl
+//     lastOperation + syslogDrainUrl
 //   - details: + servicePlan / serviceOffering / broker (TODO — not
-//              implemented; degrades to summary today).
+//     implemented; degrades to summary today).
 func toStServiceCredentialBinding(
 	b capi.ServiceCredentialBinding,
 	cnsiGUID string,

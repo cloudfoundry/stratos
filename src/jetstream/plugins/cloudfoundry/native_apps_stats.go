@@ -15,14 +15,14 @@ import (
 // when CF reports an instance in a non-RUNNING state where the metrics
 // aren't meaningful.
 type StAppStatsInstance struct {
-	Index     int                  `json:"index"`
-	State     string               `json:"state"`
-	Uptime    int                  `json:"uptime"`
-	MemQuota  int64                `json:"memQuota"`
-	DiskQuota int64                `json:"diskQuota"`
-	FdsQuota  int                  `json:"fdsQuota"`
-	Host      string               `json:"host,omitempty"`
-	Usage     *StProcessUsage      `json:"usage,omitempty"`
+	Index     int             `json:"index"`
+	State     string          `json:"state"`
+	Uptime    int             `json:"uptime"`
+	MemQuota  int64           `json:"memQuota"`
+	DiskQuota int64           `json:"diskQuota"`
+	FdsQuota  int             `json:"fdsQuota"`
+	Host      string          `json:"host,omitempty"`
+	Usage     *StProcessUsage `json:"usage,omitempty"`
 }
 
 // StProcessUsage mirrors v3's process usage block. The auto-scaler /

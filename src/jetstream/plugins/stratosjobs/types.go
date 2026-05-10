@@ -41,10 +41,10 @@ type StratosError struct {
 // by Code and appends. Frontend renders done/current/pending from
 // the resulting Stages slice.
 type JobStage struct {
-	Code      string    `json:"code"`      // e.g. "STAGING", "STARTING"
-	Label     string    `json:"label"`     // human-readable
-	Index     int       `json:"index"`     // 1-based step; 0 if unknown
-	Of        int       `json:"of"`        // total steps; 0 if unknown
+	Code      string    `json:"code"`  // e.g. "STAGING", "STARTING"
+	Label     string    `json:"label"` // human-readable
+	Index     int       `json:"index"` // 1-based step; 0 if unknown
+	Of        int       `json:"of"`    // total steps; 0 if unknown
 	EnteredAt time.Time `json:"enteredAt"`
 }
 

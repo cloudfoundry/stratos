@@ -8,14 +8,14 @@
 // Namespace: stratosjobs
 // Subsystem: (none — keeps metric names short and predictable)
 //
-//   stratosjobs_active_jobs
-//     Gauge — number of non-terminal jobs currently held in the tracker.
-//     Increments on Create; decrements per evicted job on sweep.
+//	stratosjobs_active_jobs
+//	  Gauge — number of non-terminal jobs currently held in the tracker.
+//	  Increments on Create; decrements per evicted job on sweep.
 //
-//   stratosjobs_stage_count_total
-//     CounterVec — cumulative stage appends, labelled by `kind` (e.g.
-//     "cf.app.restage", "cf.app.rollback"). Each unique stage emit is
-//     counted once — the tracker's dedup-by-Code prevents double-counting.
+//	stratosjobs_stage_count_total
+//	  CounterVec — cumulative stage appends, labelled by `kind` (e.g.
+//	  "cf.app.restage", "cf.app.rollback"). Each unique stage emit is
+//	  counted once — the tracker's dedup-by-Code prevents double-counting.
 package stratosjobs
 
 import "github.com/prometheus/client_golang/prometheus"

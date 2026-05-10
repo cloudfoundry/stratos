@@ -7,7 +7,8 @@
 //
 // See native_apps_restage_v3.go for the state-machine primitives and the
 // design rationale documented in
-//   stratos/docs/2026-04-30-A8-restage-orchestration-design.md
+//
+//	stratos/docs/2026-04-30-A8-restage-orchestration-design.md
 package cloudfoundry
 
 import (
