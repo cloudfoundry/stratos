@@ -97,6 +97,11 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   isOpen = false;
   selectedValues: any[] = [];
   displayValue = '';
+  searchTerm = '';
+  // Show the type-to-filter input once the list crosses this length —
+  // a 5-option select stays clean without it; a 50-org list desperately
+  // needs it.
+  private readonly searchThreshold = 5;
 
   /**
    * Longest projected option text by character count. Rendered as an
@@ -175,8 +180,39 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     this.isOpen = !this.isOpen;
     this._interacting = this.isOpen && this.multiple;
+    if (!this.isOpen) {
+      // Clear filter on close so the next open shows the full list.
+      this.searchTerm = '';
+      this.applyOptionFilter();
+    }
     this._onTouched();
     this.cdr.markForCheck();
+  }
+
+  /** True once the option list crosses the threshold worth showing a
+   *  search input for. */
+  get showSearch(): boolean {
+    return (this.options?.length ?? 0) > this.searchThreshold;
+  }
+
+  onSearchInput(event: Event) {
+    this.searchTerm = (event.target as HTMLInputElement).value ?? '';
+    this.applyOptionFilter();
+  }
+
+  /** Hide each option whose displayText doesn't include the (case-
+   *  insensitive) search term. Operates directly on the option's wrapper
+   *  element so we don't need to re-render projected content — selection
+   *  / focus / visual state stay intact. */
+  private applyOptionFilter() {
+    if (!this.options) return;
+    const q = this.searchTerm.trim().toLowerCase();
+    this.options.forEach(opt => {
+      const el = opt.optionContent?.nativeElement as HTMLElement | undefined;
+      if (!el) return;
+      const text = (opt.displayText ?? '').toLowerCase();
+      el.style.display = !q || text.includes(q) ? '' : 'none';
+    });
   }
 
   /**
