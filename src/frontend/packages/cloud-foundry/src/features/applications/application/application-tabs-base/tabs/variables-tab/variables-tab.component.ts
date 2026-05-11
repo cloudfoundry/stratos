@@ -1,105 +1,109 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject, signal, Signal, WritableSignal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  Signal,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
-import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
-  ListDataSource,
-} from '../../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
-import { ListComponent } from '../../../../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
   ListSubNavAddAction,
   ListSubNavComponent,
-} from '../../../../../../../../core/src/shared/components/list-sub-nav/list-sub-nav.component';
-import { stratosEndpointGuidKey } from '../../../../../../../../store/src/entity-request-pipeline/pipeline.types';
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListRowAction,
+  TailwindSnackBarService,
+} from '@stratosui/core';
+
+import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
   ListAppEnvVar,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
-  CfAppVariablesListConfigService,
-} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
-import { ApplicationService } from '../../../../application.service';
+  CfAppVariablesSignalConfigService,
+} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-signal-config.service';
+import { AppVariableActionsService } from '../../../../../../shared/services/app-variable-actions.service';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
 
 export interface VariableTabAllEnvVarType {
   name: string;
-  value: string;
+  value: any;
   section?: boolean;
 }
 
+/**
+ * VariablesTabComponent — signal-native rewrite of the app-detail
+ * Variables tab. Mirrors the slice-3 RoutesTabComponent shape:
+ *
+ * - Tab-scoped CfAppVariablesSignalConfigService and
+ *   AppVariableActionsService so per-variable transition state and
+ *   filter/sort/page reset cleanly between apps.
+ * - Reads the env envelope from `AppDetailDataService.envVars()` (already
+ *   prefetched as part of slice 1). Triggers a refresh on tab init in
+ *   case the user navigated here without going through the app-detail
+ *   shell first; subsequent action-service success callbacks also call
+ *   refresh so the next read sees the canonical CF view.
+ * - L5 sub-nav row above the list shows the count + an inline Add
+ *   Variable form (Name/Value + ✓/✕ buttons) wired to the action
+ *   service. Validation runs on submit (legacy behavior) so the row
+ *   stays pixel-stable while the user types.
+ * - Wraps the config service's no-confirm Delete with a confirmation
+ *   dialog (legacy text style).
+ * - "All Variables" code block at the bottom renders the full env
+ *   envelope (system + user + app/running/staging) by walking the
+ *   StEnvVars sections directly.
+ */
 @Component({
   selector: 'app-variables-tab',
   templateUrl: './variables-tab.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [{
-    provide: ListConfig,
-    useClass: CfAppVariablesListConfigService,
-  }],
+  providers: [
+    AppVariableActionsService,
+    CfAppVariablesSignalConfigService,
+  ],
   imports: [
     CommonModule,
     FormsModule,
-    ListComponent,
+    SignalListComponent,
     ListSubNavComponent,
     CodeBlockComponent,
   ]
 })
 export class VariablesTabComponent implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
-  private appService = inject(ApplicationService);
-  private data = inject(AppDetailDataService);
-  private listConfig = inject<ListConfig<ListAppEnvVar>>(ListConfig);
+  private dataService = inject(AppDetailDataService);
+  private variablesConfig = inject(CfAppVariablesSignalConfigService);
+  private actionsService = inject(AppVariableActionsService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
 
-  /** Data source supplied by the legacy ListConfig. Initialized via field
-   *  initializer (not the constructor) so subsequent field initializers
-   *  that depend on it (e.g. `totalVariables`) can reference it directly. */
-  envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar> = this.listConfig.getDataSource();
-  allEnvVars$!: Observable<VariableTabAllEnvVarType[] | any[]>;
+  /** Loading projection for the signal-list framework. */
+  private readonly _isAnyLoading: Signal<boolean> = computed(() => this.dataService.loading().envVars);
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
 
-  /** Pass-through of the data source's adding signal for the L5 sub-nav,
-   *  which swaps the +Add Variable button for the inline form when true. */
-  readonly isAdding: Signal<boolean> = this.envVarsDataSource.isAdding;
+  readonly listConfig: SignalListConfig<ListAppEnvVar>;
 
-  /** Signal: names of user-defined environment variables from the app entity. */
-  readonly envVarNames: Signal<string[]> = computed(() => {
-    const envJson = this.data.app()?.entity?.environment_json;
-    return envJson ? Object.keys(envJson) : [];
-  });
+  /** Reactive total surfaced to the L5 sub-nav row above the list. */
+  readonly totalVariables: Signal<number>;
 
-  /** Reactive count for the L5 sub-nav. Mirrors what the legacy paginated
-   *  list shows in its "X of Y" pager — sourced from the data source's
-   *  pagination state, which is the authoritative count of user-defined
-   *  env vars after filtering. envVarNames() (used by the input's
-   *  [appUnique] validator) reads from the app entity's
-   *  environment_json — that field isn't always populated by the legacy
-   *  app() adapter, so it can't be used for the count. */
-  readonly totalVariables: Signal<number> = toSignal(
-    this.envVarsDataSource.pagination$.pipe(
-      map(p => p?.totalResults ?? 0),
-      startWith(0),
-    ),
-    { initialValue: 0 },
-  );
+  // ---------------------------------------------------------------------------
+  // Inline add form state
+  // ---------------------------------------------------------------------------
 
-  /**
-   * L5 add action — opens the inline add-row form managed by the legacy
-   * `<app-list>`. Trusts the data source's startAdd() to reset state
-   * (it calls getEmptyType() to clear addItem). The form's NgModel
-   * controls re-bind to the empty addItem when the form re-attaches, so
-   * an explicit form.reset() isn't needed and avoids interacting with
-   * a previously-disposed NgForm reference.
-   */
-  readonly addVariableAction: ListSubNavAddAction = {
-    label: 'Add Variable',
-    icon: 'add',
-    invoke: () => this.envVarsDataSource.startAdd(),
-  };
+  /** True when the inline add form is open. The L5 sub-nav swaps the
+   *  +Add Variable button for the form when this is true. */
+  readonly isAdding: WritableSignal<boolean> = signal(false);
+
+  /** Bound to the Name/Value inputs in the inline add form. */
+  readonly addItem: WritableSignal<{ name: string; value: string }> = signal({ name: '', value: '' });
 
   /**
    * Validation error for the Name input — populated by validateAndSave()
@@ -118,10 +122,128 @@ export class VariablesTabComponent implements OnInit {
    *  underscores. */
   private static readonly NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
+  /** Signal: names of user-defined environment variables surfaced via the
+   *  data service. Used by the duplicate-name validation in
+   *  validateAndSave() — it reads from the same canonical source the
+   *  list rows render from, so the check stays in sync with what the
+   *  user sees. */
+  readonly envVarNames: Signal<string[]> = computed(() => {
+    const env = this.dataService.envVars()?.environment;
+    return env ? Object.keys(env) : [];
+  });
+
+  /**
+   * L5 add action — opens the inline add-row form. Resets state so the
+   * user always starts with empty inputs and no leftover validation
+   * error from a previous attempt.
+   */
+  readonly addVariableAction: ListSubNavAddAction = {
+    label: 'Add Variable',
+    icon: 'add',
+    invoke: () => {
+      this.addItem.set({ name: '', value: '' });
+      this.nameError.set('');
+      this.isAdding.set(true);
+    },
+  };
+
+  // ---------------------------------------------------------------------------
+  // "All Variables" projection (read-only code block at the bottom)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Flattened sections list for the "All Variables" code block: one
+   * section per env source (USER PROVIDED / SYSTEM PROVIDED / APPLICATION /
+   * RUNNING / STAGING) followed by its keys. Mirrors the legacy
+   * `mapEnvVars` projection so the code block reads identically to the
+   * pre-migration UI; section keys read straight off the StEnvVars
+   * envelope rather than the legacy `*_env_json` field names.
+   */
+  readonly allEnvVars: Signal<VariableTabAllEnvVarType[]> = computed(() => {
+    const env = this.dataService.envVars();
+    if (!env) {
+      return [];
+    }
+    const out: VariableTabAllEnvVarType[] = [];
+    const sections: Array<[string, Record<string, any> | undefined]> = [
+      ['environment', env.environment],
+      ['systemProvided', env.systemProvided as any],
+      ['applicationProvided', env.applicationProvided],
+      ['runningProvided', env.runningProvided],
+      ['stagingProvided', env.stagingProvided],
+    ];
+    for (const [name, body] of sections) {
+      if (!body || Object.keys(body).length === 0) {
+        continue;
+      }
+      out.push({ section: true, name, value: '' });
+      for (const key of Object.keys(body)) {
+        const raw = (body as Record<string, any>)[key];
+        out.push({
+          name: key,
+          value: key === 'STRATOS_PROJECT' ? this.parseStratosProject(raw) : raw,
+        });
+      }
+    }
+    return out;
+  });
+
+  constructor() {
+    // Build columns from the wave-2 config service, then replace the
+    // actions column's factory with our confirm-wrapped version. The
+    // service's default factory invokes the verbs directly (used by
+    // tests / future surfaces); the tab adds the legacy confirm dialogs.
+    const baseColumns = this.variablesConfig.buildColumns();
+    const columns: SignalListColumn<ListAppEnvVar>[] = baseColumns.map(col => {
+      if (col.key === 'actions' && col.kind === 'actions') {
+        return { ...col, actions: this.buildRowActions };
+      }
+      return col;
+    });
+
+    this.listConfig = {
+      pagedItems: this.variablesConfig.view.pagedItems,
+      totalFilteredResults: this.variablesConfig.view.totalFilteredResults,
+      totalPages: this.variablesConfig.view.totalPages,
+      pageIndex: this.variablesConfig.pageIndex,
+      pageSize: this.variablesConfig.pageSize,
+      isAnyLoading: this._isAnyLoading,
+      errorsByCnsi: this._errorsByCnsi.asReadonly(),
+      columns,
+      getRowKey: (row: ListAppEnvVar) => row.name,
+      emptyMessage: 'There are no variables',
+      emptyFilterMessage: 'No variables match the current filter',
+      loadingMessage: 'Loading variables…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.variablesConfig.nameFilter,
+      onRefresh: () => this.variablesConfig.refresh(),
+      onClear: () => this.variablesConfig.clearFilters(),
+      viewMode: this.variablesConfig.viewMode,
+      sort: this.variablesConfig.sort,
+    };
+
+    this.totalVariables = this.variablesConfig.view.totalFilteredResults;
+  }
+
+  ngOnInit(): void {
+    // envVars are typically prefetched by the app-detail shell, but
+    // refresh on mount handles the case where the user navigates here
+    // directly (deep link / refresh) without the prefetch chain firing.
+    void this.dataService.refresh('envVars');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Inline add form handlers
+  // ---------------------------------------------------------------------------
+
   /** Validate the Add Variable form and either save or surface an error
    *  in the absolute-positioned slot above the Name input. */
   validateAndSave(): void {
-    const name = (this.envVarsDataSource.addItem?.name ?? '').trim();
+    const item = this.addItem();
+    const name = (item.name ?? '').trim();
     if (!name) {
       this.nameError.set('Name is required');
       return;
@@ -135,7 +257,13 @@ export class VariablesTabComponent implements OnInit {
       return;
     }
     this.nameError.set('');
-    this.envVarsDataSource.saveAdd();
+    void this.saveAdd(name, item.value ?? '');
+  }
+
+  /** Cancel the inline add form. */
+  cancelAdd(): void {
+    this.nameError.set('');
+    this.isAdding.set(false);
   }
 
   /** Clear any pending validation error so it doesn't linger as the user
@@ -146,51 +274,71 @@ export class VariablesTabComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-    // appEnvVars is the paginator-backed ngrx path for all env var sections —
-    // kept on the legacy path intentionally (Task 5 decision).
-    this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
-      map(this.mapEnvVars.bind(this))
-    );
+  // ---------------------------------------------------------------------------
+  // Internals
+  // ---------------------------------------------------------------------------
+
+  /** Submit the new variable to the action service; on success refresh
+   *  the env envelope so the next read picks up the new key and surface
+   *  any error via the snack bar (mirrors slice-3 routes pattern). */
+  private async saveAdd(name: string, value: string): Promise<void> {
+    try {
+      await this.actionsService.addVariable(name, value);
+      this.isAdding.set(false);
+      this.addItem.set({ name: '', value: '' });
+      await this.variablesConfig.refresh();
+    } catch (err: any) {
+      this.snackBar.error(`Add variable failed: ${err?.message ?? err}`);
+    }
   }
+
+  /**
+   * Per-row action factory. Wraps the wave-2 service's Delete verb with
+   * a confirmation dialog (legacy text style). On confirm we await the
+   * verb, then refresh the env envelope so the row vanishes synchronously
+   * (cf. routes / service-bindings tabs which evict via dataService —
+   * envVars has no eviction hook because it's a single envelope, not a
+   * list, so refresh is the eviction mechanism).
+   */
+  private readonly buildRowActions = (row: ListAppEnvVar): readonly SignalListRowAction<ListAppEnvVar>[] => {
+    const disabled = this.actionsService.inFlight();
+    return [
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        disabled,
+        invoke: () => {
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Environment Variable?',
+            `Are you sure you want to delete '${row.name}'?`,
+            'Delete',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            try {
+              await this.actionsService.deleteVariable(row.name);
+              await this.variablesConfig.refresh();
+            } catch (err: any) {
+              this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
+            }
+          });
+        },
+      },
+    ];
+  };
 
   isObject(test: any): boolean {
     return typeof test === 'object';
   }
 
-  private mapEnvVars(allEnvVars: any): VariableTabAllEnvVarType[] {
-    if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {
-      return [];
+  private parseStratosProject(value: unknown): object | string {
+    if (typeof value === 'object' && value !== null) {
+      return value as object;
     }
-    const result = new Array<VariableTabAllEnvVarType>();
-
-    Object.keys(allEnvVars[0].entity).forEach(envVarType => {
-      if (envVarType === 'cfGuid' || envVarType === stratosEndpointGuidKey) {
-        return;
-      }
-      const envVars = (allEnvVars[0].entity[envVarType]) ? allEnvVars[0].entity[envVarType] : {};
-      result.push({
-        section: true,
-        name: envVarType.replace('_json', ''),
-        value: ''
-      });
-      Object.keys(envVars).forEach(key => {
-        result.push({
-          name: key,
-          value: key === 'STRATOS_PROJECT' ? this.parseStratosProject(envVars[key]) : envVars[key]
-        });
-      });
-    });
-    return result;
-  }
-
-  private parseStratosProject(value: string): object | string {
     try {
-      return JSON.parse(value);
+      return JSON.parse(String(value));
     } catch (err) {
       console.warn('Failed to parse STRATOS_PROJECT env var', err);
     }
     return '';
   }
-
 }
