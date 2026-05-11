@@ -2,14 +2,11 @@ import { CUSTOM_ELEMENTS_SCHEMA, computed, provideZonelessChangeDetection, signa
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { Store } from '@ngrx/store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { of } from 'rxjs';
 
 import { ApplicationServiceMock } from '@test-framework/cf';
-import { RouterNav } from '@stratosui/store';
 
 import { AddRoutesComponent } from './add-routes.component';
 import { ApplicationService } from '../../application.service';
@@ -22,7 +19,7 @@ import type { StRoute } from '../../../../services/endpoint-data/stratos-types';
 let createAndAttach: ReturnType<typeof vi.fn>;
 let attachRoute: ReturnType<typeof vi.fn>;
 let addRoute: ReturnType<typeof vi.fn>;
-let storeDispatch: ReturnType<typeof vi.fn>;
+let routerNavigate: ReturnType<typeof vi.fn>;
 let mapRefresh: ReturnType<typeof vi.fn>;
 
 let pickerRoutes: WritableSignal<StRoute[]>;
@@ -104,18 +101,11 @@ const makeMapConfigStub = () => {
   };
 };
 
-const mockStore = {
-  dispatch: vi.fn(),
-  select: vi.fn(() => of({})),
-  pipe: vi.fn(() => of({})),
-};
-
 describe('AddRoutesComponent', () => {
   let component: AddRoutesComponent;
   let fixture: ComponentFixture<AddRoutesComponent>;
 
   beforeEach(async () => {
-    storeDispatch = mockStore.dispatch = vi.fn();
     await TestBed.configureTestingModule({
       imports: [AddRoutesComponent],
       providers: [
@@ -124,7 +114,6 @@ describe('AddRoutesComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
-        { provide: Store, useValue: mockStore },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: AppRouteActionsService, useFactory: makeActionsStub },
@@ -132,6 +121,9 @@ describe('AddRoutesComponent', () => {
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
+
+    routerNavigate = vi.spyOn(TestBed.inject(Router), 'navigate')
+      .mockImplementation(() => Promise.resolve(true)) as unknown as ReturnType<typeof vi.fn>;
 
     fixture = TestBed.createComponent(AddRoutesComponent);
     component = fixture.componentInstance;
@@ -272,7 +264,7 @@ describe('AddRoutesComponent', () => {
     expect(req.port).toBeUndefined();
   });
 
-  it('on createAndAttachRoute success: dataService.addRoute called with returned StRoute, then RouterNav dispatched', async () => {
+  it('on createAndAttachRoute success: dataService.addRoute called with returned StRoute, then router navigates back to routes list', async () => {
     component.spaceGuid = 'mockSpaceGuid';
     component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
@@ -284,13 +276,12 @@ describe('AddRoutesComponent', () => {
     await component.runSubmit();
 
     expect(addRoute).toHaveBeenCalledWith(created);
-    const dispatched = storeDispatch.mock.calls.find(call => call[0] instanceof RouterNav);
-    expect(dispatched).toBeTruthy();
-    const nav = dispatched![0] as RouterNav;
-    expect(nav.payload.path).toEqual(['/applications', 'mockCfGuid', 'mockAppGuid', 'routes']);
+    expect(routerNavigate).toHaveBeenCalledWith(
+      ['/applications', 'mockCfGuid', 'mockAppGuid', 'routes'],
+    );
   });
 
-  it('on createAndAttachRoute orphan failure: error propagates with Orphan route message; no RouterNav', async () => {
+  it('on createAndAttachRoute orphan failure: error propagates with Orphan route message; no navigation', async () => {
     component.spaceGuid = 'mockSpaceGuid';
     component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
@@ -303,8 +294,7 @@ describe('AddRoutesComponent', () => {
     await expect(component.runSubmit()).rejects.toThrow(/Orphan route/);
 
     expect(addRoute).not.toHaveBeenCalled();
-    const dispatched = storeDispatch.mock.calls.find(call => call[0] instanceof RouterNav);
-    expect(dispatched).toBeUndefined();
+    expect(routerNavigate).not.toHaveBeenCalled();
   });
 
   it('on 422 RouteHostTaken: surfaces generic name-unavailable message', async () => {
@@ -348,8 +338,9 @@ describe('AddRoutesComponent', () => {
     expect(attachRoute).toHaveBeenCalledWith('pick-2');
     expect(createAndAttach).not.toHaveBeenCalled();
     expect(addRoute).toHaveBeenCalledWith(r2);
-    const dispatched = storeDispatch.mock.calls.find(call => call[0] instanceof RouterNav);
-    expect(dispatched).toBeTruthy();
+    expect(routerNavigate).toHaveBeenCalledWith(
+      ['/applications', 'mockCfGuid', 'mockAppGuid', 'routes'],
+    );
   });
 
   it('submit gate: invalid form + no selection → not valid', () => {
