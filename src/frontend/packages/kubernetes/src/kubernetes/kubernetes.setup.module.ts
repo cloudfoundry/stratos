@@ -56,7 +56,7 @@ import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
 import { KubernetesService } from './services/kubernetes.service';
-import { KubeEndpointLifecycleService } from '../services/endpoint-data/kube-endpoint-lifecycle.service';
+import { KubeEndpointRegistryHook } from '../services/endpoint-data/kube-endpoint-registry.hook';
 import { KubernetesSignalConfigRegistry } from './kubernetes-resource/kubernetes-signal-config-registry';
 import {
   buildNamespacesSignalConfig,
@@ -104,11 +104,11 @@ export class KubernetesSetupModule {
     const uiConfigService = inject(KubernetesUIConfigService);
     const signalRegistry = inject(KubernetesSignalConfigRegistry);
     const parentModule = inject(KubernetesSetupModule, { optional: true, skipSelf: true });
-    // Force eager construction of the registry/lifecycle bridge so
-    // CONNECT_ENDPOINTS_SUCCESS / DISCONNECT_ENDPOINTS_SUCCESS are
-    // observed before the user navigates into any kubernetes page.
-    // Wave-3 deletes the bridge once ngrx Actions is gone.
-    inject(KubeEndpointLifecycleService);
+    // Force eager construction of the signal-native registry hook so
+    // EndpointsService.endpoints$ is subscribed (and the initial-state
+    // diff is computed) before the user navigates into any kubernetes
+    // page. Replaces the wave-2 ngrx-Actions bridge.
+    inject(KubeEndpointRegistryHook);
 
     if (parentModule) {
       // Module has already been imported
