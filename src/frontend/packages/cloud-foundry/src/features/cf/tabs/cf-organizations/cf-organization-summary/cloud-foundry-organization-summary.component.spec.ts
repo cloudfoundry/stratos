@@ -19,6 +19,7 @@ import { generateCFEntities } from '../../../../../cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
+import { CfOrgsSignalConfigService } from '../../../../../shared/components/list/list-types/org/cf-orgs-signal-config.service';
 import { CloudFoundryOrganizationSummaryComponent } from './cloud-foundry-organization-summary.component';
 
 describe('CloudFoundryOrganizationSummaryComponent', () => {
@@ -63,6 +64,10 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
     deleteOrg: () => {}
   };
 
+  const mockOrgsConfig = {
+    deleteOrg: async (_cnsiGuid: string, _orgGuid: string) => {}
+  };
+
   const mockActiveRoute = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
@@ -94,6 +99,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
         { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         { provide: CloudFoundryOrganizationService, useValue: mockOrgService },
         { provide: CloudFoundryEndpointService, useValue: mockEndpointService },
+        { provide: CfOrgsSignalConfigService, useValue: mockOrgsConfig },
         TabNavService,
         ConfirmationDialogService,
         TailwindSnackBarService,
