@@ -376,3 +376,30 @@ export interface KubePod {
   };
   _meta?: StratosMeta;
 }
+
+// --- Analysis (wave-2) ---
+//
+// Analysis report wire shape — sourced from the analysis backend plugin
+// at /pp/v1/analysis/reports/:endpoint. Mirrors the legacy
+// `kubernetes/store/kube.types.ts#AnalysisReport`; duplicated here so
+// the signal layer compiles after wave-3 deletes the store directory.
+//
+// `report` is intentionally typed as a structured record because each
+// analyzer (popeye / kubescore / etc.) returns a different schema; the
+// per-format helpers live in `services/*-report.helper.ts` and mutate
+// `report` in place to attach a normalized alert map.
+export interface AnalysisReport {
+  id: string;
+  endpoint: string;
+  type: string;
+  name: string;
+  path: string;
+  created: Date;
+  read: boolean;
+  status: string;
+  duration: number;
+  report?: Record<string, unknown>;
+  title?: string;
+  format?: string;
+  _meta?: StratosMeta;
+}
