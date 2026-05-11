@@ -1,5 +1,35 @@
-<ng-template #listRepoButton>
+<div class="flex flex-row max-h-full">
   @if (!hide) {
+    <div class="flex flex-col max-h-full overflow-auto"
+      [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
+      <h3 class="text-base my-1.5">Filter By Repository</h3>
+      <app-form-field>
+        <input appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"
+          (ngModelChange)="searchReposChange($event)">
+      </app-form-field>
+      <div class="max-h-full overflow-auto pr-2.5">
+        @if (stratosRepos().length) {
+          <div class="flex flex-col">
+            <h4 class="text-[15px] mt-0 mb-2">Helm Repositories</h4>
+            @for (repo of stratosRepos(); track repo) {
+              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)"
+                 (keydown.enter)="filterCharts(repo)" [class.font-bold]="repo === filteredRepo">{{repo}}</a>
+            }
+          </div>
+        }
+        @if (artifactHubRepos().length) {
+          <div class="flex flex-col">
+            <h4 class="text-[15px] my-2">Artifact Hub Repositories</h4>
+            @for (repo of artifactHubRepos(); track repo) {
+              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)"
+                 (keydown.enter)="filterCharts(repo)" [class.font-bold]="repo === filteredRepo">{{repo}}</a>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+  <div class="flex-1 min-h-0 flex flex-col">
     <div class="flex items-end my-1">
       <button class="btn btn-ghost mr-2.5" (click)="collapsed = !collapsed">
         <span class="material-symbols-outlined">filter_list</span>
@@ -10,52 +40,19 @@
           <span class="material-symbols-outlined">chevron_left</span>
         }
       </button>
-      <div class="flex flex-wrap gap-2">
-        @if (filteredRepo) {
-          <div
-            class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-brand-100 dark:bg-brand-900 text-brand-900 dark:text-brand-100">
-            <span>{{filteredRepo}}</span>
-            <button (click)="filterCharts()"
-              class="ml-1 hover:bg-brand-200 dark:hover:bg-brand-800 rounded-full p-0.5">
-              <span class="material-symbols-outlined text-base">cancel</span>
-            </button>
-          </div>
-        }
-      </div>
+      @if (filteredRepo) {
+        <div
+          class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-brand-100 dark:bg-brand-900 text-brand-900 dark:text-brand-100">
+          <span>{{filteredRepo}}</span>
+          <button (click)="filterCharts()"
+            class="ml-1 hover:bg-brand-200 dark:hover:bg-brand-800 rounded-full p-0.5">
+            <span class="material-symbols-outlined text-base">cancel</span>
+          </button>
+        </div>
+      }
     </div>
-  }
-</ng-template>
-
-<div class="flex flex-row max-h-full">
-  @if (!hide && repos$ | async; as repos) {
-    <div class="flex flex-col max-h-full overflow-auto"
-      [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
-      <h3 class="text-base my-1.5">Filter By Repository</h3>
-      <app-form-field>
-        <input appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"
-          (ngModelChange)="searchReposChange($event)">
-      </app-form-field>
-      <div class="max-h-full overflow-auto pr-2.5">
-        @if (repos.stratosRepos.length) {
-          <div class="flex flex-col">
-            <h4 class="text-[15px] mt-0 mb-2">Helm Repositories</h4>
-            @for (repo of repos.stratosRepos; track repo) {
-              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)" (keydown.enter)="filterCharts(repo)"
-              [class.font-bold]="repo === filteredRepo">{{repo}}</a>
-            }
-          </div>
-        }
-        @if (repos.artifactHubRepos.length) {
-          <div class="flex flex-col">
-            <h4 class="text-[15px] my-2">Artifact Hub Repositories</h4>
-            @for (repo of repos.artifactHubRepos; track repo) {
-              <a class="cursor-pointer text-sm" tabindex="0" (click)="filterCharts(repo)" (keydown.enter)="filterCharts(repo)"
-              [class.font-bold]="repo === filteredRepo">{{repo}}</a>
-            }
-          </div>
-        }
-      </div>
-    </div>
-  }
-  <app-list [customFilters]="listRepoButton"></app-list>
+    @if (listConfig(); as cfg) {
+      <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
+    }
+  </div>
 </div>
