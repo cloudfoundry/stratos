@@ -8,16 +8,16 @@
   <li>Service Account - A Service Account that can be used to access the Dashboard</li>
 </ol>
 
-@if ((kubeDashboardStatus$ | async) === false || isUpdatingStatus) {
+@if (!dashboardStatus() || isUpdatingStatus()) {
   <div class="flex my-2.5">
     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-brand-500"></div>
     <div>Retrieving Dashboard configuration ...</div>
   </div>
 }
 
-@if ((kubeDashboardStatus$ | async) && !isUpdatingStatus) {
+@if (dashboardStatus() && !isUpdatingStatus()) {
   <div>
-    @if (kubeDashboardStatus$ | async; as status) {
+    @if (dashboardStatus(); as status) {
       <div>
         @if (status.service && status.serviceAccount) {
           <div class="flex my-5 [&>div]:flex-1">
@@ -26,7 +26,7 @@
               <div>Kubernetes Dashboard is installed and a Service Account exists - you can access the dashboard using the
               'View Dashboard' button on the Summary view for this cluster.</div>
             </div>
-            @if (kubeEndpointService.kubeDashboardConfigured$ | async) {
+            @if (isDashboardConfigured()) {
               <button [routerLink]="dashboardLink" class="btn btn-ghost">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span class="ml-1">View Dashboard</span>
@@ -101,7 +101,7 @@
           </div>
           @if (!status.serviceAccount) {
             <div class="card-content">
-              @if ((isAzure$ | async)) {
+              @if (isAzure()) {
                 <div>
                   <p class="flex items-center">
                     <span class="material-symbols-outlined">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
@@ -120,7 +120,7 @@
                 stratos-role=kubernetes-dashboard-user</div>
               </div>
             }
-            @if ((isAzure$ | async) === false) {
+            @if (isAzure() === false) {
               <div>
                 <p>Service Account not found - you can create one manually or <app-product-name></app-product-name> can do this for you.</p>
                 <h2 class="text-sm font-normal underline">Manually create a Service Account</h2>
