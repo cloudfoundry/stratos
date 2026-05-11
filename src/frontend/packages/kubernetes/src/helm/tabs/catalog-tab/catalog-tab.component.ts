@@ -2,15 +2,16 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 import { SignalListComponent, SignalListConfig } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
 import { EndpointModel, stratosEntityCatalog } from '../../../../../store/src/public-api';
 import { MonocularChart } from '../../../services/endpoint-data/kube-types';
-import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE } from '../../helm-entity-factory';
+import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { MonocularChartsSignalConfigService } from '../../list-types/monocular-charts-signal-config.service';
+import { ChartItemComponent } from '../../monocular/chart-item/chart-item.component';
 
 // Signal-native catalog tab. Replaces the legacy MonocularChartsListConfig
 // + ngrx pagination pipeline with MonocularChartsSignalConfigService driving
@@ -28,6 +29,7 @@ import { MonocularChartsSignalConfigService } from '../../list-types/monocular-c
     FormsModule,
     CustomFormFieldComponent,
     SignalListComponent,
+    ChartItemComponent,
   ],
 })
 export class CatalogTabComponent implements OnDestroy {
@@ -47,6 +49,28 @@ export class CatalogTabComponent implements OnDestroy {
   readonly signalConfig = inject(MonocularChartsSignalConfigService);
 
   readonly listConfig: WritableSignal<SignalListConfig<MonocularChart> | undefined> = signal(undefined);
+
+  // Drives the chart-item card layout: when both Artifact Hub AND a
+  // classic helm repo are connected, chart-item shows the source-repo
+  // badge to disambiguate. Mirrors the legacy MonocularChartCardComponent
+  // ctor so the visuals stay identical.
+  readonly artifactHubAndHelmRepoTypes$: Observable<boolean> = stratosEntityCatalog.endpoint.store.getAll
+    .getPaginationService().entities$.pipe(
+      filter(endpoints => !!endpoints),
+      take(1),
+      map(endpoints => {
+        let haveArtifactHub = false;
+        let haveHelmRepo = false;
+        for (const ep of endpoints as EndpointModel[]) {
+          if (ep.cnsi_type !== HELM_ENDPOINT_TYPE) continue;
+          if (ep.sub_type === HELM_HUB_ENDPOINT_TYPE) haveArtifactHub = true;
+          else if (ep.sub_type === HELM_REPO_ENDPOINT_TYPE) haveHelmRepo = true;
+        }
+        return haveArtifactHub && haveHelmRepo;
+      }),
+      publishReplay(1),
+      refCount(),
+    );
 
   // Repo-name lists filtered by the sidebar search.
   readonly stratosRepos: Signal<string[]> = computed(() => {

@@ -52,7 +52,15 @@
       }
     </div>
     @if (listConfig(); as cfg) {
-      <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
+      <app-signal-list [config]="cfg" class="flex-1 min-h-0">
+        <ng-template #cardTemplate let-row>
+          <app-chart-item
+            [chart]="$any(row)"
+            [showDescription]="false"
+            [artifactHubAndHelmRepoTypes$]="artifactHubAndHelmRepoTypes$">
+          </app-chart-item>
+        </ng-template>
+      </app-signal-list>
     }
   </div>
 </div>

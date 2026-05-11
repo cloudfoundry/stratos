@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
+import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -230,6 +230,15 @@ export interface SignalListConfig<T> {
 })
 export class SignalListComponent<T> implements AfterViewInit {
   @Input({ required: true }) config!: SignalListConfig<T>;
+
+  // Optional content-projected template for fully-custom card rendering.
+  // When supplied AND viewMode is 'card', signal-list delegates the card
+  // body to this template (passing each row as the implicit context),
+  // bypassing the default column-based card layout. Toolbar, pagination,
+  // empty/loading states, and overflow handling all stay in signal-list.
+  // Used by the helm catalog tab to render <app-chart-item> per row.
+  @ContentChild('cardTemplate', { read: TemplateRef })
+  cardTemplate?: TemplateRef<{ $implicit: T }>;
 
   @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
 
