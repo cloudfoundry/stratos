@@ -28,7 +28,7 @@ export interface KubeGenericResourceConfig {
 
 const nsKey = (kubeGuid: string, namespace: string) => `${kubeGuid}/${namespace}`;
 
-export abstract class KubeGenericResourceDataServiceBase<T extends { metadata?: { name?: string; kubeId?: string } }> {
+export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: { name: string; namespace?: string; kubeId?: string; creationTimestamp?: string } }> {
   protected abstract readonly http: HttpClient;
   protected abstract readonly config: KubeGenericResourceConfig;
 

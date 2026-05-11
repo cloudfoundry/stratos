@@ -412,8 +412,8 @@ export function buildNamespacesSignalConfig(
 // state-key + buildSignalListConfig) call so each per-entity factory only
 // declares its sortExtractors + columns + labels.
 
-interface GenericRow extends Record<string, unknown> {
-  metadata?: { name?: string; namespace?: string; kubeId?: string; creationTimestamp?: string };
+interface GenericRow {
+  metadata: { name: string; namespace?: string; kubeId?: string; creationTimestamp?: string };
   kubeGuid: string;
 }
 
