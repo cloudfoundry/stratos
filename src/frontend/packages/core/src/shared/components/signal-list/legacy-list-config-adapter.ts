@@ -1,8 +1,9 @@
-import { Injector, NgZone, Signal, WritableSignal, computed, runInInjectionContext, signal } from '@angular/core';
+import { Injector, NgZone, WritableSignal, computed, effect, runInInjectionContext, signal, untracked } from '@angular/core';
+// `computed` is used for derived totals; `effect` keeps snapshots in
+// sync with the legacy observable streams.
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import type { GeneralAppState, ListSort as LegacyListSort } from '@stratosui/store';
-import { combineLatest } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import {
@@ -40,6 +41,7 @@ export function __resetAdapterWarningsForTest(): void {
 // while pages that don't care continue to treat the result as a plain
 // `SignalListConfig<T>`. Kept on the return value rather than as a
 // separate parameter so the adapter remains a single-call ergonomic.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface AdaptedSignalListExtras<T> {
   // Maxed-state mirror — wave-β pages can render their own banner
   // ("Showing first N of X — load all") without subscribing to the
@@ -135,21 +137,16 @@ export function adaptLegacyListConfig<T>(
     // Keep snapshots in sync with the source-of-truth pagination
     // observable so anything that bypasses the wrapper (programmatic
     // store dispatches, pagination resets) still updates the UI.
-    runInInjectionContext(opts.injector, () => {
-      // Use a derived computed here to avoid effect()'s injection
-      // requirement — toSignal already established a reactive context
-      // we can read from.
-      const _sync = computed(() => {
-        const p = pagination();
-        const newSize = p.pageSize || 0;
-        const newIdx = p.pageIndex ? p.pageIndex - 1 : 0;
+    // `untracked` prevents the writes from triggering an effect re-run
+    // through their own consumers — we only depend on `pagination()`.
+    effect(() => {
+      const p = pagination();
+      const newSize = p.pageSize || 0;
+      const newIdx = p.pageIndex ? p.pageIndex - 1 : 0;
+      untracked(() => {
         if (pageSizeSnapshot() !== newSize) pageSizeSnapshot.set(newSize);
         if (pageIndexSnapshot() !== newIdx) pageIndexSnapshot.set(newIdx);
-        return p;
       });
-      // Touch the computed once so it registers (a no-op read keeps
-      // the dependency graph live without leaking a subscription).
-      _sync();
     });
 
     const pageSize: WritableSignal<number> = wrapWritable(
@@ -175,15 +172,13 @@ export function adaptLegacyListConfig<T>(
     const sortSnapshot = signal<SignalListSort>(toSignal(sortObs, {
       initialValue: { field: '', direction: 'asc' as const },
     })());
-    runInInjectionContext(opts.injector, () => {
-      const sortFromObs = toSignal(sortObs, { initialValue: sortSnapshot() });
-      const _sortSync = computed(() => {
-        const s = sortFromObs();
+    const sortFromObs = toSignal(sortObs, { initialValue: sortSnapshot() });
+    effect(() => {
+      const s = sortFromObs();
+      untracked(() => {
         const cur = sortSnapshot();
         if (s.field !== cur.field || s.direction !== cur.direction) sortSnapshot.set(s);
-        return s;
       });
-      _sortSync();
     });
     const sort: WritableSignal<SignalListSort> = wrapWritable(
       sortSnapshot,
@@ -205,13 +200,11 @@ export function adaptLegacyListConfig<T>(
       { initialValue: '' },
     );
     const nameFilterSnapshot = signal(nameFilterFromObs());
-    runInInjectionContext(opts.injector, () => {
-      const _nameSync = computed(() => {
-        const v = nameFilterFromObs();
+    effect(() => {
+      const v = nameFilterFromObs();
+      untracked(() => {
         if (nameFilterSnapshot() !== v) nameFilterSnapshot.set(v);
-        return v;
       });
-      _nameSync();
     });
     const nameFilter: WritableSignal<string> = wrapWritable(
       nameFilterSnapshot,
@@ -302,7 +295,6 @@ function mapLegacyColumn<T>(col: ITableColumn<T>): SignalListColumn<T> | null {
   if (col.cellComponent && !col.cellDefinition) {
     if (!_columnComponentWarned.has(col.columnId)) {
       _columnComponentWarned.add(col.columnId);
-      // eslint-disable-next-line no-console
       console.warn(
         `[adaptLegacyListConfig] column "${col.columnId}" uses cellComponent without cellDefinition; ` +
         `the signal-list adapter cannot render custom components — column dropped. ` +
