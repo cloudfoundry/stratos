@@ -32,7 +32,7 @@ import {
 import {
   CloudFoundryCellSummaryComponent,
 } from './tabs/cf-cells/cloud-foundry-cell/cloud-foundry-cell-summary/cloud-foundry-cell-summary.component';
-import { CloudFoundryCellsComponent } from './tabs/cf-cells/cloud-foundry-cells.component';
+import { CloudFoundryCellsSignalComponent } from './tabs/cf-cells/cloud-foundry-cells-signal.component';
 import { CloudFoundryEventsComponent } from './tabs/cf-events/cloud-foundry-events.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cf-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cf-firehose/cloud-foundry-firehose.component';
@@ -211,7 +211,7 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
             },
             {
               path: 'cells',
-              component: CloudFoundryCellsComponent
+              component: CloudFoundryCellsSignalComponent
             },
             {
               path: 'firehose',
