@@ -27,8 +27,7 @@ import {
   SignalListSort,
   SignalStepHandle,
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IDomain } from '../../../../cf-api.types';
+import { StDomain } from '../../../../services/endpoint-data/stratos-types';
 import { ApplicationService } from '../../application.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
 import {
@@ -115,7 +114,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
    * data service without dispatching ngrx actions or wiring through the
    * legacy entity catalog.
    */
-  readonly domains: Signal<APIResource<IDomain>[]>;
+  readonly domains: Signal<StDomain[]>;
 
   addTCPRoute: FormGroup<{
     port: FormControl<string>;
@@ -126,13 +125,13 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     path: FormControl<string>;
   }>;
   domainFormGroup: FormGroup<{
-    domain: FormControl<APIResource<IDomain> | ''>;
+    domain: FormControl<StDomain | ''>;
   }>;
 
   appGuid: string;
   cfGuid: string;
   spaceGuid!: string;
-  selectedDomain!: APIResource<IDomain>;
+  selectedDomain!: StDomain;
   appUrl: string;
 
   useRandomPort = false;
@@ -206,7 +205,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.domains = toSignal(this.applicationService.orgDomains$, { initialValue: [] });
 
     this.domainFormGroup = new FormGroup({
-      domain: new FormControl<APIResource<IDomain> | ''>('', {
+      domain: new FormControl<StDomain | ''>('', {
         nonNullable: true,
         validators: [Validators.required],
       }),
@@ -253,8 +252,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     (this as { hostCollision: Signal<StRoute | null> }).hostCollision = computed(() => {
       const domain = domainVal();
       if (!domain || typeof domain === 'string') return null;
-      const domainGuid = domain.metadata.guid;
-      const isTcp = domain.entity.router_group_type === 'tcp';
+      const domainGuid = domain.guid;
+      const isTcp = domain.supportedProtocols?.includes('tcp') ?? false;
       const available = this.mapRoutesConfig.availableRoutes();
       if (!available.length) return null;
 
@@ -470,7 +469,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   isTCPRouteCreation(): boolean {
     const domain = this.domainFormGroup.value.domain;
-    return !!domain && typeof domain !== 'string' && domain.entity.router_group_type === 'tcp';
+    return !!domain && typeof domain !== 'string' && (domain.supportedProtocols?.includes('tcp') ?? false);
   }
 
   /**
@@ -490,7 +489,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   /** Create a new route in the selected domain + attach to the app. */
   private async runCreateAndAttach(): Promise<void> {
     const domain = this.domainFormGroup.value.domain;
-    const domainGuid = domain && typeof domain !== 'string' ? domain.metadata.guid : '';
+    const domainGuid = domain && typeof domain !== 'string' ? domain.guid : '';
     if (!domainGuid) {
       throw new Error('Failed to add route: domain is required');
     }
