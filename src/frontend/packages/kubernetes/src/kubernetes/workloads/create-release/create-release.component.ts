@@ -39,11 +39,11 @@ import {
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { helmEntityCatalog } from '../../../helm/helm-entity-catalog';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
-import { HelmChartReference, HelmInstallValues } from '../../../helm/store/helm.types';
+import { KubeHelmDataService } from '../../../services/endpoint-data/kube-helm-data.service';
+import { HelmChartReference, HelmInstallPayload } from '../../../services/endpoint-data/kube-types';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubernetesNamespace } from '../../store/kube.types';
@@ -97,6 +97,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   public endpointsService = inject(EndpointsService);
   private chartsService = inject(ChartsService);
   private router = inject(Router);
+  private helmDataService = inject(KubeHelmDataService);
 
   // FWT-959 Part 2: signal-native step handles.
   //
@@ -307,7 +308,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     const endpoint = getMonocularEndpoint(this.route, undefined, undefined);
     const formValue = this.details.value;
     // Build the request body
-    const values: HelmInstallValues = {
+    const values: HelmInstallPayload = {
       endpoint: formValue.endpoint ?? '',
       releaseName: formValue.releaseName || '',
       releaseNamespace: formValue.releaseNamespace || '',
@@ -331,22 +332,25 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
         if (values.chartUrl.length === 0) {
           throw new Error('Could not get Chart URL');
         }
-        // Make the request
-        return helmEntityCatalog.chart.api.install<RequestInfoState>(values).pipe(
-          // Wait for result of request
-          filter(state => !!state),
-          pairwise(),
-          filter(([oldVal, newVal]) => (oldVal.creating && !newVal.creating)),
-          map(([, newVal]) => newVal),
-          map(result => ({
-            success: !result.error,
-            redirect: !result.error,
-            redirectPayload: {
-              path: !result.error ? `workloads/${values.endpoint}:${values.releaseNamespace}:${values.releaseName}/summary` : ''
-            },
-            message: !result.error ? '' : result.message
-          }))
-        );
+        // Signal-native install — call the data service directly. The
+        // service handles HTTP + cache refresh and surfaces failures as
+        // a rejected promise we map back to the legacy StepOnNextResult.
+        return new Observable<StepOnNextResult>(sub => {
+          this.helmDataService.install(values).then(() => {
+            sub.next({
+              success: true,
+              redirect: true,
+              redirectPayload: {
+                path: `workloads/${values.endpoint}:${values.releaseNamespace}:${values.releaseName}/summary`,
+              },
+              message: '',
+            });
+            sub.complete();
+          }).catch((err: Error) => {
+            sub.next({ success: false, message: err?.message || 'Install failed' });
+            sub.complete();
+          });
+        });
       })
     );
   }
