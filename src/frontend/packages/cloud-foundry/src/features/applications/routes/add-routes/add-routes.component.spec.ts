@@ -221,7 +221,7 @@ describe('AddRoutesComponent', () => {
   it('submit in HTTP create mode calls createAndAttachRoute with host/path + relationships (no port)', async () => {
     // Wire up the form for an HTTP submission.
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'newhost', path: 'subpath' });
 
@@ -238,7 +238,7 @@ describe('AddRoutesComponent', () => {
 
   it('submit in TCP create mode calls createAndAttachRoute with port + relationships (no host/path)', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-tcp' }, entity: { router_group_type: 'tcp' } } as any;
+    component.selectedDomain = { guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addTCPRoute.patchValue({ port: '5005', useRandomPort: false });
 
@@ -254,7 +254,7 @@ describe('AddRoutesComponent', () => {
 
   it('submit in TCP create mode with useRandomPort=true omits port', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-tcp' }, entity: { router_group_type: 'tcp' } } as any;
+    component.selectedDomain = { guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addTCPRoute.patchValue({ port: '', useRandomPort: true });
 
@@ -266,7 +266,7 @@ describe('AddRoutesComponent', () => {
 
   it('on createAndAttachRoute success: dataService.addRoute called with returned StRoute, then router navigates back to routes list', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'h', path: '' });
 
@@ -283,7 +283,7 @@ describe('AddRoutesComponent', () => {
 
   it('on createAndAttachRoute orphan failure: error propagates with Orphan route message; no navigation', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'h', path: '' });
 
@@ -299,7 +299,7 @@ describe('AddRoutesComponent', () => {
 
   it('on 422 RouteHostTaken: surfaces generic name-unavailable message', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'taken', path: '' });
 
@@ -314,7 +314,7 @@ describe('AddRoutesComponent', () => {
 
   it('on 422 with non-uniqueness code: passes CF detail through', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'invalid', path: '' });
 
@@ -349,7 +349,7 @@ describe('AddRoutesComponent', () => {
 
   it('submit gate: valid form + no collision → valid', () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'unique', path: '' });
     fixture.detectChanges();
@@ -362,7 +362,7 @@ describe('AddRoutesComponent', () => {
       makeRoute({ guid: 'taken-1', host: 'taken', path: '', domainGuid: 'domain-http', appGuids: [] }),
     ]);
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'taken', path: '' });
     fixture.detectChanges();
@@ -383,7 +383,7 @@ describe('AddRoutesComponent', () => {
       makeRoute({ guid: 'tcp-taken', domainGuid: 'domain-tcp', host: '', path: '', port: 5555, appGuids: [] }),
     ]);
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-tcp' }, entity: { router_group_type: 'tcp' } } as any;
+    component.selectedDomain = { guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addTCPRoute.patchValue({ port: '5555', useRandomPort: false });
     fixture.detectChanges();
@@ -398,7 +398,7 @@ describe('AddRoutesComponent', () => {
       makeRoute({ guid: 'mine', host: 'myhost', path: '', domainGuid: 'domain-http', appGuids: ['mockAppGuid'] }),
     ]);
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { metadata: { guid: 'domain-http' }, entity: { router_group_type: 'http' } } as any;
+    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
     component.domainFormGroup.patchValue({ domain: component.selectedDomain });
     component.addHTTPRoute.patchValue({ host: 'myhost', path: '' });
     fixture.detectChanges();

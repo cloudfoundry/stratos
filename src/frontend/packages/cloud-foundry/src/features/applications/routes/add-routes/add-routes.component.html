@@ -11,7 +11,7 @@
       </app-form-field>
     </form>
 
-    @if (selectedDomain?.entity?.router_group_type !== 'tcp') {
+    @if (!selectedDomain?.supportedProtocols?.includes('tcp')) {
       <form [formGroup]="addHTTPRoute" class="stepper-form w-1/2">
         <div class="add-route__form-prompt">
           This is an HTTP Domain - an HTTP Route will be created
@@ -42,7 +42,7 @@
         </div>
       </form>
     }
-    @if (selectedDomain?.entity?.router_group_type === 'tcp') {
+    @if (selectedDomain?.supportedProtocols?.includes('tcp')) {
       <form [formGroup]="addTCPRoute" class="stepper-form w-1/2">
         <div class="add-route__form-prompt">
           This is a TCP Domain - a TCP Route will be created
