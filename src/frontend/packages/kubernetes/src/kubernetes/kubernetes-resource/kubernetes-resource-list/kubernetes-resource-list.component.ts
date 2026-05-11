@@ -1,11 +1,21 @@
 import { CommonModule } from '@angular/common';
-import {Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Injector,
+  OnDestroy,
+  Signal,
+  WritableSignal,
+  inject,
+  ChangeDetectionStrategy,
+  computed,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { PageSubNavComponent, ListViewComponent } from '@stratosui/core';
+import { PageSubNavComponent, ListViewComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { GeneralAppState } from '../../../../../store/src/app-state';
 
 import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
@@ -38,6 +48,11 @@ import {
 } from '../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../workloads/store/workloads-entity-factory';
 import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
+import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
+import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
+import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
+import { KubeServiceDataService } from '../../../services/domain-data/kube-service-data.service';
+import { kubernetesPodsEntityType, kubernetesServicesEntityType } from '../../kubernetes-entity-factory';
 
 const namespaceColumnId = 'namespace';
 
@@ -50,7 +65,8 @@ const namespaceColumnId = 'namespace';
   imports: [
     CommonModule,
     PageSubNavComponent,
-    ListViewComponent
+    ListViewComponent,
+    SignalListComponent,
   ]
 })
 export class KubernetesResourceListComponent implements OnDestroy {
@@ -69,6 +85,17 @@ export class KubernetesResourceListComponent implements OnDestroy {
   public isWorkloadView = false;
   public menuOpen = false;
 
+  // Signal-native code path: when the entity type is registered with
+  // KubernetesSignalConfigRegistry, the shell builds a SignalListConfig
+  // and renders <app-signal-list> instead of the legacy <app-list-view>.
+  // useSignalList = !!signalListConfig().
+  public readonly signalListConfig: WritableSignal<SignalListConfig<unknown> | undefined> = signal(undefined);
+  // Drives the signal-config dataSignal projection — namespace dropdown
+  // writes flow into here so factories that consume `selectedNamespace`
+  // re-evaluate (cluster-wide vs namespaced fetch).
+  private readonly _selectedNamespaceSignal: WritableSignal<string | undefined> = signal(undefined);
+  public readonly selectedNamespaceSignal = this._selectedNamespaceSignal.asReadonly();
+
   private sub: Subscription;
   private kubeId: string;
   private workloadTitle: string;
@@ -78,6 +105,8 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private router = inject(Router);
   private baseKubeGuid = inject(BaseKubeGuid);
   private uiConfigService = inject(KubernetesUIConfigService);
+  private signalConfigRegistry = inject(KubernetesSignalConfigRegistry);
+  private injector = inject(Injector);
 
 
 
@@ -118,15 +147,69 @@ export class KubernetesResourceListComponent implements OnDestroy {
         filter((data: string) => !!data)
       ).subscribe((ns: string) => {
         this.selectedNamespace = ns === '*' ? undefined : ns;
-        if (this.isNamespacedView) {
+        // Mirror into the signal so the signal-config factory's
+        // computed() data projection re-evaluates.
+        this._selectedNamespaceSignal.set(this.selectedNamespace);
+        if (this.isNamespacedView && !this.signalListConfig()) {
+          // Only rebuild the legacy provider when we're NOT on the
+          // signal-config path — signal-configs react to the namespace
+          // signal directly without a rebuild.
           this.createProvider(catalogEntity as any);
         }
       });
     }
 
+    // Signal-config path: if the registry has an entry for this entity
+    // type, build a SignalListConfig and skip the legacy provider.
+    const signalFactory = this.signalConfigRegistry.get(this.entityCatalogKey);
+    if (signalFactory && !this.isWorkloadView) {
+      this.isNamespacedView = !!(catalogEntity as { definition?: KubeResourceEntityDefinition }).definition?.apiNamespaced;
+      const config = signalFactory(
+        {
+          kubeGuid: this.kubeId,
+          selectedNamespace: this._selectedNamespaceSignal.asReadonly(),
+          isWorkloadView: this.isWorkloadView,
+          workloadNamespace: this.workloadNamespace,
+          workloadTitle: this.workloadTitle,
+        },
+        this.injector,
+      );
+      this.signalListConfig.set(config);
+      // Kick the registry-backed cache so the underlying signal
+      // populates on first paint. Errors flow into the signal-config's
+      // errors() and surface in the toolbar.
+      this.warmRegistryCache();
+      return;
+    }
+
     this.createProvider(catalogEntity as any);
 
 
+  }
+
+  // Resolve the signal-config code path — kick the per-endpoint
+  // registry cache so cluster-scoped state (namespaces, version, node
+  // count) populates on first paint, plus kick the per-resource data
+  // service so the page's primary list populates without waiting for the
+  // user's first refresh click. Idempotent: subsequent visits return
+  // immediately from the cache.
+  private warmRegistryCache(): void {
+    const reg = this.injector.get(KubeEndpointDataRegistry);
+    const svc = reg.getService(this.kubeId);
+    svc.load().subscribe({ next: () => undefined, error: () => undefined });
+
+    // Kick the per-resource data service so the page's primary list
+    // populates without a user gesture. Each domain service dedups
+    // in-flight requests internally.
+    if (this.entityCatalogKey === kubernetesPodsEntityType) {
+      const podData = this.injector.get(KubePodDataService);
+      void podData.refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === kubernetesServicesEntityType) {
+      const serviceData = this.injector.get(KubeServiceDataService);
+      void serviceData.refresh({ kubeGuid: this.kubeId });
+    }
+    // namespaces — no extra kick needed; svc.load() above fetches the
+    // namespace list as part of the cluster-scoped state.
   }
 
   ngOnDestroy() {
