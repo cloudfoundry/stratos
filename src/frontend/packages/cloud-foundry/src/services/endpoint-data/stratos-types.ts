@@ -222,6 +222,10 @@ export interface StSpace {
   // when the backend enrichment fetch fails.
   appCount: number;
   routeCount: number;
+  // V3 space-feature `ssh` flag — populated only by detail handlers
+  // (getNativeSpaceDetail). List handlers leave it `false` to avoid
+  // an N+1 /v3/spaces/{guid}/features/ssh fetch per space.
+  allowSsh: boolean;
 }
 
 export interface StOrgDetail extends StOrg {
@@ -706,6 +710,20 @@ export interface StDomain {
 export interface StDomainsResponse {
   resources: StDomain[];
   totalResults: number;
+}
+
+// Mirrors the Go StratosPagedResponse[T] envelope returned by multi-resource
+// native handlers — paged metadata under `pagination`, not flat `totalResults`.
+// Single-resource detail handlers do NOT use this; they return their resource
+// shape directly.
+export interface StratosPagedResponse<T> {
+  resources: T[];
+  pagination: {
+    totalResults: number;
+    totalPages?: number;
+    page?: number;
+    perPage?: number;
+  };
 }
 
 // StOrgQuota is the Stratos-shaped DTO for a CF organization quota.

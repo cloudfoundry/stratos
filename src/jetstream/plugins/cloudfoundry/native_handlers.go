@@ -459,6 +459,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 		if space, ok := spaces[s.SpaceGUID]; ok {
 			s.SpaceName = space.Name
+			if orgGuid := relationshipGUID(space.Relationships.Organization); orgGuid != "" {
+				s.OrgGUID = &orgGuid
+			}
 		}
 		if rts, ok := routesByApp[r.GUID]; ok {
 			s.Routes = rts
@@ -755,6 +758,47 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 	detail := StOrgDetail{
 		StOrg:  toStOrg(*r),
 		Spaces: []StSpace{},
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, detail)
+}
+
+// getNativeSpaceDetail handles GET /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}.
+//
+// Single CAPI Get + an opportunistic /v3/spaces/{guid}/features/ssh fetch
+// to surface the V3 space-feature `ssh` flag (which V3 moved off the
+// space resource). The feature fetch is best-effort: on failure we log
+// and return AllowSSH=false rather than failing the whole detail call —
+// the SSH/env-var UI just falls back to its disabled state.
+func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	spaceGUID := ctx.Param("spaceGuid")
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	r, err := cfClient.Spaces().Get(ctx.Request().Context(), spaceGUID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+	}
+
+	detail := StSpaceDetail{
+		StSpace: toStSpace(*r),
+	}
+
+	// Best-effort SSH-feature lookup. V3 split this off the space resource
+	// to /v3/spaces/{guid}/features/ssh; failure here is non-fatal.
+	if feature, ferr := cfClient.Spaces().GetFeature(ctx.Request().Context(), spaceGUID, "ssh"); ferr != nil {
+		log.Warnf("getNativeSpaceDetail: ssh feature lookup failed for space %s: %v", spaceGUID, ferr)
+	} else if feature != nil {
+		detail.AllowSSH = feature.Enabled
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)

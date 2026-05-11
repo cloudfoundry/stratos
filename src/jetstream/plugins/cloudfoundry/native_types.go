@@ -67,11 +67,23 @@ type StSpace struct {
 	// pattern's lazy-non-fatal default branch).
 	AppCount   int `json:"appCount"`
 	RouteCount int `json:"routeCount"`
+	// AllowSSH mirrors the V3 space-feature `ssh` (V3 moved this off the
+	// space resource onto /v3/spaces/{guid}/features/ssh). Populated only
+	// by detail handlers (getNativeSpaceDetail); list handlers leave it at
+	// the default `false` to avoid an N+1 feature fetch per space.
+	AllowSSH bool `json:"allowSsh"`
 }
 
 type StOrgDetail struct {
 	StOrg
 	Spaces []StSpace `json:"spaces"`
+}
+
+// StSpaceDetail is the per-space detail wrapper. Kept as a thin embed
+// of StSpace today (mirrors StOrgDetail) so we can extend the detail
+// payload without breaking the list shape.
+type StSpaceDetail struct {
+	StSpace
 }
 
 type StOrgsResponse struct {
