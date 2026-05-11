@@ -121,13 +121,14 @@ export class KubeServiceDataService {
     } catch (err) {
       const status = (err as HttpErrorResponse)?.status;
       const code: StratosError['code'] = status === 401 || status === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR';
-      this._errors.update(curr => [...curr, {
+      const next: StratosError = {
         scope: 'envelope',
         code,
         title,
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
-      }].slice(0, 50));
+      };
+      this._errors.update(curr => [...curr, next].slice(0, 50));
       return [];
     }
   }

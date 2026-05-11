@@ -109,7 +109,7 @@ export class AnalysisReportsSignalConfigService {
     return this._reports;
   }
 
-  private readonly _sortExtractors: WritableSignal<Map<string, (row: AnalysisReport) => unknown>> = signal(new Map([
+  private readonly _sortExtractors: WritableSignal<Map<string, (row: AnalysisReport) => unknown>> = signal(new Map<string, (row: AnalysisReport) => unknown>([
     ['name', (r: AnalysisReport) => (r.name ?? '').toLowerCase()],
     ['type', (r: AnalysisReport) => (r.type ?? '').toLowerCase()],
     ['status', (r: AnalysisReport) => (r.status ?? '').toLowerCase()],

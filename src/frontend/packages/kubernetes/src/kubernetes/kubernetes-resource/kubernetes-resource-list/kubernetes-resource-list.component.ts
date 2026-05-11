@@ -163,7 +163,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     // type, build a SignalListConfig and skip the legacy provider.
     const signalFactory = this.signalConfigRegistry.get(this.entityCatalogKey);
     if (signalFactory && !this.isWorkloadView) {
-      this.isNamespacedView = !!(catalogEntity as { definition?: KubeResourceEntityDefinition }).definition?.apiNamespaced;
+      this.isNamespacedView = !!(catalogEntity as unknown as { definition?: KubeResourceEntityDefinition }).definition?.apiNamespaced;
       const config = signalFactory(
         {
           kubeGuid: this.kubeId,

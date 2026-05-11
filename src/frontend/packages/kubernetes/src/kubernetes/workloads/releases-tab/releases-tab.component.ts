@@ -6,7 +6,6 @@ import { endpointOfTypeSelector } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { NoContentMessageComponent } from '../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { SignalListComponent, SignalListConfig, SignalListDropdownOption } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
@@ -26,7 +25,6 @@ import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-sig
   imports: [
     CommonModule,
     PageHeaderComponent,
-    NoContentMessageComponent,
     SignalListComponent,
   ],
   providers: [DatePipe],
