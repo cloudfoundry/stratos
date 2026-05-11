@@ -1,0 +1,7 @@
+<div class="cells h-full flex flex-col">
+  @if (cellsConfig.availability() === false) {
+    Cell information for this Cloud Foundry cannot be found.
+  } @else if (listConfig(); as cfg) {
+    <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
+  }
+</div>
