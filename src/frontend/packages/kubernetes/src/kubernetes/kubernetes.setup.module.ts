@@ -41,9 +41,12 @@ import {
 } from './kube-config-registration/kube-config-selection/kube-config-table-user-select/kube-config-table-user-select.component';
 import {
   KUBERNETES_ENDPOINT_TYPE,
+  kubernetesConfigMapEntityType,
+  kubernetesDeploymentsEntityType,
   kubernetesNamespacesEntityType,
   kubernetesPodsEntityType,
   kubernetesServicesEntityType,
+  kubernetesStatefulSetsEntityType,
 } from './kubernetes-entity-factory';
 import { kubeEntityCatalog } from './kubernetes-entity-generator';
 
@@ -59,9 +62,21 @@ import { KubernetesService } from './services/kubernetes.service';
 import { KubeEndpointLifecycleService } from '../services/endpoint-data/kube-endpoint-lifecycle.service';
 import { KubernetesSignalConfigRegistry } from './kubernetes-resource/kubernetes-signal-config-registry';
 import {
+  buildClusterRolesSignalConfig,
+  buildConfigMapsSignalConfig,
+  buildDeploymentsSignalConfig,
+  buildJobsSignalConfig,
   buildNamespacesSignalConfig,
+  buildPersistentVolumeClaimsSignalConfig,
+  buildPersistentVolumesSignalConfig,
   buildPodsSignalConfig,
+  buildReplicaSetsSignalConfig,
+  buildRolesSignalConfig,
+  buildSecretsSignalConfig,
+  buildServiceAccountsSignalConfig,
   buildServicesSignalConfig,
+  buildStatefulSetsSignalConfig,
+  buildStorageClassesSignalConfig,
 } from './kubernetes-resource/kubernetes-resource-signal-configs';
 
 @NgModule({
@@ -127,6 +142,24 @@ export class KubernetesSetupModule {
       signalRegistry.register(kubernetesPodsEntityType, buildPodsSignalConfig as any);
       signalRegistry.register(kubernetesServicesEntityType, buildServicesSignalConfig as any);
       signalRegistry.register(kubernetesNamespacesEntityType, buildNamespacesSignalConfig as any);
+
+      // Wave-3: register the 12 generic resource types backed by
+      // KubeGenericResourceDataServiceBase subclasses. Constants for
+      // configMap / deployment / statefulSet come from kubernetes-entity-factory;
+      // the rest use the bare entity-type strings the entity catalog uses
+      // directly (matches kubernetes-entity-generator.ts registrations).
+      signalRegistry.register(kubernetesConfigMapEntityType, buildConfigMapsSignalConfig as any);
+      signalRegistry.register('secrets', buildSecretsSignalConfig as any);
+      signalRegistry.register(kubernetesDeploymentsEntityType, buildDeploymentsSignalConfig as any);
+      signalRegistry.register('replicaSet', buildReplicaSetsSignalConfig as any);
+      signalRegistry.register(kubernetesStatefulSetsEntityType, buildStatefulSetsSignalConfig as any);
+      signalRegistry.register('persistentVolume', buildPersistentVolumesSignalConfig as any);
+      signalRegistry.register('persistentVolumeClaims', buildPersistentVolumeClaimsSignalConfig as any);
+      signalRegistry.register('storageClass', buildStorageClassesSignalConfig as any);
+      signalRegistry.register('job', buildJobsSignalConfig as any);
+      signalRegistry.register('clusterRole', buildClusterRolesSignalConfig as any);
+      signalRegistry.register('role', buildRolesSignalConfig as any);
+      signalRegistry.register('serviceAccount', buildServiceAccountsSignalConfig as any);
 
       // Side-panel preview component is still wired through the legacy
       // UI-config service — it's used by the resource-viewer drawer

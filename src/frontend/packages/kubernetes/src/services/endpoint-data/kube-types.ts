@@ -377,6 +377,200 @@ export interface KubePod {
   _meta?: StratosMeta;
 }
 
+// ---------------------------------------------------------------------------
+// Wave-3 generic resource types: configMap, secret, deployment, replicaSet,
+// statefulSet, persistentVolume, persistentVolumeClaim, storageClass, job,
+// role, clusterRole, serviceAccount.
+//
+// Same convention as wave-2: wire-shape (camelCase per JSON payload),
+// client-stamped `kubeGuid`, `metadata.kubeId` mirror, optional `_meta`
+// envelope. Field sets are the minimum legacy list pages render — extra
+// wire fields just flow through because the interfaces stay open.
+// ---------------------------------------------------------------------------
+
+export interface KubeConfigMap {
+  metadata: KubeObjectMeta;
+  data?: Record<string, string>;
+  binaryData?: Record<string, string>;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeSecret {
+  metadata: KubeObjectMeta;
+  type?: string;
+  data?: Record<string, string>;
+  stringData?: Record<string, string>;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeDeploymentSpec {
+  replicas?: number;
+  strategy?: { type?: string };
+  selector?: { matchLabels?: Record<string, string> };
+}
+
+export interface KubeDeploymentStatus {
+  replicas?: number;
+  readyReplicas?: number;
+  availableReplicas?: number;
+  updatedReplicas?: number;
+  conditions?: Array<{ type?: string; status?: string; reason?: string; message?: string }>;
+}
+
+export interface KubeDeployment {
+  metadata: KubeObjectMeta;
+  spec?: KubeDeploymentSpec;
+  status?: KubeDeploymentStatus;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeReplicaSetSpec {
+  replicas?: number;
+  selector?: { matchLabels?: Record<string, string> };
+}
+
+export interface KubeReplicaSetStatus {
+  replicas?: number;
+  readyReplicas?: number;
+  availableReplicas?: number;
+}
+
+export interface KubeReplicaSet {
+  metadata: KubeObjectMeta;
+  spec?: KubeReplicaSetSpec;
+  status?: KubeReplicaSetStatus;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeStatefulSetSpec {
+  replicas?: number;
+  serviceName?: string;
+}
+
+export interface KubeStatefulSetStatus {
+  replicas?: number;
+  readyReplicas?: number;
+}
+
+export interface KubeStatefulSet {
+  metadata: KubeObjectMeta;
+  spec?: KubeStatefulSetSpec;
+  status?: KubeStatefulSetStatus;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubePersistentVolumeSpec {
+  capacity?: { storage?: string };
+  accessModes?: string[];
+  persistentVolumeReclaimPolicy?: string;
+  storageClassName?: string;
+  claimRef?: { namespace?: string; name?: string };
+}
+
+export interface KubePersistentVolumeStatus {
+  phase?: string;
+  reason?: string;
+  message?: string;
+}
+
+export interface KubePersistentVolume {
+  metadata: KubeObjectMeta;
+  spec?: KubePersistentVolumeSpec;
+  status?: KubePersistentVolumeStatus;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubePersistentVolumeClaimSpec {
+  storageClassName?: string;
+  accessModes?: string[];
+  resources?: { requests?: { storage?: string } };
+  volumeName?: string;
+}
+
+export interface KubePersistentVolumeClaimStatus {
+  phase?: string;
+  capacity?: { storage?: string };
+}
+
+export interface KubePersistentVolumeClaim {
+  metadata: KubeObjectMeta;
+  spec?: KubePersistentVolumeClaimSpec;
+  status?: KubePersistentVolumeClaimStatus;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeStorageClass {
+  metadata: KubeObjectMeta;
+  provisioner?: string;
+  reclaimPolicy?: string;
+  volumeBindingMode?: string;
+  allowVolumeExpansion?: boolean;
+  parameters?: Record<string, string>;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeJobSpec {
+  parallelism?: number;
+  completions?: number;
+  backoffLimit?: number;
+}
+
+export interface KubeJobStatus {
+  active?: number;
+  succeeded?: number;
+  failed?: number;
+  startTime?: string;
+  completionTime?: string;
+  conditions?: Array<{ type?: string; status?: string; reason?: string }>;
+}
+
+export interface KubeJob {
+  metadata: KubeObjectMeta;
+  spec?: KubeJobSpec;
+  status?: KubeJobStatus;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubePolicyRule {
+  apiGroups?: string[];
+  resources?: string[];
+  verbs?: string[];
+  resourceNames?: string[];
+  nonResourceURLs?: string[];
+}
+
+export interface KubeRole {
+  metadata: KubeObjectMeta;
+  rules?: KubePolicyRule[];
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeClusterRole {
+  metadata: KubeObjectMeta;
+  rules?: KubePolicyRule[];
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
+export interface KubeServiceAccount {
+  metadata: KubeObjectMeta;
+  secrets?: Array<{ name?: string; namespace?: string }>;
+  imagePullSecrets?: Array<{ name?: string }>;
+  automountServiceAccountToken?: boolean;
+  kubeGuid: string;
+  _meta?: StratosMeta;
+}
+
 // --- Analysis (wave-2) ---
 //
 // Analysis report wire shape — sourced from the analysis backend plugin

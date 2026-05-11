@@ -52,7 +52,27 @@ import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-regi
 import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../../../services/domain-data/kube-service-data.service';
-import { kubernetesPodsEntityType, kubernetesServicesEntityType } from '../../kubernetes-entity-factory';
+import {
+  KubeClusterRoleDataService,
+  KubeConfigMapDataService,
+  KubeDeploymentDataService,
+  KubeJobDataService,
+  KubePersistentVolumeClaimDataService,
+  KubePersistentVolumeDataService,
+  KubeReplicaSetDataService,
+  KubeRoleDataService,
+  KubeSecretDataService,
+  KubeServiceAccountDataService,
+  KubeStatefulSetDataService,
+  KubeStorageClassDataService,
+} from '../../../services/domain-data/kube-generic-resource-data.services';
+import {
+  kubernetesConfigMapEntityType,
+  kubernetesDeploymentsEntityType,
+  kubernetesPodsEntityType,
+  kubernetesServicesEntityType,
+  kubernetesStatefulSetsEntityType,
+} from '../../kubernetes-entity-factory';
 
 const namespaceColumnId = 'namespace';
 
@@ -207,6 +227,30 @@ export class KubernetesResourceListComponent implements OnDestroy {
     } else if (this.entityCatalogKey === kubernetesServicesEntityType) {
       const serviceData = this.injector.get(KubeServiceDataService);
       void serviceData.refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === kubernetesConfigMapEntityType) {
+      void this.injector.get(KubeConfigMapDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'secrets') {
+      void this.injector.get(KubeSecretDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === kubernetesDeploymentsEntityType) {
+      void this.injector.get(KubeDeploymentDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'replicaSet') {
+      void this.injector.get(KubeReplicaSetDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === kubernetesStatefulSetsEntityType) {
+      void this.injector.get(KubeStatefulSetDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'persistentVolume') {
+      void this.injector.get(KubePersistentVolumeDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'persistentVolumeClaims') {
+      void this.injector.get(KubePersistentVolumeClaimDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'storageClass') {
+      void this.injector.get(KubeStorageClassDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'job') {
+      void this.injector.get(KubeJobDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'clusterRole') {
+      void this.injector.get(KubeClusterRoleDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'role') {
+      void this.injector.get(KubeRoleDataService).refresh({ kubeGuid: this.kubeId });
+    } else if (this.entityCatalogKey === 'serviceAccount') {
+      void this.injector.get(KubeServiceAccountDataService).refresh({ kubeGuid: this.kubeId });
     }
     // namespaces — no extra kick needed; svc.load() above fetches the
     // namespace list as part of the cluster-scoped state.
