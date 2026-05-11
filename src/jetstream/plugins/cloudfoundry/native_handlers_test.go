@@ -519,6 +519,109 @@ func TestGetNativeOrgDetail(t *testing.T) {
 	assert.Equal(t, []StSpace{}, resp.Spaces)
 }
 
+func TestGetNativeSpaceDetail(t *testing.T) {
+	t.Run("populates allowSsh from features endpoint", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/spaces/sp-1":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"guid":       "sp-1",
+					"name":       "dev",
+					"created_at": "2024-01-01T00:00:00Z",
+					"updated_at": "2024-01-02T00:00:00Z",
+					"relationships": map[string]interface{}{
+						"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+					},
+				})
+			case "/v3/spaces/sp-1/features/ssh":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"name": "ssh", "enabled": true,
+				})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/sp-1", nil)
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+		ctx.SetParamNames("cnsiGuid", "spaceGuid")
+		ctx.SetParamValues("cnsi-1", "sp-1")
+
+		plugin := &CloudFoundrySpecification{
+			testProxy: &mockNativeCFProxy{
+				userID:      "user-1",
+				cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(ts.URL)},
+				tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+			},
+		}
+
+		require.NoError(t, plugin.getNativeSpaceDetail(ctx))
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var resp StSpaceDetail
+		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+		assert.Equal(t, "sp-1", resp.GUID)
+		assert.Equal(t, "dev", resp.Name)
+		assert.Equal(t, "org-1", resp.OrgGUID)
+		assert.True(t, resp.AllowSSH)
+	})
+
+	t.Run("ssh feature failure leaves allowSsh false but succeeds", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/spaces/sp-2":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"guid":       "sp-2",
+					"name":       "prod",
+					"created_at": "2024-01-01T00:00:00Z",
+					"updated_at": "2024-01-02T00:00:00Z",
+					"relationships": map[string]interface{}{
+						"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+					},
+				})
+			case "/v3/spaces/sp-2/features/ssh":
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"errors":[{"detail":"boom"}]}`))
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/sp-2", nil)
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+		ctx.SetParamNames("cnsiGuid", "spaceGuid")
+		ctx.SetParamValues("cnsi-1", "sp-2")
+
+		plugin := &CloudFoundrySpecification{
+			testProxy: &mockNativeCFProxy{
+				userID:      "user-1",
+				cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(ts.URL)},
+				tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+			},
+		}
+
+		require.NoError(t, plugin.getNativeSpaceDetail(ctx))
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var resp StSpaceDetail
+		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+		assert.Equal(t, "sp-2", resp.GUID)
+		assert.False(t, resp.AllowSSH)
+	})
+}
+
 func TestGetNativeOrgSpaces(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
