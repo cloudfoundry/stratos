@@ -53,7 +53,10 @@ export class KubernetesNamespacesTabComponent {
       errorsByCnsi: signal(new Map()),
       columns: [
         {
-          header: 'Name', key: 'name', sortField: 'name',
+          header: 'Name', key: 'name',
+          // sortField is a function so it composes against metadata.name
+          // (a nested field) rather than a top-level KubeNamespace key.
+          sortField: (n: KubeNamespace) => (n.metadata?.name ?? '').toLowerCase(),
           kind: 'link',
           // Relative router link — `<current>/namespaces/:name`.
           link: (n: KubeNamespace) => [n.metadata.name],
@@ -61,13 +64,15 @@ export class KubernetesNamespacesTabComponent {
           widthHint: '24rem',
         },
         {
-          header: 'Status', key: 'status', sortField: 'status',
+          header: 'Status', key: 'status',
+          sortField: (n: KubeNamespace) => n.status?.phase ?? '',
           kind: 'text',
           render: (n: KubeNamespace) => n.status?.phase ?? '',
           widthHint: '8rem',
         },
         {
-          header: 'Age', key: 'createdAt', sortField: 'createdAt',
+          header: 'Age', key: 'createdAt',
+          sortField: (n: KubeNamespace) => n.metadata?.creationTimestamp ?? '',
           kind: 'text',
           render: (n: KubeNamespace) => formatAge(n.metadata?.creationTimestamp),
           widthHint: '10rem',
