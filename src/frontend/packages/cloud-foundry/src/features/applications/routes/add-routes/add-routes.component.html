@@ -3,8 +3,8 @@
     <div class="add-route__section-title">Create a new route</div>
     <form class="stepper-form w-1/2" [formGroup]="domainFormGroup">
       <app-form-field [fitContent]="true">
-        <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains">
-          @for (domain of domains; track domain) {
+        <app-select formControlName="domain" placeholder="Domain" required [appFocus]="domains()">
+          @for (domain of domains(); track domain) {
             <app-option [value]="domain">{{domain?.entity?.name}}</app-option>
           }
         </app-select>

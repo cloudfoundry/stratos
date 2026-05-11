@@ -10,14 +10,11 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { of, Subscription } from 'rxjs';
-import { filter, startWith, switchMap, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { CFAppState } from '../../../../cf-app-state';
-import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
-import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import {
   CustomFormFieldComponent,
   CustomSelectComponent,
@@ -30,9 +27,8 @@ import {
   SignalListSort,
   SignalStepHandle,
 } from '@stratosui/core';
-import { RouterNav, APIResource } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
 import { IDomain } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { ApplicationService } from '../../application.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
 import {
@@ -110,10 +106,16 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   private dataService = inject(AppDetailDataService);
   private actions = inject(AppRouteActionsService);
   private mapRoutesConfig = inject(CfMapRoutesSignalConfigService);
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
 
   subscriptions: Subscription[] = [];
-  domains: APIResource<IDomain>[] = [];
+  /**
+   * Domains for the app's org. Sourced from the signal-native facade
+   * (`applicationService.orgDomains$`) so the picker stays in sync with the
+   * data service without dispatching ngrx actions or wiring through the
+   * legacy entity catalog.
+   */
+  readonly domains: Signal<APIResource<IDomain>[]>;
 
   addTCPRoute: FormGroup<{
     port: FormControl<string>;
@@ -198,6 +200,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
+
+    // Bridge the org-domains observable into a signal so the template's
+    // @for binds reactively and we keep the OnPush change detection model.
+    this.domains = toSignal(this.applicationService.orgDomains$, { initialValue: [] });
 
     this.domainFormGroup = new FormGroup({
       domain: new FormControl<APIResource<IDomain> | ''>('', {
@@ -390,41 +396,32 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }
     }));
 
-    const space$ = this.applicationService.orgDomains$.pipe(
-      // We don't need the domains, but we need them fetched first so we get the router_group_type
-      switchMap(() => this.applicationService.waitForAppEntity$
-        .pipe(
-          switchMap(app => {
-            this.spaceGuid = app.entity.entity.space_guid;
-            // Guard against cfEntityCatalog being uninitialized in unit-test
-            // isolation — the legacy `cfEntityCatalog.space.store` lookup
-            // throws if the catalog hasn't seeded yet. Skip the domain-list
-            // hydration in that case; the picker still works because the
-            // template binds to `domains` which stays empty.
-            const entityService = cfEntityCatalog?.space?.store?.getEntityService?.(
-              app.entity.entity.space_guid,
-              app.entity.entity.cfGuid,
-              { includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)] },
-            );
-            return entityService ? entityService.waitForEntity$ : of();
-          }),
-          filter(({ entity }) => !!entity.entity.domains),
-          tap(({ entity }) => {
-            this.domains = [];
-            const domains = entity.entity.domains;
-            domains.forEach(domain => {
-              this.domains.push(domain);
-            });
-            this.selectedDomain = Object.values(this.domains)[0];
-            // Set initial domain value in the form
-            if (this.selectedDomain) {
-              this.domainFormGroup.patchValue({ domain: this.selectedDomain });
-            }
-          })
-        )
-      ));
+    // Capture the app's space GUID for the create-route relationship payload
+    // as soon as the app entity resolves. Signal-native: the domain list
+    // itself flows from `this.domains` (toSignal of orgDomains$) so we no
+    // longer need the cfEntityCatalog space.domains include-fetch.
+    this.subscriptions.push(
+      this.applicationService.waitForAppEntity$.pipe(
+        filter(app => !!app?.entity?.entity?.space_guid),
+      ).subscribe(app => {
+        this.spaceGuid = app.entity.entity.space_guid;
+      }),
+    );
 
-    this.subscriptions.push(space$.subscribe());
+    // Seed the domain dropdown with the first available org domain once the
+    // signal-native facade emits a non-empty list. Stops at the first emission
+    // so a later refresh doesn't clobber a user-picked value.
+    this.subscriptions.push(
+      this.applicationService.orgDomains$.pipe(
+        filter(domains => Array.isArray(domains) && domains.length > 0),
+      ).subscribe(domains => {
+        if (this.selectedDomain) {
+          return;
+        }
+        this.selectedDomain = domains[0];
+        this.domainFormGroup.patchValue({ domain: this.selectedDomain });
+      }),
+    );
 
     // Subscribe to domain form changes to update selectedDomain so the
     // template's TCP/HTTP branching reacts.
@@ -541,7 +538,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       throw new Error(this.classifyCreateError(err));
     }
     this.dataService.addRoute(created);
-    this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
+    void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
   }
 
   /**
@@ -601,7 +598,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     // Use the picker's locally-held StRoute (backend returns empty 200 from
     // attach). The picker's drain stamps cnsiGuid via toStRoute server-side.
     this.dataService.addRoute(selected);
-    this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
+    void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
   }
 
   ngOnDestroy() {
