@@ -3,9 +3,8 @@
     <app-list-sub-nav title="Total Variables" [count]="totalVariables"
                       [addAction]="addVariableAction" [isAdding]="isAdding">
       <!-- Inline add form rendered on the L5 row when isAdding is true.
-           Replaces the +Add Variable button. Uses the same data-source
-           model bindings the legacy in-toolbar form used; save/cancel
-           call dataSource methods directly. -->
+           Replaces the +Add Variable button. Save/cancel route through
+           the component, which talks to AppVariableActionsService. -->
       <div subNavForm class="flex items-center gap-2">
         <!-- Validation runs on ✓ click, not reactively. Errors land in
              an absolute-positioned label above the Name input (sitting
@@ -20,12 +19,13 @@
           }
           <input class="bg-white rounded-md border border-gray-300 px-3 py-2 text-base text-slate-800 placeholder:text-gray-400 placeholder:opacity-70 focus:outline-none focus:ring-1 focus:ring-primary"
             id="envVarName" name="envVarName" placeholder="Name"
-            [(ngModel)]="envVarsDataSource.addItem.name"
-            (input)="clearNameError()">
+            [ngModel]="addItem().name"
+            (ngModelChange)="addItem.set({ name: $event, value: addItem().value }); clearNameError()">
         </div>
         <input class="bg-white rounded-md border border-gray-300 px-3 py-2 text-base text-slate-800 placeholder:text-gray-400 placeholder:opacity-70 focus:outline-none focus:ring-1 focus:ring-primary"
           id="envVarValue" name="envVarValue" placeholder="Value"
-          [(ngModel)]="envVarsDataSource.addItem.value">
+          [ngModel]="addItem().value"
+          (ngModelChange)="addItem.set({ name: addItem().name, value: $event })">
         <button id="addFormButtonAdd" class="btn btn-icon btn-success h-9"
                 type="button"
                 (click)="validateAndSave()">
@@ -33,12 +33,12 @@
         </button>
         <button id="addFormButtonCancel" class="btn btn-icon h-9"
                 type="button"
-                (click)="clearNameError(); envVarsDataSource.cancelAdd()">
+                (click)="cancelAdd()">
           <span class="material-icons">clear</span>
         </button>
       </div>
     </app-list-sub-nav>
-    <app-list [suppressAddButton]="true"></app-list>
+    <app-signal-list [config]="listConfig"></app-signal-list>
   </div>
 
   <div class="pt-5">
@@ -48,7 +48,7 @@
       </div>
       <div class="card-body pt-5">
         <app-code-block>
-          @for (envVar of (allEnvVars$ | async); track $index) {
+          @for (envVar of allEnvVars(); track $index) {
             <div [class]="envVar.section ? '[&:not(:first-of-type)]:pt-[15px]' : ''">
               @if (envVar.section) {
                 <pre class="m-0 whitespace-pre-wrap">{{envVar.name}}</pre>
