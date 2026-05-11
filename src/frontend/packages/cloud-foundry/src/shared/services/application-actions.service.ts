@@ -376,8 +376,8 @@ export class AppApplicationActionsService {
     } else {
       appName = this.dataService.app()?.entity?.name ?? this.applicationService.appGuid;
       cfName = this.cfEndpointService.endpoint()?.entity?.name ?? this.applicationService.cfGuid;
-      orgName = this.dataService.org()?.entity?.name ?? '?';
-      spaceName = this.dataService.space()?.entity?.name ?? '?';
+      orgName = this.dataService.org()?.name ?? '?';
+      spaceName = this.dataService.space()?.name ?? '?';
     }
     const message =
       `${verb} "${appName}" on Cloud Foundry "${cfName}" — org "${orgName}" / space "${spaceName}"?`;
@@ -449,8 +449,8 @@ export class AppApplicationActionsService {
     this.deleteSelection.seed(appGuid, {
       appName: this.dataService.app()?.entity?.name ?? appGuid,
       endpointName: this.cfEndpointService.endpoint()?.entity?.name ?? cfGuid,
-      orgName: this.dataService.org()?.entity?.name ?? '',
-      spaceName: this.dataService.space()?.entity?.name ?? '',
+      orgName: this.dataService.org()?.name ?? '',
+      spaceName: this.dataService.space()?.name ?? '',
     });
     this.router.navigate(['/applications', cfGuid, appGuid, 'delete']);
   }

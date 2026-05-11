@@ -1,21 +1,25 @@
-import { Injectable, computed, effect, inject, signal, Signal, WritableSignal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable, computed, effect, inject, signal, Signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { AppDetailPrefs } from './app-detail-prefs.service';
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService, ApplicationStateData } from '../../shared/services/application-state.service';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
+import { IApp, IAppSummary } from '../../cf-api.types';
 import { APIResource } from '@stratosui/store';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   StAppDetail,
   StAppRoutesResponse,
   StAppStat,
+  StDomain,
+  StratosPagedResponse,
   StEnvVars,
+  StOrg,
   StRoute,
   StServiceCredentialBinding,
   StServiceCredentialBindingsResponse,
+  StSpace,
   StratosError,
 } from '../../services/endpoint-data/stratos-types';
 import { stToLegacy } from '../../services/v3-to-legacy-adapter';
@@ -36,8 +40,8 @@ interface StAppStatsResponse {
  * signals via the `stToLegacy` adapter so unmigrated cards/tabs keep
  * reading their familiar shape during the migration.
  *
- * Space / org / domains stay v2-shaped for now — those are addressed in
- * a later slice when the org/space detail pages migrate.
+ * Space / org / domains are sourced from Jetstream native handlers and
+ * exposed as Stratos-native shapes (`StSpace`, `StOrg`, `StDomain[]`).
  *
  * Provide at application-base.component so signals are torn down when the
  * user navigates away from the app detail page. DO NOT add `providedIn:'root'`.
@@ -59,11 +63,12 @@ export class AppDetailDataService {
   private readonly _envVars = signal<StEnvVars | undefined>(undefined);
   private readonly _stats = signal<StAppStat[]>([]);
 
-  // Space / org / domains stay V2-shaped — out of scope for slice 1 commit 4.
-  // These switch to V3 native handlers when the org/space detail pages migrate.
-  private readonly _space = signal<APIResource<ISpace> | undefined>(undefined);
-  private readonly _org = signal<APIResource<IOrganization> | undefined>(undefined);
-  private readonly _domains = signal<IDomain[]>([]);
+  // Space / org / domains — Stratos-native shapes from Jetstream native
+  // handlers. Backend translates v2/v3 under the hood; the frontend never
+  // touches `/pp/v1/proxy/v2/...` directly.
+  private readonly _space = signal<StSpace | undefined>(undefined);
+  private readonly _org = signal<StOrg | undefined>(undefined);
+  private readonly _domains = signal<StDomain[]>([]);
 
   // Per-app routes — V3-shaped via the native handler. Null until first load
   // so consumers can distinguish "haven't fetched yet" from "fetched, empty".
@@ -117,9 +122,9 @@ export class AppDetailDataService {
   /** Trimmed V3 stats — one row per running instance with `{ index, state }`. */
   readonly stats: Signal<StAppStat[]> = this._stats.asReadonly();
 
-  readonly space: Signal<APIResource<ISpace> | undefined> = this._space.asReadonly();
-  readonly org: Signal<APIResource<IOrganization> | undefined> = this._org.asReadonly();
-  readonly domains: Signal<IDomain[]> = this._domains.asReadonly();
+  readonly space: Signal<StSpace | undefined> = this._space.asReadonly();
+  readonly org: Signal<StOrg | undefined> = this._org.asReadonly();
+  readonly domains: Signal<StDomain[]> = this._domains.asReadonly();
   readonly loading: Signal<Record<EntityKind, boolean>> = this._loading.asReadonly();
   readonly errors: Signal<Record<EntityKind, StratosError | null>> = this._errors.asReadonly();
   readonly lastPolledAt: Signal<Date | null> = this._lastPolledAt.asReadonly();
@@ -302,7 +307,7 @@ export class AppDetailDataService {
    *   Phase 1b (conditional): stats — only when state is STARTED to avoid
    *     a noisy 400 from CF's CF-AppStoppedStatsError on stopped apps.
    *   Phase 2 (sequential): space (needs app.spaceGuid), then org (needs
-   *     space.organization_guid), then domains (needs org.guid).
+   *     space.orgGuid), then domains (needs org.guid).
    */
   async refresh(scope: EntityKind | 'all' = 'all'): Promise<void> {
     if (scope === 'all') {
@@ -340,9 +345,9 @@ export class AppDetailDataService {
   // ---------------------------------------------------------------------------
   // URL helpers
   //
-  // App detail / env / stats now hit Jetstream native handlers — the cnsi
-  // is in the path, no x-cap-passthrough header needed. Space / org /
-  // domains still hit the V2 proxy until those pages migrate (slice 2+).
+  // All entity fetches hit Jetstream native handlers — cnsi is in the
+  // path and responses come back as Stratos-native shapes. No
+  // `x-cap-passthrough` header needed; the frontend never talks v2 wire.
   // ---------------------------------------------------------------------------
 
   private nativeAppDetailUrl(): string {
@@ -362,29 +367,15 @@ export class AppDetailDataService {
   }
 
   private spaceUrl(spaceGuid: string): string {
-    return `/pp/v1/proxy/v2/spaces/${spaceGuid}`;
+    return `/pp/v1/cf/spaces/${this.cnsiGuid}/${spaceGuid}`;
   }
 
   private orgUrl(orgGuid: string): string {
-    return `/pp/v1/proxy/v2/organizations/${orgGuid}`;
+    return `/pp/v1/cf/org/${this.cnsiGuid}/${orgGuid}`;
   }
 
   private orgDomainsUrl(orgGuid: string): string {
-    return `/pp/v1/proxy/v2/organizations/${orgGuid}/domains`;
-  }
-
-  /**
-   * Headers required by the V2 proxy paths (space / org / domains). Native
-   * handlers don't need these — cnsi is in the path and the response is
-   * the raw shape, no envelope.
-   */
-  private v2ProxyHeaders(): { headers: HttpHeaders } {
-    return {
-      headers: new HttpHeaders({
-        'x-cap-cnsi-list': this.cnsiGuid,
-        'x-cap-passthrough': 'true',
-      }),
-    };
+    return `/pp/v1/cf/org/${this.cnsiGuid}/${orgGuid}/private_domains`;
   }
 
   // ---------------------------------------------------------------------------
@@ -478,7 +469,7 @@ export class AppDetailDataService {
     this._errors.update(m => ({ ...m, space: null }));
     try {
       const value = await firstValueFrom(
-        this.http.get<APIResource<ISpace>>(this.spaceUrl(spaceGuid), this.v2ProxyHeaders())
+        this.http.get<StSpace>(this.spaceUrl(spaceGuid))
       );
       this._space.set(value);
     } catch (err: unknown) {
@@ -489,7 +480,7 @@ export class AppDetailDataService {
   }
 
   private async fetchOrg(): Promise<void> {
-    const orgGuid = this._space()?.entity?.organization_guid;
+    const orgGuid = this._space()?.orgGuid;
     if (!orgGuid) {
       return;
     }
@@ -497,7 +488,7 @@ export class AppDetailDataService {
     this._errors.update(m => ({ ...m, org: null }));
     try {
       const value = await firstValueFrom(
-        this.http.get<APIResource<IOrganization>>(this.orgUrl(orgGuid), this.v2ProxyHeaders())
+        this.http.get<StOrg>(this.orgUrl(orgGuid))
       );
       this._org.set(value);
     } catch (err: unknown) {
@@ -613,7 +604,7 @@ export class AppDetailDataService {
   }
 
   private async fetchDomains(): Promise<void> {
-    const orgGuid = this._org()?.metadata?.guid;
+    const orgGuid = this._org()?.guid;
     if (!orgGuid) {
       return;
     }
@@ -621,7 +612,7 @@ export class AppDetailDataService {
     this._errors.update(m => ({ ...m, domains: null }));
     try {
       const result = await firstValueFrom(
-        this.http.get<{ resources: IDomain[] }>(this.orgDomainsUrl(orgGuid), this.v2ProxyHeaders())
+        this.http.get<StratosPagedResponse<StDomain>>(this.orgDomainsUrl(orgGuid))
       );
       this._domains.set(result?.resources ?? []);
     } catch (err: unknown) {

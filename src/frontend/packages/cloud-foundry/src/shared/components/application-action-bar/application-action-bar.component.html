@@ -4,7 +4,7 @@
       @if (applicationService.appSpace$ | async; as space) {
         <div class="summary__actions">
           <ng-container
-            *appCfUserPermission="manageAppPermission;spaceGuid:space.metadata.guid;endpointGuid:applicationService.cfGuid">
+            *appCfUserPermission="manageAppPermission;spaceGuid:space.guid;endpointGuid:applicationService.cfGuid">
             <app-page-sub-nav-section>
               @if (applicationService.applicationState$ | async) {
                 <button class="btn btn-secondary btn-icon" name="edit"

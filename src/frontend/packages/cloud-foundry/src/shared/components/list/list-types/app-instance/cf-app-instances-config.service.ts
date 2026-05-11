@@ -197,8 +197,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
               app.entity.entity &&
               app.entity.entity.enable_ssh &&
               space &&
-              space.entity &&
-              space.entity.allow_ssh
+              space.allowSsh
             );
           })
         );
@@ -247,7 +246,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       appService.appSpace$
     ).pipe(
       switchMap(([org, space]) =>
-        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org.metadata.guid, space.metadata.guid)
+        cups.can(CfCurrentUserPermissions.APPLICATION_EDIT, appService.cfGuid, org!.guid, space!.guid)
       )
     );
   }

@@ -27,7 +27,8 @@ import {
   spaceEntityType,
   stackEntityType
 } from '../../cf-entity-types';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../../cf-api.types';
+import { IApp, IAppSummary } from '../../cf-api.types';
+import { StDomain, StOrg, StSpace } from '../../services/endpoint-data/stratos-types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
@@ -223,29 +224,27 @@ export class ApplicationService {
   applicationRunning$: Observable<boolean> = toObservable(this.detail.running);
 
   /**
-   * appOrg$ — APIResource<IOrganization> | undefined.
+   * appOrg$ — StOrg | undefined.
    * Used by build-tab, action-bar, tabs-base (breadcrumbs, env-vars permission).
    */
-  appOrg$: Observable<APIResource<IOrganization>> = toObservable(
-    computed(() => this.detail.org() as APIResource<IOrganization>)
+  appOrg$: Observable<StOrg | undefined> = toObservable(
+    computed(() => this.detail.org())
   ).pipe(filter(org => !!org));
 
   /**
-   * appSpace$ — APIResource<ISpace> | undefined.
+   * appSpace$ — StSpace | undefined.
    * Used by build-tab, action-bar, tabs-base (breadcrumbs, env-vars permission).
    */
-  appSpace$: Observable<APIResource<ISpace>> = toObservable(
-    computed(() => this.detail.space() as APIResource<ISpace>)
+  appSpace$: Observable<StSpace | undefined> = toObservable(
+    computed(() => this.detail.space())
   ).pipe(filter(space => !!space));
 
   /**
-   * orgDomains$ — APIResource<IDomain>[].
+   * orgDomains$ — StDomain[].
    * Used by add-routes to list available domains for the org.
-   * Note: data service returns IDomain[] (unwrapped). Wrap to match the
-   * legacy APIResource<IDomain>[] shape that consumers expect.
    */
-  orgDomains$: Observable<APIResource<IDomain>[]> = toObservable(
-    computed(() => (this.detail.domains() ?? []).map(d => wrapDomain(d)))
+  orgDomains$: Observable<StDomain[]> = toObservable(
+    computed(() => this.detail.domains() ?? [])
   );
 
   /**
@@ -377,21 +376,5 @@ function requestInfoOf(fetching: boolean, error: any): RequestInfoState {
     creating: false,
     updating: { [rootUpdatingKey]: { busy: false, error: false, message: '' } },
     deleting: { busy: false, error: false, message: '', deleted: false },
-  };
-}
-
-/**
- * Wrap a plain IDomain into the APIResource shape that legacy consumers expect.
- * The domain entity from /organizations/{id}/domains is already APIResource-shaped
- * on the wire but the data service stores IDomain[]. Check if already wrapped.
- */
-function wrapDomain(d: IDomain): APIResource<IDomain> {
-  // If it's already an APIResource (has metadata.guid), pass through.
-  if ((d as any)?.metadata?.guid) {
-    return d as any;
-  }
-  return {
-    metadata: { guid: (d as any).guid ?? '', created_at: '', updated_at: '', url: '' },
-    entity: d,
   };
 }

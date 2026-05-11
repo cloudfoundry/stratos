@@ -63,10 +63,10 @@ export class ApplicationDeleteComponent {
     this.seed?.appName || this.dataService.app()?.entity?.name || ''
   );
   public readonly orgName = computed(() =>
-    this.seed?.orgName || this.dataService.org()?.entity?.name || ''
+    this.seed?.orgName || this.dataService.org()?.name || ''
   );
   public readonly spaceName = computed(() =>
-    this.seed?.spaceName || this.dataService.space()?.entity?.name || ''
+    this.seed?.spaceName || this.dataService.space()?.name || ''
   );
   public readonly endpointName = computed(() =>
     this.seed?.endpointName || this.cfEndpointService.endpoint()?.entity?.name || ''

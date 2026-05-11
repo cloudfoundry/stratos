@@ -50,8 +50,8 @@ function makeAppServiceStub() {
   return {
     cfGuid: 'cf-1',
     appGuid: 'app-1',
-    appOrg$: of({ metadata: { guid: 'org-1' } }),
-    appSpace$: of({ metadata: { guid: 'space-1' } }),
+    appOrg$: of({ guid: 'org-1' }),
+    appSpace$: of({ guid: 'space-1' }),
   };
 }
 

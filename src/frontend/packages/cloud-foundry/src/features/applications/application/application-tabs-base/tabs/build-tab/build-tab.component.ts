@@ -94,7 +94,7 @@ export class BuildTabComponent implements OnInit {
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
       map(([app, space]) => {
-        if (!space.entity.allow_ssh) {
+        if (!space.allowSsh) {
           return 'Disabled by the space';
         } else {
           return app.app.entity.enable_ssh ? 'Yes' : 'No';
@@ -106,7 +106,7 @@ export class BuildTabComponent implements OnInit {
       switchMap(space => this.cups.can(
         CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid,
-        space.metadata.guid)
+        space.guid)
       )
     );
 

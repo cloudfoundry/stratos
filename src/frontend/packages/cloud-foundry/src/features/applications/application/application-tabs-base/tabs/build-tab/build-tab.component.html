@@ -79,7 +79,7 @@
                    org/space signals haven't emitted yet. -->
               <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
                 @if (data.org(); as appOrg) {
-                  <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
+                  <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.guid]">{{ appOrg.name }}</a>
                 } @else {
                   —
                 }
@@ -87,12 +87,12 @@
               <app-metadata-item iconFont="stratos-icons" icon="virtual_space" label="Space">
                 @if (data.org(); as appOrg) {
                   @if (data.space(); as appSpace) {
-                    <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+                    <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.guid + '/spaces/' + appSpace.guid]">{{ appSpace.name }}</a>
                   } @else {
                     —
                   }
                 } @else if (data.space(); as appSpace) {
-                  {{ appSpace.entity.name }}
+                  {{ appSpace.name }}
                 } @else {
                   —
                 }

@@ -26,8 +26,8 @@ function makeAppServiceStub(cfGuid = 'cf-1', appGuid = 'app-1') {
     cfGuid,
     appGuid,
     application$: new BehaviorSubject({ app: { entity: { name: 'test-app' } } }),
-    appOrg$: new BehaviorSubject({ entity: { name: 'test-org' } }),
-    appSpace$: new BehaviorSubject({ entity: { name: 'test-space' } }),
+    appOrg$: new BehaviorSubject({ guid: 'test-org-guid', name: 'test-org' }),
+    appSpace$: new BehaviorSubject({ guid: 'test-space-guid', name: 'test-space' }),
   };
 }
 
@@ -50,8 +50,8 @@ function makeDataServiceStub(opts: { instances?: number, runningStats?: number }
   }));
   return {
     app: signal({ entity: { name: 'test-app', instances } }),
-    org: signal({ entity: { name: 'test-org' } }),
-    space: signal({ entity: { name: 'test-space' } }),
+    org: signal({ guid: 'test-org-guid', name: 'test-org' }),
+    space: signal({ guid: 'test-space-guid', name: 'test-space' }),
     stats: signal(stats),
     summary: signal({ memory: 256, disk_quota: 512 }),
     lastPolledAt: signal(new Date()),

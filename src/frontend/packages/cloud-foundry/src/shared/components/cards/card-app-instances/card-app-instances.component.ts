@@ -113,8 +113,8 @@ export class CardAppInstancesComponent implements OnDestroy {
         this.cups.can(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           this.appService.cfGuid,
-          org.metadata.guid,
-          space.metadata.guid,
+          org!.guid,
+          space!.guid,
         ),
       ),
     ),

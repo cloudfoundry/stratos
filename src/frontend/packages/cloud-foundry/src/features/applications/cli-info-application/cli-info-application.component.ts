@@ -61,8 +61,8 @@ export class CliInfoApplicationComponent implements OnInit {
       filter(([app, space, org, ep]) => !!app && !!space && !!org && !!ep),
       map(([app, space, org, ep]) => ({
         appName: app.app.entity.name,
-        spaceName: space.entity.name,
-        orgName: org.entity.name,
+        spaceName: space.name,
+        orgName: org.name,
         apiEndpoint: getFullEndpointApiUrl(ep.entity),
         username: ep.entity.user ? ep.entity.user.name : ''
       })),
