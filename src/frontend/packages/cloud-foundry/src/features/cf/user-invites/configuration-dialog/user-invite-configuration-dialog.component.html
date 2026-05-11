@@ -1,7 +1,7 @@
 <div class="connection-dialog__loading-wrapper">
   <app-progress-bar class="connection-dialog__loading"
-    [color]="(connectingError$ | async) && (isBusy$ | async) === false ? 'warn' : 'primary'"
-    [mode]="(isBusy$ | async) ? 'indeterminate' : 'solid'">
+    [color]="hasErrored() && !isBusy() ? 'warn' : 'primary'"
+    [mode]="isBusy() ? 'indeterminate' : 'solid'">
   </app-progress-bar>
 </div>
 <div class="connection-dialog">
@@ -18,18 +18,18 @@
       </div>
       <div class="form-field">
         <input class="form-input" placeholder="Client Secret" formControlName="clientSecret"
-          [type]="!showSecret ? 'password' : 'text'">
-        <button class="btn-icon" (click)="showSecret = !showSecret" [attr.aria-label]="'Hide Secret'"
-          [attr.aria-pressed]="!showSecret" type='button'>
-          <i class="material-icons">{{!showSecret ? 'visibility_off' : 'visibility'}}</i>
+          [type]="!showSecret() ? 'password' : 'text'">
+        <button class="btn-icon" (click)="toggleShowSecret()" [attr.aria-label]="'Hide Secret'"
+          [attr.aria-pressed]="!showSecret()" type='button'>
+          <i class="material-icons">{{!showSecret() ? 'visibility_off' : 'visibility'}}</i>
         </button>
       </div>
     </div>
-    <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async">
+    <app-dialog-error message="Could not connect, please try again." [show]="hasErrored()">
     </app-dialog-error>
     <div class="dialog-actions connection-dialog__actions">
-      <button (click)="dialogRef.close()" class="btn btn-warn">Cancel</button>
-      <button type="submit" [disabled]="!endpointForm.valid" class="btn btn-primary">Configure</button>
+      <button (click)="dialogRef.close()" type="button" class="btn btn-warn">Cancel</button>
+      <button type="submit" [disabled]="!canSubmit()" class="btn btn-primary">Configure</button>
     </div>
   </form>
 </div>
