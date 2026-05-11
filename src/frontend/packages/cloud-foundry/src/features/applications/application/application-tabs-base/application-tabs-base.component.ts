@@ -26,7 +26,6 @@ import {
   EntitySchema,
   ActionState,
   endpointEntitiesSelector,
-  APIResource,
   EndpointModel,
   IFavoriteMetadata,
   UserFavoriteManager
@@ -36,13 +35,12 @@ import {
   applicationEntityType,
   UpdateExistingApplication,
   IApp,
-  IOrganization,
-  ISpace,
   CF_ENDPOINT_TYPE,
   ApplicationService,
   CfCurrentUserPermissions,
   ApplicationStateData
 } from '@stratosui/cloud-foundry';
+import { StOrg, StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
 import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
 import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
@@ -112,7 +110,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       // endpoint reducer hydrating after waitForAppEntity$ already replayed)
       // produces console TypeErrors on every navigation.
       filter(([app, endpoints, org, space]) =>
-        !!endpoints?.[app.entity.entity.cfGuid] && !!org?.entity && !!space?.entity
+        !!endpoints?.[app.entity.entity.cfGuid] && !!org && !!space
       ),
       map(([app, endpoints, org, space]) => {
         return this.getBreadcrumbs(
@@ -127,7 +125,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
       switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid, space.metadata.guid)
+        this.applicationService.cfGuid, space.guid)
       ),
       map(can => !can),
     );
@@ -199,15 +197,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private getBreadcrumbs(
     application: IApp,
     endpoint: EndpointModel,
-    org: APIResource<IOrganization>,
-    space: APIResource<ISpace>
+    org: StOrg,
+    space: StSpace
   ) {
     const baseCFUrl = `/cloud-foundry/${application.cfGuid}`;
-    const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
+    const baseOrgUrl = `${baseCFUrl}/organizations/${org.guid}`;
 
     const baseSpaceBreadcrumbs = [
       { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-      { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` }
+      { value: org.name, routerLink: `${baseOrgUrl}/spaces` }
     ];
 
     return [
@@ -218,28 +216,28 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         key: 'space',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
-          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps` }
+          { value: space.name, routerLink: `${baseOrgUrl}/spaces/${space.guid}/apps` }
         ]
       },
       {
         key: 'space-services',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
-          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances` }
+          { value: space.name, routerLink: `${baseOrgUrl}/spaces/${space.guid}/service-instances` }
         ]
       },
       {
         key: 'space-user-services',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
-          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/user-service-instances` }
+          { value: space.name, routerLink: `${baseOrgUrl}/spaces/${space.guid}/user-service-instances` }
         ]
       },
       {
         key: 'space-routes',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
-          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/routes` }
+          { value: space.name, routerLink: `${baseOrgUrl}/spaces/${space.guid}/routes` }
         ]
       },
       {
@@ -258,14 +256,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         key: 'space-summary',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
-          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/summary` }
+          { value: space.name, routerLink: `${baseOrgUrl}/spaces/${space.guid}/summary` }
         ]
       },
       {
         key: 'org',
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-          { value: org.entity.name, routerLink: `${baseOrgUrl}/summary` },
+          { value: org.name, routerLink: `${baseOrgUrl}/summary` },
         ]
       },
       {

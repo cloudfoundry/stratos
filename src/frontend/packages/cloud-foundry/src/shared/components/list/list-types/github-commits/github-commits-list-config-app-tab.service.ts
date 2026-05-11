@@ -107,7 +107,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     ).subscribe(([app, space]) => {
       this.cfGuid = app.entity.entity.cfGuid;
       this.spaceGuid = app.entity.entity.space_guid;
-      this.orgGuid = space.entity.organization_guid;
+      this.orgGuid = space.orgGuid;
       this.appGuid = app.entity.metadata.guid;
     });
   }

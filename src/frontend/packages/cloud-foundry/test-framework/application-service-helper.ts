@@ -5,7 +5,8 @@ import { signal, computed } from '@angular/core';
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { IApp, IAppSummary, IDomain, IOrganization, ISpace } from '../src/cf-api.types';
+import { IApp, IAppSummary } from '../src/cf-api.types';
+import { StDomain, StOrg, StSpace } from '../src/services/endpoint-data/stratos-types';
 import { ApplicationData } from '../src/features/applications/application.service';
 import { EnvVarStratosProject } from '../src/features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateData } from '../src/shared/services/application-state.service';
@@ -54,15 +55,29 @@ export class ApplicationServiceMock {
     fetching: false
   } as ApplicationData);
 
-  private appOrgSubject = new BehaviorSubject<APIResource<IOrganization>>(createEntity<IOrganization>({
+  private appOrgSubject = new BehaviorSubject<StOrg | undefined>({
+    guid: 'mockOrgGuid',
     name: 'mockOrg',
-    guid: 'mockOrgGuid'
-  } as IOrganization));
+    status: 'active',
+    quotaGuid: '',
+    labels: {},
+    annotations: {},
+    createdAt: '',
+    updatedAt: '',
+    cnsiGuid: this.cfGuid,
+  });
 
-  private appSpaceSubject = new BehaviorSubject<APIResource<ISpace>>(createEntity<ISpace>({
+  private appSpaceSubject = new BehaviorSubject<StSpace | undefined>({
+    guid: 'mockSpaceGuid',
     name: 'mockSpace',
-    guid: 'mockSpaceGuid'
-  } as ISpace));
+    orgGuid: 'mockOrgGuid',
+    createdAt: '',
+    updatedAt: '',
+    cnsiGuid: this.cfGuid,
+    appCount: 0,
+    routeCount: 0,
+    allowSsh: false,
+  });
 
   application$: Observable<ApplicationData> = this.appSubject.asObservable();
   app$: Observable<EntityInfo<APIResource<IApp>>> = this.application$.pipe(
@@ -93,10 +108,10 @@ export class ApplicationServiceMock {
     indicator: null,
     actions: {}
   });
-  appOrg$: Observable<APIResource<IOrganization>> = this.appOrgSubject.asObservable();
-  appSpace$: Observable<APIResource<ISpace>> = this.appSpaceSubject.asObservable();
+  appOrg$: Observable<StOrg | undefined> = this.appOrgSubject.asObservable();
+  appSpace$: Observable<StSpace | undefined> = this.appSpaceSubject.asObservable();
   applicationRunning$: Observable<boolean> = observableOf(false);
-  orgDomains$: Observable<APIResource<IDomain>[]> = observableOf([]);
+  orgDomains$: Observable<StDomain[]> = observableOf([]);
   entityService: EntityService<APIResource<IApp<unknown>>> = {
     waitForEntity$: of({}),
     updatingSection$: of({}),

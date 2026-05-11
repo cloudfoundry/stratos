@@ -326,8 +326,8 @@ describe('ApplicationService (facade shim)', () => {
     expect(count).toBe(0);   // filter blocks undefined (initial value)
 
     dataStub._org.set({
-      metadata: { guid: 'org-1', created_at: '', updated_at: '', url: '' },
-      entity: { name: 'my-org' },
+      guid: 'org-1',
+      name: 'my-org',
     });
     await tick();
     expect(count).toBe(1);
@@ -342,8 +342,8 @@ describe('ApplicationService (facade shim)', () => {
     expect(count).toBe(0);   // filter blocks undefined (initial value)
 
     dataStub._space.set({
-      metadata: { guid: 'sp-1', created_at: '', updated_at: '', url: '' },
-      entity: { name: 'my-space' },
+      guid: 'sp-1',
+      name: 'my-space',
     });
     await tick();
     expect(count).toBe(1);
@@ -360,13 +360,14 @@ describe('ApplicationService (facade shim)', () => {
     expect(v.length).toBe(0);
   });
 
-  it('orgDomains$ wraps IDomain entries into APIResource shape', async () => {
+  it('orgDomains$ passes through StDomain entries unchanged', async () => {
     dataStub._domains.set([
       { guid: 'd-1', name: 'example.com' } as any,
     ]);
     const v = await firstValueFrom(svc.orgDomains$.pipe(take(1)));
     expect(v.length).toBe(1);
-    expect(v[0].metadata?.guid).toBe('d-1');
+    expect(v[0].guid).toBe('d-1');
+    expect(v[0].name).toBe('example.com');
   });
 
   // -------------------------------------------------------------------------
