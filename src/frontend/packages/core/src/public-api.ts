@@ -225,6 +225,13 @@ export { StratosCurrentUserPermissions, StratosScopeStrings } from './core/permi
 export { UserProfileService } from './core/user-profile.service';
 export { SessionService } from './shared/services/session.service';
 
+// Signal-native auth/session/endpoints/user/permissions shims (wave-3, consumers flip later)
+export { AuthSignalService } from './core/signals/auth-signal.service';
+export { SessionSignalService } from './core/signals/session-signal.service';
+export { UserSignalService } from './core/signals/user-signal.service';
+export { EndpointsSignalService } from './core/signals/endpoints-signal.service';
+export { PermissionsSignalService } from './core/signals/permissions-signal.service';
+
 // Helper Classes
 export { arrayHelper } from './core/helper-classes/array.helper';
 
