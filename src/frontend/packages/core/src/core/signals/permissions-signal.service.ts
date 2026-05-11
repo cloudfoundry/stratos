@@ -1,4 +1,4 @@
-import { Injectable, Signal, inject } from '@angular/core';
+import { EnvironmentInjector, Injectable, Signal, inject, runInInjectionContext } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged } from 'rxjs/operators';
 
@@ -17,11 +17,14 @@ import { CurrentUserPermissionsService } from '../permissions/current-user-permi
  *
  * The underlying permission-check pipeline (StratosUserPermissionsChecker
  * + custom checkers) is unchanged — this service only adapts the output
- * shape.
+ * shape. `toSignal` is invoked through a captured EnvironmentInjector so
+ * `can()` can be called from outside an injection context (e.g. event
+ * handlers, lifecycle hooks).
  */
 @Injectable({ providedIn: 'root' })
 export class PermissionsSignalService {
   private permissions = inject(CurrentUserPermissionsService);
+  private injector = inject(EnvironmentInjector);
 
   /**
    * Permission check as a signal.
@@ -40,6 +43,8 @@ export class PermissionsSignalService {
     const obs$ = this.permissions
       .can(action, endpointGuid, ...args)
       .pipe(distinctUntilChanged());
-    return toSignal(obs$, { initialValue: false });
+    return runInInjectionContext(this.injector, () =>
+      toSignal(obs$, { initialValue: false })
+    );
   }
 }
