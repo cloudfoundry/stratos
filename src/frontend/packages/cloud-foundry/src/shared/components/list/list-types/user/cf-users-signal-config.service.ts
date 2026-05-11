@@ -7,15 +7,19 @@ import type { EndpointDataService } from '../../../../../services/endpoint-data/
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StUser, StUsersResponse } from '../../../../../services/endpoint-data/stratos-types';
 
-// Users list config service — single-CNSI, optionally space-scoped.
+// Users list config service — single-CNSI, optionally org- or space-scoped.
 // Modelled on CfRoutesSignalConfigService (which also fetches its own list
-// and supports the optional sub-scope pattern). Both the CF-level users
-// page and the per-space users tab use this one service:
+// and supports the optional sub-scope pattern). The CF-level users page,
+// the per-org users tab and the per-space users tab all use this one
+// service:
 //
-//   - CF-level page: initialize(cnsiGuid) — empty space scope, every user
-//     in the CNSI rendered.
-//   - Per-space tab: initializeForSpace(cnsiGuid, spaceGuid) — narrows the
-//     view to users with at least one space role in the locked space.
+//   - CF-level page: initialize(cnsiGuid) — empty scope, every user in
+//     the CNSI rendered.
+//   - Per-org tab: initializeForOrg(cnsiGuid, orgGuid) — narrows the
+//     view to users with at least one org role (or any space role under
+//     a space owned by the org) in the locked org.
+//   - Per-space tab: initializeForSpace(cnsiGuid, spaceGuid) — narrows
+//     the view to users with at least one space role in the locked space.
 //
 // Users are not carried on EndpointDataService (the home-page cache covers
 // orgs + apps + spaces; users live separately because the join is heavier).
@@ -37,6 +41,11 @@ export class CfUsersSignalConfigService {
   // per-space Users tab). Stored in a WritableSignal so the filter effect
   // re-derives the predicate when the lock changes mid-session.
   private readonly _lockedSpaceGuid: WritableSignal<string> = signal('');
+  // Empty string = no org scope (CF-level or per-space tabs). Non-empty =
+  // narrow to users with at least one org role in the locked org, or a
+  // space role under one of the org's spaces. Same signal pattern as the
+  // space lock — both feed the users computed below.
+  private readonly _lockedOrgGuid: WritableSignal<string> = signal('');
 
   private readonly state = inject(ListStateStore).bind('cf-users', {
     viewMode: 'table',
@@ -63,9 +72,21 @@ export class CfUsersSignalConfigService {
 
   readonly users: Signal<StUser[]> = computed(() => {
     const all = this._allUsers();
-    const lock = this._lockedSpaceGuid();
-    if (!lock) return all;
-    return all.filter(u => u.spaceRoles.some(sr => sr.spaceGuid === lock));
+    const spaceLock = this._lockedSpaceGuid();
+    const orgLock = this._lockedOrgGuid();
+    if (spaceLock) {
+      return all.filter(u => u.spaceRoles.some(sr => sr.spaceGuid === spaceLock));
+    }
+    if (orgLock) {
+      // Either an org role in the target org OR a space role on one of
+      // the org's spaces (StUserSpaceRole carries orgGuid alongside
+      // spaceGuid for exactly this lookup — no second registry hit).
+      return all.filter(u =>
+        u.orgRoles.some(or => or.orgGuid === orgLock) ||
+        u.spaceRoles.some(sr => sr.orgGuid === orgLock),
+      );
+    }
+    return all;
   });
 
   view!: ViewPipeline<StUser>;
@@ -105,6 +126,7 @@ export class CfUsersSignalConfigService {
   initialize(cnsiGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this._lockedSpaceGuid.set('');
+    this._lockedOrgGuid.set('');
     this.endpointDataService = this.registry.acquire(cnsiGuid);
     this.view = new ViewPipeline<StUser>(
       this.users,
@@ -144,6 +166,19 @@ export class CfUsersSignalConfigService {
     // computed already re-derives users, but the ViewPipeline reads filter
     // through a separate signal and the toolbar's name filter alone may
     // not have changed. Setting it to a clone forces the derivation.
+    this.filter.set(this.filter());
+  }
+
+  // Per-org variant. Mirror of initializeForSpace — pins the org lock so
+  // the users computed narrows to users with at least one org role in the
+  // target org or any space role under one of the org's spaces. Used by
+  // the per-org Users tab; column shape is the per-org reduction
+  // (Username, Origin, Org Roles for THIS org, Space Roles in THIS org,
+  // Created — no all-CNSI Org Roles column).
+  initializeForOrg(cnsiGuid: string, orgGuid: string): void {
+    this.initialize(cnsiGuid);
+    this._lockedOrgGuid.set(orgGuid);
+    // Same filter nudge as initializeForSpace (see comment above).
     this.filter.set(this.filter());
   }
 
