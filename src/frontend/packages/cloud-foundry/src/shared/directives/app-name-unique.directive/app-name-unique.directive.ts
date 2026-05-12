@@ -7,7 +7,7 @@ import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
 import { CFAppState } from '../../../cf-app-state';
-import { selectNewAppState } from './../../../store/effects/create-app-effects';
+import { selectNewAppState } from './../../../store/selectors/create-application.selectors';
 
 const APP_UNIQUE_NAME_PROVIDER = {
   provide: NG_ASYNC_VALIDATORS, useExisting: forwardRef(() => AppNameUniqueDirective), multi: true

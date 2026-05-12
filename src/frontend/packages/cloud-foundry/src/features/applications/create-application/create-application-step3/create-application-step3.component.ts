@@ -12,7 +12,7 @@ import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
-import { selectNewAppState } from '../../../../store/effects/create-app-effects';
+import { selectNewAppState } from '../../../../store/selectors/create-application.selectors';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
 interface DomainHostForm {
