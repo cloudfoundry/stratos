@@ -112,7 +112,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
       map(() => ({
         success: true,
         redirect: true,
-        message: null,
+        message: null as string | null,
       })),
       catchError(err => {
         const detail = (err && (err.message || (err.error && (err.error.message || err.error)))) || '';
