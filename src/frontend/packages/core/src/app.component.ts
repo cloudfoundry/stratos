@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, inject } from '@angular/core';
+import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { AuthOnlyAppState, VerifySession } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -7,6 +8,7 @@ import { create } from 'rxjs-spy';
 
 import { StratosBrandingService } from '../../theme/stratos-branding.service';
 
+import { AuthSignalService } from './core/signals/auth-signal.service';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
@@ -20,6 +22,7 @@ import { LoggedInService } from './logged-in.service';
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   private loggedInService = inject(LoggedInService);
   private store = inject<Store<AuthOnlyAppState>>(Store);
+  private authSignals = inject(AuthSignalService);
   branding = inject(StratosBrandingService);
   private document = inject<Document>(DOCUMENT);
 
@@ -34,7 +37,8 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     this.store.dispatch(new VerifySession());
 
     // We use the username to key the session storage. We could replace this with the users id?
-    this.userId$ = this.store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
+    // Sourced from AuthSignalService rather than a direct store.select.
+    this.userId$ = toObservable(computed(() => this.authSignals.sessionData()?.user?.name ?? null));
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
