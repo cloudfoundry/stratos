@@ -17,6 +17,11 @@ import { CFAppState } from '../../cf-app-state';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 
 
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained — CheckProjectExists is dispatched via store.dispatch from
+// github-project-exists.directive.ts:67 and
+// github-commits-list-config-app-tab.service.ts:53. Both are live
+// consumers (deploy-application form + per-app GitHub commits list).
 @Injectable({
   providedIn: 'root'
 })

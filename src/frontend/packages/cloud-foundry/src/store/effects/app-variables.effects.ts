@@ -7,6 +7,13 @@ import { AppVariables, AppVariablesUpdate } from '../../actions/app-variables.ac
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
 
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained — AppVariables.UPDATE is still dispatched via the
+// AppEnvVarActionBuilders (delete/edit/add) which are wired into
+// cfEntityCatalog.appEnvVar.actions and consumed live by the
+// cf-app-variables-data-source list (see
+// cf-app-variables-data-source.ts:56/66 and
+// cf-app-variables-list-config.service.ts:103).
 @Injectable({
   providedIn: 'root'
 })
