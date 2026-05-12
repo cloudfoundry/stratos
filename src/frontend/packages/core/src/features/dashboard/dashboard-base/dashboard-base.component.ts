@@ -4,17 +4,17 @@ import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, E
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Store } from '@ngrx/store';
 import {
-  GetCurrentUsersRelations,
   CloseSideNav,
+  DashboardOnlyAppState,
+  DashboardState,
   DisableMobileNav,
   EnableMobileNav,
-  selectDashboardState,
-  DashboardOnlyAppState,
-  stratosEntityCatalog,
-  DashboardState,
+  GetCurrentUsersRelations,
+  Store,
   entityCatalog,
+  selectDashboardState,
+  stratosEntityCatalog,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
