@@ -1,10 +1,12 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll, afterEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
@@ -76,6 +78,8 @@ describe('AutoscalerTabExtensionComponent', () => {
         { provide: EntityServiceFactory, useValue: mockEntityServiceFactory },
         TabNavService,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })
@@ -86,6 +90,14 @@ describe('AutoscalerTabExtensionComponent', () => {
     fixture = TestBed.createComponent(AutoscalerTabExtensionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Drain the autoscaler info HTTP request fired by ngOnInit so the
+    // HttpTestingController doesn't leave it hanging.
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true).forEach(req => req.flush({ name: 'as', build: '3.0.0', support: '', description: '' }));
+    httpMock.verify();
   });
 
   it('should be created', () => {
