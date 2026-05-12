@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 
@@ -9,6 +8,7 @@ import {
   AppState,
   EndpointModel,
   RouterNav,
+  Store,
   UserFavorite,
   UserFavoriteManager,
   entityCatalog,
