@@ -260,3 +260,11 @@ export { EntityCatalogTestModule, EntityCatalogTestModuleManualStore, TEST_CATAL
 // compatibility shim that should be removed once all callers
 // move off the legacy store.
 export { Store } from '@ngrx/store';
+
+// Same shim for @ngrx/effects. Mid-migration packages still need
+// to register effects against the legacy ngrx action stream while
+// their consumers complete the transition to signal-native data
+// services. Remove once no package outside this one names
+// @ngrx/effects.
+export { EffectsModule } from '@ngrx/effects';
+export { Actions, createEffect, ofType } from '@ngrx/effects';
