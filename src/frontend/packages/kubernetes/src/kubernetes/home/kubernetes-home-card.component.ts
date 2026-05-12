@@ -1,8 +1,7 @@
 import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
+import { AppState, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 

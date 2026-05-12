@@ -4,7 +4,7 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { interval, Observable, Subscription } from 'rxjs';
 import { take, map, startWith } from 'rxjs/operators';
 
