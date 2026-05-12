@@ -1,4 +1,3 @@
-import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { take, catchError, filter, map } from 'rxjs/operators';
 
@@ -10,7 +9,7 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../store/src/public-api';
+import { EndpointModel, Store } from '../../../store/src/public-api';
 import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';

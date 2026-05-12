@@ -1,6 +1,6 @@
 import { signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { format, formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
 import { take,  } from 'rxjs/operators';
