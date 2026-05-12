@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
 import { IListConfig, IListMultiFilterConfig, ITableColumn, ITableText, ListViewTypes } from '@stratosui/core';
-import { APIResource, connectedEndpointsOfTypesSelector, ListView, Store } from '@stratosui/store';
+import { APIResource, ListView, Store } from '@stratosui/store';
 import { CFAppState } from '../../../../../cf-app-state';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CfEndpointsDataService } from '../../../../../services/domain-data/cf-endpoints-data.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cf/cf.helpers';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
@@ -28,6 +29,7 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
 })
 export class CfServicesListConfigService implements IListConfig<APIResource> {
   private store = inject<Store<CFAppState>>(Store);
+  private cfEndpoints = inject(CfEndpointsDataService);
 
 
   constructor() {
@@ -35,10 +37,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
 
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
-      list$: this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-        take(1),
-        map(endpoints => Object.values(endpoints))
-      ),
+      list$: toObservable(this.cfEndpoints.connectedCfList).pipe(take(1)),
       loading$: observableOf(false),
       select: new BehaviorSubject(undefined)
     };
