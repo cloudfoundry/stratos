@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Actions, createEffect, ofType, Store } from '@stratosui/store';
 import { catchError, mergeMap } from 'rxjs/operators';
 
 import { AppState } from '../../../store/src/app-state';
