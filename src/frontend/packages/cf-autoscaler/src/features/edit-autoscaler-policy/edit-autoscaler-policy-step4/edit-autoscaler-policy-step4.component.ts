@@ -2,22 +2,20 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject }
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { BehaviorSubject, of as observableOf } from 'rxjs';
-import { take, filter, map, pairwise } from 'rxjs/operators';
+import { BehaviorSubject, from, of as observableOf } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { StepOnNextFunction } from '@stratosui/core';
-import { AppState, EntityService, EntityServiceFactory, RequestInfoState } from '@stratosui/store';
 import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
   specificDateRangeOverlapping } from '../../../core/autoscaler-helpers/autoscaler-validation';
-import { CreateAppAutoscalerPolicyAction, UpdateAppAutoscalerPolicyAction } from '../../../store/app-autoscaler.actions';
+import { AutoscalerPolicyDataService } from '../../../services/domain-data/autoscaler-policy-data.service';
 import {
   AppAutoscalerInvalidPolicyError,
   AppAutoscalerPolicyLocal,
@@ -59,16 +57,19 @@ interface EditSpecificDateForm {
 })
 export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDirective implements OnInit {
   applicationService = inject(ApplicationService);
-  private store = inject<Store<AppState>>(Store);
   private fb = inject(FormBuilder);
-  private entityServiceFactory = inject(EntityServiceFactory);
   private cdr = inject(ChangeDetectorRef);
+  // FWT-959 Track A wave-3 (A-policy slice): replaced
+  // CreateAppAutoscalerPolicyAction / UpdateAppAutoscalerPolicyAction +
+  // EntityServiceFactory entityMonitor wiring with a direct call into
+  // AutoscalerPolicyDataService.update() (covers both create and update —
+  // the legacy effects both PUT to the same /apps/{guid}/policy endpoint).
+  private policyData = inject(AutoscalerPolicyDataService);
 
 
   policyAlert = PolicyAlert;
   editSpecificDateForm: FormGroup<EditSpecificDateForm>;
 
-  private updateAppAutoscalerPolicyService!: EntityService;
   public declare currentPolicy: AppAutoscalerPolicyLocal;
   // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
   // orchestrator can bridge editIndex changes into a signal for its
@@ -81,7 +82,6 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
     limit: true,
     datetime: true
   };
-  private action!: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction;
   private createUpdateTest!: string;
 
   constructor() {
@@ -97,14 +97,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
 
   ngOnInit() {
     super.ngOnInit();
-    this.action = this.isCreate ?
-      new CreateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy) :
-      new UpdateAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid, this.currentPolicy);
     this.createUpdateTest = this.isCreate ? 'create policy' : 'update policy';
-    this.updateAppAutoscalerPolicyService = this.entityServiceFactory.create(
-      this.applicationService.appGuid,
-      this.action
-    );
   }
 
   updatePolicy: StepOnNextFunction = () => {
@@ -113,42 +106,24 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         success: false,
         message: `Could not ${this.createUpdateTest}: ${PolicyAlert.alertInvalidPolicyTriggerScheduleEmpty}` });
     }
-    this.action.policy = this.currentPolicy;
-    this.store.dispatch(this.action);
-    return this.updateAppAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      pairwise(),
-      filter(([oldV, newV]) => !!oldV && !!newV),
-      filter(([oldV, newV]) => this.getBusyState(oldV) && !this.getBusyState(newV)),
-      map(([, newV]) => this.getStateResult(newV)),
-      map(request => ({
-        success: !request.error,
-        redirect: !request.error,
-        message: request.error ? `Could not ${this.createUpdateTest}${request.message ? `: ${request.message}` : ''}` : null
+    const cfGuid = this.applicationService.cfGuid;
+    const appGuid = this.applicationService.appGuid;
+    return from(this.policyData.update(cfGuid, appGuid, this.currentPolicy)).pipe(
+      map(() => ({
+        success: true,
+        redirect: true,
+        message: null as string | null,
       })),
-      take(1),
+      catchError(err => {
+        const detail = (err && (err.message || (err.error && (err.error.message || err.error)))) || '';
+        return observableOf({
+          success: false,
+          redirect: false,
+          message: `Could not ${this.createUpdateTest}${detail ? `: ${detail}` : ''}`,
+        });
+      }),
     );
   };
-
-  private getStateResult(info: RequestInfoState): { error: boolean, message: string } {
-    if (this.isCreate) {
-      return {
-        error: info.error,
-        message: info.message
-      };
-    }
-    const updatingState = info.updating[UpdateAppAutoscalerPolicyAction.updateKey];
-    return {
-      error: updatingState.error,
-      message: updatingState.message
-    };
-  }
-
-  private getBusyState(info: RequestInfoState): boolean {
-    if (this.isCreate) {
-      return info.creating;
-    }
-    return info.updating[UpdateAppAutoscalerPolicyAction.updateKey] && info.updating[UpdateAppAutoscalerPolicyAction.updateKey].busy;
-  }
 
   addSpecificDate = () => {
     const { ...newSchedule } = AutoscalerConstants.PolicyDefaultSpecificDate;
