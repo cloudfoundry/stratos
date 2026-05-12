@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService } from '@stratosui/core';
-import { RouterNav } from '@stratosui/store';
-import { AppState } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService } from '@stratosui/core';
+import { AppState, RouterNav } from '@stratosui/store';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { KubeHelmDataService } from '../../../../../services/endpoint-data/kube-helm-data.service';
 
@@ -27,7 +26,6 @@ import { AnalysisReportSelectorComponent } from '../../../../analysis-report-vie
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
 import { SnackBarService } from '@stratosui/core';
-import { endpointsEntityRequestDataSelector } from '@stratosui/store';
 import {
   ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
@@ -117,7 +115,10 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private analysisReportId = signal<string | null>(null);
   private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
   public helmReleaseHelper = inject(HelmReleaseHelperService);
+  // Store is retained only for the RouterNav action dispatch on delete.
+  // Read-side cluster-name lookup moved to EndpointsSignalService.
   private store = inject(Store<AppState>);
+  private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackbarService = inject(SnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
@@ -303,11 +304,12 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   }
 
   public getClusterName(): Observable<string> {
-    return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
-      filter((e: any) => !!e),
-      map((e: any) => e.name),
-      take(1)
-    );
+    // Read the endpoint name from EndpointsSignalService instead of the
+    // legacy `endpointsEntityRequestDataSelector`. Returns an empty string
+    // if the endpoint hasn't hydrated yet — matches legacy `filter(!!e)`
+    // behaviour by emitting a synchronous value the template can render.
+    const endpoint = this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid];
+    return of(endpoint?.name ?? '');
   }
 
   private applyAnalysis(resources: any, report: any) {

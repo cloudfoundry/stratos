@@ -1,14 +1,15 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
-import { endpointOfTypeSelector } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '@stratosui/core';
+import { EndpointsSignalService, PageHeaderComponent } from '@stratosui/core';
 import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
 
+// Wave-3 K-helm-consumers: replaces the legacy Store + endpointOfTypeSelector
+// read with EndpointsSignalService + a computed signal that derives the helm
+// endpoint guids. PageHeaderComponent still wants an Observable<string[]>
+// so the computed is bridged via toObservable().
 @Component({
   selector: 'app-monocular-tab-base',
   templateUrl: './monocular-tab-base.component.html',
@@ -20,14 +21,17 @@ import { HELM_ENDPOINT_TYPE } from '../helm-entity-factory';
     RouterOutlet
   ]
 })
-export class MonocularTabBaseComponent implements OnInit {
+export class MonocularTabBaseComponent {
+  private endpointsSignals = inject(EndpointsSignalService);
 
-  public endpointIds$!: Observable<string[]>;
-  private store = inject(Store<AppState>);
+  // Helm endpoint guids derived from the endpoint slice signal. Mirrors the
+  // legacy `endpointOfTypeSelector(HELM_ENDPOINT_TYPE)` filter (cnsi_type)
+  // and projects to the GUID list that PageHeaderComponent renders as chips.
+  private readonly helmEndpointIds = computed(() =>
+    Object.values(this.endpointsSignals.endpoints())
+      .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
+      .map(ep => ep.guid),
+  );
 
-  ngOnInit() {
-    this.endpointIds$ = this.store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)).pipe(
-      map(endpoints => Object.keys(endpoints))
-    );
-  }
+  public readonly endpointIds$: Observable<string[]> = toObservable(this.helmEndpointIds);
 }

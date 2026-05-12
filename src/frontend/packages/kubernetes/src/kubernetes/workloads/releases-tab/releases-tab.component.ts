@@ -1,11 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, WritableSignal, computed, effect, inject, signal } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
-import { endpointOfTypeSelector } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
+import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { SignalListComponent, SignalListConfig, SignalListDropdownOption } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
@@ -31,9 +29,17 @@ import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-sig
 })
 export class HelmReleasesTabComponent {
   public helmIds$: Observable<string[]>;
-  private store = inject(Store<AppState>);
+  private endpointsSignals = inject(EndpointsSignalService);
   private datePipe = inject(DatePipe);
   readonly signalConfig = inject(HelmReleasesSignalConfigService);
+
+  // Helm endpoint guids for the page header chips. Replaces the legacy
+  // `store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE))` read.
+  private readonly helmEndpointIds = computed(() =>
+    Object.values(this.endpointsSignals.endpoints())
+      .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
+      .map(ep => ep.guid),
+  );
 
   readonly listConfig: WritableSignal<SignalListConfig<HelmRelease> | undefined> = signal(undefined);
 
@@ -61,11 +67,9 @@ export class HelmReleasesTabComponent {
   });
 
   constructor() {
-    // Endpoint-id stream for the page header — preserved from the legacy
-    // component so the header still renders the helm endpoint chips.
-    this.helmIds$ = this.store.select(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)).pipe(
-      map(endpoints => Object.keys(endpoints)),
-    );
+    // Endpoint-id stream for the page header. Bridges the helmEndpointIds
+    // computed signal to an Observable for PageHeaderComponent's input.
+    this.helmIds$ = toObservable(this.helmEndpointIds);
 
     this.signalConfig.initialize();
     void this.signalConfig.loadAll();
