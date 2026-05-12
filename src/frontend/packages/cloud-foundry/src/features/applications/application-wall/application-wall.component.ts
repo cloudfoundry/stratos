@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
