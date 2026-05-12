@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnDestroy, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Store } from '@ngrx/store';
-import { entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, AppState } from '@stratosui/store';
+import { AppState, entityCatalog, EntityCatalogEntityConfig, PaginationPageIteratorConfig, Store } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
