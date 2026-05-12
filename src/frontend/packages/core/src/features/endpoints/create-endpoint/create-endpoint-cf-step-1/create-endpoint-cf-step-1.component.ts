@@ -8,11 +8,11 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 import { ActivatedRoute } from '@angular/router';
 import {
   AppState,
+  Store,
+  StratosCatalogEndpointEntity,
   endpointEntitiesSelector,
   entityCatalog,
-  StratosCatalogEndpointEntity
 } from '@stratosui/store';
-import { Store } from '@ngrx/store';
 import { from, Observable } from 'rxjs';
 import { map, startWith, take } from 'rxjs/operators';
 
