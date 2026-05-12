@@ -1,3 +1,10 @@
+// Autoscaler actions retention (wave-3 A-cleanup audit, 2026-05-12):
+//
+// Each action class below still has a live `new XAction(...)` dispatch
+// site outside this file. Audit results recorded in the cleanup commit;
+// the dead siblings (Health, CreatePolicy, UpdatePolicy, UpdateCredential,
+// DeleteCredential) were deleted in this slice. Keep the audit fresh by
+// re-running the dispatch-site grep before the next deletion pass.
 import { HttpRequest } from '@angular/common/http';
 
 import { applicationEntityType } from '../../../cloud-foundry/src/cf-entity-types';
@@ -5,11 +12,9 @@ import { createEntityRelationPaginationKey } from '../../../cloud-foundry/src/en
 import { ApiRequestTypes } from '../../../store/src/reducers/api-request-reducer/request-helpers';
 import { PaginatedAction, PaginationParam } from '../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../store/src/types/request.types';
-import { AppAutoscalerCredential, AppAutoscalerPolicyLocal, AppScalingTrigger } from './app-autoscaler.types';
+import { AppScalingTrigger } from './app-autoscaler.types';
 import {
   appAutoscalerAppMetricEntityType,
-  appAutoscalerCredentialEntityType,
-  appAutoscalerHealthEntityType,
   appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
   appAutoscalerPolicyTriggerEntityType,
@@ -17,12 +22,6 @@ import {
   AUTOSCALER_ENDPOINT_TYPE,
   autoscalerEntityFactory,
 } from './autoscaler-entity-factory';
-
-export const AppAutoscalerPolicyEvents = {
-  GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy',
-  GET_APP_AUTOSCALER_POLICY_SUCCESS: '[App Autoscaler] Get autoscaler policy success',
-  GET_APP_AUTOSCALER_POLICY_FAILED: '[App Autoscaler] Get autoscaler policy failed'
-};
 
 export const AppAutoscalerPolicyTriggerEvents = {
   GET_APP_AUTOSCALER_POLICY: '[App Autoscaler] Get autoscaler policy trigger',
@@ -44,12 +43,7 @@ export const AppAutoscalerMetricEvents = {
 
 export const APP_AUTOSCALER_POLICY = '[New App Autoscaler] Fetch policy';
 export const APP_AUTOSCALER_POLICY_TRIGGER = '[New App Autoscaler] Fetch policy trigger';
-export const CREATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Create policy';
-export const UPDATE_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Update policy';
 export const DETACH_APP_AUTOSCALER_POLICY = '[New App Autoscaler] Detach policy';
-export const UPDATE_APP_AUTOSCALER_CREDENTIAL = '[New App Autoscaler] Update credential';
-export const DELETE_APP_AUTOSCALER_CREDENTIAL = '[New App Autoscaler] Delete credential';
-export const APP_AUTOSCALER_HEALTH = '[New App Autoscaler] Fetch Health';
 export const APP_AUTOSCALER_SCALING_HISTORY = '[New App Autoscaler] Fetch Scaling History';
 export const FETCH_APP_AUTOSCALER_METRIC = '[New App Autoscaler] Fetch Metric';
 export const AUTOSCALER_INFO = '[Autoscaler] Fetch Info';
@@ -69,19 +63,6 @@ export class GetAppAutoscalerInfoAction implements EntityRequestAction {
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
 
-export class GetAppAutoscalerHealthAction implements EntityRequestAction {
-  public guid: string;
-  constructor(
-    public endpointGuid: string,
-  ) {
-    this.guid = endpointGuid;
-  }
-  type = APP_AUTOSCALER_HEALTH;
-  entity = autoscalerEntityFactory(appAutoscalerHealthEntityType);
-  entityType = appAutoscalerHealthEntityType;
-  endpointType = AUTOSCALER_ENDPOINT_TYPE;
-}
-
 export class GetAppAutoscalerPolicyAction implements EntityRequestAction {
   constructor(
     public guid: string,
@@ -89,25 +70,6 @@ export class GetAppAutoscalerPolicyAction implements EntityRequestAction {
   ) { }
   type = APP_AUTOSCALER_POLICY;
   entity = autoscalerEntityFactory(appAutoscalerPolicyEntityType);
-  entityType = appAutoscalerPolicyEntityType;
-  endpointType = AUTOSCALER_ENDPOINT_TYPE;
-}
-
-export class CreateAppAutoscalerPolicyAction implements EntityRequestAction {
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-    public policy: AppAutoscalerPolicyLocal,
-  ) { }
-  type = CREATE_APP_AUTOSCALER_POLICY;
-  entityType = appAutoscalerPolicyEntityType;
-  endpointType = AUTOSCALER_ENDPOINT_TYPE;
-}
-
-export class UpdateAppAutoscalerPolicyAction extends CreateAppAutoscalerPolicyAction {
-  static updateKey = 'Updating-Existing-Application-Policy';
-  type = UPDATE_APP_AUTOSCALER_POLICY;
-  updatingKey = UpdateAppAutoscalerPolicyAction.updateKey;
   entityType = appAutoscalerPolicyEntityType;
   endpointType = AUTOSCALER_ENDPOINT_TYPE;
 }
@@ -238,30 +200,4 @@ export class GetAppAutoscalerAppMetricAction extends GetAppAutoscalerMetricActio
     this.url = `apps/${guid}/metric/${metricName}`;
   }
   entityType = appAutoscalerAppMetricEntityType;
-}
-
-export class UpdateAppAutoscalerCredentialAction implements EntityRequestAction {
-  static updateKey = 'Updating-Application-Credential';
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-    public credential?: AppAutoscalerCredential,
-  ) { }
-  type = UPDATE_APP_AUTOSCALER_CREDENTIAL;
-  entity = autoscalerEntityFactory(appAutoscalerCredentialEntityType);
-  entityType = appAutoscalerCredentialEntityType;
-  endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  updatingKey = UpdateAppAutoscalerCredentialAction.updateKey;
-}
-
-export class DeleteAppAutoscalerCredentialAction implements EntityRequestAction {
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-  ) { }
-  type = DELETE_APP_AUTOSCALER_CREDENTIAL;
-  entity = autoscalerEntityFactory(appAutoscalerCredentialEntityType);
-  entityType = appAutoscalerCredentialEntityType;
-  endpointType = AUTOSCALER_ENDPOINT_TYPE;
-  requestType: ApiRequestTypes = 'delete';
 }

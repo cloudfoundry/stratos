@@ -1,3 +1,22 @@
+// Autoscaler effects retention (wave-3 A-cleanup audit, 2026-05-12):
+//
+// 6 effects retained — each still has a live `new XAction(...)`
+// dispatch site that the signal-native data services have not yet
+// replaced. Per-effect notes:
+//   - fetchAutoscalerInfo$:           autoscaler-available.ts ->
+//                                     card-cf-info.component +
+//                                     autoscaler-tab-extension
+//   - getAppAutoscalerPolicy$:        autoscaler-tab-extension +
+//                                     card-autoscaler-default
+//   - detachAppAutoscalerPolicy$:     autoscaler-tab-extension
+//   - fetchAppAutoscalerPolicyTrigger$: app-autoscaler-metric-chart-data-source
+//   - fetchAppAutoscalerScalingHistory$: cf-app-autoscaler-events-data-source
+//   - fetchAppAutoscalerAppMetric$:   autoscaler-tab-extension
+//
+// 5 effects deleted in this slice (no remaining dispatch sites):
+//   fetchAppAutoscalerHealth$, createAppAutoscalerPolicy$,
+//   updateAppAutoscalerPolicy$, updateAppAutoscalerCredential$,
+//   deleteAppAutoscalerCredential$.
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
@@ -11,7 +30,6 @@ import {
   AppState,
   entityCatalog,
   isHttpErrorResponse,
-  ApiRequestTypes,
   selectPaginationState,
   APIResource,
   NormalizedResponse,
@@ -27,37 +45,25 @@ import {
 import { buildMetricData } from '../core/autoscaler-helpers/autoscaler-transform-metric';
 import {
   autoscalerTransformArrayToMap,
-  autoscalerTransformMapToArray,
 } from '../core/autoscaler-helpers/autoscaler-transform-policy';
 import { AutoscalerConstants } from '../core/autoscaler-helpers/autoscaler-util';
 import {
-  APP_AUTOSCALER_HEALTH,
   APP_AUTOSCALER_POLICY,
   APP_AUTOSCALER_POLICY_TRIGGER,
   APP_AUTOSCALER_SCALING_HISTORY,
   AUTOSCALER_INFO,
   AutoscalerPaginationParams,
   AutoscalerQuery,
-  CREATE_APP_AUTOSCALER_POLICY,
-  CreateAppAutoscalerPolicyAction,
-  DELETE_APP_AUTOSCALER_CREDENTIAL,
-  DeleteAppAutoscalerCredentialAction,
   DETACH_APP_AUTOSCALER_POLICY,
   DetachAppAutoscalerPolicyAction,
   FETCH_APP_AUTOSCALER_METRIC,
-  GetAppAutoscalerHealthAction,
   GetAppAutoscalerInfoAction,
   GetAppAutoscalerMetricAction,
   GetAppAutoscalerPolicyAction,
   GetAppAutoscalerPolicyTriggerAction,
   GetAppAutoscalerScalingHistoryAction,
-  UPDATE_APP_AUTOSCALER_CREDENTIAL,
-  UPDATE_APP_AUTOSCALER_POLICY,
-  UpdateAppAutoscalerCredentialAction,
-  UpdateAppAutoscalerPolicyAction,
 } from './app-autoscaler.actions';
 import {
-  AppAutoscalerCredential,
   AppAutoscalerEvent,
   AppAutoscalerFetchPolicyFailedResponse,
   AppAutoscalerMetricData,
@@ -125,76 +131,7 @@ export class AutoscalerEffects {
           }));
     })));
 
-  
-  fetchAppAutoscalerHealth$ = createEffect(() => this.actions$.pipe(
-    ofType<GetAppAutoscalerHealthAction>(APP_AUTOSCALER_HEALTH),
-    mergeMap(action => {
-      const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http
-        .get(`${commonPrefix}/health`, {
-          headers: this.addHeaders(action.endpointGuid)
-        }).pipe(
-          mergeMap(healthInfo => {
-            const entity = entityCatalog.getEntity(action);
-            const mappedData = {
-              entities: { [entity.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.endpointGuid, healthInfo);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => {
-            // Gracefully handle autoscaler unavailability
-            const isUnavailable = err.status === 404 || err.status === 503;
-            const errorMessage = isUnavailable
-              ? 'Autoscaler health check unavailable'
-              : createAutoscalerErrorMessage('fetch health info', err);
-            return [
-              new WrapperRequestActionFailed(errorMessage, action, actionType)
-            ];
-          }));
-    })));
 
-  
-  createAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
-    ofType<CreateAppAutoscalerPolicyAction>(CREATE_APP_AUTOSCALER_POLICY),
-    mergeMap(action => this.createUpdatePolicy(action))));
-
-  
-  updateAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
-    ofType<UpdateAppAutoscalerPolicyAction>(UPDATE_APP_AUTOSCALER_POLICY),
-    mergeMap(action => {
-      const actionType = 'update';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http.put<AppAutoscalerPolicy>(
-        `${commonPrefix}/apps/${action.guid}/policy`,
-        autoscalerTransformMapToArray(action.policy),
-        {
-          headers: this.addHeaders(action.endpointGuid)
-        }).pipe(
-          mergeMap(response => {
-            const policyInfo = autoscalerTransformArrayToMap(response);
-            const entity = entityCatalog.getEntity(action);
-            const mappedData = {
-              entities: { [entity.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => {
-            return [
-              new WrapperRequestActionFailed(createAutoscalerErrorMessage('update policy', err), action, actionType)
-            ];
-          }));
-    })));
-
-  
   getAppAutoscalerPolicy$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerPolicyAction>(APP_AUTOSCALER_POLICY),
     mergeMap(action => this.fetchPolicy(action))
@@ -234,66 +171,7 @@ export class AutoscalerEffects {
     mergeMap(action => this.fetchPolicy(new GetAppAutoscalerPolicyAction(action.guid, action.endpointGuid), action))
   ));
 
-  
-  updateAppAutoscalerCredential$ = createEffect(() => this.actions$.pipe(
-    ofType<UpdateAppAutoscalerCredentialAction>(UPDATE_APP_AUTOSCALER_CREDENTIAL),
-    mergeMap(action => {
-      const actionType = 'update';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http.put<AppAutoscalerCredential>(
-        `${commonPrefix}/apps/${action.guid}/credential`,
-        action.credential,
-        {
-          headers: this.addHeaders(action.endpointGuid)
-        }).pipe(
-          mergeMap(response => {
-            const credentialInfo = response;
-            const entity = entityCatalog.getEntity(action);
-            const mappedData = {
-              entities: { [entity.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.guid, credentialInfo);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => {
-            return [
-              new WrapperRequestActionFailed(createAutoscalerErrorMessage('update credential', err), action, actionType)
-            ];
-          }));
-    })));
 
-  
-  deleteAppAutoscalerCredential$ = createEffect(() => this.actions$.pipe(
-    ofType<DeleteAppAutoscalerCredentialAction>(DELETE_APP_AUTOSCALER_CREDENTIAL),
-    mergeMap(action => {
-      const actionType = 'delete';
-      this.store.dispatch(new StartRequestAction(action, actionType));
-      return this.http
-        .delete(`${commonPrefix}/apps/${action.guid}/credential`, {
-          headers: this.addHeaders(action.endpointGuid)
-        }).pipe(
-          mergeMap(_response => {
-            const entity = entityCatalog.getEntity(action);
-            const mappedData = {
-              entities: { [entity.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.guid, { enabled: false });
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => {
-            return [
-              new WrapperRequestActionFailed(createAutoscalerErrorMessage('delete credential', err), action, actionType)
-            ];
-          }));
-    })));
-
-  
   fetchAppAutoscalerScalingHistory$ = createEffect(() => this.actions$.pipe(
     ofType<GetAppAutoscalerScalingHistoryAction>(APP_AUTOSCALER_SCALING_HISTORY),
     withLatestFrom(this.store),
@@ -379,37 +257,6 @@ export class AutoscalerEffects {
             ];
           }));
     })));
-
-  private createUpdatePolicy(
-    action: CreateAppAutoscalerPolicyAction | UpdateAppAutoscalerPolicyAction,
-    actionType: ApiRequestTypes = 'create'
-  ): Observable<Action> {
-    this.store.dispatch(new StartRequestAction(action, actionType));
-    const entity = entityCatalog.getEntity(action);
-    return this.http
-      .put<AppAutoscalerPolicy>(
-        `${commonPrefix}/apps/${action.guid}/policy`,
-        autoscalerTransformMapToArray(action.policy),
-        {
-          headers: this.addHeaders(action.endpointGuid),
-        }).pipe(
-          mergeMap(response => {
-            const policyInfo = autoscalerTransformArrayToMap(response);
-            const mappedData = {
-              entities: { [entity.entityKey]: {} },
-              result: []
-            } as NormalizedResponse;
-            this.transformData(entity.entityKey, mappedData, action.guid, policyInfo);
-            return [
-              new WrapperRequestActionSuccess(mappedData, action, actionType)
-            ];
-          }),
-          catchError(err => {
-            return [
-              new WrapperRequestActionFailed(createAutoscalerErrorMessage('create policy', err), action, actionType)
-            ];
-          }));
-  }
 
   private fetchPolicy(
     getPolicyAction: GetAppAutoscalerPolicyAction,
