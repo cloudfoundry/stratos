@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
-import { Store } from '@ngrx/store';
-import { Logout, AppState } from '@stratosui/store';
+import { AppState, Logout, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
@@ -27,10 +27,9 @@ selector: 'app-logout-page',
 export class LogoutPageComponent implements OnInit {
 
   private store = inject(Store<AppState>);
+  private auth = inject(AuthSignalService);
 
-  public error$: Observable<boolean> = this.store.select(s => s.auth).pipe(
-    map(auth => auth.error)
-  );
+  public error$: Observable<boolean> = toObservable(this.auth.error);
 
   ngOnInit() {
     // Dispatch the logout action after 1 second - give the logging out screen time to show
