@@ -328,8 +328,8 @@
               </app-card-content>
               <app-card-actions class="autoscaler-tab__actions">
                 <app-polling-indicator (poll)="fetchScalingHistory()"
-                  [manualPoll]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async) === false"
-                  [isPolling]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async)">
+                  [manualPoll]="(scalingHistoryLoading$ | async) === false"
+                  [isPolling]="(scalingHistoryLoading$ | async)">
                 </app-polling-indicator>
                 <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">
                   <app-custom-icon>launch</app-custom-icon>
