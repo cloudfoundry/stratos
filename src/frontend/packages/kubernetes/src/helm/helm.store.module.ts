@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 
+import { EffectsModule } from '../../../store/src/public-api';
 import { HelmEffects } from './store/helm.effects';
 
 @NgModule({

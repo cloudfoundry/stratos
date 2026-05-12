@@ -259,7 +259,8 @@ export { EntityCatalogTestModule, EntityCatalogTestModuleManualStore, TEST_CATAL
 // itself still owns the ngrx dependency; this is a deliberate
 // compatibility shim that should be removed once all callers
 // move off the legacy store.
-export { Store } from '@ngrx/store';
+export { Store, StoreModule } from '@ngrx/store';
+export type { Action } from '@ngrx/store';
 
 // Same shim for @ngrx/effects. Mid-migration packages still need
 // to register effects against the legacy ngrx action stream while

@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 

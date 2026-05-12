@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 
 import { ListDataSource } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
