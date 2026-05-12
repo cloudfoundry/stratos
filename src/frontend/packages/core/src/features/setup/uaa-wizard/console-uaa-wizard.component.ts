@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import {
-  VerifySession,
+  AuthState,
+  InternalAppState,
   SetupConsoleGetScopes,
   SetupSaveConfig,
-  AuthState,
+  Store,
   UAASetupState,
-  InternalAppState,
+  VerifySession,
 } from '@stratosui/store';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { delay, filter, skipWhile, take } from 'rxjs/operators';
