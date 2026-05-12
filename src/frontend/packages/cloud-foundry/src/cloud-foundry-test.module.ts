@@ -16,7 +16,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
 import { AppVariablesEffect } from './store/effects/app-variables.effects';
 import { AppEffects } from './store/effects/app.effects';
 import { CloudFoundryEffects } from './store/effects/cloud-foundry.effects';
-import { CreateAppPageEffects } from './store/effects/create-app-effects';
 import { DeployAppEffects } from './store/effects/deploy-app.effects';
 import { CfValidateEffects } from './store/effects/request.effects';
 import { RouteEffect } from './store/effects/route.effects';
@@ -30,7 +29,6 @@ import { UsersRolesEffects } from './store/effects/users-roles.effects';
     CloudFoundryReducersModule,
     EffectsModule.forRoot([]),
     EffectsModule.forFeature([
-      CreateAppPageEffects,
       AppVariablesEffect,
       DeployAppEffects,
       CloudFoundryEffects,
