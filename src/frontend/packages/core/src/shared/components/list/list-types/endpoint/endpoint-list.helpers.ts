@@ -1,6 +1,5 @@
 import { ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { stratosEntityCatalog, RouterNav, AppState, entityCatalog, EndpointModel, ActionState } from '@stratosui/store';
+import { ActionState, AppState, EndpointModel, entityCatalog, RouterNav, Store, stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, pairwise } from 'rxjs/operators';
 

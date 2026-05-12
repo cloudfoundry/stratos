@@ -3,9 +3,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EndpointModel, appReducers, entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { appReducers, EndpointModel, entityCatalog, EntityCatalogHelper, EntityCatalogHelpers, generateStratosEntities, StoreModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 

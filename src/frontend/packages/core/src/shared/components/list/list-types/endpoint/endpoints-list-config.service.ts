@@ -1,17 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import {
-  ListView,
   AppState,
-  InternalEventMonitorFactory,
   EndpointModel,
-  PaginationEntityState,
-  SetClientFilter,
   entityCatalog,
   EntityMonitorFactory,
+  InternalEventMonitorFactory,
+  ListView,
+  PaginationEntityState,
   PaginationMonitorFactory,
+  SetClientFilter,
+  Store,
   stratosEntityCatalog,
-  UserFavoriteManager } from '@stratosui/store';
+  UserFavoriteManager,
+} from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { take, debounceTime, filter, map } from 'rxjs/operators';
 import { SessionService } from '../../../../services/session.service';

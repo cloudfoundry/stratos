@@ -1,5 +1,4 @@
-import { Action, Store } from '@ngrx/store';
-import { EntitySchema, PaginatedAction, AppState } from '@stratosui/store';
+import { Action, AppState, EntitySchema, PaginatedAction, Store } from '@stratosui/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
 import { IListConfig } from '../list.component.types';

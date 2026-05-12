@@ -2,20 +2,22 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  getFullEndpointApiUrl,
-  entityCatalog,
-  endpointEntitiesSelector,
-  MenuItem,
-  StratosStatus,
-  StratosCatalogEndpointEntity,
+  AppState,
   EndpointModel,
+  entityCatalog,
+  getFullEndpointApiUrl,
+  MenuItem,
+  RouterNav,
+  Store,
+  StratosCatalogEndpointEntity,
+  StratosStatus,
   UserFavoriteEndpoint,
   UserFavoriteManager,
-  RouterNav,
-  AppState,
 } from '@stratosui/store';
+
+import { EndpointsSignalService } from '../../../../../../core/signals/endpoints-signal.service';
 import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -67,6 +69,11 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
   private store = inject<Store<AppState>>(Store);
+  // Endpoints read goes through the signal projection so this card no
+  // longer subscribes directly to the legacy endpoints selector. Store
+  // is still needed for the routerNav dispatch below.
+  private endpointsSignal = inject(EndpointsSignalService);
+  private endpoints$ = toObservable(this.endpointsSignal.endpoints);
   private endpointListHelper = inject(EndpointListHelper);
   private userFavoriteManager = inject(UserFavoriteManager);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -110,7 +117,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
     this.address = getFullEndpointApiUrl(row);
-    this.isDuplicate$ = this.store.select(endpointEntitiesSelector).pipe(
+    this.isDuplicate$ = this.endpoints$.pipe(
       map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === this.address).length > 1)
     );
     this.rowObs.next(row);

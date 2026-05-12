@@ -1,5 +1,4 @@
-import { Store } from '@ngrx/store';
-import { AppState, GetAllApiKeys, ApiKey } from '@stratosui/store';
+import { ApiKey, AppState, GetAllApiKeys, Store } from '@stratosui/store';
 
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
