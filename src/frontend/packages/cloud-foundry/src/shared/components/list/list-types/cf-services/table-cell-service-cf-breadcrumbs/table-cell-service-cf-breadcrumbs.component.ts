@@ -1,5 +1,5 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 
 import { TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
