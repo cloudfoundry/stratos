@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 
 import {
   createTableColumnFavorite,
