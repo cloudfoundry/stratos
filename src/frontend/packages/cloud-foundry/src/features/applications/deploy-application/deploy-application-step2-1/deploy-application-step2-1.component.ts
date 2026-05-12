@@ -1,6 +1,6 @@
 
 import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { StepOnNextFunction } from '@stratosui/core';

@@ -12,7 +12,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, Subscription, of, of as observableOf, firstValueFrom } from 'rxjs';
 import { take, filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
