@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest as combineLatestObs, Observable } from 'rxjs';
 import { combineLatest, map, switchMap } from 'rxjs/operators';
 import {
