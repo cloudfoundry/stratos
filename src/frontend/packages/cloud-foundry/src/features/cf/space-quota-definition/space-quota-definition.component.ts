@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 

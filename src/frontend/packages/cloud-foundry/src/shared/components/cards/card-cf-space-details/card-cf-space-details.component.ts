@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
