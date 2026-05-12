@@ -10,7 +10,7 @@ import {
 import { toSignal } from "@angular/core/rxjs-interop";
 import { CustomCheckboxComponent } from "@stratosui/core";
 import { CustomTooltipDirective } from "@stratosui/core";
-import { Store } from "@ngrx/store";
+import { Store } from "@stratosui/store";
 import { Subscription } from "rxjs";
 import { take, combineLatest as combineLatestOp, filter } from "rxjs/operators";
 
