@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of, ReplaySubject } from 'rxjs';
 import { take, filter, map, multicast, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
@@ -12,7 +11,8 @@ import {
   getCurrentPageRequestInfo,
   PaginationObservables,
   APIResource,
-  PaginatedAction } from '@stratosui/store';
+  PaginatedAction,
+  Store } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';

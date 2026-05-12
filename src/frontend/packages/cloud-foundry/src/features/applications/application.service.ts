@@ -1,6 +1,5 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map, pairwise, publishReplay, refCount, take, withLatestFrom } from 'rxjs/operators';
 
@@ -13,7 +12,8 @@ import {
   EntityService,
   PaginationObservables,
   RequestInfoState,
-  rootUpdatingKey
+  rootUpdatingKey,
+  Store
 } from '@stratosui/store';
 import { AppMetadataTypes } from '../../actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../actions/application.actions';
