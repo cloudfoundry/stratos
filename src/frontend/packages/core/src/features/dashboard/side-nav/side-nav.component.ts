@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { ToggleSideNav, AppState, Logout } from '@stratosui/store';
+import { AppState, Logout, Store, ToggleSideNav } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';

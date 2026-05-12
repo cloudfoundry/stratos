@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   AppState,
   BaseEntityValues,
   entityCatalog,
   EntityServiceFactory,
+  Store,
   EntityCatalogHelper,
   EntityCatalogHelpers,
   EntityMonitorFactory,

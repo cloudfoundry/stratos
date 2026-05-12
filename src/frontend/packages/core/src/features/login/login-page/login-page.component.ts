@@ -1,16 +1,16 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Actions, ofType } from '@ngrx/effects';
-import { InternalAppState, RouterRedirect, Login, VerifySession, AuthState } from '@stratosui/store';
+import { Actions, AuthState, InternalAppState, Login, RouterRedirect, Store, VerifySession, ofType } from '@stratosui/store';
 import { LOGIN_SUCCESS } from '../../../../../store/src/actions/auth.actions';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
 import { queryParamMap } from '../../../core/auth-guard.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
@@ -29,6 +29,7 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
 })
 export class LoginPageComponent implements OnInit {
   private store = inject<Store<Pick<InternalAppState, 'endpoints' | 'auth'>>>(Store);
+  private authSignal = inject(AuthSignalService);
   private branding = inject(StratosBrandingService);
   private router = inject(Router);
   private actions$ = inject(Actions);
@@ -74,7 +75,8 @@ export class LoginPageComponent implements OnInit {
   message = '';
 
   // Reactive state observables
-  private readonly auth$ = this.store.select(s => s.auth).pipe(
+  private readonly auth$ = toObservable(this.authSignal.auth).pipe(
+    filter((auth): auth is AuthState => !!auth),
     distinctUntilChanged((prev, curr) =>
       prev.verifying === curr.verifying &&
       prev.loggingIn === curr.loggingIn &&
@@ -239,38 +241,35 @@ export class LoginPageComponent implements OnInit {
   }
 
   login() {
-    // Check for SSO synchronously using store snapshot
-    this.store.select(s => s.auth.sessionData).pipe(
-      take(1)
-    ).subscribe(sessionData => {
-      if (sessionData?.ssoOptions) {
-        this.doSSOLoginReactive().subscribe();
-        return;
+    // Check for SSO synchronously via the auth signal snapshot
+    const sessionData = this.authSignal.sessionData();
+    if (sessionData?.ssoOptions) {
+      this.doSSOLoginReactive().subscribe();
+      return;
+    }
+
+    // Clear redirect counter and dispatch login
+    this.clearRedirectAttempts();
+    this.message = '';
+
+    this.store.dispatch(new Login(this.username, this.password));
+
+    // Wait for LOGIN_SUCCESS, then ensure app is ready before navigating
+    this.actions$.pipe(
+      ofType(LOGIN_SUCCESS),
+      take(1),
+      switchMap(() => this.appReady$),  // Wait for app to be stable
+      switchMap(() => this.auth$.pipe(
+        filter(a => a.loggedIn && a.sessionData?.valid),
+        take(1)
+      ))
+    ).subscribe(async auth => {
+      this.navigationInProgress$.next(true);
+      try {
+        await this.handleSuccessfulLogin(auth);
+      } finally {
+        this.navigationInProgress$.next(false);
       }
-
-      // Clear redirect counter and dispatch login
-      this.clearRedirectAttempts();
-      this.message = '';
-
-      this.store.dispatch(new Login(this.username, this.password));
-
-      // Wait for LOGIN_SUCCESS, then ensure app is ready before navigating
-      this.actions$.pipe(
-        ofType(LOGIN_SUCCESS),
-        take(1),
-        switchMap(() => this.appReady$),  // Wait for app to be stable
-        switchMap(() => this.auth$.pipe(
-          filter(a => a.loggedIn && a.sessionData?.valid),
-          take(1)
-        ))
-      ).subscribe(async auth => {
-        this.navigationInProgress$.next(true);
-        try {
-          await this.handleSuccessfulLogin(auth);
-        } finally {
-          this.navigationInProgress$.next(false);
-        }
-      });
     });
   }
 

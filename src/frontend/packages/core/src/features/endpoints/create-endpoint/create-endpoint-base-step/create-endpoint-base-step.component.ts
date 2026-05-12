@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import {
-  RouterNav,
   GeneralEntityAppState,
+  RouterNav,
+  Store,
   entityCatalog,
 } from '@stratosui/store';
 

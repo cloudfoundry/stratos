@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
 import {
   AppState,
+  Store,
   UserProfileInfo,
 } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';

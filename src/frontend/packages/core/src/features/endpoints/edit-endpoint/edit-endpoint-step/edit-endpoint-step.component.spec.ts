@@ -1,24 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   AppState,
   BaseEntityValues,
-  entityCatalog,
-  EntityServiceFactory,
-  generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  PaginationMonitorFactory,
-  EntityMonitorFactory,
-  stratosEntityFactory,
-  endpointEntityType,
-  NormalizedResponse,
-  WrapperRequestActionSuccess,
   EntityCatalogTestModuleManualStore,
-  TEST_CATALOGUE_ENTITIES
+  EntityMonitorFactory,
+  EntityServiceFactory,
+  NormalizedResponse,
+  PaginationMonitorFactory,
+  Store,
+  TEST_CATALOGUE_ENTITIES,
+  WrapperRequestActionSuccess,
+  endpointEntityType,
+  entityCatalog,
+  generateStratosEntities,
+  stratosEntityFactory,
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { EditEndpointStepComponent } from './edit-endpoint-step.component';

@@ -4,8 +4,7 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { Store } from '@ngrx/store';
-import { stratosEntityCatalog, GeneralEntityAppState, httpErrorResponseToSafeString } from '@stratosui/store';
+import { GeneralEntityAppState, Store, httpErrorResponseToSafeString, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, defaultIfEmpty, map } from 'rxjs/operators';
 

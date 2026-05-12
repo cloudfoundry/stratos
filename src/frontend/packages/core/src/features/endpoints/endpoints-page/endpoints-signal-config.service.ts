@@ -1,6 +1,5 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 import {
@@ -8,6 +7,7 @@ import {
   AppState,
   EndpointModel,
   EndpointType,
+  Store,
   endpointEntitiesSelector,
   stratosEntityCatalog,
 } from '@stratosui/store';

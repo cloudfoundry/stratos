@@ -1,11 +1,11 @@
 import { Type } from '@angular/core';
-import { Store } from '@ngrx/store';
 import {
   AppState,
+  EndpointModel,
   EndpointOnlyAppState,
+  Store,
   endpointEntitiesSelector,
   endpointsEntityRequestDataSelector,
-  EndpointModel,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';

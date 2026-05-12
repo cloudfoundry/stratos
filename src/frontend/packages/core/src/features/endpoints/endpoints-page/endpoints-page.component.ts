@@ -1,14 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
+import {
+  EndpointOnlyAppState,
+  RouterNav,
+  Store,
+  endpointStatusSelector,
+  selectDashboardState,
+  stratosEntityCatalog,
+} from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
@@ -43,6 +51,7 @@ import { EndpointsSignalListComponent } from './endpoints-signal-list.component'
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
   store = inject<Store<EndpointOnlyAppState>>(Store);
+  private authSignal = inject(AuthSignalService);
   private ngZone = inject(NgZone);
   private snackBarService = inject(SnackBarService);
   sessionService = inject(SessionService);
@@ -132,7 +141,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Is the backup/restore plugin available on the backend?
     // Defensive: Add catchError to handle session data access issues
-    this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
+    this.canBackupRestore$ = toObservable(this.authSignal.sessionData).pipe(
       filter(sessionData => !!sessionData),
       take(1),
       map(sessionData => sessionData?.plugins?.backup || false),

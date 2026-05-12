@@ -1,7 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal, Injector, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
+import { BrowserStandardEncoder, EndpointModel, GeneralEntityAppState, Store, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';

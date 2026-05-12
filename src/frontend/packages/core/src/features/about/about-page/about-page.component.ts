@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
+import { SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { BUILD_INFO } from '../../../environments/build-info';
@@ -25,7 +26,7 @@ import { BUILD_INFO } from '../../../environments/build-info';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AboutPageComponent implements OnInit, OnDestroy {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private auth = inject(AuthSignalService);
   private meta = inject(Meta);
 
 
@@ -52,14 +53,15 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     const cs = inject(CustomizationService);
 
     this.customizations = cs.get();
+
+    // toObservable() requires an injection context — bridge the signal here
+    // (constructor is in DI context) rather than in ngOnInit (which is not).
+    this.sessionData$ = toObservable(this.auth.sessionData).pipe(
+      filter((sessionData): sessionData is SessionData => !!sessionData)
+    );
   }
 
   ngOnInit() {
-    this.sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      map((auth: AuthState) => auth.sessionData)
-    );
-
     this.userIsAdmin$ = this.sessionData$.pipe(
       map(session => session.user && session.user.admin)
     );

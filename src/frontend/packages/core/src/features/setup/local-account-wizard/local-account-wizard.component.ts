@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject, Injector, runInInjectionContext, ChangeDetectionStrategy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import {
-  InternalAppState,
-  UAASetupState,
-  LocalAdminSetupData,
   AuthState,
-  VerifySession,
+  InternalAppState,
+  LocalAdminSetupData,
   SetupSaveConfig,
+  Store,
+  UAASetupState,
+  VerifySession,
 } from '@stratosui/store';
 import { Observable, firstValueFrom } from 'rxjs';
 import { delay, filter, map, take } from 'rxjs/operators';

@@ -1,13 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { AppState, EntityServiceFactory, Store, selectIsMobile } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
