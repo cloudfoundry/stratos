@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { format } from 'date-fns';
 import { EMPTY, NEVER, Observable, Subject, of, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';

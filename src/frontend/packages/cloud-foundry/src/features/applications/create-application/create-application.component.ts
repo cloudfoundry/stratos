@@ -11,7 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { filter, take, tap } from 'rxjs/operators';
 

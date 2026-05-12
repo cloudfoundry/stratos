@@ -11,7 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map } from 'rxjs/operators';
 

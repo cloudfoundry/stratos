@@ -1,6 +1,6 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { map, take, startWith } from 'rxjs/operators';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';

@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 

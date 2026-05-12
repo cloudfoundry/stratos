@@ -1,5 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
