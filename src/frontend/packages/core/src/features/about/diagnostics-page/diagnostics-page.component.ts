@@ -31,7 +31,12 @@ export class DiagnosticsPageComponent implements OnInit {
   private auth = inject(AuthSignalService);
 
 
-  sessionData$!: Observable<SessionData>;
+  // toObservable() requires an injection context — bridge the signal here
+  // (field initializer runs in DI context) rather than in ngOnInit (which is not).
+  sessionData$: Observable<SessionData> = toObservable(this.auth.sessionData).pipe(
+    filter((sessionData): sessionData is SessionData => !!sessionData),
+    filter(sessionData => !!sessionData.diagnostics)
+  );
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
   helmLastModified$!: Observable<Date>;
@@ -57,11 +62,6 @@ export class DiagnosticsPageComponent implements OnInit {
   ngOnInit() {
 
     const helmLastModifiedRegEx = /seconds:([0-9]*)/;
-
-    this.sessionData$ = toObservable(this.auth.sessionData).pipe(
-      filter((sessionData): sessionData is SessionData => !!sessionData),
-      filter(sessionData => !!sessionData.diagnostics)
-    );
 
     this.userIsAdmin$ = this.sessionData$.pipe(
       map(session => session.user && session.user.admin)

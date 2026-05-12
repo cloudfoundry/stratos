@@ -53,13 +53,15 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     const cs = inject(CustomizationService);
 
     this.customizations = cs.get();
-  }
 
-  ngOnInit() {
+    // toObservable() requires an injection context — bridge the signal here
+    // (constructor is in DI context) rather than in ngOnInit (which is not).
     this.sessionData$ = toObservable(this.auth.sessionData).pipe(
       filter((sessionData): sessionData is SessionData => !!sessionData)
     );
+  }
 
+  ngOnInit() {
     this.userIsAdmin$ = this.sessionData$.pipe(
       map(session => session.user && session.user.admin)
     );
