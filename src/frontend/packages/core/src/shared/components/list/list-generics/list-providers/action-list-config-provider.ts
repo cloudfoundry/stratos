@@ -1,5 +1,5 @@
 import { Injector } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 
 import { PaginatedAction } from '../../../../../../../store/src/types/pagination.types';
 import { ActionOrConfigListConfigProvider } from './action-or-entity-config-list-config-provider';

@@ -1,6 +1,5 @@
 import { Injector, runInInjectionContext } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { EntityCatalogEntityConfig } from '@stratosui/store';
+import { EntityCatalogEntityConfig, Store } from '@stratosui/store';
 
 import {
   StratosBaseCatalogEntity,
