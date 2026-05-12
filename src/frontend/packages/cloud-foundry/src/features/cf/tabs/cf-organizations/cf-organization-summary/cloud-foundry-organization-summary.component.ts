@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { take, filter, map, startWith } from 'rxjs/operators';
 

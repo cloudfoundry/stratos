@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
