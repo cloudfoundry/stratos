@@ -7,7 +7,7 @@ import {
   inject,
   ChangeDetectionStrategy,
 } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
+import { toObservable } from "@angular/core/rxjs-interop";
 import { CustomCheckboxComponent } from "@stratosui/core";
 import { CustomTooltipDirective } from "@stratosui/core";
 import { Store } from "@stratosui/store";
@@ -23,11 +23,7 @@ import { CfUserRolesSelected } from "../../../../../cloud-foundry/src/store/type
 import { CurrentUserPermissionsService } from "../../../../../core/src/core/permissions/current-user-permissions.service";
 import { canUpdateOrgSpaceRoles } from "../../../features/cf/cf.helpers";
 import { CfRolesService } from "../../../features/cf/users/manage-users/cf-roles.service";
-import {
-  selectCfUsersIsRemove,
-  selectCfUsersIsSetByUsername,
-  selectCfUsersRolesPicked,
-} from "../../../store/selectors/cf-users-roles.selector";
+import { CfUsersRolesDataService } from "../../../services/domain-data/cf-users-roles-data.service";
 import {
   CfUser,
   IUserPermissionInOrg,
@@ -61,6 +57,9 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   private store = inject(Store<CFAppState>);
   private cfRolesService = inject(CfRolesService);
   private userPerms = inject(CurrentUserPermissionsService);
+  private rolesData = inject(CfUsersRolesDataService);
+  private picked$ = toObservable(this.rolesData.users);
+  private isSetByUsername$ = toObservable(this.rolesData.isSetByUsername);
 
   @Input() cfGuid!: string;
   @Input() orgGuid!: string;
@@ -72,13 +71,8 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   // @Output() changed = new EventEmitter<boolean>();
 
   // Convert mode$ to signal-based computed
-  private isSetByUsernameSignal = toSignal(
-    this.store.select(selectCfUsersIsSetByUsername),
-    { initialValue: false },
-  );
-  private isRemoveSignal = toSignal(this.store.select(selectCfUsersIsRemove), {
-    initialValue: false,
-  });
+  private isSetByUsernameSignal = computed(() => !!this.rolesData.isSetByUsername());
+  private isRemoveSignal = computed(() => !!this.rolesData.isRemove());
 
   mode = computed(() => {
     if (!this.isSetByUsernameSignal()) {
@@ -372,7 +366,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isOrgRole = !this.spaceGuid;
-    const users$ = this.store.select(selectCfUsersRolesPicked);
+    const users$ = this.picked$;
     // If setting an org role user must be admin or org manager.
     // If setting a space role user must be admin, org manager or space manager
     const canEditRole$ = this.isOrgRole
@@ -387,9 +381,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
           this.orgGuid,
           this.spaceGuid,
         );
-    const selectUsersIsSetByUsername$ = this.store.select(
-      selectCfUsersIsSetByUsername,
-    );
+    const selectUsersIsSetByUsername$ = this.isSetByUsername$;
 
     this.sub = this.cfRolesService.existingRoles$
       .pipe(
