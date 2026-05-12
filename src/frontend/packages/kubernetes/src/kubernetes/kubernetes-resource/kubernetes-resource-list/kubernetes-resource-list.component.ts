@@ -11,7 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 

@@ -1,8 +1,7 @@
 import { AsyncPipe } from "@angular/common";
 import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { Store } from "@ngrx/store";
-import { AppState } from "@stratosui/store";
+import { AppState, Store } from "@stratosui/store";
 import { Observable } from "rxjs";
 
 import { PreviewableComponent } from "../../../../../core/src/shared/previewable-component";
