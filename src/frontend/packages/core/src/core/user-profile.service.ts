@@ -1,11 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  SessionData,
   EntityService,
-  AuthState,
   stratosEntityCatalog,
-  AppState,
   ActionState,
   getDefaultActionState,
   UserProfileInfo,
@@ -14,12 +11,14 @@ import {
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, defaultIfEmpty, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
+import { AuthSignalService } from './signals/auth-signal.service';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserProfileService {
-  private store = inject<Store<AppState>>(Store);
+  private authSignals = inject(AuthSignalService);
 
 
   isError$: Observable<boolean>;
@@ -33,10 +32,12 @@ export class UserProfileService {
   private userGuid$: Observable<string>;
 
   constructor() {
-    this.userGuid$ = this.store.select(s => s.auth).pipe(
-      filter((auth: AuthState) => !!(auth && auth.sessionData)),
-      map((auth: AuthState) => auth.sessionData),
-      filter((sessionData: SessionData) => !!sessionData.user),
+    // Source the user GUID from the signal-native auth projection. The
+    // upstream pipe order matches the legacy implementation: wait for
+    // populated sessionData, then a populated `user`, then take the first
+    // GUID and complete.
+    this.userGuid$ = toObservable(this.authSignals.sessionData).pipe(
+      filter(sessionData => !!sessionData?.user),
       take(1),
       map(data => data.user.guid)
     );

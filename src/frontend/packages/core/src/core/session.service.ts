@@ -1,15 +1,24 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { AppState, AuthState, SessionData, SessionDataConfig } from '@stratosui/store';
+import { AuthState, SessionData, SessionDataConfig } from '@stratosui/store';
 
+import { AuthSignalService } from './signals/auth-signal.service';
+
+/**
+ * Compatibility shim that re-exports the signals from {@link AuthSignalService}
+ * under the legacy `SessionService` name. Existing consumers reading
+ * `service.auth() / sessionData() / config()` continue to work; new code
+ * should inject `AuthSignalService` (or `SessionSignalService` for the
+ * higher-level helpers) directly.
+ */
 @Injectable({ providedIn: 'root' })
 export class SessionService {
-  private store = inject<Store<AppState>>(Store);
+  private authSignals = inject(AuthSignalService);
 
-  readonly auth: Signal<AuthState | undefined> = toSignal(this.store.select(s => s.auth));
+  readonly auth: Signal<AuthState | undefined> = this.authSignals.auth;
 
-  readonly sessionData: Signal<SessionData | null> = computed(() => this.auth()?.sessionData ?? null);
+  readonly sessionData: Signal<SessionData | null> = this.authSignals.sessionData;
 
-  readonly config: Signal<SessionDataConfig | null> = computed(() => this.sessionData()?.config ?? null);
+  readonly config: Signal<SessionDataConfig | null> = computed(
+    () => this.sessionData()?.config ?? null
+  );
 }
