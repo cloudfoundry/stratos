@@ -1,16 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
 import { environment } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { catchError, flatMap, mergeMap } from 'rxjs/operators';
 
 import {
+  Action,
+  Actions,
   AppState,
+  Store,
+  WrapperRequestActionSuccess,
+  createEffect,
   entityCatalog,
   NormalizedResponse,
-  WrapperRequestActionSuccess,
+  ofType,
 } from '../../../../../store/src/public-api';
 import { ApiRequestTypes } from '../../../../../store/src/reducers/api-request-reducer/request-helpers';
 import {

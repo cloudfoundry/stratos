@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
 
+import { EffectsModule, StoreModule } from '../../../../../store/src/public-api';
 import { WorkloadsEffects } from './workloads.effects';
 import { helmReleaseReducer } from './workloads.reducers';
 
