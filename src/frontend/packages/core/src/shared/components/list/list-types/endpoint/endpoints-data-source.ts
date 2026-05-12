@@ -1,10 +1,10 @@
-import { Store } from '@ngrx/store';
 import {
-  EntityMonitorFactory,
-  EndpointModel,
   AppState,
+  EndpointModel,
+  EntityMonitorFactory,
   InternalEventMonitorFactory,
   PaginationMonitorFactory,
+  Store,
   stratosEntityCatalog,
 } from '@stratosui/store';
 
