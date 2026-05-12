@@ -10,7 +10,7 @@
         <app-custom-icon class="nav-button-with-text__icon">delete</app-custom-icon> Delete Policy
       </span>
     </button>
-    @if (canManageCredentials$ | async) {
+    @if (canManageCredentials()) {
       <button class="btn nav-button-with-text" name="credential" (click)="manageCredentialPage()">
         <span class="nav-button-with-text__span">
           <app-custom-icon class="nav-button-with-text__icon">vpn_key</app-custom-icon> Manage Credentials

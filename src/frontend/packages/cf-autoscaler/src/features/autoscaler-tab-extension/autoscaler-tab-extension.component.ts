@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
@@ -52,8 +52,9 @@ import {
   selectDeletionInfo,
   APIResource
 } from '@stratosui/store';
-import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler-info-data.service';
 import {
   AutoscalerPaginationParams,
   DetachAppAutoscalerPolicyAction,
@@ -146,9 +147,14 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private appAutoscalerPolicySnackBar = inject(TailwindSnackBarService);
   private appAutoscalerScalingHistorySnackBar = inject(TailwindSnackBarService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private autoscalerInfoData = inject(AutoscalerInfoDataService);
 
 
-  canManageCredentials$!: Observable<boolean>;
+  // Signal-native replacement for the legacy `canManageCredentials$`
+  // Observable. Bound directly in the template via `canManageCredentials()`.
+  // Source data comes from the per-endpoint cache populated by load()
+  // in ngOnInit.
+  canManageCredentials!: Signal<boolean>;
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
@@ -206,27 +212,14 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.canManageCredentials$ = fetchAutoscalerInfo(
-      this.applicationService.cfGuid,
-      this.entityServiceFactory
-    ).pipe(
-      map(info => {
-        // If autoscaler is not available (404 error), return false
-        if (!info || info.entityRequestInfo.error || !info.entity || !info.entity.entity) {
-          return false;
-        }
-        const build = info.entity.entity.build;
-        // Null safety: ensure build exists and can be split
-        if (!build || typeof build !== 'string') {
-          return false;
-        }
-        const buildParts = build.split('.');
-        if (buildParts.length === 0) {
-          return false;
-        }
-        return Number.parseInt(buildParts[0], 10) >= 3;
-      })
-    );
+    // Trigger autoscaler info fetch via the signal-native data service
+    // (replaces the legacy fetchAutoscalerInfo helper + Store/Effects
+    // path). canManageCredentials() reads the cached per-endpoint
+    // signal — its value reflects whether the autoscaler build is
+    // >= 3.x and credential management is exposed.
+    const cfGuid = this.applicationService.cfGuid;
+    this.autoscalerInfoData.load(cfGuid);
+    this.canManageCredentials = this.autoscalerInfoData.canManageCredentials(cfGuid);
 
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
