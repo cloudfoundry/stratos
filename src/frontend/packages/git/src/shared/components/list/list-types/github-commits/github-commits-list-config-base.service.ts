@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
