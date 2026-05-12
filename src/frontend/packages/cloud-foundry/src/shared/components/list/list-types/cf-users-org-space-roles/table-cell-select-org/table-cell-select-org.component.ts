@@ -3,7 +3,7 @@ import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
