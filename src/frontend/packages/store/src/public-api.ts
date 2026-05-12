@@ -266,5 +266,5 @@ export { Store } from '@ngrx/store';
 // their consumers complete the transition to signal-native data
 // services. Remove once no package outside this one names
 // @ngrx/effects.
-export { EffectsModule } from '@ngrx/effects';
+export { EffectsModule, EffectsFeatureModule } from '@ngrx/effects';
 export { Actions, createEffect, ofType } from '@ngrx/effects';
