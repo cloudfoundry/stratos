@@ -20,6 +20,10 @@ import { validateEntityRelations } from '../../entity-relations/entity-relations
  * Now purely looks after ad-hoc validation of an entity or list of entities
  * Does not link in to the API request chain (see new location in success-entity-request.handler)
  */
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained — EntitiesPipelineActionTypes.VALIDATE / .COMPLETE actions
+// are dispatched live from cf-entity-generator.ts:336 and 351 every
+// time a CF entity request needs ad-hoc relation validation.
 @Injectable({
   providedIn: 'root'
 })

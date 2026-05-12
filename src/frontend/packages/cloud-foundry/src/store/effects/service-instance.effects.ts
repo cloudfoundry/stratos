@@ -9,6 +9,17 @@ import { LongRunningCfOperationsService } from '../../shared/data-services/long-
 
 
 
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained defensively — DELETE_SERVICE_INSTANCE_ACTIONS[2] (success)
+// would fire whenever a DeleteServiceInstance action runs through the
+// CF request pipeline. The current UI delete path now bypasses the
+// store entirely (V3 async-job HTTP DELETE in
+// cf-service-instances-signal-config.service.ts:291), so today this
+// effect's listener has no live producer. The action class +
+// serviceInstance.api.remove builder remain wired in the catalogue
+// however, so any future caller of cfEntityCatalog.serviceInstance.api.remove
+// would re-activate the dispatch. Effect kept until the action +
+// builder are jettisoned in a follow-up cleanup (out of scope here).
 @Injectable({
   providedIn: 'root'
 })

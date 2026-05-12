@@ -7,7 +7,6 @@ import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AppEffects } from './effects/app.effects';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
-import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { CfValidateEffects } from './effects/request.effects';
 import { RouteEffect } from './effects/route.effects';
@@ -19,7 +18,6 @@ import { UsersRolesEffects } from './effects/users-roles.effects';
   imports: [
     CloudFoundryReducersModule,
     EffectsModule.forFeature([
-      CreateAppPageEffects,
       AppVariablesEffect,
       DeployAppEffects,
       CloudFoundryEffects,
