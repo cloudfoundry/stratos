@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
