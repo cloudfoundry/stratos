@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 
@@ -16,11 +15,11 @@ import { PageSubNavComponent } from '../../../../../core/src/shared/components/p
 import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
-import { AppState } from '../../../../../store/src/app-state';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
@@ -52,8 +51,6 @@ export const QUOTA_SPACE_GUID = 'space';
   ]
 })
 export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
-  protected store: Store<AppState>;
-
   declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
   declare cfGuid: string;
@@ -68,13 +65,12 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   public isOrg = false;
 
   constructor() {
-    const store = inject<Store<AppState>>(Store);
+    const endpoints = inject(CfEndpointsDataService);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
     const activatedRoute = inject(ActivatedRoute);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
-    super(store, activeRouteCfOrgSpace, activatedRoute);
-    this.store = store;
+    super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
     this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;

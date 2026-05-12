@@ -3,12 +3,12 @@ import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
-import { Store } from '@stratosui/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
-import { AppState, APIResource, EndpointModel } from '@stratosui/store';
+import { APIResource, EndpointModel } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
@@ -40,8 +40,6 @@ export const QUOTA_ORG_GUID = 'org';
   ]
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
-  protected store: Store<AppState>;
-
   declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   declare quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
   declare org$: Observable<APIResource<IOrganization>>;
@@ -58,13 +56,12 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
   public isCf = false;
 
   constructor() {
-    const store = inject<Store<AppState>>(Store);
+    const endpoints = inject(CfEndpointsDataService);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
     const activatedRoute = inject(ActivatedRoute);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
-    super(store, activeRouteCfOrgSpace, activatedRoute);
-    this.store = store;
+    super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
     this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
