@@ -1,7 +1,6 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
@@ -15,6 +14,7 @@ import {
   PaginationParam,
   ResetPagination,
   SetParams,
+  Store,
 } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';

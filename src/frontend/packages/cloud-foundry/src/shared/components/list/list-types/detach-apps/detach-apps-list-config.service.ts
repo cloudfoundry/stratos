@@ -1,10 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 
 import { ITableColumn, IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '@stratosui/core';
-import { ListView, APIResource } from '@stratosui/store';
+import { ListView, APIResource, Store } from '@stratosui/store';
 import { IServiceBinding } from '../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { DetachAppsDataSource } from './detach-apps-data-source';

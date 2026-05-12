@@ -1,6 +1,5 @@
 import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
@@ -17,7 +16,8 @@ import {
   EntityInfo,
   EndpointModel,
   EndpointUser,
-  PaginatedAction } from '@stratosui/store';
+  PaginatedAction,
+  Store } from '@stratosui/store';
 import { GetAllApplications } from '../../../actions/application.actions';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';

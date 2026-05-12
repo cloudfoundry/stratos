@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { GithubCommitsDataSource, GithubCommitsListConfigServiceBase, GitSCMService, GitSCMType } from '@stratosui/git';
 import { take, filter, map } from 'rxjs/operators';
 
