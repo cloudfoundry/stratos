@@ -1,37 +1,39 @@
-@if (metricData$ | async; as metricData) {
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">
-        {{metricType}}
-        <div class="text-sm text-content-muted font-normal mt-1">
-          {{paramsMetricsStart | date:'medium'}} ~
-          {{paramsMetricsEnd | date:'medium'}}
-        </div>
-      </h3>
-    </div>
-    <div class="card-content p-4">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="flex justify-center">
-          <canvas baseChart
-            [type]="'doughnut'"
-            [data]="gaugeData"
-            [options]="gaugeOptions"
-            width="200"
-            height="200"
-            (chartClick)="select($event)">
-          </canvas>
-        </div>
-        <div class="w-full">
-          <app-autoscaler-combo-chart-component [scheme]="comboBarScheme" [colorSchemeLine]="lineChartScheme"
-            [customColors]="metricData[0].entity.formated.colorTarget" [results]="metricData[0].entity.formated.target"
-            [animations]="true" [lineChart]="metricData[0].entity.markline" [tooltipDisabled]="false"
-            [yLeftAxisScaleFactor]="yLeftAxisScale" [gradient]="false" [xAxis]="true" [yAxis]="true" [legend]="true"
-            [legendData]="appAutoscalerAppMetricLegend.legendColor" [showGridLines]="true" [showXAxisLabel]="true"
-            [showYAxisLabel]="true" [yAxisLabel]="metricData[0].entity.unit" [metricName]="metricType"
-            [yScaleMax]="metricData[0].entity.chartMaxValue">
-          </app-autoscaler-combo-chart-component>
+@if (metricData(); as metricData) {
+  @if (metricData.length > 0) {
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          {{metricType}}
+          <div class="text-sm text-content-muted font-normal mt-1">
+            {{paramsMetricsStart | date:'medium'}} ~
+            {{paramsMetricsEnd | date:'medium'}}
+          </div>
+        </h3>
+      </div>
+      <div class="card-content p-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="flex justify-center">
+            <canvas baseChart
+              [type]="'doughnut'"
+              [data]="gaugeData"
+              [options]="gaugeOptions"
+              width="200"
+              height="200"
+              (chartClick)="select($event)">
+            </canvas>
+          </div>
+          <div class="w-full">
+            <app-autoscaler-combo-chart-component [scheme]="comboBarScheme" [colorSchemeLine]="lineChartScheme"
+              [customColors]="metricData[0].entity.formated.colorTarget" [results]="metricData[0].entity.formated.target"
+              [animations]="true" [lineChart]="metricData[0].entity.markline" [tooltipDisabled]="false"
+              [yLeftAxisScaleFactor]="yLeftAxisScale" [gradient]="false" [xAxis]="true" [yAxis]="true" [legend]="true"
+              [legendData]="appAutoscalerAppMetricLegend.legendColor" [showGridLines]="true" [showXAxisLabel]="true"
+              [showYAxisLabel]="true" [yAxisLabel]="metricData[0].entity.unit" [metricName]="metricType"
+              [yScaleMax]="metricData[0].entity.chartMaxValue">
+            </app-autoscaler-combo-chart-component>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  }
 }

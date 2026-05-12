@@ -1,4 +1,6 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -37,6 +39,8 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         ConfirmationDialogService,
         DatePipe,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     }).compileComponents();
   });
