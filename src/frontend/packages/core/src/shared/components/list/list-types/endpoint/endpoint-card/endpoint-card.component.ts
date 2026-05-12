@@ -2,19 +2,19 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
 import {
-  getFullEndpointApiUrl,
-  entityCatalog,
+  AppState,
   endpointEntitiesSelector,
-  MenuItem,
-  StratosStatus,
-  StratosCatalogEndpointEntity,
   EndpointModel,
+  entityCatalog,
+  getFullEndpointApiUrl,
+  MenuItem,
+  RouterNav,
+  Store,
+  StratosCatalogEndpointEntity,
+  StratosStatus,
   UserFavoriteEndpoint,
   UserFavoriteManager,
-  RouterNav,
-  AppState,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';

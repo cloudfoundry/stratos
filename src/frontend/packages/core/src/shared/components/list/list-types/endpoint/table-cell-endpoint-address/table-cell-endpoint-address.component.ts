@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, Input  } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState, EndpointModel, endpointEntitiesSelector, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { AppState, endpointEntitiesSelector, EndpointModel, getFullEndpointApiUrl, Store, stratosEntityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
