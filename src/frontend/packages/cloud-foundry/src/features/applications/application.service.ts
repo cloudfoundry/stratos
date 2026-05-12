@@ -7,7 +7,6 @@ import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
   ActionState,
   APIResource,
-  endpointEntitiesSelector,
   EntityInfo,
   EntityService,
   PaginationObservables,
@@ -28,6 +27,7 @@ import {
   stackEntityType
 } from '../../cf-entity-types';
 import { IApp, IAppSummary } from '../../cf-api.types';
+import { CfEndpointsDataService } from '../../services/domain-data/cf-endpoints-data.service';
 import { StDomain, StOrg, StSpace } from '../../services/endpoint-data/stratos-types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
@@ -101,6 +101,7 @@ export class ApplicationService {
   private store = inject<Store<CFAppState>>(Store);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private detail = inject(AppDetailDataService);
+  private cfEndpoints = inject(CfEndpointsDataService);
 
   // ---------------------------------------------------------------------------
   // Legacy ngrx EntityService — kept for application-tabs-base
@@ -268,7 +269,7 @@ export class ApplicationService {
     filter(data => !!data.app),
     // Attach the endpoint model from the ngrx store so cf?.guid / cf?.name work.
     // This keeps the legacy consumer API intact without adding endpoint HTTP fetches.
-    withLatestFrom(this.store.select(endpointEntitiesSelector)),
+    withLatestFrom(toObservable(this.cfEndpoints.all)),
     map(([data, endpoints]) => ({ ...data, cf: endpoints?.[this.cfGuid] ?? null })),
     publishReplay(1),
     refCount(),

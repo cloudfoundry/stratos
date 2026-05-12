@@ -1,15 +1,14 @@
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { AppState } from '../../../../../store/src/app-state';
-import { endpointEntitiesSelector } from '../../../../../store/src/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 export class QuotaDefinitionBaseComponent {
@@ -25,7 +24,7 @@ export class QuotaDefinitionBaseComponent {
   orgSubscriber!: Subscription;
 
   constructor(
-    protected store: Store<AppState>,
+    protected endpoints: CfEndpointsDataService,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     protected activatedRoute: ActivatedRoute,
   ) {
@@ -55,7 +54,7 @@ export class QuotaDefinitionBaseComponent {
   }
 
   private setupBreadcrumbs() {
-    const endpoints$ = this.store.select(endpointEntitiesSelector);
+    const endpoints$ = toObservable(this.endpoints.all);
     const org$ = this.org$ ? this.org$ : of(null);
     const space$ = this.space$ ? this.space$ : of(null);
     this.breadcrumbs$ = combineLatest(endpoints$, org$, space$).pipe(

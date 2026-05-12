@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@stratosui/store';
 import { Observable, Subject } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -16,12 +17,12 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
   TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
   TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { selectCfUsersRoles, selectCfUsersRolesChangedRoles } from '../../../../../store/selectors/cf-users-roles.selector';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
@@ -40,6 +41,11 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   private store = inject(Store<CFAppState>);
   private cfUserService = inject(CfUserService);
+  private rolesData = inject(CfUsersRolesDataService);
+  // Cached toObservable bridges so handlers can use them outside the
+  // injection context.
+  private state$ = toObservable(this.rolesData.state);
+  private changedRoles$ = toObservable(this.rolesData.changedRoles);
 
   @Input() setUsernames = false;
 
@@ -121,9 +127,13 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     // Kick off an update
     this.updateChanges.next(new Date().getTime());
     // Ensure that any entity we're going to show the state for is clear of any previous or unrelated errors
-    this.store.select(selectCfUsersRoles).pipe(
+    this.state$.pipe(
       take(1),
-    ).subscribe(usersRoles => this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles)));
+    ).subscribe(usersRoles => {
+      if (usersRoles) {
+        this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles));
+      }
+    });
   };
 
   fetchUsername = (userGuid: string, users: APIResource<CfUser>[]): string => {
@@ -143,8 +153,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   };
 
   private createCfObs() {
-    this.cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
-      map(mu => mu.cfGuid),
+    this.cfGuid$ = this.state$.pipe(
+      map(mu => mu?.cfGuid),
       filter(cfGuid => !!cfGuid),
       distinctUntilChanged(),
     );
@@ -152,7 +162,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   private createChangesObs() {
     const changesViaUsername = this.updateChanges.pipe(
-      switchMap(() => this.store.select(selectCfUsersRolesChangedRoles)),
+      switchMap(() => this.changedRoles$),
       map(changes => changes
         .map(change => ({
           ...change,
@@ -165,7 +175,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     const changesViaUserGuid = this.updateChanges.pipe(
       withLatestFrom(this.cfGuid$),
       mergeMap(([, cfGuid]) => this.cfUserService.getUsers(cfGuid)),
-      withLatestFrom(this.store.select(selectCfUsersRolesChangedRoles)),
+      withLatestFrom(this.changedRoles$),
       map(([users, changes]) =>
         changes
           .map(change => ({

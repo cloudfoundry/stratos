@@ -11,6 +11,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@stratosui/store';
 import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map } from 'rxjs/operators';
@@ -18,8 +19,8 @@ import { take, combineLatest, filter, map } from 'rxjs/operators';
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CFAppState } from '../../../../cf-app-state';
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { selectCfUsersRoles, selectCfUsersRolesPicked } from '../../../../store/selectors/cf-users-roles.selector';
 import { CfUser } from '../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
@@ -56,6 +57,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private rolesData = inject(CfUsersRolesDataService);
 
   initialUsers$!: Observable<CfUser[]>;
   singleUser$!: Observable<CfUser | null>;
@@ -167,7 +169,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
           take(1)
         );
       } else {
-        this.initialUsers$ = this.store.select(selectCfUsersRolesPicked).pipe(take(1));
+        this.initialUsers$ = toObservable(this.rolesData.users).pipe(take(1));
       }
 
       this.singleUser$ = this.initialUsers$.pipe(
@@ -177,11 +179,11 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
       );
 
       // Ensure that when we arrive here directly the store is set up with all it needs
-      this.store.select(selectCfUsersRoles).pipe(
+      toObservable(this.rolesData.state).pipe(
         combineLatest(this.initialUsers$),
         take(1)
       ).subscribe(([usersRoles, users]) => {
-        if (!usersRoles.cfGuid || !users) {
+        if (!usersRoles?.cfGuid || !users) {
           this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, users));
         }
       });

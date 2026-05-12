@@ -8,7 +8,6 @@ import { take, catchError, combineLatest, filter, map, mergeMap, share, switchMa
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
 import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import {
   AppData,
   DeployApplicationSource,
@@ -16,6 +15,7 @@ import {
   OverrideAppDetails,
   SocketEventTypes } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../../../core/src/environments/environment.prod';
+import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
@@ -198,8 +198,10 @@ export class DeployApplicationDeployer {
 
       };
     this.isOpen = true;
-    this.connectSub = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+    const deployData = this.injector.get(CfDeployAppDataService);
+    const deployState$ = toObservable(deployData.state, { injector: this.injector });
+    this.connectSub = deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       mergeMap(appDetails => {
         const orgSubscription = this.store.select(selectCfEntity(organizationEntityType, appDetails.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectCfEntity(spaceEntityType, appDetails.cloudFoundryDetails.space));
@@ -253,8 +255,8 @@ export class DeployApplicationDeployer {
     ).subscribe();
 
     // Watch for updates to the app overrides - use case is app overrides being set after source file/folder upload
-    this.updateSub = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+    this.updateSub = deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
         this.applicationOverrides = appDetail.applicationOverrides;
       })
