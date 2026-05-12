@@ -73,7 +73,7 @@ function setup(opts: DataStubOpts & { showActions?: boolean; canEdit?: boolean }
   const appsStub = makeAppsStub();
   const cupsStub = makeCupsStub(opts.canEdit ?? true);
   const confirmStub = { open: vi.fn((_cfg: any, fn: () => void) => fn()) };
-  const snackStub = { open: vi.fn() };
+  const snackStub = { open: vi.fn(), error: vi.fn(), warn: vi.fn(), info: vi.fn() };
 
   TestBed.configureTestingModule({
     imports: [CardAppInstancesComponent],
