@@ -1,9 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { publishReplay, refCount } from 'rxjs/operators';
 import { CurrentUserPermissionsService, ConfirmationDialogService, IListConfig } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
+import { APIResource, Store } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../cf-app-state';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';

@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
 import { IListConfig, IListMultiFilterConfig, ITableColumn, ITableText, ListViewTypes } from '@stratosui/core';
-import { APIResource, connectedEndpointsOfTypesSelector, ListView } from '@stratosui/store';
+import { APIResource, connectedEndpointsOfTypesSelector, ListView, Store } from '@stratosui/store';
 import { CFAppState } from '../../../../../cf-app-state';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
