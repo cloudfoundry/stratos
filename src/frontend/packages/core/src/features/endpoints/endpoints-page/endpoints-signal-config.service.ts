@@ -1,5 +1,4 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 import {
@@ -8,10 +7,10 @@ import {
   EndpointModel,
   EndpointType,
   Store,
-  endpointEntitiesSelector,
   stratosEntityCatalog,
 } from '@stratosui/store';
 
+import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
 import { ListStateStore } from '../../../shared/components/signal-list/list-state-store.service';
 
 // ViewPipeline lives in the cloud-foundry package today (used by the
@@ -104,6 +103,7 @@ export class EndpointsSignalConfigService {
   private readonly store = inject<Store<AppState>>(Store);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly endpointsSignals = inject(EndpointsSignalService);
 
   // Filter / sort / paging state. Endpoints list has historically rendered as a
   // table by default (legacy ListConfig defaultView = 'cards' but the practical
@@ -125,16 +125,13 @@ export class EndpointsSignalConfigService {
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode = this.state.viewMode;
 
-  // Endpoint store holds Record<guid, EndpointModel>. Project to an array via
-  // Object.values() in a computed so re-renders fire only when the underlying
-  // selector emits, not on every interaction. Use empty-record initial value
-  // so the first synchronous read before ngrx hydrates returns [] not undefined.
-  private readonly endpointsRecord: Signal<Record<string, EndpointModel>> = toSignal(
-    this.store.select(endpointEntitiesSelector),
-    { initialValue: {} as Record<string, EndpointModel> },
+  // Endpoint entries sourced from EndpointsSignalService so the
+  // toSignal(store.select(endpointEntitiesSelector)) bridge lives in
+  // exactly one place. Project the Record to an array via Object.values()
+  // so re-renders fire only when the underlying signal emits.
+  readonly endpoints: Signal<EndpointModel[]> = computed(
+    () => Object.values(this.endpointsSignals.endpoints() ?? {})
   );
-
-  readonly endpoints: Signal<EndpointModel[]> = computed(() => Object.values(this.endpointsRecord() ?? {}));
 
   view!: ViewPipeline<EndpointModel>;
 

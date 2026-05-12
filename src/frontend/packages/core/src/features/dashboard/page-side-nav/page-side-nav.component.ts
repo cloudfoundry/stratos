@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { AppState, EntityServiceFactory, Store, selectIsMobile } from '@stratosui/store';
+import { AppState, EntityServiceFactory, Store } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 import { TabNavService } from '../../../tab-nav.service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -34,6 +36,7 @@ export class PageSideNavComponent implements OnInit {
   private esf = inject(EntityServiceFactory);
   private activatedRoute = inject(ActivatedRoute);
   private cups = inject(CurrentUserPermissionsService);
+  private dashboardSignals = inject(DashboardSignalService);
 
 
   pTabs: IPageSideNavTab[] = [];
@@ -60,7 +63,7 @@ export class PageSideNavComponent implements OnInit {
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   constructor() {
-    this.isMobile$ = this.store.select(selectIsMobile);
+    this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
   }
 
   ngOnInit() {

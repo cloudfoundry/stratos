@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
-  AppState,
-  Store,
   UserProfileInfo,
 } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
@@ -11,6 +10,7 @@ import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { UserService } from '../../../core/user.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -40,7 +40,7 @@ import { AppChipsComponent } from '../../../shared/components/chips/chips.compon
 export class ProfileInfoComponent {
   userService = inject(UserService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
-  private store = inject<Store<AppState>>(Store);
+  private dashboardSignals = inject(DashboardSignalService);
 
 
   isError$: Observable<boolean>;
@@ -64,9 +64,7 @@ export class ProfileInfoComponent {
       map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
     );
 
-    this.allowGravatar$ = this.store.select(s => s.dashboard).pipe(
-      map(dashboardState => dashboardState.gravatarEnabled)
-    );
+    this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
   }
 }

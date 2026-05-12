@@ -11,6 +11,7 @@ import { StratosBrandingService } from '../../../../../theme/stratos-branding.se
 
 import { queryParamMap } from '../../../core/auth-guard.service';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
@@ -30,6 +31,7 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
 export class LoginPageComponent implements OnInit {
   private store = inject<Store<Pick<InternalAppState, 'endpoints' | 'auth'>>>(Store);
   private authSignal = inject(AuthSignalService);
+  private endpointStatusSignals = inject(EndpointStatusSignalService);
   private branding = inject(StratosBrandingService);
   private router = inject(Router);
   private actions$ = inject(Actions);
@@ -87,7 +89,7 @@ export class LoginPageComponent implements OnInit {
     shareReplay({ bufferSize: 1, refCount: false })
   );
 
-  private readonly endpoints$ = this.store.select(s => s.endpoints).pipe(
+  private readonly endpoints$ = toObservable(this.endpointStatusSignals.status).pipe(
     distinctUntilChanged((prev, curr) => prev.loading === curr.loading),
     shareReplay({ bufferSize: 1, refCount: false })
   );

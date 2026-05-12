@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
   InternalEventSeverity,
@@ -10,13 +11,12 @@ import {
   UserFavorite,
   AddRecentlyVisitedEntityAction,
   StratosStatus,
-  selectDashboardState,
   ToggleSideNav,
   AppState,
-  selectIsMobile,
   UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { getTime } from 'date-fns';
 import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -67,6 +67,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
   private snackBarService = inject(SnackBarService);
+  private dashboardSignals = inject(DashboardSignalService);
 
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
@@ -75,7 +76,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public pFavorite!: UserFavorite<IFavoriteMetadata>;
   private pTabs!: IPageSideNavTab[];
 
-  public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
+  public isMobile$: Observable<boolean> = toObservable(this.dashboardSignals.isMobile);
 
   public environment = environment;
 
@@ -232,9 +233,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       })
     );
 
-    this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.gravatarEnabled)
-    );
+    this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
     this.canAPIKeys$ = combineLatest([

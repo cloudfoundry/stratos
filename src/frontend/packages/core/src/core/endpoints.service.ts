@@ -3,7 +3,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
-  endpointStatusSelector,
   EndpointOnlyAppState,
   EntityCatalogHelpers,
   IRequestEntityTypeState,
@@ -21,6 +20,7 @@ import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-he
 import { SessionService } from '../shared/services/session.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { AuthSignalService } from './signals/auth-signal.service';
+import { EndpointStatusSignalService } from './signals/endpoint-status-signal.service';
 import { EndpointsSignalService } from './signals/endpoints-signal.service';
 import { UserService } from './user.service';
 
@@ -258,12 +258,13 @@ export const endpointsGuard: CanActivateFn = (
   const userService = inject(UserService);
   const sessionService = inject(SessionService);
   const authSignals = inject(AuthSignalService);
+  const endpointStatusSignals = inject(EndpointStatusSignalService);
 
   // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints.
-  // Auth slice now sourced from AuthSignalService; endpoint loading state still lives in the store.
+  // Auth + endpoint loading state both sourced from signal services.
   const guardLogic$ = observableCombineLatest(
     toObservable(authSignals.auth),
-    store.select(endpointStatusSelector)
+    toObservable(endpointStatusSignals.status)
   ).pipe(
     filter(([state, endpointState]) => {
       // Only proceed when logged in and endpoints are done loading
