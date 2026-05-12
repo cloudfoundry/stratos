@@ -10,12 +10,12 @@ import {
   AppState,
   Store,
   StratosCatalogEndpointEntity,
-  endpointEntitiesSelector,
   entityCatalog,
 } from '@stratosui/store';
 import { from, Observable } from 'rxjs';
 import { map, startWith, take } from 'rxjs/operators';
 
+import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
@@ -63,6 +63,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   private snackBarService = inject(SnackBarService);
   private store = inject<Store<AppState>>(Store);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
+  private endpointsSignals = inject(EndpointsSignalService);
 
 
   registerForm: FormGroup<CreateEndpointForm>;
@@ -176,17 +177,14 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       // Delay past the endpoints-page subscription that calls snackBarService.hide()
       // when endpoint connectivity state updates after registration completes.
       setTimeout(() => {
-        this.store.select(endpointEntitiesSelector).pipe(
-          take(1),
-          map(entities => Object.values(entities).filter(e =>
-            e.api_endpoint?.Host === urlHost && e.guid !== result.message
-          ))
-        ).subscribe(dupes => {
-          if (dupes.length > 0) {
-            const names = dupes.map(e => e.name).join(', ');
-            this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
-          }
-        });
+        const entities = this.endpointsSignals.endpoints();
+        const dupes = Object.values(entities).filter(e =>
+          e.api_endpoint?.Host === urlHost && e.guid !== result.message
+        );
+        if (dupes.length > 0) {
+          const names = dupes.map(e => e.name).join(', ');
+          this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
+        }
       }, 1500);
     }
     const success = !result.error;
