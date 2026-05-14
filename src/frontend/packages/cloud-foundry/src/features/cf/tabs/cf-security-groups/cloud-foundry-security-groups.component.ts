@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
@@ -38,7 +38,7 @@ export class CloudFoundrySecurityGroupsComponent {
       totalPages: this.securityGroupsConfig.view.totalPages,
       pageIndex: this.securityGroupsConfig.pageIndex,
       pageSize: this.securityGroupsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.securityGroupsConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

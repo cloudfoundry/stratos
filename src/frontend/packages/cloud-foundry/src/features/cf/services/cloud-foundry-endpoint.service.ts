@@ -1,16 +1,18 @@
-import { Injectable, Injector, Signal, inject } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Observable, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 
 import {
   EntityService,
   endpointEntityType,
   PaginationMonitorFactory,
   getPaginationObservables,
-  PaginationObservables,
   stratosEntityCatalog,
   APIResource,
   EntityInfo,
@@ -62,13 +64,24 @@ export class CloudFoundryEndpointService {
   private cfUserService = inject(CfUserService);
   private pmf = inject(PaginationMonitorFactory);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
   private injector = inject(Injector);
 
 
   hasSSHAccess$!: Observable<boolean>;
   totalMem$!: Observable<number>;
   paginationSubscription!: Subscription;
-  appsPagObs!: PaginationObservables<APIResource<IApp>>;
+  // Signal-native apps stream — backed by EndpointDataService.apps via the
+  // EndpointDataRegistry-managed load() / loadDetails() pipeline. Replaces
+  // the legacy `appsPagObs` PaginationObservables that hit
+  // /pp/v1/cf/apps?...&results-per-page=100 in parallel with the
+  // signal-native ?per_page=500 fetch and double-fired every downstream
+  // consumer (recent-apps stats fetch, totals, list filters).
+  endpointData!: EndpointDataService;
+  apps$!: Observable<APIResource<IApp>[]>;
+  appsLoading$!: Observable<boolean>;
+  hasApps$!: Observable<boolean>;
+  appCount$!: Observable<number>;
   usersCount$!: Observable<number | null>;
   orgs$!: Observable<APIResource<IOrganization>[]>;
   info$!: Observable<EntityInfo<APIResource<ICfV2Info>>>;
@@ -206,7 +219,21 @@ export class CloudFoundryEndpointService {
   }
 
   constructAppObs() {
-    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.cfGuid);
+    // Signal-native apps pipeline — acquire() schedules load() (counts +
+    // recent apps fast path) which chains into loadDetails() (full apps
+    // list at ?per_page=500). The legacy ngrx pagination fetcher
+    // (cfEntityCatalog.application.store.getPaginationService) is gone;
+    // every CF page-tree consumer now reads through these observables
+    // bridged off the EndpointDataService signals.
+    this.endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    const appsResources = computed(() => this.endpointData.apps().map(stAppToAPIResource));
+    this.apps$ = toObservable(appsResources, { injector: this.injector });
+    this.appsLoading$ = toObservable(this.endpointData.isLoadingDetails, { injector: this.injector });
+    this.hasApps$ = toObservable(
+      computed(() => this.endpointData.apps().length > 0),
+      { injector: this.injector },
+    );
+    this.appCount$ = toObservable(this.endpointData.appCount, { injector: this.injector });
   }
 
   private constructSecondaryObservable() {
@@ -216,7 +243,7 @@ export class CloudFoundryEndpointService {
         p.entity.entity.app_ssh_host_key_fingerprint &&
         p.entity.entity.app_ssh_oauth_client))
     );
-    this.totalMem$ = this.appsPagObs.entities$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
+    this.totalMem$ = this.apps$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
 
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')
@@ -226,7 +253,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
-    return this.appsPagObs.entities$.pipe(
+    return this.apps$.pipe(
       filter(allApps => !!allApps),
       map(allApps => {
         const spaces = org.entity.spaces || [];
@@ -237,7 +264,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getAppsInSpaceViaAllApps(space: APIResource<ISpace>): Observable<APIResource<IApp>[]> {
-    return this.appsPagObs.entities$.pipe(
+    return this.apps$.pipe(
       filter(allApps => !!allApps),
       map(apps => {
         return apps.filter(a => a.entity.space_guid === space.metadata.guid);
@@ -261,7 +288,12 @@ export class CloudFoundryEndpointService {
   }
 
   fetchApps() {
-    cfEntityCatalog.application.api.getMultiple(this.cfGuid);
+    // Signal-native refresh: re-runs loadDetails() which re-populates the
+    // apps signal. Internal call sites (org / space services) called this
+    // for "make sure the apps cache is warm before reading appsPagObs" —
+    // the new pipeline already enqueues loadDetails on acquire(), so this
+    // is now an explicit re-fetch (e.g. user-initiated refresh button).
+    this.endpointData.loadDetails().subscribe();
   }
 
 }

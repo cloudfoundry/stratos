@@ -38,6 +38,9 @@ export class CfSecurityGroupsSignalConfigService {
   private readonly _securityGroups: WritableSignal<StSecurityGroup[]> = signal([]);
   readonly securityGroups: Signal<StSecurityGroup[]> = this._securityGroups.asReadonly();
 
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StSecurityGroup) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StSecurityGroup>;
@@ -69,12 +72,14 @@ export class CfSecurityGroupsSignalConfigService {
     if (!this.source) return;
     await this.source.load();
     this._securityGroups.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   async refresh(): Promise<void> {
     if (!this.source) return;
     await this.source.refresh();
     this._securityGroups.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   clearFilters(): void {

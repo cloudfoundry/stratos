@@ -39,6 +39,9 @@ export class RevisionsSignalConfigService {
   private readonly _revisions: WritableSignal<RevisionRow[]> = signal([]);
   readonly revisions: Signal<RevisionRow[]> = this._revisions.asReadonly();
 
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
   private readonly _featureEnabled: WritableSignal<boolean> = signal(true);
   readonly featureEnabled: Signal<boolean> = this._featureEnabled.asReadonly();
 
@@ -82,6 +85,7 @@ export class RevisionsSignalConfigService {
     this._revisions.set(resp.revisions ?? []);
     this._featureEnabled.set(resp.featureEnabled ?? true);
     this._deployedUnknown.set(resp.partial?.deployedUnknown ?? false);
+    this._hasLoadedOnce.set(true);
   }
 
   async refresh(): Promise<void> {

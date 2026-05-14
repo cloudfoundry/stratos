@@ -137,7 +137,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       this.row
     );
 
-    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))
     );
 

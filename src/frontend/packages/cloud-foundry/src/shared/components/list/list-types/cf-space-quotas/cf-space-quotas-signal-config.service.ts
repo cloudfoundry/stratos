@@ -41,6 +41,9 @@ export class CfSpaceQuotasSignalConfigService {
   private readonly _spaceQuotas: WritableSignal<StSpaceQuota[]> = signal([]);
   readonly spaceQuotas: Signal<StSpaceQuota[]> = this._spaceQuotas.asReadonly();
 
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StSpaceQuota) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StSpaceQuota>;
@@ -74,12 +77,14 @@ export class CfSpaceQuotasSignalConfigService {
     if (!this.source) return;
     await this.source.load();
     this._spaceQuotas.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   async refresh(): Promise<void> {
     if (!this.source) return;
     await this.source.refresh();
     this._spaceQuotas.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   clearFilters(): void {

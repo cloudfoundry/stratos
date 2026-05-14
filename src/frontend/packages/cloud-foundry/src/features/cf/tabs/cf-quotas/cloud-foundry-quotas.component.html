@@ -1,8 +1,8 @@
-<div class="quotas">
+<div class="quotas h-full flex flex-col">
   <app-list-sub-nav title="Total Organization Quotas"
                     [count]="totalQuotas"
                     [addAction]="createQuotaAction"></app-list-sub-nav>
   @if (listConfig(); as cfg) {
-    <app-signal-list [config]="cfg" />
+    <app-signal-list [config]="cfg" class="flex-1 min-h-0"></app-signal-list>
   }
 </div>

@@ -80,7 +80,16 @@ import {
 } from './tabs/cf-organizations/cf-organization-users/cloud-foundry-organization-users.component';
 import { CloudFoundryOrganizationsSignalComponent } from './tabs/cf-organizations/cloud-foundry-organizations-signal.component';
 import { CloudFoundryQuotasComponent } from './tabs/cf-quotas/cloud-foundry-quotas.component';
+import {
+  CloudFoundryApplicationsSignalComponent,
+} from './tabs/cf-applications/cloud-foundry-applications-signal.component';
+import {
+  CloudFoundryMarketplaceSignalComponent,
+} from './tabs/cf-marketplace/cloud-foundry-marketplace-signal.component';
 import { CloudFoundryRoutesSignalComponent } from './tabs/cf-routes/cloud-foundry-routes-signal.component';
+import {
+  CloudFoundryServicesSignalComponent,
+} from './tabs/cf-services/cloud-foundry-services-signal.component';
 import { CloudFoundrySecurityGroupsComponent } from './tabs/cf-security-groups/cloud-foundry-security-groups.component';
 import { CloudFoundryStacksComponent } from './tabs/cf-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cf-summary-tab/cloud-foundry-summary-tab.component';
@@ -204,6 +213,18 @@ export const CLOUD_FOUNDRY_SECTION_ROUTES: Routes = [{
             {
               path: 'organizations',
               component: CloudFoundryOrganizationsSignalComponent,
+            },
+            {
+              path: 'applications',
+              component: CloudFoundryApplicationsSignalComponent,
+            },
+            {
+              path: 'marketplace',
+              component: CloudFoundryMarketplaceSignalComponent,
+            },
+            {
+              path: 'services',
+              component: CloudFoundryServicesSignalComponent,
             },
             {
               path: 'users',

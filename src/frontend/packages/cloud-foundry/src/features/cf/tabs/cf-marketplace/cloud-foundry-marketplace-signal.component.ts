@@ -1,74 +1,46 @@
-import { animate, query, style, transition, trigger } from '@angular/animations';
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
-  PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
 } from '@stratosui/core';
 import { UserFavorite, UserFavoriteManager } from '@stratosui/store';
-import { serviceEntityType } from '../../../cf-entity-types';
-import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
+
+import { serviceEntityType } from '../../../../cf-entity-types';
 import {
   CfServiceOfferingsSignalConfigService,
-} from '../../../shared/components/list/list-types/service-offering/cf-service-offerings-signal-config.service';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import type { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
+} from '../../../../shared/components/list/list-types/service-offering/cf-service-offerings-signal-config.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import type { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';
 
-// Stratos Marketplace — multi-CNSI service offerings catalog.
-//
-// Mirrors ApplicationWallComponent's MergeOrchestrator + ViewPipeline + signal
-// config wiring. Read-only list (no kebab actions); detail navigation goes
-// to the existing /marketplace/:cnsi/:offeringGuid page (which still uses
-// the legacy ngrx ListConfig today and is out of scope for this migration).
+// Per-CF Marketplace tab. Single-CNSI variant of the top-level Marketplace
+// page (ServiceCatalogPageComponent). The CF dropdown is hidden — the URL
+// already pins the CNSI via the parent CloudFoundryEndpointService — and
+// every column / sort / filter wiring otherwise mirrors the multi-CNSI
+// page. Reads the same singleton signal config; initialize() is keyed by
+// cnsi-set so the wall and the per-CF tab don't fight over scope.
 @Component({
-  selector: 'app-service-catalog-page',
-  templateUrl: './service-catalog-page.component.html',
+  selector: 'app-cloud-foundry-marketplace-signal',
+  templateUrl: './cloud-foundry-marketplace-signal.component.html',
+  styleUrls: ['./cloud-foundry-marketplace-signal.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
-    PageHeaderComponent,
     SignalListComponent,
-    CfEndpointsMissingComponent,
-    DuplicateUrlBannerComponent,
-  ],
-  animations: [
-    trigger('cardEnter', [
-      transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(10px)' }),
-          animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
-        ], { optional: true }),
-      ]),
-    ]),
-  ],
-  providers: [
-    DatePipe,
   ],
 })
-export class ServiceCatalogPageComponent implements OnInit {
-  cloudFoundryService = inject(CloudFoundryService);
+export class CloudFoundryMarketplaceSignalComponent implements OnInit {
+  cfEndpointService = inject(CloudFoundryEndpointService);
   private offeringsConfig = inject(CfServiceOfferingsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
 
-  public cfIds$: Observable<string[]>;
-  public haveConnectedCf$: Observable<boolean>;
-
-  // Row keys ({cnsiGuid}:{offeringGuid}) for service offerings the user has
-  // favorited. Mirrors the app-wall pattern exactly — derived from
-  // UserFavoriteManager's combined (groups, entities) stream and exposed
-  // as a Signal so SignalListColumn.favorite can subscribe directly. The
-  // legacy 481 catalog page used the same `serviceEntityType = 'service'`
-  // key, so existing favorites carry over.
   private readonly favoriteOfferingRowKeys: Signal<ReadonlySet<string>> = toSignal(
     this.userFavoriteManager.getAllFavorites().pipe(
       map(([groups, entities]) => {
@@ -95,45 +67,26 @@ export class ServiceCatalogPageComponent implements OnInit {
     this.userFavoriteManager.toggleFavorite(fav);
   }
 
-  // Config for <app-signal-list>. Populated in ngOnInit once the signal
-  // config has been initialized with the connected CF guids. Using a
-  // WritableSignal so assignment triggers change detection under OnPush.
   public listConfig: WritableSignal<SignalListConfig<StServiceOffering> | undefined> = signal(undefined);
 
-  constructor() {
-    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid),
-      ),
-    );
-    this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0),
-    );
-  }
-
   async ngOnInit(): Promise<void> {
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
-    const cnsiGuids = (connected ?? []).map(ep => ep.guid);
-    this.offeringsConfig.initialize(cnsiGuids);
-
+    const cfGuid = this.cfEndpointService.cfGuid;
+    this.offeringsConfig.initialize([cfGuid]);
+    // CNSI is pre-chosen by the URL — show the dropdown but disable it so
+    // the scope is visible and can't drift.
+    this.offeringsConfig.selectedCnsi.set(cfGuid);
+    const cnsiLocked: Signal<boolean> = signal(true).asReadonly();
     const dropdowns: SignalListDropdown[] = [
       {
         label: 'Cloud Foundry',
         options: this.offeringsConfig.cnsiOptions,
         selected: this.offeringsConfig.selectedCnsi,
+        disabled: cnsiLocked,
       },
     ];
 
     const renderTags = (o: StServiceOffering): string =>
       (o.tags ?? []).join(', ');
-    const renderCf = (o: StServiceOffering): string =>
-      this.offeringsConfig.endpointNames().get(o.cnsiGuid) ?? '—';
 
     this.listConfig.set({
       pagedItems: this.offeringsConfig.view.pagedItems,
@@ -154,9 +107,6 @@ export class ServiceCatalogPageComponent implements OnInit {
         {
           header: 'Description', key: 'description', sortField: 'description',
           render: (o: StServiceOffering) => o.description ?? '',
-          // Long descriptions get truncated by the cell template's title-attr
-          // overflow handling; the widthHint keeps the column from devouring
-          // the row when a broker emits a wall-of-text description.
           widthHint: '24rem',
         },
         {
@@ -169,16 +119,6 @@ export class ServiceCatalogPageComponent implements OnInit {
           header: 'Tags', key: 'tags', sortField: renderTags,
           render: renderTags,
           widthHint: '14rem',
-        },
-        {
-          header: 'CF', key: 'cf', sortField: renderCf,
-          kind: 'link',
-          // Only link once the endpoint name resolves — mirrors app-wall's
-          // "no dead anchors during loading" rule.
-          link: (o: StServiceOffering) =>
-            renderCf(o) === '—' ? null : ['/cloud-foundry', o.cnsiGuid],
-          render: renderCf,
-          widthHint: '12rem',
         },
         {
           header: '', key: 'favorite',
@@ -200,8 +140,6 @@ export class ServiceCatalogPageComponent implements OnInit {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.offeringsConfig.nameFilter,
-      // Filter columns enable the toolbar's "filter by:" dropdown so the
-      // text input can target Name, Description, Tags, or Broker.
       filterColumns: ['name', 'description', 'tags', 'broker'],
       filterField: this.offeringsConfig.filterField,
       filterDropdowns: dropdowns,
@@ -212,14 +150,11 @@ export class ServiceCatalogPageComponent implements OnInit {
     });
 
     this.offeringsConfig.registerSortExtractor('tags', renderTags);
-    this.offeringsConfig.registerSortExtractor('cf', renderCf);
     this.offeringsConfig.registerFilterExtractor('name', (o: StServiceOffering) => o.name ?? '');
     this.offeringsConfig.registerFilterExtractor('description', (o: StServiceOffering) => o.description ?? '');
     this.offeringsConfig.registerFilterExtractor('tags', renderTags);
     this.offeringsConfig.registerFilterExtractor('broker', (o: StServiceOffering) => o.broker?.name ?? '');
 
-    if (cnsiGuids.length > 0) {
-      void this.offeringsConfig.loadAll();
-    }
+    void this.offeringsConfig.loadAll();
   }
 }

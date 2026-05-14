@@ -202,7 +202,7 @@ export class CloudFoundryOrganizationService {
     // apps stream against the org's spaces$ list instead — same intent, V3-shape
     // org compatible. apps$ remains V2-shaped for now since /pp/v1/proxy/v2/apps
     // is the data source.
-    this.apps$ = combineLatest([this.cfEndpointService.appsPagObs.entities$, this.spaces$]).pipe(
+    this.apps$ = combineLatest([this.cfEndpointService.apps$, this.spaces$]).pipe(
       filter(([apps, spaces]) => !!apps && !!spaces),
       map(([allApps, spaces]) => {
         const spaceGuids = new Set(spaces.map(s => s.metadata.guid));
@@ -216,11 +216,11 @@ export class CloudFoundryOrganizationService {
 
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
 
-    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    this.appCount$ = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
 
-    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+    this.loadingApps$ = this.cfEndpointService.appsLoading$;
   }
 
   private countExistingApps(): Observable<number> {

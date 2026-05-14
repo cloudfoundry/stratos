@@ -40,7 +40,7 @@
           <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application"
           value="{{ cfOrgService.appCount$ | async }}"></app-card-number-metric>
         </app-tile>
-        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+        @if (cfEndpointService.hasApps$ | async) {
           <app-tile>
             <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
               value="{{ (cfOrgService.appInstances$ | async) }}"
@@ -75,7 +75,7 @@
             value="{{ (cfOrgService.userProvidedServiceInstancesCount$ | async) }}"></app-card-number-metric>
           </app-tile>
         }
-        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+        @if (cfEndpointService.hasApps$ | async) {
           <app-tile>
             <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
               value="{{ (cfOrgService.totalMem$ | async) }}"

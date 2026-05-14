@@ -39,6 +39,9 @@ export class CfBuildpacksSignalConfigService {
   private readonly _buildpacks: WritableSignal<StBuildpack[]> = signal([]);
   readonly buildpacks: Signal<StBuildpack[]> = this._buildpacks.asReadonly();
 
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StBuildpack) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StBuildpack>;
@@ -70,12 +73,14 @@ export class CfBuildpacksSignalConfigService {
     if (!this.source) return;
     await this.source.load();
     this._buildpacks.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   async refresh(): Promise<void> {
     if (!this.source) return;
     await this.source.refresh();
     this._buildpacks.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   // Position default keeps natural staging order; clearing returns there.

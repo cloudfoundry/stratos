@@ -83,6 +83,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'cloud_foundry', iconFont: 'stratos-icons' },
       { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
+      { link: 'applications', label: 'Applications', icon: 'apps' },
+      { link: 'marketplace', label: 'Marketplace', icon: 'store' },
+      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',

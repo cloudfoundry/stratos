@@ -50,7 +50,7 @@ export class RevisionsTabComponent {
       totalPages: this.revsConfig.view.totalPages,
       pageIndex: this.revsConfig.pageIndex,
       pageSize: this.revsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.revsConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

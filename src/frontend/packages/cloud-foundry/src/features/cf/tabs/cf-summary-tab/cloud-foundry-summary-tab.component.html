@@ -3,8 +3,8 @@
     <span class="material-icons">keyboard</span>
   </button>
   <app-polling-indicator class="ml-auto"
-    [manualPoll]="(cfEndpointService.appsPagObs.fetchingEntities$ | async) === false"
-    [isPolling]="(cfEndpointService.appsPagObs.fetchingEntities$ | async)"
+    [manualPoll]="(cfEndpointService.appsLoading$ | async) === false"
+    [isPolling]="(cfEndpointService.appsLoading$ | async)"
     (poll)="cfEndpointService.fetchApps()">
   </app-polling-indicator>
 </app-page-sub-nav>
@@ -20,33 +20,31 @@
       <app-tile-group class="tile-group-4-cols">
         <app-tile>
           <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application"
-          value="{{ (cfEndpointService.appsPagObs.totalEntities$ | async) }}"></app-card-number-metric>
+          value="{{ (cfEndpointService.appCount$ | async) }}"></app-card-number-metric>
         </app-tile>
         <app-tile>
           <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations"
             iconFont="stratos-icons" icon="organization" label="Orgs" labelSingular="Org"
-          value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+          value="{{ (orgCount$ | async) }}"></app-card-number-metric>
         </app-tile>
-        @if ((cfEndpointService.usersCount$ | async)) {
-          <app-tile>
-            <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users"
-            labelSingular="User" value="{{ (cfEndpointService.usersCount$ | async) }}"></app-card-number-metric>
-          </app-tile>
-        }
-        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+        @if (cfEndpointService.hasApps$ | async) {
           <app-tile>
             <app-card-number-metric icon="memory" units="mb" label="Memory Usage"
             value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
           </app-tile>
         }
+        <app-tile>
+          <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users"
+          labelSingular="User" value="{{ (cfEndpointService.usersCount$ | async) ?? '–' }}"></app-card-number-metric>
+        </app-tile>
       </app-tile-group>
       <app-tile-group class="tile-group-1-cols">
         <app-tile>
           @if ((detailsLoading$ | async) === false) {
             <app-card-cf-recent-apps
               [endpoint]="cfEndpointService.cfGuid"
-              [allApps$]="cfEndpointService.appsPagObs.entities$"
-              [loading$]="cfEndpointService.appsPagObs.fetchingEntities$" (refresh)="cfEndpointService.fetchApps()">
+              [allApps$]="cfEndpointService.apps$"
+              [loading$]="cfEndpointService.appsLoading$" (refresh)="cfEndpointService.fetchApps()">
             </app-card-cf-recent-apps>
           }
         </app-tile>

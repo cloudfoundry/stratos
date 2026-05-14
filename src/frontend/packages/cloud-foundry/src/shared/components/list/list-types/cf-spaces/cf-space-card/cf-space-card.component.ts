@@ -143,7 +143,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
       map(u => getSpaceRolesString(u))
     );
 
-    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInSpaceViaAllApps(this.row) : observableOf(null))
     );
 

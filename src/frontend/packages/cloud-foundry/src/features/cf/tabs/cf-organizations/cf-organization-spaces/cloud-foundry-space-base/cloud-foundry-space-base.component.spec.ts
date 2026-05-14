@@ -77,10 +77,9 @@ describe('CloudFoundrySpaceBaseComponent', () => {
       name: 'test-user',
       admin: false
     }),
-    appsPagObs: {
-      hasEntities$: of(true),
-      fetchingEntities$: of(false)
-    },
+    apps$: of([]),
+    hasApps$: of(true),
+    appsLoading$: of(false),
     getAppsInOrgViaAllApps: () => of([]),
     getMetricFromApps: () => 0,
     fetchApps: () => {}

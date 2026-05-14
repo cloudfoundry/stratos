@@ -11,6 +11,7 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { ApplicationWallComponent } from './application-wall.component';
+import { countDuplicateUrlEndpoints } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
@@ -167,7 +168,7 @@ describe('ApplicationWallComponent', () => {
   });
 });
 
-describe('ApplicationWallComponent.countDuplicateUrlEndpoints', () => {
+describe('countDuplicateUrlEndpoints (shared dup-URL helper)', () => {
   const ep = (guid: string, host: string) => ({
     guid,
     name: guid,
@@ -175,26 +176,26 @@ describe('ApplicationWallComponent.countDuplicateUrlEndpoints', () => {
   } as any);
 
   it('returns null for zero or one endpoint', () => {
-    expect(ApplicationWallComponent.countDuplicateUrlEndpoints([])).toBeNull();
-    expect(ApplicationWallComponent.countDuplicateUrlEndpoints([ep('a', 'cf.a')])).toBeNull();
+    expect(countDuplicateUrlEndpoints([])).toBeNull();
+    expect(countDuplicateUrlEndpoints([ep('a', 'cf.a')])).toBeNull();
   });
 
   it('returns null when all URLs are distinct', () => {
-    expect(ApplicationWallComponent.countDuplicateUrlEndpoints([
+    expect(countDuplicateUrlEndpoints([
       ep('a', 'cf-a.example.com'),
       ep('b', 'cf-b.example.com'),
     ])).toBeNull();
   });
 
   it('returns endpoint count in duplicate groups when URLs collide', () => {
-    expect(ApplicationWallComponent.countDuplicateUrlEndpoints([
+    expect(countDuplicateUrlEndpoints([
       ep('a', 'cf.example.com'),
       ep('b', 'cf.example.com'),
     ])).toBe(2);
   });
 
   it('counts only endpoints in duplicate groups, not distinct-URL endpoints', () => {
-    expect(ApplicationWallComponent.countDuplicateUrlEndpoints([
+    expect(countDuplicateUrlEndpoints([
       ep('a', 'cf.example.com'),
       ep('b', 'cf.example.com'),
       ep('c', 'cf-other.example.com'),
@@ -202,7 +203,7 @@ describe('ApplicationWallComponent.countDuplicateUrlEndpoints', () => {
   });
 
   it('sums across multiple duplicate groups', () => {
-    expect(ApplicationWallComponent.countDuplicateUrlEndpoints([
+    expect(countDuplicateUrlEndpoints([
       ep('a', 'cf.example.com'),
       ep('b', 'cf.example.com'),
       ep('c', 'cf-two.example.com'),

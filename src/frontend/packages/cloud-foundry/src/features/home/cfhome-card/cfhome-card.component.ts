@@ -5,7 +5,7 @@ import { Observable, of } from 'rxjs';
 import { map, take, startWith } from 'rxjs/operators';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
-import { StApp } from '../../../services/endpoint-data/stratos-types';
+import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 
 import { BASE_REDIRECT_QUERY } from '@stratosui/core';
 import { RouterNav, EndpointModel, APIResource } from '@stratosui/store';
@@ -19,7 +19,6 @@ import {
   AUTO_SELECT_CF_URL_PARAM,
   IAppTileData } from '../../applications/new-application-base-step/new-application-base-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
-import { goToAppWall } from '../../cf/cf.helpers';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { HomePageCardLayout, HomePageEndpointCard, ITileConfig } from '@stratosui/core';
 import { TileGridComponent } from '@stratosui/core';
@@ -73,7 +72,6 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
 
   guid: string;
   recentAppsRows = 10;
-  appLink: () => void;
   hasNoApps$!: Observable<boolean>;
   allApps$!: Observable<APIResource<IApp>[]>;
   cardLoaded = false;
@@ -111,13 +109,11 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     this.endpointDataService = this.registry.acquire(this.guid);
     this.cdr.markForCheck();
 
-    this.appLink = () => goToAppWall(this.store, this.guid);
-
     // afterLoad$ resolves immediately on cache hit, otherwise completes when the
     // parallel native-route fetch finishes. Both allApps$ and hasNoApps$ share it.
     const afterLoad$ = this.afterLoad();
     this.allApps$ = afterLoad$.pipe(
-      map(() => this.endpointDataService!.recentApps().map(app => this.stAppToApiResource(app))),
+      map(() => this.endpointDataService!.recentApps().map(app => stAppToAPIResource(app))),
       startWith([] as APIResource<IApp>[]),
     );
     this.hasNoApps$ = afterLoad$.pipe(
@@ -164,25 +160,4 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
       : svc.loaded$.pipe(take(1));
   }
 
-  // Maps StApp (from the native parallel fetch) to the minimal APIResource<IApp> shape
-  // that CardCfRecentAppsComponent renders. package_state defaults to 'STAGED' — the v3
-  // equivalent (droplet state) is not fetched here; noStats=true means live instance
-  // counts are not shown, so instances from the web process is sufficient.
-  private stAppToApiResource(app: StApp): APIResource<IApp> {
-    return {
-      metadata: {
-        guid: app.guid,
-        url: '',
-        created_at: app.createdAt,
-        updated_at: app.updatedAt,
-      },
-      entity: {
-        name: app.name,
-        state: app.state,
-        space_guid: app.spaceGuid,
-        instances: app.instances,
-        package_state: 'STAGED',
-      } as IApp,
-    };
-  }
 }

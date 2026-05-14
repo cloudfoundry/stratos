@@ -1,15 +1,12 @@
-import { animate, query, style, transition, trigger } from '@angular/animations';
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Observable, firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
-  PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
@@ -18,69 +15,39 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 import { UserFavorite, UserFavoriteManager } from '@stratosui/store';
+
 import {
   serviceInstancesEntityType,
   userProvidedServiceInstanceEntityType,
-} from '../../../cf-entity-types';
-import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
+} from '../../../../cf-entity-types';
 import {
   CfServiceInstancesSignalConfigService,
-} from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
-import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+} from '../../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
-// Stratos Services Wall — multi-CNSI service instances list (managed +
-// user-provided), foundation-wide.
-//
-// Mirrors ServiceCatalogPageComponent (the marketplace migration) and
-// ApplicationWallComponent: MergeOrchestrator + ViewPipeline + signal
-// config wiring + CF dropdown filter. The only write surface is a
-// per-row Delete kebab. Detach / edit / add stay on the legacy ngrx
-// flow and are out of scope for this migration; the row Name link
-// keeps the existing /services/:type/:cnsi/:siGuid detail-page route.
+// Per-CF Services tab. Single-CNSI variant of the top-level Services Wall.
+// CF dropdown hidden — URL pins the CNSI; the rest of the column / sort /
+// filter wiring mirrors the multi-CNSI page.
 @Component({
-  selector: 'app-services-wall',
-  templateUrl: './services-wall.component.html',
+  selector: 'app-cloud-foundry-services-signal',
+  templateUrl: './cloud-foundry-services-signal.component.html',
+  styleUrls: ['./cloud-foundry-services-signal.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     RouterModule,
-    PageHeaderComponent,
     SignalListComponent,
-    CfEndpointsMissingComponent,
-    DuplicateUrlBannerComponent,
-  ],
-  animations: [
-    trigger('cardEnter', [
-      transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(10px)' }),
-          animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
-        ], { optional: true }),
-      ]),
-    ]),
-  ],
-  providers: [
-    DatePipe,
   ],
 })
-export class ServicesWallComponent implements OnInit {
-  cloudFoundryService = inject(CloudFoundryService);
+export class CloudFoundryServicesSignalComponent implements OnInit {
+  cfEndpointService = inject(CloudFoundryEndpointService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
 
-  public cfIds$: Observable<string[]>;
-  public haveConnectedCf$: Observable<boolean>;
-
-  // Row keys ({cnsiGuid}:{siGuid}) for service instances the user has
-  // favorited. Either entity type qualifies — the legacy 481 UI used
-  // separate favorite entityTypes for managed (`serviceInstance`) and
-  // user-provided (`userProvidedServiceInstance`); we OR them so existing
-  // favorites of either kind light up here.
   private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
     this.userFavoriteManager.getAllFavorites().pipe(
       map(([groups, entities]) => {
@@ -105,8 +72,6 @@ export class ServicesWallComponent implements OnInit {
   );
 
   private toggleInstanceFavorite(si: StServiceInstance): void {
-    // Use the entity type that matches the instance's actual kind so the
-    // favorite is keyed under the same bucket the legacy UI used.
     const entityType = si.type === 'user-provided'
       ? userProvidedServiceInstanceEntityType
       : serviceInstancesEntityType;
@@ -114,37 +79,21 @@ export class ServicesWallComponent implements OnInit {
     this.userFavoriteManager.toggleFavorite(fav);
   }
 
-  // Config for <app-signal-list>. Populated in ngOnInit once the signal
-  // config has been initialized with the connected CF guids.
   public listConfig: WritableSignal<SignalListConfig<StServiceInstance> | undefined> = signal(undefined);
 
-  constructor() {
-    this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints
-        .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid),
-      ),
-    );
-    this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
-      map(endpoints => !!endpoints && endpoints.length > 0),
-    );
-  }
-
   async ngOnInit(): Promise<void> {
-    const connected = await firstValueFrom(
-      this.cloudFoundryService.connectedCFEndpoints$.pipe(
-        filter(endpoints => !!endpoints),
-        take(1),
-      ),
-    );
-    const cnsiGuids = (connected ?? []).map(ep => ep.guid);
-    this.instancesConfig.initialize(cnsiGuids);
-
+    const cfGuid = this.cfEndpointService.cfGuid;
+    this.instancesConfig.initialize([cfGuid]);
+    // CNSI is pre-chosen by the URL — show the dropdown but disable it so
+    // the scope is visible and can't drift.
+    this.instancesConfig.selectedCnsi.set(cfGuid);
+    const cnsiLocked: Signal<boolean> = signal(true).asReadonly();
     const dropdowns: SignalListDropdown[] = [
       {
         label: 'Cloud Foundry',
         options: this.instancesConfig.cnsiOptions,
         selected: this.instancesConfig.selectedCnsi,
+        disabled: cnsiLocked,
       },
     ];
 
@@ -157,9 +106,6 @@ export class ServicesWallComponent implements OnInit {
       const tags = si.tags ?? [];
       return tags.length === 0 ? '—' : tags.join(', ');
     };
-
-    const renderCf = (si: StServiceInstance): string =>
-      this.instancesConfig.endpointNames().get(si.cnsiGuid) ?? '—';
 
     const renderType = (si: StServiceInstance): string =>
       si.type === 'user-provided' ? 'User Provided' : 'Managed';
@@ -179,7 +125,7 @@ export class ServicesWallComponent implements OnInit {
     };
 
     const renderCreated = (si: StServiceInstance): string =>
-      ServicesWallComponent.formatDate(si.createdAt);
+      CloudFoundryServicesSignalComponent.formatDate(si.createdAt);
 
     this.listConfig.set({
       pagedItems: this.instancesConfig.view.pagedItems,
@@ -193,8 +139,6 @@ export class ServicesWallComponent implements OnInit {
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
-          // Use the legacy detail-page route shape: /services/:type/:cnsi/:siGuid
-          // (the legacy detail page itself stays untouched in this migration).
           link: (si: StServiceInstance) =>
             ['/services', si.type === 'user-provided' ? 'user-provided' : 'managed', si.cnsiGuid, si.guid],
           render: (si: StServiceInstance) => si.name,
@@ -230,16 +174,6 @@ export class ServicesWallComponent implements OnInit {
           widthHint: '8rem',
         },
         {
-          header: 'CF', key: 'cf', sortField: renderCf,
-          kind: 'link',
-          // Only link once the endpoint name resolves — mirrors the
-          // marketplace's "no dead anchors during loading" rule.
-          link: (si: StServiceInstance) =>
-            renderCf(si) === '—' ? null : ['/cloud-foundry', si.cnsiGuid],
-          render: renderCf,
-          widthHint: '12rem',
-        },
-        {
           header: '', key: 'favorite',
           kind: 'favorite',
           favorite: {
@@ -266,7 +200,6 @@ export class ServicesWallComponent implements OnInit {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.instancesConfig.nameFilter,
-      // Toolbar's "filter by:" dropdown swaps which column the text input targets.
       filterColumns: ['name', 'service', 'tags'],
       filterField: this.instancesConfig.filterField,
       filterDropdowns: dropdowns,
@@ -280,14 +213,11 @@ export class ServicesWallComponent implements OnInit {
     this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerSortExtractor('type', renderType);
-    this.instancesConfig.registerSortExtractor('cf', renderCf);
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
     this.instancesConfig.registerFilterExtractor('service', renderService);
     this.instancesConfig.registerFilterExtractor('tags', renderTags);
 
-    if (cnsiGuids.length > 0) {
-      void this.instancesConfig.loadAll();
-    }
+    void this.instancesConfig.loadAll();
   }
 
   private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] => {

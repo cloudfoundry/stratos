@@ -11,7 +11,6 @@ import { AppState, Store } from '../../../store/src/public-api';
 import { HELM_ENDPOINT_TYPE } from './helm-entity-factory';
 import { generateHelmEntities } from './helm-entity-generator';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
-import { HelmStoreModule } from './helm.store.module';
 
 @NgModule({
   imports: [
@@ -19,7 +18,6 @@ import { HelmStoreModule } from './helm.store.module';
     CoreModule,
     CommonModule,
     SharedModule,
-    HelmStoreModule,
     HelmHubRegistrationComponent
   ]
 })

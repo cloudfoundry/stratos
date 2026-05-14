@@ -206,11 +206,11 @@ export class CloudFoundrySpaceService {
       map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
     );
 
-    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    this.appCount$ = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
 
-    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+    this.loadingApps$ = this.cfEndpointService.appsLoading$;
   }
 
   private countExistingApps(): Observable<number> {

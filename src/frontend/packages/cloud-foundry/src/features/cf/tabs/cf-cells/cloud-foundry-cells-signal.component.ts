@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig, SignalListPillColor } from '@stratosui/core';
 
@@ -60,7 +60,7 @@ export class CloudFoundryCellsSignalComponent {
       totalPages: this.cellsConfig.view.totalPages,
       pageIndex: this.cellsConfig.pageIndex,
       pageSize: this.cellsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => this.cellsConfig.availability() === undefined),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

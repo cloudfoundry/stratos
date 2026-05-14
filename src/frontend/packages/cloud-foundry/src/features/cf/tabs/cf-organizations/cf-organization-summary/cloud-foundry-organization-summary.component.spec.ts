@@ -58,9 +58,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
         api_endpoint: { Host: 'api.example.com' }
       }
     }),
-    appsPagObs: {
-      fetchingEntities$: of(false)
-    },
+    appsLoading$: of(false),
     deleteOrg: () => {}
   };
 
