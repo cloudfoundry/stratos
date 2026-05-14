@@ -35,6 +35,13 @@ export class KubernetesComponent implements OnInit, OnDestroy {
   connectedEndpoints$: Observable<number>;
   private kubeService = inject(KubernetesService);
   private router = inject(Router);
+  // Wave-3: signal-native list config. The service is now a true
+  // SignalListConfig orchestrator — no `Store` import, no
+  // BaseEndpointsDataSource. The card template below renders rows via
+  // the standard EndpointCardComponent without binding `dataSource`,
+  // which keeps the kebab menu suppressed (matching the legacy
+  // `dsEndpointType: 'k8s'` flag) and leaves cardStatus$ unset
+  // (matching the legacy "no per-row error indicator" behaviour).
   readonly endpointsSignalConfig = inject(KubernetesEndpointsSignalConfigService);
 
 
@@ -62,17 +69,17 @@ export class KubernetesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Touch the lazily-built signal config so the underlying data source
-    // wires up before the template binds. Without this, the @if-gated
-    // <app-signal-list> doesn't create the config until the connected
-    // endpoint count resolves, deferring the first render.
+    // Touch the lazily-built signal config so the view pipeline wires
+    // up before the template binds. Without this, the @if-gated
+    // <app-signal-list> doesn't construct the config until the
+    // connected endpoint count resolves, deferring the first render.
     void this.endpointsSignalConfig.config;
   }
 
   ngOnDestroy(): void {
-    // Release the legacy data source's pagination subscription; the
-    // signal-config is `providedIn: 'root'` so it would otherwise live
-    // beyond the page navigation.
+    // Drop the cached config so a future re-mount rebuilds (and the
+    // service — which is `providedIn: 'root'` — doesn't keep a stale
+    // view pipeline alive across navigations).
     this.endpointsSignalConfig.destroy();
   }
 }
