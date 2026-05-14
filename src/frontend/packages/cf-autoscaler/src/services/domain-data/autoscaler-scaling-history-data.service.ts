@@ -49,11 +49,10 @@ export type ScalingHistoryQueryParams = Record<string, string | number | undefin
 //   load(cnsi, app, params?)  — Promise<void>; populates the cache, replacing
 //                                any previously cached events for the slot.
 //
-// The events list-config (CfAppAutoscalerEventsConfigService /
-// CfAppAutoscalerEventsDataSource) is NOT migrated here — that surface is
-// built on the legacy ListDataSource framework which still requires Store/
-// PaginatedAction. It will be flipped (or rebuilt as a SignalListConfig) in
-// the A-cleanup slice that finally retires the autoscaler effects.
+// The events list-config now consumes this service via
+// CfAppAutoscalerEventsSignalConfigService — the legacy
+// CfAppAutoscalerEventsConfigService / CfAppAutoscalerEventsDataSource
+// pair was retired in wave-3 along with their @ngrx Store dispatches.
 @Injectable({ providedIn: 'root' })
 export class AutoscalerScalingHistoryDataService {
   private readonly http = inject(HttpClient);
