@@ -1,11 +1,9 @@
-import { Component, inject, ChangeDetectionStrategy, OnInit, OnDestroy, computed, signal } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subscription } from 'rxjs';
 
 import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
-import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
-import { EntityServiceFactory } from '@stratosui/store';
+import { AutoscalerInfoDataService } from '@stratosui/cf-autoscaler';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
@@ -32,12 +30,12 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
     MetadataItemComponent,
   ],
 })
-export class CardCfInfoComponent implements OnInit, OnDestroy {
+export class CardCfInfoComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   userInviteService = inject(UserInviteService);
   userInviteConfigureService = inject(UserInviteConfigureService);
   private dialog = inject(TailwindDialogService);
-  private esf = inject(EntityServiceFactory);
+  private autoscalerInfoData = inject(AutoscalerInfoDataService);
 
   // Signal bridges over the existing observables. The data they carry is
   // already V3-native (the effect under cfEntityCatalog.cfInfo.api.get
@@ -49,13 +47,15 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   readonly canConfigureInvites = toSignal(this.userInviteService.canConfigure$, { initialValue: false });
   readonly invitesConfigured = toSignal(this.userInviteService.configured$, { initialValue: false });
 
-  // Autoscaler version comes from a separate package's entity catalog;
-  // fetch is deferred to ngOnInit so test setups that don't register the
-  // autoscaler entities can still construct this component (the catalog
-  // throws on missing entity registration during fetchAutoscalerInfo).
-  private readonly _autoscalerVersion = signal<any>(null);
-  readonly autoscalerVersion = this._autoscalerVersion.asReadonly();
-  private autoscalerSub?: Subscription;
+  // Autoscaler version comes from the cf-autoscaler signal-native data
+  // service. Wave-3 (A-effects-cleanup) replaced the legacy
+  // fetchAutoscalerInfo helper + AutoscalerEffects path with a direct
+  // injection of AutoscalerInfoDataService, dropping ngrx from the
+  // autoscaler package end-to-end. The fetch is still deferred to
+  // ngOnInit so test setups that don't pre-register autoscaler entities
+  // can still construct this component.
+  readonly autoscalerVersion = this.autoscalerInfoData.info(this.cfEndpointService.cfGuid);
+  private readonly autoscalerError = this.autoscalerInfoData.error(this.cfEndpointService.cfGuid);
 
   /** API endpoint URL, formatted for display. */
   readonly apiUrl = computed((): string => {
@@ -76,19 +76,14 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
 
   /** Autoscaler build version, '' for empty entity, null for error/missing. */
   readonly autoscalerVersionLabel = computed((): string | null => {
-    const ev = this.autoscalerVersion() as any;
-    if (!ev) return null;
-    if (ev.entityRequestInfo?.error) return null;
-    return ev.entity ? (ev.entity.entity?.build ?? '') : '';
+    if (this.autoscalerError()) return null;
+    const info = this.autoscalerVersion();
+    if (!info) return null;
+    return info.build ?? '';
   });
 
   ngOnInit(): void {
-    this.autoscalerSub = fetchAutoscalerInfo(this.cfEndpointService.cfGuid, this.esf)
-      .subscribe(v => this._autoscalerVersion.set(v));
-  }
-
-  ngOnDestroy(): void {
-    this.autoscalerSub?.unsubscribe();
+    void this.autoscalerInfoData.load(this.cfEndpointService.cfGuid);
   }
 
   configureUserInvites() {
