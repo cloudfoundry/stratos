@@ -17,9 +17,23 @@ interface PolicyState {
   // 404 from GET (or post-DELETE state) is "no policy configured"; not an
   // error. The legacy effect distinguished `noPolicy` for the same reason.
   noPolicy: boolean;
+  // Surface for the in-flight DELETE (detach) request. The legacy effect
+  // path used the ngrx ActionState/`selectDeletionInfo` selector chain to
+  // drive the autoscaler-tab snackbar after a "Disable Autoscaler"
+  // confirmation; consumers now bind to `deleting()` / `deletionError()`
+  // for the same UX feedback loop without going through the store.
+  deleting: boolean;
+  deletionError: string | null;
 }
 
-const EMPTY: PolicyState = { policy: null, loading: false, error: null, noPolicy: false };
+const EMPTY: PolicyState = {
+  policy: null,
+  loading: false,
+  error: null,
+  noPolicy: false,
+  deleting: false,
+  deletionError: null,
+};
 
 // Signal-native data service for autoscaler `/v1/apps/{guid}/policy` CRUD.
 // Replaces the legacy GetAppAutoscalerPolicyAction / CreateAppAutoscalerPolicyAction
@@ -36,6 +50,8 @@ const EMPTY: PolicyState = { policy: null, loading: false, error: null, noPolicy
 //   loading(cnsi, app)    — Signal<boolean>
 //   error(cnsi, app)      — Signal<string | null>
 //   noPolicy(cnsi, app)   — Signal<boolean>  (true after a 404 or detach)
+//   deleting(cnsi, app)   — Signal<boolean>  (true while DELETE is in flight)
+//   deletionError(c, a)   — Signal<string | null> (last DELETE failure msg)
 //   load(cnsi, app)       — Promise<void>; populates the cache
 //   update(cnsi, app, p)  — Promise<void>; PUT (covers both create and update)
 //   detach(cnsi, app)     — Promise<void>; DELETE; clears the cached policy
@@ -60,6 +76,14 @@ export class AutoscalerPolicyDataService {
 
   noPolicy(endpointGuid: string, appGuid: string): Signal<boolean> {
     return computed(() => this.stateFor(endpointGuid, appGuid).noPolicy);
+  }
+
+  deleting(endpointGuid: string, appGuid: string): Signal<boolean> {
+    return computed(() => this.stateFor(endpointGuid, appGuid).deleting);
+  }
+
+  deletionError(endpointGuid: string, appGuid: string): Signal<string | null> {
+    return computed(() => this.stateFor(endpointGuid, appGuid).deletionError);
   }
 
   async load(endpointGuid: string, appGuid: string): Promise<void> {
@@ -100,14 +124,19 @@ export class AutoscalerPolicyDataService {
   }
 
   async detach(endpointGuid: string, appGuid: string): Promise<void> {
-    this.patch(endpointGuid, appGuid, { loading: true, error: null });
+    this.patch(endpointGuid, appGuid, { deleting: true, deletionError: null });
     const headers = this.headers(endpointGuid);
     try {
       await firstValueFrom(this.http.delete(this.url(appGuid), { headers }));
-      this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: null, noPolicy: true });
+      this.patch(endpointGuid, appGuid, {
+        policy: null,
+        deleting: false,
+        deletionError: null,
+        noPolicy: true,
+      });
     } catch (err) {
       const message = (err as HttpErrorResponse)?.message ?? String(err);
-      this.patch(endpointGuid, appGuid, { loading: false, error: message });
+      this.patch(endpointGuid, appGuid, { deleting: false, deletionError: message });
       throw err;
     }
   }

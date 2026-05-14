@@ -147,6 +147,7 @@ describe('AutoscalerPolicyDataService', () => {
     expect(svc.policy(ENDPOINT_GUID, APP_GUID)()).not.toBeNull();
 
     const detachP = svc.detach(ENDPOINT_GUID, APP_GUID);
+    expect(svc.deleting(ENDPOINT_GUID, APP_GUID)()).toBe(true);
     const req = httpMock.expectOne(POLICY_URL);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
@@ -155,6 +156,20 @@ describe('AutoscalerPolicyDataService', () => {
     expect(svc.policy(ENDPOINT_GUID, APP_GUID)()).toBeNull();
     expect(svc.noPolicy(ENDPOINT_GUID, APP_GUID)()).toBe(true);
     expect(svc.error(ENDPOINT_GUID, APP_GUID)()).toBeNull();
+    expect(svc.deleting(ENDPOINT_GUID, APP_GUID)()).toBe(false);
+    expect(svc.deletionError(ENDPOINT_GUID, APP_GUID)()).toBeNull();
+  });
+
+  it('detach() surfaces deletionError + clears deleting on failure', async () => {
+    const detachP = svc.detach(ENDPOINT_GUID, APP_GUID);
+    expect(svc.deleting(ENDPOINT_GUID, APP_GUID)()).toBe(true);
+    httpMock.expectOne(POLICY_URL).flush('boom', { status: 500, statusText: 'Internal Server Error' });
+    await expect(detachP).rejects.toBeTruthy();
+
+    expect(svc.deleting(ENDPOINT_GUID, APP_GUID)()).toBe(false);
+    expect(svc.deletionError(ENDPOINT_GUID, APP_GUID)()).not.toBeNull();
+    // detachment failure does not flip noPolicy or wipe an existing cache
+    expect(svc.noPolicy(ENDPOINT_GUID, APP_GUID)()).toBe(false);
   });
 
   it('per-app state is isolated under a single endpoint', async () => {
