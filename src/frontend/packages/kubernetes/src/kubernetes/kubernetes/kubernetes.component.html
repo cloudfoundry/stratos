@@ -4,10 +4,7 @@
 @if ((connectedEndpoints$ | async) > 1) {
   <app-signal-list [config]="endpointsSignalConfig.config" class="flex-1 min-h-0">
     <ng-template #cardTemplate let-row>
-      <app-endpoint-card
-        [row]="$any(row)"
-        [dataSource]="$any(endpointsSignalConfig.dataSource)">
-      </app-endpoint-card>
+      <app-endpoint-card [row]="$any(row)"></app-endpoint-card>
     </ng-template>
   </app-signal-list>
 }
