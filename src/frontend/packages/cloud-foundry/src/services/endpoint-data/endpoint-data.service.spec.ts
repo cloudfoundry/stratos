@@ -267,4 +267,44 @@ describe('EndpointDataService', () => {
     httpMock.expectOne(SERVICE_PLANS_COUNTS_URL).flush({ totalResults: 0 });
     httpMock.expectOne(SERVICE_BROKERS_COUNTS_URL).flush({ totalResults: 0 });
   });
+
+  describe('services-cache accessors and setters', () => {
+    it('serviceOfferingsAndPlans() returns null before any services-details fetch (cache cold)', () => {
+      expect(service.serviceOfferingsAndPlans()).toBeNull();
+    });
+
+    it('serviceInstancesAndBrokers() returns null before any services-details fetch (cache cold)', () => {
+      expect(service.serviceInstancesAndBrokers()).toBeNull();
+    });
+
+    it('setServiceOfferingsAndPlans() stamps timestamp and exposes the bundle on read', () => {
+      const offerings = [{ guid: 'off-1', name: 'mysql' } as any];
+      const plans = [{ guid: 'pl-1', name: 'small' } as any];
+      service.setServiceOfferingsAndPlans(offerings, plans);
+      const bundle = service.serviceOfferingsAndPlans();
+      expect(bundle).not.toBeNull();
+      expect(bundle!.offerings).toBe(offerings);
+      expect(bundle!.plans).toBe(plans);
+      expect(service.servicesDetailsLastFetched()).not.toBeNull();
+    });
+
+    it('setServiceInstancesAndBrokers() stamps timestamp and exposes the bundle on read', () => {
+      const instances = [{ guid: 'si-1', name: 'cache' } as any];
+      const brokers = [{ guid: 'br-1', name: 'broker' } as any];
+      service.setServiceInstancesAndBrokers(instances, brokers);
+      const bundle = service.serviceInstancesAndBrokers();
+      expect(bundle).not.toBeNull();
+      expect(bundle!.instances).toBe(instances);
+      expect(bundle!.brokers).toBe(brokers);
+      expect(service.servicesDetailsLastFetched()).not.toBeNull();
+    });
+
+    it('accessors return empty arrays (not null) when timestamp set but lists empty', () => {
+      service.setServiceOfferingsAndPlans([], []);
+      const bundle = service.serviceOfferingsAndPlans();
+      expect(bundle).not.toBeNull();
+      expect(bundle!.offerings).toEqual([]);
+      expect(bundle!.plans).toEqual([]);
+    });
+  });
 });

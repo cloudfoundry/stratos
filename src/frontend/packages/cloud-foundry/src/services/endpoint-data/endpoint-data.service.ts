@@ -296,6 +296,46 @@ export class EndpointDataService {
     }
   }
 
+  // Read accessor for the offerings + plans bundle. Returns null when no
+  // services-details fetch has completed yet (cache cold). Used by the
+  // marketplace signal-config to decide whether to pre-seed its
+  // CnsiServiceOfferingsSource from the registry's pre-warmed cache
+  // instead of re-firing the offerings HTTP call.
+  serviceOfferingsAndPlans(): { offerings: StServiceOffering[], plans: StServicePlan[] } | null {
+    if (this._servicesDetailsLastFetched() === null) return null;
+    return { offerings: this._serviceOfferings(), plans: this._servicePlans() };
+  }
+
+  // Read accessor for the instances + brokers bundle. Returns null when no
+  // services-details fetch has completed yet (cache cold). Used by the
+  // services-instances signal-config to decide whether to pre-seed its
+  // CnsiServiceInstancesSource from the registry's pre-warmed cache
+  // instead of re-firing the instances HTTP call.
+  serviceInstancesAndBrokers(): { instances: StServiceInstance[], brokers: StServiceBroker[] } | null {
+    if (this._servicesDetailsLastFetched() === null) return null;
+    return { instances: this._serviceInstances(), brokers: this._serviceBrokers() };
+  }
+
+  // Setter used by the marketplace signal-config after its orchestrator
+  // load() completes. Stamps the services-details timestamp so subsequent
+  // reads via serviceOfferingsAndPlans() see a hot cache. Plans may be []
+  // when the writer only had offerings in scope — that's fine; the cache
+  // gate is the timestamp, not array length.
+  setServiceOfferingsAndPlans(offerings: StServiceOffering[], plans: StServicePlan[]): void {
+    this._serviceOfferings.set(offerings);
+    this._servicePlans.set(plans);
+    this._servicesDetailsLastFetched.set(new Date());
+  }
+
+  // Setter used by the services-instances signal-config after its
+  // orchestrator load() completes. Mirrors the offerings setter shape;
+  // brokers may be [] when the writer only had instances in scope.
+  setServiceInstancesAndBrokers(instances: StServiceInstance[], brokers: StServiceBroker[]): void {
+    this._serviceInstances.set(instances);
+    this._serviceBrokers.set(brokers);
+    this._servicesDetailsLastFetched.set(new Date());
+  }
+
   currentData(): StEndpointData {
     return {
       orgs: this._orgs(),
