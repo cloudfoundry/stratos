@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 
 import { CFAppState, ISpace } from '@stratosui/cloud-foundry';
 import { ITableColumn } from '@stratosui/core';

@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import {
   GeneralEntityAppState,
+  Store,
   entityCatalog,
-  selectSessionData,
 } from '@stratosui/store';
-import { map } from 'rxjs/operators';
 
+import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { ITileConfig } from '../../../shared/components/tile/tile-selector.types';
 import { BaseEndpointTileManager, ICreateEndpointTilesData } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
 import { TileSelectorComponent } from '../../../shared/components/tile-selector/tile-selector.component';
@@ -42,10 +42,13 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   constructor() {
     const store = inject<Store<GeneralEntityAppState>>(Store);
+    const session = inject(SessionSignalService);
 
-    const types = store.select(selectSessionData()).pipe(
-      // Get a list of all known endpoint types
-      map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
+    // Tech-preview flag is sourced from the signal-native session projection;
+    // bridged to Observable<StratosCatalogEndpointEntity[]> for the legacy
+    // BaseEndpointTileManager constructor signature.
+    const types = toObservable(
+      computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
     super(types, store);
     this.store = store;

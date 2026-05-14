@@ -1,7 +1,6 @@
 import {Component, Input, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 
@@ -17,7 +16,6 @@ import {
 import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
-import { AppState } from '../../../../../store/src/public-api';
 import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
@@ -139,7 +137,7 @@ export class KubeConfigSelectionComponent {
   private _valid = signal<boolean>(false);
   valid$ = toObservable(this._valid);
 
-  canSetIntermediate = false;  private store = inject(Store<AppState>);
+  canSetIntermediate = false;
   public helper = inject(KubeConfigHelper);
   private snackbarService = inject(SnackBarService);
 

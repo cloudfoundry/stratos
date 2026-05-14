@@ -1,5 +1,5 @@
 import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 

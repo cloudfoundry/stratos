@@ -11,7 +11,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Store } from '@stratosui/store';
 import { combineLatest as obsCombineLatest, Observable, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map, startWith } from 'rxjs/operators';
 
@@ -28,8 +29,8 @@ import {
   UsersRolesExecuteChanges,
   UsersRolesSetChanges,
   UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { selectCfUsersRoles } from '../../../../store/selectors/cf-users-roles.selector';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -65,6 +66,8 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
   private userPerms = inject(CurrentUserPermissionsService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private rolesData = inject(CfUsersRolesDataService);
+  private state$ = toObservable(this.rolesData.state);
 
   initialUsers$!: Observable<CfUser[]>;
   singleUser$!: Observable<CfUser>;
@@ -146,13 +149,13 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
+    const cfGuid$ = this.state$.pipe(
       combineLatest(this.singleUser$),
       take(1)
     );
     // Ensure that when we arrive here directly the store is set up with all it needs
     cfGuid$.subscribe(([usersRoles, user]) => {
-      if (!usersRoles.cfGuid || !user) {
+      if (!usersRoles?.cfGuid || !user) {
         this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, [user]));
       }
     });

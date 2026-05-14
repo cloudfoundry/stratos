@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';

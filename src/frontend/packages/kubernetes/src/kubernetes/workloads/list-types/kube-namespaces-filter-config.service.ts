@@ -1,21 +1,15 @@
 import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { naturalCompare, safeUnsubscribe } from '@stratosui/core';
+import { EndpointsSignalService, naturalCompare, safeUnsubscribe } from '@stratosui/core';
 import {
-  AppState,
-  connectedEndpointsOfTypesSelector,
   EndpointModel,
-  getCurrentPageRequestInfo
+  getCurrentPageRequestInfo,
 } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
-  filter,
   first,
   map,
-  publishReplay,
-  refCount,
   startWith,
   tap,
   withLatestFrom,
@@ -67,7 +61,7 @@ export interface KubernetesNamespacesFilterItem<T = any> {
   providedIn: 'root'
 })
 export class KubernetesNamespacesFilterService implements OnDestroy {
-  private store = inject<Store<AppState>>(Store);
+  private endpointsSignals = inject(EndpointsSignalService);
 
   public kube: KubernetesNamespacesFilterItem<EndpointModel>;
   public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;
@@ -93,25 +87,31 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
   }
 
   private createKube(): KubernetesNamespacesFilterItem<EndpointModel> {
-    const list$ = this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
-      // Ensure we have endpoints
-      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
-      publishReplay(1),
-      refCount(),
+    // Connected K8s endpoints derived from the EndpointsSignalService
+    // computed projection (replaces the legacy
+    // `connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)` read).
+    // The legacy selector also gated on cnsi_type === KUBERNETES + connected
+    // status; signal-side we filter the already-connected list by cnsi_type.
+    const connectedKubeEndpoints = computed(() =>
+      this.endpointsSignals.connectedEndpoints()
+        .filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE)
+        .sort((a, b) => naturalCompare(a.name, b.name)),
     );
 
-    // Create signal wrapper within injection context
-    return runInInjectionContext(this.injector, () => ({
-      list$: list$.pipe(
-        map(endpoints => Object.values(endpoints)),
-        first(undefined, []), // Provide default empty array to prevent EmptyError
-        map((endpoints: EndpointModel[]) => {
-          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
-        }),
-      ),
-      loading$: list$.pipe(map(kubes => !kubes)),
-      select: createSignalWrapper<string>(undefined)
-    }));
+    return runInInjectionContext(this.injector, () => {
+      const list$ = toObservable(connectedKubeEndpoints);
+      return {
+        // Match legacy `first(undefined, [])` semantics so downstream
+        // auto-selectors don't EmptyError on init when no endpoints exist.
+        list$: list$.pipe(first(undefined, [])),
+        // Loading mirrors the legacy "we don't have a list yet" gate. The
+        // signal projection always produces an array so loading flips to
+        // false on first read; matches the legacy `!kubes` semantics
+        // because the signal never emits null.
+        loading$: list$.pipe(map(kubes => !kubes)),
+        select: createSignalWrapper<string>(undefined)
+      };
+    });
   }
 
   private createNamespace(): KubernetesNamespacesFilterItem<KubernetesNamespace> {

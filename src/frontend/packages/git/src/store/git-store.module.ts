@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
+import { EffectsModule } from '@stratosui/store';
 
 import { GitEffects } from './git.effects';
 

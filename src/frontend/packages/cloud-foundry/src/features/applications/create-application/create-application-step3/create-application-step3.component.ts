@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, catchError, filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
 
@@ -12,7 +12,7 @@ import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
 import { createGetApplicationAction } from '../../application.service';
-import { selectNewAppState } from '../../../../store/effects/create-app-effects';
+import { selectNewAppState } from '../../../../store/selectors/create-application.selectors';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
 interface DomainHostForm {

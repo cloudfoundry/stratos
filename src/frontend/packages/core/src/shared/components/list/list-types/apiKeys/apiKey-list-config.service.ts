@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 export type SortDirection = 'asc' | 'desc' | '';
-import { Store } from '@ngrx/store';
-import { ApiKey, stratosEntityCatalog, ListView, AppState } from '@stratosui/store';
+import { ApiKey, AppState, ListView, stratosEntityCatalog, Store } from '@stratosui/store';
 import { format } from 'date-fns';
 
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';

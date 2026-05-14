@@ -10,7 +10,7 @@
         <app-custom-icon class="nav-button-with-text__icon">delete</app-custom-icon> Delete Policy
       </span>
     </button>
-    @if (canManageCredentials$ | async) {
+    @if (canManageCredentials()) {
       <button class="btn nav-button-with-text" name="credential" (click)="manageCredentialPage()">
         <span class="nav-button-with-text__span">
           <app-custom-icon class="nav-button-with-text__icon">vpn_key</app-custom-icon> Manage Credentials
@@ -328,8 +328,8 @@
               </app-card-content>
               <app-card-actions class="autoscaler-tab__actions">
                 <app-polling-indicator (poll)="fetchScalingHistory()"
-                  [manualPoll]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async) === false"
-                  [isPolling]="(appAutoscalerScalingHistoryService.isFetchingEntity$ | async)">
+                  [manualPoll]="(scalingHistoryLoading$ | async) === false"
+                  [isPolling]="(scalingHistoryLoading$ | async)">
                 </app-polling-indicator>
                 <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">
                   <app-custom-icon>launch</app-custom-icon>

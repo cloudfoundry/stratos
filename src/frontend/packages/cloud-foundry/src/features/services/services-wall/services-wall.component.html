@@ -14,6 +14,7 @@
 }
 
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <app-duplicate-url-banner nounPlural="Service instances"></app-duplicate-url-banner>
   @if (listConfig(); as cfg) {
     <div class="flex-1 min-h-0 p-4 flex flex-col">
       <app-signal-list [config]="cfg"></app-signal-list>

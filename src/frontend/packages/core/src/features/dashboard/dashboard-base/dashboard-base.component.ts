@@ -4,18 +4,19 @@ import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, E
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  GetCurrentUsersRelations,
   CloseSideNav,
+  DashboardOnlyAppState,
+  DashboardState,
   DisableMobileNav,
   EnableMobileNav,
-  selectDashboardState,
-  DashboardOnlyAppState,
-  stratosEntityCatalog,
-  DashboardState,
+  GetCurrentUsersRelations,
+  Store,
   entityCatalog,
+  stratosEntityCatalog,
 } from '@stratosui/store';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
@@ -60,6 +61,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   sidePanelService = inject(SidePanelService);
   private cs = inject(CustomizationService);
   private cd = inject(ChangeDetectorRef);
+  private dashboardSignals = inject(DashboardSignalService);
 
   public activeTabLabel$!: Observable<string>;
   public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
@@ -100,7 +102,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       startWith(false),
       distinctUntilChanged()
     );
-    this.dashboardState$ = this.store.select(selectDashboardState);
+    this.dashboardState$ = toObservable(this.dashboardSignals.dashboard);
     this.mainNavState$ = this.dashboardState$.pipe(
       map(state => {
         if (state.isMobile) {

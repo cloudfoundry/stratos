@@ -23,6 +23,7 @@ import {
   userProvidedServiceInstanceEntityType,
 } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
@@ -49,6 +50,7 @@ import type { StServiceInstance } from '../../../services/endpoint-data/stratos-
     PageHeaderComponent,
     SignalListComponent,
     CfEndpointsMissingComponent,
+    DuplicateUrlBannerComponent,
   ],
   animations: [
     trigger('cardEnter', [

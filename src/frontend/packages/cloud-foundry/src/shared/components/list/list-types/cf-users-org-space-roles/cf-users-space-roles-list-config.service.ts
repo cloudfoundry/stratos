@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { take,  } from 'rxjs/operators';
@@ -12,7 +13,7 @@ import { IGlobalListAction, IListAction, IListConfig, IListMultiFilterConfig, IM
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { ISpace } from '../../../../../cf-api.types';
-import { selectCfUsersRolesRoles } from '../../../../../store/selectors/cf-users-roles.selector';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
 import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
@@ -78,12 +79,13 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   // Use BehaviorSubject instead of signal + toObservable to avoid NG0203
   private initialised$ = new BehaviorSubject<boolean>(false);
   private store = inject(Store<CFAppState>);
+  private rolesData = inject(CfUsersRolesDataService);
 
   constructor(cfGuid: string, spaceGuid: string, userPerms: CurrentUserPermissionsService) {
-    this.store.select(selectCfUsersRolesRoles).pipe(
+    toObservable(this.rolesData.newRoles).pipe(
       take(1)
     ).subscribe(newRoles => {
-      this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles.orgGuid, spaceGuid, this.store, userPerms, this);
+      this.dataSource = new CfUsersSpaceRolesDataSourceService(cfGuid, newRoles?.orgGuid, spaceGuid, this.store, userPerms, this);
       this.initialised$.next(true);
     });
   }

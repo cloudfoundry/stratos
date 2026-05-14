@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
@@ -131,7 +131,7 @@ export class CloudFoundryUsersComponent {
       totalPages: this.usersConfig.view.totalPages,
       pageIndex: this.usersConfig.pageIndex,
       pageSize: this.usersConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.usersConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

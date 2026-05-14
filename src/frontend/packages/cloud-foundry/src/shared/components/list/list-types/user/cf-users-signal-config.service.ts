@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, eff
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
+import { CfUserListDiagnosticsService } from '../../../../../services/diagnostics/cf-user-list-diagnostics.service';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -33,6 +34,7 @@ export class CfUsersSignalConfigService {
   private readonly registry = inject(EndpointDataRegistry);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly diag = inject(CfUserListDiagnosticsService);
 
   private endpointDataService?: EndpointDataService;
   private cnsiGuid = '';
@@ -124,6 +126,11 @@ export class CfUsersSignalConfigService {
   }
 
   initialize(cnsiGuid: string): void {
+    this.diag.record(cnsiGuid, 'initialize-called', {
+      previousCnsiGuid: this.cnsiGuid,
+      allUsersLenBefore: this._allUsers().length,
+      hasLoadedOnceBefore: this._hasLoadedOnce(),
+    });
     this.cnsiGuid = cnsiGuid;
     this._lockedSpaceGuid.set('');
     this._lockedOrgGuid.set('');
@@ -136,6 +143,13 @@ export class CfUsersSignalConfigService {
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
+    this.diag.setIdentity(cnsiGuid, '/pp/v1/cf/users', `signal:${cnsiGuid}`, 'CfUsersSignalConfigService');
+    this.diag.setDataSource(cnsiGuid, {
+      rowCount: () => this.view?.totalFilteredResults() ?? -1,
+      allRowsCount: () => this._allUsers().length,
+      isLoadingPage: () => !this._hasLoadedOnce(),
+    });
+    this.diag.record(cnsiGuid, 'view-pipeline-built');
     // Kick off the endpoint-data load so orgs() / spaces() populate; swallow
     // errors since the user list still renders without name lookups (cells
     // fall back to the GUID short-form / em-dash).
@@ -183,16 +197,27 @@ export class CfUsersSignalConfigService {
   }
 
   private async fetchUsers(): Promise<void> {
+    const requestedFor = this.cnsiGuid;
+    this.diag.record(requestedFor, 'fetch-start');
     try {
       const resp = await firstValueFrom(
-        this.http.get<StUsersResponse>(`/pp/v1/cf/users/${this.cnsiGuid}`),
+        this.http.get<StUsersResponse>(`/pp/v1/cf/users/${requestedFor}`),
       );
+      const cnsiAtResolve = this.cnsiGuid;
+      this.diag.record(requestedFor, 'fetch-resolved', {
+        cnsiAtResolve,
+        cnsiAtRequest: requestedFor,
+        sameCnsi: cnsiAtResolve === requestedFor,
+        respCount: resp?.resources?.length ?? 0,
+      });
       this._allUsers.set(resp?.resources ?? []);
       this._hasLoadedOnce.set(true);
-    } catch {
+      this.diag.record(requestedFor, 'allUsers-set', { len: this._allUsers().length });
+    } catch (e) {
       // Swallow — empty state renders instead of a forever-loading
       // spinner. Errors surface via the list's generic error UI if wired
       // through the orchestrator-style errorsByCnsi signal in future.
+      this.diag.record(requestedFor, 'fetch-error', { error: (e as Error)?.message });
       this._hasLoadedOnce.set(true);
     }
   }

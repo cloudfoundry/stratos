@@ -1,17 +1,21 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import {
-  VerifySession,
+  AuthState,
+  InternalAppState,
   SetupConsoleGetScopes,
   SetupSaveConfig,
-  AuthState,
+  Store,
   UAASetupState,
-  InternalAppState,
+  VerifySession,
 } from '@stratosui/store';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
 import { delay, filter, skipWhile, take } from 'rxjs/operators';
+
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
 
 interface UAAWizardForm {
   apiUrl: FormControl<string>;
@@ -57,8 +61,13 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
 export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   private store = inject<Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>>(Store);
   private cdr = inject(ChangeDetectorRef);
+  private authSignals = inject(AuthSignalService);
+  private uaaSetupSignals = inject(UaaSetupSignalService);
   title = inject(APP_TITLE);
 
+  // Bridge signals → observables in injection context (used by step handlers below).
+  private uaaSetup$ = toObservable(this.uaaSetupSignals.uaaSetup);
+  private auth$ = toObservable(this.authSignals.auth);
 
   private clientRedirectURI: string;
 
@@ -105,7 +114,7 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
         console_admin_scope: ''
       }));
       const state = await firstValueFrom(
-        this.store.select('uaaSetup').pipe(
+        this.uaaSetup$.pipe(
           skipWhile((s: UAASetupState) => s.settingUp),
           take(1),
         )
@@ -143,12 +152,12 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
 
       this.applyingSetup.set(true);
       const state = await firstValueFrom(
-        this.store.select(s => [s.uaaSetup, s.auth] as [UAASetupState, AuthState]).pipe(
-          filter(([uaa, auth]) => !(uaa.settingUp || auth.verifying)),
+        combineLatest([this.uaaSetup$, this.auth$] as [typeof this.uaaSetup$, typeof this.auth$]).pipe(
+          filter(([uaa, auth]: [UAASetupState, AuthState | undefined]) => !!auth && !(uaa.settingUp || auth.verifying)),
           delay(2000),
           take(10),
-          filter(([_uaa, auth]) => {
-            const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
+          filter(([_uaa, auth]: [UAASetupState, AuthState | undefined]) => {
+            const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
             if (!validUAASessionData) {
               this.store.dispatch(new VerifySession());
             }

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { take, filter, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -25,7 +26,6 @@ import {
   entityCatalog,
   EntitySchema,
   ActionState,
-  endpointEntitiesSelector,
   EndpointModel,
   IFavoriteMetadata,
   UserFavoriteManager
@@ -40,6 +40,7 @@ import {
   CfCurrentUserPermissions,
   ApplicationStateData
 } from '@stratosui/cloud-foundry';
+import { CfEndpointsDataService } from '../../../../services/domain-data/cf-endpoints-data.service';
 import { StOrg, StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
 import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
@@ -71,6 +72,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private cfEndpoints = inject(CfEndpointsDataService);
   private lifecycleProgress = inject(AppLifecycleProgressService);
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
@@ -97,7 +99,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     );
     const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
     this.schema = catalogEntity.getSchema();
-    const endpoints$ = store.select(endpointEntitiesSelector);
+    const endpoints$ = toObservable(this.cfEndpoints.all);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
         endpoints$,

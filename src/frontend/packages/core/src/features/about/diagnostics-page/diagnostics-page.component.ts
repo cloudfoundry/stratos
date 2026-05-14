@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
+import { SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -27,10 +28,15 @@ import { BUILD_INFO } from '../../../environments/build-info';
 })
 export class DiagnosticsPageComponent implements OnInit {
   private meta = inject(Meta);
-  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private auth = inject(AuthSignalService);
 
 
-  sessionData$!: Observable<SessionData>;
+  // toObservable() requires an injection context — bridge the signal here
+  // (field initializer runs in DI context) rather than in ngOnInit (which is not).
+  sessionData$: Observable<SessionData> = toObservable(this.auth.sessionData).pipe(
+    filter((sessionData): sessionData is SessionData => !!sessionData),
+    filter(sessionData => !!sessionData.diagnostics)
+  );
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
   helmLastModified$!: Observable<Date>;
@@ -56,12 +62,6 @@ export class DiagnosticsPageComponent implements OnInit {
   ngOnInit() {
 
     const helmLastModifiedRegEx = /seconds:([0-9]*)/;
-
-    this.sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      filter(auth => !!(auth.sessionData.diagnostics)),
-      map((auth: AuthState) => auth.sessionData)
-    );
 
     this.userIsAdmin$ = this.sessionData$.pipe(
       map(session => session.user && session.user.admin)

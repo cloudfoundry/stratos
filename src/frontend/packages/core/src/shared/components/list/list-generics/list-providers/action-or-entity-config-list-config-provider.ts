@@ -1,7 +1,5 @@
 import { Injector } from '@angular/core';
-import { Store } from '@ngrx/store';
-
-import { EntityPipelineEntity } from '@stratosui/store';
+import { EntityPipelineEntity, Store } from '@stratosui/store';
 import { IListDataSourceConfig } from '../../data-sources-controllers/list-data-source-config';
 import { IListConfig } from '../../list.component.types';
 import { ListActionOrConfig, ListActionOrConfigHelpers } from '../helpers/action-or-config-helpers';

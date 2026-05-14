@@ -184,7 +184,16 @@ export class StratosBaseCatalogEntity<
 
   public getGuidFromEntity(entity: Y) {
     if (this.builders.entityBuilder && this.builders.entityBuilder.getGuid) {
-      return this.builders.entityBuilder.getGuid(entity);
+      // Builders typically read `entity.metadata.guid` (CF v2 shape) or
+      // `entity.guid` (v3). Partial / mid-hydration entities may be missing
+      // the nested key, which throws inside the builder. Catch defensively
+      // — callers handle null by falling back to an outer guid (see
+      // mapMultiEndpointResponses) or skipping the row.
+      try {
+        return this.builders.entityBuilder.getGuid(entity);
+      } catch {
+        return null;
+      }
     }
     return null;
   }

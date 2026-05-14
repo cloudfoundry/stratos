@@ -7,9 +7,9 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
-import { filter, map, pairwise, take, tap } from 'rxjs/operators';
+import { filter, map, take, tap } from 'rxjs/operators';
 
 import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -18,15 +18,15 @@ import {
   StepComponent,
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
-import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
+import { MonocularVersion } from '../../../helm/store/helm.types';
+import { KubeHelmDataService } from '../../../services/endpoint-data/kube-helm-data.service';
+import { HelmUpgradePayload } from '../../../services/endpoint-data/kube-types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
-import { workloadsEntityCatalog } from './../workloads-entity-catalog';
 import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config';
 
 @Component({
@@ -76,6 +76,7 @@ export class UpgradeReleaseComponent implements OnDestroy {
   public helper = inject(HelmReleaseHelperService);
   private chartsService = inject(ChartsService);
   private router = inject(Router);
+  private helmDataService = inject(KubeHelmDataService);
 
   // FWT-959 Part 2: signal-native step handles.
   //
@@ -192,10 +193,10 @@ export class UpgradeReleaseComponent implements OnDestroy {
   }
 
   // Returns the legacy ActionState shape so the caller can decide
-  // success/failure + redirect explicitly.
+  // success/failure + redirect explicitly. Now backed by the
+  // KubeHelmDataService rather than the ngrx upgrade action.
   private doUpgrade$(): Observable<{ success: boolean; message?: string }> {
-    // Add the chart url into the values
-    const values: HelmUpgradeValues = {
+    const values: HelmUpgradePayload = {
       values: JSON.stringify(this.editor.getValues()),
       restartPods: false,
       chart: {
@@ -207,19 +208,20 @@ export class UpgradeReleaseComponent implements OnDestroy {
       chartUrl: this.chartUrl
     };
 
-    // Make the request
-    return workloadsEntityCatalog.release.api.upgrade<ActionState>(this.helper.releaseTitle,
-      this.helper.endpointGuid, this.helper.namespace, values).pipe(
-        // Wait for result of request
-        filter(state => !!state),
-        pairwise(),
-        filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-        map(([, newVal]) => newVal),
-        map((result: ActionState) => ({
-          success: !result.error,
-          message: result.error ? result.message : undefined,
-        }))
-      );
+    return new Observable<{ success: boolean; message?: string }>(sub => {
+      this.helmDataService.upgrade(
+        this.helper.endpointGuid,
+        this.helper.namespace,
+        this.helper.releaseTitle,
+        values,
+      ).then(() => {
+        sub.next({ success: true });
+        sub.complete();
+      }).catch((err: Error) => {
+        sub.next({ success: false, message: err?.message || 'Upgrade failed' });
+        sub.complete();
+      });
+    });
   }
 
   ngOnDestroy(): void {

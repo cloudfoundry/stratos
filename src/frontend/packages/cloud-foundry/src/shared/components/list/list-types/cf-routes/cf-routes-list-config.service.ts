@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 

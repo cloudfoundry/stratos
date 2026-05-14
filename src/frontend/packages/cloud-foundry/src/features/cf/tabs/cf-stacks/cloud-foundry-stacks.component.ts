@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
@@ -38,7 +38,7 @@ export class CloudFoundryStacksComponent {
       totalPages: this.stacksConfig.view.totalPages,
       pageIndex: this.stacksConfig.pageIndex,
       pageSize: this.stacksConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.stacksConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

@@ -38,6 +38,9 @@ export class CfOrgQuotasSignalConfigService {
   private readonly _orgQuotas: WritableSignal<StOrgQuota[]> = signal([]);
   readonly orgQuotas: Signal<StOrgQuota[]> = this._orgQuotas.asReadonly();
 
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StOrgQuota) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StOrgQuota>;
@@ -69,12 +72,14 @@ export class CfOrgQuotasSignalConfigService {
     if (!this.source) return;
     await this.source.load();
     this._orgQuotas.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   async refresh(): Promise<void> {
     if (!this.source) return;
     await this.source.refresh();
     this._orgQuotas.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   clearFilters(): void {

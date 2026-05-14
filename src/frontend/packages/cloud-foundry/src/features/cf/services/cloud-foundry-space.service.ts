@@ -1,6 +1,6 @@
 import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
@@ -206,11 +206,11 @@ export class CloudFoundrySpaceService {
       map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
     );
 
-    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    this.appCount$ = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
 
-    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
+    this.loadingApps$ = this.cfEndpointService.appsLoading$;
   }
 
   private countExistingApps(): Observable<number> {

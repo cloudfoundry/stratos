@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
@@ -137,7 +137,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       this.row
     );
 
-    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInOrgViaAllApps(this.row) : observableOf(null))
     );
 

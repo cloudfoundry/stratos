@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -113,7 +113,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
       totalPages: this.spacesConfig.view.totalPages,
       pageIndex: this.spacesConfig.pageIndex,
       pageSize: this.spacesConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.spacesConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

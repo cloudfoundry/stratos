@@ -1,7 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 
-import { Store } from '@ngrx/store';
-import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
+import { GeneralEntityAppState, RouterNav, Store } from '@stratosui/store';
 
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';

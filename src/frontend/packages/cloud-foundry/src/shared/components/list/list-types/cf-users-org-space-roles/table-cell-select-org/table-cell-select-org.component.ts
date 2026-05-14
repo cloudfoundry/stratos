@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
@@ -14,7 +15,7 @@ import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';
 import { CfRolesService } from '../../../../../../features/cf/users/manage-users/cf-roles.service';
-import { selectCfUsersRolesOrgGuid } from '../../../../../../store/selectors/cf-users-roles.selector';
+import { CfUsersRolesDataService } from '../../../../../../services/domain-data/cf-users-roles-data.service';
 
 @Component({
   selector: 'app-table-cell-select-org',
@@ -34,6 +35,8 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
   private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfRolesService = inject(CfRolesService);
+  private rolesData = inject(CfUsersRolesDataService);
+  private orgGuid$ = toObservable(this.rolesData.orgGuid);
 
 
   /**
@@ -54,7 +57,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
         map(orgs => orgs && orgs.length === 1 ? orgs[0] : null)
       );
     }
-    this.orgGuidChangedSub = this.store.select(selectCfUsersRolesOrgGuid).subscribe(orgGuid => {
+    this.orgGuidChangedSub = this.orgGuid$.subscribe(orgGuid => {
       this.selectedOrgGuid = orgGuid;
     });
   }

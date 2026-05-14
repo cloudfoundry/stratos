@@ -9,10 +9,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, Subscription, of, of as observableOf, firstValueFrom } from 'rxjs';
 import { take, filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
@@ -24,10 +24,10 @@ import { CFAppState } from '@stratosui/cloud-foundry';
 import { getCFEntityKey } from '../../../cf-entity-helpers';
 import { applicationEntityType } from '@stratosui/cloud-foundry';
 import {
-  selectApplicationSource,
-  selectCfDetails } from '../../../store/selectors/deploy-application.selector';
+  selectApplicationSource } from '../../../store/selectors/deploy-application.selector';
 import { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
 import { RouterNav, selectPaginationState } from '@stratosui/store';
+import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
@@ -68,6 +68,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private activatedRoute = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
+  private deployData = inject(CfDeployAppDataService);
+  private cfDetails$ = toObservable(this.deployData.cfDetails);
 
 
   appGuid: string;
@@ -400,7 +402,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     }
 
     if (this.appGuid) {
-      this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
+      this.initCfOrgSpaceService.push(this.cfDetails$.pipe(
         filter(p => !!p),
         tap(p => {
           this.cfOrgSpaceService.cf.select.next(p.cloudFoundry);
@@ -409,7 +411,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         })
       ).subscribe());
       // In case user has specified the query param manually
-      this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
+      this.initCfOrgSpaceService.push(this.cfDetails$.pipe(
         filter(p => !p),
         tap(_p => {
           this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));

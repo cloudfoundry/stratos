@@ -145,7 +145,7 @@ export class CloudFoundrySpaceRoutesSignalComponent {
       totalPages: this.routesConfig.view.totalPages,
       pageIndex: this.routesConfig.pageIndex,
       pageSize: this.routesConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.routesConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

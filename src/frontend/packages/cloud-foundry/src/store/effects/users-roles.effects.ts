@@ -29,6 +29,17 @@ import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
 import { OrgUserRoleNames } from '../types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained — all three actions this effect listens for have live
+// dispatchers:
+//   - GET_CURRENT_CF_USER_RELATION (GetCurrentCfUserRelations) is
+//     dispatched from cf-user-roles-fetch.ts:138 during permissions
+//     bootstrapping for every CF endpoint.
+//   - UsersRolesActions.ClearUpdateState (UsersRolesClearUpdateState)
+//     is dispatched from manage-users-confirm.component.ts:126.
+//   - UsersRolesActions.ExecuteChanges (UsersRolesExecuteChanges) is
+//     dispatched from manage-users.component.ts:140 and
+//     remove-user.component.ts:120.
 @Injectable({
   providedIn: 'root'
 })

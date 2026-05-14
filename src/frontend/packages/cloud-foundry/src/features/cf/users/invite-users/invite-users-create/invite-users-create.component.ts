@@ -3,7 +3,7 @@ import { Component, Input, OnInit, signal, ChangeDetectionStrategy, inject } fro
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { firstValueFrom, Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 

@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BooleanIndicatorComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
@@ -14,7 +14,27 @@ import { ProductNameComponent } from '../../../../../core/src/shared/components/
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../../services/kubernetes.service';
-import { KubeDashboardStatus } from '../../store/kubernetes.effects';
+
+// Local copy of the kubedash status shape — wave-3 deletes the legacy
+// `store/kubernetes.effects.ts` location, so the consumer-side code holds
+// its own type definition rather than importing from store/. Matches the
+// jetstream `/pp/v1/kubedash/{guid}/status` payload.
+export interface KubeDashboardServiceInfo {
+  namespace: string;
+  name: string;
+  scheme: string;
+}
+
+export interface KubeDashboardStatus {
+  guid?: string;
+  kubeGuid?: string;
+  installed: boolean;
+  stratosInstalled?: boolean;
+  running?: boolean;
+  version?: string;
+  service?: KubeDashboardServiceInfo;
+  serviceAccount?: { metadata: { name: string; namespace: string } } | null;
+}
 
 type MessageUpdater = (msg: string) => void;
 
@@ -78,9 +98,20 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  public kubeDashboardStatus$: Observable<KubeDashboardStatus>;
-
-  // Removed Angular Material snackbar dependency
+  // Signal-native dashboard status — fetched directly from the kubedash
+  // status endpoint, no ngrx dispatch. Wave-3 deletes the ngrx kubeEntityCatalog
+  // dashboard slice; the consumer (this component) is the only reader, so it
+  // owns its own cache.
+  private readonly _dashboardStatus = signal<KubeDashboardStatus | null>(null);
+  public readonly dashboardStatus = this._dashboardStatus.asReadonly();
+  public readonly isAzure = computed(() => {
+    const status = this._dashboardStatus();
+    return !!status && !!status.version && status.version.indexOf('azure') !== -1;
+  });
+  public readonly isDashboardConfigured = computed(() => {
+    const status = this._dashboardStatus();
+    return !!status && !!status.installed && !!status.serviceAccount && !!status.service;
+  });
 
   // Signals for busy state tracking
   public serviceAccountBusy = signal<boolean>(false);
@@ -92,38 +123,16 @@ export class KubedashConfigurationComponent implements OnDestroy {
   // Are we busy with an operation - disable buttons if we are
   public isBusy = signal<boolean>(false);
 
-  // Is the status loading
-  public isUpdatingStatus = false;
-
-  private sub: Subscription;
-
-  public isAzure$: Observable<boolean>;
+  // Is the status loading — true on first load and during refresh().
+  public isUpdatingStatus = signal<boolean>(true);
 
   public dashboardLink: string;
   public kubeEndpointService = inject(KubernetesEndpointService);
   private httpClient = inject(HttpClient);
   private confirmDialog = inject(ConfirmationDialogService);
 
-
-
   constructor() {
-
-
-    this.kubeDashboardStatus$ = this.kubeEndpointService.kubeDashboardStatus$;
-    // Clear the updating status when we get back new dashboard status
-    this.sub = this.kubeDashboardStatus$.pipe(distinctUntilChanged()).subscribe(status => {
-      if (status !== null) {
-        this.isUpdatingStatus = false;
-      }
-    });
-
     this.dashboardLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/dashboard`;
-
-    this.isAzure$ = this.kubeDashboardStatus$.pipe(
-      filter(status => status !== null),
-      filter(status => !!status.version),
-      map(status => status.version.indexOf('azure') !== -1)
-    );
 
     this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
@@ -131,13 +140,36 @@ export class KubedashConfigurationComponent implements OnDestroy {
       }]))
     );
 
-
+    // Kick off initial status fetch.
+    this.refreshStatus();
   }
 
   ngOnDestroy() {
-    if (this.sub) {
-      this.sub.unsubscribe();
+    // No subscriptions to clean up — status is signal-backed.
+  }
+
+  // Fetch the kubedash status payload directly from jetstream. Replaces
+  // the prior `kubeEntityCatalog.dashboard.api.get(...)` ngrx dispatch.
+  private refreshStatus() {
+    const guid = this.kubeEndpointService.kubeGuid;
+    if (!guid) {
+      return;
     }
+    this.isUpdatingStatus.set(true);
+    this.httpClient.get<KubeDashboardStatus>(`/pp/v1/kubedash/${guid}/status`).subscribe({
+      next: (status) => {
+        this._dashboardStatus.set(status ?? null);
+        this.isUpdatingStatus.set(false);
+      },
+      error: () => {
+        // Treat fetch failure as "no status yet" — surface via the
+        // existing "Retrieving Dashboard configuration ..." spinner clearing
+        // and falling through to install / configure UI when the user
+        // re-triggers an action.
+        this._dashboardStatus.set(null);
+        this.isUpdatingStatus.set(false);
+      }
+    });
   }
 
   public createServiceAccount() {
@@ -243,8 +275,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
   }
 
   private refresh() {
-    this.isUpdatingStatus = true;
-    this.kubeEndpointService.refreshKubernetesDashboardStatus();
     this.isBusy.set(false);
+    this.refreshStatus();
   }
 }

@@ -8,6 +8,12 @@ import { CFAppState } from '../../cf-app-state';
 import { ClearPaginationOfEntity } from '../../../../store/src/actions/pagination.actions';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained — UNMAP_ROUTE_SUCCESS is auto-emitted by the request
+// pipeline when UnmapRoute completes, and UnmapRoute is dispatched
+// live via cfEntityCatalog.route.api.unmap from
+// cf-routes-list-config-base.ts:149. Effect performs the
+// post-success ClearPaginationOfEntity side-effect.
 @Injectable({
   providedIn: 'root'
 })

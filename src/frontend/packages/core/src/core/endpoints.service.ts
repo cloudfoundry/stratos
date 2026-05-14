@@ -1,16 +1,14 @@
 import { ApplicationRef, inject, Injectable } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
-  endpointEntitiesSelector,
-  endpointStatusSelector,
   EndpointOnlyAppState,
   EntityCatalogHelpers,
   IRequestEntityTypeState,
   IEndpointFavMetadata,
   UserFavorite,
   entityCatalog,
-  AuthState,
   RouterNav,
   EndpointHealthCheck,
   EndpointModel,
@@ -21,13 +19,18 @@ import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
 import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
+import { AuthSignalService } from './signals/auth-signal.service';
+import { EndpointStatusSignalService } from './signals/endpoint-status-signal.service';
+import { EndpointsSignalService } from './signals/endpoints-signal.service';
 import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EndpointsService {
+  // Store is retained only for the per-endpoint metrics selector below.
   private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsSignals = inject(EndpointsSignalService);
   private userService = inject(UserService);
   private endpointHealthChecks = inject(EndpointHealthChecks);
   private sessionService = inject(SessionService);
@@ -83,8 +86,6 @@ export class EndpointsService {
   }
 
   constructor() {
-    const store = this.store;
-
     // TIMING FIX: Defer entity catalog validation until application is stable
     // This ensures all feature modules (CloudFoundryPackageModule, KubernetesSetupModule, etc.)
     // have completed their entity registration before validation runs.
@@ -96,69 +97,35 @@ export class EndpointsService {
       this.validateEntityCatalog();
     });
 
-    this.endpoints$ = store.select(endpointEntitiesSelector);
-    this.haveRegistered$ = this.endpoints$.pipe(
-      map(endpoints => !!Object.keys(endpoints).length),
+    // Observables sourced from the signal-native projection. The signal
+    // service already encapsulates the entity-catalog defensive filtering
+    // for the connected/registered/persistence projections, so we just
+    // adapt to Observable shape here for legacy callers.
+    this.endpoints$ = toObservable(this.endpointsSignals.endpoints).pipe(
+      catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
+        console.error('Error reading endpoints:', error);
+        return of({} as IRequestEntityTypeState<EndpointModel>);
+      })
+    );
+    this.haveRegistered$ = toObservable(this.endpointsSignals.haveRegistered).pipe(
       catchError((error): Observable<boolean> => {
         console.error('Error checking registered endpoints:', error);
         return of(false);
       })
     );
-    // Entity registration is synchronous during module construction, so no need to wait for app stability
-    // Navigation will wait for appReady$ in LoginPageComponent, ensuring guards resolve instantly
-    this.connectedEndpoints$ = this.endpoints$.pipe(
-      map(endpoints =>
-        Object.values(endpoints).filter(endpoint => {
-          try {
-            // Defensive: Entity catalog lookup may return null if endpoint type not registered yet
-            const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
-            if (!epType) {
-              console.warn(
-                `Endpoint catalog entity not found for ${endpoint.cnsi_type}${endpoint.sub_type ? '/' + endpoint.sub_type : ''}. ` +
-                `This endpoint will be excluded from connected endpoints list until its type is registered. ` +
-                `Run window.__STRATOS_ENTITY_CATALOG__.getDiagnostics() for details.`
-              );
-              return false;
-            }
-
-            // Defensive: Verify definition exists before accessing properties
-            if (!epType.definition) {
-              console.warn(
-                `Endpoint definition missing for ${endpoint.cnsi_type}${endpoint.sub_type ? '/' + endpoint.sub_type : ''}. ` +
-                `This may indicate an incomplete entity registration.`
-              );
-              return false;
-            }
-
-            const epEntity = epType.definition;
-            return epEntity.unConnectable || endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking';
-          } catch (error) {
-            console.warn(
-              `Error filtering endpoint ${endpoint.guid} (${endpoint.cnsi_type}): ${error.message}. ` +
-              `Excluding from connected endpoints.`
-            );
-            return false;
-          }
-        })
-      ),
+    this.connectedEndpoints$ = toObservable(this.endpointsSignals.connectedEndpoints).pipe(
       catchError((error): Observable<EndpointModel[]> => {
         console.error('Error getting connected endpoints:', error);
         return of([]);
       })
     );
-    this.haveConnected$ = this.connectedEndpoints$.pipe(
-      map(endpoints => endpoints.length > 0),
+    this.haveConnected$ = toObservable(this.endpointsSignals.haveConnected).pipe(
       catchError((error): Observable<boolean> => {
         console.error('Error checking connected endpoints:', error);
         return of(false);
       })
     );
-
-    this.disablePersistenceFeatures$ = this.store.select('auth').pipe(
-      map((auth) => auth.sessionData &&
-        auth.sessionData['plugin-config'] &&
-        auth.sessionData['plugin-config'].disablePersistenceFeatures === 'true'
-      ),
+    this.disablePersistenceFeatures$ = toObservable(this.endpointsSignals.disablePersistenceFeatures).pipe(
       catchError((error): Observable<boolean> => {
         console.error('Error checking persistence features:', error);
         return of(false);
@@ -290,15 +257,18 @@ export const endpointsGuard: CanActivateFn = (
   const endpointsService = inject(EndpointsService);
   const userService = inject(UserService);
   const sessionService = inject(SessionService);
+  const authSignals = inject(AuthSignalService);
+  const endpointStatusSignals = inject(EndpointStatusSignalService);
 
-  // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
+  // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints.
+  // Auth + endpoint loading state both sourced from signal services.
   const guardLogic$ = observableCombineLatest(
-    store.select('auth'),
-    store.select(endpointStatusSelector)
+    toObservable(authSignals.auth),
+    toObservable(endpointStatusSignals.status)
   ).pipe(
-    filter(([state, endpointState]: [AuthState, EndpointState]) => {
+    filter(([state, endpointState]) => {
       // Only proceed when logged in and endpoints are done loading
-      return state.loggedIn && !endpointState.loading;
+      return !!state && state.loggedIn && !endpointState.loading;
     }),
     withLatestFrom(
       endpointsService.haveRegistered$,
@@ -309,7 +279,7 @@ export const endpointsGuard: CanActivateFn = (
       endpointsService.disablePersistenceFeatures$
     ),
     map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
-      : [[AuthState, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
+      : [[any, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
       const [authState] = state;
 
       if (authState.sessionData.valid) {

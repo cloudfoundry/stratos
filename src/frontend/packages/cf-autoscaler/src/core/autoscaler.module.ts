@@ -14,18 +14,6 @@ import {
 } from '../features/edit-autoscaler-policy/edit-autoscaler-policy-step1/edit-autoscaler-policy-step1.component';
 import { EditAutoscalerPolicyComponent } from '../features/edit-autoscaler-policy/edit-autoscaler-policy.component';
 import {
-  TableCellAutoscalerEventChangeIconPipe,
-} from '../shared/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change-icon.pipe';
-import {
-  TableCellAutoscalerEventChangeComponent,
-} from '../shared/list-types/app-autoscaler-event/table-cell-autoscaler-event-change/table-cell-autoscaler-event-change.component';
-import {
-  TableCellAutoscalerEventStatusIconPipe,
-} from '../shared/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status-icon.pipe';
-import {
-  TableCellAutoscalerEventStatusComponent,
-} from '../shared/list-types/app-autoscaler-event/table-cell-autoscaler-event-status/table-cell-autoscaler-event-status.component';
-import {
   AppAutoscalerMetricChartCardComponent,
 } from '../shared/list-types/app-autoscaler-metric-chart/app-autoscaler-metric-chart-card/app-autoscaler-metric-chart-card.component';
 import {
@@ -49,10 +37,6 @@ import {
     AppAutoscalerComboChartComponent,
     AppAutoscalerMetricChartCardComponent,
     EditAutoscalerPolicyComponent,
-    TableCellAutoscalerEventChangeComponent,
-    TableCellAutoscalerEventStatusComponent,
-    TableCellAutoscalerEventStatusIconPipe,
-    TableCellAutoscalerEventChangeIconPipe,
   ],
   declarations: [],
   providers: [

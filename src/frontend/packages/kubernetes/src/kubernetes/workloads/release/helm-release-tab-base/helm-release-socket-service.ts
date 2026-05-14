@@ -1,11 +1,10 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
+import { AppState, Store, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
 import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';

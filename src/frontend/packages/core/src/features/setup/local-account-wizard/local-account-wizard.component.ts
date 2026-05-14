@@ -1,20 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject, Injector, runInInjectionContext, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import {
-  InternalAppState,
-  UAASetupState,
-  LocalAdminSetupData,
   AuthState,
-  VerifySession,
+  InternalAppState,
+  LocalAdminSetupData,
   SetupSaveConfig,
+  Store,
+  UAASetupState,
+  VerifySession,
 } from '@stratosui/store';
-import { Observable, firstValueFrom } from 'rxjs';
+import { combineLatest, Observable, firstValueFrom } from 'rxjs';
 import { delay, filter, map, take } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
 import { SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
@@ -52,7 +54,13 @@ export class LocalAccountWizardComponent implements OnInit {
 
   private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
   private injector = inject(Injector);
+  private authSignals = inject(AuthSignalService);
+  private uaaSetupSignals = inject(UaaSetupSignalService);
   public title = inject(APP_TITLE);
+
+  // Bridge signals → observables in injection context for use in `next` handler.
+  private uaaSetup$ = toObservable(this.uaaSetupSignals.uaaSetup);
+  private auth$ = toObservable(this.authSignals.auth);
 
   passwordForm!: FormGroup;
   validateLocalAuthForm!: Observable<boolean>;
@@ -113,21 +121,21 @@ export class LocalAccountWizardComponent implements OnInit {
 
     this.applyingSetup.set(true);
     this.store.dispatch(new SetupSaveConfig(data));
-    return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
-      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
-        return !(uaa.settingUp || auth.verifying);
+    return combineLatest([this.uaaSetup$, this.auth$]).pipe(
+      filter(([uaa, auth]: [UAASetupState, AuthState | undefined]) => {
+        return !!auth && !(uaa.settingUp || auth.verifying);
       }),
       delay(2000),
       take(10),
-      filter(([_uaa, auth]: [UAASetupState, AuthState]) => {
-        const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
+      filter(([_uaa, auth]: [UAASetupState, AuthState | undefined]) => {
+        const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
         }
         return validUAASessionData;
       }),
-      map((state: [UAASetupState, AuthState]) => {
-        if (!state[0].error) {
+      map(([uaa]: [UAASetupState, AuthState | undefined]) => {
+        if (!uaa.error) {
           // Do a hard reload of the app
           const loc = window.location;
           const reload = loc.protocol + '//' + loc.host;
@@ -136,8 +144,8 @@ export class LocalAccountWizardComponent implements OnInit {
           this.applyingSetup.set(false);
         }
         return {
-          success: !state[0].error,
-          message: state[0].message
+          success: !uaa.error,
+          message: uaa.message
         };
       }));
   };

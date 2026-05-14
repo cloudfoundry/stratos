@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Injector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 

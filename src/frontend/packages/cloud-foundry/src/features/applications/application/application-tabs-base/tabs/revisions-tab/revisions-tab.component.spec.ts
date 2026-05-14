@@ -39,6 +39,7 @@ function makeConfigSvcMock(overrides: Partial<{
     revisions: signal(revisions),
     featureEnabled: signal(featureEnabledValue),
     deployedUnknown: signal(deployedUnknownValue),
+    hasLoadedOnce: signal(true),
     nameFilter: signal(''),
     sort: signal({ field: 'version', direction: 'desc' as const }),
     pageSize: signal(25),

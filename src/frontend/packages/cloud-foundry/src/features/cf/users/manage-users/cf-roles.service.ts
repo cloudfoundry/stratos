@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take,
   combineLatest as combineLatestOperators,
@@ -24,13 +25,9 @@ import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../entity-relations/entity-relations.types';
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/cf-users-roles.reducer';
-import {
-  selectCfUsersRolesCf,
-  selectCfUsersRolesPicked,
-  selectCfUsersRolesRoles,
-} from '../../../../store/selectors/cf-users-roles.selector';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
@@ -43,12 +40,14 @@ export class CfRolesService {
   private store = inject<Store<CFAppState>>(Store);
   private cfUserService = inject(CfUserService);
   private userPerms = inject(CurrentUserPermissionsService);
+  private rolesData = inject(CfUsersRolesDataService);
 
 
   existingRoles$: Observable<CfUserRolesSelected>;
   newRoles$: Observable<IUserPermissionInOrg>;
   loading$: Observable<boolean>;
   cfOrgs: { [cfGuid: string]: Observable<APIResource<IOrganization>[]>, } = {};
+  private users$: Observable<CfUser[]>;
 
   /**
    * Given a list of orgs or spaces remove those that the connected user cannot edit roles in.
@@ -92,15 +91,16 @@ export class CfRolesService {
   }
 
   constructor() {
-    this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
-      combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
+    this.users$ = toObservable(this.rolesData.users);
+    this.existingRoles$ = this.users$.pipe(
+      combineLatestOperators(toObservable(this.rolesData.cfGuid)),
       filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
     );
-    this.newRoles$ = this.store.select(selectCfUsersRolesRoles).pipe(
+    this.newRoles$ = toObservable(this.rolesData.newRoles).pipe(
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
@@ -170,7 +170,7 @@ export class CfRolesService {
     return this.existingRoles$.pipe(
       combineLatestOperators(
         this.newRoles$,
-        this.store.select(selectCfUsersRolesPicked),
+        this.users$,
       ),
       take(1),
       map(([existingRoles, newRoles, pickedUsers]) => {

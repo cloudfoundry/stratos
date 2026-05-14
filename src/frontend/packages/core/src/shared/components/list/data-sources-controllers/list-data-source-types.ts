@@ -1,16 +1,16 @@
 import { DataSource } from '@angular/cdk/table';
 import { Signal } from '@angular/core';
-import { Action } from '@ngrx/store';
 import {
-  IRequestEntityTypeState,
-  MetricsAction,
+  Action,
+  EntityCatalogEntityConfig,
   EntitySchema,
+  IRequestEntityTypeState,
+  ListFilter,
+  ListSort,
+  MetricsAction,
   PaginatedAction,
   PaginationEntityState,
   PaginationParam,
-  ListFilter,
-  ListSort,
-  EntityCatalogEntityConfig,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 

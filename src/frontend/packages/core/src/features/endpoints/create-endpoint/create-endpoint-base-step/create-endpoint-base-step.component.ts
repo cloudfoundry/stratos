@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  RouterNav,
   GeneralEntityAppState,
+  RouterNav,
+  Store,
   entityCatalog,
-  selectSessionData,
 } from '@stratosui/store';
-import { map } from 'rxjs/operators';
 
+import { SessionSignalService } from '../../../../core/signals/session-signal.service';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { ITileConfig } from '../../../../shared/components/tile/tile-selector.types';
 import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoint-tile-manager';
@@ -53,10 +53,13 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
 
   constructor() {
     const store = inject<Store<GeneralEntityAppState>>(Store);
+    const session = inject(SessionSignalService);
 
-    const types = store.select(selectSessionData()).pipe(
-      // Get a list of all known endpoint types
-      map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
+    // Tech-preview flag is sourced from the signal-native session projection;
+    // bridged to Observable<StratosCatalogEndpointEntity[]> for the legacy
+    // BaseEndpointTileManager constructor signature.
+    const types = toObservable(
+      computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
     super(types, store);
     this.store = store;

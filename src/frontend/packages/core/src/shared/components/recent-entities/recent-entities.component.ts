@@ -1,4 +1,5 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -10,11 +11,11 @@ import {
   IRecentlyVisitedEntity,
   entityCatalog,
   MAX_RECENT_COUNT,
-  endpointEntitiesSelector,
 } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
@@ -22,7 +23,10 @@ class RenderableRecent {
   public subText$: Observable<string>;
   public icon: string;
   public iconFont: string;
-  constructor(readonly entity: IRecentlyVisitedEntity, private store: Store<AppState>) {
+  constructor(
+    readonly entity: IRecentlyVisitedEntity,
+    endpointEntities$: Observable<Record<string, { name?: string }>>,
+  ) {
     const catalogEntity = entityCatalog.getEntity(entity.endpointType, entity.entityType);
     this.icon = catalogEntity.definition.icon;
     this.iconFont = catalogEntity.definition.iconFont;
@@ -32,7 +36,7 @@ class RenderableRecent {
     if (entity.entityType === endpointEntityType) {
       this.subText$ = observableOf(entity.prettyType);
     } else {
-      this.subText$ = this.store.select(endpointEntitiesSelector).pipe(
+      this.subText$ = endpointEntities$.pipe(
         map(endpoints => {
           if (entity.endpointId && Object.keys(endpoints).length > 1) {
             return `${entity.prettyType} - ${endpoints[entity.endpointId].name}`;
@@ -59,6 +63,7 @@ class RenderableRecent {
 })
 export class RecentEntitiesComponent {
   private store = inject(Store<AppState>);
+  private endpointsSignals = inject(EndpointsSignalService);
 
   @Input()
   public history = false;
@@ -68,6 +73,10 @@ export class RecentEntitiesComponent {
   public recentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;
 
+  // Bridge endpoints signal → observable in injection context. Captured
+  // once and reused for every RenderableRecent so we don't re-bind per row.
+  private endpointEntities$ = toObservable(this.endpointsSignals.endpoints);
+
   constructor() {
     const recentEntities$ = this.store.select(recentlyVisitedSelector);
     this.recentEntities$ = recentEntities$.pipe(
@@ -76,7 +85,7 @@ export class RecentEntitiesComponent {
         // Sort them - most recent first
         // Cap the list at the maximum we can display
         const sorted = entities.sort((a, b) => b.date - a.date).slice(0, MAX_RECENT_COUNT);
-        return sorted.map(entity => new RenderableRecent(entity, this.store));
+        return sorted.map(entity => new RenderableRecent(entity, this.endpointEntities$));
       })
     );
 

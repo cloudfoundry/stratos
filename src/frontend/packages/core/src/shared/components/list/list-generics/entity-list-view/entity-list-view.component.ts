@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 
 import { ListEntityConfig } from '../helpers/action-or-config-helpers';
 import { ListConfigProvider } from '../list-config-provider.types';

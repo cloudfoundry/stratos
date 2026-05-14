@@ -5,6 +5,7 @@ import type { EndpointModel } from '@stratosui/store';
 import { CnsiServiceInstancesSource } from '../../../../../services/data-sources/cnsi-service-instances-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { StServiceInstance } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
@@ -98,6 +99,11 @@ export class CfServiceInstancesSignalConfigService {
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
+  // Optional so unit tests don't have to provide it; the real app always
+  // does (providedIn: 'root'). When present, used to short-circuit the
+  // orchestrator's HTTP drain on revisit by pre-seeding each per-CNSI
+  // source from the registry's pre-warmed services-details cache.
+  private readonly registry = inject(EndpointDataRegistry, { optional: true });
 
   constructor() {
     const cfService = inject(CloudFoundryService, { optional: true });
@@ -178,7 +184,7 @@ export class CfServiceInstancesSignalConfigService {
     this._spaceGuid.set('');
     this._typeFilter.set(undefined);
     this._offeringGuid.set('');
-    const sources = cnsiGuids.map(guid => new CnsiServiceInstancesSource(guid, this.http));
+    const sources = cnsiGuids.map(guid => this.makeSource(guid));
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
@@ -200,7 +206,7 @@ export class CfServiceInstancesSignalConfigService {
     this._spaceGuid.set(spaceGuid);
     this._typeFilter.set(typeFilter);
     this._offeringGuid.set('');
-    const sources = [new CnsiServiceInstancesSource(cnsiGuid, this.http)];
+    const sources = [this.makeSource(cnsiGuid)];
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
@@ -223,7 +229,7 @@ export class CfServiceInstancesSignalConfigService {
     this._spaceGuid.set('');
     this._typeFilter.set(undefined);
     this._offeringGuid.set(serviceOfferingGuid);
-    const sources = [new CnsiServiceInstancesSource(cnsiGuid, this.http)];
+    const sources = [this.makeSource(cnsiGuid)];
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
@@ -238,12 +244,43 @@ export class CfServiceInstancesSignalConfigService {
   async loadAll(): Promise<void> {
     await this.orchestrator.load();
     this._hasLoadedOnce.set(true);
+    this.writeBackToRegistry();
   }
 
   async refresh(): Promise<void> {
     if (!this.orchestrator) return;
     await this.orchestrator.refresh();
     this._hasLoadedOnce.set(true);
+    this.writeBackToRegistry();
+  }
+
+  // Build a per-CNSI source, optionally pre-seeded from the registry's
+  // services-details cache. Skip the seed when a fresh load is in-flight
+  // — the in-flight will write the cache itself, and the orchestrator's
+  // load() will fall through to its normal HTTP drain rather than risk
+  // seeding mid-flight stale data.
+  private makeSource(guid: string): CnsiServiceInstancesSource {
+    const source = new CnsiServiceInstancesSource(guid, this.http);
+    const ds = this.registry?.acquire(guid);
+    if (ds && !ds.isLoadingServicesDetails()) {
+      const bundle = ds.serviceInstancesAndBrokers();
+      if (bundle) source.preSeed(bundle.instances);
+    }
+    return source;
+  }
+
+  // Push the per-CNSI instances array back into the registry's
+  // services-details cache so the next visit to Services finds a hot
+  // bundle. Brokers are out of scope for this orchestrator; preserve any
+  // brokers the registry already has from loadServicesDetails().
+  private writeBackToRegistry(): void {
+    if (!this.registry || !this.orchestrator) return;
+    for (const source of this.orchestrator.sources) {
+      const ds = this.registry.acquire(source.cnsiGuid);
+      const existing = ds.serviceInstancesAndBrokers();
+      const brokers = existing?.brokers ?? [];
+      ds.setServiceInstancesAndBrokers(source.items() as StServiceInstance[], brokers);
+    }
   }
 
   clearFilters(): void {

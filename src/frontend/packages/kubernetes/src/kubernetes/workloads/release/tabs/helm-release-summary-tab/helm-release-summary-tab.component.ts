@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService } from '@stratosui/core';
-import { ClearPaginationOfType } from '@stratosui/store';
-import { RouterNav } from '@stratosui/store';
-import { AppState } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService } from '@stratosui/core';
+import { AppState, RouterNav } from '@stratosui/store';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+
+import { KubeHelmDataService } from '../../../../../services/endpoint-data/kube-helm-data.service';
 
 import {
   PageSubNavComponent,
@@ -27,12 +26,10 @@ import { AnalysisReportSelectorComponent } from '../../../../analysis-report-vie
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
 import { SnackBarService } from '@stratosui/core';
-import { endpointsEntityRequestDataSelector } from '@stratosui/store';
 import {
   ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import { HelmReleaseChartData } from '../../../workload.types';
-import { workloadsEntityCatalog } from '../../../workloads-entity-catalog';
 import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import { ResourceAlert } from './../../../../services/analysis-report.types';
@@ -118,13 +115,16 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private analysisReportId = signal<string | null>(null);
   private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
   public helmReleaseHelper = inject(HelmReleaseHelperService);
+  // Store is retained only for the RouterNav action dispatch on delete.
+  // Read-side cluster-name lookup moved to EndpointsSignalService.
   private store = inject(Store<AppState>);
+  private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private httpClient = inject(HttpClient);
   private snackbarService = inject(SnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
   private injector = inject(Injector);
+  private helmDataService = inject(KubeHelmDataService);
 
 
   constructor() {
@@ -263,21 +263,20 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
-      // Make the http request to delete the release
-      const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/').replace(':', '/');
+      // Signal-native delete via KubeHelmDataService — handles HTTP +
+      // optimistic local removal + cache refresh.
       this.startDelete();
-      this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
-        error: (err: any) => {
-          this.endDelete();
-          this.snackbarService.show('Failed to delete release', 'Close');
-          console.error('Failed to delete release: ', err);
-        },
-        complete: () => {
-          const action = workloadsEntityCatalog.release.actions.getMultiple();
-          this.store.dispatch(new ClearPaginationOfType(action));
-          this.completeDelete();
-          this.store.dispatch(new RouterNav({ path: ['./workloads'] }));
-        }
+      this.helmDataService.delete(
+        this.helmReleaseHelper.endpointGuid,
+        this.helmReleaseHelper.namespace,
+        this.helmReleaseHelper.releaseTitle,
+      ).then(() => {
+        this.completeDelete();
+        this.store.dispatch(new RouterNav({ path: ['./workloads'] }));
+      }).catch((err: Error) => {
+        this.endDelete();
+        this.snackbarService.show('Failed to delete release', 'Close');
+        console.error('Failed to delete release: ', err);
       });
     });
   }
@@ -305,11 +304,12 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   }
 
   public getClusterName(): Observable<string> {
-    return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
-      filter((e: any) => !!e),
-      map((e: any) => e.name),
-      take(1)
-    );
+    // Read the endpoint name from EndpointsSignalService instead of the
+    // legacy `endpointsEntityRequestDataSelector`. Returns an empty string
+    // if the endpoint hasn't hydrated yet — matches legacy `filter(!!e)`
+    // behaviour by emitting a synchronous value the template can render.
+    const endpoint = this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid];
+    return of(endpoint?.name ?? '');
   }
 
   private applyAnalysis(resources: any, report: any) {

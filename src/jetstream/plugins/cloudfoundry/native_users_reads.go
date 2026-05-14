@@ -207,25 +207,76 @@ func buildUserRoleBuckets(
 
 // listRolesForUsers fetches /v3/roles?user_guids=<csv> for the given
 // user GUIDs. Bounded by the input set: at typical page size (~50 users
-// × ~5 roles each = ~250 roles) this is a single CAPI page; we still
-// paginate defensively for the long-tail user with many grants.
+// × ~5 roles each = ~250 roles) this is a single CAPI page; admin-class
+// users with thousands of grants paginate.
+//
+// Pagination strategy: fetch page 1 to learn total_pages, then fan out
+// pages 2..N concurrently with bounded parallelism. Sequential drain on
+// admin (5K+ grants over ~11 pages) dominated wall time at ~8s; parallel
+// fan-out collapses that to ~max(page latency).
 func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, error) {
-	all := make([]capi.Role, 0)
-	pageNum := 1
-	for {
+	if len(userGUIDs) == 0 {
+		return nil, nil
+	}
+
+	const perPage = 500
+	const maxConcurrency = 6
+
+	filter := strings.Join(userGUIDs, ",")
+	fetchPage := func(page int) ([]capi.Role, capi.Pagination, error) {
 		params := capi.NewQueryParams().
-			WithFilter("user_guids", strings.Join(userGUIDs, ",")).
-			WithPerPage(500)
-		params.Page = pageNum
+			WithFilter("user_guids", filter).
+			WithPerPage(perPage)
+		params.Page = page
 		raw, err := cfClient.Roles().List(ctx, params)
 		if err != nil {
-			return nil, err
+			return nil, capi.Pagination{}, err
 		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
+		return raw.Resources, raw.Pagination, nil
+	}
+
+	firstResources, pagination, err := fetchPage(1)
+	if err != nil {
+		return nil, err
+	}
+	totalPages := pagination.TotalPages
+	if totalPages <= 1 {
+		return firstResources, nil
+	}
+
+	pageRoles := make([][]capi.Role, totalPages)
+	pageRoles[0] = firstResources
+
+	type pageResult struct {
+		page  int
+		roles []capi.Role
+		err   error
+	}
+	sem := make(chan struct{}, maxConcurrency)
+	results := make(chan pageResult, totalPages-1)
+	for p := 2; p <= totalPages; p++ {
+		sem <- struct{}{}
+		go func(pn int) {
+			defer func() { <-sem }()
+			res, _, perr := fetchPage(pn)
+			results <- pageResult{page: pn, roles: res, err: perr}
+		}(p)
+	}
+	for i := 0; i < totalPages-1; i++ {
+		r := <-results
+		if r.err != nil {
+			return nil, r.err
 		}
-		pageNum++
+		pageRoles[r.page-1] = r.roles
+	}
+
+	totalLen := 0
+	for _, p := range pageRoles {
+		totalLen += len(p)
+	}
+	all := make([]capi.Role, 0, totalLen)
+	for _, p := range pageRoles {
+		all = append(all, p...)
 	}
 	return all, nil
 }

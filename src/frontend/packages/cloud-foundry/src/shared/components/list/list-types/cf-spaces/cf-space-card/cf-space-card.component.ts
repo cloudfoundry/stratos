@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
@@ -143,7 +143,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
       map(u => getSpaceRolesString(u))
     );
 
-    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    const allApps$: Observable<APIResource<IApp>[]> = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAll => hasAll ? this.cfEndpointService.getAppsInSpaceViaAllApps(this.row) : observableOf(null))
     );
 

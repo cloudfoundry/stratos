@@ -1,7 +1,7 @@
 /* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 

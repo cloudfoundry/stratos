@@ -212,8 +212,12 @@ export class UserFavoriteManager {
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
     const metadata = catalogEntity.builders?.entityBuilder?.getMetadata(entity);
     const guid = isEndpoint ? null : catalogEntity.builders?.entityBuilder?.getGuid(entity);
+    // Transient state during data load: callers retry once the entity row
+    // resolves with a stamped endpoint id. Skip silently rather than emit
+    // a UserFavorite with no endpoint context (which can't round-trip
+    // through the favorites store anyway).
     if (!endpointId) {
-      console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
+      return null;
     }
     return new UserFavorite<T>(
       endpointId,

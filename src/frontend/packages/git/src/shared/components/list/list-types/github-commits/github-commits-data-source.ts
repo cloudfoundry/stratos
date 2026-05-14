@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { of as observableOf } from 'rxjs';
 
 import {

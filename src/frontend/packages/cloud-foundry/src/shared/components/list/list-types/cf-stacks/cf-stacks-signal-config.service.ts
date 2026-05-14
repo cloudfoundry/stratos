@@ -39,6 +39,9 @@ export class CfStacksSignalConfigService {
   private readonly _stacks: WritableSignal<StStack[]> = signal([]);
   readonly stacks: Signal<StStack[]> = this._stacks.asReadonly();
 
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StStack) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StStack>;
@@ -70,12 +73,14 @@ export class CfStacksSignalConfigService {
     if (!this.source) return;
     await this.source.load();
     this._stacks.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   async refresh(): Promise<void> {
     if (!this.source) return;
     await this.source.refresh();
     this._stacks.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
   }
 
   clearFilters(): void {

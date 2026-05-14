@@ -7,7 +7,9 @@
   </div>
 </app-page-header>
 <div class="autoscaler-metric-page">
-  <div class="events-tab">
-    <app-list></app-list>
+  <div class="events-tab flex flex-col flex-1 min-h-0">
+    @if (listConfig(); as cfg) {
+      <app-signal-list [config]="cfg" />
+    }
   </div>
 </div>

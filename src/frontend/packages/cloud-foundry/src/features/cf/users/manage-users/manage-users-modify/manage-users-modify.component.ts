@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take,
   catchError,
@@ -35,13 +35,7 @@ import {
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
-import {
-  selectCfUsersIsRemove,
-  selectCfUsersIsSetByUsername,
-  selectCfUsersRolesOrgGuid,
-  selectCfUsersRolesPicked,
-  selectCfUsersRolesRoles,
-} from '../../../../../store/selectors/cf-users-roles.selector';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUser, OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
@@ -70,6 +64,16 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private cfRolesService = inject(CfRolesService);
   private cd = inject(ChangeDetectorRef);
   private snackBar = inject(TailwindSnackBarService);
+  private rolesData = inject(CfUsersRolesDataService);
+  // Cache the rxjs bridges in the constructor so handlers and ngOnInit
+  // can reuse them without needing the injection context that toObservable
+  // requires. orgGuid$/picked$/newRoles$/isRemove$ are stable per service
+  // instance and emit synchronously through the underlying signal.
+  private orgGuid$ = toObservable(this.rolesData.orgGuid);
+  private picked$ = toObservable(this.rolesData.users);
+  private newRoles$ = toObservable(this.rolesData.newRoles);
+  private isRemove$$ = toObservable(this.rolesData.isRemove);
+  private isSetByUsername$$ = toObservable(this.rolesData.isSetByUsername);
 
 
 
@@ -143,7 +147,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       this.cfRolesService.loading$.subscribe(loading => this.blocked.set(loading));
     }
 
-    const orgEntity$ = this.store.select(selectCfUsersRolesOrgGuid).pipe(
+    const orgEntity$ = this.orgGuid$.pipe(
       startWith(''),
       distinctUntilChanged(),
       filter(orgGuid => !!orgGuid),
@@ -189,7 +193,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       });
     }
 
-    const users$: Observable<CfUserWithWarning[]> = this.store.select(selectCfUsersRolesPicked).pipe(
+    const users$: Observable<CfUserWithWarning[]> = this.picked$.pipe(
       filter(users => !!users),
       distinctUntilChanged(),
       map(users => users.map(this.mapUser.bind(this)))
@@ -203,14 +207,14 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       map(users => users.filter(user => !!user.showWarning).map(user => user.username))
     );
 
-    this.valid$ = this.store.select(selectCfUsersRolesRoles).pipe(
+    this.valid$ = this.newRoles$.pipe(
       debounceTime(150),
-      switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles.orgGuid)),
+      switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles?.orgGuid)),
       map(changes => !!changes.length)
     );
 
-    this.isSetByUsername$ = this.store.select(selectCfUsersIsSetByUsername);
-    this.isRemove$ = this.store.select(selectCfUsersIsRemove);
+    this.isSetByUsername$ = this.isSetByUsername$$;
+    this.isRemove$ = this.isRemove$$;
   }
 
   private mapUser(user: CfUser): CfUserWithWarning {
@@ -255,9 +259,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
 
     // When the state is ready (org guid is correct), recreate the space roles table for the selected org
-    this.store.select(selectCfUsersRolesRoles).pipe(
+    this.newRoles$.pipe(
       // Wait for the store to have the correct org
-      filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
+      filter(newRoles => !!newRoles && newRoles.orgGuid === orgGuid),
       take(1)
     ).subscribe({
       complete: () => {
@@ -281,7 +285,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     }
 
     // In order to show the removed roles correctly (as ticks) flip them from remove to add
-    this.store.select(selectCfUsersIsRemove).pipe(take(1)).subscribe(isRemove => {
+    this.isRemove$$.pipe(take(1)).subscribe(isRemove => {
       if (isRemove) {
         this.store.dispatch(new UsersRolesFlipSetRoles());
       }
@@ -297,7 +301,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
   onNext = () => {
     return combineLatest([
-      this.store.select(selectCfUsersIsRemove).pipe(take(1)),
+      this.isRemove$$.pipe(take(1)),
       this.cfRolesService.createRolesDiff(this.selectedOrgGuid)
     ]).pipe(
       map(([isRemove]) => {

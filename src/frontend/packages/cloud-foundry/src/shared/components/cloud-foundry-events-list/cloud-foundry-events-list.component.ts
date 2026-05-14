@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Input, OnChanges, SimpleChanges, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
@@ -30,7 +30,7 @@ import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types
     SignalListComponent,
   ],
 })
-export class CloudFoundryEventsListComponent implements OnChanges {
+export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
   @Input() orgGuid?: string;
   @Input() spaceGuid?: string;
   @Input() targetGuid?: string;
@@ -45,13 +45,8 @@ export class CloudFoundryEventsListComponent implements OnChanges {
   public listConfig: WritableSignal<SignalListConfig<StAuditEvent> | undefined> = signal(undefined);
 
   constructor() {
-    // basePredicate set ahead of initialize so the auto-filter effect
-    // picks it up on first run.
-    this.applyBasePredicate();
-
     const cfGuid = this.cfEndpointService.cfGuid;
     this.eventsConfig.initialize(cfGuid);
-    void this.eventsConfig.loadAll();
 
     this.listConfig.set({
       pagedItems: this.eventsConfig.view.pagedItems,
@@ -59,7 +54,7 @@ export class CloudFoundryEventsListComponent implements OnChanges {
       totalPages: this.eventsConfig.view.totalPages,
       pageIndex: this.eventsConfig.pageIndex,
       pageSize: this.eventsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.eventsConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {
@@ -112,6 +107,16 @@ export class CloudFoundryEventsListComponent implements OnChanges {
       viewMode: this.eventsConfig.viewMode,
       sort: this.eventsConfig.sort,
     });
+  }
+
+  // @Input() values are not bound at constructor time. Setting the
+  // predicate here (with the inputs guaranteed bound) before triggering
+  // the data fetch keeps cross-org/space events from rendering during
+  // the initial load. Same fix shape as the per-CF tabs: scope first,
+  // then load.
+  ngOnInit(): void {
+    this.applyBasePredicate();
+    void this.eventsConfig.loadAll();
   }
 
   // Re-apply the base predicate when scope inputs change (Angular

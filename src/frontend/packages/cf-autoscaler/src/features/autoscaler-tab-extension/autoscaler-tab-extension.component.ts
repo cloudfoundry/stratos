@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, effect, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BaseChartDirective } from 'ng2-charts';
@@ -31,7 +32,6 @@ import {
   organizationEntityType,
   spaceEntityType,
   createEntityRelationKey,
-  createEntityRelationPaginationKey,
   ApplicationMonitorService,
   ApplicationService,
   getGuids,
@@ -47,19 +47,18 @@ import {
   PaginationMonitorFactory,
   ActionState,
   getPaginationObservables,
-  getCurrentPageRequestInfo,
-  PaginationObservables,
   selectDeletionInfo,
   APIResource
 } from '@stratosui/store';
-import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler-info-data.service';
+import { AutoscalerScalingHistoryDataService } from '../../services/domain-data/autoscaler-scaling-history-data.service';
 import {
   AutoscalerPaginationParams,
   DetachAppAutoscalerPolicyAction,
   GetAppAutoscalerAppMetricAction,
-  GetAppAutoscalerPolicyAction,
-  GetAppAutoscalerScalingHistoryAction } from '../../store/app-autoscaler.actions';
+  GetAppAutoscalerPolicyAction } from '../../store/app-autoscaler.actions';
 import {
   AppAutoscaleMetricChart,
   AppAutoscalerEvent,
@@ -146,9 +145,16 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private appAutoscalerPolicySnackBar = inject(TailwindSnackBarService);
   private appAutoscalerScalingHistorySnackBar = inject(TailwindSnackBarService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private autoscalerInfoData = inject(AutoscalerInfoDataService);
+  private scalingHistoryData = inject(AutoscalerScalingHistoryDataService);
+  private injector = inject(Injector);
 
 
-  canManageCredentials$!: Observable<boolean>;
+  // Signal-native replacement for the legacy `canManageCredentials$`
+  // Observable. Bound directly in the template via `canManageCredentials()`.
+  // Source data comes from the per-endpoint cache populated by load()
+  // in ngOnInit.
+  canManageCredentials!: Signal<boolean>;
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
@@ -157,10 +163,15 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
   appAutoscalerPolicyService!: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService!: PaginationObservables<APIResource<AppAutoscalerEvent>>;
   appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal>;
   appAutoscalerPolicySafe$!: Observable<AppAutoscalerPolicyLocal>;
+  // Signal-native scaling-history bindings, sourced from
+  // AutoscalerScalingHistoryDataService. Templates still bind via async
+  // pipe through these Observable wrappers so the existing markup stays
+  // unchanged. The polling indicator's "isPolling" state is derived from
+  // the loading() signal and exposed as scalingHistoryLoading$.
   appAutoscalerScalingHistory$!: Observable<AppAutoscalerEvent[]>;
+  scalingHistoryLoading$!: Observable<boolean>;
   appAutoscalerAppMetricNames$!: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$!: Observable<boolean>;
@@ -172,10 +183,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   };
 
   private appAutoscalerPolicyErrorSub!: Subscription;
-  private appAutoscalerScalingHistoryErrorSub!: Subscription;
   private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
   private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<any>;
-  private scalingHistoryAction!: GetAppAutoscalerScalingHistoryAction;
 
   appAutoscalerAppMetrics = {};
 
@@ -201,32 +210,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     if (this.appAutoscalerScalingHistorySnackBarRef) {
       this.appAutoscalerScalingHistorySnackBarRef.dismiss();
     }
-    safeUnsubscribe(this.appAutoscalerPolicyErrorSub, this.appAutoscalerScalingHistoryErrorSub);
+    safeUnsubscribe(this.appAutoscalerPolicyErrorSub);
   }
 
   ngOnInit() {
 
-    this.canManageCredentials$ = fetchAutoscalerInfo(
-      this.applicationService.cfGuid,
-      this.entityServiceFactory
-    ).pipe(
-      map(info => {
-        // If autoscaler is not available (404 error), return false
-        if (!info || info.entityRequestInfo.error || !info.entity || !info.entity.entity) {
-          return false;
-        }
-        const build = info.entity.entity.build;
-        // Null safety: ensure build exists and can be split
-        if (!build || typeof build !== 'string') {
-          return false;
-        }
-        const buildParts = build.split('.');
-        if (buildParts.length === 0) {
-          return false;
-        }
-        return Number.parseInt(buildParts[0], 10) >= 3;
-      })
-    );
+    // Trigger autoscaler info fetch via the signal-native data service
+    // (replaces the legacy fetchAutoscalerInfo helper + Store/Effects
+    // path). canManageCredentials() reads the cached per-endpoint
+    // signal — its value reflects whether the autoscaler build is
+    // >= 3.x and credential management is exposed.
+    const cfGuid = this.applicationService.cfGuid;
+    this.autoscalerInfoData.load(cfGuid);
+    this.canManageCredentials = this.autoscalerInfoData.canManageCredentials(cfGuid);
 
     this.appAutoscalerPolicyService = this.entityServiceFactory.create(
       this.applicationService.appGuid,
@@ -262,26 +258,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       }),
     );
 
-    this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
-      createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
-      this.applicationService.appGuid,
-      this.applicationService.cfGuid,
-      false,
-      this.paramsHistory
-    );
-    this.appAutoscalerScalingHistoryService = getPaginationObservables({
-      store: this.store,
-      action: this.scalingHistoryAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.scalingHistoryAction.paginationKey,
-        this.scalingHistoryAction,
-        true
-      ) }, true);
-    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entities$.pipe(
-      map(entities => entities.map(entity => entity.entity)),
-      publishReplay(1),
-      refCount()
-    );
+    // Signal-native history wiring. fetchScalingHistory() refreshes
+    // paramsHistory.end-time and triggers load(); the data service caches
+    // results per (cnsi, app). The polling indicator binds via
+    // scalingHistoryLoading$.
+    this.appAutoscalerScalingHistory$ = toObservable(
+      this.scalingHistoryData.events(this.applicationService.cfGuid, this.applicationService.appGuid),
+      { injector: this.injector },
+    ).pipe(publishReplay(1), refCount());
+    this.scalingHistoryLoading$ = toObservable(
+      this.scalingHistoryData.loading(this.applicationService.cfGuid, this.applicationService.appGuid),
+      { injector: this.injector },
+    ).pipe(publishReplay(1), refCount());
+    this.fetchScalingHistory();
     this.initErrorSub();
 
     this.showAutoscalerHistory$ = combineLatest([
@@ -338,10 +327,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   initErrorSub() {
-    if (this.appAutoscalerPolicyErrorSub) {
-      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
-    }
-
     this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
       filter(response => {
         // Filter out expected errors (no policy, autoscaler unavailable)
@@ -369,28 +354,29 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.appAutoscalerPolicySnackBarRef = this.appAutoscalerPolicySnackBar.open(errorMessage, 'Dismiss');
     });
 
-    if (this.appAutoscalerScalingHistoryErrorSub) {
-      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
-    }
-    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.pagination$.pipe(
-      map(pagination => getCurrentPageRequestInfo(pagination)),
-      filter(request => {
-        // Filter out expected autoscaler unavailability errors
-        if (!request.error) {
-          return false;
-        }
-        const isAutoscalerUnavailable = request.message?.includes('Autoscaler not available') ||
-                                        request.message?.includes('Autoscaler plugin not available');
-        return !isAutoscalerUnavailable;
-      }),
-      map(request => request.message),
-      distinctUntilChanged(),
-    ).subscribe(errorMessage => {
+    // Signal-native scaling-history error surfacing. Effect re-runs whenever
+    // the data-service error signal changes; mirrors the legacy
+    // distinctUntilChanged + isAutoscalerUnavailable filter.
+    let lastHistoryError: string | null = null;
+    effect(() => {
+      const errorMessage = this.scalingHistoryData
+        .error(this.applicationService.cfGuid, this.applicationService.appGuid)();
+      if (!errorMessage || errorMessage === lastHistoryError) {
+        return;
+      }
+      const isAutoscalerUnavailable = errorMessage.includes('Autoscaler not available') ||
+                                      errorMessage.includes('Autoscaler plugin not available');
+      if (isAutoscalerUnavailable) {
+        lastHistoryError = errorMessage;
+        return;
+      }
+      lastHistoryError = errorMessage;
       if (this.appAutoscalerScalingHistorySnackBarRef) {
         this.appAutoscalerScalingHistorySnackBarRef.dismiss();
       }
-      this.appAutoscalerScalingHistorySnackBarRef = this.appAutoscalerScalingHistorySnackBar.open(errorMessage, 'Dismiss');
-    });
+      this.appAutoscalerScalingHistorySnackBarRef =
+        this.appAutoscalerScalingHistorySnackBar.open(errorMessage, 'Dismiss');
+    }, { injector: this.injector });
   }
 
   disableAutoscaler() {
@@ -463,7 +449,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
   fetchScalingHistory() {
     this.paramsHistory['end-time'] = (new Date()).getTime().toString() + '000000';
-    this.store.dispatch(this.scalingHistoryAction);
+    // Fire-and-forget; errors surface via the data-service error signal.
+    void this.scalingHistoryData.load(
+      this.applicationService.cfGuid,
+      this.applicationService.appGuid,
+      this.paramsHistory as Record<string, string>,
+    );
   }
 
   getMetricUnit(metricType: string, unit?: string) {

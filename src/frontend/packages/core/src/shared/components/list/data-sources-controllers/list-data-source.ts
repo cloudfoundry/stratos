@@ -1,22 +1,22 @@
 import { DataSource } from '@angular/cdk/table';
 export type SortDirection = 'asc' | 'desc' | '';
 import { ApplicationRef, signal } from '@angular/core';
-import { Store } from '@ngrx/store';
 import {
+  AppState,
   entityCatalog,
   EntitySchema,
+  getPaginationObservables,
+  IgnorePaginationMaxedState,
   ListFilter,
   ListSort,
-  MetricsAction,
-  AppState,
   LocalPaginationHelpers,
-  PaginationMonitor,
-  getPaginationObservables,
+  MetricsAction,
   PaginatedAction,
   PaginationEntityState,
+  PaginationMonitor,
   PaginationParam,
-  IgnorePaginationMaxedState,
   SetResultCount,
+  Store,
 } from '@stratosui/store';
 import {
   BehaviorSubject,

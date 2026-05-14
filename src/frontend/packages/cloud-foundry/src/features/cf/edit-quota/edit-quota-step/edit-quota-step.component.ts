@@ -1,7 +1,7 @@
 
 import { Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { take, filter, map, pairwise, tap } from 'rxjs/operators';
 

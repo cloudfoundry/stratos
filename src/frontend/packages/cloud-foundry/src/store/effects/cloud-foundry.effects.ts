@@ -15,6 +15,14 @@ import {
 import { GET_CF_INFO, GetCFInfo } from '../../actions/cloud-foundry.actions';
 import { CFAppState } from '../../cf-app-state';
 
+// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
+// Retained — GetCFInfo is dispatched live via cfEntityCatalog.cfInfo
+// (action-builder at cf-info.action-builders.ts:9). Active call sites
+// include the CF endpoint healthCheck registration in
+// cf-entity-generator.ts:295 and getEntityService in
+// cloud-foundry-endpoint.service.ts:182. The handler itself is the
+// V3-only Stratos-native /pp/v1/cf/info/<guid> shim that returns the
+// legacy ICfV2Info shape.
 @Injectable({
   providedIn: 'root'
 })

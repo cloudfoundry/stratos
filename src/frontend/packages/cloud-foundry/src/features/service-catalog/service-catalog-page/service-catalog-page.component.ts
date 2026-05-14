@@ -15,6 +15,7 @@ import {
 import { UserFavorite, UserFavoriteManager } from '@stratosui/store';
 import { serviceEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import {
   CfServiceOfferingsSignalConfigService,
 } from '../../../shared/components/list/list-types/service-offering/cf-service-offerings-signal-config.service';
@@ -38,6 +39,7 @@ import type { StServiceOffering } from '../../../services/endpoint-data/stratos-
     PageHeaderComponent,
     SignalListComponent,
     CfEndpointsMissingComponent,
+    DuplicateUrlBannerComponent,
   ],
   animations: [
     trigger('cardEnter', [

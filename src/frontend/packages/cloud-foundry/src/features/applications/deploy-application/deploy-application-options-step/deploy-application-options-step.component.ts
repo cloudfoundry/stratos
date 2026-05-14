@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
@@ -11,10 +12,7 @@ import { StepOnNextFunction } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
 import { CFAppState } from '../../../../cf-app-state';
-import {
-  selectCfDetails,
-  selectDeployAppState,
-  selectSourceType } from '../../../../store/selectors/deploy-application.selector';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
@@ -61,6 +59,10 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   private store = inject<Store<CFAppState>>(Store);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private activatedRoute = inject(ActivatedRoute);
+  private deployData = inject(CfDeployAppDataService);
+  private deployState$ = toObservable(this.deployData.state);
+  private deployCfDetails$ = toObservable(this.deployData.cfDetails);
+  private deploySourceType$ = toObservable(this.deployData.sourceType);
 
 
   valid$: Observable<boolean>;
@@ -122,10 +124,10 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
-    this.sourceType$ = this.store.select(selectSourceType);
+    this.sourceType$ = this.deploySourceType$;
 
     // Set previously supplied docker values
-    this.subs.push(this.store.select(selectDeployAppState).pipe(
+    this.subs.push(this.deployState$.pipe(
       filter(deployAppState =>
         !!deployAppState &&
         !!deployAppState.applicationSource &&
@@ -143,7 +145,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
-    const cfDetails$ = this.store.select(selectCfDetails).pipe(
+    const cfDetails$ = this.deployCfDetails$.pipe(
       filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
     );
 

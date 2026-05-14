@@ -6,7 +6,7 @@ import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } 
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { defer, firstValueFrom, from, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';

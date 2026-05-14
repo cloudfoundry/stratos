@@ -54,7 +54,10 @@ describe('KubernetesNodePodsComponent', () => {
   });
 
   afterEach(() => {
-    // Absorb any pending company-config request from StratosBrandingService
+    // Absorb any pending company-config / pods request so HttpTestingController
+    // doesn't fail verify(). Component init triggers a pods fetch through the
+    // signal-config; we don't assert on it here — KubePodDataService spec covers
+    // that path. We only need the component to mount.
     const httpMock = TestBed.inject(HttpTestingController);
     httpMock.match(() => true);
   });

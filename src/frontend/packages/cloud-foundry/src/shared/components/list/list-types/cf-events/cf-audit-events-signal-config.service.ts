@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
@@ -39,8 +39,21 @@ export class CfAuditEventsSignalConfigService {
   // restrict the foundation-wide event stream to their entity.
   readonly basePredicate: WritableSignal<(e: StAuditEvent) => boolean> = signal(() => true);
 
-  private readonly _auditEvents: WritableSignal<StAuditEvent[]> = signal([]);
-  readonly auditEvents: Signal<StAuditEvent[]> = this._auditEvents.asReadonly();
+  // Mirror source.items() directly so the UI re-renders incrementally as
+  // pages drain in. Audit events on a busy CF can span 50+ pages of 100;
+  // awaiting full drain before paint left the page in "Loading…" for
+  // 30-60s. Reading the source signal lets the first page render
+  // immediately and subsequent pages append as they arrive.
+  readonly auditEvents: Signal<StAuditEvent[]> = computed(() =>
+    this.source ? this.source.items() : [],
+  );
+
+  // Page is "loaded" once page 1 is in. The background drain keeps adding
+  // events to the list afterward; the spinner should not block on the
+  // full sweep.
+  readonly hasLoadedOnce: Signal<boolean> = computed(() =>
+    !!this.source && this.source.fetchedPages() >= 1,
+  );
 
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StAuditEvent) => unknown>> = signal(new Map());
 
@@ -77,16 +90,18 @@ export class CfAuditEventsSignalConfigService {
     });
   }
 
-  async loadAll(): Promise<void> {
-    if (!this.source) return;
-    await this.source.load();
-    this._auditEvents.set([...this.source.items()]);
+  // Fire-and-forget: source emits items incrementally per page, so the
+  // template re-renders via the computed mirror as each page arrives.
+  // Awaiting here would re-introduce the long-blocking "Loading…" gate
+  // on busy CFs.
+  loadAll(): Promise<void> {
+    if (!this.source) return Promise.resolve();
+    return this.source.load();
   }
 
-  async refresh(): Promise<void> {
-    if (!this.source) return;
-    await this.source.refresh();
-    this._auditEvents.set([...this.source.items()]);
+  refresh(): Promise<void> {
+    if (!this.source) return Promise.resolve();
+    return this.source.refresh();
   }
 
   // Default sort is newest-first; clearing returns there.

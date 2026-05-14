@@ -34,4 +34,8 @@
   }
 </app-page-sub-nav>
 
-<app-list-view [config]="provider"></app-list-view>
+@if (signalListConfig(); as cfg) {
+  <app-signal-list [config]="cfg"></app-signal-list>
+} @else {
+  <app-list-view [config]="provider"></app-list-view>
+}

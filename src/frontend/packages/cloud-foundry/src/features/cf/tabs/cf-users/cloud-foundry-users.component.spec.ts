@@ -41,6 +41,7 @@ function makeStubSignalConfigService(opts?: {
     viewMode: signal<'card' | 'table'>('table'),
     orgNameByGuid: signal(opts?.orgNames ?? new Map<string, string>()).asReadonly(),
     spaceNameByGuid: signal(opts?.spaceNames ?? new Map<string, string>()).asReadonly(),
+    hasLoadedOnce: signal(true).asReadonly(),
   };
 }
 

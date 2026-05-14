@@ -1,8 +1,9 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Subject, Subscription } from 'rxjs';
+import { from, Subject, Subscription } from 'rxjs';
 import { mergeMap, concatMap, tap } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
+import { CnsiUsersSnapshotService } from './cnsi-users-snapshot.service';
 import { EndpointDataService } from './endpoint-data.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 
@@ -16,12 +17,21 @@ export class EndpointDataRegistry implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly shim = inject(EndpointDataShim);
   private readonly diagnostics = inject(StratosDiagnostics);
+  private readonly cnsiUsers = inject(CnsiUsersSnapshotService);
 
   private readonly instances = new Map<string, RegistryEntry>();
   private readonly cardQueue$ = new Subject<EndpointDataService>();
   private readonly detailsQueue$ = new Subject<EndpointDataService>();
+  // Pre-warm queue for the secondary domains the operator typically reaches
+  // for after the home dashboard: services (Marketplace + Services pages)
+  // and users (Summary tile + Users tab). Both fire AFTER loadDetails so the
+  // primary apps/orgs/spaces signals warm first; the user-perceptible
+  // dashboard render isn't penalized. Pre-warming keeps the user on the
+  // home page long enough that subsequent navigation finds a hot cache.
+  private readonly prewarmQueue$ = new Subject<EndpointDataService>();
   private queueSub: Subscription;
   private detailsSub: Subscription;
+  private prewarmSub: Subscription;
   // Must match the backend default in src/jetstream/info.go (s.Configuration.
   // EndpointCardConcurrency defaults to 2). If these drift, the first call to
   // configure() from auth.sessionData.config rebuilds the card queue and
@@ -37,9 +47,24 @@ export class EndpointDataRegistry implements OnDestroy {
     this.queueSub = this.buildCardQueue();
     // Details fetches run one-at-a-time after their card's load() completes.
     // Serial (concatMap) so the big full-list requests don't pile up and drown
-    // out other card fast-path traffic.
+    // out other card fast-path traffic. On completion, enqueue the secondary
+    // pre-warm pass for services + users so Marketplace/Services/Users tabs
+    // find a hot cache when the operator navigates off the home page.
     this.detailsSub = this.detailsQueue$.pipe(
-      concatMap(svc => svc.loadDetails()),
+      concatMap(svc => svc.loadDetails().pipe(
+        tap({ complete: () => this.prewarmQueue$.next(svc) }),
+      )),
+    ).subscribe();
+    // Secondary pre-warm: services-domain details (instances + offerings +
+    // plans + brokers) followed by a lazy users-snapshot read. Serial across
+    // CFs to avoid stacking 4×N parallel CAPI hits on a multi-endpoint
+    // foundation. Users snapshot kick is fire-and-forget — the service's
+    // first-read sentinel triggers the /pp/v1/cf/users/:cnsi fetch
+    // internally and we don't need to await it.
+    this.prewarmSub = this.prewarmQueue$.pipe(
+      concatMap(svc => from(svc.loadServicesDetails()).pipe(
+        tap({ complete: () => { this.cnsiUsers.users(svc.guid); } }),
+      )),
     ).subscribe();
 
     if (typeof window !== 'undefined') {
@@ -114,8 +139,10 @@ export class EndpointDataRegistry implements OnDestroy {
   ngOnDestroy(): void {
     this.queueSub.unsubscribe();
     this.detailsSub.unsubscribe();
+    this.prewarmSub.unsubscribe();
     this.cardQueue$.complete();
     this.detailsQueue$.complete();
+    this.prewarmQueue$.complete();
   }
 
   private buildCardQueue(): Subscription {

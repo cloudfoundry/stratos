@@ -1,9 +1,8 @@
 import { Injectable, computed, inject, signal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
-import { ResetPagination } from '@stratosui/store';
+import { ResetPagination, Store } from '@stratosui/store';
 
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityCatalog } from '../../cf-entity-catalog';

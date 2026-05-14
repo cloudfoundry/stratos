@@ -24,25 +24,25 @@ import { FormsModule, NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent } from '../../../shared/services/tailwind-material-replacements';
 import { PageSizeSessionService } from '../../../shared/services/page-size-session.service';
 export type SortDirection = 'asc' | 'desc' | '';
-import { Store } from '@ngrx/store';
 import {
-  SetClientFilterKey,
-  SetPage,
+  ActionState,
+  defaultClientPaginationPageSize,
   entityCatalog,
-  getListStateObservables,
+  EntityCatalogEntityConfig,
   GeneralAppState,
+  getListStateObservables,
   ListFilter,
   ListPagination,
   ListSort,
   ListView,
-  SetListViewAction,
-  EntityCatalogEntityConfig,
-  ActionState,
+  PaginatedAction,
   ResetPagination,
   ResetPaginationSortFilter,
-  PaginatedAction,
-  defaultClientPaginationPageSize,
+  SetClientFilterKey,
   SetClientPageSize,
+  SetListViewAction,
+  SetPage,
+  Store,
 } from '@stratosui/store';
 import {
   asapScheduler,

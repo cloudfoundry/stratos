@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { map } from 'rxjs/operators';
 
 import {
@@ -136,7 +136,7 @@ export class CloudFoundryOrganizationsSignalComponent {
       totalPages: this.orgsConfig.view.totalPages,
       pageIndex: this.orgsConfig.pageIndex,
       pageSize: this.orgsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.orgsConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

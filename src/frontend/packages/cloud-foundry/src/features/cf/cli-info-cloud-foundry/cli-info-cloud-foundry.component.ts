@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { CustomTooltipDirective } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 

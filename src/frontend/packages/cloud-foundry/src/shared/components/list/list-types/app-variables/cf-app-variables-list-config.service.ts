@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { of as observableOf, Subject } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState, RouterNav } from '@stratosui/store';
+import { AppState, RouterNav, Store } from '@stratosui/store';
 
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';

@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
@@ -23,14 +23,13 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 import {
-  EndpointModel,
   UserFavorite,
   UserFavoriteManager,
-  getFullEndpointApiUrl,
 } from '@stratosui/store';
 import { CFAppState } from '../../../cf-app-state';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -50,6 +49,7 @@ import type { StApp } from '../../../services/endpoint-data/stratos-types';
     SignalListComponent,
     ListSubNavComponent,
     CfEndpointsMissingComponent,
+    DuplicateUrlBannerComponent,
   ],
   animations: [
     trigger(
@@ -193,14 +193,6 @@ export class ApplicationWallComponent implements OnInit {
 
   public haveConnectedCf$!: Observable<boolean>;
 
-  // Count of endpoints that share a URL with another connected CF, or null when
-  // all URLs are distinct. Drives an informational banner so operators know
-  // multiple endpoints are registered against the same foundation (different
-  // auth contexts). Under FWT-934 composite keys this is no longer a *warning*
-  // about scoping — apps/orgs from each connection coexist in the store — but
-  // the shared-URL fact itself is still useful context.
-  public duplicateEndpointCount$!: Observable<number | null>;
-
   // Config for <app-signal-list>. Populated in ngOnInit after the signal
   // config service is initialized with the connected CF GUIDs. Using a
   // WritableSignal so assignment triggers change detection under OnPush.
@@ -242,10 +234,6 @@ export class ApplicationWallComponent implements OnInit {
 
     this.haveConnectedCf$ = cloudFoundryService.connectedCFEndpoints$.pipe(
       map(endpoints => !!endpoints && endpoints.length > 0)
-    );
-
-    this.duplicateEndpointCount$ = cloudFoundryService.connectedCFEndpoints$.pipe(
-      map((endpoints: EndpointModel[]) => ApplicationWallComponent.countDuplicateUrlEndpoints(endpoints)),
     );
   }
 
@@ -468,20 +456,4 @@ export class ApplicationWallComponent implements OnInit {
     });
   }
 
-  // Returns the number of endpoints that share a URL with at least one other
-  // connected CF, or null when all URLs are distinct. An endpoint is in a
-  // "duplicate group" if its URL appears 2+ times among connected CFs.
-  static countDuplicateUrlEndpoints(endpoints: EndpointModel[]): number | null {
-    if (!endpoints || endpoints.length < 2) { return null; }
-    const urlCounts = new Map<string, number>();
-    for (const ep of endpoints) {
-      const url = getFullEndpointApiUrl(ep);
-      urlCounts.set(url, (urlCounts.get(url) ?? 0) + 1);
-    }
-    let dupCount = 0;
-    for (const count of urlCounts.values()) {
-      if (count > 1) { dupCount += count; }
-    }
-    return dupCount > 0 ? dupCount : null;
-  }
 }

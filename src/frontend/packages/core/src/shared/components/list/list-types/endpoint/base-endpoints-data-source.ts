@@ -1,15 +1,15 @@
-import { Store } from '@ngrx/store';
 import {
-  PaginationMonitorFactory,
-  GetAllEndpoints,
   AppState,
-  InternalEventMonitorFactory,
-  EndpointModel,
-  PaginationEntityState,
   CreatePagination,
-  endpointEntityType,
-  EntityMonitorFactory,
   endpointEntitiesSelector,
+  endpointEntityType,
+  EndpointModel,
+  EntityMonitorFactory,
+  GetAllEndpoints,
+  InternalEventMonitorFactory,
+  PaginationEntityState,
+  PaginationMonitorFactory,
+  Store,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';

@@ -251,3 +251,20 @@ export { MetricQueryConfig, MetricsAction } from './actions/metrics.actions';
 export { defaultClientPaginationPageSize } from './reducers/pagination-reducer/pagination-reducer-reset-pagination';
 export { appReducers } from './reducers.module';
 export { EntityCatalogTestModule, EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
+
+// Re-export of @ngrx/store runtime tokens. Consumer packages
+// mid-way through the wave-3 signal-native migration (e.g. `git`,
+// `cloud-foundry`) need to inject/use the legacy store without
+// naming @ngrx/store directly inside their own `src/`. The store
+// package itself still owns the ngrx dependency; this is a deliberate
+// compatibility shim that should be removed once all callers
+// move off the legacy store.
+export { Action, Store, StoreModule, createSelector, provideStore, select } from '@ngrx/store';
+
+// Same shim for @ngrx/effects. Mid-migration packages still need
+// to register effects against the legacy ngrx action stream while
+// their consumers complete the transition to signal-native data
+// services. Remove once no package outside this one names
+// @ngrx/effects.
+export { EffectsModule, EffectsFeatureModule } from '@ngrx/effects';
+export { Actions, createEffect, ofType } from '@ngrx/effects';

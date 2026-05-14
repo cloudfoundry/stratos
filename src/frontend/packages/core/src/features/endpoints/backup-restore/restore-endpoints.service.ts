@@ -1,10 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal, computed, Injector, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { selectSessionData, GeneralEntityAppState, BrowserStandardEncoder, SessionData } from '@stratosui/store';
+import { BrowserStandardEncoder } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
+
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 
 interface BackupContent {
   payload: string;
@@ -21,7 +21,7 @@ interface RestoreEndpointsData {
   providedIn: 'root'
 })
 export class RestoreEndpointsService {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private authSignals = inject(AuthSignalService);
   private http = inject(HttpClient);
   private injector = inject(Injector);
 
@@ -66,13 +66,12 @@ export class RestoreEndpointsService {
   private password!: string;
 
   constructor() {
-    // Initialize signals with injector context
-    this.currentDbVersionSignal = toSignal(
-      this.store.select(selectSessionData()).pipe(
-        filter(sd => !!sd),
-        map((sd: SessionData) => sd.version.database_version)
-      ),
-      { initialValue: 0, injector: this.injector }
+    // Sourced from the signal-native auth projection. The legacy
+    // implementation gated on `!!sd`; the same null-coalesce here keeps
+    // the initial value as 0 until sessionData is populated, matching the
+    // `{ initialValue: 0 }` semantics of the original toSignal.
+    this.currentDbVersionSignal = computed(
+      () => this.authSignals.sessionData()?.version?.database_version ?? 0
     );
 
     this.validFileContent$ = toObservable(this.validFileContent, { injector: this.injector });

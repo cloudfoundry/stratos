@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import {
   BaseSCM,
   GitBranch,
@@ -48,14 +49,7 @@ import {
   SetDeployBranch,
 } from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  selectDeployAppState,
-  selectDeployBranchName,
-  selectNewProjectCommit,
-  selectPEProjectName,
-  selectProjectExists,
-  selectSourceType,
-} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
@@ -88,6 +82,13 @@ export class DeployApplicationStep2Component
   private scmService = inject(GitSCMService);
   private httpClient = inject(HttpClient);
   private appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+  private deployData = inject(CfDeployAppDataService);
+  private deployState$ = toObservable(this.deployData.state);
+  private sourceType$$ = toObservable(this.deployData.sourceType);
+  private projectExists$ = toObservable(this.deployData.projectExists);
+  private deployBranchName$ = toObservable(this.deployData.deployBranchName);
+  private deployCommit$ = toObservable(this.deployData.newProjectCommit);
+  private peProjectName$ = toObservable(this.deployData.projectName);
 
 
   @Input() isRedeploy = false;
@@ -198,7 +199,7 @@ export class DeployApplicationStep2Component
   ngOnInit() {
     this.sourceType$ = combineLatest(
       this.appDeploySourceTypes.getAutoSelectedType(this.route),
-      this.store.select(selectSourceType),
+      this.sourceType$$,
       this.appDeploySourceTypes.types$.pipe(take(1), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
       map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
@@ -224,9 +225,9 @@ export class DeployApplicationStep2Component
       })
     );
 
-    const cfGuid$ = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails),
-      map((appDetail: DeployApplicationState) => appDetail.cloudFoundryDetails.cloudFoundry)
+    const cfGuid$ = this.deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails),
+      map(appDetail => appDetail.cloudFoundryDetails.cloudFoundry)
     );
 
     this.canDeployType$ = combineLatest([
@@ -265,7 +266,7 @@ export class DeployApplicationStep2Component
 
   /* Git ------------------*/
   private setupForGit() {
-    this.projectInfo$ = this.store.select(selectProjectExists).pipe(
+    this.projectInfo$ = this.projectExists$.pipe(
       filter(p => !!p),
       map(p => (!!p.exists && !!p.data) ? p.data : null),
       tap(p => {
@@ -275,11 +276,10 @@ export class DeployApplicationStep2Component
       })
     );
 
-    const deployBranchName$ = this.store.select(selectDeployBranchName);
-    const deployCommit$ = this.store.select(selectNewProjectCommit);
+    const deployBranchName$ = this.deployBranchName$;
+    const deployCommit$ = this.deployCommit$;
 
-    this.repositoryBranches$ = this.store
-      .select(selectProjectExists)
+    this.repositoryBranches$ = this.projectExists$
       .pipe(
         // Wait for a new project name change
         filter(state => state && !state.checking && !state.error && state.exists),
@@ -338,7 +338,7 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 
-    const setSourceTypeModel$ = this.store.select(selectSourceType).pipe(
+    const setSourceTypeModel$ = this.sourceType$$.pipe(
       filter(p => !!p),
       withLatestFrom(this.appDeploySourceTypes.types$),
       tap(([p, sourceTypes]) => {
@@ -361,7 +361,7 @@ export class DeployApplicationStep2Component
       })
     );
 
-    const setProjectName = this.store.select(selectPEProjectName).pipe(
+    const setProjectName = this.peProjectName$.pipe(
       filter(p => !!p),
       take(1),
       tap(p => {

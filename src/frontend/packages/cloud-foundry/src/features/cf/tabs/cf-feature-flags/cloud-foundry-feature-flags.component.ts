@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
@@ -39,7 +39,7 @@ export class CloudFoundryFeatureFlagsComponent {
       totalPages: this.flagsConfig.view.totalPages,
       pageIndex: this.flagsConfig.pageIndex,
       pageSize: this.flagsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.flagsConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

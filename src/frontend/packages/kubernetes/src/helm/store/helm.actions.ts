@@ -1,6 +1,5 @@
-import { Action } from '@ngrx/store';
+import { Action, EndpointModel } from '../../../../store/src/public-api';
 
-import { EndpointModel } from '../../../../store/src/public-api';
 import { PaginatedAction } from '../../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../../store/src/types/request.types';
 import {

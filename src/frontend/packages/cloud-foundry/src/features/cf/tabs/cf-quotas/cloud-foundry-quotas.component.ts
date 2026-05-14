@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
@@ -78,7 +78,7 @@ export class CloudFoundryQuotasComponent {
       totalPages: this.quotasConfig.view.totalPages,
       pageIndex: this.quotasConfig.pageIndex,
       pageSize: this.quotasConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: computed(() => !this.quotasConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
         {

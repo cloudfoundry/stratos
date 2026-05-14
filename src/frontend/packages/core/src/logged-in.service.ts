@@ -1,8 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, NgZone, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
 import { Store } from '@ngrx/store';
-import { VerifySession, selectDashboardState, DashboardState, AppState, AuthState } from '@stratosui/store';
+import { VerifySession, DashboardState, AppState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
@@ -10,6 +11,8 @@ import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.comp
 import { PageVisible } from './core/page-visible';
 import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from './core/permissions/stratos-user-permissions.checker';
+import { AuthSignalService } from './core/signals/auth-signal.service';
+import { DashboardSignalService } from './core/signals/dashboard-signal.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +23,13 @@ export class LoggedInService {
   private dialog = inject(TailwindDialogService);
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private authSignals = inject(AuthSignalService);
+  private dashboardSignals = inject(DashboardSignalService);
+
+  // Bridge signals → observables once at construction time so the
+  // injection context is available for toObservable().
+  private auth$ = toObservable(this.authSignals.auth);
+  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
   private userInteractionChecker!: Subscription;
   private lastUserInteraction = Date.now();
@@ -56,9 +66,11 @@ export class LoggedInService {
       return fromEvent(this.document, eventName);
     });
 
-    const auth$ = this.store.select(s => s.auth);
     const canNotLogout$ = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.CAN_NOT_LOGOUT);
-    this.sub = combineLatest([auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
+    this.sub = combineLatest([this.auth$, canNotLogout$]).subscribe(([auth, canNotLogout]) => {
+      if (!auth) {
+        return;
+      }
       if (!canNotLogout && auth.loggedIn && auth.sessionData && auth.sessionData.valid && !auth.error) {
         if (!this.sessionChecker || this.sessionChecker.closed) {
           this.openSessionCheckerPoll();
@@ -98,10 +110,13 @@ export class LoggedInService {
       this.sessionChecker = interval(intervalTime)
         .pipe(
           withLatestFrom(
-            this.store.select(selectDashboardState),
-            this.store.select(s => s.auth)
+            this.dashboardState$,
+            this.auth$
           ),
           tap(([, dashboardState, authState]) => {
+            if (!authState) {
+              return;
+            }
             this.ngZone.run(() => {
               this._checkSession(dashboardState, authState);
             });

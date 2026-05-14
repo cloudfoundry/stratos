@@ -2,7 +2,6 @@ import {Component, EnvironmentInjector, Injector, OnDestroy, signal, WritableSig
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, take } from 'rxjs/operators';
 
@@ -24,7 +23,6 @@ import {
 import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
 import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeConfigAuthHelper } from '../kube-config-auth.helper';
 import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.types';
@@ -130,7 +128,6 @@ export class KubeConfigImportComponent implements OnDestroy {
   private iteration = 0;
 
   private connectService: ConnectEndpointService;
-  public store = inject(Store<AppState>);
   private environmentInjector = inject(EnvironmentInjector);
   private injector = inject(Injector);
   private fb = inject(UntypedFormBuilder);

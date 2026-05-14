@@ -4,7 +4,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, 
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store } from '@stratosui/store';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 

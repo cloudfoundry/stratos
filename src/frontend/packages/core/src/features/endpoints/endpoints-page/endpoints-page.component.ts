@@ -1,14 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
+import {
+  EndpointOnlyAppState,
+  RouterNav,
+  Store,
+  stratosEntityCatalog,
+} from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
@@ -43,10 +51,15 @@ import { EndpointsSignalListComponent } from './endpoints-signal-list.component'
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
   store = inject<Store<EndpointOnlyAppState>>(Store);
+  private authSignal = inject(AuthSignalService);
   private ngZone = inject(NgZone);
   private snackBarService = inject(SnackBarService);
   sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
+  private dashboardSignals = inject(DashboardSignalService);
+  private endpointStatusSignals = inject(EndpointStatusSignalService);
+  // Bridge dashboard signal → observable in injection context (field init).
+  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
   // Signal-backed permission flag. The directive-based approach (*appUserPermission
   // + async pipe) was sensitive to CD timing under zoneless Angular 21 — the
@@ -132,7 +145,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Is the backup/restore plugin available on the backend?
     // Defensive: Add catchError to handle session data access issues
-    this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
+    this.canBackupRestore$ = toObservable(this.authSignal.sessionData).pipe(
       filter(sessionData => !!sessionData),
       take(1),
       map(sessionData => sessionData?.plugins?.backup || false),
@@ -141,9 +154,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Create an observable to track when endpoints are loaded and ready
     // Defensive: Add null checks and error handling
-    this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
-      filter(endpointState => !!endpointState),
-      map(endpointState => !endpointState.loading),
+    this.isInitialised$ = toObservable(this.endpointStatusSignals.initialised).pipe(
       delay(500) // Delay to ensure proper loading sequence
     );
   }
@@ -236,7 +247,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     // Subscribe to dashboard state to enable polling if configured
     // Defensive: Add error handling and ensure subscription cleanup
     this.subs.push(
-      this.store.select(selectDashboardState).pipe(
+      this.dashboardState$.pipe(
         filter(dashboard => !!dashboard),
         take(1)
       ).subscribe({
