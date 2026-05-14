@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
@@ -21,7 +20,6 @@ describe('AddSpaceComponent', () => {
         AddSpaceComponent,
       ],
       providers: [
-        provideMockStore(),
         ...STORE_TEST_PROVIDERS,
         {
           provide: TEST_CATALOGUE_ENTITIES,

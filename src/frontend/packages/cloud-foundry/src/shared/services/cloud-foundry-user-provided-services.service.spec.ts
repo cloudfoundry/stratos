@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideMockStore } from '@ngrx/store/testing';
 import { firstValueFrom } from 'rxjs';
 import { describe, it, beforeEach, afterEach, expect } from 'vitest';
 
@@ -21,7 +20,6 @@ describe('CloudFoundryUserProvidedServicesService — V3 write surface', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideMockStore({ initialState: {} }),
         { provide: PaginationMonitorFactory, useValue: {} },
         CloudFoundryUserProvidedServicesService,
       ],
@@ -122,7 +120,6 @@ describe('CloudFoundryUserProvidedServicesService — V3 read surface', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideMockStore({ initialState: {} }),
         { provide: PaginationMonitorFactory, useValue: {} },
         CloudFoundryUserProvidedServicesService,
       ],
