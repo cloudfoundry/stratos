@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
@@ -23,7 +22,6 @@ describe('EditApplicationComponent', () => {
         EditApplicationComponent,
       ],
       providers: [
-        provideMockStore(),
         ...STORE_TEST_PROVIDERS,
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
