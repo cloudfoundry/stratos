@@ -7,7 +7,29 @@
   </div>
 </app-page-header>
 <div class="autoscaler-metric-page">
-  <div class="events-tab">
-    <app-list></app-list>
+  <!-- Time-window selector. Replaces the legacy
+       <app-metrics-range-selector>; presets cover the same 30m / 1h / 2h
+       windows that shipped (custom-range picker dropped in this port —
+       see signal-config.service for the rationale). -->
+  <div class="flex items-center gap-2 px-3 py-2 text-sm text-content-muted">
+    <label for="metric-chart-window">Time window:</label>
+    <select
+      id="metric-chart-window"
+      class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text"
+      [value]="windowValue()"
+      (change)="onWindowChange($any($event.target).value)">
+      @for (w of windows; track w.value) {
+        <option [value]="w.value">{{ w.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="events-tab flex flex-col flex-1 min-h-0">
+    @if (listConfig(); as cfg) {
+      <app-signal-list [config]="cfg">
+        <ng-template #cardTemplate let-row>
+          <app-app-autoscaler-metric-chart-card [row]="$any(row)"></app-app-autoscaler-metric-chart-card>
+        </ng-template>
+      </app-signal-list>
+    }
   </div>
 </div>

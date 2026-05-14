@@ -1,19 +1,24 @@
-// Autoscaler effects retention (wave-3 A-cleanup audit, 2026-05-12):
+// Autoscaler effects retention (wave-3 A-metric-chart port, 2026-05-14):
 //
-// 6 effects retained — each still has a live `new XAction(...)`
-// dispatch site that the signal-native data services have not yet
-// replaced. Per-effect notes:
+// 6 effects retained pending the upcoming effects-deletion slice. With
+// the metric-chart and scaling-events lists now signal-native, the two
+// effects below have no remaining dispatch site and are safe to remove
+// once the EffectsModule.forFeature(...) line in
+// cf-autoscaler-package.module.ts is updated:
+//   - fetchAppAutoscalerPolicyTrigger$ (was: app-autoscaler-metric-chart-data-source)
+//   - fetchAppAutoscalerScalingHistory$ (was: cf-app-autoscaler-events-data-source)
+//
+// Still live (ngrx-backed; replaced when the autoscaler-tab-extension
+// and card-autoscaler-default migrate):
 //   - fetchAutoscalerInfo$:           autoscaler-available.ts ->
 //                                     card-cf-info.component +
 //                                     autoscaler-tab-extension
 //   - getAppAutoscalerPolicy$:        autoscaler-tab-extension +
 //                                     card-autoscaler-default
 //   - detachAppAutoscalerPolicy$:     autoscaler-tab-extension
-//   - fetchAppAutoscalerPolicyTrigger$: app-autoscaler-metric-chart-data-source
-//   - fetchAppAutoscalerScalingHistory$: cf-app-autoscaler-events-data-source
 //   - fetchAppAutoscalerAppMetric$:   autoscaler-tab-extension
 //
-// 5 effects deleted in this slice (no remaining dispatch sites):
+// 5 effects deleted in earlier slices (no remaining dispatch sites):
 //   fetchAppAutoscalerHealth$, createAppAutoscalerPolicy$,
 //   updateAppAutoscalerPolicy$, updateAppAutoscalerCredential$,
 //   deleteAppAutoscalerCredential$.
