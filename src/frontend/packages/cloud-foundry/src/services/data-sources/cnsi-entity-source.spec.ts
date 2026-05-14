@@ -281,6 +281,39 @@ describe('CnsiEntitySource', () => {
     });
   });
 
+  describe('preSeed', () => {
+    it('marks source done with seeded items and totalResults; load() does not fire HTTP', async () => {
+      const http = makeHttp([]); // would throw on shift if called
+      const src = new TestSource('cnsi-1', http);
+      const seed = [new TestItem('a'), new TestItem('b')];
+      src.preSeed(seed);
+      expect(src.items()).toEqual(seed);
+      expect(src.done()).toBe(true);
+      expect(src.totalResults()).toBe(2);
+      expect(src.fetchedPages()).toBe(1);
+      await src.load();
+      expect(http.get).not.toHaveBeenCalled();
+      // Items unchanged after the short-circuited load.
+      expect(src.items()).toEqual(seed);
+    });
+
+    it('subsequent load() (after a seeded one) falls through to HTTP — flag is single-shot', async () => {
+      const fetched = {
+        resources: [new TestItem('x')],
+        pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '...' }, last: { href: '...' } }
+      };
+      const http = makeHttp([fetched]);
+      const src = new TestSource('cnsi-1', http);
+      src.preSeed([new TestItem('seed')]);
+      await src.load(); // short-circuits
+      expect(http.get).not.toHaveBeenCalled();
+      // refresh() re-enters _doLoad — preseeded flag was reset, so HTTP fires.
+      await src.refresh();
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(src.items().map(i => i.guid)).toEqual(['x']);
+    });
+  });
+
   describe('removeItem', () => {
     async function loaded(): Promise<TestSource> {
       const resp = {

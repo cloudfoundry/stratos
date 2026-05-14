@@ -5,6 +5,7 @@ import type { EndpointModel } from '@stratosui/store';
 import { CnsiServiceOfferingsSource } from '../../../../../services/data-sources/cnsi-service-offerings-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import { GlobalEventService, ListStateStore } from '@stratosui/core';
@@ -72,6 +73,11 @@ export class CfServiceOfferingsSignalConfigService {
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
   private readonly eventService = inject(GlobalEventService);
+  // Optional so unit tests don't have to provide it; the real app always
+  // does (providedIn: 'root'). When present, used to short-circuit the
+  // orchestrator's HTTP drain on revisit by pre-seeding each per-CNSI
+  // source from the registry's pre-warmed services-details cache.
+  private readonly registry = inject(EndpointDataRegistry, { optional: true });
   // Effect that publishes orchestrator errors to the page-header banner.
   // Re-bound on each initialize() to track the new orchestrator's
   // errorsByCnsi signal; previous binding is destroyed.
@@ -140,7 +146,21 @@ export class CfServiceOfferingsSignalConfigService {
     if (key === this._initializedFor) return;
     this._initializedFor = key;
     this._hasLoadedOnce.set(false);
-    const sources = cnsiGuids.map(guid => new CnsiServiceOfferingsSource(guid, this.http));
+    const sources = cnsiGuids.map(guid => {
+      const source = new CnsiServiceOfferingsSource(guid, this.http);
+      // Pre-seed from the registry's services-details cache when the
+      // pre-warm has already populated it. Skip when a fresh load is
+      // in-flight — the in-flight will write the cache itself, and the
+      // orchestrator's load() will fall through to its normal HTTP drain
+      // (cheap on a hot backend) rather than risk seeding mid-flight
+      // stale data.
+      const ds = this.registry?.acquire(guid);
+      if (ds && !ds.isLoadingServicesDetails()) {
+        const bundle = ds.serviceOfferingsAndPlans();
+        if (bundle) source.preSeed(bundle.offerings);
+      }
+      return source;
+    });
     this.orchestrator = new MergeOrchestrator<StServiceOffering>(sources);
     this.view = new ViewPipeline<StServiceOffering>(
       this.orchestrator.allItems,
@@ -159,12 +179,30 @@ export class CfServiceOfferingsSignalConfigService {
   async loadAll(): Promise<void> {
     await this.orchestrator.load();
     this._hasLoadedOnce.set(true);
+    this.writeBackToRegistry();
   }
 
   async refresh(): Promise<void> {
     if (!this.orchestrator) return;
     await this.orchestrator.refresh();
     this._hasLoadedOnce.set(true);
+    this.writeBackToRegistry();
+  }
+
+  // Push the per-CNSI offerings array back into the registry's
+  // services-details cache so the next visit to Marketplace finds a hot
+  // bundle. Plans are out of scope for this orchestrator (the offerings
+  // handler doesn't drain plans alongside) — pass [] so the timestamp
+  // still gets stamped without overwriting any plans previously seeded
+  // by loadServicesDetails().
+  private writeBackToRegistry(): void {
+    if (!this.registry || !this.orchestrator) return;
+    for (const source of this.orchestrator.sources) {
+      const ds = this.registry.acquire(source.cnsiGuid);
+      const existing = ds.serviceOfferingsAndPlans();
+      const plans = existing?.plans ?? [];
+      ds.setServiceOfferingsAndPlans(source.items() as StServiceOffering[], plans);
+    }
   }
 
   clearFilters(): void {

@@ -37,6 +37,11 @@ export abstract class CnsiEntitySource<T> {
 
   private _inFlight: Promise<void> | null = null;
   private _inFlightOne: Map<string, Promise<void>> = new Map();
+  // Set true by preSeed() — short-circuits the next _doLoad() so the cached
+  // bundle handed in by the registry-aware signal-config isn't immediately
+  // wiped + re-fetched. The flag flips back to false after that one
+  // short-circuit so refresh() (which re-enters _doLoad) still works.
+  private _preseeded = false;
 
   constructor(
     readonly cnsiGuid: string,
@@ -69,7 +74,34 @@ export abstract class CnsiEntitySource<T> {
     }
   }
 
+  /**
+   * Pre-seed local state from a cache the consumer has already populated
+   * (e.g. the EndpointDataRegistry's pre-warmed services bundle). The next
+   * call to load() will short-circuit, skipping the HTTP drain entirely;
+   * subsequent refresh() / load()-after-refresh calls re-enter the normal
+   * fetch path.
+   *
+   * Idempotent — calling preSeed() twice replaces the prior seed. Marks
+   * the source as done so consumers querying done()/totalResults see the
+   * same shape they'd see after a normal load.
+   */
+  preSeed(items: T[]): void {
+    this._items.set(items);
+    this._totalResults.set(items.length);
+    this._fetchedPages.set(1);
+    this._done.set(true);
+    this._preseeded = true;
+  }
+
   private async _doLoad(): Promise<void> {
+    // Short-circuit when preSeed() handed us a ready bundle. The seed
+    // satisfies this load(); refresh() (or any subsequent load() after
+    // refresh()) will fall through to the normal HTTP drain because the
+    // flag flips off here.
+    if (this._preseeded) {
+      this._preseeded = false;
+      return;
+    }
     this._loading.set(true);
     this._error.set(null);
     this._items.set([]);
