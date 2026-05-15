@@ -488,8 +488,12 @@ export class ListComponent<T> implements OnInit, OnChanges, OnDestroy, AfterView
         // Always force the page size to match the current view's options
         this.paginatorSettings.pageSize = targetSize;
         if (this.dataSource.isLocal) {
+          // force=true so the view-toggle restore lands even when the store
+          // happens to already hold this size from a sibling code path —
+          // otherwise the same-value guard blocks the explicit per-view
+          // restore and the paginator displays a stale value.
           this.store.dispatch(new SetClientPageSize(
-            this.dataSource, this.dataSource.paginationKey, effectiveSize
+            this.dataSource, this.dataSource.paginationKey, effectiveSize, true
           ));
           this.paginationController.page(0);
         } else {
