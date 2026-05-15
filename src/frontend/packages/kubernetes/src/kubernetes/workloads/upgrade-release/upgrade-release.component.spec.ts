@@ -5,12 +5,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { provideStore } from '@ngrx/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
-import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers, appReducers, provideStore } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
 import { generateHelmEntities } from '../../../helm/helm-entity-generator';
