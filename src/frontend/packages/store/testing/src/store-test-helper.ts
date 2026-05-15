@@ -153,21 +153,6 @@ function getDefaultInitialTestStratosStoreState() {
       error: false,
       message: ''
     },
-    dashboard: {
-      sidenavOpen: true,
-      timeoutSession: true,
-      sideHelpOpen: false,
-      sideHelpDocument: '',
-      isMobile: false,
-      isMobileNavOpen: false,
-      sideNavPinned: false,
-      pollingEnabled: true,
-      themeKey: null as any,
-      headerEventMinimized: true,
-      gravatarEnabled: false,
-      homeLayout: 0,
-      homeShowAllEndpoints: true,
-    },
     lists: {},
     routing: {
       previousState: {

@@ -98,6 +98,13 @@ export class GlobalEventService {
   // already clear with auth state.
   private _signalEvents = signal<IGlobalEvent[]>(loadPersistedSignalEvents());
 
+  // Per-key static events published from signal-driven sources (e.g.
+  // app.module's timeout-session / polling-disabled banners that used to
+  // observe `state.dashboard.*` via ngrx). Each entry is keyed; setting
+  // `null` removes that key. Merged into `events$` alongside the ngrx-
+  // driven and `_signalEvents` channels.
+  private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
+
   public events$: Observable<IGlobalEvent[]>;
   public priorityType$: Observable<GlobalEventTypes>;
   public priorityStratosStatus$: Observable<StratosStatus>;
@@ -105,6 +112,25 @@ export class GlobalEventService {
   public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
+  }
+
+  /**
+   * Publish (or clear) a static global event keyed by `key`. Pass an
+   * `event` to set it, `null` to remove it. Used by app.module to
+   * surface signal-derived warnings (timeout-session disabled, polling
+   * disabled) that previously read from the ngrx `state.dashboard`
+   * slice.
+   */
+  public setStaticEvent(key: string, event: IGlobalEvent | null): void {
+    this._staticEvents.update(current => {
+      const next = new Map(current);
+      if (event) {
+        next.set(key, { ...event, key });
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
   }
 
   /**
@@ -308,16 +334,18 @@ export class GlobalEventService {
 
   constructor() {
     const signalEvents$ = toObservable(this._signalEvents, { injector: this.injector });
+    const staticEvents$ = toObservable(this._staticEvents, { injector: this.injector });
     const eventsAndPriority$ = combineLatest([
       this.getEventsAndPriorityType(),
       toObservable(this._readEvents, { injector: this.injector }),
       signalEvents$,
+      staticEvents$,
     ]).pipe(
-      map(([[ngrxEvents, types], readEvents, signalEvents]) => {
+      map(([[ngrxEvents, types], readEvents, signalEvents, staticEvents]) => {
         // Merge ngrx-derived events with signal-published events. Apply
         // read state to both so the page-header banner's dismiss control
         // works the same regardless of source.
-        const events = [...ngrxEvents, ...signalEvents];
+        const events = [...ngrxEvents, ...signalEvents, ...Array.from(staticEvents.values())];
         events.forEach(event => {
           event.read = !!readEvents.get(event.key);
         });

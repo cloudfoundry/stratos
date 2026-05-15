@@ -3,8 +3,8 @@ import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { ConfirmationDialogConfig } from '../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../core/src/shared/components/confirmation-dialog.service';
+import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
 import { BUILD_INFO } from '../../../core/src/environments/build-info';
-import { HydrateDashboardStateAction } from '../actions/dashboard-actions';
 import { HydrateListsStateAction } from '../actions/list.actions';
 import { HydratePaginationStateAction } from '../actions/pagination.actions';
 import { DispatchOnlyAppState } from '../app-state';
@@ -77,9 +77,18 @@ export class LocalStorageService {
   }
 
   /**
-   * Normally used on app init, move local storage data into the console's store
+   * Normally used on app init, move local storage data into the console's store.
+   *
+   * `dashboardData` is optional purely so the legacy callsite signature
+   * doesn't break specs that don't bother instantiating the service.
+   * Real callers pass it so the dashboard slice (signal-native, no
+   * longer ngrx) can hydrate from its user-keyed localStorage entry.
    */
-  public static localStorageToStore(store: Store<DispatchOnlyAppState>, sessionData: SessionData) {
+  public static localStorageToStore(
+    store: Store<DispatchOnlyAppState>,
+    sessionData: SessionData,
+    dashboardData?: DashboardDataService,
+  ) {
     const storage = LocalStorageService.getStorage();
     // We use the username to key the session storage. We could replace this with the users id?
     if (storage && sessionData.user) {
@@ -87,15 +96,17 @@ export class LocalStorageService {
       if (sessionId) {
         // Check version — clear stale preferences if version changed
         if (!LocalStorageService.checkVersionAndClear(storage, sessionId)) {
-          return; // Preferences cleared, use defaults
+          // Preferences cleared, use defaults — but still tell the
+          // dashboard data service the storage key so subsequent
+          // mutations write through to localStorage.
+          dashboardData?.hydrateFromStorage(LocalStorageService.makeKey(sessionId, LocalStorageSyncTypes.DASHBOARD), null);
+          return;
         }
 
-        LocalStorageService.localStorageToStoreSection(
-          LocalStorageSyncTypes.DASHBOARD,
-          dataForStore => store.dispatch(new HydrateDashboardStateAction(dataForStore)),
-          storage,
-          sessionId
-        );
+        if (dashboardData) {
+          const dashboardKey = LocalStorageService.makeKey(sessionId, LocalStorageSyncTypes.DASHBOARD);
+          dashboardData.hydrateFromStorage(dashboardKey, storage.getItem(dashboardKey));
+        }
         LocalStorageService.localStorageToStoreSection(
           LocalStorageSyncTypes.PAGINATION,
           dataForStore => store.dispatch(new HydratePaginationStateAction(dataForStore)),
@@ -159,7 +170,8 @@ export class LocalStorageService {
         return false;
       },
       keys: [
-        LocalStorageSyncTypes.DASHBOARD,
+        // DASHBOARD is signal-native (DashboardDataService) — it owns its
+        // own write path; the metaReducer no longer mirrors it.
         LocalStorageSyncTypes.LISTS,
         {
           [LocalStorageSyncTypes.PAGINATION]: {

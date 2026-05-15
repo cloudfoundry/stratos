@@ -5,7 +5,6 @@ import { EffectsModule } from '@ngrx/effects';
 import { APIEffect } from './effects/api.effects';
 import { ApiKeyEffect } from './effects/apiKey.effects';
 import { AuthEffect } from './effects/auth.effects';
-import { DashboardEffect } from './effects/dashboard.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
@@ -33,7 +32,6 @@ import { AppReducersModule } from './reducers.module';
     EntityCatalogProvidersModule,
     HttpClientModule,
     EffectsModule.forRoot([
-      DashboardEffect,
       APIEffect,
       EndpointApiError,
       AuthEffect,

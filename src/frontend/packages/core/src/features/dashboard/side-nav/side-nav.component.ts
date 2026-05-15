@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AppState, Logout, Store, ToggleSideNav } from '@stratosui/store';
+import { AppState, Logout, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { environment } from '../../../environments/environment';
 import { TabNavItem } from '../../../tab-nav.types';
@@ -40,6 +41,7 @@ export class SideNavComponent implements OnInit {
   private store = inject<Store<AppState>>(Store);
   private router = inject(Router);
   private branding = inject(StratosBrandingService);
+  private dashboardData = inject(DashboardDataService);
 
 
   public customizations: CustomizationsMetadata;
@@ -88,12 +90,12 @@ export class SideNavComponent implements OnInit {
   private isIconMode = true;
 
   public toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
+    this.dashboardData.toggleSideNav();
   }
 
   public toggleSidenavMode() {
     // Toggle the sidebar open/closed state which controls iconMode
-    this.store.dispatch(new ToggleSideNav());
+    this.dashboardData.toggleSideNav();
   }
 
   ngOnInit() {

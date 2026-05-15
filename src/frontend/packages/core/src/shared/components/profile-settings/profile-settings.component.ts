@@ -3,22 +3,18 @@ import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
 import {
-  AppState,
   LocalStorageService,
-  LocalStorageSyncTypes,
-  SetGravatarEnabledAction,
-  SetPollingEnabledAction,
-  SetSessionTimeoutAction } from '@stratosui/store';
+  LocalStorageSyncTypes } from '@stratosui/store';
 import { StratosBrandingService, ThemeMode } from '@stratosui/theme';
 import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
@@ -51,9 +47,9 @@ export enum ProfileSettingsTypes {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileSettingsComponent {
-  private store = inject<Store<AppState>>(Store);
   private authSignals = inject(AuthSignalService);
   private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
   stratosBranding = inject(StratosBrandingService);
   private confirmationService = inject(ConfirmationDialogService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -118,15 +114,15 @@ export class ProfileSettingsComponent {
   }
 
   private setSessionTimeout(timeoutSession: boolean) {
-    this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
+    this.dashboardData.setSessionTimeout(timeoutSession);
   }
 
   public setPollingEnabled(pollingEnabled: boolean) {
-    this.store.dispatch(new SetPollingEnabledAction(pollingEnabled));
+    this.dashboardData.setPollingEnabled(pollingEnabled);
   }
 
   public setGravatarEnabled(gravatarEnabled: boolean) {
-    this.store.dispatch(new SetGravatarEnabledAction(gravatarEnabled));
+    this.dashboardData.setGravatarEnabled(gravatarEnabled);
   }
 
   constructor() {

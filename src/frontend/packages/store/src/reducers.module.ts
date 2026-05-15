@@ -7,7 +7,6 @@ import { authReducer } from './reducers/auth.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
-import { dashboardReducer } from './reducers/dashboard-reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
@@ -32,7 +31,6 @@ export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   request: requestReducer,
   // This is added as part of the entity catalog module.
   // requestData,
-  dashboard: dashboardReducer,
   lists: listReducer,
   routing: routingReducer,
   internalEvents: internalEventReducer,

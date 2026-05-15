@@ -2,7 +2,9 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, NgZone, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
-import { DashboardState, AuthState } from '@stratosui/store';
+import { AuthState } from '@stratosui/store';
+
+import { DashboardState } from './core/dashboard-data.service';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
