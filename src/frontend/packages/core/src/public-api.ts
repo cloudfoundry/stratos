@@ -34,6 +34,7 @@ export { ProfileSettingsTypes } from './shared/components/profile-settings/profi
 // Tailwind Material Replacements
 export * from './shared/services/tailwind-material-replacements';
 export * from './shared/services/tailwind-snackbar.service';
+export * from './shared/services/endpoint-auth-state.service';
 export * from './shared/services/tailwind-dialog.service';
 export * from './shared/services/tailwind-sidenav.service';
 export * from './shared/services/tailwind-sort.service';
