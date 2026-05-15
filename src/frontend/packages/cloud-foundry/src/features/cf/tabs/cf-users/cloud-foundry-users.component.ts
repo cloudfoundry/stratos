@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import {
   ListSubNavComponent,
   SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
+  SignalListHeaderAction,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -38,6 +39,7 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../service
 export class CloudFoundryUsersComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private usersConfig = inject(CfUsersSignalConfigService);
+  private router = inject(Router);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -119,11 +121,37 @@ export class CloudFoundryUsersComponent {
     const renderCreated = (u: StUser): string =>
       CloudFoundryUsersComponent.formatDate(u.createdAt);
 
-    // The L5 sub-nav row above this list shows "Total Users: N" with no
-    // add affordance — Invite User and Manage Users still go through the
-    // legacy stepper routes (/users/manage, /users/invite). When those
-    // flows migrate signal-native, wire an `addAction` onto the L5 row in
-    // the template instead of reintroducing in-toolbar buttons.
+    // Page-level actions reintroduced via SignalList headerActions slot.
+    // Both Invite User and Manage Users currently route to the legacy
+    // stepper components — when they migrate signal-native we keep these
+    // entries pointed at whatever the new home is. Surface as header
+    // buttons rather than per-row actions because they operate on the
+    // CF as a whole, not on individual user rows.
+    const headerActions: SignalListHeaderAction[] = [
+      {
+        label: 'Invite User',
+        icon: 'mail_outline',
+        title: 'Invite a new user to this Cloud Foundry',
+        dataTest: 'cf-users-invite-user',
+        run: (): void => {
+          void this.router.navigate(
+            ['/cloud-foundry', cfGuid, 'users', 'invite'],
+          );
+        },
+      },
+      {
+        label: 'Manage Users',
+        icon: 'group',
+        title: 'Manage org / space role assignments',
+        dataTest: 'cf-users-manage-users',
+        primary: true,
+        run: (): void => {
+          void this.router.navigate(
+            ['/cloud-foundry', cfGuid, 'users', 'manage'],
+          );
+        },
+      },
+    ];
 
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
@@ -193,6 +221,7 @@ export class CloudFoundryUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
+      headerActions,
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);

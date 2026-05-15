@@ -158,6 +158,34 @@ export interface SignalListDropdown {
 
 export type SignalListViewMode = 'table' | 'card';
 
+/**
+ * Page-level action button rendered in the SignalList toolbar — the slot
+ * that hosts affordances like "Invite User" / "Manage Users" / "Add Org".
+ *
+ * Wave-4 of the signal-list framework had this field excised after the
+ * first migration round shipped placeholder snackbar handlers; re-added
+ * with explicit semantics: this is for actions that operate on the LIST
+ * as a whole (open a dialog, navigate to a stepper), not on individual
+ * rows. Row-level actions still use the per-row `kind: 'actions'` column.
+ */
+export interface SignalListHeaderAction {
+  /** Display label inside the button. */
+  readonly label: string;
+  /** Optional Material icon name rendered to the left of the label. */
+  readonly icon?: string;
+  /** Click handler. */
+  readonly run: () => void;
+  /** Optional reactive disabled state — e.g. permission-gated actions. */
+  readonly disabled?: Signal<boolean>;
+  /** Optional tooltip / aria title. */
+  readonly title?: string;
+  /** Optional `data-test` attribute for E2E selectors. */
+  readonly dataTest?: string;
+  /** When true, render with a primary/accent style (typically the page's
+   *  default action). At most one primary per toolbar by convention. */
+  readonly primary?: boolean;
+}
+
 export interface SignalListConfig<T> {
   readonly pagedItems: Signal<T[]>;
   readonly totalFilteredResults: Signal<number>;
@@ -218,6 +246,11 @@ export interface SignalListConfig<T> {
   // panel inside a stepper) skip the paginator chrome until it actually has
   // a job to do. Default false preserves existing behavior.
   readonly hidePagerWhenSingle?: boolean;
+  // Optional — page-level action buttons rendered in the toolbar between
+  // the view toggle and the refresh button. Use for affordances that
+  // operate on the list as a whole (Invite User / Manage Users / Create
+  // Org) — not per-row actions, which still go via `kind: 'actions'`.
+  readonly headerActions?: readonly SignalListHeaderAction[];
 }
 
 @Component({
