@@ -1,41 +1,23 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { AppState, UAASetupState } from '@stratosui/store';
 
-const EMPTY_UAA_SETUP: UAASetupState = {
-  payload: null,
-  setup: false,
-  error: false,
-  message: '',
-  settingUp: false,
-};
+import { UaaSetupDataService, UaaSetupState } from '../uaa-setup-data.service';
 
 /**
- * Signal-native projection of the `uaaSetup` ngrx slice.
- *
- * Read-through wrapper over `Store.select(s => s.uaaSetup)`. Used by the
- * setup-welcome / local-account-wizard / console-uaa-wizard flows, which
- * historically held a long-lived `Observable<UAASetupState>` and pushed it
- * through `combineLatest` against the auth slice.
- *
- * Writes still go through UAA setup actions — this service is read-side only.
+ * Signal-native facade over {@link UaaSetupDataService}. Preserves the
+ * legacy import path for existing wizard consumers; new code should
+ * inject `UaaSetupDataService` directly.
  */
 @Injectable({ providedIn: 'root' })
 export class UaaSetupSignalService {
-  private store = inject<Store<AppState>>(Store);
+  private uaaData = inject(UaaSetupDataService);
 
-  /** Raw uaaSetup slice. Empty/false defaults before the store hydrates. */
-  readonly uaaSetup: Signal<UAASetupState> = toSignal(
-    this.store.select(s => s.uaaSetup),
-    { initialValue: EMPTY_UAA_SETUP }
-  );
+  readonly uaaSetup: Signal<UaaSetupState> = this.uaaData.state;
 
   readonly setup: Signal<boolean> = computed(() => !!this.uaaSetup().setup);
   readonly settingUp: Signal<boolean> = computed(() => !!this.uaaSetup().settingUp);
   readonly error: Signal<boolean> = computed(() => !!this.uaaSetup().error);
   readonly message: Signal<string> = computed(() => this.uaaSetup().message ?? '');
-  readonly payload: Signal<UAASetupState['payload']> = computed(
+  readonly payload: Signal<UaaSetupState['payload']> = computed(
     () => this.uaaSetup().payload ?? null
   );
 }

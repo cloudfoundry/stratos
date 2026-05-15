@@ -13,7 +13,6 @@ import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
-import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
@@ -28,7 +27,6 @@ import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 
 export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   auth: authReducer,
-  uaaSetup: uaaSetupReducer,
   endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,

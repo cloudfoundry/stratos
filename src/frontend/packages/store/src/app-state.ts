@@ -10,8 +10,6 @@ import type { InternalEventsState } from './types/internal-events.types';
 import type { PaginationEntityTypeState } from './types/pagination.types';
 import type { IRecentlyVisitedState } from './types/recently-visited.types';
 import type { RoutingHistory } from './types/routing.type';
-import type { UAASetupState } from './types/uaa-setup.types';
-
 export interface IRequestTypeState {
   [entityKey: string]: any;
 }
@@ -26,7 +24,6 @@ export abstract class AppState<
   T extends Record<string, any> = any
   > {
   auth!: AuthState;
-  uaaSetup!: UAASetupState;
   endpoints!: EndpointState;
   pagination!: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
   request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;

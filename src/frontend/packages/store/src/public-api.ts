@@ -89,7 +89,6 @@ export {
   stratosEntityFactory,
   userFavouritesEntityType,
 } from './helpers/stratos-entity-factory';
-export { SetupConsoleGetScopes, SetupSaveConfig } from './actions/setup.actions';
 export type { IMetricApplication, IMetricCell } from './types/metric.types';
 export { MetricQueryType } from './types/metric.types';
 export { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, EntityCatalogModule } from './entity-catalog.module';
@@ -230,7 +229,6 @@ export {
 export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './reducers/routing.reducer';
-export type { LocalAdminSetupData, UAASetupState } from './types/uaa-setup.types';
 export { GetAllApiKeys } from './actions/apiKey.actions';
 export { getListStateObservables } from './reducers/list.reducer';
 export type { AuthParams } from './actions/endpoint.actions';

@@ -15,7 +15,6 @@ import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect'
 import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SystemEffects } from './effects/system.effects';
-import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
@@ -38,7 +37,6 @@ import { AppReducersModule } from './reducers.module';
       APIEffect,
       EndpointApiError,
       AuthEffect,
-      UAASetupEffect,
       EndpointsEffect,
       PaginationEffects,
       RouterEffect,

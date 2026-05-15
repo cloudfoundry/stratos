@@ -1,13 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { UAASetupState } from '@stratosui/store';
 
+import { UaaSetupDataService, UaaSetupState } from '../uaa-setup-data.service';
 import { UaaSetupSignalService } from './uaa-setup-signal.service';
 
-function makeUaaSetupState(overrides: Partial<UAASetupState> = {}): UAASetupState {
+function makeUaaSetupState(overrides: Partial<UaaSetupState> = {}): UaaSetupState {
   return {
     payload: null,
     setup: false,
@@ -19,18 +17,16 @@ function makeUaaSetupState(overrides: Partial<UAASetupState> = {}): UAASetupStat
 }
 
 describe('UaaSetupSignalService', () => {
-  let uaaSetup$: BehaviorSubject<UAASetupState>;
+  let stateSignal: ReturnType<typeof signal<UaaSetupState>>;
 
   beforeEach(() => {
-    uaaSetup$ = new BehaviorSubject<UAASetupState>(makeUaaSetupState());
-    const stubStore = {
-      select: () => uaaSetup$.asObservable(),
-      dispatch: () => undefined,
-    };
+    stateSignal = signal<UaaSetupState>(makeUaaSetupState());
+    const stubData = { state: stateSignal.asReadonly() };
+
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
+        { provide: UaaSetupDataService, useValue: stubData },
         UaaSetupSignalService,
       ],
     });
@@ -46,7 +42,7 @@ describe('UaaSetupSignalService', () => {
   });
 
   it('reflects uaaSetup updates through projected signals', () => {
-    uaaSetup$.next(makeUaaSetupState({
+    stateSignal.set(makeUaaSetupState({
       setup: true,
       settingUp: false,
       error: true,

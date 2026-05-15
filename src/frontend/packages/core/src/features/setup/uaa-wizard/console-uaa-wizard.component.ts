@@ -4,11 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import {
   AuthState,
-  InternalAppState,
-  SetupConsoleGetScopes,
-  SetupSaveConfig,
   Store,
-  UAASetupState,
   VerifySession,
 } from '@stratosui/store';
 import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
@@ -16,6 +12,7 @@ import { delay, filter, skipWhile, take } from 'rxjs/operators';
 
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
+import { UaaSetupDataService, UaaSetupState } from '../../../core/uaa-setup-data.service';
 
 interface UAAWizardForm {
   apiUrl: FormControl<string>;
@@ -59,10 +56,11 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
-  private store = inject<Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>>(Store);
+  private store = inject(Store);
   private cdr = inject(ChangeDetectorRef);
   private authSignals = inject(AuthSignalService);
   private uaaSetupSignals = inject(UaaSetupSignalService);
+  private uaaSetupData = inject(UaaSetupDataService);
   title = inject(APP_TITLE);
 
   // Bridge signals → observables in injection context (used by step handlers below).
@@ -103,7 +101,7 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   uaaFormStepHandle: SignalStepHandle = {
     valid: this.uaaFormValid.asReadonly(),
     submit: async () => {
-      this.store.dispatch(new SetupConsoleGetScopes({
+      void this.uaaSetupData.checkScopes({
         uaa_endpoint: this.uaaForm.get('apiUrl').value,
         console_client: this.uaaForm.get('clientId').value,
         password: this.uaaForm.get('adminPassword').value,
@@ -112,17 +110,17 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
         console_client_secret: this.uaaForm.get('clientSecret').value,
         use_sso: this.uaaForm.get('useSSO').value,
         console_admin_scope: ''
-      }));
+      });
       const state = await firstValueFrom(
         this.uaaSetup$.pipe(
-          skipWhile((s: UAASetupState) => s.settingUp),
+          skipWhile((s: UaaSetupState) => s.settingUp),
           take(1),
         )
       );
       if (state.error) {
         throw new Error(state.message || 'Failed to fetch UAA scopes');
       }
-      this.uaaScopes = state.payload.scope;
+      this.uaaScopes = state.payload?.scope ?? [];
       if (this.uaaScopes.find(scope => scope === 'stratos.admin')) {
         this.selectedScope = 'stratos.admin';
       } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
@@ -139,7 +137,7 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   uaaScopeStepHandle: SignalStepHandle = {
     valid: signal(true).asReadonly(),
     submit: async () => {
-      this.store.dispatch(new SetupSaveConfig({
+      void this.uaaSetupData.saveConfig({
         uaa_endpoint: this.uaaForm.get('apiUrl').value,
         console_client: this.uaaForm.get('clientId').value,
         password: this.uaaForm.get('adminPassword').value,
@@ -148,15 +146,15 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
         console_client_secret: this.uaaForm.get('clientSecret').value,
         use_sso: this.uaaForm.get('useSSO').value,
         console_admin_scope: this.selectedScope
-      }));
+      });
 
       this.applyingSetup.set(true);
       const state = await firstValueFrom(
         combineLatest([this.uaaSetup$, this.auth$] as [typeof this.uaaSetup$, typeof this.auth$]).pipe(
-          filter(([uaa, auth]: [UAASetupState, AuthState | undefined]) => !!auth && !(uaa.settingUp || auth.verifying)),
+          filter(([uaa, auth]: [UaaSetupState, AuthState | undefined]) => !!auth && !(uaa.settingUp || auth.verifying)),
           delay(2000),
           take(10),
-          filter(([_uaa, auth]: [UAASetupState, AuthState | undefined]) => {
+          filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
             const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
             if (!validUAASessionData) {
               this.store.dispatch(new VerifySession());
