@@ -4,6 +4,7 @@ import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } fr
 import { Store } from '@ngrx/store';
 import {
   EndpointOnlyAppState,
+  EndpointsDataService,
   EntityCatalogHelpers,
   IRequestEntityTypeState,
   IEndpointFavMetadata,
@@ -27,8 +28,8 @@ import { UserService } from './user.service';
   providedIn: 'root'
 })
 export class EndpointsService {
-  // Store is retained only for the per-endpoint metrics selector below.
   private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
   private endpointsSignals = inject(EndpointsSignalService);
   private userService = inject(UserService);
   private endpointHealthChecks = inject(EndpointHealthChecks);
@@ -178,7 +179,7 @@ export class EndpointsService {
 
 
   hasMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.store, endpointId);
+    return endpointHasMetricsByAvailable(this.endpointsService, endpointId);
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {

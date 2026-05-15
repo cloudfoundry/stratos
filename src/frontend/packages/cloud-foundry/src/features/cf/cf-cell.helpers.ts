@@ -5,6 +5,7 @@ import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/oper
 import { endpointHasMetricsByAvailable } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import {
   AppState,
+  EndpointsDataService,
   getPaginationObservables,
   IMetrics,
   MetricQueryConfig,
@@ -19,7 +20,8 @@ export class CfCellHelper {
 
   constructor(
     private store: Store<AppState>,
-    private paginationMonitorFactory: PaginationMonitorFactory) {
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private endpointsService: EndpointsDataService) {
   }
 
   public createCellMetricAction(cfId: string, cellId?: string): Observable<FetchCFCellMetricsPaginatedAction> {
@@ -63,7 +65,7 @@ export class CfCellHelper {
   }
 
   public hasCellMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.store, endpointId).pipe(
+    return endpointHasMetricsByAvailable(this.endpointsService, endpointId).pipe(
       // If metrics set up for this endpoint check if we can fetch cell metrics from it.
       // If the metric is unknown an empty list is returned
       switchMap(hasMetrics => hasMetrics ? this.createCellMetricAction(endpointId).pipe(map(action => !!action)) : of(false))

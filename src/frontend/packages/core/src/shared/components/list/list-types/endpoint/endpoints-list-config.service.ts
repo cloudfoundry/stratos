@@ -1,7 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import {
   AppState,
   EndpointModel,
+  EndpointsDataService,
   entityCatalog,
   EntityMonitorFactory,
   InternalEventMonitorFactory,
@@ -123,6 +124,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     const userFavoriteManager = inject(UserFavoriteManager);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const sessionService = inject(SessionService);
+    const endpointsService = inject(EndpointsDataService);
+    const injector = inject(Injector);
 
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
@@ -163,6 +166,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,
+      endpointsService,
+      injector,
       true
     );
   }

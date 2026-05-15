@@ -1,32 +1,27 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, EndpointState, endpointStatusSelector } from '@stratosui/store';
-
-const EMPTY_STATUS: EndpointState = {
-  loading: false,
-  error: false,
-  message: '',
-};
+import { EndpointsDataService, EndpointState } from '@stratosui/store';
 
 /**
- * Signal-native projection of the endpoints loading/error aggregate
- * (`state.endpoints` — which is the request-state metadata, not the entities).
+ * Signal-native projection of the endpoints loading/error aggregate.
  *
- * Mirrors `Store.select(endpointStatusSelector)` as a signal so guards and
- * page components can read `loading` / `error` / `message` without subscribing.
+ * Wave 2 (W36-B): now sourced from {@link EndpointsDataService} directly
+ * rather than the legacy `endpointStatusSelector`. Maintains the legacy
+ * `EndpointState`-shaped surface (`{loading, error, message}`) so existing
+ * consumers (`status()`, `loading()`, `error()`, `message()`, `initialised()`)
+ * continue to work unchanged.
  *
  * For the entity entries themselves use `EndpointsSignalService.endpoints`.
  */
 @Injectable({ providedIn: 'root' })
 export class EndpointStatusSignalService {
-  private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
 
-  /** Raw endpoints request state. Default-shaped before the store hydrates. */
-  readonly status: Signal<EndpointState> = toSignal(
-    this.store.select(endpointStatusSelector),
-    { initialValue: EMPTY_STATUS }
-  );
+  /** Raw endpoints request state. Default-shaped before the service hydrates. */
+  readonly status: Signal<EndpointState> = computed(() => ({
+    loading: this.endpointsService.loading(),
+    error: !!this.endpointsService.error(),
+    message: this.endpointsService.error() ?? '',
+  }));
 
   readonly loading: Signal<boolean> = computed(() => !!this.status().loading);
   readonly error: Signal<boolean> = computed(() => !!this.status().error);

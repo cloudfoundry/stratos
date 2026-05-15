@@ -1,9 +1,9 @@
 import {
   AppState,
   CreatePagination,
-  endpointEntitiesSelector,
-  endpointEntityType,
   EndpointModel,
+  EndpointsDataService,
+  endpointEntityType,
   EntityMonitorFactory,
   GetAllEndpoints,
   InternalEventMonitorFactory,
@@ -11,6 +11,8 @@ import {
   PaginationMonitorFactory,
   Store,
 } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -56,6 +58,8 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
+    endpointsService: EndpointsDataService,
+    injector: Injector,
     onlyConnected = true,
     filterByType = false
   ) {
@@ -68,7 +72,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       EndpointRowStateSetUpManager,
       false
     );
-    const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
+    const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, endpointsService, injector);
     const config = BaseEndpointsDataSource.getEndpointConfig(
       store,
       action,
@@ -148,13 +152,22 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   static monitorEvents(
     internalEventMonitorFactory: InternalEventMonitorFactory,
     rowStateManager: TableRowStateManager,
-    store: Store<AppState>
+    endpointsService: EndpointsDataService,
+    injector: Injector
   ) {
     const eventMonitor = internalEventMonitorFactory.getMonitor(endpointEntityType);
+    // Wave 2 (W36-B): bridge `endpointsService.endpoints` signal to an
+    // observable so the `withLatestFrom` rxjs pipeline keeps working.
+    // `toObservable` requires an injection context, hence the
+    // `runInInjectionContext` wrap.
+    const endpoints$ = runInInjectionContext(injector, () =>
+      toObservable(endpointsService.endpoints)
+    );
     return eventMonitor.hasErroredOverTime().pipe(
-      withLatestFrom(store.select(endpointEntitiesSelector)),
+      withLatestFrom(endpoints$),
       tap(([errored, endpoints]) => Object.keys(errored).forEach(id => {
-        if (endpoints[id] && endpoints[id].connectionStatus === 'connected') {
+        const endpoint = endpoints.get(id);
+        if (endpoint && endpoint.connectionStatus === 'connected') {
           rowStateManager.updateRowState(id, {
             error: true,
             message: `We've been having trouble communicating with this endpoint`

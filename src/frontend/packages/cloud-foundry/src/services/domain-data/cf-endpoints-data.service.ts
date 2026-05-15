@@ -1,49 +1,46 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
   EndpointModel,
+  EndpointsDataService,
   IRequestEntityTypeState,
-  Store,
-  connectedEndpointsOfTypesSelector,
-  connectedEndpointsSelector,
-  endpointEntitiesSelector,
 } from '@stratosui/store';
 
-import { CFAppState } from '../../cf-app-state';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 
 // Signal-native bridge for Stratos endpoint registry reads consumed
-// across the cloud-foundry package. Wraps the existing NgRx selectors
-// in `toSignal` so consumers can drop their `store.select(...)` calls
-// without waiting for the endpoint state to migrate off NgRx.
+// across the cloud-foundry package.
+//
+// Wave 2 (W36-B): the underlying source is now {@link EndpointsDataService}
+// signals rather than the legacy `endpointEntitiesSelector` /
+// `connectedEndpointsSelector` / `connectedEndpointsOfTypesSelector` chain.
+// The public surface (object-keyed `IRequestEntityTypeState`) is preserved
+// so consumers downstream (`Object.values(...)`, `Object.keys(...)`) keep
+// working unchanged. Each accessor returns a stable `computed` signal
+// derived from the new service's `Map`.
 //
 // Surface kept intentionally minimal — only the selectors actually
 // used in this package are exposed:
 //   all                — Signal<IRequestEntityTypeState<EndpointModel>>
 //   connected          — Signal<IRequestEntityTypeState<EndpointModel>>
 //   connectedCf        — Signal<IRequestEntityTypeState<EndpointModel>>
-//
-// Each accessor returns a stable Signal wired through `toSignal` once
-// at construction; consumers may convert back to Observable via
-// `toObservable` where rxjs interop is still required.
 @Injectable({ providedIn: 'root' })
 export class CfEndpointsDataService {
-  private readonly store = inject<Store<CFAppState>>(Store);
+  private readonly endpointsService = inject(EndpointsDataService);
 
-  readonly all: Signal<IRequestEntityTypeState<EndpointModel>> = toSignal(
-    this.store.select(endpointEntitiesSelector),
-    { initialValue: {} as IRequestEntityTypeState<EndpointModel> },
+  readonly all: Signal<IRequestEntityTypeState<EndpointModel>> = computed(() =>
+    mapToRecord(this.endpointsService.endpoints()),
   );
 
-  readonly connected: Signal<IRequestEntityTypeState<EndpointModel>> = toSignal(
-    this.store.select(connectedEndpointsSelector()),
-    { initialValue: {} as IRequestEntityTypeState<EndpointModel> },
+  readonly connected: Signal<IRequestEntityTypeState<EndpointModel>> = computed(() =>
+    mapToRecord(this.endpointsService.endpoints(), e => e.connectionStatus === 'connected'),
   );
 
-  readonly connectedCf: Signal<IRequestEntityTypeState<EndpointModel>> = toSignal(
-    this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)),
-    { initialValue: {} as IRequestEntityTypeState<EndpointModel> },
+  readonly connectedCf: Signal<IRequestEntityTypeState<EndpointModel>> = computed(() =>
+    mapToRecord(
+      this.endpointsService.endpoints(),
+      e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected',
+    ),
   );
 
   readonly connectedCfList: Signal<EndpointModel[]> = computed(() =>
@@ -53,4 +50,17 @@ export class CfEndpointsDataService {
   readonly hasConnectedCf: Signal<boolean> = computed(() =>
     this.connectedCfList().length > 0,
   );
+}
+
+function mapToRecord(
+  map: Map<string, EndpointModel>,
+  predicate?: (e: EndpointModel) => boolean,
+): IRequestEntityTypeState<EndpointModel> {
+  const out: IRequestEntityTypeState<EndpointModel> = {};
+  map.forEach((endpoint, guid) => {
+    if (!predicate || predicate(endpoint)) {
+      out[guid] = endpoint;
+    }
+  });
+  return out;
 }

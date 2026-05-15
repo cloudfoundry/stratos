@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { EndpointsDataService, GeneralEntityAppState, PermissionValues } from '@stratosui/store';
+import { Observable, defer, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CF_ENDPOINT_TYPE } from '../cf-types';
@@ -23,6 +23,11 @@ import { CfScopeStrings } from './cf-user-permissions.types';
  * transitively pull in `CurrentUserPermissionsService` (and never run a
  * permission check) don't need to provide `@ngrx/store` at all.
  *
+ * Wave 2 (W36-B): the connected-CF-endpoint enumeration now reads from
+ * {@link EndpointsDataService} signals rather than
+ * `connectedEndpointsSelector`. The observable surface is preserved for
+ * the existing rxjs-shaped checker pipelines.
+ *
  * Returns `Observable<...>` rather than `Signal<...>` because the existing
  * checker pipelines (`combineLatest`, `switchMap`, `distinctUntilChanged`)
  * are observable-shaped and porting them piecewise would expand this
@@ -31,6 +36,7 @@ import { CfScopeStrings } from './cf-user-permissions.types';
 @Injectable({ providedIn: 'root' })
 export class CfCurrentUserRolesSignalService {
   private store = inject<Store<GeneralEntityAppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
 
   /** Whether the current user has the named scope on the given CF endpoint. */
   cfEndpointHasScope$(endpointGuid: string, scope: CfScopeStrings): Observable<boolean> {
@@ -49,10 +55,10 @@ export class CfCurrentUserRolesSignalService {
 
   /** GUIDs of every connected CF endpoint. */
   connectedCfEndpointGuids$(): Observable<string[]> {
-    return this.store.select(connectedEndpointsSelector()).pipe(
-      map(endpoints =>
-        Object.values(endpoints)
-          .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE)
+    return defer(() => from(this.endpointsService.whenReady())).pipe(
+      map(() =>
+        Array.from(this.endpointsService.endpoints().values())
+          .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected')
           .map(endpoint => endpoint.guid)
       )
     );

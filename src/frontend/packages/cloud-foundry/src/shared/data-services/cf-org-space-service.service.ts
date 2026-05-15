@@ -1,13 +1,13 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import { ListPaginationMultiFilterChange, naturalCompare, valueOrCommonFalsy } from '@stratosui/core';
 import {
-  connectedEndpointsOfTypesSelector,
   EndpointModel,
+  EndpointsDataService,
   PaginatedAction,
   PaginationEntityState,
   PaginationMonitorFactory,
@@ -145,6 +145,7 @@ interface InitialValues { cf: string; org: string; space: string; }
 export class CfOrgSpaceDataService implements OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private http = inject(HttpClient);
+  private endpointsService = inject(EndpointsDataService);
   paginationMonitorFactory = inject(PaginationMonitorFactory);
 
   private debug: CfOrgSpaceDebug = createCfOrgSpaceDebug();
@@ -165,17 +166,14 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private _autoSelectEnabled = signal(false);
 
   // === Connected CF endpoints ===
-  // Leaf rxjs/ngrx bridge: the connected-endpoint store has no signal
-  // replacement yet. One-line conversion, no operators in the control flow.
-  private connectedCfList = toSignal(
-    this.store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
-      map(endpoints => Object.values(endpoints)
-        .filter(e => e.cnsi_type === 'cf' && e.connectionStatus === 'connected')
-        .sort((a, b) => naturalCompare(a.name, b.name))
-      ),
-    ),
-    { initialValue: [] as EndpointModel[] }
+  // Wave 2 (W36-B): sourced from `EndpointsDataService` signals rather
+  // than `connectedEndpointsOfTypesSelector`. Sorting is done in a
+  // `computed` over the service Map; the legacy rxjs `filter`+`map`
+  // pipeline is no longer needed.
+  private connectedCfList: Signal<EndpointModel[]> = computed(() =>
+    Array.from(this.endpointsService.endpoints().values())
+      .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected')
+      .sort((a, b) => naturalCompare(a.name, b.name))
   );
 
   // === Public derived signals ===

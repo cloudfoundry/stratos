@@ -1,17 +1,12 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import {
   EndpointModel,
-  EndpointOnlyAppState,
+  EndpointsDataService,
   IRequestEntityTypeState,
-  endpointEntitiesSelector,
   entityCatalog,
 } from '@stratosui/store';
 
 import { AuthSignalService } from './auth-signal.service';
-
-const EMPTY_ENDPOINTS: IRequestEntityTypeState<EndpointModel> = {} as IRequestEntityTypeState<EndpointModel>;
 
 /**
  * Signal-native projection of the endpoints slice + auth-derived persistence flag.
@@ -20,20 +15,30 @@ const EMPTY_ENDPOINTS: IRequestEntityTypeState<EndpointModel> = {} as IRequestEn
  * (`endpoints$`, `haveRegistered$`, `haveConnected$`, `connectedEndpoints$`,
  * `disablePersistenceFeatures$`) as `Signal<...>` accessors.
  *
+ * Wave 2 (W36-B): the endpoints map is now sourced from
+ * {@link EndpointsDataService} rather than the legacy `endpointEntitiesSelector`.
+ * The public `endpoints` signal still returns a `Record<guid, EndpointModel>`
+ * to preserve the `Object.keys` / `Object.values` consumer surface; the shape
+ * is computed once per change from the new service's `Map`.
+ *
  * Defensive entity-catalog filtering matches the legacy service behaviour:
  * endpoints whose type is not yet registered are excluded from the
  * "connected" projections rather than throwing.
  */
 @Injectable({ providedIn: 'root' })
 export class EndpointsSignalService {
-  private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
   private auth = inject(AuthSignalService);
 
-  /** Raw endpoint entities keyed by GUID. Empty object before the store hydrates. */
-  readonly endpoints: Signal<IRequestEntityTypeState<EndpointModel>> = toSignal(
-    this.store.select(endpointEntitiesSelector),
-    { initialValue: EMPTY_ENDPOINTS }
-  );
+  /** Raw endpoint entities keyed by GUID. Empty object before the service hydrates. */
+  readonly endpoints: Signal<IRequestEntityTypeState<EndpointModel>> = computed(() => {
+    const map = this.endpointsService.endpoints();
+    const out: IRequestEntityTypeState<EndpointModel> = {};
+    map.forEach((endpoint, guid) => {
+      out[guid] = endpoint;
+    });
+    return out;
+  });
 
   /** True iff at least one endpoint has been registered. */
   readonly haveRegistered: Signal<boolean> = computed(

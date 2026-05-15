@@ -145,7 +145,8 @@ export interface EntityUserRolesEndpoint {
 export type EntityUserRolesFetch = (
   endpoints: string[] | EntityUserRolesEndpoint[],
   store: Store<AppState>,
-  httpClient: HttpClient
+  httpClient: HttpClient,
+  endpointsService: import('../services/endpoints-data.service').EndpointsDataService
 ) => Observable<boolean>;
 
 export type EntityUserRolesReducer<T = any> = (state: T, action: Action) => T;

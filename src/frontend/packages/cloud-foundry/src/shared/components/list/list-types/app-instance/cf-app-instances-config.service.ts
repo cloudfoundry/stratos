@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@stratosui/store';
+import { EndpointsDataService, Store } from '@stratosui/store';
 import { combineLatest as combineLatestObs, Observable } from 'rxjs';
 import { combineLatest, map, switchMap } from 'rxjs/operators';
 import {
@@ -219,7 +219,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     const paginationMonitorFactory = inject(PaginationMonitorFactory);
     const cups = inject(CurrentUserPermissionsService);
 
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
+    const endpointsService = inject(EndpointsDataService);
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory, endpointsService);
 
     this.initialised$ = cellHelper.hasCellMetrics(appService.cfGuid).pipe(
       map(hasMetrics => {

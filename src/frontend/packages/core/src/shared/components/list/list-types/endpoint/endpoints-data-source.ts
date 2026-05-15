@@ -1,6 +1,8 @@
+import { Injector } from '@angular/core';
 import {
   AppState,
   EndpointModel,
+  EndpointsDataService,
   EntityMonitorFactory,
   InternalEventMonitorFactory,
   PaginationMonitorFactory,
@@ -20,6 +22,8 @@ export class EndpointsDataSource extends BaseEndpointsDataSource {
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
+    endpointsService: EndpointsDataService,
+    injector: Injector,
     filterByType = false
   ) {
     super(
@@ -30,6 +34,8 @@ export class EndpointsDataSource extends BaseEndpointsDataSource {
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,
+      endpointsService,
+      injector,
       false,
       filterByType
     );

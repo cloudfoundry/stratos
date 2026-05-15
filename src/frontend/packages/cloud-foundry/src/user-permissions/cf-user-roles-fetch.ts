@@ -1,18 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Action, Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, defer, from, Observable, of } from 'rxjs';
 import { take, catchError, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppState,
   entityCatalog,
+  EndpointsDataService,
   EntityUserRolesEndpoint,
   EntityUserRolesFetch,
   BaseHttpClientFetcher,
   flattenPagination,
   PaginationFlattener,
   ActionState,
-  connectedEndpointsOfTypesSelector,
   selectPaginationState,
   PaginationEntityState,
   BasePaginatedAction } from '@stratosui/store';
@@ -29,18 +29,28 @@ import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { CFResponse } from '../store/types/cf-api.types';
 
 const createEndpointArray = (
-  store: Store<AppState>,
+  endpointsService: EndpointsDataService,
   endpoints: string[] | EntityUserRolesEndpoint[]
 ): Observable<EntityUserRolesEndpoint[]> => {
   // If there's no endpoints get all from store. Alternatively fetch specific endpoint id's from store
   if (!endpoints || !endpoints.length || typeof (endpoints[0]) === 'string') {
     const endpointIds = endpoints as string[];
-    return store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-      take(1),
-      map(cfEndpoints => endpointIds.length === 0 ?
-        Object.values(cfEndpoints) :
-        Object.values(cfEndpoints).filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))
+    // Wave 2 (W36-B): connected CF endpoint enumeration now reads from
+    // {@link EndpointsDataService} signals instead of
+    // `connectedEndpointsOfTypesSelector`. Wrapped in `defer(from(whenReady))`
+    // to preserve the legacy `take(1)` first-emission semantic — callers
+    // still get a single-shot observable that resolves once the data
+    // service has hydrated.
+    return defer(() => from(endpointsService.whenReady())).pipe(
+      map(() =>
+        Array.from(endpointsService.endpoints().values())
+          .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected')
       ),
+      map(cfEndpoints => endpointIds.length === 0 ?
+        cfEndpoints :
+        cfEndpoints.filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))
+      ),
+      take(1),
     );
   }
   return of(endpoints as EntityUserRolesEndpoint[]);
@@ -49,9 +59,10 @@ const createEndpointArray = (
 export const cfUserRolesFetch: EntityUserRolesFetch = (
   endpoints: string[] | EntityUserRolesEndpoint[],
   store: Store<AppState>,
-  httpClient: HttpClient
+  httpClient: HttpClient,
+  endpointsService: EndpointsDataService
 ) => {
-  return createEndpointArray(store, endpoints).pipe(
+  return createEndpointArray(endpointsService, endpoints).pipe(
     switchMap((cfEndpoints: EntityUserRolesEndpoint[]) => {
       const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
       // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised

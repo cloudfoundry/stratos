@@ -1,7 +1,7 @@
 /* tslint:disable:max-line-length */
 import { DatePipe } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
+import { EndpointsDataService, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 
@@ -34,6 +34,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
   private store = inject<Store<CFAppState>>(Store);
   private datePipe = inject(DatePipe);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private endpointsService = inject(EndpointsDataService);
 
 
   dataSource!: CfCellHealthDataSource;
@@ -69,7 +70,7 @@ export class CfCellHealthListConfigService extends BaseCfListConfig<CfCellHealth
   }
 
   private createMetricsAction(cfGuid: string, cellId: string): Observable<FetchCFCellMetricsPaginatedAction> {
-    const cellHelper = new CfCellHelper(this.store, this.paginationMonitorFactory);
+    const cellHelper = new CfCellHelper(this.store, this.paginationMonitorFactory, this.endpointsService);
     return cellHelper.createCellMetricAction(cfGuid, cellId);
   }
 
