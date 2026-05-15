@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import {
@@ -15,16 +14,12 @@ import {
   PermissionConfigLink,
   PermissionTypes,
 } from '@stratosui/core';
-import { GeneralEntityAppState, PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
+import { PermissionValues } from '@stratosui/store';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import {
-  getCurrentUserCFEndpointHasScope,
-  getCurrentUserCFEndpointRolesState,
-  getCurrentUserCFGlobalState,
-} from '../store/selectors/cf-current-user-role.selectors';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
+import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import {
   CfCurrentUserPermissions,
   CfPermissionStrings,
@@ -115,7 +110,7 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 
 @Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private roles = inject(CfCurrentUserRolesSignalService);
 
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
 
@@ -136,11 +131,11 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       if (!endpointGuid) {
         return of(false);
       }
-      return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as CfScopeStrings));
+      return this.roles.cfEndpointHasScope$(endpointGuid, permission as CfScopeStrings);
     }
 
     if (type === CfPermissionTypes.ENDPOINT) {
-      return this.store.select(getCurrentUserCFGlobalState(endpointGuid, permission));
+      return this.roles.cfGlobalState$(endpointGuid, permission);
     }
     return this.getCfEndpointState(endpointGuid).pipe(
       filter(state => !!state),
@@ -337,9 +332,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   private getAllEndpointGuids(): Observable<string[]> {
-    return this.store.select(connectedEndpointsSelector()).pipe(
-      map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === CF_ENDPOINT_TYPE).map(endpoint => endpoint.guid))
-    );
+    return this.roles.connectedCfEndpointGuids$();
   }
 
   private getEndpointGuidObservable(endpointGuid: string | undefined): Observable<string[]> {
@@ -360,7 +353,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   private getCfEndpointState(endpointGuid: string): Observable<any> {
-    return this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid));
+    return this.roles.cfEndpointRolesState$(endpointGuid);
   }
 
   public getComplexCheck(
