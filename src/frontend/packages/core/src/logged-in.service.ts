@@ -2,8 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, NgZone, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
-import { Store } from '@ngrx/store';
-import { VerifySession, DashboardState, AppState, AuthState } from '@stratosui/store';
+import { DashboardState, AuthState } from '@stratosui/store';
 import { combineLatest, fromEvent, interval, merge, Subscription } from 'rxjs';
 import { tap, withLatestFrom } from 'rxjs/operators';
 
@@ -19,7 +18,6 @@ import { DashboardSignalService } from './core/signals/dashboard-signal.service'
 })
 export class LoggedInService {
   private document = inject<Document>(DOCUMENT);
-  private store = inject<Store<AppState>>(Store);
   private dialog = inject(TailwindDialogService);
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -142,7 +140,7 @@ export class LoggedInService {
 
     dialogRef.afterClosed().subscribe((verify: boolean = false) => {
       if (verify) {
-        this.store.dispatch(new VerifySession(false, false));
+        this.authSignals.verifySession(false, false);
         this.openSessionCheckerPoll();
       }
       this.activityPromptShown = false;
@@ -169,7 +167,7 @@ export class LoggedInService {
       const userIsActive = idleDelta < this.userIdlePeriod;
       const pageVisible = new PageVisible(document);
       if ((!dashboardState.timeoutSession && pageVisible.isPageVisible()) || userIsActive) {
-        this.store.dispatch(new VerifySession(false, false));
+        this.authSignals.verifySession(false, false);
       } else {
         this._promptInactiveUser(safeExpire);
         this.closeSessionCheckerPoll();
