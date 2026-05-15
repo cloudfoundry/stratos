@@ -4,11 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import {
   AuthState,
-  InternalAppState,
-  LocalAdminSetupData,
-  SetupSaveConfig,
   Store,
-  UAASetupState,
   VerifySession,
 } from '@stratosui/store';
 import { combineLatest, Observable, firstValueFrom } from 'rxjs';
@@ -17,6 +13,7 @@ import { delay, filter, map, take } from 'rxjs/operators';
 import { APP_TITLE } from '../../../core/core.types';
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
+import { LocalAdminSetupData, UaaSetupDataService, UaaSetupState } from '../../../core/uaa-setup-data.service';
 import { SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
@@ -52,10 +49,11 @@ selector: 'app-local-account-wizard',
 })
 export class LocalAccountWizardComponent implements OnInit {
 
-  private store = inject(Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>);
+  private store = inject(Store);
   private injector = inject(Injector);
   private authSignals = inject(AuthSignalService);
   private uaaSetupSignals = inject(UaaSetupSignalService);
+  private uaaSetupData = inject(UaaSetupDataService);
   public title = inject(APP_TITLE);
 
   // Bridge signals → observables in injection context for use in `next` handler.
@@ -120,21 +118,21 @@ export class LocalAccountWizardComponent implements OnInit {
     };
 
     this.applyingSetup.set(true);
-    this.store.dispatch(new SetupSaveConfig(data));
+    void this.uaaSetupData.saveConfig(data);
     return combineLatest([this.uaaSetup$, this.auth$]).pipe(
-      filter(([uaa, auth]: [UAASetupState, AuthState | undefined]) => {
+      filter(([uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
         return !!auth && !(uaa.settingUp || auth.verifying);
       }),
       delay(2000),
       take(10),
-      filter(([_uaa, auth]: [UAASetupState, AuthState | undefined]) => {
+      filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
         const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
         }
         return validUAASessionData;
       }),
-      map(([uaa]: [UAASetupState, AuthState | undefined]) => {
+      map(([uaa]: [UaaSetupState, AuthState | undefined]) => {
         if (!uaa.error) {
           // Do a hard reload of the app
           const loc = window.location;

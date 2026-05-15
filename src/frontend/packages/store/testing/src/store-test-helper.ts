@@ -148,13 +148,6 @@ function getDefaultInitialTestStratosStoreState() {
       sessionData: testSessionData,
       verifying: false
     },
-    uaaSetup: {
-      payload: null as any,
-      setup: false,
-      error: false,
-      message: '',
-      settingUp: false
-    },
     endpoints: {
       loading: false,
       error: false,
