@@ -3,6 +3,8 @@ import { Injectable, OnDestroy, effect, inject } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 
+import { EndpointModel } from '../types/endpoint.types';
+
 import {
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
@@ -13,6 +15,7 @@ import {
 } from '../actions/recently-visited.actions';
 import { SendClearEndpointEventsAction } from '../actions/internal-events.actions';
 import { ResetPaginationOfType } from '../actions/pagination.actions';
+import { RemoveEntitiesForEndpoint } from '../actions/remove-entities-for-endpoint.actions';
 import { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EntityUserRolesEndpoint } from '../entity-request-pipeline/entity-request-pipeline.types';
@@ -65,6 +68,7 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
 
   private disconnectHandlers: Array<(event: EndpointDisconnectEvent) => void> = [];
   private connectHandlers: Array<(event: EndpointConnectEvent) => void> = [];
+  private endpointsObservers: Array<(endpoints: Map<string, EndpointModel>) => void> = [];
 
   /**
    * Track previously-seen endpoint guids so the prune-recents effect only
@@ -132,10 +136,35 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
     this.store.dispatch(new PruneRecentsToConnectedAction(connectedGuids));
   });
 
+  /**
+   * Wave 4 part 2 (W36-B): mirrors what legacy `helm.effects.ts
+   * updateOnSyncFinished$` did off `GET_ENDPOINTS_SUCCESS` — fires every
+   * time the endpoint set is hydrated/refreshed so plugin observers can
+   * react to status fields (e.g. "Synchronizing" helm endpoints) without
+   * coupling to legacy ngrx actions. Unlike `pruneRecentsEffect`, we do
+   * NOT short-circuit on identical-guid sets: an endpoint's metadata
+   * (status, sub_type, …) can change without the guid set changing, and
+   * helm's sync watcher needs to see those mutations.
+   */
+  private readonly endpointsHydrationEffect = effect(() => {
+    const endpoints = this.endpointsService.endpoints();
+    if (this.endpointsObservers.length === 0) {
+      return;
+    }
+    for (const observer of this.endpointsObservers) {
+      try {
+        observer(endpoints);
+      } catch (err) {
+        console.warn('[EndpointDisconnectCleanup] endpoints observer threw', err);
+      }
+    }
+  });
+
   ngOnDestroy(): void {
     this.disconnectEffect.destroy();
     this.connectEffect.destroy();
     this.pruneRecentsEffect.destroy();
+    this.endpointsHydrationEffect.destroy();
   }
 
   /**
@@ -155,6 +184,17 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
    */
   registerConnectHandler(handler: (event: EndpointConnectEvent) => void): void {
     this.connectHandlers.push(handler);
+  }
+
+  /**
+   * Wave 4 part 2 (W36-B): plugin layers register an observer here to
+   * react to every endpoint-set hydration/refresh cycle (replacing
+   * `GET_ENDPOINTS_SUCCESS` ngrx action listeners). The handler receives
+   * the live `Map<guid, EndpointModel>` after the cleanup service's
+   * signal effect fires.
+   */
+  registerEndpointsObserver(handler: (endpoints: Map<string, EndpointModel>) => void): void {
+    this.endpointsObservers.push(handler);
   }
 
   // ---- internals ---------------------------------------------------------
@@ -181,6 +221,13 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
     //    `recently-visited.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`
     //    branch.
     this.store.dispatch(new CleanRecentsForEndpointsAction([event.guid]));
+    // 4. Per-entity-slice prune — replaces the legacy per-entity
+    //    `endpointDisconnectRemoveEntitiesReducer()` dataReducers (26 cf +
+    //    4 git inline registrations) and the
+    //    `endpoint-disconnect-application.reducer.ts` file. The reducer
+    //    walks `entityCatalog.getAllEntitiesForEndpointType(event.type)`
+    //    and prunes by `cfGuid` / `endpointGuid`.
+    this.store.dispatch(new RemoveEntitiesForEndpoint(event.type, event.guid));
   }
 
   private runGenericConnectCleanup(event: EndpointConnectEvent): void {

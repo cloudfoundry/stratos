@@ -69,6 +69,12 @@ export interface EndpointConnectEvent {
   guid: string;
   type: EndpointType;
   name: string;
+  /**
+   * Endpoint sub-type tag (e.g. `helm-hub` for HELM endpoints). Optional
+   * because not every endpoint type has sub-types; consumers should
+   * fall back to `undefined`.
+   */
+  subType?: string;
   /** User the endpoint is now connected as — required by `userRolesFetch`. */
   user: EndpointModel['user'];
 }
@@ -339,6 +345,7 @@ export class EndpointsDataService {
             guid,
             type: after.cnsi_type,
             name: after.name,
+            subType: after.sub_type,
             user: after.user,
           });
         }
