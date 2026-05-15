@@ -1,15 +1,5 @@
 import { AddApiKey, DeleteApiKey, GetAllApiKeys } from './actions/apiKey.actions';
-import {
-  AuthParams,
-  ConnectEndpoint,
-  DisconnectEndpoint,
-  GetAllEndpoints,
-  GetEndpoint,
-  RegisterEndpoint,
-  UnregisterEndpoint,
-  UpdateEndpoint,
-} from './actions/endpoint.actions';
-import { GetSystemInfo, GetSystemInfoAssociatedAction } from './actions/system.actions';
+import { GetSystemInfo } from './actions/system.actions';
 import {
   GetUserFavoritesAction,
   RemoveUserFavoriteAction,
@@ -19,146 +9,16 @@ import {
 } from './actions/user-favourites.actions';
 import { FetchUserProfileAction, UpdateUserPasswordAction, UpdateUserProfileAction } from './actions/user-profile.actions';
 import { OrchestratedActionBuilders } from './entity-catalog/action-orchestrator/action-orchestrator';
-import { EndpointType } from './extension-types';
 import { IFavoriteMetadata, UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo, UserProfilePasswordUpdate } from './types/user-profile.types';
-
-export interface EndpointActionBuilder extends OrchestratedActionBuilders {
-  get: (
-    guid: string,
-  ) => GetEndpoint;
-  getAll: (
-    login?: boolean,
-  ) => GetAllEndpoints;
-  getMultiple: (
-    endpointGuid?: string,
-    paginationKey?: string,
-    args?: { login: boolean, }
-  ) => GetAllEndpoints;
-  connect: (
-    guid: string,
-    endpointType: EndpointType,
-    authType: string,
-    authValues: AuthParams,
-    systemShared: boolean,
-    body: string,
-  ) => ConnectEndpoint;
-  disconnect: (
-    guid: string,
-    endpointType: EndpointType,
-  ) => DisconnectEndpoint;
-  unregister: (
-    guid: string,
-    endpointType: EndpointType,
-  ) => UnregisterEndpoint;
-  register: (
-    endpointType: EndpointType,
-    endpointSubType: string,
-    name: string,
-    endpoint: string,
-    skipSslValidation: boolean,
-    clientID?: string,
-    clientSecret?: string,
-    ssoAllowed?: boolean,
-    createSystemEndpointField?: boolean,
-    caCert?: string,
-  ) => RegisterEndpoint;
-  update: (
-    guid: string,
-    endpointGuid: string,
-    args: {
-      endpointType: EndpointType,
-      id: string,
-      name: string,
-      skipSSL: boolean,
-      setClientInfo: boolean,
-      clientID: string,
-      clientSecret: string,
-      allowSSO: boolean,
-      caCert?: string,
-    }
-  ) => UpdateEndpoint;
-}
-
-export const endpointActionBuilder: EndpointActionBuilder = {
-  get: (guid: string) => new GetEndpoint(guid),
-  getAll: (login: boolean) => new GetAllEndpoints(login),
-  getMultiple: (
-    endpointGuid?: string,
-    paginationKey?: string,
-    args?: { login: boolean, }
-  ) => new GetAllEndpoints(args ? args.login : false),
-  connect: (
-    guid: string,
-    endpointType: EndpointType,
-    authType: string,
-    authValues: AuthParams,
-    systemShared: boolean,
-    body: string,
-  ) => new ConnectEndpoint(guid, endpointType, authType, authValues, systemShared, body),
-  disconnect: (guid: string, endpointType: EndpointType) => new DisconnectEndpoint(guid, endpointType),
-  unregister: (guid: string, endpointType: EndpointType) => new UnregisterEndpoint(guid, endpointType),
-  register: (
-    endpointType: EndpointType,
-    endpointSubType: string,
-    name: string,
-    endpoint: string,
-    skipSslValidation: boolean,
-    clientID?: string,
-    clientSecret?: string,
-    ssoAllowed?: boolean,
-    createSystemEndpoint?: boolean,
-    caCert?: string,
-  ) => new RegisterEndpoint(
-    endpointType,
-    endpointSubType,
-    name,
-    endpoint,
-    skipSslValidation,
-    clientID,
-    clientSecret,
-    ssoAllowed,
-    createSystemEndpoint,
-    caCert,
-  ),
-  update: (
-    guid: string,
-    endpointGuid: string,
-    args: {
-      endpointType: EndpointType,
-      // id: string,
-      name: string,
-      skipSSL: boolean,
-      setClientInfo: boolean,
-      clientID: string,
-      clientSecret: string,
-      allowSSO: boolean,
-      caCert?: string,
-    }
-  ) => new UpdateEndpoint(
-    args.endpointType,
-    guid,
-    args.name,
-    args.skipSSL,
-    args.setClientInfo,
-    args.clientID,
-    args.clientSecret,
-    args.allowSSO,
-    args.caCert,
-  ),
-};
 
 export interface SystemInfoActionBuilder extends OrchestratedActionBuilders {
   getSystemInfo: (
     login?: boolean,
-    associatedAction?: GetSystemInfoAssociatedAction
   ) => GetSystemInfo;
 }
 export const systemInfoActionBuilder: SystemInfoActionBuilder = {
-  getSystemInfo: (
-    login?: false,
-    associatedAction?: GetSystemInfoAssociatedAction
-  ) => new GetSystemInfo(login, associatedAction)
+  getSystemInfo: (login?: false) => new GetSystemInfo(login)
 };
 
 export interface UserFavoriteActionBuilder extends OrchestratedActionBuilders {

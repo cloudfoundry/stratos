@@ -45,9 +45,4 @@ export class PermissionsEffects {
       return of(failedAction);
     })
   ));
-
-  // Wave 4 part 1 (W36-B): `getPermissionForNewlyConnectedEndpoint$` was
-  // retired here. Its per-endpoint userRolesFetch trigger now lives in
-  // `EndpointDisconnectCleanupService.runGenericConnectCleanup`, driven by
-  // `EndpointsDataService.connectedSignal`.
 }

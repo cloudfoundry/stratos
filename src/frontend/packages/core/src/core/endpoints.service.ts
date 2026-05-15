@@ -11,8 +11,8 @@ import {
   UserFavorite,
   entityCatalog,
   EndpointHealthCheck,
-  EndpointModel,
-  EndpointState } from '@stratosui/store';
+  EndpointModel } from '@stratosui/store';
+import { EndpointStatusState } from './signals/endpoint-status-signal.service';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
 
@@ -279,7 +279,7 @@ export const endpointsGuard: CanActivateFn = (
       endpointsService.disablePersistenceFeatures$
     ),
     map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
-      : [[any, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
+      : [[any, EndpointStatusState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
       const [authState] = state;
 
       if (authState.sessionData.valid) {

@@ -173,7 +173,7 @@ import { populatePaginationFromParent } from './entity-relations/entity-relation
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
-import { cfUserReducer, endpointDisconnectUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
+import { cfUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
@@ -998,7 +998,7 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
     definition,
     {
       actionBuilders: userActionBuilders,
-      dataReducers: [cfUserReducer, endpointDisconnectUserReducer],
+      dataReducers: [cfUserReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.username || ent.entity.guid || ent.metadata.guid,

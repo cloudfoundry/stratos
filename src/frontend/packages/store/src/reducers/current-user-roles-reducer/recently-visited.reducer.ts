@@ -32,11 +32,6 @@ export function recentlyVisitedReducer(
       };
       return newState;
     }
-    // Wave 4 part 1 (W36-B): cleanup actions dispatched by
-    // EndpointDisconnectCleanupService in response to the
-    // EndpointsDataService disconnect / endpoints signals. Replaces the
-    // legacy direct listeners on `*_ENDPOINTS_SUCCESS` /
-    // `GET_ENDPOINTS_SUCCESS` ngrx actions.
     case CleanRecentsForEndpointsAction.ACTION_TYPE: {
       const cleanAction = action as CleanRecentsForEndpointsAction;
       return cleanRecentsList(state, cleanAction.endpointGuids);

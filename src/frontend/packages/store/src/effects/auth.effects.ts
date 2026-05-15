@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
+import { from } from 'rxjs';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import {
@@ -24,11 +25,10 @@ import {
   VERIFY_SESSION,
   VerifySession,
 } from '../actions/auth.actions';
-import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { LocalStorageService } from '../helpers/local-storage-service';
-import { stratosEntityCatalog } from '../stratos-entity-catalog';
+import { EndpointsDataService } from '../services/endpoints-data.service';
 import { SessionDataEnvelope } from '../types/auth.types';
 import { StratosBrandingService } from '@stratosui/theme';
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
@@ -48,6 +48,7 @@ export class AuthEffect {
   private appRef = inject(ApplicationRef);
   private branding = inject(StratosBrandingService);
   private dashboardData = inject(DashboardDataService);
+  private endpointsService = inject(EndpointsDataService);
 
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
@@ -104,10 +105,24 @@ export class AuthEffect {
             LocalStorageService.localStorageToStore(this.store, sessionData, this.dashboardData);
             this.branding.activateUserPreferences();
             this.appRef.tick();
-            return [
-              stratosEntityCatalog.systemInfo.actions.getSystemInfo(true),
-              new VerifiedSession(sessionData, action.updateEndpoints)
-            ];
+            // Wave 5 (W36-B): replaces the legacy
+            // `stratosEntityCatalog.systemInfo.actions.getSystemInfo(true)`
+            // dispatch + `EndpointsSuccess$` listener pair. The
+            // EndpointsDataService.getAll(true) call hydrates the
+            // endpoints map and (on success) triggers LoginSuccess
+            // directly — collapsing the legacy two-action saga into a
+            // single Promise chain per audit decision B.
+            const verified: Action = new VerifiedSession(sessionData, action.updateEndpoints);
+            return from(
+              this.endpointsService.getAll(true)
+                .then(() => {
+                  this.appRef.tick();
+                  return action.login
+                    ? [verified, new LoginSuccess()]
+                    : [verified];
+                })
+                .catch(() => [verified])
+            ).pipe(mergeMap(actions => actions));
           }
         }),
         catchError((err, _caught) => {
@@ -124,16 +139,6 @@ export class AuthEffect {
           this.appRef.tick();
           return action.login ? [new InvalidSession(setupMode, isUpgrading, isDomainMismatch, ssoOptions)] : [new ResetAuth()];
         }));
-    })));
-
-   EndpointsSuccess$ = createEffect(() => this.actions$.pipe(
-    ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
-    mergeMap(action => {
-      if (action.login) {
-        this.appRef.tick();
-        return [new LoginSuccess()];
-      }
-      return [];
     })));
 
    invalidSessionAuth$ = createEffect(() => this.actions$.pipe(

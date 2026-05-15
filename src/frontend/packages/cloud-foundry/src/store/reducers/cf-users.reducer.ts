@@ -1,4 +1,3 @@
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { deepMergeState } from '../../../../store/src/helpers/reducer.helper';
 import { APIResource, NormalizedResponse } from '../../../../store/src/types/api.types';
@@ -12,7 +11,6 @@ import {
 } from '../../actions/users.actions';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfUserEntityType } from '../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   CfUser,
   CfUserMissingOrgRoles,
@@ -58,25 +56,6 @@ export function cfUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>
     case GET_ORGANIZATION_USERS_SUCCESS:
       // Determine if any of the user's roles have not been provided
       return updateUserMissingRoles(state, action);
-  }
-  return state;
-}
-
-export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint): IRequestEntityTypeState<APIResource<CfUser>> {
-  if (action.endpointType === CF_ENDPOINT_TYPE) {
-    switch (action.type) {
-      case DISCONNECT_ENDPOINTS_SUCCESS: {
-        const cfGuid = action.guid;
-        // remove users that belong to this CF
-        const newUsers: IRequestEntityTypeState<APIResource<CfUser>> = {};
-        Object.values(state)
-          .filter((u: APIResource<CfUser>) => u.entity.cfGuid !== cfGuid)
-          .forEach((u: APIResource<CfUser>) => {
-            newUsers[u.metadata.guid] = u;
-          });
-        return newUsers;
-      }
-    }
   }
   return state;
 }

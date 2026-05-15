@@ -3,11 +3,6 @@ import { Action } from '@ngrx/store';
 import {
   SESSION_VERIFIED,
   VerifiedSession,
-  CONNECT_ENDPOINTS_SUCCESS,
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  EndpointActionComplete,
-  REGISTER_ENDPOINTS_SUCCESS,
-  UNREGISTER_ENDPOINTS_SUCCESS,
   APISuccessOrFailedAction
 } from '@stratosui/store';
 import { EntityUserRolesReducer } from '../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
@@ -26,6 +21,14 @@ import {
 } from '../../../actions/permissions.actions';
 import { DELETE_SPACE_SUCCESS } from '../../../actions/space.actions';
 import { ADD_CF_ROLE_SUCCESS, REMOVE_CF_ROLE_SUCCESS } from '../../../actions/users.actions';
+import {
+  CF_ROLE_ENDPOINT_CONNECTED,
+  CF_ROLE_ENDPOINT_REGISTERED,
+  CF_ROLE_ENDPOINT_REMOVED,
+  CfRoleEndpointConnectedAction,
+  CfRoleEndpointRegisteredAction,
+  CfRoleEndpointRemovedAction,
+} from '../../actions/cf-endpoint-role.actions';
 import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
 import { currentUserBaseCFRolesReducer } from './current-cf-user-base-cf-role.reducer';
 import { cfRoleInfoFromSessionReducer, updateNewlyConnectedCfEndpoint } from './current-cf-user-role-session.reducer';
@@ -48,13 +51,12 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState>
     }
     case SESSION_VERIFIED:
       return cfRoleInfoFromSessionReducer(state, action as VerifiedSession);
-    case REGISTER_ENDPOINTS_SUCCESS:
-      return addCfEndpoint(state, action as EndpointActionComplete);
-    case CONNECT_ENDPOINTS_SUCCESS:
-      return updateNewlyConnectedCfEndpoint(state, action as EndpointActionComplete);
-    case DISCONNECT_ENDPOINTS_SUCCESS:
-    case UNREGISTER_ENDPOINTS_SUCCESS:
-      return removeEndpointCfRoles(state, action as EndpointActionComplete);
+    case CF_ROLE_ENDPOINT_REGISTERED:
+      return addCfEndpoint(state, action as CfRoleEndpointRegisteredAction);
+    case CF_ROLE_ENDPOINT_CONNECTED:
+      return updateNewlyConnectedCfEndpoint(state, action as CfRoleEndpointConnectedAction);
+    case CF_ROLE_ENDPOINT_REMOVED:
+      return removeEndpointCfRoles(state, action as CfRoleEndpointRemovedAction);
     case DELETE_ORGANIZATION_SUCCESS:
       return removeCfOrgRoles(state, action as APISuccessOrFailedAction);
     case DELETE_SPACE_SUCCESS:

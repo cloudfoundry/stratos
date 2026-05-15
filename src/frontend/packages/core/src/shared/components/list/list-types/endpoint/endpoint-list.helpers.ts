@@ -69,7 +69,7 @@ export class EndpointListHelper {
     const customActions = entityCatalog.getAllEndpointTypes()
       .map(endpoint => endpoint.definition.endpointListActions)
       .filter(endpointListActions => !!endpointListActions)
-      .map(endpointListActions => endpointListActions(this.store))
+      .map(endpointListActions => endpointListActions(this.store, this.endpointsData))
       .reduce((res, actions) => res.concat(actions), []);
 
     if (includeSeparators && customActions.length) {

@@ -138,22 +138,6 @@ function paginate(action: any, state: PaginationState = {}, updatePagination: an
     return paginationClearOfEntity(state, action);
   }
 
-  // Wave 4 part 1 (W36-B): the legacy `isEndpointAction` branch (which
-  // ran `resetEndpointEntities` synchronously inside the pagination
-  // reducer cycle on `CONNECT/DISCONNECT_ENDPOINTS_SUCCESS` /
-  // `UNREGISTER_ENDPOINTS` — note: the latter was the request action,
-  // not _SUCCESS, a long-standing latent bug) was deleted. Cleanup is
-  // now driven by `EndpointDisconnectCleanupService`'s signal effect on
-  // `EndpointsDataService.disconnectedSignal`, which dispatches
-  // `ResetPaginationOfType` per affected entity. The new path fires via
-  // `UNREGISTER_ENDPOINTS_SUCCESS` (correct semantic) and the
-  // disconnected-signal pipeline guarantees the same observable
-  // outcome — pagination cleared after disconnect/unregister — modulo
-  // a single Angular microtask of latency vs the legacy synchronous
-  // reducer-cycle wipe. Acceptable for W36-B (consumers tolerated
-  // multi-frame async refresh in the legacy path already since
-  // pagination feeds Observable selectors).
-
   if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action as UpdatePaginationMaxedState);
   }
@@ -247,13 +231,6 @@ function enterPaginationReducer(state: PaginationState, action: any, updatePagin
   if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
     if (!newState[entityKey]) {
-      // Wave 4 part 1 (W36-B): the legacy `isEndpointAction` branch used
-      // to return early before this point for any endpoint-action — its
-      // removal exposed a latent NPE here when an action's entity slot
-      // hadn't been initialized (e.g. shim dispatch on a fresh test
-      // store). Initialize the slot so updatePagination receives
-      // `undefined` (its standard "initial state" sentinel) rather than
-      // crashing reading `undefined[paginationKey]`.
       logMissing(`entity type ''`, Object.keys(newState));
       newState[entityKey] = {};
     }

@@ -6,7 +6,6 @@ import { APIEffect } from './effects/api.effects';
 import { ApiKeyEffect } from './effects/apiKey.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
-import { EndpointsEffect } from './effects/endpoint.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { PermissionsEffects } from './effects/permissions.effect';
@@ -36,7 +35,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
       APIEffect,
       EndpointApiError,
       AuthEffect,
-      EndpointsEffect,
       PaginationEffects,
       RouterEffect,
       SystemEffects,

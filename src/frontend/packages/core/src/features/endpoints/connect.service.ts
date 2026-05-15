@@ -4,10 +4,15 @@ import {
   entityCatalog,
   EndpointModel,
   EndpointsDataService,
-  AuthParams,
   EndpointType,
   ActionState,
 } from '@stratosui/store';
+
+export interface ConnectAuthParams {
+  username?: string;
+  password?: string;
+  token?: string;
+}
 import { combineLatest, defer, from, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
@@ -24,7 +29,7 @@ export interface ConnectEndpointConfig {
 
 export interface ConnectEndpointData {
   authType: string;
-  authVal: AuthParams;
+  authVal: ConnectAuthParams;
   systemShared: boolean;
   bodyContent: string;
 }

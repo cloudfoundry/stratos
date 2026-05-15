@@ -1,23 +1,22 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { EndpointsDataService, EndpointState } from '@stratosui/store';
+import { EndpointsDataService } from '@stratosui/store';
+
+export interface EndpointStatusState {
+  loading: boolean;
+  error: boolean;
+  message: string;
+}
 
 /**
- * Signal-native projection of the endpoints loading/error aggregate.
- *
- * Wave 2 (W36-B): now sourced from {@link EndpointsDataService} directly
- * rather than the legacy `endpointStatusSelector`. Maintains the legacy
- * `EndpointState`-shaped surface (`{loading, error, message}`) so existing
- * consumers (`status()`, `loading()`, `error()`, `message()`, `initialised()`)
- * continue to work unchanged.
- *
- * For the entity entries themselves use `EndpointsSignalService.endpoints`.
+ * Signal-native projection of the endpoints loading/error aggregate,
+ * sourced from {@link EndpointsDataService}.
  */
 @Injectable({ providedIn: 'root' })
 export class EndpointStatusSignalService {
   private endpointsService = inject(EndpointsDataService);
 
   /** Raw endpoints request state. Default-shaped before the service hydrates. */
-  readonly status: Signal<EndpointState> = computed(() => ({
+  readonly status: Signal<EndpointStatusState> = computed(() => ({
     loading: this.endpointsService.loading(),
     error: !!this.endpointsService.error(),
     message: this.endpointsService.error() ?? '',

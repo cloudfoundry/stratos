@@ -7,7 +7,6 @@ import { authReducer } from './reducers/auth.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
-import { endpointsReducer } from './reducers/endpoints.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
@@ -26,7 +25,6 @@ import { routingReducer } from './reducers/routing.reducer';
 
 export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   auth: authReducer,
-  endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
   // This is added as part of the entity catalog module.

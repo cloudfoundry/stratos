@@ -23,17 +23,12 @@ export class SystemEffects {
    getInfo$ = createEffect(() => this.actions$.pipe(
     ofType<GetSystemInfo>(GET_SYSTEM_INFO),
     mergeMap(action => {
-      // Associated action with be either get endpoint or get all endpoints/
-      // Start action for those two are dispatched here, as well as error handling
-      // Success actions are handling in the effect associated with GetSystemSuccess
       this.store.dispatch(new StartRequestAction(action));
-      const { associatedAction } = action;
-      this.store.dispatch(new StartRequestAction(associatedAction, 'fetch'));
       return this.httpClient.get('/pp/v1/info').pipe(
         mergeMap((info: SystemInfo) => {
           this.appRef.tick();
           return [
-            new GetSystemSuccess(info, action.login, associatedAction),
+            new GetSystemSuccess(info, action.login),
             new WrapperRequestActionSuccess({ entities: {}, result: [] }, action)
           ];
         }), catchError((_e) => {

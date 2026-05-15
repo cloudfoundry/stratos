@@ -22,6 +22,7 @@ import type {
 } from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
 import type { EndpointAuthTypeConfig } from '../extension-types';
 import type { EntitySchema } from '../helpers/entity-schema';
+import type { EndpointsDataService } from '../services/endpoints-data.service';
 import type { EndpointModel } from '../types/endpoint.types';
 import type { StratosStatus } from '../types/shared.types';
 import type { UserFavorite } from '../types/user-favorites.types';
@@ -178,7 +179,10 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    * A list of actions that will be displayed in the endpoints lists
    * Note - These should be restricted by type
    */
-  readonly endpointListActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
+  readonly endpointListActions?: (
+    store: Store<AppState>,
+    endpointsService: EndpointsDataService,
+  ) => IListAction<EndpointModel>[];
 
   /**
    * Metadata for the card to show on the Home Page for this endpoint type

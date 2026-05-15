@@ -32,11 +32,6 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
       return clearEvents(state, action as SendClearEventAction);
     }
     case CLEAR_ENDPOINT_ERROR_EVENTS: {
-      // Wave 4 part 1 (W36-B): EndpointDisconnectCleanupService dispatches
-      // SendClearEndpointEventsAction in response to disconnect / connect /
-      // (Wave 5: register / update) signal events. The legacy direct
-      // listeners on `*_ENDPOINTS_SUCCESS` / `UPDATE_ENDPOINT_SUCCESS`
-      // collapsed into this single path.
       const clearEndpointAction = action as SendClearEndpointEventsAction;
       return clearEndpointEvents(state, clearEndpointAction.endpointGuid);
     }

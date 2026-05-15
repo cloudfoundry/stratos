@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, flatMap, map, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
 import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
@@ -13,6 +13,7 @@ import {
   Actions,
   AppState,
   EndpointModel,
+  EndpointsDataService,
   Store,
   WrapperRequestActionSuccess,
   createEffect,
@@ -20,7 +21,6 @@ import {
   NormalizedResponse,
   ofType } from '../../../../store/src/public-api';
 import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
-import { endpointOfTypeSelector } from '../../../../store/src/selectors/endpoint.selectors';
 import { EndpointDisconnectCleanupService } from '../../../../store/src/services/endpoint-disconnect-cleanup.service';
 import {
   EntityRequestAction,
@@ -102,6 +102,7 @@ export class HelmEffects {
   snackBar = inject(TailwindSnackBarService);
   private appRef = inject(ApplicationRef);
   private cleanup = inject(EndpointDisconnectCleanupService);
+  private endpointsService = inject(EndpointsDataService);
 
 
   // Endpoints that we know are synchronizing
@@ -125,13 +126,12 @@ export class HelmEffects {
 
   fetchCharts$ = createEffect(() => this.actions$.pipe(
     ofType<GetMonocularCharts>(GET_MONOCULAR_CHARTS),
-    withLatestFrom(this.store),
-    flatMap(([action, appState]) => {
+    flatMap((action) => {
       const entityKey = entityCatalog.getEntityKey(action);
 
       this.store.dispatch(new StartRequestAction(action));
 
-      const helmEndpoints = Object.values(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)(appState)) as EndpointModel[];
+      const helmEndpoints = this.endpointsService.endpointsByType(HELM_ENDPOINT_TYPE)();
       const helmHubEndpoint = helmEndpoints.find(endpoint => (endpoint as any).sub_type === HELM_HUB_ENDPOINT_TYPE);
 
       // See https://github.com/SUSE/stratos/issues/466. It would be better to use the standard proxy for this request and go out to all

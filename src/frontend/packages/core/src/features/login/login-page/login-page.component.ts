@@ -29,7 +29,7 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit {
-  private store = inject<Store<Pick<InternalAppState, 'endpoints' | 'auth'>>>(Store);
+  private store = inject<Store<Pick<InternalAppState, 'auth'>>>(Store);
   private authSignal = inject(AuthSignalService);
   private endpointStatusSignals = inject(EndpointStatusSignalService);
   private branding = inject(StratosBrandingService);

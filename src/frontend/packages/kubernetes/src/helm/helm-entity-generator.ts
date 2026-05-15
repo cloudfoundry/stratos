@@ -9,8 +9,7 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel, Store } from '../../../store/src/public-api';
-import { GetAllEndpoints } from '../../../store/src/actions/endpoint.actions';
+import { EndpointModel, EndpointsDataService, Store } from '../../../store/src/public-api';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
@@ -53,7 +52,10 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         unConnectable: true,
         techPreview: false,
         authTypes: [],
-        endpointListActions: (store: Store<AppState>): IListAction<EndpointModel>[] => {
+        endpointListActions: (
+          _store: Store<AppState>,
+          endpointsService: EndpointsDataService,
+        ): IListAction<EndpointModel>[] => {
           return [{
             action: (item: EndpointModel) => {
               helmEntityCatalog.chart.api.synchronise(item).pipe(
@@ -61,18 +63,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
                 take(1)
               ).subscribe((res: unknown) => {
                 if (res != null) {
-                  // W36-B Wave 3: dispatch legacy GetAllEndpoints
-                  // directly via the store rather than going through
-                  // the entity-catalog dispatcher. EndpointsDataService
-                  // is not reachable from this module-bootstrap-time
-                  // closure without restructuring the
-                  // endpointListActions signature; the legacy effect
-                  // path keeps the side-effect-free behaviour and the
-                  // service's signal map updates as a downstream
-                  // consequence of the GET_SYSTEM_INFO chain that
-                  // GetAllEndpoints triggers. Wave 5 deletes this
-                  // alongside the action class.
-                  store.dispatch(new GetAllEndpoints());
+                  void endpointsService.getAll(false);
                 }
               });
             },

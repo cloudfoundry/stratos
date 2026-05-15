@@ -105,10 +105,3 @@ function paginationResetPaginationState(oldEntityState: PaginationEntityState) {
   };
   return entityState;
 }
-
-// Wave 4 part 1 (W36-B): legacy `resetEndpointEntities` deleted. The
-// equivalent generic walk now lives in
-// `EndpointDisconnectCleanupService.runGenericCleanup`, driven by
-// `EndpointsDataService.disconnectedSignal`. The new path dispatches
-// `ResetPaginationOfType` per affected entity, which routes through this
-// file's existing `paginationResetPagination(..., allTypes=true)` path.
