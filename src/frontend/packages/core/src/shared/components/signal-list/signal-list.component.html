@@ -84,6 +84,26 @@
       </button>
     }
 
+    @if (config.headerActions) {
+      @for (act of config.headerActions; track act.label) {
+        <button
+          type="button"
+          (click)="act.run()"
+          [disabled]="act.disabled ? act.disabled() : false"
+          [title]="act.title ?? act.label"
+          [attr.data-test]="act.dataTest ?? ('header-action-' + act.label)"
+          [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
+            (act.primary
+              ? 'border-primary-shade-700 bg-primary text-white hover:bg-primary-shade-700'
+              : 'border-content-border bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700')">
+          @if (act.icon) {
+            <span class="material-icons text-base leading-5">{{ act.icon }}</span>
+          }
+          <span>{{ act.label }}</span>
+        </button>
+      }
+    }
+
     @if (config.onRefresh) {
       <button
         type="button"
