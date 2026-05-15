@@ -150,7 +150,6 @@ export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } f
 export { ListFilterStore, BoundListFilterState, ListFilterDefaults } from './shared/components/signal-list/list-filter-store.service';
 export { ListSelectionStore, BoundListSelectionState } from './shared/components/signal-list/list-selection-store.service';
 export { MaxedStateSignal, MaxedStateSignalOptions, createMaxedStateSignal, maxedStateActive } from './shared/components/signal-list/maxed-state.signal';
-export { adaptLegacyListConfig, AdaptLegacyListConfigOptions, AdaptedSignalListConfig, AdaptedSignalListExtras } from './shared/components/signal-list/legacy-list-config-adapter';
 export { ListViewComponent } from './shared/components/list/list-generics/list-view/list-view.component';
 export { TableComponent } from './shared/components/list/list-table/table.component';
 export { EnumerateComponent } from './shared/components/enumerate/enumerate.component';
