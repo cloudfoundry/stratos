@@ -28,6 +28,7 @@ import { PaginatedAction } from '../../../../../../../store/src/types/pagination
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { waitForCFPermissions } from '../../../../../features/cf/cf.helpers';
 import { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
@@ -65,10 +66,11 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
     cfUserService: CfUserService,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory
+    private entityMonitorFactory: EntityMonitorFactory,
+    cfRoles: CfCurrentUserRolesSignalService,
   ) {
     this.initialised = waitForCFPermissions(
-      store,
+      cfRoles,
       activeRouteCfOrgSpace.cfGuid
     ).pipe(
       switchMap(cf =>

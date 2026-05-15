@@ -1,4 +1,4 @@
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
@@ -13,13 +13,10 @@ import {
 import {
   APIResource,
   AppState,
-  EndpointModel,
-  endpointEntitiesSelector,
   getPaginationObservables,
   PaginatedAction,
   PaginationEntityState,
   PaginationMonitorFactory,
-  RouterNav,
   selectPaginationState,
   SetClientFilter
 } from '@stratosui/store';
@@ -32,8 +29,8 @@ import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
 import { applicationEntityType } from '../../cf-entity-types';
 import { CFEntityConfig } from '../../cf-types';
 import { ListCfRoute } from '../../shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
-import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/cf-current-user-role.selectors';
 import { ICfRolesState } from '../../store/types/cf-current-user-roles.types';
+import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import {
   CfUser,
   CfUserRoleParams,
@@ -253,7 +250,13 @@ export const getActiveRouteCfCellProvider = {
   ]
 };
 
-export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
+export function goToAppWall(
+  store: Store<CFAppState>,
+  router: Router,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string
+) {
   const appWallPagKey = 'applicationWall';
   const entityKey = getCFEntityKey(applicationEntityType);
   store.dispatch(new SetClientFilter(new CFEntityConfig(applicationEntityType), appWallPagKey,
@@ -273,7 +276,7 @@ export function goToAppWall(store: Store<CFAppState>, cfGuid: string, orgGuid?: 
     }),
     take(1),
     tap(() => {
-      store.dispatch(new RouterNav({ path: ['applications'] }));
+      router.navigate(['applications']);
     })
   ).subscribe();
 }
@@ -298,8 +301,11 @@ export function canUpdateOrgRoles(
   return perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid);
 }
 
-export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
-  return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
+export function waitForCFPermissions(
+  cfRoles: CfCurrentUserRolesSignalService,
+  cfGuid: string
+): Observable<ICfRolesState> {
+  return cfRoles.cfEndpointRolesState$(cfGuid).pipe(
     filter(cf => cf && cf.state.initialised),
     take(1),
     publishReplay(1),
@@ -307,16 +313,9 @@ export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Ob
   );
 }
 
-export function selectConnectedCfs(store: Store<AppState>): Observable<EndpointModel[]> {
-  return store.select(endpointEntitiesSelector).pipe(
-    map(endpoints => Object.values(endpoints)),
-    map(endpoints => endpoints.filter(endpoint => endpoint.cnsi_type === 'cf' && endpoint.connectionStatus === 'connected')),
-  );
-}
-
-export function haveMultiConnectedCfs(store: Store<AppState>): Observable<boolean> {
-  return selectConnectedCfs(store).pipe(
-    map(connectedCfs => connectedCfs.length > 1)
+export function haveMultiConnectedCfs(cfRoles: CfCurrentUserRolesSignalService): Observable<boolean> {
+  return cfRoles.connectedCfEndpointGuids$().pipe(
+    map(guids => guids.length > 1)
   );
 }
 
@@ -431,10 +430,10 @@ export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceIns
 export function someFeatureFlags(
   ff: CFFeatureFlagTypes[],
   cfGuid: string,
-  store: Store<AppState>,
+  cfRoles: CfCurrentUserRolesSignalService,
   userPerms: CurrentUserPermissionsService,
 ): Observable<boolean> {
-  return waitForCFPermissions(store, cfGuid).pipe(
+  return waitForCFPermissions(cfRoles, cfGuid).pipe(
     switchMap(() => combineLatest(ff.map(flag => {
       const permConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, flag);
       return userPerms.can(permConfig, cfGuid);

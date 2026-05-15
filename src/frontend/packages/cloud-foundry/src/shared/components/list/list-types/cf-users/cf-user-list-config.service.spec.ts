@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {CFAppState,
+  CfCurrentUserRolesSignalService,
   cfCurrentUserPermissionsService} from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import {
@@ -53,8 +54,9 @@ describe('CfUserListConfigService', () => {
             router: Router,
             activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
             userPerms: CurrentUserPermissionsService,
-          ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-          deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService],
+            cfRoles: CfCurrentUserRolesSignalService,
+          ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms, cfRoles),
+          deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService, CfCurrentUserRolesSignalService],
         },
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },

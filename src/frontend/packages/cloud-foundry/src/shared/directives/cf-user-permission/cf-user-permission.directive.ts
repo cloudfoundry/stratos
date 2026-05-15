@@ -1,18 +1,16 @@
 import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
-import { CfCurrentUserPermissions, waitForCFPermissions } from '@stratosui/cloud-foundry';
+import { CfCurrentUserPermissions, CfCurrentUserRolesSignalService, waitForCFPermissions } from '@stratosui/cloud-foundry';
 
 @Directive({
   selector: '[appCfUserPermission]',
   standalone: true
 })
 export class CfUserPermissionDirective implements OnDestroy, OnInit {
-  private store = inject<Store<AppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
   private templateRef = inject<TemplateRef<any>>(TemplateRef);
   private viewContainer = inject(ViewContainerRef);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -51,7 +49,7 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   }
 
   private waitForEndpointPermissions(endpointGuid: string): Observable<any> {
-    return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.store, endpointGuid) : observableOf(true);
+    return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.cfRoles, endpointGuid) : observableOf(true);
   }
 
   public ngOnDestroy() {

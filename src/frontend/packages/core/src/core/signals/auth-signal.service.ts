@@ -1,7 +1,7 @@
 import { Injectable, Signal, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { AppState, AuthState, RouterRedirect, SessionData } from '@stratosui/store';
+import { AppState, AuthState, RouterNav, RouterRedirect, SessionData, VerifySession } from '@stratosui/store';
 
 /**
  * Signal-native projection of the `auth` ngrx slice.
@@ -52,5 +52,24 @@ export class AuthSignalService {
       prevLoggedIn = isLoggedIn;
     });
     this.loginCompletedAt = completedAt.asReadonly();
+  }
+
+  /**
+   * Trigger a session-verification cycle. Wraps the legacy `VerifySession`
+   * action so callers can stay Store-free; the underlying ngrx effect remains
+   * responsible for the HTTP round-trip until session refresh is fully
+   * signal-native.
+   */
+  verifySession(login: boolean = false, updateEndpoints: boolean = false): void {
+    this.store.dispatch(new VerifySession(login, updateEndpoints));
+  }
+
+  /**
+   * Navigate to `path` while remembering `redirect` as the post-login target.
+   * Wraps the legacy `RouterNav` action — the auth reducer captures the
+   * redirect into `auth.redirect` so the login page can replay it on success.
+   */
+  navigateAndRememberRedirect(path: string[] | string, redirect: RouterRedirect): void {
+    this.store.dispatch(new RouterNav({ path }, redirect));
   }
 }

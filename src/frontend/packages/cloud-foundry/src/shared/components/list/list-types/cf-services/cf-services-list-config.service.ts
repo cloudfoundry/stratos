@@ -9,6 +9,7 @@ import { CFAppState } from '../../../../../cf-app-state';
 import { CfEndpointsDataService } from '../../../../../services/domain-data/cf-endpoints-data.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 import { haveMultiConnectedCfs } from '../../../../../features/cf/cf.helpers';
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfOrgSpaceItem, createCfOrgSpaceFilterConfig } from '../../../../data-services/cf-org-space-service.service';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
@@ -29,6 +30,7 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
 })
 export class CfServicesListConfigService implements IListConfig<APIResource> {
   private store = inject<Store<CFAppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
   private cfEndpoints = inject(CfEndpointsDataService);
 
 
@@ -45,7 +47,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       createCfOrgSpaceFilterConfig('cf', 'Cloud Foundry', this.cf),
     ];
 
-    this.init$ = haveMultiConnectedCfs(this.store).pipe(
+    this.init$ = haveMultiConnectedCfs(this.cfRoles).pipe(
       take(1),
       map(multipleConnectedEndpoints => {
         if (!multipleConnectedEndpoints) {

@@ -209,7 +209,7 @@ export class ApplicationWallComponent implements OnInit {
     // If we have an endpoint ID, select it and redirect
     const { endpointId } = activatedRoute.snapshot.params;
     if (endpointId) {
-      goToAppWall(this.store, endpointId);
+      goToAppWall(this.store, router, endpointId);
       this.redirected = true;
       return;
     }

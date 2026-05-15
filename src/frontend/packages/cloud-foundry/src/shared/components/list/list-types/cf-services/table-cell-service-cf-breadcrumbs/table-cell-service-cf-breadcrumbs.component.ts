@@ -5,6 +5,7 @@ import { TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IService } from '../../../../../../cf-api-svc.types';
 import { CFAppState } from '../../../../../../cf-app-state';
+import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from '../../../../../components/cf-org-space-links/cf-org-space-links.component';
 
@@ -21,6 +22,7 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIR
 
   cfOrgSpace!: CfOrgSpaceLabelService;
   private store = inject(Store<CFAppState>);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
 
   @Input()
   set row(pService: APIResource<IService>) {
@@ -28,7 +30,7 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<APIR
     if (!pService || !!this.cfOrgSpace) {
       return;
     }
-    this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, pService.entity.cfGuid);
+    this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.cfRoles, pService.entity.cfGuid);
   }
 
   constructor() {

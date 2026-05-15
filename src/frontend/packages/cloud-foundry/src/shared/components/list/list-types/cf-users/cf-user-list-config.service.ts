@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
+import { CFAppState, CfCurrentUserRolesSignalService } from '@stratosui/cloud-foundry';
 import { CurrentUserPermissionsService, ITableColumn, ITableText, IListAction, IListMultiFilterConfig, IMultiListAction, ListConfig, ListViewTypes } from '@stratosui/core';
 import { SetClientFilter, entityCatalog, selectPaginationState, APIResource, EntityInfo, PaginatedAction } from '@stratosui/store';
 import { IOrganization, ISpace } from '../../../../../cf-api.types';
@@ -198,6 +198,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     private router: Router,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private userPerms: CurrentUserPermissionsService,
+    private cfRoles: CfCurrentUserRolesSignalService,
     userHasRoles: (user: CfUser) => boolean = defaultUserHasRoles,
     org$?: Observable<EntityInfo<APIResource<IOrganization>>>,
     space$?: Observable<EntityInfo<APIResource<ISpace>>>,
@@ -206,7 +207,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
     this.assignColumnConfig(org$, space$);
 
-    this.initialised = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+    this.initialised = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(cf =>
         combineLatest(
           observableOf(cf),
