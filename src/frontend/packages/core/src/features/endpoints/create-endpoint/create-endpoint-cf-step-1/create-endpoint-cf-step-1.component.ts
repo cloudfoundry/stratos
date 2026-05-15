@@ -138,9 +138,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   private async runRegistration(): Promise<StepOnNextResult> {
     const { subType, type } = this.endpoint.getTypeAndSubtype();
 
-    // SSL Setttings
+    // SSL settings — when a CA cert is provided we trust it as the override
+    // (skip-ssl is mutually exclusive with cert pinning). When the CA-cert
+    // field is shown but left empty, honor the user's checkbox so self-signed
+    // endpoints (k3d / kind / minikube) still work via skipSslValidation.
     let sslAllow = this.registerForm.value.skipSSLField ?? false;
-    if (this.showCACertField) {
+    const caCert = (this.registerForm.value.caCertField ?? '').trim();
+    if (this.showCACertField && caCert.length > 0) {
       sslAllow = false;
     }
 
