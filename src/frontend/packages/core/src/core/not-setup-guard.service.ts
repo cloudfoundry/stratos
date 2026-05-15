@@ -1,8 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { RouterNav, AppState } from '@stratosui/store';
+import { CanActivateFn, Router } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -12,7 +10,7 @@ const { proxyAPIVersion } = environment;
 
 export const notSetupGuard: CanActivateFn = (): Observable<boolean> => {
   const http = inject(HttpClient);
-  const store = inject(Store<AppState>);
+  const router = inject(Router);
 
   const url = `/api/${proxyAPIVersion}/auth/verify`;
   return http.get(url).pipe(
@@ -27,9 +25,7 @@ export const notSetupGuard: CanActivateFn = (): Observable<boolean> => {
     tap(result => {
       // False means already setup, so should not be able to access /uaa endpoint
       if (!result) {
-        store.dispatch(new RouterNav({
-          path: ['/not-found']
-        }));
+        router.navigate(['/not-found']);
       }
     })
   );
