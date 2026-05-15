@@ -6,6 +6,8 @@ import { Observable, Subscription } from 'rxjs';
 import { take, defaultIfEmpty, delay, startWith } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 
+import { EndpointsDataService } from '@stratosui/store';
+
 import { EndpointsService } from '../../../core/endpoints.service';
 import { BlurDirective } from '../../../shared/components/blur.directive';
 import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
@@ -50,7 +52,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     const data = this.data;
     const endpointsService = inject(EndpointsService);
 
-    this.connectService = new ConnectEndpointService(endpointsService, data);
+    const endpointsData = inject(EndpointsDataService);
+    this.connectService = new ConnectEndpointService(endpointsService, data, endpointsData, this.injector);
 
     this.hasConnected = this.connectService.hasConnected$.subscribe(() => {
       this.snackBarService.show(`Connected endpoint '${this.data.name}'`);

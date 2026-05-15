@@ -1,4 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injector } from '@angular/core';
+import { EndpointsDataService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Md5 } from 'ts-md5';
@@ -14,9 +16,15 @@ const GITLAB_PER_PAGE_PARAM_VALUE = 100;
 
 export class GitLabSCM extends BaseSCM implements GitSCM {
 
-  constructor(endpointGuid: string) {
+  constructor(
+    endpointGuid: string,
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
+  ) {
     super(gitLabAPIUrl);
     this.endpointGuid = endpointGuid;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
   }
 
   getType(): GitSCMType {

@@ -7,7 +7,7 @@ import {
 } from '@stratosui/core';
 import { EndpointsSignalService } from '@stratosui/core';
 import type { EndpointModel } from '@stratosui/store';
-import { stratosEntityCatalog } from '@stratosui/store';
+import { EndpointsDataService } from '@stratosui/store';
 
 // Wave-3 endpoints-list config service for the K8s landing page.
 //
@@ -51,6 +51,7 @@ export class KubernetesEndpointsSignalConfigService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly endpointsSignals = inject(EndpointsSignalService);
+  private readonly endpointsData = inject(EndpointsDataService);
 
   // Filter / sort / paging state. Card-only on the legacy K8s landing
   // page; pageSize 24 (a 2x12 / 3x8 / 4x6 friendly default for card
@@ -189,12 +190,12 @@ export class KubernetesEndpointsSignalConfigService {
   }
 
   refresh(): void {
-    // Mirror the legacy data source's refresh, which dispatched
-    // `GetAllEndpoints`. The api-side `getAll()` performs the dispatch
-    // internally — keeps this service Store-free at the type level.
-    if (stratosEntityCatalog?.endpoint?.api?.getAll) {
-      stratosEntityCatalog.endpoint.api.getAll();
-    }
+    // W36-B Wave 3: refresh via signal-native EndpointsDataService.
+    // The service owns its own /pp/v1/info HTTP call + lifecycle
+    // signals; the EndpointsSignalService's projection updates as a
+    // downstream effect of the legacy GET path that still runs in
+    // parallel until Wave 5 retires the parallel ngrx code.
+    void this.endpointsData.getAll(false).catch(() => {/* surfaced on service.error */});
   }
 
   // Releases any state held by the service. Currently a no-op (the

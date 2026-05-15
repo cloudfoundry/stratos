@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  Injector,
   OnDestroy,
   ViewChild,
   computed,
@@ -31,7 +32,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
 import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { entityCatalog } from '../../../../../store/src/public-api';
+import { entityCatalog, EndpointsDataService } from '../../../../../store/src/public-api';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
 import { GitSCMService } from '../../scm/scm.service';
 
@@ -196,7 +197,13 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const userProfileService = inject(UserProfileService);
 
-    super(sessionService, currentUserPermissionsService, userProfileService);
+    super(
+      sessionService,
+      currentUserPermissionsService,
+      userProfileService,
+      inject(EndpointsDataService),
+      inject(Injector),
+    );
     this.sessionService = sessionService;
     this.currentUserPermissionsService = currentUserPermissionsService;
     this.userProfileService = userProfileService;

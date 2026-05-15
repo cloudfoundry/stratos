@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, Injector, Input, inject } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -8,6 +8,7 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 import { ActivatedRoute } from '@angular/router';
 import {
   AppState,
+  EndpointsDataService,
   Store,
   StratosCatalogEndpointEntity,
   entityCatalog,
@@ -105,7 +106,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const userProfileService = inject(UserProfileService);
 
-    super(sessionService, currentUserPermissionsService, userProfileService);
+    super(
+      sessionService,
+      currentUserPermissionsService,
+      userProfileService,
+      inject(EndpointsDataService),
+      inject(Injector),
+    );
 
     this.registerForm = this.fb.group<CreateEndpointForm>({
       nameField: this.fb.nonNullable.control('', [Validators.required]),

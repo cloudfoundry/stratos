@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
@@ -7,7 +8,7 @@ import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 import { SignalListComponent, SignalListConfig } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
-import { EndpointModel, stratosEntityCatalog } from '../../../../../store/src/public-api';
+import { EndpointModel, EndpointsDataService } from '../../../../../store/src/public-api';
 import { MonocularChart } from '../../../services/endpoint-data/kube-types';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { MonocularChartsSignalConfigService } from '../../list-types/monocular-charts-signal-config.service';
@@ -46,7 +47,15 @@ export class CatalogTabComponent implements OnDestroy {
 
   private sub: Subscription | undefined;
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly endpointsData = inject(EndpointsDataService);
+  private readonly injector = inject(Injector);
   readonly signalConfig = inject(MonocularChartsSignalConfigService);
+
+  // W36-B Wave 3: Pre-built signal-bridge over EndpointsDataService.
+  // Reused by both the artifactHubAndHelmRepoTypes$ stream and the
+  // computeSidebarVisibility() one-shot read so we don't recreate
+  // toObservable() on every change-detection cycle.
+  private readonly endpoints$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector });
 
   readonly listConfig: WritableSignal<SignalListConfig<MonocularChart> | undefined> = signal(undefined);
 
@@ -54,8 +63,7 @@ export class CatalogTabComponent implements OnDestroy {
   // classic helm repo are connected, chart-item shows the source-repo
   // badge to disambiguate. Mirrors the legacy MonocularChartCardComponent
   // ctor so the visuals stay identical.
-  readonly artifactHubAndHelmRepoTypes$: Observable<boolean> = stratosEntityCatalog.endpoint.store.getAll
-    .getPaginationService().entities$.pipe(
+  readonly artifactHubAndHelmRepoTypes$: Observable<boolean> = this.endpoints$.pipe(
       filter(endpoints => !!endpoints),
       take(1),
       map(endpoints => {
@@ -147,7 +155,7 @@ export class CatalogTabComponent implements OnDestroy {
   private async computeSidebarVisibility(): Promise<void> {
     try {
       const endpoints = await firstValueFrom(
-        stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+        this.endpoints$.pipe(
           filter(e => !!e),
           take(1),
         ),

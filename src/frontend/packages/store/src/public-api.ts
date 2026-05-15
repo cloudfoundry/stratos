@@ -262,3 +262,18 @@ export { Action, Store, StoreModule, createSelector, provideStore, select } from
 // @ngrx/effects.
 export { EffectsModule, EffectsFeatureModule } from '@ngrx/effects';
 export { Actions, createEffect, ofType } from '@ngrx/effects';
+
+// W36-B Wave 1 — signal-native endpoints data service. Wave 3 dispatcher
+// + monitor consumers import from here; Wave 5 deletion of the legacy
+// `endpoint.actions` / `endpoint.effects` / `endpoint.selectors` slice
+// retires the parallel ngrx path that this service replaces.
+export {
+  EndpointsDataService,
+} from './services/endpoints-data.service';
+export type {
+  EndpointConnectOptions,
+  EndpointDisconnectEvent,
+  EndpointFetchingState,
+  EndpointRegisterOptions,
+  EndpointUpdateOptions,
+} from './services/endpoints-data.service';

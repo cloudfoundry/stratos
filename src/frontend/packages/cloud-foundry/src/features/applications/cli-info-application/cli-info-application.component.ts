@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
-import { EndpointModel, EntityService, getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
@@ -23,9 +23,13 @@ import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/component
 })
 export class CliInfoApplicationComponent implements OnInit {
   private applicationService = inject(ApplicationService);
+  private endpointsData = inject(EndpointsDataService);
 
 
-  cfEndpointEntityService!: EntityService<EndpointModel>;
+  // Retained for backward compatibility with downstream consumers/tests
+  // that still reference the field shape; W36-B Wave 3 stops populating
+  // it from the legacy entity-service.
+  cfEndpointEntityService: any = null;
   public previousUrl!: string;
   public previousQueryParams!: {
     [key: string]: string;
@@ -45,7 +49,12 @@ export class CliInfoApplicationComponent implements OnInit {
   }
 
   private setupObservables(cfGuid: string) {
-    this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(cfGuid);
+    // W36-B Wave 3: replace EntityService.waitForEntity$ with the
+    // signal-native EndpointsDataService.waitFor() promise. The
+    // promise resolves to a raw EndpointModel (no EntityInfo
+    // envelope), so the downstream `ep.entity.foo` field access
+    // collapses to `ep.foo`.
+    const endpoint$ = from(this.endpointsData.waitFor(cfGuid));
 
     // V3 IApp.entity carries `space_guid` only — the legacy `space`
     // relation (and nested organization) isn't populated by the adapter.
@@ -56,15 +65,15 @@ export class CliInfoApplicationComponent implements OnInit {
       this.applicationService.application$,
       this.applicationService.appSpace$,
       this.applicationService.appOrg$,
-      this.cfEndpointEntityService.waitForEntity$
+      endpoint$,
     ).pipe(
       filter(([app, space, org, ep]) => !!app && !!space && !!org && !!ep),
-      map(([app, space, org, ep]) => ({
+      map(([app, space, org, ep]: [any, any, any, EndpointModel]) => ({
         appName: app.app.entity.name,
         spaceName: space.name,
         orgName: org.name,
-        apiEndpoint: getFullEndpointApiUrl(ep.entity),
-        username: ep.entity.user ? ep.entity.user.name : ''
+        apiEndpoint: getFullEndpointApiUrl(ep),
+        username: ep.user ? ep.user.name : ''
       })),
       take(1)
     );

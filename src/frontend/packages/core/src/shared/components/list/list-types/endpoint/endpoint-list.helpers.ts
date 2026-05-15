@@ -1,7 +1,7 @@
 import { ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
-import { ActionState, AppState, EndpointModel, entityCatalog, RouterNav, Store, stratosEntityCatalog } from '@stratosui/store';
+import { ActionState, AppState, EndpointModel, EndpointsDataService, entityCatalog, RouterNav, Store, stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { map, pairwise } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { TailwindDialogService } from '../../../../services/tailwind-dialog.service';
 import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
@@ -61,6 +61,7 @@ export class EndpointListHelper {
   private snackBarService = inject(SnackBarService);
   private sessionService = inject(SessionService);
   private userProfileService = inject(UserProfileService);
+  private endpointsData = inject(EndpointsDataService);
 
 
   endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
@@ -93,8 +94,10 @@ export class EndpointListHelper {
             false
           );
           this.confirmDialog.open(confirmation, () => {
-            const obs$ = stratosEntityCatalog.endpoint.api.disconnect<ActionState>(item.guid, item.cnsi_type);
-            this.handleAction(obs$, () => {
+            // W36-B Wave 3: dispatch via EndpointsDataService.
+            // Promise<ActionState>; the legacy pairwise dance over the
+            // Observable form collapses to a single await.
+            void this.handlePromiseAction(this.endpointsData.disconnect(item.guid), () => {
               this.snackBarService.show(`Disconnected endpoint '${item.name}'`);
               stratosEntityCatalog.systemInfo.api.getSystemInfo();
             });
@@ -159,8 +162,7 @@ export class EndpointListHelper {
             true
           );
           this.confirmDialog.open(confirmation, () => {
-            const obs$ = stratosEntityCatalog.endpoint.api.unregister<ActionState>(item.guid, item.cnsi_type);
-            this.handleAction(obs$, () => {
+            void this.handlePromiseAction(this.endpointsData.unregister(item.guid), () => {
               this.snackBarService.show(`Unregistered ${item.name}`);
             });
           });
@@ -214,16 +216,22 @@ export class EndpointListHelper {
     ];
   }
 
-  private handleAction(obs$: Observable<ActionState>, handleChange: ([o, n]: [ActionState, ActionState]) => void) {
-    const disSub = obs$.pipe(
-      pairwise()
-    ).subscribe(([oldVal, newVal]) => {
+  // W36-B Wave 3: Promise<ActionState> handler — replaces the legacy
+  // Observable+pairwise busy-edge pattern. The new EndpointsDataService
+  // returns the resolved final ActionState directly.
+  private async handlePromiseAction(action: Promise<ActionState>, handleChange: () => void): Promise<void> {
+    try {
+      const result = await action;
       // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
-      if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-        handleChange([oldVal, newVal]);
-        disSub.unsubscribe();
+      if (!result.error) {
+        handleChange();
       }
-    });
+    } catch (err) {
+      // Promise rejection is a hard failure — service should normally
+      // resolve with {error:true,message} instead of throwing, but
+      // catch defensively.
+      console.warn('Endpoint action failed:', err);
+    }
   }
 
   createEndpointDetails(listDetailsComponent: any, container: ViewContainerRef):

@@ -1,13 +1,11 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
 import {
   ActionState,
   AppState,
   EndpointModel,
+  EndpointsDataService,
   EndpointType,
   Store,
-  stratosEntityCatalog,
 } from '@stratosui/store';
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
@@ -104,6 +102,7 @@ export class EndpointsSignalConfigService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly endpointsSignals = inject(EndpointsSignalService);
+  private readonly endpointsData = inject(EndpointsDataService);
 
   // Filter / sort / paging state. Endpoints list has historically rendered as a
   // table by default (legacy ListConfig defaultView = 'cards' but the practical
@@ -169,13 +168,11 @@ export class EndpointsSignalConfigService {
   }
 
   refresh(): void {
-    // The legacy endpoint card / list both dispatch endpoint.actions.getAll();
-    // mirror that. System info refresh is owned by the surrounding page (it
-    // also drives the haveRegistered / haveConnected snackbar logic), so we
+    // W36-B Wave 3: refresh via signal-native EndpointsDataService.
+    // System info refresh is owned by the surrounding page (it also
+    // drives the haveRegistered / haveConnected snackbar logic), so we
     // leave it alone here.
-    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
-      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    }
+    void this.endpointsData.getAll(false).catch(() => {/* surfaced via service.error */});
   }
 
   registerSortExtractor(fieldKey: string, extractor: (row: EndpointModel) => unknown): void {
@@ -186,17 +183,18 @@ export class EndpointsSignalConfigService {
     });
   }
 
-  // Thin wrapper over the entity-catalog disconnect API — same call the legacy
-  // EndpointListHelper makes. Returns an Observable<ActionState> the caller can
-  // pair-watch to surface success / failure into the snackbar.
-  disconnectEndpoint(guid: string, type: string) {
-    return stratosEntityCatalog.endpoint.api.disconnect<ActionState>(guid, type);
+  // W36-B Wave 3: thin wrapper over EndpointsDataService.disconnect.
+  // The service returns Promise<ActionState>; callers that previously
+  // pair-watched the legacy Observable<ActionState> for the busy→idle
+  // transition now just await the single resolved final state.
+  disconnectEndpoint(guid: string, _type: string): Promise<ActionState> {
+    return this.endpointsData.disconnect(guid);
   }
 
-  // Same shape as disconnect — entity-catalog dispatches the unregister action
-  // and returns an ActionState observable.
-  unregisterEndpoint(guid: string, type: string) {
-    return stratosEntityCatalog.endpoint.api.unregister<ActionState>(guid, type);
+  // Same shape as disconnect — service-managed lifecycle, single
+  // resolved ActionState (with .error / .message) returned.
+  unregisterEndpoint(guid: string, _type: string): Promise<ActionState> {
+    return this.endpointsData.unregister(guid);
   }
 
   // Promise-returning register wrapper used by the signal-native registration
@@ -239,40 +237,30 @@ export class EndpointsSignalConfigService {
       createSystemEndpoint = true,
       caCert = '',
     } = opts;
-    return firstValueFrom(
-      stratosEntityCatalog.endpoint.api
-        .register<ActionState>(
-          endpointType,
-          endpointSubType,
-          name,
-          endpoint,
-          skipSslValidation,
-          clientID,
-          clientSecret,
-          ssoAllowed,
-          createSystemEndpoint,
-          caCert,
-        )
-        .pipe(
-          pairwise(),
-          filter(([oldVal, newVal]) => oldVal.busy && !newVal.busy),
-          map(([, newVal]) => newVal),
-        ),
-    );
+    // W36-B Wave 3: delegate to EndpointsDataService.register, which
+    // owns the HTTP call + lifecycle signals and returns the resolved
+    // final ActionState directly. The previous pairwise+filter shape
+    // existed to flatten the legacy ngrx busy→idle Observable into a
+    // single Promise; the new service already exposes that semantics.
+    return this.endpointsData.register({
+      endpointType,
+      endpointSubType,
+      name,
+      endpoint,
+      skipSslValidation,
+      clientID,
+      clientSecret,
+      ssoAllowed,
+      createSystemEndpoint,
+      caCert,
+    });
   }
 
-  // Promise-returning unregister wrapper. Same pairwise+filter shape as
-  // register: resolves once the ngrx action transitions from busy to
-  // idle, surfacing the final ActionState (with .error / .message).
-  async unregister(guid: string, type: EndpointType): Promise<ActionState> {
-    return firstValueFrom(
-      stratosEntityCatalog.endpoint.api
-        .unregister<ActionState>(guid, type)
-        .pipe(
-          pairwise(),
-          filter(([oldVal, newVal]) => oldVal.busy && !newVal.busy),
-          map(([, newVal]) => newVal),
-        ),
-    );
+  // W36-B Wave 3: promise-returning unregister wrapper now backed by
+  // EndpointsDataService.unregister (Promise<ActionState>). Type is
+  // accepted for caller compatibility but not forwarded — the new
+  // service derives endpoint type from the local map.
+  async unregister(guid: string, _type: EndpointType): Promise<ActionState> {
+    return this.endpointsData.unregister(guid);
   }
 }

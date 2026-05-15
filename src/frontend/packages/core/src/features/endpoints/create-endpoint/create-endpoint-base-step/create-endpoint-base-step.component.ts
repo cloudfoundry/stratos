@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
+  EndpointsDataService,
   GeneralEntityAppState,
   RouterNav,
   Store,
@@ -61,7 +62,7 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
     const types = toObservable(
       computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
-    super(types, store);
+    super(types, store, inject(EndpointsDataService), inject(Injector));
     this.store = store;
   }
 }

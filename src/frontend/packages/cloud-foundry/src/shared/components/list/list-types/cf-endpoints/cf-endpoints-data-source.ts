@@ -10,8 +10,8 @@ import { IListConfig } from '../../../../../../../core/src/shared/components/lis
 import { EntityMonitorFactory } from '../../../../../../../store/src/monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../../../../store/src/monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { GetAllEndpoints } from '../../../../../../../store/src/actions/endpoint.actions';
 import { EndpointsDataService } from '../../../../../../../store/src/services/endpoints-data.service';
-import { stratosEntityCatalog } from '../../../../../../../store/src/stratos-entity-catalog';
 import { EndpointModel } from '../../../../../../../store/src/types/endpoint.types';
 
 export class CFEndpointsDataSource extends BaseEndpointsDataSource {
@@ -26,7 +26,12 @@ export class CFEndpointsDataSource extends BaseEndpointsDataSource {
     endpointsService: EndpointsDataService,
     injector: Injector
   ) {
-    const action = stratosEntityCatalog.endpoint.actions.getAll();
+    // W36-B Wave 3: construct the legacy `GetAllEndpoints` action
+    // directly. See cf-endpoints-data-source for full rationale —
+    // BaseEndpointsDataSource still uses the action's pagination key
+    // + refresh dispatch path; this just removes the catalog
+    // indirection without touching that pipeline.
+    const action = new GetAllEndpoints();
     const paginationKey = 'cf-endpoints';
     // We do this here to ensure we sync up with main endpoint table data.
     syncPaginationSection(store, action, paginationKey);
