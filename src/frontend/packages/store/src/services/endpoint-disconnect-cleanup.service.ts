@@ -204,7 +204,7 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
     };
     try {
       const succeeded = await firstValueFrom(
-        endpointType.definition.userRolesFetch([endpoint], this.store, this.httpClient),
+        endpointType.definition.userRolesFetch([endpoint], this.store, this.httpClient, this.endpointsService),
       );
       const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
       const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };

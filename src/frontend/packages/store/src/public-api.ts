@@ -206,16 +206,6 @@ export { GetCurrentUsersRelations } from './actions/permissions.actions';
 export type { EndpointModel, EndpointState, EndpointUser, INewlyConnectedEndpointInfo } from './types/endpoint.types';
 export { SystemSharedUserGuid } from './types/endpoint.types';
 export { stratosEntityCatalog } from './stratos-entity-catalog';
-export {
-  EndpointsDataService,
-} from './services/endpoints-data.service';
-export type {
-  EndpointConnectOptions,
-  EndpointDisconnectEvent,
-  EndpointFetchingState,
-  EndpointRegisterOptions,
-  EndpointUpdateOptions,
-} from './services/endpoints-data.service';
 export { EntityCatalogHelper } from './entity-catalog/entity-catalog-entity/entity-catalog.service';
 export {
   PermissionValues,

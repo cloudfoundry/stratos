@@ -24,7 +24,7 @@ import {
   PaginationMonitorFactory,
   UserFavoriteManager
 } from '@stratosui/store';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { STORE_TEST_PROVIDERS, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import {
   testSessionData,
   generateCfBaseTestModulesNoShared,
@@ -78,6 +78,7 @@ describe('CfSpaceCardComponent', () => {
 
     const store = TestBed.inject(Store);
     store.dispatch(new VerifiedSession(testSessionData));
+    populateStoreWithTestEndpoint();
   });
 
   beforeEach(() => {
