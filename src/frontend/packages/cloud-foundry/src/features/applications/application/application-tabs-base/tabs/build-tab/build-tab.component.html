@@ -51,7 +51,7 @@
                   <app-metadata-item icon="card_travel" label="Package State">{{ detail.pkg?.state ?? '-' }}
                   </app-metadata-item>
                   <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
-                    {{ data.summary()?.services?.length || '0' }}
+                    {{ data.serviceBindingsCount() || '0' }}
                   </app-metadata-item>
                   <app-metadata-item icon="route" iconFont="stratos-icons" label="Routes">
                     {{ detail.app.routes?.length || '0' }}

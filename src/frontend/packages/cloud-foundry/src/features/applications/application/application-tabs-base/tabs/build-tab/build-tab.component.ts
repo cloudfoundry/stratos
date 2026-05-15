@@ -83,6 +83,12 @@ export class BuildTabComponent implements OnInit {
   public gitRepo: GitRepo | null = null;
 
   ngOnInit() {
+    // Trigger the service-bindings fetch so the Summary card's Services
+    // count signal is populated when the Build tab loads — without
+    // requiring the user to visit the Services tab first to kick off
+    // the load.
+    void this.data.refresh('serviceBindings');
+
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
       combineLatest(
         this.applicationService.appSummary$
