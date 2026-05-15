@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { AppState, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
 import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
-import { AppState } from '../../../../store/src/public-api';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
