@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { stratosEntityCatalog, InternalAppState } from '@stratosui/store';
+import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
+import { stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
@@ -23,18 +22,30 @@ export const CUSTOM_USER_PERMISSION_CHECKERS = 'custom_user_perm_checkers';
   providedIn: 'root'
 })
 export class CurrentUserPermissionsService {
-  private store = inject<Store<InternalAppState>>(Store);
+  // Capture the injection context so checkers — which call `inject(...)` for
+  // their signal-mirror dependencies — can be constructed lazily on the first
+  // permission check. Eager construction would pull in `Store` at root
+  // injection time, breaking component specs that transitively reference this
+  // service but never invoke a permission check.
+  private injector = inject(EnvironmentInjector);
+  private _allCheckers: ICurrentUserPermissionsChecker[] | null = null;
 
-  private allCheckers: ICurrentUserPermissionsChecker[];
-  constructor() {
-    const customCheckers = inject<ICurrentUserPermissionsChecker[]>(CUSTOM_USER_PERMISSION_CHECKERS as any, { optional: true });
-
-    // Cannot set default value for parameter as the Optional decorator sets it to null
-    const nullSafeCustomCheckers = customCheckers || [];
-    this.allCheckers = [
-      new StratosUserPermissionsChecker(),
-      ...nullSafeCustomCheckers
-    ];
+  private get allCheckers(): ICurrentUserPermissionsChecker[] {
+    if (!this._allCheckers) {
+      this._allCheckers = runInInjectionContext(this.injector, () => {
+        const customCheckers = inject<ICurrentUserPermissionsChecker[]>(
+          CUSTOM_USER_PERMISSION_CHECKERS as any,
+          { optional: true }
+        );
+        // Cannot set default value for parameter as the Optional decorator sets it to null
+        const nullSafeCustomCheckers = customCheckers || [];
+        return [
+          new StratosUserPermissionsChecker(),
+          ...nullSafeCustomCheckers,
+        ];
+      });
+    }
+    return this._allCheckers;
   }
   /**
    * @param action The action we're going to check the user's access to.
