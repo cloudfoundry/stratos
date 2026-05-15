@@ -1,16 +1,9 @@
 import { inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import {
-  selectSessionData,
-  APIKeysEnabled,
-  GeneralEntityAppState,
-  getCurrentUserStratosHasScope,
-  getCurrentUserStratosRole,
-  PermissionValues,
-} from '@stratosui/store';
+import { APIKeysEnabled, PermissionValues } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 
+import { CurrentUserRolesSignalService } from '../signals/current-user-roles-signal.service';
 import { IPermissionConfigs, PermissionConfig, PermissionTypes } from './current-user-permissions.config';
 import {
   BaseCurrentUserPermissionsChecker,
@@ -78,7 +71,7 @@ export const stratosPermissionConfigs: IPermissionConfigs = {
 };
 
 export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  private store = inject(Store<GeneralEntityAppState>);
+  private roles = inject(CurrentUserRolesSignalService);
 
   constructor() {
     super();
@@ -93,11 +86,11 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
     permission: PermissionValues,
   ) {
     if (type === StratosPermissionTypes.STRATOS) {
-      return this.store.select(getCurrentUserStratosRole(permission));
+      return this.roles.stratosRole$(permission);
     }
 
     if (type === StratosPermissionTypes.STRATOS_SCOPE) {
-      return this.store.select(getCurrentUserStratosHasScope(permission as StratosScopeStrings));
+      return this.roles.stratosHasScope$(permission as StratosScopeStrings);
     }
   }
   /**
@@ -132,12 +125,12 @@ export class StratosUserPermissionsChecker extends BaseCurrentUserPermissionsChe
   }
 
   private apiKeyCheck(): Observable<boolean> {
-    return this.store.select(selectSessionData()).pipe(
+    return this.roles.sessionData$().pipe(
       filter(sessionData => !!sessionData),
       switchMap(sessionData => {
         switch (sessionData.config.APIKeysEnabled) {
           case APIKeysEnabled.ADMIN_ONLY:
-            return this.store.select(getCurrentUserStratosRole(StratosPermissionStrings.STRATOS_ADMIN));
+            return this.roles.stratosRole$(StratosPermissionStrings.STRATOS_ADMIN);
           case APIKeysEnabled.ALL_USERS:
             return of(true);
         }
