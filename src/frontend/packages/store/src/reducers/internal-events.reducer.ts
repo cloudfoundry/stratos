@@ -1,11 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import {
-  CONNECT_ENDPOINTS_SUCCESS,
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../actions/endpoint.actions';
 import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
 import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import {
@@ -16,7 +10,6 @@ import {
   InternalEventState,
   SEND_EVENT,
 } from '../types/internal-events.types';
-import { UPDATE_ENDPOINT_SUCCESS } from './../actions/endpoint.actions';
 
 const defaultState: InternalEventsState = {
   types: {
@@ -39,15 +32,13 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
       return clearEvents(state, action as SendClearEventAction);
     }
     case CLEAR_ENDPOINT_ERROR_EVENTS: {
+      // Wave 4 part 1 (W36-B): EndpointDisconnectCleanupService dispatches
+      // SendClearEndpointEventsAction in response to disconnect / connect /
+      // (Wave 5: register / update) signal events. The legacy direct
+      // listeners on `*_ENDPOINTS_SUCCESS` / `UPDATE_ENDPOINT_SUCCESS`
+      // collapsed into this single path.
       const clearEndpointAction = action as SendClearEndpointEventsAction;
       return clearEndpointEvents(state, clearEndpointAction.endpointGuid);
-    }
-    case DISCONNECT_ENDPOINTS_SUCCESS:
-    case UNREGISTER_ENDPOINTS_SUCCESS:
-    case UPDATE_ENDPOINT_SUCCESS:
-    case CONNECT_ENDPOINTS_SUCCESS: {
-      const clearEndpointAction = action as DisconnectEndpoint;
-      return clearEndpointEvents(state, clearEndpointAction.guid);
     }
   }
   return state;

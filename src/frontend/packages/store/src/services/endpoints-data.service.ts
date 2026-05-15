@@ -55,6 +55,24 @@ export interface EndpointDisconnectEvent {
   name: string;
 }
 
+/**
+ * Wave 4 part 1 (W36-B) — connect-event delta surface.
+ *
+ * Mirrors {@link EndpointDisconnectEvent}: the service emits one event per
+ * successful connect mutation, and Wave 4's cleanup orchestration drains
+ * the queue via {@link EndpointsDataService.clearConnected}. Used to drive
+ * post-connect side-effects that legacy listeners hung off
+ * `CONNECT_ENDPOINTS_SUCCESS` (per-endpoint user-roles fetch + per-endpoint
+ * internal-event log clear).
+ */
+export interface EndpointConnectEvent {
+  guid: string;
+  type: EndpointType;
+  name: string;
+  /** User the endpoint is now connected as — required by `userRolesFetch`. */
+  user: EndpointModel['user'];
+}
+
 export interface EndpointConnectOptions {
   endpointType: EndpointType;
   authType: string;
@@ -114,6 +132,9 @@ export class EndpointsDataService {
   /** Delta queue of disconnects, consumed by Wave 4 cleanup orchestration. */
   private readonly _disconnected = signal<EndpointDisconnectEvent[]>([]);
 
+  /** Delta queue of connects, consumed by Wave 4 cleanup orchestration. */
+  private readonly _connected = signal<EndpointConnectEvent[]>([]);
+
   // Wave 5 will read this. Wave 1 records it but does not act on it.
   private lastGetAllLogin = false;
   private hydrationPromise: Promise<EndpointModel[]> | null = null;
@@ -133,6 +154,9 @@ export class EndpointsDataService {
 
   /** Delta-list of recent disconnects. Consumers read + clear via {@link clearDisconnected}. */
   readonly disconnectedSignal: Signal<EndpointDisconnectEvent[]> = this._disconnected.asReadonly();
+
+  /** Delta-list of recent successful connects. Consumers read + clear via {@link clearConnected}. */
+  readonly connectedSignal: Signal<EndpointConnectEvent[]> = this._connected.asReadonly();
 
   endpointById(guid: string): Signal<EndpointModel | null> {
     return computed(() => this._endpoints().get(guid) ?? null);
@@ -302,11 +326,22 @@ export class EndpointsDataService {
     this.markConnecting(guid, true);
     return this.runMutation(guid, 'POST', TOKENS_URL, body, e =>
       httpErrorResponseToSafeString(e) || 'Could not connect, please try again',
-    ).then(state => {
+    ).then(async state => {
       this.markConnecting(guid, false, state);
       if (!state.error) {
         // Refresh authoritative state so connectionStatus + user fields land.
-        void this.getAll(false).catch(() => {/* surfaced on _error */});
+        // Await so the emitted ConnectEvent reflects post-refresh user data
+        // (Wave 4 cleanup orchestration needs `user` to drive userRolesFetch).
+        await this.getAll(false).catch(() => {/* surfaced on _error */});
+        const after = this._endpoints().get(guid);
+        if (after) {
+          this.emitConnect({
+            guid,
+            type: after.cnsi_type,
+            name: after.name,
+            user: after.user,
+          });
+        }
       }
       return state;
     });
@@ -379,6 +414,10 @@ export class EndpointsDataService {
     this._disconnected.set([]);
   }
 
+  clearConnected(): void {
+    this._connected.set([]);
+  }
+
   // ---- internals ---------------------------------------------------------
 
   /** True iff the last `getAll()` was triggered as part of the login flow. */
@@ -429,6 +468,10 @@ export class EndpointsDataService {
 
   private emitDisconnect(event: EndpointDisconnectEvent): void {
     this._disconnected.set([...this._disconnected(), event]);
+  }
+
+  private emitConnect(event: EndpointConnectEvent): void {
+    this._connected.set([...this._connected(), event]);
   }
 
   private async runMutation(

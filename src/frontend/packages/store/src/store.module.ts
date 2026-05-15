@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { NgModule, inject } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
 import { APIEffect } from './effects/api.effects';
@@ -19,6 +19,7 @@ import { UserProfileEffect } from './effects/user-profile.effects';
 import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 import { AppReducersModule } from './reducers.module';
+import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect-cleanup.service';
 
 
 @NgModule({
@@ -49,4 +50,12 @@ import { AppReducersModule } from './reducers.module';
     ])
   ]
 })
-export class AppStoreModule { }
+export class AppStoreModule {
+  // Wave 4 part 1 (W36-B): Eagerly instantiate the cleanup service so its
+  // constructor signal effects start observing EndpointsDataService deltas
+  // before any user-driven endpoint mutation can fire. The service has
+  // `providedIn: 'root'`, so this `inject` triggers the singleton creation.
+  constructor() {
+    inject(EndpointDisconnectCleanupService);
+  }
+}

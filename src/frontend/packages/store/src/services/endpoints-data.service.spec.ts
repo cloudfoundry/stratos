@@ -195,14 +195,39 @@ describe('EndpointsDataService', () => {
     expect(svc.connectingState('cf-2')().busy).toBe(true);
 
     httpMock.expectOne('/api/v1/tokens').flush({ guid: 'cf-2' });
+    // Yield enough microtasks so the .then() handler runs and dispatches
+    // the awaited getAll() HTTP request.
+    await new Promise(r => setTimeout(r, 0));
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
     const state = await connectPromise;
 
     expect(state.error).toBe(false);
     expect(svc.connectingState('cf-2')().busy).toBe(false);
 
-    // connect() fires a fire-and-forget getAll() refresh after success.
-    // Drain that request so HttpTestingController.verify() is happy.
+    // Successful connect emits on the connectedSignal delta queue.
+    expect(svc.connectedSignal()).toHaveLength(1);
+    expect(svc.connectedSignal()[0]).toMatchObject({ guid: 'cf-2', type: 'cf' });
+  });
+
+  it('clearConnected resets the connect delta queue', async () => {
+    const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await p;
+
+    const cp = svc.connect('cf-2', {
+      endpointType: 'cf',
+      authType: 'creds',
+      authValues: { username: 'u', password: 'p' },
+      systemShared: false,
+    });
+    httpMock.expectOne('/api/v1/tokens').flush({ guid: 'cf-2' });
+    await new Promise(r => setTimeout(r, 0));
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await cp;
+
+    expect(svc.connectedSignal()).toHaveLength(1);
+    svc.clearConnected();
+    expect(svc.connectedSignal()).toHaveLength(0);
   });
 
   it('wasLoginCall records the login flag from the most recent getAll', async () => {
