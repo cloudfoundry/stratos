@@ -29,8 +29,8 @@
                       (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{service.currentDbVersion$ | async}}</code>) and the backup
                       (<code class="bg-warning-shade-100 px-1 py-0.5 rounded text-xs">{{file.content.dbVersion}}</code>) are different. Restoring this file may have adverse affects.
                     </p>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                      <input type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500" (change)="onIgnoreDbChange($event)">
+                    <label class="flex items-center space-x-2 cursor-pointer" for="restore-ignore-db">
+                      <input id="restore-ignore-db" type="checkbox" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500" (change)="onIgnoreDbChange($event)">
                       <span class="text-sm text-warning-shade-800">Ignore different database versions</span>
                     </label>
                   </div>

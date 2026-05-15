@@ -124,7 +124,6 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       valid: computed(() => {
         // Touch both ticks so the computed depends on both streams; then
         // read the live form state for the actual answer.
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         statusTick(); valueTick();
         return this.editAppForm.valid && this.editAppForm.dirty;
       }),

@@ -37,7 +37,9 @@ import { AppApplicationActionBarComponent } from './application-action-bar.compo
   template: `
     <app-application-action-bar></app-application-action-bar>
     <div data-test-id="portal-outlet">
-      <ng-container *ngIf="portal$ | async as portal" [cdkPortalOutlet]="portal"></ng-container>
+      @if (portal$ | async; as portal) {
+        <ng-container [cdkPortalOutlet]="portal"></ng-container>
+      }
     </div>
   `,
 })

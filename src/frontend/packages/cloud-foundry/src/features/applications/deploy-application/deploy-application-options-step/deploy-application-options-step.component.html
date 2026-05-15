@@ -31,12 +31,12 @@
         <!--- Section -->
         <div class="deploy-options__title"><b>Route</b></div>
         <div class="flex flex-col space-y-2">
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" name="no_route" formControlName="no_route" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <label class="flex items-center space-x-2" for="deploy-no-route">
+            <input id="deploy-no-route" type="checkbox" name="no_route" formControlName="no_route" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
             <span class="text-sm">Do not create a route</span>
           </label>
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" name="random_route" formControlName="random_route" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <label class="flex items-center space-x-2" for="deploy-random-route">
+            <input id="deploy-random-route" type="checkbox" name="random_route" formControlName="random_route" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
             <span class="text-sm">Create a random route</span>
           </label>
         </div>
@@ -65,8 +65,8 @@
         <!--- Section -->
         <div class="deploy-options__title"><b>Build</b></div>
         <div class="form-field">
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" name="no_start" formControlName="no_start" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+          <label class="flex items-center space-x-2" for="deploy-no-start">
+            <input id="deploy-no-start" type="checkbox" name="no_start" formControlName="no_start" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
             <span class="text-sm">Do not start the application</span>
           </label>
         </div>

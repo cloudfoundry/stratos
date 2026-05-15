@@ -465,7 +465,6 @@ export class CfAppsSignalConfigService {
       const perPage = 500;
       // Per-chunk pagination loop: break when no `next` link. Most chunks
       // exit after one iteration on real CFs.
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const url = `/pp/v1/cf/spaces/${cnsi}?organization_guids=${chunk.join(',')}&per_page=${perPage}&page=${page}`;
         const resp = await firstValueFrom(this.http.get<StSpacesResponse>(url))

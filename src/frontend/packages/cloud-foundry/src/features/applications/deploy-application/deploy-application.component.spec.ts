@@ -98,10 +98,8 @@ describe('DeployApplicationComponent', () => {
     const mockStep2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: fakeFileInfo })) };
     const mockStep2_2 = { onEnter: vi.fn(), valid$: of(true) };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any)._step2 = mockStep2;
     await component.step2Handle.submit!();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).step2_2Ref = mockStep2_2;
 
     expect(mockStep2_2.onEnter).toHaveBeenCalledWith(fakeFileInfo);
