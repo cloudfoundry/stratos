@@ -1,19 +1,18 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  effect,
   Injector,
   OnDestroy,
-  Signal,
   WritableSignal,
   inject,
   ChangeDetectionStrategy,
-  computed,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { Observable, of, Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { PageSubNavComponent, ListViewComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { GeneralAppState } from '../../../../../store/src/app-state';
@@ -42,12 +41,11 @@ import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
 import {
   KubeAPIResource,
   KubeResourceEntityDefinition,
-  KubernetesCurrentNamespace,
   SimpleColumnValueGetter,
   SimpleKubeListColumn,
 } from '../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../workloads/store/workloads-entity-factory';
-import { SetCurrentNamespaceAction } from './../../store/kubernetes.actions';
+import { KubeCurrentNamespaceService } from '../../../services/domain-data/kube-current-namespace.service';
 import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
 import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
@@ -126,6 +124,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private baseKubeGuid = inject(BaseKubeGuid);
   private uiConfigService = inject(KubernetesUIConfigService);
   private signalConfigRegistry = inject(KubernetesSignalConfigRegistry);
+  private currentNamespaceService = inject(KubeCurrentNamespaceService);
   private injector = inject(Injector);
 
 
@@ -160,12 +159,15 @@ export class KubernetesResourceListComponent implements OnDestroy {
       const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(this.baseKubeGuid.guid);
       this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
 
-      // Watch for namespace changes
-      this.sub = this.store.select<KubernetesCurrentNamespace>((state: any) => state.k8sCurrentNamespace).pipe(
-        filter((data: Record<string, string>) => !!data), // Filter out undefined/null before accessing properties
-        map((data: Record<string, string>) => data[this.kubeId]),
-        filter((data: string) => !!data)
-      ).subscribe((ns: string) => {
+      // Watch for namespace changes via the signal-native current-namespace
+      // service. effect() runs whenever the per-endpoint selection signal
+      // emits a new value — replaces the legacy ngrx select+filter chain.
+      const nsSignal = this.currentNamespaceService.forEndpoint(this.kubeId);
+      effect(() => {
+        const ns = nsSignal();
+        if (!ns) {
+          return;
+        }
         this.selectedNamespace = ns === '*' ? undefined : ns;
         // Mirror into the signal so the signal-config factory's
         // computed() data projection re-evaluates.
@@ -296,7 +298,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
   }
 
   select(item?: string) {
-    this.store.dispatch(new SetCurrentNamespaceAction(this.kubeId, item));
+    this.currentNamespaceService.set(this.kubeId, item);
   }
 
   private getColumns(definition: KubeResourceEntityDefinition): ITableColumn<KubeAPIResource>[] {

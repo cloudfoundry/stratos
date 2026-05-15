@@ -1,10 +1,11 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, Input, OnInit, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { AppState, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
+import { SessionService } from '../../../../core/src/core/session.service';
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -52,7 +53,8 @@ export class KubernetesHomeCardComponent implements OnInit {
   public nodeCount$!: Observable<number>;
   public namespaceCount$!: Observable<number>;
 
-  private store = inject(Store<AppState>);
+  private session = inject(SessionService);
+  private http = inject(HttpClient);
   private injector = inject(Injector);
   private cdr = inject(ChangeDetectorRef);
 
@@ -89,7 +91,7 @@ export class KubernetesHomeCardComponent implements OnInit {
     this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
     this.cdr.markForCheck();
 
-    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(take(1)).subscribe(hasKubeTerminal => {
+    KubernetesEndpointService.hasKubeTerminalEnabled(this.session).pipe(take(1)).subscribe(hasKubeTerminal => {
       if (hasKubeTerminal) {
         this.shortcuts.push(
           {
@@ -102,7 +104,7 @@ export class KubernetesHomeCardComponent implements OnInit {
       }
     });
 
-    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(take(1)).subscribe(hasKubeDashboard => {
+    KubernetesEndpointService.kubeDashboardConfigured(this.http, this.session, guid).pipe(take(1)).subscribe(hasKubeDashboard => {
       if (hasKubeDashboard) {
         this.shortcuts.push(
           {

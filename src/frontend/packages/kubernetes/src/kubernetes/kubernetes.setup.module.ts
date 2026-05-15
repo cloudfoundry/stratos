@@ -55,7 +55,6 @@ import {
 } from './kubernetes-namespace/kubernetes-namespace-preview/kubernetes-namespace-preview.component';
 import { BaseKubeGuid } from './kubernetes-page.types';
 import { KubernetesUIConfigService } from './kubernetes-ui-service';
-import { KubernetesStoreModule } from './kubernetes.store.module';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
 import { KubernetesService } from './services/kubernetes.service';
@@ -85,7 +84,6 @@ import {
         CoreModule,
         CommonModule,
         SharedModule,
-        KubernetesStoreModule,
         // Standalone auth form components
         KubernetesCertsAuthFormComponent,
         KubernetesAWSAuthFormComponent,

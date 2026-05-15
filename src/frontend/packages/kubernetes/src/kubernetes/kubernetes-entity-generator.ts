@@ -86,7 +86,7 @@ import {
   KubeServiceAccount,
   SimpleKubeListColumn,
 } from './store/kube.types';
-import { KubeDashboardStatus } from './store/kubernetes.effects';
+import { KubeDashboardStatus } from './services/kubernetes-endpoint.service';
 import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
 
 

@@ -1,29 +1,23 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { map, shareReplay, startWith, switchMap, take } from 'rxjs/operators';
+import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 
 import {
   GetAllEndpoints,
-  AppState,
   EntityService,
   EntityServiceFactory,
   EndpointModel,
-  PaginationObservables,
   EntityInfo,
-  EndpointUser
+  EndpointUser,
 } from '@stratosui/store';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
+import { SessionService } from '../../../../core/src/core/session.service';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import {
-  KubernetesDeployment,
   KubernetesNode,
   KubernetesPod,
-  KubernetesStatefulSet,
-  KubeService,
 } from '../store/kube.types';
-import { KubeDashboardStatus } from '../store/kubernetes.effects';
 import { Annotations } from './../store/kube.types';
 
 const CAASP_VERSION_ANNOTATION = 'caasp.suse.com/caasp-release-version';
@@ -46,13 +40,46 @@ export interface CaaspNodeData {
   securityUpdates: boolean;
 }
 
+// Locally-defined kubedash status shape — wave-3.5 (slice K-final) deletes
+// the legacy `store/kubernetes.effects.ts` location, so the consumer-side
+// code holds its own type definition rather than importing from store/.
+// Mirrors the jetstream `/pp/v1/kubedash/{guid}/status` payload.
+export interface KubeDashboardContainer {
+  name: string;
+  image: string;
+}
+
+export interface KubeDashboardStatus {
+  guid: string;
+  kubeGuid: string;
+  metadata?: {
+    kubeId: string;
+  };
+  installed: boolean;
+  stratosInstalled: boolean;
+  running: boolean;
+  pod: {
+    spec: {
+      containers: KubeDashboardContainer[];
+    };
+  };
+  version: string;
+  service: {
+    namespace: string;
+    name: string;
+    scheme: string;
+  };
+  serviceAccount: any;
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class KubernetesEndpointService {
   baseKube = inject(BaseKubeGuid);
-  private store = inject<Store<AppState>>(Store);
+  private session = inject(SessionService);
+  private http = inject(HttpClient);
   private entityServiceFactory = inject(EntityServiceFactory);
 
   info$: Observable<EntityInfo<any>>;
@@ -62,53 +89,39 @@ export class KubernetesEndpointService {
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
   kubeGuid!: string;
-  deployments$: Observable<KubernetesDeployment[]>;
-  statefulSets$: Observable<KubernetesStatefulSet[]>;
-  services$: Observable<KubeService[]>;
-  pods$: Observable<KubernetesPod[]>;
-  nodes$: Observable<KubernetesNode[]>;
   kubeDashboardEnabled$: Observable<boolean>;
   kubeDashboardVersion$: Observable<string>;
-  kubeDashboardStatus$: Observable<KubeDashboardStatus>;
+  kubeDashboardStatus$: Observable<KubeDashboardStatus | null>;
   kubeDashboardLabel$: Observable<string>;
   kubeDashboardConfigured$: Observable<boolean>;
   kubeTerminalEnabled$: Observable<boolean>;
 
   private injector = inject(Injector);
 
-  public static hasKubeTerminalEnabled(store: Store<AppState>): Observable<boolean> {
-    // ZONELESS FIX: Don't block when plugin-config is missing
-    // Use switchMap to emit false when config is unavailable
-    return store.select('auth').pipe(
-      switchMap(auth =>
-        auth?.sessionData?.['plugin-config']
-          ? of(auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
-          : of(false)
-      )
+  // Static helpers retained as a public surface for callers outside the
+  // service instance lifecycle (e.g. KubernetesHomeCardComponent's
+  // imperative load() method). Wave-3.5 dropped the @ngrx Store
+  // dependency; the helpers now require SessionService + HttpClient
+  // injected by the caller (mirrors the wave-3 cf-autoscaler pattern).
+  public static hasKubeTerminalEnabled(session: SessionService): Observable<boolean> {
+    const pluginConfig = session.sessionData()?.['plugin-config'];
+    return of(pluginConfig?.kubeTerminalEnabled === 'true');
+  }
+
+  public static getKubeDashboardStatus(http: HttpClient, session: SessionService, kubeGuid: string): Observable<KubeDashboardStatus | null> {
+    const pluginConfig = session.sessionData()?.['plugin-config'];
+    const enabled = pluginConfig?.kubeDashboardEnabled === 'true';
+    if (!enabled) {
+      return of(null);
+    }
+    return http.get<KubeDashboardStatus>(`/pp/v1/kubedash/${kubeGuid}/status`).pipe(
+      catchError(() => of(null)),
     );
   }
 
-  public static getKubeDashboardStatus(store: Store<AppState>, kubeGuid: string): Observable<KubeDashboardStatus> {
-    // ZONELESS FIX: Don't block when plugin-config is missing
-    const kubeDashboardEnabled$ = store.select('auth').pipe(
-      switchMap(auth =>
-        auth?.sessionData?.['plugin-config']
-          ? of(auth.sessionData['plugin-config'].kubeDashboardEnabled === 'true')
-          : of(false)
-      )
-    );
-
-    // ZONELESS FIX: Don't block when status entity is null
-    const kubeDashboardStatus$ = kubeEntityCatalog.dashboard.store.getEntityService(kubeGuid).waitForEntity$.pipe(
-      map(status => status?.entity || null)
-    );
-
-    return kubeDashboardEnabled$.pipe(switchMap(enabled => enabled ? kubeDashboardStatus$ : of(null)));
-  }
-
-  public static kubeDashboardConfigured(store: Store<AppState>, kubeGuid: string): Observable<boolean> {
-    return KubernetesEndpointService.getKubeDashboardStatus(store, kubeGuid).pipe(
-      map(status => status && status.installed && !!status.serviceAccount && !!status.service),
+  public static kubeDashboardConfigured(http: HttpClient, session: SessionService, kubeGuid: string): Observable<boolean> {
+    return KubernetesEndpointService.getKubeDashboardStatus(http, session, kubeGuid).pipe(
+      map(status => !!(status && status.installed && !!status.serviceAccount && !!status.service)),
     );
   }
 
@@ -133,7 +146,7 @@ export class KubernetesEndpointService {
     this.constructCoreObservables();
   }
 
-  getCaaspNodesData(nodes$: Observable<KubernetesNode[]> = this.nodes$): Observable<CaaspNodesData> {
+  getCaaspNodesData(nodes$: Observable<KubernetesNode[]>): Observable<CaaspNodesData> {
     return nodes$.pipe(
       map(nodes => {
         const info: CaaspNodesData = {
@@ -192,7 +205,7 @@ export class KubernetesEndpointService {
     return annotations[annotation] && annotations[annotation] === 'yes' ? true : false;
   }
 
-  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]> = this.nodes$): Observable<string> {
+  getNodeKubeVersions(nodes$: Observable<KubernetesNode[]>): Observable<string> {
     return nodes$.pipe(
       map(nodes => {
         const versions: Record<string, string> = {};
@@ -214,7 +227,7 @@ export class KubernetesEndpointService {
     );
   }
 
-  getPodCapacity(nodes$: Observable<KubernetesNode[]> = this.nodes$, pods$: Observable<KubernetesPod[]> = this.pods$) {
+  getPodCapacity(nodes$: Observable<KubernetesNode[]>, pods$: Observable<KubernetesPod[]>) {
     // Convert to signals within injection context
     return runInInjectionContext(this.injector, () => {
       const nodesSignal = toSignal(nodes$, { initialValue: [] as KubernetesNode[] });
@@ -282,29 +295,25 @@ export class KubernetesEndpointService {
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
 
-    this.deployments$ = this.getObservable<KubernetesDeployment>(kubeEntityCatalog.deployment.store.getPaginationService(this.kubeGuid));
+    // Plugin-config-derived flags — read off the SessionService signal,
+    // mirrored back into Observables for template consumers.
+    const pluginConfig = () => this.session.sessionData()?.['plugin-config'];
 
-    this.pods$ = this.getObservable<KubernetesPod>(kubeEntityCatalog.pod.store.getPaginationService(this.kubeGuid));
+    this.kubeDashboardEnabled$ = of(pluginConfig()?.kubeTerminalEnabled === 'true');
+    this.kubeTerminalEnabled$ = of(pluginConfig()?.kubeTerminalEnabled === 'true');
 
-    this.nodes$ = this.getObservable<KubernetesNode>(kubeEntityCatalog.node.store.getPaginationService(this.kubeGuid));
-
-    this.statefulSets$ = this.getObservable<KubernetesStatefulSet>(kubeEntityCatalog.statefulSet.store.getPaginationService(this.kubeGuid));
-
-    this.services$ = this.getObservable<KubeService>(kubeEntityCatalog.service.store.getPaginationService(this.kubeGuid));
-
-    this.kubeDashboardEnabled$ = KubernetesEndpointService.hasKubeTerminalEnabled(this.store);
-
-    // ZONELESS FIX: Don't block when plugin-config is missing
-    this.kubeTerminalEnabled$ = this.store.select('auth').pipe(
-      switchMap(auth =>
-        auth?.sessionData?.['plugin-config']
-          ? of(auth.sessionData['plugin-config'].kubeTerminalEnabled === 'true')
-          : of(false)
-      )
+    // Wave-3.5: dashboard status now fetched directly from the kubedash
+    // status endpoint. The legacy ngrx-backed entity-catalog dashboard
+    // slice is being deleted — this read replaces both the entity
+    // service.waitForEntity$ chain and the dispatch that used to seed
+    // it. Cached via shareReplay so the multiple template bindings
+    // (status, label, configured) share one wire request.
+    this.kubeDashboardStatus$ = KubernetesEndpointService
+      .getKubeDashboardStatus(this.http, this.session, this.kubeGuid)
+      .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    this.kubeDashboardConfigured$ = this.kubeDashboardStatus$.pipe(
+      map(status => !!(status && status.installed && !!status.serviceAccount && !!status.service)),
     );
-
-    this.kubeDashboardStatus$ = KubernetesEndpointService.getKubeDashboardStatus(this.store, this.kubeGuid);
-    this.kubeDashboardConfigured$ = KubernetesEndpointService.kubeDashboardConfigured(this.store, this.kubeGuid);
 
     this.kubeDashboardLabel$ = this.kubeDashboardStatus$.pipe(
       map(status => {
@@ -323,16 +332,10 @@ export class KubernetesEndpointService {
   }
 
   public refreshKubernetesDashboardStatus() {
-    kubeEntityCatalog.dashboard.api.get(this.kubeGuid);
-  }
-
-  private getObservable<T>(obs: PaginationObservables<T>): Observable<T[]> {
-    // ZONELESS FIX: Don't block the observable chain when entities are null
-    // The filter was preventing any emissions, which blocked combineLatest from ever firing
-    // Now we emit an empty array when entities are null, allowing the template to render
-    return obs.entities$.pipe(
-      map(p => p || []),
-      take(1)
-    );
+    // Re-fetch the status directly. Replaces the legacy
+    // `kubeEntityCatalog.dashboard.api.get(guid)` ngrx dispatch.
+    this.kubeDashboardStatus$ = KubernetesEndpointService
+      .getKubeDashboardStatus(this.http, this.session, this.kubeGuid)
+      .pipe(shareReplay({ bufferSize: 1, refCount: false }));
   }
 }
