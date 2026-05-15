@@ -1,6 +1,6 @@
 import { ApplicationRef, inject, Injectable } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   EndpointOnlyAppState,
@@ -9,7 +9,6 @@ import {
   IEndpointFavMetadata,
   UserFavorite,
   entityCatalog,
-  RouterNav,
   EndpointHealthCheck,
   EndpointModel,
   EndpointState } from '@stratosui/store';
@@ -253,7 +252,7 @@ export const endpointsGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
   routeState: RouterStateSnapshot
 ): Observable<boolean> => {
-  const store = inject(Store<EndpointOnlyAppState>);
+  const router = inject(Router);
   const endpointsService = inject(EndpointsService);
   const userService = inject(UserService);
   const sessionService = inject(SessionService);
@@ -298,7 +297,7 @@ export const endpointsGuard: CanActivateFn = (
           return true;
         }
 
-        store.dispatch(new RouterNav({ path: [redirect] }, null));
+        router.navigate([redirect]);
       }
 
       return false;
