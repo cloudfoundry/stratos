@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Injector, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -44,6 +44,7 @@ import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoin
 })
 export class CloudFoundrySummaryTabComponent {
   private store = inject(Store<CFAppState>);
+  private router = inject(Router);
   public cfEndpointService = inject(CloudFoundryEndpointService);
   private registry = inject(EndpointDataRegistry);
   private injector = inject(Injector);
@@ -61,7 +62,7 @@ export class CloudFoundrySummaryTabComponent {
 
   constructor() {
     this.appLink = () => {
-      goToAppWall(this.store, this.cfEndpointService.cfGuid);
+      goToAppWall(this.store, this.router, this.cfEndpointService.cfGuid);
     };
 
     const endpointData = this.registry.acquire(this.cfEndpointService.cfGuid);

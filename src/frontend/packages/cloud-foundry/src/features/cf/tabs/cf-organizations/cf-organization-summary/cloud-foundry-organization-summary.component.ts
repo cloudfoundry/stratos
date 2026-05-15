@@ -65,8 +65,9 @@ export class CloudFoundryOrganizationSummaryComponent {
     const cfEndpointService = this.cfEndpointService;
     const cfOrgService = this.cfOrgService;
 
+    const router = this.router;
     this.appLink = () => {
-      goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
+      goToAppWall(store, router, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now

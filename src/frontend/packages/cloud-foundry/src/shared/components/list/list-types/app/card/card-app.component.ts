@@ -23,6 +23,7 @@ import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
@@ -50,6 +51,7 @@ import { RunningInstancesComponent } from '../../../../running-instances/running
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
   private store = inject<Store<CFAppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
   private appStateService = inject(ApplicationStateService);
   private userFavoriteManager = inject(UserFavoriteManager);
 
@@ -66,6 +68,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(applicationEntityType));
     this.cfOrgSpace = new CfOrgSpaceLabelService(
       this.store,
+      this.cfRoles,
       this.row.entity.cfGuid,
       (this.row.entity.space as APIResource<ISpace>).entity.organization_guid,
       this.row.entity.space_guid

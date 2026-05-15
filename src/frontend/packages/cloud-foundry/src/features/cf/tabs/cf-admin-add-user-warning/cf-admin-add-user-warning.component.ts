@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map, switchMap } from 'rxjs/operators';
 
 import { GetAllCfUsersAsAdmin } from '../../../../actions/users.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+import { CfCurrentUserRolesSignalService } from '../../../../user-permissions/cf-current-user-roles-signal.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { waitForCFPermissions } from '../../cf.helpers';
 
@@ -26,13 +25,13 @@ export class CfAdminAddUserWarningComponent {
   show$: Observable<boolean>;
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
+    const cfRoles = inject(CfCurrentUserRolesSignalService);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
     const cfUserService = inject(CfUserService);
 
     this.isOrg = !activeRouteCfOrgSpace.spaceGuid;
     this.show$ = waitForCFPermissions(
-      store,
+      cfRoles,
       activeRouteCfOrgSpace.cfGuid
     ).pipe(
       filter(cf => cf.global.isAdmin),

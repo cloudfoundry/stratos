@@ -32,6 +32,7 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
   waitForCFPermissions } from '../../features/cf/cf.helpers';
+import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import { selectCfPaginationState } from '../../store/selectors/pagination.selectors';
 import {
   CfUser,
@@ -47,6 +48,7 @@ import {
 })
 export class CfUserService {
   private store = inject<Store<CFAppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
   paginationMonitorFactory = inject(PaginationMonitorFactory);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
@@ -290,7 +292,7 @@ export class CfUserService {
 
   private getAllUsers(endpointGuid: string): Observable<PaginationObservables<APIResource<CfUser>>> {
     if (!this.allUsers$) {
-      this.allUsers$ = waitForCFPermissions(this.store, endpointGuid).pipe(
+      this.allUsers$ = waitForCFPermissions(this.cfRoles, endpointGuid).pipe(
         switchMap(cf => {
           const isAdmin = cf.global.isAdmin;
           // Note - This service is used at cf, org and space level of the cf pages.
