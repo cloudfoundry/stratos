@@ -1,42 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { DashboardState } from '@stratosui/store';
 
+import { DashboardDataService, DashboardState, defaultDashboardState } from '../dashboard-data.service';
 import { DashboardSignalService } from './dashboard-signal.service';
 
-function makeDashboardState(overrides: Partial<DashboardState> = {}): DashboardState {
-  return {
-    timeoutSession: true,
-    pollingEnabled: true,
-    sidenavOpen: true,
-    isMobile: false,
-    isMobileNavOpen: false,
-    sideNavPinned: true,
-    themeKey: null,
-    headerEventMinimized: false,
-    gravatarEnabled: false,
-    homeLayout: 0,
-    homeShowAllEndpoints: null,
-    ...overrides,
-  } as DashboardState;
+function setState(svc: DashboardDataService, overrides: Partial<DashboardState>) {
+  // Mutate via setValue (the only public per-key setter on the data
+  // service) so the spec exercises the same path consumers do.
+  Object.entries(overrides).forEach(([key, value]) => {
+    svc.setValue(key as keyof DashboardState, value as DashboardState[keyof DashboardState]);
+  });
 }
 
 describe('DashboardSignalService', () => {
-  let dashboard$: BehaviorSubject<DashboardState>;
-
   beforeEach(() => {
-    dashboard$ = new BehaviorSubject<DashboardState>(makeDashboardState());
-    const stubStore = {
-      select: () => dashboard$.asObservable(),
-      dispatch: () => undefined,
-    };
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
+        DashboardDataService,
         DashboardSignalService,
       ],
     });
@@ -44,25 +26,25 @@ describe('DashboardSignalService', () => {
 
   it('exposes default-shaped dashboard signals', () => {
     const service = TestBed.inject(DashboardSignalService);
-    expect(service.isMobile()).toBe(false);
-    expect(service.sidenavOpen()).toBe(true);
-    expect(service.sideNavPinned()).toBe(true);
-    expect(service.gravatarEnabled()).toBe(false);
-    expect(service.pollingEnabled()).toBe(true);
-    expect(service.homeLayout()).toBe(0);
+    expect(service.isMobile()).toBe(defaultDashboardState.isMobile);
+    expect(service.sidenavOpen()).toBe(defaultDashboardState.sidenavOpen);
+    expect(service.sideNavPinned()).toBe(defaultDashboardState.sideNavPinned);
+    expect(service.gravatarEnabled()).toBe(defaultDashboardState.gravatarEnabled);
+    expect(service.pollingEnabled()).toBe(defaultDashboardState.pollingEnabled);
+    expect(service.homeLayout()).toBe(defaultDashboardState.homeLayout);
     expect(service.homeShowAllEndpoints()).toBeNull();
   });
 
-  it('reflects dashboard slice updates through the projected signals', () => {
-    dashboard$.next(makeDashboardState({
+  it('reflects DashboardDataService updates through the projected signals', () => {
+    const data = TestBed.inject(DashboardDataService);
+    const service = TestBed.inject(DashboardSignalService);
+    setState(data, {
       isMobile: true,
       isMobileNavOpen: true,
       gravatarEnabled: true,
       homeLayout: 2,
       homeShowAllEndpoints: true,
-    }));
-
-    const service = TestBed.inject(DashboardSignalService);
+    });
     expect(service.isMobile()).toBe(true);
     expect(service.isMobileNavOpen()).toBe(true);
     expect(service.gravatarEnabled()).toBe(true);

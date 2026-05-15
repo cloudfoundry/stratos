@@ -1,49 +1,26 @@
-import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { DashboardOnlyAppState, DashboardState, selectDashboardState } from '@stratosui/store';
+import { Injectable, Signal, inject } from '@angular/core';
 
-const EMPTY_DASHBOARD: DashboardState = {} as DashboardState;
+import { DashboardDataService, DashboardState } from '../dashboard-data.service';
 
 /**
- * Signal-native projection of the `dashboard` ngrx slice.
- *
- * Read-through wrapper over `Store.select(selectDashboardState)`. Mirrors
- * every field of `DashboardState` as a derived signal so consumers can read
- * sidenav/mobile/polling/gravatar/home-layout state without subscriptions.
- *
- * Writes still go through `SetDashboardStateValueAction` against the store —
- * this service is read-side only.
+ * Signal-native facade over {@link DashboardDataService}. Preserves the
+ * legacy import path and per-field signal API for existing dashboard
+ * consumers; new code should inject `DashboardDataService` directly.
  */
 @Injectable({ providedIn: 'root' })
 export class DashboardSignalService {
-  private store = inject<Store<DashboardOnlyAppState>>(Store);
+  private dashboardData = inject(DashboardDataService);
 
-  /** Raw dashboard slice. Empty object before the store hydrates. */
-  readonly dashboard: Signal<DashboardState> = toSignal(
-    this.store.select(selectDashboardState),
-    { initialValue: EMPTY_DASHBOARD }
-  );
+  readonly dashboard: Signal<DashboardState> = this.dashboardData.state;
 
-  readonly isMobile: Signal<boolean> = computed(() => !!this.dashboard().isMobile);
-  readonly isMobileNavOpen: Signal<boolean> = computed(() => !!this.dashboard().isMobileNavOpen);
-  readonly sidenavOpen: Signal<boolean> = computed(() => !!this.dashboard().sidenavOpen);
-  readonly sideNavPinned: Signal<boolean> = computed(() => !!this.dashboard().sideNavPinned);
-  readonly headerEventMinimized: Signal<boolean> = computed(
-    () => !!this.dashboard().headerEventMinimized
-  );
-  readonly gravatarEnabled: Signal<boolean> = computed(
-    () => !!this.dashboard().gravatarEnabled
-  );
-  readonly pollingEnabled: Signal<boolean> = computed(
-    () => !!this.dashboard().pollingEnabled
-  );
-  readonly timeoutSession: Signal<boolean> = computed(
-    () => !!this.dashboard().timeoutSession
-  );
-  readonly homeLayout: Signal<number> = computed(() => this.dashboard().homeLayout ?? 0);
-  readonly homeShowAllEndpoints: Signal<boolean | null> = computed(() => {
-    const v = this.dashboard().homeShowAllEndpoints;
-    return v === undefined ? null : v;
-  });
+  readonly isMobile = this.dashboardData.isMobile;
+  readonly isMobileNavOpen = this.dashboardData.isMobileNavOpen;
+  readonly sidenavOpen = this.dashboardData.sidenavOpen;
+  readonly sideNavPinned = this.dashboardData.sideNavPinned;
+  readonly headerEventMinimized = this.dashboardData.headerEventMinimized;
+  readonly gravatarEnabled = this.dashboardData.gravatarEnabled;
+  readonly pollingEnabled = this.dashboardData.pollingEnabled;
+  readonly timeoutSession = this.dashboardData.timeoutSession;
+  readonly homeLayout = this.dashboardData.homeLayout;
+  readonly homeShowAllEndpoints = this.dashboardData.homeShowAllEndpoints;
 }

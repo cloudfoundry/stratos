@@ -2,7 +2,6 @@ import type { RequestInfoState } from './reducers/api-request-reducer/types';
 import type { AuthState } from './reducers/auth.reducer';
 import type { ListsState } from './reducers/list.reducer';
 import type { ICurrentUserRolesState } from './types/current-user-roles.types';
-import type { DashboardState } from './types/dashboard.types';
 import type { EndpointState } from './types/endpoint.types';
 import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import type { IUserFavoritesGroupsState } from './types/favorite-groups.types';
@@ -28,7 +27,6 @@ export abstract class AppState<
   pagination!: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
   request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData!: T;
-  dashboard!: DashboardState;
   lists!: ListsState;
   routing!: RoutingHistory;
   internalEvents!: InternalEventsState;
@@ -44,7 +42,6 @@ export interface GeneralRequestDataState {
 export interface GeneralAppRequestDataState extends BaseEntityValues, GeneralRequestDataState { }
 
 export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'stratosEndpoint'>>;
-export type DashboardOnlyAppState = Pick<AppState, 'dashboard'>;
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
 export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
 export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'stratosUserFavorites'>>, 'userFavoritesGroups'>;

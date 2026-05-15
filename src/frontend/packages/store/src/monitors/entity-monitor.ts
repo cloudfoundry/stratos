@@ -1,6 +1,8 @@
+import { Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { denormalize, schema as normalizrSchema } from 'normalizr';
-import { combineLatest, interval as observableInterval, Observable } from 'rxjs';
+import { combineLatest, interval as observableInterval, Observable, of } from 'rxjs';
 import { tag } from 'rxjs-spy/operators';
 import {
   distinctUntilChanged,
@@ -24,7 +26,23 @@ import {
   UpdatingSection,
 } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
-import { selectDashboardState } from '../selectors/dashboard.selectors';
+
+// Module-level reference to the dashboard polling-enabled signal,
+// supplied by the app shell at bootstrap. Replaces the legacy
+// `Store.select(selectDashboardState).pollingEnabled` read — the
+// dashboard slice is signal-native now and lives outside the store
+// package, so EntityMonitor can't inject DashboardDataService directly
+// (it's constructed via `new`, not DI). The injector setter wraps the
+// signal in an observable (under the supplied EnvironmentInjector for
+// `toObservable`) and caches it for every subsequent EntityMonitor.
+let pollingEnabled$: Observable<boolean> = of(true);
+
+export function setEntityMonitorPollingEnabledSource(
+  signalRef: Signal<boolean>,
+  injector: import('@angular/core').Injector,
+): void {
+  pollingEnabled$ = toObservable(signalRef, { injector });
+}
 
 
 export class EntityMonitor<T = any> {
@@ -133,9 +151,6 @@ export class EntityMonitor<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, action: () => void, getActionState: (request: RequestInfoState) => ActionState) {
-    const pollingEnabled$ = this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.pollingEnabled)
-    );
     return observableInterval(interval)
       .pipe(
         tag('poll'),

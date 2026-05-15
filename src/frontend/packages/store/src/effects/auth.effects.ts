@@ -31,6 +31,7 @@ import { LocalStorageService } from '../helpers/local-storage-service';
 import { stratosEntityCatalog } from '../stratos-entity-catalog';
 import { SessionDataEnvelope } from '../types/auth.types';
 import { StratosBrandingService } from '@stratosui/theme';
+import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -46,6 +47,7 @@ export class AuthEffect {
   private store = inject<Store<DispatchOnlyAppState>>(Store);
   private appRef = inject(ApplicationRef);
   private branding = inject(StratosBrandingService);
+  private dashboardData = inject(DashboardDataService);
 
 
    loginRequest$ = createEffect(() => this.actions$.pipe(
@@ -99,7 +101,7 @@ export class AuthEffect {
           } else {
             const sessionData = envelope.data;
             sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
-            LocalStorageService.localStorageToStore(this.store, sessionData);
+            LocalStorageService.localStorageToStore(this.store, sessionData, this.dashboardData);
             this.branding.activateUserPreferences();
             this.appRef.tick();
             return [

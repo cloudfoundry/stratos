@@ -11,12 +11,12 @@ import {
   UserFavorite,
   AddRecentlyVisitedEntityAction,
   StratosStatus,
-  ToggleSideNav,
   AppState,
   UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
 import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -68,6 +68,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private http = inject(HttpClient);
   private snackBarService = inject(SnackBarService);
   private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
 
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
@@ -201,7 +202,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   public toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
+    this.dashboardData.toggleSideNav();
   }
 
   constructor() {

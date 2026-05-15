@@ -19,12 +19,16 @@ describe('LocalStorageService', () => {
       localStorage.setItem('stratos-testuser-version', 'v4.9.0');
 
       const store = { dispatch: vi.fn() } as any;
+      const dashboardData = { hydrateFromStorage: vi.fn() } as any;
       const sessionData = { user: { name: 'testuser', guid: 'test-guid', admin: false, scopes: [] } } as any;
 
-      LocalStorageService.localStorageToStore(store, sessionData);
+      LocalStorageService.localStorageToStore(store, sessionData, dashboardData);
 
       // Should NOT dispatch any hydrate actions
       expect(store.dispatch).not.toHaveBeenCalled();
+      // DashboardDataService is told the storage key (with null value)
+      // so subsequent mutations write through to the cleared slot.
+      expect(dashboardData.hydrateFromStorage).toHaveBeenCalledWith('stratos-testuser', null);
 
       // Should clear all user-scoped keys
       expect(localStorage.getItem('stratos-testuser')).toBeNull();
@@ -35,16 +39,23 @@ describe('LocalStorageService', () => {
       expect(localStorage.getItem('stratos-testuser-version')).toBe(CURRENT_VERSION);
     });
 
-    it('should hydrate normally when version matches', () => {
+    it('should hydrate dashboard via DashboardDataService and pagination/lists via store dispatch', () => {
       localStorage.setItem('stratos-testuser', JSON.stringify({ sidenavOpen: true }));
+      localStorage.setItem('stratos-testuser-lists', JSON.stringify({ view: 'cards' }));
       localStorage.setItem('stratos-testuser-version', CURRENT_VERSION);
 
       const store = { dispatch: vi.fn() } as any;
+      const dashboardData = { hydrateFromStorage: vi.fn() } as any;
       const sessionData = { user: { name: 'testuser', guid: 'test-guid', admin: false, scopes: [] } } as any;
 
-      LocalStorageService.localStorageToStore(store, sessionData);
+      LocalStorageService.localStorageToStore(store, sessionData, dashboardData);
 
-      // Should dispatch hydrate action for dashboard
+      // Dashboard slice now hydrates through the data service, NOT
+      // through a store dispatch. List/pagination slices still dispatch.
+      expect(dashboardData.hydrateFromStorage).toHaveBeenCalledWith(
+        'stratos-testuser',
+        JSON.stringify({ sidenavOpen: true })
+      );
       expect(store.dispatch).toHaveBeenCalled();
     });
 

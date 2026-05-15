@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgModule, provideZonelessChangeDetection, inject } from '@angular/core';
+import { ApplicationRef, EnvironmentInjector, Injectable, NgModule, effect, provideZonelessChangeDetection, inject, runInInjectionContext } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -27,7 +27,8 @@ import {
   EndpointModel,
   IFavoriteMetadata,
   UserFavorite,
-  UserFavoriteManager
+  UserFavoriteManager,
+  setEntityMonitorPollingEnabledSource,
 } from '@stratosui/store';
 import { StratosThemeModule } from '../../theme/theme.module';
 import { debounceTime, filter, take, withLatestFrom } from 'rxjs/operators';
@@ -46,6 +47,7 @@ import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { SetupModule } from './features/setup/setup.module';
+import { DashboardDataService } from './core/dashboard-data.service';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
 import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
@@ -207,17 +209,43 @@ export class AppModule {
       }
     });
 
-    eventService.addEventConfig<boolean>({
-      eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.timeoutSession),
-      message: 'Timeout session is disabled - this is considered a security risk.',
-      key: 'timeoutSessionWarning',
-      link: '/user-profile'
-    });
-    eventService.addEventConfig<boolean>({
-      eventTriggered: (state: GeneralEntityAppState) => new GlobalEventData(!state.dashboard.pollingEnabled),
-      message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
-      key: 'pollingEnabledWarning',
-      link: '/user-profile'
+    // Signal-driven static warnings — replace the legacy ngrx
+    // `state.dashboard.{timeoutSession,pollingEnabled}` event configs.
+    const dashboardData = inject(DashboardDataService);
+    const envInjector = inject(EnvironmentInjector);
+
+    // Hand the dashboard polling-enabled signal to EntityMonitor so its
+    // `.poll()` callers continue to honour the user pref now that the
+    // ngrx dashboard slice is gone.
+    setEntityMonitorPollingEnabledSource(dashboardData.pollingEnabled, envInjector);
+
+    runInInjectionContext(envInjector, () => {
+      effect(() => {
+        if (!dashboardData.timeoutSession()) {
+          eventService.setStaticEvent('timeoutSessionWarning', {
+            key: 'timeoutSessionWarning',
+            message: 'Timeout session is disabled - this is considered a security risk.',
+            link: '/user-profile',
+            type: 'warning',
+            stratosStatus: eventService.eventTypeToStratosStatus('warning'),
+          });
+        } else {
+          eventService.setStaticEvent('timeoutSessionWarning', null);
+        }
+      });
+      effect(() => {
+        if (!dashboardData.pollingEnabled()) {
+          eventService.setStaticEvent('pollingEnabledWarning', {
+            key: 'pollingEnabledWarning',
+            message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
+            link: '/user-profile',
+            type: 'warning',
+            stratosStatus: eventService.eventTypeToStratosStatus('warning'),
+          });
+        } else {
+          eventService.setStaticEvent('pollingEnabledWarning', null);
+        }
+      });
     });
     eventService.addEventConfig<{
       count: number,

@@ -49,7 +49,6 @@ export type {
 export { JetstreamError } from './entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 export type {
   AuthOnlyAppState,
-  DashboardOnlyAppState,
   EndpointOnlyAppState,
   GeneralRequestDataState,
   IRequestEntityTypeState,
@@ -65,7 +64,6 @@ export { internalEventStateSelector } from './selectors/internal-events.selector
 export { Login, Logout, VerifySession, VerifiedSession, SESSION_VERIFIED } from './actions/auth.actions';
 export { RequestTypes, APIResponse } from './actions/request.actions';
 export { selectDeletionInfo } from './selectors/api.selectors';
-export { SetDashboardStateValueAction } from './actions/dashboard-actions';
 export { LocalPaginationHelpers } from './helpers/local-list.helpers';
 export { getPaginationObservables } from './reducers/pagination-reducer/pagination-reducer.helper';
 export type { PaginationObservables } from './reducers/pagination-reducer/pagination-reducer.types';
@@ -77,8 +75,6 @@ export {
 export { pick } from './helpers/reducer.helper';
 export type { ApiKey } from './apiKey.types';
 export { MultiActionListEntity, PaginationMonitor } from './monitors/pagination-monitor';
-export { selectDashboardState, selectIsMobile } from './selectors/dashboard.selectors';
-export type { DashboardState } from './types/dashboard.types';
 export {
   PaginationPageIteratorConfig,
 } from './entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
@@ -105,16 +101,6 @@ export { selectPaginationState } from './selectors/pagination.selectors';
 export type { AuthState } from './reducers/auth.reducer';
 export { selectSessionData } from './reducers/auth.reducer';
 export type { SessionUser } from './types/auth.types';
-export {
-  CloseSideNav,
-  DisableMobileNav,
-  EnableMobileNav,
-  SetGravatarEnabledAction,
-  SetPollingEnabledAction,
-  SetSessionTimeoutAction,
-  SetHomeCardLayoutAction,
-  ToggleSideNav,
-} from './actions/dashboard-actions';
 export { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 export type { StratosStatusMetadata } from './types/shared.types';
 export { ComponentEntityMonitorConfig, StratosStatus } from './types/shared.types';
@@ -181,7 +167,7 @@ export {
   endpointStatusSelector,
   endpointsEntityRequestDataSelector,
 } from './selectors/endpoint.selectors';
-export { EntityMonitor } from './monitors/entity-monitor';
+export { EntityMonitor, setEntityMonitorPollingEnabledSource } from './monitors/entity-monitor';
 export type {
   EntityCatalogEntityConfig,
   EntityCatalogSchemas,

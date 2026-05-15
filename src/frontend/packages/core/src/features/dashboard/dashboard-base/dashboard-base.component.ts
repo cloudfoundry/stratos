@@ -6,17 +6,14 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, R
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  CloseSideNav,
-  DashboardOnlyAppState,
-  DashboardState,
-  DisableMobileNav,
-  EnableMobileNav,
+  AppState,
   GetCurrentUsersRelations,
   Store,
   entityCatalog,
   stratosEntityCatalog,
 } from '@stratosui/store';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
@@ -51,7 +48,7 @@ import { ShowPageHeaderComponent } from '../../../shared/components/page-header/
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
   pageHeaderService = inject(PageHeaderService);
-  private store = inject<Store<DashboardOnlyAppState>>(Store);
+  private store = inject<Store<AppState>>(Store);
   private breakpointObserver = inject(BreakpointObserver);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
@@ -62,6 +59,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private cs = inject(CustomizationService);
   private cd = inject(ChangeDetectorRef);
   private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
 
   public activeTabLabel$!: Observable<string>;
   public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
@@ -122,7 +120,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     );
 
     this.mobileSub = this.isMobile$
-      .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
+      .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
   }
 
   @ViewChild('sidenav') set sidenav(drawer: any) {
@@ -131,7 +129,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
       this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([_change, state]: [any, DashboardState]) => {
         if (state.isMobile) {
-          this.store.dispatch(new CloseSideNav());
+          this.dashboardData.closeSideNav();
         }
       });
     }
