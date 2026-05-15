@@ -95,6 +95,10 @@ describe('ApplicationTabsBaseComponent', () => {
     const mockEndpointsDataService = {
       endpoints: endpointsMap,
       whenReady: () => Promise.resolve(),
+      waitFor: (guid: string) => {
+        const ep = endpointsMap().get(guid);
+        return ep ? Promise.resolve(ep) : Promise.reject(new Error(`Endpoint ${guid} not found`));
+      },
     };
 
     await TestBed.configureTestingModule({

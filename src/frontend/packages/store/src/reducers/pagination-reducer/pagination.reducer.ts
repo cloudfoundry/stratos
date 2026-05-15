@@ -247,10 +247,18 @@ function enterPaginationReducer(state: PaginationState, action: any, updatePagin
   if (actionType && entityKey && paginationKey) {
     const newState = { ...state };
     if (!newState[entityKey]) {
+      // Wave 4 part 1 (W36-B): the legacy `isEndpointAction` branch used
+      // to return early before this point for any endpoint-action — its
+      // removal exposed a latent NPE here when an action's entity slot
+      // hadn't been initialized (e.g. shim dispatch on a fresh test
+      // store). Initialize the slot so updatePagination receives
+      // `undefined` (its standard "initial state" sentinel) rather than
+      // crashing reading `undefined[paginationKey]`.
       logMissing(`entity type ''`, Object.keys(newState));
+      newState[entityKey] = {};
     }
     const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
-    if (state[entityKey][paginationKey] === updatedPaginationState) {
+    if (newState[entityKey][paginationKey] === updatedPaginationState) {
       return state;
     }
     newState[entityKey] = mergeState(newState[entityKey], {
