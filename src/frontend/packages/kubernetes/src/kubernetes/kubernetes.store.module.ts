@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 
-import { KubernetesEffects } from './store/kubernetes.effects';
-import { KubernetesReducersModule } from './store/kubernetes.reducers';
-
+// Wave-3.5 (slice K-final) drained the @ngrx surface from the kubernetes
+// package. KubernetesEffects, AnalysisEffects, and KubernetesReducersModule
+// were deleted alongside their consumers' migration to signal-native data
+// services (KubeEndpointDataService, KubeAnalysisDataService, etc.).
+//
+// This module is preserved as an empty NgModule for one slice so any
+// cross-package import (kubernetes.setup.module → KubernetesStoreModule)
+// keeps compiling. The next slice removes the module entirely along
+// with its registration in KubernetesSetupModule.
 @NgModule({
-  imports: [
-    EffectsModule.forFeature([
-      KubernetesEffects,
-    ]),
-    KubernetesReducersModule,
-  ]
+  imports: []
 })
 export class KubernetesStoreModule { }
