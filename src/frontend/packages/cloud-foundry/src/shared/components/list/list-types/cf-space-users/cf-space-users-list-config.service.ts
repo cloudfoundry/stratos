@@ -10,6 +10,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types'
 import { CloudFoundryOrganizationService } from '../../../../../features/cf/services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../features/cf/services/cloud-foundry-space.service';
 import { CfUser } from '../../../../../store/types/cf-user.types';
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfUserService } from '../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from '../cf-users/cf-user-list-config.service';
 
@@ -25,6 +26,7 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
     const router = inject(Router);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
     const userPerms = inject(CurrentUserPermissionsService);
+    const cfRoles = inject(CfCurrentUserRolesSignalService);
 
     super(
       store,
@@ -32,6 +34,7 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
       router,
       activeRouteCfOrgSpace,
       userPerms,
+      cfRoles,
       (user: CfUser): boolean => cfUserService.hasSpaceRoles(user, activeRouteCfOrgSpace.spaceGuid),
       cfOrgService.org$,
       cfSpaceService.space$,

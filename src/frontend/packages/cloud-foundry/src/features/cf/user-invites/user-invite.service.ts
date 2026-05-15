@@ -11,6 +11,7 @@ import { ConfirmationDialogConfig } from '../../../../../core/src/shared/compone
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CFAppState } from '../../../cf-app-state';
+import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
@@ -128,6 +129,7 @@ export class UserInviteConfigureService {
 })
 export class UserInviteService {
   private store = inject<Store<CFAppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
   private http = inject(HttpClient);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
@@ -147,7 +149,7 @@ export class UserInviteService {
     );
 
     this.canConfigure$ = combineLatest(
-      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
+      waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
       this.store.select('auth')
     ).pipe(
       map(([cf, auth]) =>
@@ -160,7 +162,7 @@ export class UserInviteService {
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
     // Can only invite someone to an org or space and user must be admin or org manager
-    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.store, cfGuid).pipe(
+    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
       switchMap(() => combineLatest(
         this.configured$,
         this.currentUserPermissionsService.can(

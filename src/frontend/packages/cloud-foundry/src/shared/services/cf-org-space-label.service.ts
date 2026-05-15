@@ -15,6 +15,7 @@ import { CFAppState } from '../../cf-app-state';
 import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
 import { selectCfEntity } from '../../store/selectors/api.selectors';
+import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
 
 export class CfOrgSpaceLabelService {
@@ -32,6 +33,7 @@ export class CfOrgSpaceLabelService {
    */
   constructor(
     private store: Store<CFAppState>,
+    cfRoles: CfCurrentUserRolesSignalService,
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {
@@ -41,7 +43,7 @@ export class CfOrgSpaceLabelService {
     // the breadcrumb path.
     cfOsDebugLog('labelService:construct', { cfGuid, orgGuid, spaceGuid });
 
-    this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(this.store);
+    this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(cfRoles);
     // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
     const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
 

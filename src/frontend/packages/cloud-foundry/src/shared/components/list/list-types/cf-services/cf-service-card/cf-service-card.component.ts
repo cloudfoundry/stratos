@@ -17,6 +17,7 @@ import { APIResource, EntityServiceFactory, RouterNav } from '@stratosui/store';
 import { CFAppState } from '../../../../../../cf-app-state';
 import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
 import { getServiceName } from '../../../../../../features/service-catalog/services-helper';
+import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
@@ -60,6 +61,7 @@ export interface ServiceTag {
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   private store = inject<Store<CFAppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
 
   serviceEntity: APIResource<IService>;
   cfOrgSpace: CfOrgSpaceLabelService;
@@ -87,7 +89,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
       }
 
       if (!this.cfOrgSpace) {
-        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.serviceEntity.entity.cfGuid);
+        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.cfRoles, this.serviceEntity.entity.cfGuid);
       }
     }
   }

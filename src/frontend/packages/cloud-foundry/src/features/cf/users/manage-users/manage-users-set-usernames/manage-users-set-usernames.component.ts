@@ -24,6 +24,7 @@ import {
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CFAppState } from '../../../../../cf-app-state';
 import { CfUser } from '../../../../../store/types/cf-user.types';
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { waitForCFPermissions } from '../../../cf.helpers';
@@ -79,20 +80,20 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor() {
-    const store = this.store;
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+    const cfRoles = inject(CfCurrentUserRolesSignalService);
     const userPerms = inject(CurrentUserPermissionsService);
 
     this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
-    this.canAdd$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+    this.canAdd$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
       publishReplay(1),
       refCount()
     );
-    this.canRemove$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+    this.canRemove$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
       publishReplay(1),

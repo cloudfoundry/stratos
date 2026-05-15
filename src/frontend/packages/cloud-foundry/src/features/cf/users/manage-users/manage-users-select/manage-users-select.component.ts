@@ -13,6 +13,7 @@ import {
   CfSelectUsersListConfigService } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-list-config.service';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { CfUser } from '../../../../../store/types/cf-user.types';
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
@@ -36,16 +37,18 @@ import { ListComponent } from '../../../../../../../core/src/shared/components/l
         activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
         cfUserService: CfUserService,
         paginationMonitorFactory: PaginationMonitorFactory,
-        entityMonitorFactory: EntityMonitorFactory) => {
+        entityMonitorFactory: EntityMonitorFactory,
+        cfRoles: CfCurrentUserRolesSignalService) => {
         return new CfSelectUsersListConfigService(
           store,
           activeRouteCfOrgSpace.cfGuid,
           cfUserService,
           activeRouteCfOrgSpace,
           paginationMonitorFactory,
-          entityMonitorFactory);
+          entityMonitorFactory,
+          cfRoles);
       },
-      deps: [Store, ActiveRouteCfOrgSpace, CfUserService, PaginationMonitorFactory, EntityMonitorFactory]
+      deps: [Store, ActiveRouteCfOrgSpace, CfUserService, PaginationMonitorFactory, EntityMonitorFactory, CfCurrentUserRolesSignalService]
     }
   ] })
 export class UsersRolesSelectComponent {
