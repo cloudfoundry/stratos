@@ -13,10 +13,11 @@
             @for (gitTypeEntry of gitTypes[epSubType].types | keyvalue; track gitTypeEntry) {
               <div class="block">
                 <label class="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  [attr.for]="'gitType-' + gitTypeEntry.key"
                   [class.opacity-50]="gitTypeEntry.value.exists"
                   [class.cursor-not-allowed]="gitTypeEntry.value.exists"
                   [class.pointer-events-none]="gitTypeEntry.value.exists">
-                  <input type="radio" formControlName="selectedType" [value]="gitTypeEntry.key"
+                  <input [attr.id]="'gitType-' + gitTypeEntry.key" type="radio" formControlName="selectedType" [value]="gitTypeEntry.key"
                     class="mt-1 text-brand-600 focus:ring-brand-500 border-gray-300"
                     [attr.aria-disabled]="gitTypeEntry.value.exists ? 'true' : null">
                   <div class="flex-1">
@@ -74,16 +75,16 @@
               </div>
               <div class="space-y-3">
                 @if (userEndpointsAndIsAdmin | async) {
-                  <label class="checkbox-label"
+                  <label class="checkbox-label" for="git-create-system-endpoint"
                     [class.hidden]="fixedUrl">
-                    <input type="checkbox" name="createSystemEndpoint"
+                    <input id="git-create-system-endpoint" type="checkbox" name="createSystemEndpoint"
                       formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
                       class="checkbox">
                     <span class="checkbox-text">Create a system endpoint (visible to all users)</span>
                   </label>
                 }
-                <label class="checkbox-label" [class.hidden]="fixedUrl">
-                  <input type="checkbox" name="skipSSL" formControlName="skipSSLField" class="checkbox">
+                <label class="checkbox-label" for="git-skip-ssl" [class.hidden]="fixedUrl">
+                  <input id="git-skip-ssl" type="checkbox" name="skipSSL" formControlName="skipSSLField" class="checkbox">
                   <span class="checkbox-text">Skip SSL validation for the endpoint</span>
                 </label>
               </div>

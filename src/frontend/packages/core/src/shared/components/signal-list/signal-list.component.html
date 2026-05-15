@@ -5,9 +5,10 @@
 
     @if (config.filterDropdowns) {
       @for (dd of config.filterDropdowns; track dd.label) {
-        <label class="flex items-center gap-2 text-sm text-content-muted" [attr.data-test]="'dropdown-' + dd.label">
+        <label class="flex items-center gap-2 text-sm text-content-muted" [attr.for]="'dropdown-' + dd.label" [attr.data-test]="'dropdown-' + dd.label">
           <span>{{ dd.label }}:</span>
           <select
+            [attr.id]="'dropdown-' + dd.label"
             [disabled]="dd.disabled ? dd.disabled() : false"
             (change)="onDropdownChange(dd, $any($event.target).value)"
             class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text disabled:opacity-40 disabled:cursor-not-allowed">

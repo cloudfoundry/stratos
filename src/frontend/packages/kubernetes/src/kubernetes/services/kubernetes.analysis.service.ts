@@ -48,8 +48,7 @@ export class KubernetesAnalysisService {
   // Compatibility shim — legacy `isAnalysisEnabled(store)` callers that
   // imported @ngrx/store can call this overload. The store parameter is
   // ignored; the read goes through SessionService.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public static isAnalysisEnabled(store: unknown): Observable<boolean>;
+  public static isAnalysisEnabled(_store: unknown): Observable<boolean>;
   public static isAnalysisEnabled(session: SessionService): Observable<boolean>;
   public static isAnalysisEnabled(arg: unknown): Observable<boolean> {
     // Detect SessionService by sessionData() signal presence; ngrx Store

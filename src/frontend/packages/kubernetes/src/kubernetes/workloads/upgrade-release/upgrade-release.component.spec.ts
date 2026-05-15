@@ -106,7 +106,6 @@ describe('UpgradeReleaseComponent', () => {
   // would keep emitting after component destruction.
   it('unsubscribes validateSub on destroy', () => {
     const sub = { unsubscribe: vi.fn() };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (component as any).validateSub = sub;
     component.ngOnDestroy();
     expect(sub.unsubscribe).toHaveBeenCalled();

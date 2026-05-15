@@ -36,8 +36,9 @@
 
     <!-- Show All Menu Items Toggle (only in expanded mode) -->
     <div class="nav-show-all-toggle border-b border-nav-border p-3" [class.hidden]="iconMode">
-      <label class="flex items-center space-x-2 text-nav-text-muted hover:text-nav-text cursor-pointer">
+      <label class="flex items-center space-x-2 text-nav-text-muted hover:text-nav-text cursor-pointer" for="nav-show-all">
         <input
+          id="nav-show-all"
           type="checkbox"
           class="form-checkbox h-4 w-4 text-accent rounded border-nav-border focus:ring-accent focus:ring-2"
           [checked]="showAllMenuItems"

@@ -453,7 +453,6 @@ export class AppDetailDataService {
       if (typeof localStorage === 'undefined' || !localStorage.getItem('stratosDebug')) {
         return;
       }
-      // eslint-disable-next-line no-console
       console.debug('[AppDetailData]', kind, outcome, `${ms.toFixed(0)}ms`, url, err ?? '');
     } catch {
       // localStorage may throw in private-mode browsers; ignore.

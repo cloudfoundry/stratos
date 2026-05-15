@@ -45,12 +45,12 @@
                         <div class="space-y-4">
                           <app-metadata-item label="Effective Duration">
                             <div class="space-y-3" name="effective_type" formControlName="effective_type">
-                              <label class="radio-label">
-                                <input type="radio" value="always" (click)="resetEffectiveType('always')" class="radio">
+                              <label class="radio-label" for="effective-always">
+                                <input id="effective-always" type="radio" value="always" (click)="resetEffectiveType('always')" class="radio">
                                 <span class="radio-text">Always</span>
                               </label>
-                              <label class="radio-label">
-                                <input type="radio" value="custom" (click)="resetEffectiveType('custom')" class="radio">
+                              <label class="radio-label" for="effective-custom">
+                                <input id="effective-custom" type="radio" value="custom" (click)="resetEffectiveType('custom')" class="radio">
                                 <span class="radio-text">Custom</span>
                                 @if (editEffectiveType==='custom') {
                                   <div class="mt-2 grid grid-cols-2 gap-2">
@@ -69,12 +69,12 @@
                           </app-metadata-item>
                           <app-metadata-item label="Repeat By">
                             <div class="space-y-3" name="repeat_type" formControlName="repeat_type">
-                              <label class="radio-label">
-                                <input type="radio" value="week" class="radio">
+                              <label class="radio-label" for="repeat-week">
+                                <input id="repeat-week" type="radio" value="week" class="radio">
                                 <span class="radio-text">Week</span>
                               </label>
-                              <label class="radio-label">
-                                <input type="radio" value="month" class="radio">
+                              <label class="radio-label" for="repeat-month">
+                                <input id="repeat-month" type="radio" value="month" class="radio">
                                 <span class="radio-text">Month</span>
                               </label>
                             </div>

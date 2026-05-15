@@ -73,7 +73,6 @@ function asEntityInfoObservable(
 
 export const fetchAutoscalerInfo = (
   endpointGuid: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _esf?: EntityServiceFactory,
 ): Observable<EntityInfo<APIResource<AutoscalerInfo>>> => {
   const svc = getDataService();
@@ -88,7 +87,6 @@ export const fetchAutoscalerInfo = (
  */
 export const isAutoscalerEnabled = (
   endpointGuid: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _esf?: EntityServiceFactory,
 ): Observable<boolean> => {
   const svc = getDataService();
