@@ -54,7 +54,7 @@ print_success "Go $(go version | awk '{print $3}') found"
 echo ""
 
 # Step 1: Build devkit package
-print_status "Step 1/4: Building devkit package..."
+print_status "Step 1/5: Building devkit package..."
 if [ ! -d "src/frontend/packages/devkit" ]; then
     print_error "Devkit package directory not found. Are you in the Stratos root directory?"
     exit 1
@@ -85,7 +85,7 @@ else
 fi
 
 # Step 2: Generate extension module
-print_status "Step 2/4: Generating extension imports..."
+print_status "Step 2/5: Generating extension imports..."
 if [ ! -f "build/extension-generator.mjs" ]; then
     print_error "extension-generator.mjs not found"
     exit 1
@@ -101,7 +101,7 @@ else
 fi
 
 # Step 3: Setup development configuration
-print_status "Step 3/4: Setting up development configuration..."
+print_status "Step 3/5: Setting up development configuration..."
 if [ ! -f "build/dev-setup.js" ]; then
     print_error "dev-setup.js not found"
     exit 1
@@ -122,8 +122,18 @@ else
     print_warning "proxy.conf.js not created (may already exist)"
 fi
 
-# Step 4: Clean up any stray node_modules in workspace packages
-print_status "Step 4/4: Cleaning workspace..."
+# Step 4: Stamp build-info.ts so vitest can resolve the import without a full build
+print_status "Step 4/5: Stamping build-info.ts..."
+make stamp frontend > /dev/null
+if [ -f "src/frontend/packages/core/src/environments/build-info.ts" ]; then
+    print_success "build-info.ts stamped"
+else
+    print_error "build-info.ts stamp failed"
+    exit 1
+fi
+
+# Step 5: Clean up any stray node_modules in workspace packages
+print_status "Step 5/5: Cleaning workspace..."
 find src/frontend/packages -type d -name "node_modules" -maxdepth 2 2>/dev/null | while read dir; do
     print_warning "Removing unexpected node_modules: $dir"
     rm -rf "$dir"
