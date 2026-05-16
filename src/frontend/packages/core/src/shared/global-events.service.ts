@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import {
   StratosStatus, GeneralEntityAppState,
   EndpointModel, endpointEntityType, STRATOS_ENDPOINT_TYPE,
-  selectEntity, entityCatalog,
+  selectEntity, EntityCatalogHelpers,
 } from '@stratosui/store';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
@@ -152,9 +152,13 @@ export class GlobalEventService {
       return;
     }
     this.store.pipe(take(1)).subscribe((appState: GeneralEntityAppState) => {
-      const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointEntityType);
+      // The `stratos/endpoint` catalog entry no longer exists (retired in
+      // W36-B/C Wave 5). Endpoints remain keyed under the deterministic
+      // entity key produced by `buildEntityKey`, so derive it directly
+      // instead of looking it up via the catalog.
+      const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
       for (const [cnsiGuid, err] of errors) {
-        const endpoint = selectEntity<EndpointModel>(entityConfig.entityKey, cnsiGuid)(appState);
+        const endpoint = selectEntity<EndpointModel>(endpointEntityKey, cnsiGuid)(appState);
         const name = endpoint?.name ?? cnsiGuid;
         const detail = formatEndpointErrorDetail(err);
         events.push({

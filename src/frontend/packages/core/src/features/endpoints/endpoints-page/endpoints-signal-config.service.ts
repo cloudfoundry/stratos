@@ -88,14 +88,13 @@ export class ViewPipeline<T> {
   }
 }
 
-// Endpoints list config service — bridges the legacy ngrx endpoints store to the
-// signal-native list pattern. Unlike the per-CNSI services in cloud-foundry
-// (CfApps/Orgs/Spaces/Routes), endpoints have no parent CNSI: they're top-level
-// records under stratosEntityCatalog.endpoint.store. The data source is therefore
-// a direct toSignal() over endpointEntitiesSelector — no EndpointDataService /
-// registry indirection involved. Filter / sort / paging machinery is identical to
-// the CF analogs, so the visual / interaction language stays consistent across
-// signal-list pages.
+// Endpoints list config service — provides the signal-native list pattern
+// over `EndpointsDataService` (the W36-B replacement for the legacy
+// `stratosEntityCatalog.endpoint.store` slice). Unlike the per-CNSI
+// services in cloud-foundry (CfApps/Orgs/Spaces/Routes), endpoints have
+// no parent CNSI: they're top-level records owned by `EndpointsDataService`.
+// Filter / sort / paging machinery is identical to the CF analogs, so the
+// visual / interaction language stays consistent across signal-list pages.
 @Injectable({ providedIn: 'root' })
 export class EndpointsSignalConfigService {
   private readonly store = inject<Store<AppState>>(Store);

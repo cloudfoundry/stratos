@@ -92,10 +92,22 @@ export class PaginationMonitor<T = any, Y extends AppState = GeneralEntityAppSta
   ) {
     const { endpointType, entityType, schemaKey } = entityConfig;
     const catalogEntity = entityCatalog.getEntity(endpointType, entityType);
-    if (!catalogEntity) {
-      throw new Error(`Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}'`);
+    if (catalogEntity) {
+      this.schema = catalogEntity.getSchema(schemaKey);
+    } else {
+      // Defensive: callers like `BaseEndpointsDataSource` carry their
+      // schema on the action itself (`entity[0]`) and no longer register
+      // a `stratos`/`endpoint` catalog entry (retired in W36-B/C Wave 5).
+      // Fall back to the action-borne schema rather than throwing.
+      const inlineEntity = (entityConfig as { entity?: EntitySchema[] }).entity;
+      const inlineSchema = inlineEntity && inlineEntity[0];
+      if (!inlineSchema) {
+        throw new Error(
+          `Could not find catalog entity for endpoint type '${endpointType}' and entity type '${entityType}', and no inline schema was supplied on the action.`
+        );
+      }
+      this.schema = inlineSchema;
     }
-    this.schema = entityCatalog.getEntity(endpointType, entityType).getSchema(schemaKey);
     this.init(store, paginationKey, this.schema);
   }
 
