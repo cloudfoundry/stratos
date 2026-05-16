@@ -2,16 +2,21 @@
 package cloudfoundry
 
 import (
+	"context"
+
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
 )
 
 // fetchSpacesForOrgs drains /v3/spaces?organization_guids=<orgGUIDs> once
 // and returns both a per-org space count and a space_guid → org_guid map
-// for downstream callers (e.g. fetchAppCountsForOrgs) so the spaces drain
+// for downstream callers (e.g. attributeAppsToOrgs) so the spaces drain
 // isn't duplicated when both counts are needed. Mirrors the lazy-non-fatal
 // pattern of fetchAppCountsForSpaces.
-func fetchSpacesForOrgs(ctx echo.Context, cfClient capi.Client, orgGUIDs []string) (counts map[string]int, spaceToOrg map[string]string, err error) {
+//
+// Takes context.Context (not echo.Context) so callers can spawn this
+// inside an errgroup goroutine — echo.Context is not safe for concurrent
+// use, but the request's context.Context is.
+func fetchSpacesForOrgs(ctx context.Context, cfClient capi.Client, orgGUIDs []string) (counts map[string]int, spaceToOrg map[string]string, err error) {
 	counts = make(map[string]int, len(orgGUIDs))
 	spaceToOrg = make(map[string]string)
 	if len(orgGUIDs) == 0 {
@@ -22,7 +27,7 @@ func fetchSpacesForOrgs(ctx echo.Context, cfClient capi.Client, orgGUIDs []strin
 		params.Page = page
 		params.Filters["organization_guids"] = orgGUIDs
 
-		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		raw, lerr := cfClient.Spaces().List(ctx, params)
 		if lerr != nil {
 			return nil, nil, lerr
 		}
@@ -40,35 +45,44 @@ func fetchSpacesForOrgs(ctx echo.Context, cfClient capi.Client, orgGUIDs []strin
 	return counts, spaceToOrg, nil
 }
 
-// fetchAppCountsForOrgs drains /v3/apps?organization_guids=<orgGUIDs> and
-// attributes each app back to its org via the supplied space → org map
-// (V3 /v3/apps only carries the space relationship inline). Pass a
-// spaceToOrg from fetchSpacesForOrgs to avoid duplicate /v3/spaces drains.
-// Returns map org_guid → app count. Same lazy-non-fatal pattern as the
-// spaces counterpart.
-func fetchAppCountsForOrgs(ctx echo.Context, cfClient capi.Client, orgGUIDs []string, spaceToOrg map[string]string) (map[string]int, error) {
-	counts := make(map[string]int, len(orgGUIDs))
+// drainAppsForOrgs drains /v3/apps?organization_guids=<orgGUIDs> and
+// returns the raw apps. Attribution to orgs happens separately via
+// attributeAppsToOrgs so the drain can run concurrently with the
+// spaces drain (the attribution-time dependency on space→org doesn't
+// gate the HTTP roundtrips). Takes context.Context for the same
+// goroutine-safety reason as fetchSpacesForOrgs.
+func drainAppsForOrgs(ctx context.Context, cfClient capi.Client, orgGUIDs []string) ([]capi.App, error) {
 	if len(orgGUIDs) == 0 {
-		return counts, nil
+		return nil, nil
 	}
+	apps := make([]capi.App, 0)
 	for page := 1; ; page++ {
 		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
 		params.Page = page
 		params.Filters["organization_guids"] = orgGUIDs
 
-		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+		raw, err := cfClient.Apps().List(ctx, params)
 		if err != nil {
 			return nil, err
 		}
-		for _, a := range raw.Resources {
-			sg := relationshipGUID(a.Relationships.Space)
-			if og, ok := spaceToOrg[sg]; ok && og != "" {
-				counts[og]++
-			}
-		}
+		apps = append(apps, raw.Resources...)
 		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
 			break
 		}
 	}
-	return counts, nil
+	return apps, nil
+}
+
+// attributeAppsToOrgs walks the drained apps and counts per-org via the
+// space→org map (V3 /v3/apps only carries the space relationship inline,
+// not the org). Pure function — no I/O.
+func attributeAppsToOrgs(apps []capi.App, spaceToOrg map[string]string) map[string]int {
+	counts := make(map[string]int)
+	for _, a := range apps {
+		sg := relationshipGUID(a.Relationships.Space)
+		if og, ok := spaceToOrg[sg]; ok && og != "" {
+			counts[og]++
+		}
+	}
+	return counts
 }

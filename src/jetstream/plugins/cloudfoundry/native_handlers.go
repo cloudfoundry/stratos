@@ -308,21 +308,25 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
 
-	// Enrich with per-org space + app counts so the orgs-list columns read
-	// from each row's own context, not from a separately-loaded global
-	// list (which is capped at fullPagePerRequest and undercounts orgs
-	// whose rows fall past the cap). fetchSpacesForOrgs returns both the
-	// per-org space count AND a space→org map; fetchAppCountsForOrgs reuses
-	// that map to attribute /v3/apps rows back to their org (V3 /apps only
-	// exposes the space relationship inline, not the org).
+	// Enrich with per-org space + app counts. Drains run sequentially
+	// because the bottleneck is CAPI-side, not Stratos-side: an A/B
+	// measurement with errgroup showed p50 going from 11s (sequential)
+	// to 14s (parallel) on adepttech — two concurrent drains contend
+	// for the CAPI's connection pool and backend serialization. The
+	// real perf win is the frontend cache short-circuit in
+	// EndpointDataService.loadDetails() which skips this call entirely
+	// on warm-cache navigation; backend handler latency only matters
+	// on cold cache (first-load).
 	orgGUIDs := make([]string, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
 		if r.GUID != "" {
 			orgGUIDs = append(orgGUIDs, r.GUID)
 		}
 	}
-	spaceCounts, spaceToOrg, _ := fetchSpacesForOrgs(ctx, cfClient, orgGUIDs)
-	appCounts, _ := fetchAppCountsForOrgs(ctx, cfClient, orgGUIDs, spaceToOrg)
+	reqCtx := ctx.Request().Context()
+	spaceCounts, spaceToOrg, _ := fetchSpacesForOrgs(reqCtx, cfClient, orgGUIDs)
+	rawApps, _ := drainAppsForOrgs(reqCtx, cfClient, orgGUIDs)
+	appCounts := attributeAppsToOrgs(rawApps, spaceToOrg)
 
 	orgs := make([]StOrg, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
