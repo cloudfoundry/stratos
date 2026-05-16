@@ -54,6 +54,32 @@ describe('SessionSignalService', () => {
     expect(service.userEndpointsNotDisabled()).toBe(true);
   });
 
+  it('projects the SessionDataConfig object verbatim onto config()', () => {
+    const config = {
+      enableTechPreview: true,
+      userEndpointsEnabled: UserEndpointsEnabled.ADMIN_ONLY,
+    };
+    stub.setSessionData({ valid: true, config } as unknown as SessionData);
+
+    const service = TestBed.inject(SessionSignalService);
+    expect(service.config()).toEqual(config);
+  });
+
+  it('reacts to upstream sessionData changes (signal pass-through)', () => {
+    const service = TestBed.inject(SessionSignalService);
+    expect(service.isTechPreview()).toBe(false);
+
+    stub.setSessionData({
+      valid: true,
+      config: { enableTechPreview: true },
+    } as unknown as SessionData);
+    expect(service.isTechPreview()).toBe(true);
+
+    stub.setSessionData(null);
+    expect(service.isTechPreview()).toBe(false);
+    expect(service.config()).toBeNull();
+  });
+
   it('treats DISABLED as both not-enabled and not-not-disabled', () => {
     stub.setSessionData({
       valid: true,
