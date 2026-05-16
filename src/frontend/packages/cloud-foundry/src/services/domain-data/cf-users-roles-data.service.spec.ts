@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 
+import { UsersRolesSetChanges } from '../../actions/users-roles.actions';
 import { CfUser, IUserPermissionInOrg } from '../../store/types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../../store/types/users-roles.types';
 import { CfUsersRolesDataService } from './cf-users-roles-data.service';
@@ -72,5 +73,19 @@ describe('CfUsersRolesDataService', () => {
     expect(svc.cfGuid()).toBe('cf-2');
     expect(svc.isRemove()).toBe(true);
     expect(svc.isSetByUsername()).toBe(false);
+  });
+
+  it('setChanges dispatches UsersRolesSetChanges with the provided diff', () => {
+    const dispatched: unknown[] = [];
+    store.scannedActions$.subscribe(a => dispatched.push(a));
+
+    const newChange: CfRoleChange = { ...change, role: 'auditors' as any };
+    svc.setChanges([newChange]);
+
+    const setAction = dispatched.find(
+      (a): a is UsersRolesSetChanges => a instanceof UsersRolesSetChanges,
+    );
+    expect(setAction).toBeDefined();
+    expect(setAction!.changes).toEqual([newChange]);
   });
 });

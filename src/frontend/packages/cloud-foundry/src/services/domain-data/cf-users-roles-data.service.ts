@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Store } from '@stratosui/store';
 
+import { UsersRolesSetChanges } from '../../actions/users-roles.actions';
 import { CFAppState } from '../../cf-app-state';
 import {
   selectCfUsersIsRemove,
@@ -24,9 +25,11 @@ import { CfUser, IUserPermissionInOrg } from '../../store/types/cf-user.types';
 // cf-role-checkbox) can drop their `store.select(selectCfUsers...)`
 // calls without waiting for the underlying NgRx reducer to migrate.
 //
-// The wizard still mutates state through reducer actions; this service
-// is read-only on top. Each accessor is a stable Signal wired through
-// toSignal once at construction.
+// Reads are signal-out (toSignal-wrapped selectors); writes are a
+// thin set of mutation methods that wrap the existing reducer actions
+// so consumers don't have to `inject(Store)` for the dispatch leg.
+// When the reducer eventually folds into this service, the public
+// surface stays put — only the internal `store` bridge goes away.
 @Injectable({ providedIn: 'root' })
 export class CfUsersRolesDataService {
   private readonly store = inject<Store<CFAppState>>(Store);
@@ -70,4 +73,15 @@ export class CfUsersRolesDataService {
     this.store.select(selectCfUsersIsSetByUsername),
     { initialValue: undefined },
   );
+
+  /**
+   * Replace the wizard's pending role-change set. Wraps the
+   * {@link UsersRolesSetChanges} reducer action so consumers (the
+   * manage-users review step in `CfRolesService`, the remove-user
+   * confirm step) don't have to `inject(Store)` for this single
+   * dispatch.
+   */
+  setChanges(changes: CfRoleChange[]): void {
+    this.store.dispatch(new UsersRolesSetChanges(changes));
+  }
 }
