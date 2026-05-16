@@ -27,13 +27,17 @@ import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
 /**
- * Wave 5 (W36-B): the legacy `GetAllEndpoints` ngrx action class is gone,
- * but `BaseEndpointsDataSource` (and subclasses) still feed the legacy
- * client-side pagination machinery, which keys off `EntityRequestAction`
- * shape (entityType, endpointType, schema, paginationKey, initialParams).
+ * Wave 5 (W36-B/C): the legacy `GetAllEndpoints` ngrx action class is
+ * gone, and the schema-only `stratos`/`endpoint` catalog entry that
+ * previously served lookups for this data source has been retired too.
+ * `BaseEndpointsDataSource` still feeds the legacy client-side
+ * pagination machinery, which keys off `EntityRequestAction` shape
+ * (entityType, endpointType, schema, paginationKey, initialParams).
+ *
  * `EndpointsListAction` is the value-only stand-in: never dispatched
- * (refresh now calls `EndpointsDataService.getAll()` directly), just used
- * to seed the pagination row.
+ * (refresh now calls `EndpointsDataService.getAll()` directly), just
+ * used to seed the pagination row. The schema lives on the action
+ * itself (`entity[0]`) — no catalog round-trip needed.
  */
 export class EndpointsListAction implements EntityRequestAction {
   public type = '[Endpoints] List';
