@@ -168,7 +168,9 @@
            style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card"
-               class="border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow relative">
+               [routerLink]="rowLink(row)"
+               [class]="'border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow relative ' +
+                 (rowLink(row) ? 'cursor-pointer' : '')">
             @if (config.cardAccentColor) {
               <div data-test="card-accent"
                    [class]="'h-1.5 rounded-t ' + accentBarClass(cardAccentFor(row))"></div>
@@ -179,7 +181,7 @@
                   <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
                     <span class="truncate min-w-0" [attr.title]="col.render(row)">
                       @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                        <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                        <a [routerLink]="target" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                       } @else {
                         {{ col.render(row) }}
                       }
@@ -266,7 +268,7 @@
                     <div class="flex flex-col items-end leading-tight text-right min-w-0">
                       @for (seg of visibleCompoundSegments(col, row); track $index) {
                         @if (seg.link) {
-                          <a [routerLink]="seg.link" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</a>
+                          <a [routerLink]="seg.link" (click)="$event.stopPropagation()" class="text-accent hover:underline truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</a>
                         } @else {
                           <span class="truncate max-w-full" [attr.title]="seg.text">{{ seg.text }}</span>
                         }
@@ -295,7 +297,7 @@
                     <span class="text-content-muted">{{ col.header }}</span>
                     <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
                       @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                        <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                        <a [routerLink]="target" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                       } @else if (col.kind === 'pill') {
                         <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
                       } @else if (col.kind === 'dot') {
@@ -317,46 +319,113 @@
     } @else {
       <table class="min-w-full border-collapse" style="table-layout: fixed;">
         <colgroup>
+          @if (favoriteColumn() || actionsColumn()) {
+            <col style="width: 4.5rem">
+          }
           @for (col of config.columns; track col.key) {
-            <col [style.width]="col.widthHint ?? null">
+            @if (col.kind !== 'favorite' && col.kind !== 'actions') {
+              <col [style.width]="col.widthHint ?? null">
+            }
           }
         </colgroup>
         <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
           <tr>
+            @if (favoriteColumn() || actionsColumn()) {
+              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap"></th>
+            }
             @for (col of config.columns; track col.key) {
-              <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
-                @if (isSortable(col)) {
-                  <button
-                    type="button"
-                    (click)="onHeaderSort(col)"
-                    class="inline-flex items-center gap-1 hover:text-content-muted">
-                    <span>{{ col.header }}</span>
-                    @if (sortDirectionFor(col) === 'asc') {
-                      <span class="material-icons text-base opacity-60 rotate-180">sort</span>
-                    } @else if (sortDirectionFor(col) === 'desc') {
-                      <span class="material-icons text-base opacity-60">sort</span>
-                    } @else {
-                      <span class="material-icons text-base opacity-40">sort</span>
-                    }
-                  </button>
-                } @else {
-                  {{ col.header }}
-                }
-              </th>
+              @if (col.kind !== 'favorite' && col.kind !== 'actions') {
+                <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
+                  @if (isSortable(col)) {
+                    <button
+                      type="button"
+                      (click)="onHeaderSort(col)"
+                      class="inline-flex items-center gap-1 hover:text-content-muted">
+                      <span>{{ col.header }}</span>
+                      @if (sortDirectionFor(col) === 'asc') {
+                        <span class="material-icons text-base opacity-60 rotate-180">sort</span>
+                      } @else if (sortDirectionFor(col) === 'desc') {
+                        <span class="material-icons text-base opacity-60">sort</span>
+                      } @else {
+                        <span class="material-icons text-base opacity-40">sort</span>
+                      }
+                    </button>
+                  } @else {
+                    {{ col.header }}
+                  }
+                </th>
+              }
             }
           </tr>
         </thead>
         <tbody>
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
-            <tr data-test="row" class="border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900">
+            <tr data-test="row"
+                [routerLink]="rowLink(row)"
+                [class]="'border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900 ' +
+                  (rowLink(row) ? 'cursor-pointer' : '')">
+              @if (favoriteColumn() || actionsColumn()) {
+                <td class="px-2 py-2 overflow-visible whitespace-nowrap">
+                  <div class="flex items-center gap-0">
+                    @if (favoriteColumn(); as fc) {
+                      <button
+                        data-test="favorite-star"
+                        type="button"
+                        (click)="onToggleFavorite(fc, row, $event)"
+                        [title]="isFavorite(fc, row) ? 'Remove from favorites' : 'Add to favorites'"
+                        class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                        <span class="material-icons text-xl leading-none" [class.text-accent]="isFavorite(fc, row)">
+                          {{ isFavorite(fc, row) ? 'star' : 'star_border' }}
+                        </span>
+                      </button>
+                    }
+                    @if (actionsColumn(); as ac) {
+                      <div class="relative inline-block">
+                        <button
+                          data-test="row-actions"
+                          type="button"
+                          (click)="toggleRowActions(row, $event)"
+                          title="Actions"
+                          class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
+                          <span class="material-icons text-xl leading-none">more_vert</span>
+                        </button>
+                        @if (openActionsRowKey() === config.getRowKey(row)) {
+                          <div
+                            data-test="row-actions-menu"
+                            (click)="$event.stopPropagation()"
+                            class="absolute left-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-2">
+                            @for (act of ac.actions!(row); track act.label) {
+                              <button
+                                type="button"
+                                [disabled]="act.disabled"
+                                (click)="invokeAction(act, row, $event)"
+                                class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                                [class.text-red-600]="act.danger"
+                                [class.dark:text-red-400]="act.danger">
+                                @if (act.icon) {
+                                  <span class="material-icons text-base leading-none">{{ act.icon }}</span>
+                                }
+                                <span>{{ act.label }}</span>
+                              </button>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+              }
               @for (col of config.columns; track col.key) {
+                @if (col.kind === 'favorite' || col.kind === 'actions') {
+                  <!-- Suppressed: rendered in the leading controls cell -->
+                } @else {
                 <td class="px-3 py-2 text-sm text-content-text"
                     [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'gauge'"
                     [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge'"
                     [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge' ? null : col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
-                      <a [routerLink]="target" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                      <a [routerLink]="target" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                     } @else {
                       {{ col.render(row) }}
                     }
@@ -371,7 +440,7 @@
                     <div class="flex flex-col leading-tight">
                       @for (seg of visibleCompoundSegments(col, row); track $index) {
                         @if (seg.link) {
-                          <a [routerLink]="seg.link" class="text-accent hover:underline truncate" [attr.title]="seg.text">{{ seg.text }}</a>
+                          <a [routerLink]="seg.link" (click)="$event.stopPropagation()" class="text-accent hover:underline truncate" [attr.title]="seg.text">{{ seg.text }}</a>
                         } @else {
                           <span class="truncate" [attr.title]="seg.text">{{ seg.text }}</span>
                         }
@@ -460,6 +529,7 @@
                     {{ col.render(row) }}
                   }
                 </td>
+                }
               }
             </tr>
           }
