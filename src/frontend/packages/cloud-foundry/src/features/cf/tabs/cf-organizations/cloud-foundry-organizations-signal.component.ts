@@ -128,6 +128,10 @@ export class CloudFoundryOrganizationsSignalComponent {
       if (org.spacesCount === undefined) return '—';
       return String(org.spacesCount);
     };
+    const renderApps = (org: StOrg): string => {
+      if (org.appsCount === undefined) return '—';
+      return String(org.appsCount);
+    };
 
     this.listConfig.set({
       pagedItems: this.orgsConfig.view.pagedItems,
@@ -155,6 +159,11 @@ export class CloudFoundryOrganizationsSignalComponent {
         {
           header: 'Spaces', key: 'spaces', sortField: renderSpaces,
           render: renderSpaces,
+          widthHint: '7rem',
+        },
+        {
+          header: 'Apps', key: 'apps', sortField: renderApps,
+          render: renderApps,
           widthHint: '7rem',
         },
         {
@@ -197,6 +206,7 @@ export class CloudFoundryOrganizationsSignalComponent {
     });
 
     this.orgsConfig.registerSortExtractor('spaces', (o: StOrg) => o.spacesCount ?? 0);
+    this.orgsConfig.registerSortExtractor('apps', (o: StOrg) => o.appsCount ?? 0);
   }
 
   private toggleOrgFavorite(org: StOrg): void {

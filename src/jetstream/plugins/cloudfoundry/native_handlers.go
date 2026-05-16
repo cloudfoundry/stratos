@@ -308,22 +308,27 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
 
-	// Enrich with per-org space counts so the orgs-list "Spaces" column
-	// reads from each row's own context, not from a separately-loaded
-	// global spaces list (which is capped at fullPagePerRequest and
-	// undercounts orgs whose spaces fall past the cap).
+	// Enrich with per-org space + app counts so the orgs-list columns read
+	// from each row's own context, not from a separately-loaded global
+	// list (which is capped at fullPagePerRequest and undercounts orgs
+	// whose rows fall past the cap). fetchSpacesForOrgs returns both the
+	// per-org space count AND a space→org map; fetchAppCountsForOrgs reuses
+	// that map to attribute /v3/apps rows back to their org (V3 /apps only
+	// exposes the space relationship inline, not the org).
 	orgGUIDs := make([]string, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
 		if r.GUID != "" {
 			orgGUIDs = append(orgGUIDs, r.GUID)
 		}
 	}
-	spaceCounts, _ := fetchSpaceCountsForOrgs(ctx, cfClient, orgGUIDs)
+	spaceCounts, spaceToOrg, _ := fetchSpacesForOrgs(ctx, cfClient, orgGUIDs)
+	appCounts, _ := fetchAppCountsForOrgs(ctx, cfClient, orgGUIDs, spaceToOrg)
 
 	orgs := make([]StOrg, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
 		o := toStOrg(r)
 		o.SpacesCount = spaceCounts[r.GUID]
+		o.AppsCount = appCounts[r.GUID]
 		orgs = append(orgs, o)
 	}
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrg]{
