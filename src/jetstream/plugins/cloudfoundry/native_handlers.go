@@ -307,9 +307,24 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 	if lerr != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
 	}
+
+	// Enrich with per-org space counts so the orgs-list "Spaces" column
+	// reads from each row's own context, not from a separately-loaded
+	// global spaces list (which is capped at fullPagePerRequest and
+	// undercounts orgs whose spaces fall past the cap).
+	orgGUIDs := make([]string, 0, len(raw.Resources))
+	for _, r := range raw.Resources {
+		if r.GUID != "" {
+			orgGUIDs = append(orgGUIDs, r.GUID)
+		}
+	}
+	spaceCounts, _ := fetchSpaceCountsForOrgs(ctx, cfClient, orgGUIDs)
+
 	orgs := make([]StOrg, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		orgs = append(orgs, toStOrg(r))
+		o := toStOrg(r)
+		o.SpacesCount = spaceCounts[r.GUID]
+		orgs = append(orgs, o)
 	}
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StOrg]{
 		Resources:  orgs,
