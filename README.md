@@ -68,7 +68,8 @@ make dev-frontend
 2. Builds the devkit package (required by Angular CLI)
 3. Generates extension module imports
 4. Creates development proxy configuration
-5. Cleans up workspace
+5. Stamps `build-info.ts` so vitest can run without a full build
+6. Cleans up workspace
 
 **Troubleshooting:**
 - If `bun install` fails with missing files: Run `make bootstrap` first
