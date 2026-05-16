@@ -483,6 +483,17 @@ export class SignalListComponent<T> implements AfterViewInit {
     return this.config.columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
   }
 
+  // Resolves the row-level link target — used to make the whole card /
+  // table row clickable, mirroring the "name" link. Picks the first
+  // column declared as kind === 'link' and asks it for the row's target.
+  // Returns null when no link column exists or the column returns null
+  // for this row (lookup still pending, permission denied, etc.) — the
+  // template then renders the row as non-clickable.
+  rowLink(row: T): readonly (string | number)[] | null {
+    const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
+    return col?.link?.(row) ?? null;
+  }
+
   // Row key whose kebab menu is currently open. null = no menu open.
   // Clicking a kebab sets this to the row's key; clicking it again or
   // anywhere outside an open menu clears it.
