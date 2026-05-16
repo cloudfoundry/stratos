@@ -102,14 +102,14 @@ export class EndpointDataService {
   // the full orgs/apps/spaces arrays are populated for detail views.
   load(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'load' });
-    // Cache hit when we already have counts populated — the home card is
-    // driven entirely by recentApps + counts, so a warm signal means no
-    // network work is needed.
+    // Warm-cache short-circuit: signals already populated, no network needed.
+    // Without this, every consumer that calls load() fires the full HTTP
+    // fan-out — measured as ~3-15s per endpoint on adepttech.
     if (this._lastFetched() !== null && this._recentApps().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'load' });
-    } else {
-      this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'load' });
+      return of(undefined);
     }
+    this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'load' });
     this._isLoading.set(true);
     this._errors.set([]);
 
@@ -152,9 +152,9 @@ export class EndpointDataService {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadDetails' });
     if (this._detailsLastFetched() !== null && this._orgs().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadDetails' });
-    } else {
-      this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadDetails' });
+      return of(undefined);
     }
+    this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadDetails' });
     this._isLoadingDetails.set(true);
 
     // Use the bounded ?per_page passthrough so each list call is one CAPI
