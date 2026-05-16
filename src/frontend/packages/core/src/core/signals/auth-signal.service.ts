@@ -1,33 +1,33 @@
-import { Injectable, Signal, computed, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { AppState, AuthState, RouterNav, RouterRedirect, SessionData, VerifySession } from '@stratosui/store';
+import { Injectable, Signal, effect, inject, signal } from '@angular/core';
+import { AuthDataService, AuthState, RouterRedirect, SessionData } from '@stratosui/store';
 
 /**
- * Signal-native projection of the `auth` ngrx slice.
+ * W36-C Wave 1 — thin signal-native facade over {@link AuthDataService}.
  *
- * Read-through wrapper over `Store.select(s => s.auth)`. Does not write to the
- * store and does not persist to localStorage — auth state rehydrates from
- * `verify-session` on app start, so no signal mirror is needed.
+ * Preserves the per-field signal API the existing consumer surface
+ * (session.service, endpoints, login/logout pages, profile, restore,
+ * about/diagnostics, wizards) was written against. New code should inject
+ * `AuthDataService` directly; the indirection here is only worth the
+ * compile-time stability for the dozen-plus call sites.
  *
- * Consumers will be flipped from the legacy SessionService / Actions stream
- * to these signals in a later wave-3 slice.
+ * The single bridge to `store.select(s => s.auth)` lives in
+ * `AuthDataService` now — this service does not touch `Store`.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthSignalService {
-  private store = inject<Store<AppState>>(Store);
+  private authData = inject(AuthDataService);
 
-  /** Raw auth slice. `undefined` until the store emits its first value. */
-  readonly auth: Signal<AuthState | undefined> = toSignal(this.store.select(s => s.auth));
+  /** Raw auth slice. `undefined` until the data service mirrors its first value. */
+  readonly auth: Signal<AuthState | undefined> = this.authData.auth;
 
-  readonly loggedIn: Signal<boolean> = computed(() => !!this.auth()?.loggedIn);
-  readonly loggingIn: Signal<boolean> = computed(() => !!this.auth()?.loggingIn);
-  readonly verifying: Signal<boolean> = computed(() => !!this.auth()?.verifying);
-  readonly error: Signal<boolean> = computed(() => !!this.auth()?.error);
-  readonly errorResponse: Signal<unknown> = computed(() => this.auth()?.errorResponse);
-  readonly sessionData: Signal<SessionData | null> = computed(() => this.auth()?.sessionData ?? null);
-  readonly sessionValid: Signal<boolean> = computed(() => !!this.sessionData()?.valid);
-  readonly redirect: Signal<RouterRedirect | undefined> = computed(() => this.auth()?.redirect);
+  readonly loggedIn: Signal<boolean> = this.authData.loggedIn;
+  readonly loggingIn: Signal<boolean> = this.authData.loggingIn;
+  readonly verifying: Signal<boolean> = this.authData.verifying;
+  readonly error: Signal<boolean> = this.authData.error;
+  readonly errorResponse: Signal<unknown> = this.authData.errorResponse;
+  readonly sessionData: Signal<SessionData | null> = this.authData.sessionData;
+  readonly sessionValid: Signal<boolean> = this.authData.sessionValid;
+  readonly redirect: Signal<RouterRedirect | undefined> = this.authData.redirect;
 
   /**
    * Timestamp (ms since epoch) of the most recent transition into a logged-in
@@ -55,21 +55,22 @@ export class AuthSignalService {
   }
 
   /**
-   * Trigger a session-verification cycle. Wraps the legacy `VerifySession`
-   * action so callers can stay Store-free; the underlying ngrx effect remains
+   * Trigger a session-verification cycle. Delegates to {@link AuthDataService}
+   * so callers can stay Store-free; the underlying ngrx effect remains
    * responsible for the HTTP round-trip until session refresh is fully
    * signal-native.
    */
   verifySession(login: boolean = false, updateEndpoints: boolean = false): void {
-    this.store.dispatch(new VerifySession(login, updateEndpoints));
+    this.authData.verifySession(login, updateEndpoints);
   }
 
   /**
    * Navigate to `path` while remembering `redirect` as the post-login target.
-   * Wraps the legacy `RouterNav` action — the auth reducer captures the
-   * redirect into `auth.redirect` so the login page can replay it on success.
+   * Delegates to {@link AuthDataService}, which dispatches `RouterNav`; the
+   * auth reducer captures the redirect so the login page can replay it on
+   * success.
    */
   navigateAndRememberRedirect(path: string[] | string, redirect: RouterRedirect): void {
-    this.store.dispatch(new RouterNav({ path }, redirect));
+    this.authData.navigateAndRememberRedirect(path, redirect);
   }
 }
