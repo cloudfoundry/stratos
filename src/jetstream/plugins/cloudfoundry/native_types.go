@@ -23,6 +23,9 @@ type StOrg struct {
 	// predictable; on enrichment failure the default-path handler degrades
 	// silently (mirrors the StSpace AppCount/RouteCount pattern).
 	SpacesCount int `json:"spacesCount"`
+	// AppsCount is the matching apps-per-org aggregate from /v3/apps
+	// filtered by organization_guids. Drives the orgs-list "Apps" column.
+	AppsCount int `json:"appsCount"`
 }
 
 type StApp struct {

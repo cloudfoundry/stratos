@@ -18,6 +18,10 @@ export interface StOrg {
   // sourced from the org's own context — not summed over a global spaces
   // list that may be page-capped.
   spacesCount?: number;
+  // Matching aggregate from /v3/apps?organization_guids=<this-org>. Drives
+  // the orgs-list "Apps" column. Same context-sensitive single-source
+  // rationale as spacesCount.
+  appsCount?: number;
 }
 
 export interface StApp {
