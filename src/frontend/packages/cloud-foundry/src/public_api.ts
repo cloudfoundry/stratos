@@ -33,6 +33,7 @@ export { createCfOrSpaceMultipleFilterFn } from './shared/data-services/cf-org-s
 // Permissions
 export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
 export { CfCurrentUserRolesSignalService } from './user-permissions/cf-current-user-roles-signal.service';
+export { CfCurrentUserRolesDataService } from './services/cf-current-user-roles-data.service';
 
 // Test helpers
 export * from './entity-relations/entity-relations-spec-helper';

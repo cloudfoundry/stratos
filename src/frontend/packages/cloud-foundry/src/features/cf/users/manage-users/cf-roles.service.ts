@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take,
   combineLatest as combineLatestOperators,
@@ -16,9 +15,7 @@ import { take,
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { IOrganization, ISpace } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
 import {
@@ -37,7 +34,6 @@ import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
   providedIn: 'root'
 })
 export class CfRolesService {
-  private store = inject<Store<CFAppState>>(Store);
   private cfUserService = inject(CfUserService);
   private userPerms = inject(CurrentUserPermissionsService);
   private rolesData = inject(CfUsersRolesDataService);
@@ -180,7 +176,7 @@ export class CfRolesService {
         pickedUsers.forEach(user => {
           changes.push(...this.createRolesUserDiff(existingRoles, newRoles, changes, user, orgGuid));
         });
-        this.store.dispatch(new UsersRolesSetChanges(changes));
+        this.rolesData.setChanges(changes);
         return changes;
       })
     );

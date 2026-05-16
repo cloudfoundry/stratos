@@ -261,9 +261,14 @@ export class AppModule {
           if (!backendErrors.length) {
             return res;
           }
-          const entityConfig = entityCatalog.getEntity(STRATOS_ENDPOINT_TYPE, endpointEntityType);
+          // The `stratos/endpoint` catalog entry no longer exists (the
+          // legacy ngrx slice + schema-only catalog placeholder were
+          // retired in W36-B/C Wave 5). The store still keys endpoints
+          // under the same deterministic entity key, so compute it
+          // directly via `buildEntityKey` rather than catalog lookup.
+          const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
           res.push(new GlobalEventData(true, {
-            endpoint: selectEntity<EndpointModel>(entityConfig.entityKey, eventId)(state),
+            endpoint: selectEntity<EndpointModel>(endpointEntityKey, eventId)(state),
             count: backendErrors.length
           }));
           return res;

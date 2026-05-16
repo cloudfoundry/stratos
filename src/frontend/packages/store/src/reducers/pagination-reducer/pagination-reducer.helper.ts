@@ -183,8 +183,13 @@ function getObservables<T = any>(
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.pipe(filter(pagination => !!pagination));
 
+  // Defensive: entity may be null when an action references an entity type
+  // not registered in the catalog (e.g. the legacy endpoint list, whose
+  // schema lives on the action itself rather than in the catalog now that
+  // the `endpoint` ngrx slice has been retired). Fall back to the default
+  // fetch handler and a no-op emit handler in that case.
   const entity = entityCatalog.getEntity(arrayAction[0]);
-  const entitiesFetchHandler = entity.getEntitiesFetchHandler();
+  const entitiesFetchHandler = entity ? entity.getEntitiesFetchHandler() : null;
   const fetchHandler = entitiesFetchHandler ?
     entitiesFetchHandler(store, arrayAction) :
     defaultEntitiesFetchHandler(store, arrayAction);
@@ -202,7 +207,7 @@ function getObservables<T = any>(
     map(([, newPag]) => newPag)
   );
 
-  const entitiesEmitHandlerBuilder = entity.getEntitiesEmitHandler();
+  const entitiesEmitHandlerBuilder = entity ? entity.getEntitiesEmitHandler() : null;
   const actionEmitHandler = entitiesEmitHandlerBuilder ? entitiesEmitHandlerBuilder(
     paginationAction, (action) => store.dispatch(action)
   ) : () => { };

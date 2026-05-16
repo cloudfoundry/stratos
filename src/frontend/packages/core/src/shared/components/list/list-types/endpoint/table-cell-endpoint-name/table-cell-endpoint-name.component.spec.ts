@@ -13,8 +13,12 @@ describe('TableCellEndpointNameComponent', () => {
   let fixture: ComponentFixture<TableCellEndpointNameComponent>;
 
   beforeEach(() => {
-    // Register stratos entities so stratosEntityCatalog.endpoint is populated
-    // before the component's row setter calls .endpoint.store.getEntityMonitor()
+    // Register stratos entities so `systemInfo`, `userFavorite`, etc. are
+    // available to any catalog lookups exercised during the row render.
+    // The endpoint schema itself no longer lives in the catalog — it ships
+    // on the data source's action — so registration is no longer
+    // load-bearing for endpoint lookups, but staying consistent with the
+    // rest of the suite avoids surprising drift.
     (entityCatalog as any).clear();
     generateStratosEntities().forEach(entity => entityCatalog.register(entity));
 

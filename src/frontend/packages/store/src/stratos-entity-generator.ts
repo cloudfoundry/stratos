@@ -7,13 +7,12 @@ import {
 import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
   apiKeyEntityType,
-  endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
 } from './helpers/stratos-entity-factory';
-import { EndpointModel, stratosEntityFactory } from './public-api';
+import { stratosEntityFactory } from './public-api';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
 import {
   ApiKeyActionBuilder,
@@ -41,33 +40,12 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     schema: null as any
   };
   return [
-    generateEndpointSchemaEntry(stratosType),
     generateSystemInfo(stratosType),
     generateUserFavorite(stratosType),
     generateUserProfile(stratosType),
     generateMetricsEndpoint(),
     generateAPIKeys(stratosType)
   ];
-}
-
-/**
- * Wave 5 (W36-B): the `endpoint` slice's actions, effects, reducers, and
- * action builders are gone — EndpointsDataService owns the endpoint
- * lifecycle end-to-end. But the legacy `BaseEndpointsDataSource` (and
- * subclasses) still feed the client-side pagination/list machinery
- * (stratos pagination reducer, monitors, schema-driven row IDs) keyed on
- * the `stratos`/`endpoint` catalog entry. Register a no-action,
- * no-reducer schema-only entry here so those lookups resolve. The entry
- * is unreachable from any action dispatch path — there are no action
- * builders + nothing dispatches.
- */
-function generateEndpointSchemaEntry(stratosType: any) {
-  const definition: IStratosEntityDefinition = {
-    schema: stratosEntityFactory(endpointEntityType),
-    type: endpointEntityType,
-    endpoint: stratosType,
-  };
-  return new StratosCatalogEntity<undefined, EndpointModel>(definition);
 }
 
 function generateSystemInfo(stratosType: any) {
