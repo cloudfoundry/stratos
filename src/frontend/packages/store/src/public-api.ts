@@ -265,3 +265,11 @@ export { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
 // reads in `AuthSignalService` and consolidates `VerifySession` / `RouterNav`
 // dispatch into one place so downstream consumers stay Store-free.
 export { AuthDataService } from './services/auth-data.service';
+
+// W36-C Wave 2 — signal-native current-user-roles data service. Single
+// bridge over the legacy `currentUserRoles` ngrx slice. Replaces direct
+// `store.select(getCurrentUserStratosRole(...))` /
+// `store.select(getCurrentUserStratosHasScope(...))` reads in
+// `CurrentUserRolesSignalService` and underpins the cf-side
+// `CfCurrentUserRolesDataService` in the cloud-foundry package.
+export { CurrentUserRolesDataService } from './services/current-user-roles-data.service';
