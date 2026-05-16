@@ -1,6 +1,6 @@
 import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../../services/data-sources/cnsi-apps-source';
@@ -716,6 +716,13 @@ export class CfAppsSignalConfigService {
   // so one bad endpoint doesn't block the rest of the page.
   private refreshStatsForKeys(rowKeys: readonly string[]): void {
     if (!rowKeys.length) return;
+    // Group keys by CNSI so each CNSI is one batched request instead of
+    // one request per visible app. On a 24-app page across 4 CFs, this
+    // drops the polling cycle from 24 HTTP requests to 4. The backend's
+    // /pp/v1/cf/app-stats/{cnsi}?app_guids=g1,g2,... handler resolves
+    // process GUIDs in one shot and fans out the stats calls server-side
+    // under a bounded errgroup.
+    const byCnsi = new Map<string, string[]>();
     for (const key of rowKeys) {
       if (this.statsInFlight.has(key)) continue;
       const sep = key.indexOf(':');
@@ -723,28 +730,43 @@ export class CfAppsSignalConfigService {
       const cnsiGuid = key.slice(0, sep);
       const appGuid = key.slice(sep + 1);
       this.statsInFlight.add(key);
+      const list = byCnsi.get(cnsiGuid);
+      if (list) {
+        list.push(appGuid);
+      } else {
+        byCnsi.set(cnsiGuid, [appGuid]);
+      }
+    }
+    for (const [cnsiGuid, appGuids] of byCnsi) {
+      const params = new HttpParams().set('app_guids', appGuids.join(','));
       this.http
-        .get<{ instances?: Array<{ state?: string }> }>(
-          `/pp/v1/cf/app-stats/${cnsiGuid}/${appGuid}`,
+        .get<{ apps?: Record<string, { instances?: Array<{ state?: string }> }> }>(
+          `/pp/v1/cf/app-stats/${cnsiGuid}`,
+          { params },
         )
         .subscribe({
           next: (resp) => {
-            const list = Array.isArray(resp?.instances) ? resp.instances : [];
-            const running = list.filter((i) => (i?.state ?? '').toUpperCase() === 'RUNNING').length;
-            const total = list.length;
+            const apps = resp?.apps ?? {};
             this._appStats.update((curr) => {
               const next = new Map(curr);
-              next.set(key, { running, total });
+              for (const appGuid of appGuids) {
+                const entry = apps[appGuid];
+                const instances = Array.isArray(entry?.instances) ? entry.instances : [];
+                const running = instances.filter((i) => (i?.state ?? '').toUpperCase() === 'RUNNING').length;
+                const total = instances.length;
+                next.set(`${cnsiGuid}:${appGuid}`, { running, total });
+                this.statsInFlight.delete(`${cnsiGuid}:${appGuid}`);
+              }
               return next;
             });
-            this.statsInFlight.delete(key);
           },
           error: () => {
             // Leave any previously cached value in place — a transient
-            // 502/504 shouldn't clear the number the user was just looking
-            // at. If we've never seen this key, it stays absent and the
-            // column falls back to the "—" placeholder.
-            this.statsInFlight.delete(key);
+            // 502/504 shouldn't clear the numbers the user was just looking
+            // at. Clear in-flight markers so the next poll cycle re-tries.
+            for (const appGuid of appGuids) {
+              this.statsInFlight.delete(`${cnsiGuid}:${appGuid}`);
+            }
           },
         });
     }
