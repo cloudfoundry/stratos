@@ -5,7 +5,7 @@ import { ListStateStore } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StOrg, StSpace } from '../../../../../services/endpoint-data/stratos-types';
+import type { StOrg } from '../../../../../services/endpoint-data/stratos-types';
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 
 // Orgs list config service — single-CNSI analog to CfAppsSignalConfigService.
@@ -44,18 +44,6 @@ export class CfOrgsSignalConfigService {
   readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode = this.state.viewMode;
-
-  // Lazy per-CNSI space list; used to count spaces per org for the Spaces column.
-  // The endpoint-data service loads spaces in the background; before that
-  // finishes we show an em-dash placeholder to avoid an inaccurate "0".
-  readonly spaces: Signal<StSpace[]> = computed(() => this.endpointDataService()?.spaces() ?? []);
-  readonly spaceCountByOrgGuid: Signal<Map<string, number>> = computed(() => {
-    const map = new Map<string, number>();
-    for (const s of this.spaces()) {
-      map.set(s.orgGuid, (map.get(s.orgGuid) ?? 0) + 1);
-    }
-    return map;
-  });
 
   // Raw org list driving the view pipeline. Empty when initialize() hasn't
   // been called yet or the endpoint-data service hasn't finished the

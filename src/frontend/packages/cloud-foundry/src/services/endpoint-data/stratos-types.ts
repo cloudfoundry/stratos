@@ -13,6 +13,11 @@ export interface StOrg {
   createdAt: string;
   updatedAt: string;
   cnsiGuid: string;
+  // Server-side aggregate from /v3/spaces?organization_guids=<this-org> set
+  // by getNativeOrgs. Drives the orgs-list "Spaces" column so the count is
+  // sourced from the org's own context — not summed over a global spaces
+  // list that may be page-capped.
+  spacesCount?: number;
 }
 
 export interface StApp {

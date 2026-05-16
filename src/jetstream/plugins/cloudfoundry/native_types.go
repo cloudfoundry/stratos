@@ -17,6 +17,12 @@ type StOrg struct {
 	Annotations map[string]string `json:"annotations"`
 	CreatedAt   string            `json:"createdAt"`
 	UpdatedAt   string            `json:"updatedAt"`
+	// SpacesCount is a server-side aggregate from /v3/spaces filtered by
+	// organization_guids — drives the orgs-list "Spaces" column from a
+	// single payload. Always-emit (default 0) so the wire shape stays
+	// predictable; on enrichment failure the default-path handler degrades
+	// silently (mirrors the StSpace AppCount/RouteCount pattern).
+	SpacesCount int `json:"spacesCount"`
 }
 
 type StApp struct {

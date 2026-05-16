@@ -125,9 +125,8 @@ export class CloudFoundryOrganizationsSignalComponent {
       return org.status ?? '—';
     };
     const renderSpaces = (org: StOrg): string => {
-      if (!this.orgsConfig.hasLoadedOnce()) return '—';
-      const count = this.orgsConfig.spaceCountByOrgGuid().get(org.guid) ?? 0;
-      return String(count);
+      if (org.spacesCount === undefined) return '—';
+      return String(org.spacesCount);
     };
 
     this.listConfig.set({
@@ -197,9 +196,7 @@ export class CloudFoundryOrganizationsSignalComponent {
       sort: this.orgsConfig.sort,
     });
 
-    this.orgsConfig.registerSortExtractor('spaces', (o: StOrg) => {
-      return this.orgsConfig.spaceCountByOrgGuid().get(o.guid) ?? 0;
-    });
+    this.orgsConfig.registerSortExtractor('spaces', (o: StOrg) => o.spacesCount ?? 0);
   }
 
   private toggleOrgFavorite(org: StOrg): void {
