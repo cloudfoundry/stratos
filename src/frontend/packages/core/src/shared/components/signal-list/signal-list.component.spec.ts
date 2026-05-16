@@ -1,8 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { SignalListComponent } from './signal-list.component';
 import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption } from './signal-list.component';
+
+// SignalListComponent now applies [routerLink] to the card / table row when a
+// link column is present, so the RouterLink directive needs a router injector.
+beforeEach(() => {
+  TestBed.configureTestingModule({ providers: [provideRouter([])] });
+});
 
 @Component({
   standalone: true,

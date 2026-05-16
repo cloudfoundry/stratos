@@ -185,18 +185,17 @@ describe('EndpointDataService', () => {
   });
 
   it('emits service-call-count + cache-miss on first load, cache-hit on warm second load', async () => {
-    // First load — cold, should be cache-miss
+    // First load — cold, should be cache-miss and fire HTTP.
     service.load().subscribe();
     httpMock.expectOne(ORGS_URL).flush({ resources: [], totalResults: 0 });
     httpMock.expectOne(APPS_URL).flush({ resources: [{ guid: 'a1', name: 'A', state: 'STARTED', orgGuid: '', spaceGuid: '', instances: 1, createdAt: '', updatedAt: '' }], totalResults: 1 });
     httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
     await Promise.resolve();
 
-    // Second load — warm (lastFetched non-null, recentApps non-empty) — should be cache-hit
+    // Second load — warm (lastFetched non-null, recentApps non-empty) — should
+    // be cache-hit and short-circuit WITHOUT firing HTTP. httpMock.verify()
+    // below would throw if any of the three URLs were re-requested.
     service.load().subscribe();
-    httpMock.expectOne(ORGS_URL).flush({ resources: [], totalResults: 0 });
-    httpMock.expectOne(APPS_URL).flush({ resources: [], totalResults: 0 });
-    httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
     await Promise.resolve();
     await diagnostics.waitForFlush();
 
@@ -207,6 +206,7 @@ describe('EndpointDataService', () => {
     const hit = snap.counters['cache-hit']?.find(c => c.dimensions.method === 'load');
     expect(miss?.count).toBe(1);
     expect(hit?.count).toBe(1);
+    httpMock.verify(); // no pending requests — confirms the cache-hit short-circuit
   });
 
   // -------------------------------------------------------------------------
