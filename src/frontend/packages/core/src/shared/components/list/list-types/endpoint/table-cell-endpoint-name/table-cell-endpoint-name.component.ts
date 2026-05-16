@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
-import { entityCatalog, EndpointModel, stratosEntityCatalog } from '@stratosui/store';
+import { entityCatalog, EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -29,6 +30,9 @@ export interface RowWithEndpointId {
 })
 export class TableCellEndpointNameComponent extends TableCellCustom<EndpointModel | RowWithEndpointId>  {
 
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
+
   public endpoint$!: Observable<any>;
 
   @Input()
@@ -36,8 +40,10 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     super.row = row;
     /* tslint:disable-next-line:no-string-literal */
     const id = (row as any)['endpointId'] || (row as any)['guid'];
-    this.endpoint$ = stratosEntityCatalog.endpoint.store.getEntityMonitor(id).entity$.pipe(
-      filter(data => !!data),
+    // W36-B Wave 3: read endpoint via EndpointsDataService signal
+    // bridge instead of legacy EntityMonitor.entity$.
+    this.endpoint$ = toObservable(this.endpointsData.endpointById(id), { injector: this.injector }).pipe(
+      filter((data): data is EndpointModel => !!data),
       map(data => {
         const ep = entityCatalog.getEndpoint(data.cnsi_type, data.sub_type).definition;
         return {

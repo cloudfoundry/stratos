@@ -1,5 +1,6 @@
 import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
-import { stratosEntityCatalog } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { EndpointsDataService } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
@@ -28,6 +29,7 @@ export class CurrentUserPermissionsService {
   // injection time, breaking component specs that transitively reference this
   // service but never invoke a permission check.
   private injector = inject(EnvironmentInjector);
+  private endpointsData = inject(EndpointsDataService);
   private _allCheckers: ICurrentUserPermissionsChecker[] | null = null;
 
   private get allCheckers(): ICurrentUserPermissionsChecker[] {
@@ -86,7 +88,9 @@ export class CurrentUserPermissionsService {
     } else if (actionConfig) {
       return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
-      return stratosEntityCatalog.endpoint.store.getEntityMonitor(endpointGuid).entity$.pipe(
+      // W36-B Wave 3: read endpoint via EndpointsDataService signal
+      // bridge instead of the legacy EntityMonitor.entity$.
+      return toObservable(this.endpointsData.endpointById(endpointGuid), { injector: this.injector }).pipe(
         switchMap(endpoint => endpoint ?
           this.getFallbackPermission(endpointGuid, endpoint.cnsi_type) :
           of(false)

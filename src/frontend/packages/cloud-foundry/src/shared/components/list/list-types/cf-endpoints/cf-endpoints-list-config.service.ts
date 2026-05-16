@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
+import { Injectable, Injector, inject } from '@angular/core';
+import { EndpointsDataService, Store } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
@@ -40,6 +40,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
     const entityMonitorFactory = inject(EntityMonitorFactory);
     const internalEventMonitorFactory = inject(InternalEventMonitorFactory);
     const endpointsListConfigService = inject(EndpointsListConfigService);
+    const endpointsService = inject(EndpointsDataService);
+    const injector = inject(Injector);
 
     this.columns = endpointsListConfigService.columns.filter((column: any) => {
       return column.columnId !== 'type';
@@ -50,6 +52,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,
+      endpointsService,
+      injector,
     );
   }
   public getColumns = (): ITableColumn<EndpointModel>[] => this.columns;

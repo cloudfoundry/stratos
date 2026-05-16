@@ -1,7 +1,9 @@
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector } from '@angular/core';
 
-import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -23,9 +25,19 @@ export class CreateEndpointHelperComponent {
   constructor(
     public sessionService: SessionService,
     public currentUserPermissionsService: CurrentUserPermissionsService,
-    public userProfileService: UserProfileService
+    public userProfileService: UserProfileService,
+    // W36-B Wave 3: optional EndpointsDataService + Injector params.
+    // When supplied, the existing-endpoints projection comes from the
+    // signal-native service; when omitted (legacy callers not yet
+    // threaded), the helper would have failed before this wave too —
+    // there's no fallback path because the catalog read is gone.
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
   ) {
-    const currentPage$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$;
+    if (!endpointsData || !injector) {
+      throw new Error('CreateEndpointHelperComponent requires EndpointsDataService + Injector — supply them via the subclass super() call.');
+    }
+    const currentPage$ = toObservable(endpointsData.endpointsList, { injector });
     this.existingSystemEndpoints = currentPage$.pipe(
       map(endpoints => ({
         names: endpoints.filter(ep => ep.creator.system).map(ep => ep.name),

@@ -1,9 +1,10 @@
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { EndpointsDataService } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { BlurDirective } from '../../../../shared/components/blur.directive';
@@ -30,6 +31,8 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   private endpointsService = inject(EndpointsService);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
   private sidePanelService = inject(SidePanelService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -55,7 +58,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   }
 
   onEnter = (data: ConnectEndpointConfig) => {
-    this.connectService = new ConnectEndpointService(this.endpointsService, data);
+    this.connectService = new ConnectEndpointService(this.endpointsService, data, this.endpointsData, this.injector);
     // OnPush change detection: setting a non-signal field doesn't notify
     // the template, so the success message renders without the endpoint
     // name until something else triggers a check. Force a tick.

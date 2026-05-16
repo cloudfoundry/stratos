@@ -159,14 +159,6 @@ export type { IRouterNavPayload, RouterQueryParams } from './actions/router.acti
 export { RouterNav } from './actions/router.actions';
 export { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 export type { EndpointAuthTypeConfig, EndpointType, IAuthForm, IEndpointAuthComponent } from './extension-types';
-export {
-  connectedEndpointsSelector,
-  connectedEndpointsOfTypesSelector,
-  endpointEntitiesSelector,
-  endpointOfTypeSelector,
-  endpointStatusSelector,
-  endpointsEntityRequestDataSelector,
-} from './selectors/endpoint.selectors';
 export { EntityMonitor, setEntityMonitorPollingEnabledSource } from './monitors/entity-monitor';
 export type {
   EntityCatalogEntityConfig,
@@ -203,7 +195,7 @@ export {
   startApiRequest,
 } from './reducers/api-request-reducer/request-helpers';
 export { GetCurrentUsersRelations } from './actions/permissions.actions';
-export type { EndpointModel, EndpointState, EndpointUser, INewlyConnectedEndpointInfo } from './types/endpoint.types';
+export type { EndpointModel, EndpointUser, INewlyConnectedEndpointInfo } from './types/endpoint.types';
 export { SystemSharedUserGuid } from './types/endpoint.types';
 export { stratosEntityCatalog } from './stratos-entity-catalog';
 export { EntityCatalogHelper } from './entity-catalog/entity-catalog-entity/entity-catalog.service';
@@ -217,8 +209,6 @@ export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './reducers/routing.reducer';
 export { GetAllApiKeys } from './actions/apiKey.actions';
 export { getListStateObservables } from './reducers/list.reducer';
-export type { AuthParams } from './actions/endpoint.actions';
-export { ConnectEndpoint, DisconnectEndpoint, GetAllEndpoints, EndpointActionComplete, CONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_SUCCESS } from './actions/endpoint.actions';
 export { EntitySchema } from './helpers/entity-schema';
 export type {
   ChartSeries,
@@ -252,3 +242,20 @@ export { Action, Store, StoreModule, createSelector, provideStore, select } from
 // @ngrx/effects.
 export { EffectsModule, EffectsFeatureModule } from '@ngrx/effects';
 export { Actions, createEffect, ofType } from '@ngrx/effects';
+
+// W36-B Wave 1 — signal-native endpoints data service. Wave 3 dispatcher
+// + monitor consumers import from here; Wave 5 deletion of the legacy
+// `endpoint.actions` / `endpoint.effects` / `endpoint.selectors` slice
+// retires the parallel ngrx path that this service replaces.
+export {
+  EndpointsDataService,
+} from './services/endpoints-data.service';
+export type {
+  EndpointConnectEvent,
+  EndpointConnectOptions,
+  EndpointDisconnectEvent,
+  EndpointFetchingState,
+  EndpointRegisterOptions,
+  EndpointUpdateOptions,
+} from './services/endpoints-data.service';
+export { EndpointDisconnectCleanupService } from './services/endpoint-disconnect-cleanup.service';

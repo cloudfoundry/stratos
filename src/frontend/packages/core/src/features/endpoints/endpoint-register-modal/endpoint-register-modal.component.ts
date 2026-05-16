@@ -4,6 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { of } from 'rxjs';
 import {
+  EndpointsDataService,
   GeneralEntityAppState,
   Store,
   entityCatalog,
@@ -27,7 +28,10 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
   protected store: Store<GeneralEntityAppState>;
-  private injector = inject(Injector);
+  // Note: `injector` field name shadows the protected one in
+  // BaseEndpointTileManager — keep the same access level (protected)
+  // so TS doesn't flag the shadowed field as an incompatible base.
+  protected override injector = inject(Injector);
 
   @Output() closeModalEvent = new EventEmitter<void>();
   @Output() endpointRegistered = new EventEmitter<any>();
@@ -50,7 +54,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     const types = toObservable(
       computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
-    super(types, store);
+    super(types, store, inject(EndpointsDataService), inject(Injector));
     this.store = store;
   }
 

@@ -5,6 +5,7 @@ import { CustomTooltipDirective } from '../../../shared/components/custom-toolti
 import { RouterModule } from '@angular/router';
 import {
   EndpointOnlyAppState,
+  EndpointsDataService,
   RouterNav,
   Store,
   stratosEntityCatalog,
@@ -51,6 +52,7 @@ import { EndpointsSignalListComponent } from './endpoints-signal-list.component'
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
   store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsData = inject(EndpointsDataService);
   private authSignal = inject(AuthSignalService);
   private ngZone = inject(NgZone);
   private snackBarService = inject(SnackBarService);
@@ -191,16 +193,15 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     // and should be available by the time component constructors run. However, we add defensive checks
     // to gracefully handle edge cases where catalog might not be fully initialized.
 
-    // Dispatch the GET_ENDPOINTS action which triggers system info fetch
-    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
-      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    } else {
-      console.error('Entity catalog endpoint actions not initialized. This may indicate a module initialization issue.', {
-        hasCatalog: !!stratosEntityCatalog,
-        hasEndpoint: !!stratosEntityCatalog?.endpoint,
-        hasActions: !!stratosEntityCatalog?.endpoint?.actions
-      });
-    }
+    // W36-B Wave 3: trigger endpoint hydration via the signal-native
+    // EndpointsDataService instead of dispatching the legacy
+    // GetAllEndpoints action. The service owns its own /pp/v1/info HTTP
+    // call + lifecycle signals; the legacy effect path still runs in
+    // parallel via the `systemInfo.actions.getSystemInfo()` dispatch
+    // below until Wave 5 retires the action/effect/reducer slice.
+    void this.endpointsData.getAll(false).catch(err => {
+      console.error('Failed to load endpoints via EndpointsDataService:', err);
+    });
 
     // Also explicitly trigger system info
     if (stratosEntityCatalog?.systemInfo?.actions?.getSystemInfo) {
@@ -321,16 +322,11 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   onEndpointRegistered() {
-    // Defensive: Validate entity catalog before dispatching refresh actions
-    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
-      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    } else {
-      console.error('Cannot refresh endpoints - entity catalog not initialized', {
-        hasCatalog: !!stratosEntityCatalog,
-        hasEndpoint: !!stratosEntityCatalog?.endpoint,
-        hasActions: !!stratosEntityCatalog?.endpoint?.actions
-      });
-    }
+    // W36-B Wave 3: refresh via signal-native service. See ngOnInit
+    // comment for the dual-path rationale.
+    void this.endpointsData.getAll(false).catch(err => {
+      console.error('Failed to refresh endpoints via EndpointsDataService:', err);
+    });
 
     // Also trigger system info refresh to update overall state
     if (stratosEntityCatalog?.systemInfo?.actions?.getSystemInfo) {

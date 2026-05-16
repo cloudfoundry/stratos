@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { GeneralEntityAppState, Store, httpErrorResponseToSafeString, stratosEntityCatalog } from '@stratosui/store';
+import { EndpointsDataService, GeneralEntityAppState, Store, httpErrorResponseToSafeString } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, defaultIfEmpty, map } from 'rxjs/operators';
 
@@ -42,6 +42,7 @@ export class RestoreEndpointsComponent {
   private store = inject<Store<GeneralEntityAppState>>(Store);
   service = inject(RestoreEndpointsService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private endpointsData = inject(EndpointsDataService);
   private router = inject(Router);
 
 
@@ -106,7 +107,9 @@ export class RestoreEndpointsComponent {
       };
 
       const restoreSuccess = () => {
-        stratosEntityCatalog.endpoint.api.getAll();
+        // W36-B Wave 3: refresh endpoints via EndpointsDataService so
+        // the local signal map repopulates with the restored entries.
+        void this.endpointsData.getAll(false).catch(() => {/* surfaced on service.error */});
         // Replace legacy `redirect: true` with explicit navigation back to
         // the endpoints page (matches the stepper cancel target).
         this.router.navigate(['/endpoints']).then(() => resolve());

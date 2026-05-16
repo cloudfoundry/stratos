@@ -1,11 +1,13 @@
 import { combineLatest, Observable, of } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector } from '@angular/core';
 import {
+  EndpointsDataService,
   GeneralEntityAppState,
   IStratosEndpointDefinition,
   Store,
   StratosCatalogEndpointEntity,
-  stratosEntityCatalog,
 } from '@stratosui/store';
 
 import { TileConfigManager } from '../../../../shared/components/tile/tile-selector.helpers';
@@ -29,6 +31,12 @@ type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
  */
 export abstract class BaseEndpointTileManager {
   protected store: Store<GeneralEntityAppState>;
+  // W36-B Wave 3: optional EndpointsDataService + Injector. When
+  // supplied, the tile-population pipeline reads endpoints from the
+  // signal-native service instead of the legacy ngrx pagination
+  // service. Subclass `super()` calls must thread these through.
+  protected endpointsData?: EndpointsDataService;
+  protected injector?: Injector;
 
   private tileManager: TileConfigManager;
 
@@ -84,9 +92,13 @@ export abstract class BaseEndpointTileManager {
 
   constructor(
     types$: Observable<StratosCatalogEndpointEntity[]>,
-    store: Store<GeneralEntityAppState>
+    store: Store<GeneralEntityAppState>,
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
   ) {
     this.store = store;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
     this.tileManager = new TileConfigManager();
     // Need to filter the endpoint types on the tech preview flag
     this.tileSelectorConfig$ = types$.pipe(
@@ -122,7 +134,15 @@ export abstract class BaseEndpointTileManager {
   }
 
   protected expandEndpointTypes(endpointEntities: StratosCatalogEndpointEntity[]): Observable<ExpandedEndpoints> {
-    return stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+    // W36-B Wave 3: source endpoints from EndpointsDataService when
+    // available. Subclasses created before this wave were
+    // single-instance per page; the service is providedIn: 'root', so
+    // any caller can access it. The Injector is required to keep
+    // toObservable() inside an injection context.
+    if (!this.endpointsData || !this.injector) {
+      throw new Error('BaseEndpointTileManager requires EndpointsDataService + Injector — supply them via the subclass super() call.');
+    }
+    return toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       filter(endpoints => !!endpoints),
       map(endpoints => {
         const endpointsByType: ExpandedEndpoints<Observable<number>> = [];

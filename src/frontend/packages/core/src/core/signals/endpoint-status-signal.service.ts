@@ -1,32 +1,26 @@
 import { Injectable, Signal, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, EndpointState, endpointStatusSelector } from '@stratosui/store';
+import { EndpointsDataService } from '@stratosui/store';
 
-const EMPTY_STATUS: EndpointState = {
-  loading: false,
-  error: false,
-  message: '',
-};
+export interface EndpointStatusState {
+  loading: boolean;
+  error: boolean;
+  message: string;
+}
 
 /**
- * Signal-native projection of the endpoints loading/error aggregate
- * (`state.endpoints` — which is the request-state metadata, not the entities).
- *
- * Mirrors `Store.select(endpointStatusSelector)` as a signal so guards and
- * page components can read `loading` / `error` / `message` without subscribing.
- *
- * For the entity entries themselves use `EndpointsSignalService.endpoints`.
+ * Signal-native projection of the endpoints loading/error aggregate,
+ * sourced from {@link EndpointsDataService}.
  */
 @Injectable({ providedIn: 'root' })
 export class EndpointStatusSignalService {
-  private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
 
-  /** Raw endpoints request state. Default-shaped before the store hydrates. */
-  readonly status: Signal<EndpointState> = toSignal(
-    this.store.select(endpointStatusSelector),
-    { initialValue: EMPTY_STATUS }
-  );
+  /** Raw endpoints request state. Default-shaped before the service hydrates. */
+  readonly status: Signal<EndpointStatusState> = computed(() => ({
+    loading: this.endpointsService.loading(),
+    error: !!this.endpointsService.error(),
+    message: this.endpointsService.error() ?? '',
+  }));
 
   readonly loading: Signal<boolean> = computed(() => !!this.status().loading);
   readonly error: Signal<boolean> = computed(() => !!this.status().error);

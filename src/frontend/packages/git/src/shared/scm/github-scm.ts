@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { flattenPagination } from '@stratosui/store';
+import { Injector } from '@angular/core';
+import { EndpointsDataService, flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -24,9 +25,17 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   // through every method signature.
   private options: HttpOptions;
 
-  constructor(gitHubURL: string, endpointGuid: string, accessToken?: string) {
+  constructor(
+    gitHubURL: string,
+    endpointGuid: string,
+    accessToken?: string,
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
+  ) {
     super(gitHubURL);
     this.endpointGuid = endpointGuid;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
     if (accessToken && accessToken.trim() !== '') {
       this.setAccessToken(accessToken);
     }

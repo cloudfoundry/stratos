@@ -5,6 +5,8 @@ import { UntypedFormBuilder } from '@angular/forms';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, take } from 'rxjs/operators';
 
+import { EndpointsDataService } from '@stratosui/store';
+
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
@@ -132,6 +134,7 @@ export class KubeConfigImportComponent implements OnDestroy {
   private injector = inject(Injector);
   private fb = inject(UntypedFormBuilder);
   private endpointsService = inject(EndpointsService);
+  private endpointsData = inject(EndpointsDataService);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
 
   // Process the next action in the list
@@ -260,7 +263,7 @@ export class KubeConfigImportComponent implements OnDestroy {
     if (this.connectService) {
       this.connectService.destroy();
     }
-    this.connectService = new ConnectEndpointService(this.endpointsService, config);
+    this.connectService = new ConnectEndpointService(this.endpointsService, config, this.endpointsData, this.injector);
     this.connectService.setData(pData);
     return this.connectService.submit().pipe(
       map(updateSection => ({

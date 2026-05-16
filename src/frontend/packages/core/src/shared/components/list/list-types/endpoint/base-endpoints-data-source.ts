@@ -1,16 +1,20 @@
 import {
   AppState,
   CreatePagination,
-  endpointEntitiesSelector,
-  endpointEntityType,
   EndpointModel,
+  EndpointsDataService,
+  endpointEntityType,
   EntityMonitorFactory,
-  GetAllEndpoints,
+  EntityRequestAction,
   InternalEventMonitorFactory,
   PaginationEntityState,
   PaginationMonitorFactory,
+  STRATOS_ENDPOINT_TYPE,
+  stratosEntityFactory,
   Store,
 } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, pairwise, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -22,9 +26,32 @@ import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from '../../list.helper';
 import { EndpointRowStateSetUpManager } from '../endpoint/endpoint-data-source.helpers';
 
+/**
+ * Wave 5 (W36-B): the legacy `GetAllEndpoints` ngrx action class is gone,
+ * but `BaseEndpointsDataSource` (and subclasses) still feed the legacy
+ * client-side pagination machinery, which keys off `EntityRequestAction`
+ * shape (entityType, endpointType, schema, paginationKey, initialParams).
+ * `EndpointsListAction` is the value-only stand-in: never dispatched
+ * (refresh now calls `EndpointsDataService.getAll()` directly), just used
+ * to seed the pagination row.
+ */
+export class EndpointsListAction implements EntityRequestAction {
+  public type = '[Endpoints] List';
+  public entityType = endpointEntityType;
+  public endpointType = STRATOS_ENDPOINT_TYPE;
+  public entity = [stratosEntityFactory(endpointEntityType)];
+  constructor(public paginationKey: string = 'endpoint-list') { }
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
+    page: 1,
+    'results-per-page': 50,
+  };
+}
+
 export function syncPaginationSection(
   store: Store<AppState>,
-  action: GetAllEndpoints,
+  action: EndpointsListAction,
   paginationKey: string
 ) {
   store.dispatch(new CreatePagination(
@@ -51,11 +78,13 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   constructor(
     store: Store<AppState>,
     listConfig: IListConfig<EndpointModel>,
-    action: GetAllEndpoints,
+    action: EndpointsListAction,
     dsEndpointType: string = null,
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     internalEventMonitorFactory: InternalEventMonitorFactory,
+    endpointsService: EndpointsDataService,
+    injector: Injector,
     onlyConnected = true,
     filterByType = false
   ) {
@@ -65,10 +94,17 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
       entityMonitorFactory,
       action.paginationKey,
       action,
-      EndpointRowStateSetUpManager,
+      (paginationMonitor, entityMonitorFactoryArg, rowStateManagerArg) =>
+        EndpointRowStateSetUpManager(
+          paginationMonitor,
+          entityMonitorFactoryArg,
+          rowStateManagerArg,
+          endpointsService,
+          injector,
+        ),
       false
     );
-    const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, store);
+    const eventSub = BaseEndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager, endpointsService, injector);
     const config = BaseEndpointsDataSource.getEndpointConfig(
       store,
       action,
@@ -78,7 +114,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
         eventSub.unsubscribe();
         sub.unsubscribe();
       },
-      () => this.store.dispatch(action)
+      () => { void endpointsService.getAll(false); }
     );
 
     const transformEntities: (DataFunctionDefinition | DataFunction<EndpointModel>)[] = [{
@@ -109,7 +145,7 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
 
   static getEndpointConfig(
     store: Store<AppState>,
-    action: GetAllEndpoints,
+    action: EndpointsListAction,
     listConfig: IListConfig<EndpointModel>,
     rowsState: Observable<RowsState>,
     destroy: () => void,
@@ -148,13 +184,22 @@ export class BaseEndpointsDataSource extends ListDataSource<EndpointModel> {
   static monitorEvents(
     internalEventMonitorFactory: InternalEventMonitorFactory,
     rowStateManager: TableRowStateManager,
-    store: Store<AppState>
+    endpointsService: EndpointsDataService,
+    injector: Injector
   ) {
     const eventMonitor = internalEventMonitorFactory.getMonitor(endpointEntityType);
+    // Wave 2 (W36-B): bridge `endpointsService.endpoints` signal to an
+    // observable so the `withLatestFrom` rxjs pipeline keeps working.
+    // `toObservable` requires an injection context, hence the
+    // `runInInjectionContext` wrap.
+    const endpoints$ = runInInjectionContext(injector, () =>
+      toObservable(endpointsService.endpoints)
+    );
     return eventMonitor.hasErroredOverTime().pipe(
-      withLatestFrom(store.select(endpointEntitiesSelector)),
+      withLatestFrom(endpoints$),
       tap(([errored, endpoints]) => Object.keys(errored).forEach(id => {
-        if (endpoints[id] && endpoints[id].connectionStatus === 'connected') {
+        const endpoint = endpoints.get(id);
+        if (endpoint && endpoint.connectionStatus === 'connected') {
           rowStateManager.updateRowState(id, {
             error: true,
             message: `We've been having trouble communicating with this endpoint`

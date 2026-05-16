@@ -1,9 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { EndpointModel, IRequestEntityTypeState, SessionData } from '@stratosui/store';
+import type { EndpointModel, SessionData } from '@stratosui/store';
+import { EndpointsDataService } from '@stratosui/store';
 
 import { AuthSignalService } from './auth-signal.service';
 import { EndpointsSignalService } from './endpoints-signal.service';
@@ -16,25 +15,26 @@ function makeAuthStub(sessionData: SessionData | null) {
   };
 }
 
+function makeEndpointsServiceStub(initial: Map<string, EndpointModel> = new Map()) {
+  const map: WritableSignal<Map<string, EndpointModel>> = signal(initial);
+  return {
+    endpoints: map,
+    set: (next: Map<string, EndpointModel>) => map.set(next),
+  };
+}
+
 describe('EndpointsSignalService', () => {
-  let entities$: BehaviorSubject<IRequestEntityTypeState<EndpointModel>>;
+  let endpointsServiceStub: ReturnType<typeof makeEndpointsServiceStub>;
   let authStub: ReturnType<typeof makeAuthStub>;
 
   beforeEach(() => {
-    entities$ = new BehaviorSubject<IRequestEntityTypeState<EndpointModel>>(
-      {} as IRequestEntityTypeState<EndpointModel>
-    );
+    endpointsServiceStub = makeEndpointsServiceStub();
     authStub = makeAuthStub(null);
-
-    const stubStore = {
-      select: () => entities$.asObservable(),
-      dispatch: () => undefined,
-    };
 
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
+        { provide: EndpointsDataService, useValue: endpointsServiceStub },
         { provide: AuthSignalService, useValue: authStub },
         EndpointsSignalService,
       ],
@@ -54,13 +54,13 @@ describe('EndpointsSignalService', () => {
     const service = TestBed.inject(EndpointsSignalService);
     expect(service.haveRegistered()).toBe(false);
 
-    entities$.next({
-      'guid-1': {
+    endpointsServiceStub.set(new Map([
+      ['guid-1', {
         guid: 'guid-1',
         cnsi_type: 'cf',
         connectionStatus: 'disconnected',
-      } as unknown as EndpointModel,
-    } as IRequestEntityTypeState<EndpointModel>);
+      } as unknown as EndpointModel],
+    ]));
 
     expect(service.haveRegistered()).toBe(true);
     expect(Object.keys(service.endpoints()).length).toBe(1);
@@ -87,13 +87,13 @@ describe('EndpointsSignalService', () => {
     const service = TestBed.inject(EndpointsSignalService);
 
     // Use an unregistered cnsi_type so the defensive guard returns false.
-    entities$.next({
-      'guid-1': {
+    endpointsServiceStub.set(new Map([
+      ['guid-1', {
         guid: 'guid-1',
         cnsi_type: '__unregistered_for_test__',
         connectionStatus: 'connected',
-      } as unknown as EndpointModel,
-    } as IRequestEntityTypeState<EndpointModel>);
+      } as unknown as EndpointModel],
+    ]));
 
     expect(service.haveRegistered()).toBe(true);
     expect(service.connectedEndpoints()).toEqual([]);

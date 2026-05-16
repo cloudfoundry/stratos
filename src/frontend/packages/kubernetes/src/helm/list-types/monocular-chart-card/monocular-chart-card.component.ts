@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { CardCell } from '../../../../../core/src/shared/components/list/list.types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
+import { EndpointsDataService } from '../../../../../store/src/services/endpoints-data.service';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../../helm-entity-factory';
 import { ChartItemComponent } from '../../monocular/chart-item/chart-item.component';
 import { MonocularChart } from '../../store/helm.types';
@@ -19,10 +20,13 @@ import { MonocularChart } from '../../store/helm.types';
 export class MonocularChartCardComponent extends CardCell<MonocularChart> {
 
   public artifactHubAndHelmRepoTypes$: Observable<boolean>;
+  private endpointsData = inject(EndpointsDataService);
 
   constructor() {
     super();
-    this.artifactHubAndHelmRepoTypes$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+    // W36-B Wave 3: source endpoints from EndpointsDataService signal
+    // bridge instead of legacy ngrx PaginationService.
+    this.artifactHubAndHelmRepoTypes$ = toObservable(this.endpointsData.endpointsList).pipe(
       filter(endpoints => !!endpoints), // Wait until we have some entities
       take(1),
       map(endpoints => {

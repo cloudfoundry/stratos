@@ -2,16 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { combineLatest, Observable, of } from 'rxjs';
-import { take, catchError, flatMap, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { catchError, flatMap, map, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
-import {
-  EndpointActionComplete,
-  GET_ENDPOINTS_SUCCESS,
-  GetAllEndpointsSuccess,
-  REGISTER_ENDPOINTS_SUCCESS,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-  UnregisterEndpoint } from '../../../../store/src/actions/endpoint.actions';
 import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { isJetstreamError } from '../../../../store/src/jetstream';
@@ -20,6 +13,7 @@ import {
   Actions,
   AppState,
   EndpointModel,
+  EndpointsDataService,
   Store,
   WrapperRequestActionSuccess,
   createEffect,
@@ -27,8 +21,7 @@ import {
   NormalizedResponse,
   ofType } from '../../../../store/src/public-api';
 import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
-import { endpointOfTypeSelector } from '../../../../store/src/selectors/endpoint.selectors';
-import { stratosEntityCatalog } from '../../../../store/src/stratos-entity-catalog';
+import { EndpointDisconnectCleanupService } from '../../../../store/src/services/endpoint-disconnect-cleanup.service';
 import {
   EntityRequestAction,
   StartRequestAction,
@@ -108,6 +101,8 @@ export class HelmEffects {
   private store = inject<Store<AppState>>(Store);
   snackBar = inject(TailwindSnackBarService);
   private appRef = inject(ApplicationRef);
+  private cleanup = inject(EndpointDisconnectCleanupService);
+  private endpointsService = inject(EndpointsDataService);
 
 
   // Endpoints that we know are synchronizing
@@ -116,44 +111,27 @@ export class HelmEffects {
 
   proxyAPIVersion = environment.proxyAPIVersion;
 
-  // Ensure that we refresh the charts when a repository finishes synchronizing
+  // Wave 4 part 2 (W36-B): replaced legacy
+  // `updateOnSyncFinished$` (`GET_ENDPOINTS_SUCCESS`),
+  // `endpointUnregister$` (`UNREGISTER_ENDPOINTS_SUCCESS`), and
+  // `registerEndpoint$` (`REGISTER_ENDPOINTS_SUCCESS`) ngrx effects with
+  // cleanup-service handlers + a signal effect on the endpoint set. The
+  // legacy actions are deleted in Wave 5; routing the same logic through
+  // the cleanup service severs the dependency now.
+  constructor() {
+    this.registerSyncWatcher();
+    this.registerHelmCleanupHandlers();
+  }
 
-  updateOnSyncFinished$ = createEffect(() => this.actions$.pipe(
-    ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS),
-    flatMap((action): Action[] => {
-      // Look to see if we have any endpoints that are synchronizing
-      let updated = false;
-      Object.values(action.payload.entities.stratosEndpoint).forEach((endpoint: unknown) => {
-        const ep = endpoint as EndpointModel;
-        if (ep.cnsi_type === HELM_ENDPOINT_TYPE && ep.endpoint_metadata) {
-          if (ep.endpoint_metadata.status === 'Synchronizing') {
-            // An endpoint is busy, so add it to the list to be monitored
-            if (!this.syncing[ep.guid]) {
-              this.syncing[ep.guid] = true;
-              updated = true;
-            }
-          }
-        }
-      });
 
-      if (updated) {
-        // Schedule check
-        this.scheduleSyncStatusCheck();
-      }
-      return [];
-    })
-  ));
-
-  
   fetchCharts$ = createEffect(() => this.actions$.pipe(
     ofType<GetMonocularCharts>(GET_MONOCULAR_CHARTS),
-    withLatestFrom(this.store),
-    flatMap(([action, appState]) => {
+    flatMap((action) => {
       const entityKey = entityCatalog.getEntityKey(action);
 
       this.store.dispatch(new StartRequestAction(action));
 
-      const helmEndpoints = Object.values(endpointOfTypeSelector(HELM_ENDPOINT_TYPE)(appState)) as EndpointModel[];
+      const helmEndpoints = this.endpointsService.endpointsByType(HELM_ENDPOINT_TYPE)();
       const helmHubEndpoint = helmEndpoints.find(endpoint => (endpoint as any).sub_type === HELM_HUB_ENDPOINT_TYPE);
 
       // See https://github.com/SUSE/stratos/issues/466. It would be better to use the standard proxy for this request and go out to all
@@ -302,39 +280,63 @@ export class HelmEffects {
     })
   ));
 
-  
-  endpointUnregister$ = createEffect(() => this.actions$.pipe(
-    ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS_SUCCESS),
-    flatMap(action => stratosEntityCatalog.endpoint.store.getEntityMonitor(action.guid).entity$.pipe(
-      take(1),
-      mergeMap(endpoint => {
-        if (endpoint.cnsi_type !== HELM_ENDPOINT_TYPE) {
-          return [];
-        }
-        this.appRef.tick();
-        return [
-          new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
-          new ResetPaginationOfType(helmEntityCatalog.chartVersions.getSchema()),
-          new ResetPaginationOfType(helmEntityCatalog.version.getSchema()),
-        ];
-      })
-    ))
-  ));
-
-  
-  registerEndpoint$ = createEffect(() => this.actions$.pipe(
-    ofType<EndpointActionComplete>(REGISTER_ENDPOINTS_SUCCESS),
-    flatMap(action => {
-      const endpoint: EndpointModel = action.endpoint as EndpointModel;
-      if (endpoint && endpoint.cnsi_type === HELM_ENDPOINT_TYPE && endpoint.sub_type === HELM_HUB_ENDPOINT_TYPE) {
-        this.appRef.tick();
-        return [
-          new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()),
-        ];
+  private registerHelmCleanupHandlers(): void {
+    // Replaces legacy `endpointUnregister$` (UNREGISTER_ENDPOINTS_SUCCESS).
+    // Cleanup service emits the disconnect-event vocabulary
+    // (`{ guid, type, name }`); the generic per-entity prune action
+    // dispatched by `runGenericDisconnectCleanup` already wipes the
+    // helm-entity request-data slices, so all we need to add is the
+    // pagination reset for charts/chartVersions/version slices, which the
+    // generic path doesn't cover.
+    this.cleanup.registerDisconnectHandler(event => {
+      if (event.type !== HELM_ENDPOINT_TYPE) {
+        return;
       }
-      return [];
-    })
-  ));
+      this.appRef.tick();
+      this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()));
+      this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.chartVersions.getSchema()));
+      this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.version.getSchema()));
+    });
+
+    // Replaces legacy `registerEndpoint$` (REGISTER_ENDPOINTS_SUCCESS) —
+    // resets chart pagination when a helm-hub endpoint is registered so
+    // the new hub's charts get fetched on the next list view.
+    this.cleanup.registerConnectHandler(event => {
+      if (event.type !== HELM_ENDPOINT_TYPE) {
+        return;
+      }
+      if (event.subType !== HELM_HUB_ENDPOINT_TYPE) {
+        return;
+      }
+      this.appRef.tick();
+      this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()));
+    });
+  }
+
+  private registerSyncWatcher(): void {
+    // Replaces legacy `updateOnSyncFinished$` (GET_ENDPOINTS_SUCCESS).
+    // The cleanup service exposes the live endpoints map indirectly via
+    // `EndpointsDataService.endpoints`; we watch it via a signal effect so
+    // that any endpoint hydration cycle (initial getAll, post-mutation
+    // refresh, etc.) re-evaluates the sync set without depending on the
+    // legacy ngrx action.
+    this.cleanup.registerEndpointsObserver(endpoints => {
+      let updated = false;
+      endpoints.forEach((ep) => {
+        if (ep.cnsi_type === HELM_ENDPOINT_TYPE && ep.endpoint_metadata) {
+          if (ep.endpoint_metadata.status === 'Synchronizing') {
+            if (!this.syncing[ep.guid]) {
+              this.syncing[ep.guid] = true;
+              updated = true;
+            }
+          }
+        }
+      });
+      if (updated) {
+        this.scheduleSyncStatusCheck();
+      }
+    });
+  }
 
   private static createHelmErrorMessage(err: any): string {
     if (err) {

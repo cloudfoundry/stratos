@@ -7,19 +7,17 @@ import {
 import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import {
   apiKeyEntityType,
+  endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
   systemInfoEntityType,
   userFavouritesEntityType,
   userProfileEntityType,
 } from './helpers/stratos-entity-factory';
-import { endpointEntityType, EndpointModel, stratosEntityFactory } from './public-api';
+import { EndpointModel, stratosEntityFactory } from './public-api';
 import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
-import { systemEndpointsReducer } from './reducers/system-endpoints.reducer';
 import {
   ApiKeyActionBuilder,
   apiKeyActionBuilder,
-  EndpointActionBuilder,
-  endpointActionBuilder,
   SystemInfoActionBuilder,
   systemInfoActionBuilder,
   UserFavoriteActionBuilder,
@@ -43,7 +41,7 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
     schema: null as any
   };
   return [
-    generateEndpoint(stratosType),
+    generateEndpointSchemaEntry(stratosType),
     generateSystemInfo(stratosType),
     generateUserFavorite(stratosType),
     generateUserProfile(stratosType),
@@ -53,34 +51,23 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
 }
 
 /**
- * DefaultEndpointEntityType is used to represent a general endpoint
- * This should not be used to actually attempt to render an endpoint and is instead used as a way to fill the
+ * Wave 5 (W36-B): the `endpoint` slice's actions, effects, reducers, and
+ * action builders are gone — EndpointsDataService owns the endpoint
+ * lifecycle end-to-end. But the legacy `BaseEndpointsDataSource` (and
+ * subclasses) still feed the client-side pagination/list machinery
+ * (stratos pagination reducer, monitors, schema-driven row IDs) keyed on
+ * the `stratos`/`endpoint` catalog entry. Register a no-action,
+ * no-reducer schema-only entry here so those lookups resolve. The entry
+ * is unreachable from any action dispatch path — there are no action
+ * builders + nothing dispatches.
  */
-function generateEndpoint(stratosType: any) {
-  // NOTE: For endpoint entities, we should NOT set the 'endpoint' property.
-  // The absence of 'endpoint' property triggers isEndpoint=true logic in StratosBaseCatalogEntity,
-  // which correctly registers this as an endpoint entity in the endpoints Map.
-  // However, since this is used as a base entity type and not a true endpoint,
-  // we register it as a regular entity (with endpoint property set).
+function generateEndpointSchemaEntry(stratosType: any) {
   const definition: IStratosEntityDefinition = {
     schema: stratosEntityFactory(endpointEntityType),
     type: endpointEntityType,
     endpoint: stratosType,
   };
-  stratosEntityCatalog.endpoint = new StratosCatalogEntity<
-    undefined,
-    EndpointModel,
-    EndpointActionBuilder
-  >(
-    definition,
-    {
-      dataReducers: [
-        systemEndpointsReducer
-      ],
-      actionBuilders: endpointActionBuilder
-    }
-  );
-  return stratosEntityCatalog.endpoint;
+  return new StratosCatalogEntity<undefined, EndpointModel>(definition);
 }
 
 function generateSystemInfo(stratosType: any) {

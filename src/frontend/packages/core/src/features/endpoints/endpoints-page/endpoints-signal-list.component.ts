@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Subscription } from 'rxjs';
-import { map, pairwise } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {
   AppState,
@@ -318,8 +317,7 @@ export class EndpointsSignalListComponent {
       false,
     );
     this.confirmDialog.open(config, () => {
-      const obs$ = this.endpointsConfig.disconnectEndpoint(ep.guid, ep.cnsi_type);
-      this.handleAction(obs$, () => {
+      void this.handleAction(this.endpointsConfig.disconnectEndpoint(ep.guid, ep.cnsi_type), () => {
         this.snackBar.show(`Disconnected endpoint '${ep.name}'`);
         // System info also needs a refresh so menu / nav items that key off
         // connection status update — same call the legacy path made.
@@ -338,27 +336,26 @@ export class EndpointsSignalListComponent {
       true,
     );
     this.confirmDialog.open(config, () => {
-      const obs$ = this.endpointsConfig.unregisterEndpoint(ep.guid, ep.cnsi_type);
-      this.handleAction(obs$, () => {
+      void this.handleAction(this.endpointsConfig.unregisterEndpoint(ep.guid, ep.cnsi_type), () => {
         this.snackBar.show(`Unregistered ${ep.name}`);
       });
     });
   }
 
-  // Pair-watch the ActionState observable for the busy → !busy transition,
-  // which is how the legacy EndpointListHelper detects success / failure
-  // without leaning on a side-effect from the action reducer. Local
-  // subscription handle so we can unsubscribe inside the handler — the
-  // observable itself never completes.
-  private handleAction(obs$: any, onSuccess: () => void): void {
-    const sub: Subscription = obs$.pipe(pairwise()).subscribe(([oldVal, newVal]: [any, any]) => {
-      if (!newVal.error && oldVal.busy && !newVal.busy) {
+  // W36-B Wave 3: EndpointsDataService returns a single resolved
+  // ActionState via Promise — no more pairwise() over a busy→idle
+  // legacy ngrx Observable. Success/failure routes off the resolved
+  // state directly.
+  private async handleAction(action: Promise<{ error: boolean; message?: string }>, onSuccess: () => void): Promise<void> {
+    try {
+      const result = await action;
+      if (!result.error) {
         onSuccess();
-        sub.unsubscribe();
-      } else if (newVal.error && oldVal.busy && !newVal.busy) {
-        this.snackBar.show(newVal.message ?? 'Action failed');
-        sub.unsubscribe();
+      } else {
+        this.snackBar.show(result.message ?? 'Action failed');
       }
-    });
+    } catch (err) {
+      this.snackBar.show((err as Error)?.message ?? 'Action failed');
+    }
   }
 }

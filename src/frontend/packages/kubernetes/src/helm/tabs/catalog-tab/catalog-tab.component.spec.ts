@@ -1,16 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { SharedModule } from '@stratosui/core';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
-import { entityCatalog, TestEntityCatalog } from '../../../../../store/src/public-api';
+import { EndpointsDataService, entityCatalog, TestEntityCatalog } from '../../../../../store/src/public-api';
 
 import { HelmTestingModule } from '../../helm-testing.module';
 import { MockChartService } from '../../monocular/shared/services/chart.service.mock';
@@ -22,12 +21,11 @@ import { generateHelmEntities } from '../../helm-entity-generator';
 describe('CatalogTabComponent', () => {
   let component: CatalogTabComponent;
   let fixture: ComponentFixture<CatalogTabComponent>;
-  let mockPaginationService: any;
   let mockChartMonitor: any;
 
   beforeEach(async () => {
     // Manually register catalog entities before TestBed setup
-    // This ensures stratosEntityCatalog.endpoint and helmEntityCatalog.chart are defined
+    // This ensures helmEntityCatalog.chart is defined
     const testEntityCatalog = entityCatalog as TestEntityCatalog;
     testEntityCatalog.clear();
     const entities = [
@@ -35,17 +33,6 @@ describe('CatalogTabComponent', () => {
       ...generateHelmEntities(),
     ];
     entities.forEach(entity => entityCatalog.register(entity));
-
-    // Create persistent mock observables at test suite level to prevent garbage collection
-    // Use BehaviorSubject to keep observables alive throughout the test
-    mockPaginationService = {
-      entities$: new BehaviorSubject([]),
-      fetchingEntities$: new BehaviorSubject(false),
-      pagination$: new BehaviorSubject(null),
-      hasEntities$: new BehaviorSubject(false),
-      totalEntities$: new BehaviorSubject(0),
-      isMultiAction$: new BehaviorSubject(false)
-    };
 
     mockChartMonitor = {
       currentPage$: new BehaviorSubject([]),
@@ -62,8 +49,6 @@ describe('CatalogTabComponent', () => {
       totalEntities$: new BehaviorSubject(0)
     };
 
-    // Mock the catalog methods to return our persistent observables
-    vi.spyOn(stratosEntityCatalog.endpoint.store.getAll, 'getPaginationService').mockReturnValue(mockPaginationService);
     vi.spyOn(helmEntityCatalog.chart.store, 'getPaginationMonitor').mockReturnValue(mockChartMonitor);
 
     await TestBed.configureTestingModule({
@@ -88,22 +73,18 @@ describe('CatalogTabComponent', () => {
   });
 
   beforeEach(() => {
+    // Wave 5 (W36-B): seed EndpointsDataService with empty signals to
+    // satisfy the component's signal-bridge over the data service.
+    const endpointsData = TestBed.inject(EndpointsDataService);
+    Object.defineProperty(endpointsData, 'endpointsList', { value: signal([]) });
+    Object.defineProperty(endpointsData, 'loading', { value: signal(false) });
+
     fixture = TestBed.createComponent(CatalogTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   afterEach(() => {
-    // Properly clean up to prevent async errors
-    // Complete all BehaviorSubjects before destroying the fixture
-    if (mockPaginationService) {
-      mockPaginationService.entities$.complete();
-      mockPaginationService.fetchingEntities$.complete();
-      mockPaginationService.pagination$.complete();
-      mockPaginationService.hasEntities$.complete();
-      mockPaginationService.totalEntities$.complete();
-      mockPaginationService.isMultiAction$.complete();
-    }
     if (mockChartMonitor) {
       mockChartMonitor.currentPage$.complete();
       mockChartMonitor.pagination$.complete();

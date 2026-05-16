@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   InternalEventMonitorFactory,
   EndpointModel,
+  EndpointsDataService,
   getPreviousRoutingState,
   StratosStatus,
   endpointEntityType,
-  stratosEntityCatalog,
   InternalEventState,
   SendClearEndpointEventsAction,
   AppState,
@@ -41,6 +42,8 @@ export class ErrorPageComponent implements OnInit {
   private store = inject<Store<AppState>>(Store);
   private internalEventMonitorFactory = inject(InternalEventMonitorFactory);
   private sanitizer = inject(DomSanitizer);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
 
   public back$: Observable<string>;
   public backParams$: Observable<object>;
@@ -55,10 +58,15 @@ export class ErrorPageComponent implements OnInit {
   ngOnInit() {
     const endpointId = this.activatedRoute.snapshot.params.endpointId;
     if (endpointId) {
-      const endpointMonitor = stratosEntityCatalog.endpoint.store.getEntityMonitor(endpointId);
+      // W36-B Wave 3: read endpoint via EndpointsDataService signal
+      // bridge instead of legacy EntityMonitor.entity$.
+      const endpoint$ = toObservable(
+        this.endpointsData.endpointById(endpointId),
+        { injector: this.injector },
+      );
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointEntityType, of([endpointId]));
       this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
-        withLatestFrom(endpointMonitor.entity$),
+        withLatestFrom(endpoint$),
         map(([errors, endpoint]: [any, EndpointModel]) => {
           return {
             endpoint,

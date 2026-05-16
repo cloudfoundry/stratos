@@ -4,18 +4,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
+  EndpointsDataService,
   EntityCatalogHelper,
   EntityCatalogHelpers,
   EntityCatalogTestModuleManualStore,
   EntityServiceFactory,
   generateStratosEntities,
-  stratosEntityCatalog,
   TEST_CATALOGUE_ENTITIES
 } from '@stratosui/store';
 import { createBasicStoreModule, testSCFEndpoint, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { signal } from '@angular/core';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../../tab-nav.service';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -66,17 +66,14 @@ describe('BackupEndpointsComponent', () => {
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
-    // Mock the getPaginationService to return a working observable with test endpoint data
-    // This prevents the EmptyError that occurs when the component's constructor
-    // subscribes to an empty observable with take(1)
-    vi.spyOn(stratosEntityCatalog.endpoint.store.getAll, 'getPaginationService').mockReturnValue({
-      entities$: of([testSCFEndpoint]),
-      fetchingEntities$: of(false),
-      pagination$: of(null),
-      hasEntities$: of(true),
-      totalEntities$: of(1),
-      isMultiAction$: of(false)
-    } as any);
+    // Wave 5 (W36-B): seed EndpointsDataService.endpointsList signal with
+    // a test endpoint so the component's
+    // `toObservable(endpointsData.endpointsList).pipe(take(1))` chain
+    // emits and the constructor doesn't EmptyError.
+    const endpointsData = TestBed.inject(EndpointsDataService);
+    const endpointsListSignal = signal([testSCFEndpoint]);
+    Object.defineProperty(endpointsData, 'endpointsList', { value: endpointsListSignal });
+    Object.defineProperty(endpointsData, 'loading', { value: signal(false) });
   });
 
   beforeEach(() => {

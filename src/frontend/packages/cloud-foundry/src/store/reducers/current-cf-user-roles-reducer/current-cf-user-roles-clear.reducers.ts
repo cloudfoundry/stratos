@@ -1,11 +1,12 @@
-import { EndpointActionComplete } from '../../../../../store/src/actions/endpoint.actions';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { APISuccessOrFailedAction } from '../../../../../store/src/types/request.types';
-import { CF_ENDPOINT_TYPE } from '../../../cf-types';
+import {
+  CfRoleEndpointRegisteredAction,
+  CfRoleEndpointRemovedAction,
+} from '../../actions/cf-endpoint-role.actions';
 import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
 import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
 
-export function removeEndpointCfRoles(state: IAllCfRolesState, action: EndpointActionComplete) {
+export function removeEndpointCfRoles(state: IAllCfRolesState, action: CfRoleEndpointRemovedAction) {
   if (!state[action.guid]) {
     return state;
   }
@@ -18,12 +19,8 @@ export function removeEndpointCfRoles(state: IAllCfRolesState, action: EndpointA
   };
 }
 
-export function addCfEndpoint(state: IAllCfRolesState, action: EndpointActionComplete) {
-  if (action.endpointType !== CF_ENDPOINT_TYPE) {
-    return state;
-  }
-  const endpoint = action.endpoint as EndpointModel;
-  const guid = endpoint.guid;
+export function addCfEndpoint(state: IAllCfRolesState, action: CfRoleEndpointRegisteredAction) {
+  const guid = action.guid;
   if (state[guid]) {
     return state;
   }

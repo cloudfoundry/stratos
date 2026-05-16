@@ -1,14 +1,12 @@
 import { HttpClient, HttpRequest, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { take, filter, map, mergeMap } from 'rxjs/operators';
+import { from, Observable } from 'rxjs';
+import { filter, map, mergeMap } from 'rxjs/operators';
 
-import { InternalAppState } from '../app-state';
 import { StratosCatalogEndpointEntity } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IStratosEndpointDefinition } from '../entity-catalog/entity-catalog.types';
 import { cfAPIVersion, proxyAPIVersion } from '../jetstream';
-import { connectedEndpointsOfTypesSelector, endpointOfTypeSelector } from '../selectors/endpoint.selectors';
+import { EndpointsDataService } from '../services/endpoints-data.service';
 import { resolvePipelineUrl } from './resolve-pipeline-url';
 
 /**
@@ -29,7 +27,7 @@ export class PipelineHttpClient {
 
   static readonly EndpointHeader = 'x-cap-cnsi-list';
   public httpClient = inject(HttpClient);
-  private store = inject(Store<InternalAppState>);
+  private endpointsData = inject(EndpointsDataService);
 
   private makeRequest<R>(
     hr: HttpRequest<any>,
@@ -69,14 +67,20 @@ export class PipelineHttpClient {
       const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, endpointGuids);
       return this.httpClient.request<R>(hr.clone({ headers, url }));
     } else {
-      const selector = endpointConfig.unConnectable ?
-        endpointOfTypeSelector(endpointConfig.type) :
-        connectedEndpointsOfTypesSelector(endpointConfig.type);
-
-      return this.store.select(selector).pipe(
-        take(1),
-        mergeMap(endpoints => {
-          const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, Object.keys(endpoints));
+      // Read endpoint guids from EndpointsDataService (W36-B Wave 1).
+      // Bridge through whenReady() so the first call after bootstrap
+      // waits for hydration — preserving the take(1) semantics the
+      // legacy `store.select(...)` pipeline relied on. Subsequent calls
+      // resolve synchronously from the signal.
+      return from(this.endpointsData.whenReady()).pipe(
+        mergeMap(() => {
+          const all = Array.from(this.endpointsData.endpoints().values())
+            .filter(e => e.cnsi_type === endpointConfig.type);
+          const selected = endpointConfig.unConnectable
+            ? all
+            : all.filter(e => e.connectionStatus === 'connected');
+          const guids = selected.map(e => e.guid);
+          const headers = hr.headers.set(PipelineHttpClient.EndpointHeader, guids);
           return this.httpClient.request<R>(hr.clone({ headers, url }));
         })
       );

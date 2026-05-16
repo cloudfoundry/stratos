@@ -1,9 +1,4 @@
 import {
-  CONNECT_ENDPOINTS_SUCCESS,
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  UNREGISTER_ENDPOINTS,
-} from '../../actions/endpoint.actions';
-import {
   ADD_PARAMS,
   CLEAR_PAGES,
   CLEAR_PAGINATION_OF_ENTITY,
@@ -46,11 +41,7 @@ import { paginationClearAllTypes } from './pagination-reducer-clear-pagination-t
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { paginationIgnoreMaxed, paginationMaxReached } from './pagination-reducer-max-reached';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
-import {
-  getDefaultPaginationEntityState,
-  paginationResetPagination,
-  resetEndpointEntities,
-} from './pagination-reducer-reset-pagination';
+import { getDefaultPaginationEntityState, paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationResetSortAndFilter } from './pagination-reducer-reset-sort-filter';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientFilterKey } from './pagination-reducer-set-client-filter-key';
@@ -147,10 +138,6 @@ function paginate(action: any, state: PaginationState = {}, updatePagination: an
     return paginationClearOfEntity(state, action);
   }
 
-  if (isEndpointAction(action)) {
-    return resetEndpointEntities(state, action);
-  }
-
   if (action.type === UPDATE_MAXED_STATE) {
     return paginationMaxReached(state, action as UpdatePaginationMaxedState);
   }
@@ -230,13 +217,6 @@ function hydratePagination(state: PaginationState, action: HydratePaginationStat
   return newState;
 }
 
-function isEndpointAction(action: any) {
-  // ... that we care about.
-  return action.type === DISCONNECT_ENDPOINTS_SUCCESS ||
-    action.type === CONNECT_ENDPOINTS_SUCCESS ||
-    action.type === UNREGISTER_ENDPOINTS;
-}
-
 function logMissing(missing: string, allKeys: any) {
   console.warn(
     `Missing ${missing} in store`,
@@ -252,9 +232,10 @@ function enterPaginationReducer(state: PaginationState, action: any, updatePagin
     const newState = { ...state };
     if (!newState[entityKey]) {
       logMissing(`entity type ''`, Object.keys(newState));
+      newState[entityKey] = {};
     }
     const updatedPaginationState = updatePagination(newState[entityKey][paginationKey], action, actionType);
-    if (state[entityKey][paginationKey] === updatedPaginationState) {
+    if (newState[entityKey][paginationKey] === updatedPaginationState) {
       return state;
     }
     newState[entityKey] = mergeState(newState[entityKey], {

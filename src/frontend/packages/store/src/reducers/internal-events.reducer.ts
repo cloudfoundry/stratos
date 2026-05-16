@@ -1,11 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import {
-  CONNECT_ENDPOINTS_SUCCESS,
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../actions/endpoint.actions';
 import { SendClearEndpointEventsAction, SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
 import { endpointEntityType } from '../helpers/stratos-entity-factory';
 import {
@@ -16,7 +10,6 @@ import {
   InternalEventState,
   SEND_EVENT,
 } from '../types/internal-events.types';
-import { UPDATE_ENDPOINT_SUCCESS } from './../actions/endpoint.actions';
 
 const defaultState: InternalEventsState = {
   types: {
@@ -41,13 +34,6 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
     case CLEAR_ENDPOINT_ERROR_EVENTS: {
       const clearEndpointAction = action as SendClearEndpointEventsAction;
       return clearEndpointEvents(state, clearEndpointAction.endpointGuid);
-    }
-    case DISCONNECT_ENDPOINTS_SUCCESS:
-    case UNREGISTER_ENDPOINTS_SUCCESS:
-    case UPDATE_ENDPOINT_SUCCESS:
-    case CONNECT_ENDPOINTS_SUCCESS: {
-      const clearEndpointAction = action as DisconnectEndpoint;
-      return clearEndpointEvents(state, clearEndpointAction.guid);
     }
   }
   return state;

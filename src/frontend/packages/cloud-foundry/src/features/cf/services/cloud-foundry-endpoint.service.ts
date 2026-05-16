@@ -11,7 +11,9 @@ import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapt
 import {
   EntityService,
   endpointEntityType,
+  EndpointsDataService,
   PaginationMonitorFactory,
+  getDefaultRequestState,
   getPaginationObservables,
   stratosEntityCatalog,
   APIResource,
@@ -20,6 +22,7 @@ import {
   EndpointUser,
   PaginatedAction,
   Store } from '@stratosui/store';
+import { from } from 'rxjs';
 import { GetAllApplications } from '../../../actions/application.actions';
 import { GetAllRoutes } from '../../../actions/route.actions';
 import { GetSpaceRoutes } from '../../../actions/space.actions';
@@ -65,6 +68,7 @@ export class CloudFoundryEndpointService {
   private pmf = inject(PaginationMonitorFactory);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
+  private endpointsData = inject(EndpointsDataService);
   private injector = inject(Injector);
 
 
@@ -190,7 +194,12 @@ export class CloudFoundryEndpointService {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
 
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.cfEndpointEntityService = stratosEntityCatalog.endpoint.store.getEntityService(this.cfGuid);
+    // W36-B Wave 3: keep cfEndpointEntityService unset — the legacy
+    // EntityService is no longer the source for endpoint reads. The
+    // field is retained as `any` for backward-compat (some downstream
+    // tests still reference its type) but no consumer reads from it
+    // directly within this service.
+    this.cfEndpointEntityService = null as unknown as EntityService<EndpointModel>;
 
     this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid);
     this.constructCoreObservables();
@@ -198,7 +207,17 @@ export class CloudFoundryEndpointService {
   }
 
   private constructCoreObservables() {
-    this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
+    // W36-B Wave 3: replace cfEndpointEntityService.waitForEntity$ with
+    // the signal-native EndpointsDataService.waitFor() promise lifted
+    // to an Observable. Wrap in EntityInfo envelope so existing
+    // downstream consumers (`endpoint$.entity.foo`) keep working —
+    // those consumers are out of Wave 3 scope.
+    this.endpoint$ = from(this.endpointsData.waitFor(this.cfGuid)).pipe(
+      map((endpoint: EndpointModel) => ({
+        entity: endpoint,
+        entityRequestInfo: getDefaultRequestState(),
+      } as EntityInfo<EndpointModel>)),
+    );
     // Sync mirror — backs the new `endpoint` signal. toSignal needs an
     // injection context; we have one because constructCoreObservables runs
     // during constructor execution.

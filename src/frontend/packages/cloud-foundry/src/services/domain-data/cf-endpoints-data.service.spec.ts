@@ -1,14 +1,11 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 
-import { EndpointModel } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService } from '@stratosui/store';
 
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { CfEndpointsDataService } from './cf-endpoints-data.service';
-
-const ENDPOINT_KEY = 'stratosEndpoint';
 
 const cfA = {
   guid: 'cf-a',
@@ -31,28 +28,28 @@ const k8sA = {
   connectionStatus: 'connected',
 } as unknown as EndpointModel;
 
-function stateWith(endpoints: Record<string, EndpointModel>): unknown {
+function makeEndpointsServiceStub() {
+  const map: WritableSignal<Map<string, EndpointModel>> = signal(new Map());
   return {
-    requestData: {
-      [ENDPOINT_KEY]: endpoints,
-    },
+    endpoints: map,
+    set: (entries: Record<string, EndpointModel>) => map.set(new Map(Object.entries(entries))),
   };
 }
 
 describe('CfEndpointsDataService', () => {
   let svc: CfEndpointsDataService;
-  let store: MockStore;
+  let endpointsServiceStub: ReturnType<typeof makeEndpointsServiceStub>;
 
   beforeEach(() => {
     TestBed.resetTestingModule();
+    endpointsServiceStub = makeEndpointsServiceStub();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideMockStore({ initialState: stateWith({}) }),
+        { provide: EndpointsDataService, useValue: endpointsServiceStub },
         CfEndpointsDataService,
       ],
     });
-    store = TestBed.inject(MockStore);
     svc = TestBed.inject(CfEndpointsDataService);
   });
 
@@ -65,7 +62,7 @@ describe('CfEndpointsDataService', () => {
   });
 
   it('exposes endpoint entities, connected endpoints and connectedCf via signals', () => {
-    store.setState(stateWith({ 'cf-a': cfA, 'cf-b': cfB, 'k8s-a': k8sA }));
+    endpointsServiceStub.set({ 'cf-a': cfA, 'cf-b': cfB, 'k8s-a': k8sA });
 
     expect(Object.keys(svc.all()).sort()).toEqual(['cf-a', 'cf-b', 'k8s-a']);
     expect(Object.keys(svc.connected()).sort()).toEqual(['cf-a', 'k8s-a']);
@@ -75,7 +72,7 @@ describe('CfEndpointsDataService', () => {
   });
 
   it('filters out non-cf and non-connected endpoints from connectedCf', () => {
-    store.setState(stateWith({ 'cf-b': cfB, 'k8s-a': k8sA }));
+    endpointsServiceStub.set({ 'cf-b': cfB, 'k8s-a': k8sA });
 
     expect(Object.keys(svc.connectedCf())).toEqual([]);
     expect(svc.hasConnectedCf()).toBe(false);

@@ -5,6 +5,7 @@ import { take, defaultIfEmpty, map } from 'rxjs/operators';
 
 import { endpointHasMetrics } from '../../../../core/src/features/endpoints/endpoint-helpers';
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
+import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { ASSIGN_ROUTE_SUCCESS } from '../../actions/application-service-routes.actions';
 import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
@@ -29,6 +30,7 @@ export class AppEffects {
   private actions$ = inject(Actions);
   private store = inject<Store<EndpointOnlyAppState>>(Store);
   private appRef = inject(ApplicationRef);
+  private endpointsService = inject(EndpointsDataService);
 
 
    updateSummary$ = createEffect(() => this.actions$.pipe(
@@ -49,7 +51,7 @@ export class AppEffects {
       const updateAction: UpdateExistingApplication = action.apiAction as UpdateExistingApplication;
       if (!!updateAction.existingApplication && updateAction.newApplication.instances > updateAction.existingApplication.instances) {
         // First check that we have a metrics endpoint associated with this cf
-        endpointHasMetrics(updateAction.endpointGuid, this.store).pipe(take(1), defaultIfEmpty(false)).subscribe(hasMetrics => {
+        endpointHasMetrics(updateAction.endpointGuid, this.endpointsService).pipe(take(1), defaultIfEmpty(false)).subscribe(hasMetrics => {
           if (hasMetrics) {
             this.store.dispatch(createAppInstancesMetricAction(updateAction.guid, updateAction.endpointGuid));
           }

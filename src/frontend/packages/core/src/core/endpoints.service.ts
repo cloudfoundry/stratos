@@ -4,14 +4,15 @@ import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } fr
 import { Store } from '@ngrx/store';
 import {
   EndpointOnlyAppState,
+  EndpointsDataService,
   EntityCatalogHelpers,
   IRequestEntityTypeState,
   IEndpointFavMetadata,
   UserFavorite,
   entityCatalog,
   EndpointHealthCheck,
-  EndpointModel,
-  EndpointState } from '@stratosui/store';
+  EndpointModel } from '@stratosui/store';
+import { EndpointStatusState } from './signals/endpoint-status-signal.service';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
 
@@ -27,8 +28,8 @@ import { UserService } from './user.service';
   providedIn: 'root'
 })
 export class EndpointsService {
-  // Store is retained only for the per-endpoint metrics selector below.
   private store = inject<Store<EndpointOnlyAppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
   private endpointsSignals = inject(EndpointsSignalService);
   private userService = inject(UserService);
   private endpointHealthChecks = inject(EndpointHealthChecks);
@@ -178,7 +179,7 @@ export class EndpointsService {
 
 
   hasMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.store, endpointId);
+    return endpointHasMetricsByAvailable(this.endpointsService, endpointId);
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {
@@ -278,7 +279,7 @@ export const endpointsGuard: CanActivateFn = (
       endpointsService.disablePersistenceFeatures$
     ),
     map(([state, haveRegistered, haveConnected, isAdmin, isEndpointAdmin, userEndpointsEnabled, disablePersistenceFeatures]
-      : [[any, EndpointState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
+      : [[any, EndpointStatusState], boolean, boolean, boolean, boolean, boolean, boolean]) => {
       const [authState] = state;
 
       if (authState.sessionData.valid) {

@@ -1,16 +1,12 @@
 import { Action } from '@ngrx/store';
 
-import {
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
-  GET_ENDPOINTS_SUCCESS,
-  GetAllEndpointsSuccess,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../../actions/endpoint.actions';
 import { EntityDeleteCompleteAction } from '../../actions/entity.delete.actions';
-import { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from '../../actions/recently-visited.actions';
-import { entityCatalog } from '../../entity-catalog/entity-catalog';
-import { endpointEntityType, STRATOS_ENDPOINT_TYPE } from '../../helpers/stratos-entity-factory';
+import {
+  AddRecentlyVisitedEntityAction,
+  CleanRecentsForEndpointsAction,
+  PruneRecentsToConnectedAction,
+  SetRecentlyVisitedEntityAction,
+} from '../../actions/recently-visited.actions';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
 import {
   addRecentlyVisitedEntity,
@@ -36,21 +32,13 @@ export function recentlyVisitedReducer(
       };
       return newState;
     }
-    case DISCONNECT_ENDPOINTS_SUCCESS:
-    case UNREGISTER_ENDPOINTS_SUCCESS: {
-      const removeEndpointAction = action as DisconnectEndpoint;
-      return cleanRecentsList(state, [removeEndpointAction.guid]);
+    case CleanRecentsForEndpointsAction.ACTION_TYPE: {
+      const cleanAction = action as CleanRecentsForEndpointsAction;
+      return cleanRecentsList(state, cleanAction.endpointGuids);
     }
-    case GET_ENDPOINTS_SUCCESS: {
-      const getAllAction = action as GetAllEndpointsSuccess;
-      const endpointKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
-      const connectedIds = Object.values(getAllAction.payload.entities[endpointKey]).reduce((ids, endpoint) => {
-        if (endpoint.user) {
-          ids.push(endpoint.guid);
-        }
-        return ids;
-      }, []);
-      return cleanRecentsList(state, connectedIds, true);
+    case PruneRecentsToConnectedAction.ACTION_TYPE: {
+      const pruneAction = action as PruneRecentsToConnectedAction;
+      return cleanRecentsList(state, pruneAction.connectedEndpointGuids, true);
     }
   }
   return state;

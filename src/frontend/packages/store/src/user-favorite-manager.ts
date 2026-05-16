@@ -8,7 +8,6 @@ import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity
 import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
 import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from './public-api';
-import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
 import {
   errorFetchingFavoritesSelector,
   favoriteEntitiesSelector,
@@ -16,6 +15,7 @@ import {
   fetchingFavoritesSelector,
 } from './selectors/favorite-groups.selectors';
 import { isFavorite } from './selectors/favorite.selectors';
+import { EndpointsDataService } from './services/endpoints-data.service';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
 import {
@@ -37,6 +37,7 @@ interface IGroupedFavorites {
 })
 export class UserFavoriteManager {
   private store = inject(Store<GeneralEntityAppState>);
+  private endpointsService = inject(EndpointsDataService);
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
@@ -96,17 +97,16 @@ export class UserFavoriteManager {
     const endpointFav = favoriteEntities[endpointFavoriteGuid] as UserFavorite<IEndpointFavMetadata>;
     const entities = favEntitiesGuid.map(guid => this.getUserFavoriteFromObject(favoriteEntities[guid]));
     if (!endpointFav) {
-      return this.store.select(endpointEntitiesSelector).pipe(
-        map(endpoints => {
-          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
-          const endpointEntity = endpoints[endpointGuid];
-          return this.getFavoriteEndpointFromEntity(endpointEntity);
-        }),
-        map(endpointFavorite => ({
-          endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite),
-          entities
-        }))
-      );
+      // Wave 5 (W36-B) decision C: legacy favorites point at endpoints by
+      // guid. Resolve via EndpointsDataService.endpointById signal rather
+      // than the deleted endpointEntitiesSelector.
+      const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
+      const endpointEntity = this.endpointsService.endpointById(endpointGuid)();
+      const endpointFavorite = this.getFavoriteEndpointFromEntity(endpointEntity);
+      return of({
+        endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite),
+        entities
+      });
     }
     return of({
       endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFav),

@@ -72,12 +72,6 @@ export interface CreatorInfo {
   system: boolean;
 }
 
-export interface EndpointState {
-  loading: boolean;
-  error: boolean;
-  message: string;
-}
-
 export interface StateUpdateAction {
   type: string;
   guid: string;

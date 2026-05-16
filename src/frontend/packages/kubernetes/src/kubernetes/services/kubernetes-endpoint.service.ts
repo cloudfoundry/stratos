@@ -1,11 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
-import { Observable, of } from 'rxjs';
+import { Observable, defer, from, of } from 'rxjs';
 import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 
 import {
-  GetAllEndpoints,
+  EndpointsDataService,
   EntityService,
   EntityServiceFactory,
   EndpointModel,
@@ -81,11 +81,11 @@ export class KubernetesEndpointService {
   private session = inject(SessionService);
   private http = inject(HttpClient);
   private entityServiceFactory = inject(EntityServiceFactory);
+  private endpointsService = inject(EndpointsDataService);
 
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
-  kubeEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
   kubeGuid!: string;
@@ -137,11 +137,6 @@ export class KubernetesEndpointService {
 
   initialize(kubeGuid: string): void {
     this.kubeGuid = kubeGuid;
-
-    this.kubeEndpointEntityService = this.entityServiceFactory.create(
-      this.kubeGuid,
-      new GetAllEndpoints()
-    );
 
     this.constructCoreObservables();
   }
@@ -287,7 +282,18 @@ export class KubernetesEndpointService {
   }
 
   private constructCoreObservables() {
-    this.endpoint$ = this.kubeEndpointEntityService.waitForEntity$;
+    // Wave 5 (W36-B): replaces the legacy `entityServiceFactory.create(guid,
+    // new GetAllEndpoints()).waitForEntity$` chain. Resolves the endpoint
+    // model directly off EndpointsDataService.waitFor (Promise) and wraps
+    // it in an EntityInfo-shaped observable for downstream template
+    // consumers.
+    this.endpoint$ = defer(() => from(this.endpointsService.waitFor(this.kubeGuid))).pipe(
+      map(endpoint => ({
+        entityRequestInfo: undefined,
+        entity: endpoint,
+      } as unknown as EntityInfo<EndpointModel>)),
+      shareReplay(1),
+    );
 
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')

@@ -1,11 +1,12 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
 import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
-import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
@@ -28,6 +29,8 @@ export const AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM = 'auto-select-deploy-endpoi
 export class ApplicationDeploySourceTypes {
   private perms = inject(CurrentUserPermissionsService);
   private scmService = inject(GitSCMService);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
 
 
   private baseTypes: SourceType[] = [
@@ -92,7 +95,9 @@ export class ApplicationDeploySourceTypes {
       [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', null)
     };
 
-    this.types$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+    // W36-B Wave 3: source endpoints from EndpointsDataService signal
+    // bridge instead of legacy ngrx PaginationService.
+    this.types$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       filter(e => !!e),
       map(endpoints => {
         const newTypes: SourceType[] = [];

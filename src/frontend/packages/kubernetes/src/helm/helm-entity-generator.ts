@@ -9,8 +9,7 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel, Store } from '../../../store/src/public-api';
-import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
+import { EndpointModel, EndpointsDataService, Store } from '../../../store/src/public-api';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
@@ -53,7 +52,10 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         unConnectable: true,
         techPreview: false,
         authTypes: [],
-        endpointListActions: (_store: Store<AppState>): IListAction<EndpointModel>[] => {
+        endpointListActions: (
+          _store: Store<AppState>,
+          endpointsService: EndpointsDataService,
+        ): IListAction<EndpointModel>[] => {
           return [{
             action: (item: EndpointModel) => {
               helmEntityCatalog.chart.api.synchronise(item).pipe(
@@ -61,7 +63,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
                 take(1)
               ).subscribe((res: unknown) => {
                 if (res != null) {
-                  stratosEntityCatalog.endpoint.api.getAll();
+                  void endpointsService.getAll(false);
                 }
               });
             },

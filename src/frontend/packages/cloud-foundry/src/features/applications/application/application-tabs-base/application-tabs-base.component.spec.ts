@@ -1,14 +1,13 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
-import { Store } from '@ngrx/store';
 
 import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
-import {ApplicationService, CFAppState} from '@stratosui/cloud-foundry';
-import { EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
+import {ApplicationService} from '@stratosui/cloud-foundry';
+import { EndpointModel, EndpointsDataService, UserFavoriteManager } from '@stratosui/store';
 import {
   EndpointsService,
   CurrentUserPermissionsService
@@ -23,7 +22,6 @@ import { AppLifecycleProgressService } from '../../../../shared/components/app-l
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
   let fixture: ComponentFixture<ApplicationTabsBaseComponent>;
-  let store: Store<CFAppState>;
   let applicationServiceMock: ApplicationServiceMock;
 
   beforeEach(async () => {
@@ -55,11 +53,9 @@ describe('ApplicationTabsBaseComponent', () => {
       getFavorite: vi.fn().mockReturnValue(null)
     };
 
-    // The issue is that observableOf() completes immediately after emitting,
-    // which causes withLatestFrom to miss values. We need observables that
-    // emit but don't complete immediately.
-
-    // Create mock endpoint data for store selector
+    // Wave 2 (W36-B): mock `EndpointsDataService` instead of overriding
+    // `store.select(endpointEntitiesSelector)`. Endpoint entity reads now
+    // come from the data service's signal surface.
     const mockEndpoint: EndpointModel = {
       guid: 'mockCfGuid',
       name: 'Mock CF',
@@ -93,9 +89,17 @@ describe('ApplicationTabsBaseComponent', () => {
       logged_in_as_admin: false
     };
 
-    const endpointsSubject = new BehaviorSubject<{ [guid: string]: EndpointModel }>({
-      mockCfGuid: mockEndpoint
-    });
+    const endpointsMap: WritableSignal<Map<string, EndpointModel>> = signal(
+      new Map([['mockCfGuid', mockEndpoint]])
+    );
+    const mockEndpointsDataService = {
+      endpoints: endpointsMap,
+      whenReady: () => Promise.resolve(),
+      waitFor: (guid: string) => {
+        const ep = endpointsMap().get(guid);
+        return ep ? Promise.resolve(ep) : Promise.reject(new Error(`Endpoint ${guid} not found`));
+      },
+    };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -106,6 +110,7 @@ describe('ApplicationTabsBaseComponent', () => {
       providers: [
         { provide: ApplicationService, useValue: applicationServiceMock },
         { provide: EndpointsService, useValue: mockEndpointsService },
+        { provide: EndpointsDataService, useValue: mockEndpointsDataService },
         { provide: CurrentUserPermissionsService, useValue: mockCurrentUserPermissionsService },
         { provide: GitSCMService, useValue: mockGitSCMService },
         { provide: UserFavoriteManager, useValue: mockUserFavoriteManager },
@@ -126,19 +131,7 @@ describe('ApplicationTabsBaseComponent', () => {
       ]
     }).compileComponents();
 
-    store = TestBed.inject(Store);
     populateStoreWithTestEndpoint();
-
-    // Override store.select to return our mocked endpoints observable
-    const originalSelect = store.select.bind(store);
-    store.select = vi.fn().mockImplementation((selector: any) => {
-      // Return mocked endpoints for the endpoint selector
-      if (selector === endpointEntitiesSelector) {
-        return endpointsSubject.asObservable();
-      }
-      // Fall back to original select for other selectors
-      return originalSelect(selector);
-    }) as any;
 
     fixture = TestBed.createComponent(ApplicationTabsBaseComponent);
     component = fixture.componentInstance;

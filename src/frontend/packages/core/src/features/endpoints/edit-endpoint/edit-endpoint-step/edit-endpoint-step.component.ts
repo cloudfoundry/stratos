@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
@@ -8,14 +8,14 @@ import { CustomCheckboxComponent } from '../../../../shared/components/custom-ch
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
   EndpointModel,
+  EndpointsDataService,
   getFullEndpointApiUrl,
   EntityCatalogSchemas,
   IStratosEndpointDefinition,
-  stratosEntityCatalog,
   entityCatalog,
   ActionState } from '@stratosui/store';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
-import { take, filter, map, pairwise, switchMap } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom, from } from 'rxjs';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction, StepComponent, StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
@@ -79,6 +79,8 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   signalHandle: SignalStepHandle;
 
   private router = inject(Router);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
@@ -113,7 +115,12 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
     this.endpointID = getIdFromRoute(activatedRoute, 'id');
 
-    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+    // W36-B Wave 3: source the existing-endpoints map from the
+    // signal-native EndpointsDataService instead of the legacy
+    // pagination monitor's currentPage$. The service's `endpointsList`
+    // is computed off the same underlying state, so callers see the
+    // same set of records.
+    this.existingEndpoints = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       map(endpoints => endpoints.reduce((res: EndpointModelMap, endpoint) => {
         res[endpoint.guid] = endpoint;
         return res;
@@ -187,22 +194,20 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       switchMap(endpoint => {
         const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
         const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL ?? false;
-        return ((stratosEntityCatalog.endpoint.api as any).update(
-          this.endpointID,
-          this.endpointID, {
+        // W36-B Wave 3: dispatch the update via EndpointsDataService.
+        // The service returns Promise<ActionState> with the resolved
+        // final state — the previous pairwise+busy-edge dance over the
+        // legacy ngrx update Observable collapses to a single await.
+        return from(this.endpointsData.update(this.endpointID, {
           endpointType: endpoint.cnsi_type,
-          id: this.endpointID,
           name: this.editEndpoint.value.name ?? '',
           skipSSL,
           setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
           clientID: this.editEndpoint.value.clientID ?? '',
           clientSecret: this.editEndpoint.value.clientSecret ?? '',
           allowSSO: this.editEndpoint.value.allowSSO ?? false,
-          caCert }
-        ) as Observable<ActionState>).pipe(
-          pairwise(),
-          filter(([oldV, newV]) => oldV.busy && !newV.busy),
-          map(([, newV]) => newV),
+          caCert,
+        })).pipe(
           map((o: ActionState): StepOnNextResult => {
             return {
               success: !o.error,

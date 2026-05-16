@@ -1,7 +1,9 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   AppState,
   EndpointModel,
+  EndpointsDataService,
   entityCatalog,
   EntityMonitorFactory,
   InternalEventMonitorFactory,
@@ -10,7 +12,6 @@ import {
   PaginationMonitorFactory,
   SetClientFilter,
   Store,
-  stratosEntityCatalog,
   UserFavoriteManager,
 } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
@@ -42,6 +43,8 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
 })
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private store = inject<Store<AppState>>(Store);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
 
   cardComponent = EndpointCardComponent;
 
@@ -123,6 +126,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     const userFavoriteManager = inject(UserFavoriteManager);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     const sessionService = inject(SessionService);
+    const endpointsService = inject(EndpointsDataService);
+    const injector = inject(Injector);
 
     this.singleActions = endpointListHelper.endpointActions();
     const favoriteCell = createTableColumnFavorite(
@@ -163,6 +168,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       paginationMonitorFactory,
       entityMonitorFactory,
       internalEventMonitorFactory,
+      endpointsService,
+      injector,
       true
     );
   }
@@ -182,12 +189,20 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   }
 
   private createEndpointTypeFilter(): IListMultiFilterConfig {
+    // W36-B Wave 3: source endpoints from EndpointsDataService signal
+    // bridge. The pagination$ stream still comes from the legacy
+    // per-data-source pagination monitor because
+    // `resetEndpointTypeFilter` writes the type-filter back into the
+    // client-pagination state on the data source itself — that ngrx
+    // pagination plumbing belongs to BaseEndpointsDataSource and lives
+    // through Wave 3 unchanged.
+    const endpoints$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector });
     return {
       key: BaseEndpointsDataSource.typeFilterKey,
       label: 'Endpoint Type',
       list$: combineLatest([
-        stratosEntityCatalog.endpoint.store.getPaginationMonitor().currentPage$,
-        stratosEntityCatalog.endpoint.store.getPaginationMonitor().pagination$
+        endpoints$,
+        this.dataSource.pagination$,
       ]).pipe(
         debounceTime(100), // This can get pretty spammy, to help protect resetEndpointTypeFilter allow a pause
         filter(([endpoints]) => !!endpoints),

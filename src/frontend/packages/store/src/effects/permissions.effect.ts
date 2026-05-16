@@ -2,10 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { combineLatest, EMPTY, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { combineLatest, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
-import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
@@ -14,7 +13,7 @@ import {
 } from '../actions/permissions.actions';
 import { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { EntityUserRolesEndpoint } from '../entity-request-pipeline/entity-request-pipeline.types';
+import { EndpointsDataService } from '../services/endpoints-data.service';
 
 const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
@@ -25,6 +24,7 @@ export class PermissionsEffects {
   private httpClient = inject(HttpClient);
   private actions$ = inject(Actions);
   private store = inject<Store<AppState>>(Store);
+  private endpointsService = inject(EndpointsDataService);
 
 
    getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
@@ -32,7 +32,7 @@ export class PermissionsEffects {
     switchMap(_action => {
       const allRequestsCompleted = entityCatalog.getAllBaseEndpointTypes().reduce((res, endpointType) => {
         if (endpointType.definition.userRolesFetch) {
-          res.push(endpointType.definition.userRolesFetch([], this.store, this.httpClient));
+          res.push(endpointType.definition.userRolesFetch([], this.store, this.httpClient, this.endpointsService));
         }
         return res;
       }, []);
@@ -42,28 +42,6 @@ export class PermissionsEffects {
     }),
     catchError(err => {
       console.warn('Failed to fetch current user permissions: ', err);
-      return of(failedAction);
-    })
-  ));
-
-
-   getPermissionForNewlyConnectedEndpoint$ = createEffect(() => this.actions$.pipe(
-    ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS),
-    switchMap(action => {
-      const endpointType = entityCatalog.getEndpoint(action.endpointType);
-      if (!endpointType.definition.userRolesFetch) {
-        return EMPTY;
-      }
-      const endpoint: EntityUserRolesEndpoint = {
-        guid: action.guid,
-        user: action.endpoint.user
-      };
-      return endpointType.definition.userRolesFetch([endpoint], this.store, this.httpClient).pipe(
-        map(succeeded => succeeded ? successAction : failedAction)
-      );
-    }),
-    catchError(err => {
-      console.warn('Failed to fetch current user permissions after endpoint connected: ', err);
       return of(failedAction);
     })
   ));

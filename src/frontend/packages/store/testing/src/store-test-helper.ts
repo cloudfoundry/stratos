@@ -5,6 +5,7 @@ import {
   appReducers,
   AppState,
   BaseEntityValues,
+  EndpointsDataService,
   endpointEntityType,
   EndpointModel,
   entityCatalog,
@@ -404,6 +405,27 @@ export function populateStoreWithTestEndpoint(): EndpointModel {
     type: 'POPULATE_TEST_DATA',
     ...stratosEndpointEntityConfig
   }, 'fetch'));
+
+  // Wave 2 (W36-B): mirror the seed into EndpointsDataService so that
+  // signal-native consumers (`EndpointsSignalService`, `CfEndpointsDataService`,
+  // `EndpointsService.endpoints$`) see the test endpoint too. Tolerates the
+  // service not being available in the test injector (e.g. tests that don't
+  // pull in the store package).
+  try {
+    const endpointsService = TestBed.inject(EndpointsDataService, null);
+    if (endpointsService) {
+      // Bypass private encapsulation via index access — the writable signal
+      // is the source of truth that the public readonly `endpoints` signal
+      // mirrors. This is a test-only seam; production code dispatches via
+      // `getAll()` / `register()` etc.
+      const writable = (endpointsService as unknown as { ['_endpoints']?: { set: (m: Map<string, EndpointModel>) => void } })['_endpoints'];
+      if (writable && typeof writable.set === 'function') {
+        writable.set(new Map([[testSCFEndpoint.guid, testSCFEndpoint]]));
+      }
+    }
+  } catch {
+    // Service not provided in this test — non-fatal.
+  }
 
   return testSCFEndpoint;
 }

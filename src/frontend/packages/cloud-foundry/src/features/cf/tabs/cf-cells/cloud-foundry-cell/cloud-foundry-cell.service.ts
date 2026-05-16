@@ -12,6 +12,7 @@ import { MetricQueryConfig } from '../../../../../../../store/src/actions/metric
 import { AppState } from '../../../../../../../store/src/app-state';
 import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
+import { EndpointsDataService } from '../../../../../../../store/src/services/endpoints-data.service';
 import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
@@ -72,6 +73,7 @@ export class CloudFoundryCellService {
     const activeRouteCfCell = inject(ActiveRouteCfCell);
     const store = inject<Store<AppState>>(Store);
     const paginationMonitorFactory = inject(PaginationMonitorFactory);
+    const endpointsService = inject(EndpointsDataService);
 
 
     this.cellId = activeRouteCfCell.cellId;
@@ -89,7 +91,7 @@ export class CloudFoundryCellService {
     this.usageDisk$ = this.generateUsage(this.remainingDisk$, this.totalDisk$);
     this.usageMemory$ = this.generateUsage(this.remainingMemory$, this.totalMemory$);
 
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory);
+    const cellHelper = new CfCellHelper(store, paginationMonitorFactory, endpointsService);
     const action$ = cellHelper.createCellMetricAction(this.cfGuid);
     this.cellMetric$ = action$.pipe(
       switchMap(action => {

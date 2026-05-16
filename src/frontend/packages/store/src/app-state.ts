@@ -2,7 +2,6 @@ import type { RequestInfoState } from './reducers/api-request-reducer/types';
 import type { AuthState } from './reducers/auth.reducer';
 import type { ListsState } from './reducers/list.reducer';
 import type { ICurrentUserRolesState } from './types/current-user-roles.types';
-import type { EndpointState } from './types/endpoint.types';
 import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import type { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import type { InternalEventsState } from './types/internal-events.types';
@@ -23,7 +22,6 @@ export abstract class AppState<
   T extends Record<string, any> = any
   > {
   auth!: AuthState;
-  endpoints!: EndpointState;
   pagination!: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
   request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData!: T;
