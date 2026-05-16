@@ -259,3 +259,9 @@ export type {
   EndpointUpdateOptions,
 } from './services/endpoints-data.service';
 export { EndpointDisconnectCleanupService } from './services/endpoint-disconnect-cleanup.service';
+
+// W36-C Wave 1 — signal-native auth data service. Single bridge over the
+// legacy `auth` ngrx slice. Replaces direct `store.select(s => s.auth)`
+// reads in `AuthSignalService` and consolidates `VerifySession` / `RouterNav`
+// dispatch into one place so downstream consumers stay Store-free.
+export { AuthDataService } from './services/auth-data.service';
