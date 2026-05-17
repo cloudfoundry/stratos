@@ -29,23 +29,13 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
   const mockOrgService = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
-    org$: of({
-      entity: {
-        entity: {
-          name: 'test-org',
-          guid: 'org-guid',
-          spaces: []
-        },
-        metadata: {
-          guid: 'org-guid'
-        }
-      },
-      entityRequestInfo: {
-        fetching: false,
-        error: false,
-        deleting: { busy: false, deleted: false }
-      }
-    }),
+    orgDataService: {
+      org: () => null,
+      spaces: () => [],
+      isLoading: () => false,
+      errors: () => [],
+      load: () => of(undefined),
+    },
     userProvidedServiceInstancesCount$: of(0)
   };
 
