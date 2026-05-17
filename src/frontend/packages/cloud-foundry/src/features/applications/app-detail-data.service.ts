@@ -389,7 +389,19 @@ export class AppDetailDataService {
     const url = this.nativeAppDetailUrl();
     try {
       const value = await firstValueFrom(this.http.get<StAppDetail>(url));
-      this._appDetail.set(value);
+      // Backend native handlers don't echo cnsiGuid on the response — the
+      // endpoint is identified by URL path. Frontend consumers reach for
+      // app.cnsiGuid (the legacy IApp.cfGuid via stToLegacy) for routerLink
+      // construction (e.g. SshApplicationComponent's breadcrumb back to
+      // /applications/{cfGuid}/{appGuid}/instances). Stamp it here so the
+      // signal-side and legacy-adapter projections see the right guid.
+      // Without this, breadcrumb returns landed on /applications/undefined/
+      // and rendered the empty 'no instances' shell.
+      const stamped: StAppDetail = {
+        ...value,
+        app: { ...value.app, cnsiGuid: this.cnsiGuid },
+      };
+      this._appDetail.set(stamped);
       this.debugTrace('app', url, 'ok', performance.now() - t0);
     } catch (err: unknown) {
       this._errors.update(m => ({ ...m, app: this.toStratosError('app', err) }));
