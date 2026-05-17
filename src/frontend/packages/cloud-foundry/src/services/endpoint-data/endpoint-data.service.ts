@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
 import { EMPTY, firstValueFrom, merge, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, tap, timeout } from 'rxjs/operators';
+import { catchError, finalize, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 import {
@@ -90,6 +90,14 @@ export class EndpointDataService {
   readonly loaded$ = new ReplaySubject<void>(1);
   readonly detailsLoaded$ = new ReplaySubject<void>(1);
 
+  // In-flight dedup. Concurrent callers before the first HTTP completes share
+  // the same Observable instead of each firing their own fan-out — without
+  // this, multiple subscribers (org-list + endpoint summary + recents) each
+  // start fresh requests; teardown of the first subscriber aborts its in-
+  // flight requests (ERR_ABORTED), leaving only the last to complete.
+  private _inFlightLoad: Observable<void> | null = null;
+  private _inFlightLoadDetails: Observable<void> | null = null;
+
   constructor(
     private readonly http: HttpClient,
     private readonly shim: EndpointDataShim,
@@ -109,11 +117,15 @@ export class EndpointDataService {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'load' });
       return of(undefined);
     }
+    if (this._inFlightLoad) {
+      this.diagnostics?.emitCounter('in-flight-hit', { service: 'EndpointDataService', method: 'load' });
+      return this._inFlightLoad;
+    }
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'load' });
     this._isLoading.set(true);
     this._errors.set([]);
 
-    return merge(
+    this._inFlightLoad = merge(
       this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}?return=counts`).pipe(
         tap(resp => this._orgCount.set(resp.totalResults)),
         catchError(err => { this.addError('orgs', err); return EMPTY; }),
@@ -142,8 +154,11 @@ export class EndpointDataService {
         // pagination store only needs the full lists, which loadDetails()
         // dispatches via shim.write() in its own finalize().
         this.loaded$.next();
+        this._inFlightLoad = null;
       }),
+      shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
+    return this._inFlightLoad;
   }
 
   // loadDetails() fetches the full orgs/apps/spaces lists (paginated
@@ -153,6 +168,10 @@ export class EndpointDataService {
     if (this._detailsLastFetched() !== null && this._orgs().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadDetails' });
       return of(undefined);
+    }
+    if (this._inFlightLoadDetails) {
+      this.diagnostics?.emitCounter('in-flight-hit', { service: 'EndpointDataService', method: 'loadDetails' });
+      return this._inFlightLoadDetails;
     }
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadDetails' });
     this._isLoadingDetails.set(true);
@@ -171,7 +190,7 @@ export class EndpointDataService {
     const detailPerPage = 500;
     type Paged<T> = { resources: T[]; totalResults?: number; pagination?: { totalResults?: number } };
     const totalOf = <T>(r: Paged<T>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
-    return merge(
+    this._inFlightLoadDetails = merge(
       this.http.get<Paged<StOrg>>(
         `/pp/v1/cf/orgs/${this.guid}?per_page=${detailPerPage}&page=1`,
       ).pipe(
@@ -203,8 +222,11 @@ export class EndpointDataService {
         this._detailsLastFetched.set(new Date());
         this.shim.write(this.guid, this.currentData());
         this.detailsLoaded$.next();
+        this._inFlightLoadDetails = null;
       }),
+      shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
+    return this._inFlightLoadDetails;
   }
 
   // loadServicesCounts() fetches the four cnsi-scoped services-domain counts
