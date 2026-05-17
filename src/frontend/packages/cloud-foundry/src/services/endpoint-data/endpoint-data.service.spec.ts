@@ -166,6 +166,53 @@ describe('EndpointDataService', () => {
     );
   });
 
+  it('loadDetails() drains all pages when pagination.totalPages > 1', async () => {
+    // Regression guard: the previous implementation capped at ?page=1
+    // (silently truncating to 500 rows on large CFs). The drain fetches
+    // page 1 inline, then pages 2..N in parallel via the totalPages
+    // metadata from the StratosPagedResponse envelope.
+    const orgsPage1 = [
+      { guid: 'org-1', name: 'Org One', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' },
+    ];
+    const orgsPage2 = [
+      { guid: 'org-2', name: 'Org Two', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' },
+    ];
+    const orgsPage3 = [
+      { guid: 'org-3', name: 'Org Three', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' },
+    ];
+
+    service.loadDetails().subscribe();
+
+    // Page 1 fires for all three resources; apps + spaces report single-
+    // page totalPages so they don't drain further.
+    httpMock.expectOne(ORGS_FULL_URL).flush({
+      resources: orgsPage1,
+      pagination: { totalResults: 3, totalPages: 3 },
+    });
+    httpMock.expectOne(APPS_FULL_URL).flush({
+      resources: [], pagination: { totalResults: 0, totalPages: 1 },
+    });
+    httpMock.expectOne(SPACES_FULL_URL).flush({
+      resources: [], pagination: { totalResults: 0, totalPages: 1 },
+    });
+
+    // After page 1 lands, the orgs drain triggers pages 2 + 3 in parallel.
+    httpMock.expectOne('/pp/v1/cf/orgs/test-cnsi-guid?per_page=500&page=2').flush({
+      resources: orgsPage2,
+      pagination: { totalResults: 3, totalPages: 3 },
+    });
+    httpMock.expectOne('/pp/v1/cf/orgs/test-cnsi-guid?per_page=500&page=3').flush({
+      resources: orgsPage3,
+      pagination: { totalResults: 3, totalPages: 3 },
+    });
+
+    await Promise.resolve();
+
+    expect(service.orgs().length).toBe(3);
+    expect(service.orgs().map(o => o.guid)).toEqual(['org-1', 'org-2', 'org-3']);
+    expect(service.orgCount()).toBe(3);
+  });
+
   it('loadDetails() reads totalResults from the StratosPagedResponse pagination envelope', async () => {
     // Regression: the bounded ?per_page passthrough wraps responses in
     // StratosPagedResponse — totals live under pagination.totalResults rather
