@@ -1,9 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, ChangeDetectionStrategy, computed, inject, OnInit, Signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { take, map } from 'rxjs/operators';
+import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
 import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 
 import {
@@ -26,6 +26,7 @@ import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService } from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -38,7 +39,17 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     CfUserService,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
+    // Provide a single OrgDataService instance for this org-detail subtree,
+    // acquired from the registry so navigation away and back returns a hot
+    // cached signal instead of refiring HTTP. Children inject(OrgDataService)
+    // directly — no per-component acquire boilerplate.
+    {
+      provide: OrgDataService,
+      useFactory: (registry: OrgDataRegistry, route: ActiveRouteCfOrgSpace) =>
+        registry.acquire(route.cfGuid, route.orgGuid),
+      deps: [OrgDataRegistry, ActiveRouteCfOrgSpace],
+    },
   ],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,8 +63,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 export class CloudFoundryOrganizationBaseComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   cfOrgService = inject(CloudFoundryOrganizationService);
-  private http = inject(HttpClient);
-  orgDataService: OrgDataService | null = null;
+  orgDataService = inject(OrgDataService);
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -94,9 +104,6 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   ];
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  /** @deprecated Use orgDataService.org()?.name — kept for backward compatibility with favorite$ */
-  public name$: Observable<string>;
-
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
 
@@ -104,21 +111,22 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
-  public favorite$: Observable<UserFavorite<IFavoriteMetadata>>;
+  // Favorite recomputes when the org signal lands. Built from the V3-native
+  // org-detail snapshot — getMetadata reads `entity.name`, getGuid reads
+  // `metadata.guid`, getEndpointIdFromEntity reads `entity.cfGuid`, so we
+  // synthesise the minimal APIResource-shape favorites expect.
+  public favorite: Signal<UserFavorite<IFavoriteMetadata> | null>;
 
   constructor() {
-    const cfOrgService = this.cfOrgService;
     const userFavoriteManager = inject(UserFavoriteManager);
 
     this.schema = cfEntityFactory(organizationEntityType);
-    this.favorite$ = cfOrgService.org$.pipe(
-      take(1),
-      map(org => userFavoriteManager.getFavorite<IFavoriteMetadata>(org.entity, organizationEntityType, CF_ENDPOINT_TYPE))
-    );
-    this.name$ = cfOrgService.org$.pipe(
-      map(org => org.entity.entity.name),
-      take(1)
-    );
+    this.favorite = computed(() => {
+      const org = this.orgDataService.org();
+      if (!org) return null;
+      const favEntity = { entity: { name: org.name, cfGuid: org.cnsiGuid }, metadata: { guid: org.guid } };
+      return userFavoriteManager.getFavorite<IFavoriteMetadata>(favEntity, organizationEntityType, CF_ENDPOINT_TYPE);
+    });
     this.breadcrumbs$ = this.getBreadcrumbs();
 
     // Add any tabs from extensions
@@ -126,9 +134,9 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const cnsiGuid = this.cfOrgService.cfGuid;
-    const orgGuid = this.cfOrgService.orgGuid;
-    this.orgDataService = new OrgDataService(this.http, cnsiGuid, orgGuid);
+    // Trigger initial load. The registry-acquired instance dedupes concurrent
+    // load() calls and short-circuits once warm, so re-entry on tab nav is a
+    // no-op.
     this.orgDataService.load().subscribe({ error: () => {} });
   }
 
