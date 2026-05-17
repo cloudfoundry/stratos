@@ -30,6 +30,10 @@ class Host {
     errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
     columns: [{ header: 'Name', render: r => r.name }],
     getRowKey: r => r.name,
+    // Inline refresh indicator lives on this button; onRefresh must be
+    // present for the button (and therefore the refreshing-state spinner)
+    // to render.
+    onRefresh: () => {},
   };
 }
 
@@ -43,12 +47,23 @@ describe('SignalListComponent', () => {
     expect(rows[1].textContent).toContain('two');
   });
 
-  it('renders the subtle refresh indicator when items present and isAnyLoading is true', () => {
+  it('swaps the refresh button into the refreshing-state indicator when items present and isAnyLoading is true', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = { ...fixture.componentInstance.config, isAnyLoading: signal(true).asReadonly() };
     fixture.detectChanges();
-    // Items present + loading: show subtle refresh banner (not the big full-screen indicator)
+    // The same button toggles from data-test="refresh" → data-test="refresh-loading"
+    // (and from refresh icon → spinner) when a reload is mid-flight against
+    // a populated table — no separate row, no layout shift.
+    expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] .spinner')).not.toBeNull();
+  });
+
+  it('shows the refresh icon (not spinner) when not loading', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).toBeNull();
   });
 
   it('renders the full loading indicator when no items and isAnyLoading is true', () => {
