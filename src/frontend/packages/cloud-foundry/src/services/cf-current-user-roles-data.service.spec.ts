@@ -14,6 +14,7 @@ import { CfScopeStrings } from '../user-permissions/cf-user-permissions.types';
 import { CfCurrentUserRolesDataService } from './cf-current-user-roles-data.service';
 
 const ENDPOINT_A = 'cf-guid-a';
+const ENDPOINT_B = 'cf-guid-b';
 
 function makeGlobal(overrides: Partial<IGlobalRolesState> = {}): IGlobalRolesState {
   return {
@@ -127,5 +128,17 @@ describe('CfCurrentUserRolesDataService', () => {
     expect(svc.cfEndpointRolesState('missing')()).toBeNull();
     expect(svc.cfGlobalState('missing', 'isAdmin')()).toBe(false);
     await expect(firstValueFrom(svc.cfGlobalState$('missing', 'isAdmin'))).resolves.toBe(false);
+  });
+
+  it('memoizes cfEndpointRolesState$ per endpointGuid (same observable instance)', () => {
+    const svc = TestBed.inject(CfCurrentUserRolesDataService);
+    // Multiple permission directives on one page request the same endpoint's
+    // roles state — they should share one pipe instead of rebuilding map +
+    // distinctUntilChanged + shareReplay each subscription.
+    const a1 = svc.cfEndpointRolesState$(ENDPOINT_A);
+    const a2 = svc.cfEndpointRolesState$(ENDPOINT_A);
+    const b1 = svc.cfEndpointRolesState$(ENDPOINT_B);
+    expect(a1).toBe(a2);
+    expect(a1).not.toBe(b1);
   });
 });
