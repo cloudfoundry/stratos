@@ -381,23 +381,18 @@ describe('CfAppsSignalConfigService', () => {
     src._items.set(apps);
   }
 
-  it('resolver fetches names for visible-row guids that are NOT in the catalog', async () => {
+  it('resolver fetches space names for visible-row guids that are NOT in the catalog', async () => {
     // Catalog (per_page=500&page=1) returns NO spaces — simulating the
     // overflow case where the visible row's space lives beyond page 1.
     // Resolver hits the same URL with `?guids=...` and gets the missing name.
+    // Orgs are NOT resolved client-side any more: every StApp row carries
+    // OrgName from the server-side space→org join in Jetstream.
     const httpMock = {
       get: vi.fn((url: string) => {
         if (url.startsWith('/pp/v1/cf/spaces/cnsi-1?guids=space-overflow')) {
           return of({
             resources: [
               { guid: 'space-overflow', name: 'overflow-space', orgGuid: 'org-1', cnsiGuid: 'cnsi-1' },
-            ],
-          });
-        }
-        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1?guids=org-overflow')) {
-          return of({
-            resources: [
-              { guid: 'org-overflow', name: 'overflow-org', cnsiGuid: 'cnsi-1' },
             ],
           });
         }
@@ -421,7 +416,6 @@ describe('CfAppsSignalConfigService', () => {
     TestBed.tick();
 
     expect(svc.spaceNames().get('space-overflow')).toBe('overflow-space');
-    expect(svc.orgNames().get('org-overflow')).toBe('overflow-org');
   });
 
   it('resolver does NOT re-fetch guids already in the catalog', async () => {
@@ -525,10 +519,12 @@ describe('CfAppsSignalConfigService', () => {
     expect(guidCalls.length).toBe(0);
   });
 
-  it('resolver overlay merges into spaceNames/orgNames; catalog wins on duplicates', async () => {
+  it('resolver overlay merges into spaceNames; catalog wins on duplicates', async () => {
     // Catalog returns name "from-catalog" for space-dup. The resolver,
     // even if it ran, wouldn't fetch space-dup because it's already in
-    // the catalog. Verify catalog name surfaces.
+    // the catalog. Verify catalog name surfaces. Orgs are no longer
+    // overlay-resolved client-side — the backend stitches OrgName onto
+    // every StApp via space→org join.
     const httpMock = {
       get: vi.fn((url: string) => {
         // The bulk-catalog path is now the org-batched drain. Match both

@@ -92,15 +92,19 @@ export class CfAppsSignalConfigService {
   // is the expected visual cue.
   private readonly _orgsByCnsi = signal<Map<string, StOrg[]>>(new Map());
   private readonly _spacesByCnsi = signal<Map<string, StSpace[]>>(new Map());
-  // Visible-row resolver overlay: org/space names looked up by guid for
-  // rows currently visible in the view but whose guid wasn't in the
-  // bounded /pp/v1/cf/orgs|spaces catalog page (which caps at ~500
-  // resources to avoid 30s gorouter timeouts on large CFs). Populated by
-  // an effect over view.pagedItems(); merged into orgNames/spaceNames so
-  // the cell renderer reads a single map. Catalog wins on duplicates
-  // (no real conflict expected — same backend, same V3 resource).
-  // Keyed cnsiGuid → guid → name to mirror the catalog shape.
-  private readonly _resolvedOrgsByCnsi = signal<Map<string, Map<string, string>>>(new Map());
+  // Visible-row resolver overlay: space names looked up by guid for rows
+  // currently visible in the view but whose guid wasn't in the bounded
+  // /pp/v1/cf/spaces catalog page (which caps at ~500 resources to avoid
+  // 30s gorouter timeouts on large CFs). Populated by an effect over
+  // view.pagedItems(); merged into spaceNames so the cell renderer reads
+  // a single map. Catalog wins on duplicates (no real conflict expected
+  // — same backend, same V3 resource). Keyed cnsiGuid → guid → name to
+  // mirror the catalog shape.
+  //
+  // Orgs no longer need a resolver overlay — every StApp row now carries
+  // OrgName from the server-side space→org join in
+  // getNativeApps/getNativeAppsSummary, so the cell renderer reads
+  // app.orgName directly with the catalog as a dropdown-only fallback.
   private readonly _resolvedSpacesByCnsi = signal<Map<string, Map<string, string>>>(new Map());
   // In-flight + already-attempted guid sets keyed `${cnsiGuid}:${guid}`.
   // Dedup concurrent triggers from rapid pagedItems changes (page nav,
@@ -169,11 +173,11 @@ export class CfAppsSignalConfigService {
     // the visible-row resolver fills them in. Catalog values win on
     // duplicates — both come from the same backend so they should
     // agree, but the catalog is the dropdown's source of truth.
+    //
+    // orgNames is catalog-only — the row-side resolver hop is gone
+    // (every StApp now carries OrgName from the server-side join).
     this.orgNames = computed(() => {
       const m = new Map<string, string>();
-      for (const byGuid of this._resolvedOrgsByCnsi().values()) {
-        for (const [guid, name] of byGuid) m.set(guid, name);
-      }
       for (const orgs of this._orgsByCnsi().values()) {
         for (const o of orgs) m.set(o.guid, o.name);
       }
@@ -529,19 +533,22 @@ export class CfAppsSignalConfigService {
   // (catches the rename / replace case — see resolverInFlight comment for
   // the staleness window inside one mount).
   private clearResolverState(): void {
-    this._resolvedOrgsByCnsi.set(new Map());
     this._resolvedSpacesByCnsi.set(new Map());
     this.resolverInFlight.clear();
     this.resolverAttempted.clear();
   }
 
-  // Watches view.pagedItems for (cnsi, orgGuid) and (cnsi, spaceGuid)
-  // pairs that aren't already resolved. Fetches missing names via
-  // /pp/v1/cf/orgs/{cnsi}?guids=... and /pp/v1/cf/spaces/{cnsi}?guids=...
-  // batched per CNSI, capped at GUIDS_PER_BATCH per request to keep URLs
-  // under reasonable browser/server limits. Bounded by visible row count
-  // per page (~25-100), so it can't time out on large CFs the way the
-  // original bulk-drain fetch did.
+  // Watches view.pagedItems for (cnsi, spaceGuid) pairs whose name
+  // isn't already resolved. Fetches missing names via
+  // /pp/v1/cf/spaces/{cnsi}?guids=... batched per CNSI, capped at
+  // GUIDS_PER_BATCH per request to keep URLs under reasonable
+  // browser/server limits. Bounded by visible row count per page
+  // (~25-100), so it can't time out on large CFs the way the original
+  // bulk-drain fetch did.
+  //
+  // Orgs no longer flow through here — every StApp row carries OrgName
+  // from the server-side space→org join (see native_apps_summary.go
+  // composeStAppSummary).
   //
   // Idempotent: in-flight + already-attempted guid keys (cnsi:guid) are
   // tracked to dedupe rapid pagedItems changes (page navigation, filter,
@@ -556,25 +563,17 @@ export class CfAppsSignalConfigService {
       this.resolverEffect = effect(() => {
         const visible = this.view.pagedItems();
         if (!visible.length) return;
-        // Build per-CNSI sets of org/space guids referenced by visible rows
-        // that aren't already in the catalog, the overlay, in-flight, or
-        // previously attempted in this initialize() cycle.
-        const knownOrgs = this.orgNames();
+        // Build a per-CNSI set of space guids referenced by visible rows
+        // whose name isn't already known (catalog / overlay / in-flight
+        // / previously-attempted this initialize() cycle).
+        //
+        // Orgs no longer need the resolver leg — every visible row
+        // already carries OrgName from the server-side space→org join.
         const knownSpaces = this.spaceNames();
-        const orgsToFetch = new Map<string, Set<string>>();
         const spacesToFetch = new Map<string, Set<string>>();
         for (const row of visible) {
           const cnsi = row.cnsiGuid;
           if (!cnsi) continue;
-          const orgGuid = row.orgGuid;
-          if (orgGuid && !knownOrgs.has(orgGuid)) {
-            const key = `${cnsi}:${orgGuid}`;
-            if (!this.resolverInFlight.has(key) && !this.resolverAttempted.has(key)) {
-              const set = orgsToFetch.get(cnsi) ?? new Set<string>();
-              set.add(orgGuid);
-              orgsToFetch.set(cnsi, set);
-            }
-          }
           const spaceGuid = row.spaceGuid;
           if (spaceGuid && !knownSpaces.has(spaceGuid)) {
             const key = `${cnsi}:${spaceGuid}`;
@@ -584,9 +583,6 @@ export class CfAppsSignalConfigService {
               spacesToFetch.set(cnsi, set);
             }
           }
-        }
-        for (const [cnsi, guids] of orgsToFetch) {
-          void this.resolveOrgs(cnsi, Array.from(guids));
         }
         for (const [cnsi, guids] of spacesToFetch) {
           void this.resolveSpaces(cnsi, Array.from(guids));
@@ -599,36 +595,6 @@ export class CfAppsSignalConfigService {
   // Most servers accept 4-8K URLs, so 100 is a comfortable cap that also
   // keeps a single failure scope small. Larger sets paginate.
   private static readonly GUIDS_PER_BATCH = 100;
-
-  private async resolveOrgs(cnsi: string, guids: string[]): Promise<void> {
-    if (!guids.length) return;
-    for (const g of guids) this.resolverInFlight.add(`${cnsi}:${g}`);
-    try {
-      for (let i = 0; i < guids.length; i += CfAppsSignalConfigService.GUIDS_PER_BATCH) {
-        const batch = guids.slice(i, i + CfAppsSignalConfigService.GUIDS_PER_BATCH);
-        const url = `/pp/v1/cf/orgs/${cnsi}?guids=${batch.join(',')}&per_page=${batch.length}`;
-        const resp = await firstValueFrom(this.http.get<StOrgsResponse>(url))
-          .catch((): StOrgsResponse | null => null);
-        if (resp?.resources?.length) {
-          this._resolvedOrgsByCnsi.update(curr => {
-            const next = new Map(curr);
-            const byGuid = new Map(next.get(cnsi) ?? []);
-            for (const o of resp.resources as StOrg[]) {
-              if (o.guid && o.name) byGuid.set(o.guid, o.name);
-            }
-            next.set(cnsi, byGuid);
-            return next;
-          });
-        }
-      }
-    } finally {
-      for (const g of guids) {
-        const key = `${cnsi}:${g}`;
-        this.resolverInFlight.delete(key);
-        this.resolverAttempted.add(key);
-      }
-    }
-  }
 
   private async resolveSpaces(cnsi: string, guids: string[]): Promise<void> {
     if (!guids.length) return;
