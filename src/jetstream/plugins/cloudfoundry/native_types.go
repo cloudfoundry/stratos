@@ -6,9 +6,16 @@ package cloudfoundry
 // Version communicated via X-Stratos-Schema-Version response header.
 
 type StOrg struct {
-	GUID   string `json:"guid"`
-	Name   string `json:"name"`
-	Status string `json:"status"`
+	GUID string `json:"guid"`
+	// CnsiGUID is stamped server-side so the response is self-describing
+	// when items from multiple CFs are merged on the frontend. Replaces
+	// the legacy V2-era pattern where the frontend re-stitched cnsiGuid
+	// from the route path after every fetch (and silently produced
+	// `/applications/undefined/...` URLs whenever a fetch path forgot
+	// to stamp).
+	CnsiGUID string `json:"cnsiGuid"`
+	Name     string `json:"name"`
+	Status   string `json:"status"`
 	// QuotaGUID mirrors v3's relationships.quota.data.guid — the org's
 	// associated quota_definition. Empty when the org has no quota linked
 	// or when the source response omitted the relationship envelope.
@@ -29,12 +36,26 @@ type StOrg struct {
 }
 
 type StApp struct {
-	GUID      string  `json:"guid"`
+	GUID string `json:"guid"`
+	// CnsiGUID is stamped server-side so the response is self-describing
+	// — frontend consumers (breadcrumbs, deep links, detail-page routing)
+	// read it directly off the resource without re-stitching from the
+	// route path. See the StOrg note for the V2-era pattern this
+	// replaces.
+	CnsiGUID  string  `json:"cnsiGuid"`
 	Name      string  `json:"name"`
 	State     string  `json:"state"`
 	SpaceGUID string  `json:"spaceGuid"`
 	SpaceName string  `json:"spaceName,omitempty"`
 	OrgGUID   *string `json:"orgGuid,omitempty"`
+	// OrgName mirrors SpaceName — populated server-side via space→org
+	// join on the same fanout that resolves SpaceName. Avoids a second
+	// frontend orgs-catalog fetch + visible-row resolver just to render
+	// the "CF / Org / Space" cell on the app wall. Omitempty so wire
+	// shape stays predictable on detail/write paths that don't compose
+	// the join (OrgName surfaces in _meta.unavailable when the
+	// enrichment fetch fails on a list path).
+	OrgName string `json:"orgName,omitempty"`
 	// StackName is sourced inline from CF v3's app.lifecycle.data.stack
 	// (buildpack lifecycle) — V3 has no stack GUID, the name IS the
 	// identity. No extra HTTP call: it ships on every /v3/apps row.
@@ -63,7 +84,10 @@ type StAppRoute struct {
 }
 
 type StSpace struct {
-	GUID      string `json:"guid"`
+	GUID string `json:"guid"`
+	// CnsiGUID is stamped server-side so the response is self-describing.
+	// See StOrg for the V2-era pattern this replaces.
+	CnsiGUID  string `json:"cnsiGuid"`
 	Name      string `json:"name"`
 	OrgGUID   string `json:"orgGuid"`
 	CreatedAt string `json:"createdAt"`

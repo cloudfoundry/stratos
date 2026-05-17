@@ -47,7 +47,8 @@ export class SpaceDataService {
     this._errors.set([]);
 
     this._inFlightLoad = this.http.get<StSpace>(`/pp/v1/cf/spaces/${this.cnsiGuid}/${this.spaceGuid}`).pipe(
-      tap(space => this._space.set({ ...space, cnsiGuid: this.cnsiGuid })),
+      // Backend echoes cnsiGuid on StSpace; no client-side stamp.
+      tap(space => this._space.set(space)),
       catchError(err => { this.addError('space', err); return EMPTY; }),
       timeout(60_000),
       finalize(() => {

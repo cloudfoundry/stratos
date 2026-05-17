@@ -132,7 +132,8 @@ export class EndpointDataService {
       ),
       this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}?return=recent`).pipe(
         tap(resp => {
-          this._recentApps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
+          // Backend echoes cnsiGuid on every StApp; no client-side stamp.
+          this._recentApps.set(resp.resources);
           this._appCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('apps', err); return EMPTY; }),
@@ -186,23 +187,25 @@ export class EndpointDataService {
     // 500 per page balances per-request latency vs round-trip count.
     // Concurrency cap of 4 keeps parallel page fetches from saturating
     // the connection or hitting gorouter back-pressure on slow CFs.
+    // Backend echoes cnsiGuid on every StOrg/StApp/StSpace; no
+    // client-side stamping needed here.
     this._inFlightLoadDetails = merge(
       this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
         tap(resp => {
-          this._orgs.set(resp.resources.map(org => ({ ...org, cnsiGuid: this.guid })));
+          this._orgs.set(resp.resources);
           this._orgCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('orgs-full', err); return EMPTY; }),
       ),
       this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
         tap(resp => {
-          this._apps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
+          this._apps.set(resp.resources);
           this._appCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('apps-full', err); return EMPTY; }),
       ),
       this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
-        tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.guid })))),
+        tap(resp => this._spaces.set(resp.resources)),
         catchError(err => { this.addError('spaces-full', err); return EMPTY; }),
       ),
     ).pipe(

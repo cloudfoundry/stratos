@@ -30,10 +30,13 @@ describe('SpaceDataService', () => {
     expect(service.lastFetched()).toBeNull();
   });
 
-  it('fetches space detail and stamps cnsiGuid', async () => {
+  it('fetches space detail and preserves backend-echoed cnsiGuid', async () => {
+    // Backend (getNativeSpaceDetail) echoes cnsiGuid on every StSpace
+    // response so the resource is self-describing once items from multiple
+    // CFs are merged; the frontend no longer stamps post-fetch.
     const mockSpace = {
       guid: 'sp-1', name: 'Space One', orgGuid: 'org-1',
-      createdAt: '', updatedAt: '', cnsiGuid: '',
+      createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1',
       appCount: 3, routeCount: 5, allowSsh: true, quotaGuid: 'q-1',
     };
 

@@ -109,15 +109,15 @@ export abstract class CnsiEntitySource<T> {
     this._done.set(false);
 
     try {
-      // Stamp cnsiGuid on each resource — the backend's Stratos-shape DTOs
-      // don't carry it (the source route already identifies the endpoint),
-      // but downstream filters/joins need it once items from multiple
-      // sources are merged in MergeOrchestrator. Subclasses that need to
-      // transform the wire shape provide adaptResource (services-domain
-      // slice) — adapter does cnsiGuid stamping itself.
+      // Backend native handlers now echo cnsiGuid on every St* row, so the
+      // ad-hoc stamping (`{...r, cnsiGuid: this.cnsiGuid}`) that lived here
+      // is gone — replacing the V2-era "frontend stitches identifier back
+      // in" pattern. adaptResource still runs for subclasses that need to
+      // transform the wire shape (services-domain slice's nested-ref
+      // rewrite); those adapters already preserve cnsiGuid from the wire.
       const stamp = (resources: T[]): T[] => this.adaptResource
         ? (resources as unknown[]).map(r => this.adaptResource!(r, this.cnsiGuid))
-        : resources.map(r => ({ ...r, cnsiGuid: this.cnsiGuid }) as unknown as T);
+        : resources;
 
       // Page 1 sequentially — its pagination block tells us totalPages.
       const first = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(1)));
@@ -195,9 +195,11 @@ export abstract class CnsiEntitySource<T> {
     }
     const url = this.urlForOne(guid);
     const item = await firstValueFrom(this.http.get<T>(url));
+    // Backend echoes cnsiGuid (see _doLoad note); single-resource
+    // adaptResource still runs for the services-domain rewrite.
     const stamped = this.adaptResource
       ? this.adaptResource(item, this.cnsiGuid)
-      : ({ ...item, cnsiGuid: this.cnsiGuid } as unknown as T);
+      : item;
     this._items.update(curr => {
       const idx = curr.findIndex(i => (i as { guid?: string }).guid === guid);
       if (idx >= 0) {

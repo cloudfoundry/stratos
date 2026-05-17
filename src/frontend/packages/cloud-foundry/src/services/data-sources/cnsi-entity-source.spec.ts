@@ -208,8 +208,11 @@ describe('CnsiEntitySource', () => {
       expect(src.byGuid('a')()?.guid).toBe('a');
     });
 
-    it('uses single GET via urlForOne when implemented and stamps cnsiGuid', async () => {
-      const single = new TestItem('a');
+    it('uses single GET via urlForOne when implemented and preserves backend-echoed cnsiGuid', async () => {
+      // Backend native handlers stamp cnsiGuid server-side; the source no
+      // longer overlays it client-side. The mock shapes the response the
+      // same way the real handler does so the test asserts the read path.
+      const single = { ...new TestItem('a'), cnsiGuid: 'cnsi-1' };
       const http = makeHttp([single]);
       const src = new TestSourceWithUrlForOne('cnsi-1', http);
       await src.loadOne('a');

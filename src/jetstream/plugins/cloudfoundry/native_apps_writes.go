@@ -772,7 +772,7 @@ func (cf *CloudFoundrySpecification) createNativeApp(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return c.JSON(http.StatusCreated, toStApp(*app))
+	return c.JSON(http.StatusCreated, toStApp(*app, cnsiGUID))
 }
 
 // statusFromCapiError maps a capi sentinel error to an HTTP status code.

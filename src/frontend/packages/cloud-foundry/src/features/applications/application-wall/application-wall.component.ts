@@ -295,9 +295,19 @@ export class ApplicationWallComponent implements OnInit {
       // user-facing cells read names, and briefly flashing GUIDs before the
       // name map lands (or leaving them there when /pp/v1/cf/spaces times
       // out) is worse UX than an em-dash. GUIDs remain in the URL + tooltip.
+      //
+      // app.orgName / app.spaceName ride on the row from the server-side
+      // space→org / app→space join (getNativeApps / getNativeAppsSummary).
+      // Prefer them when present — the row renders the right name
+      // immediately, no resolver round-trip. Fall back to the catalog /
+      // visible-row resolver maps for rare cases where the backend
+      // stitch dropped (orgs-by-guid fetch failed → orgName empty,
+      // surfaces in _meta.unavailable).
       const cfName = this.appsConfig.endpointNames().get(app.cnsiGuid) ?? '—';
-      const orgName = app.orgGuid ? (this.appsConfig.orgNames().get(app.orgGuid) ?? '—') : '—';
-      const spaceName = app.spaceGuid ? (this.appsConfig.spaceNames().get(app.spaceGuid) ?? '—') : '—';
+      const orgName = app.orgName
+        || (app.orgGuid ? (this.appsConfig.orgNames().get(app.orgGuid) ?? '—') : '—');
+      const spaceName = app.spaceName
+        || (app.spaceGuid ? (this.appsConfig.spaceNames().get(app.spaceGuid) ?? '—') : '—');
       return { cfName, orgName, spaceName };
     };
     const renderCfOrgSpace = (app: StApp): string => {

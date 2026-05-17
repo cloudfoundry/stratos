@@ -211,13 +211,16 @@ func envIntWithDefault(name string, def int) int {
 // non-counts branch of getNativeRouteCount still needs the full route set
 // to populate destinations.)
 
-func toStOrg(r capi.Organization) StOrg {
+// cnsiGUID is required: stamped on every St* so the response is self-
+// describing once items from multiple CFs are merged on the frontend.
+func toStOrg(r capi.Organization, cnsiGUID string) StOrg {
 	quotaGUID := ""
 	if r.Relationships != nil {
 		quotaGUID = relationshipGUID(r.Relationships.Quota)
 	}
 	return StOrg{
 		GUID:        r.GUID,
+		CnsiGUID:    cnsiGUID,
 		Name:        r.Name,
 		Status:      "active",
 		QuotaGUID:   quotaGUID,
@@ -228,7 +231,8 @@ func toStOrg(r capi.Organization) StOrg {
 	}
 }
 
-func toStApp(r capi.App) StApp {
+// cnsiGUID is required (see toStOrg).
+func toStApp(r capi.App, cnsiGUID string) StApp {
 	// V3's lifecycle.data is a free-form map; for buildpack lifecycle
 	// (the common case) it carries `stack` as a string. Other lifecycles
 	// (docker) leave it absent — StackName stays empty and is omitted
@@ -236,6 +240,7 @@ func toStApp(r capi.App) StApp {
 	stackName, _ := r.Lifecycle.Data["stack"].(string)
 	return StApp{
 		GUID:      r.GUID,
+		CnsiGUID:  cnsiGUID,
 		Name:      r.Name,
 		State:     r.State,
 		SpaceGUID: relationshipGUID(r.Relationships.Space),
@@ -246,13 +251,15 @@ func toStApp(r capi.App) StApp {
 	}
 }
 
-func toStSpace(r capi.Space) StSpace {
+// cnsiGUID is required (see toStOrg).
+func toStSpace(r capi.Space, cnsiGUID string) StSpace {
 	quotaGUID := ""
 	if r.Relationships.Quota != nil {
 		quotaGUID = relationshipGUID(*r.Relationships.Quota)
 	}
 	return StSpace{
 		GUID:      r.GUID,
+		CnsiGUID:  cnsiGUID,
 		Name:      r.Name,
 		OrgGUID:   relationshipGUID(r.Relationships.Organization),
 		CreatedAt: r.CreatedAt.Format(time.RFC3339),
@@ -288,7 +295,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		}
 		orgs := make([]StOrg, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
-			orgs = append(orgs, toStOrg(r))
+			orgs = append(orgs, toStOrg(r, cnsiGUID))
 		}
 		return ctx.JSON(http.StatusOK, StOrgsResponse{Resources: orgs, TotalResults: raw.Pagination.TotalResults})
 	}
@@ -359,7 +366,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 
 	orgs := make([]StOrg, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		o := toStOrg(r)
+		o := toStOrg(r, cnsiGUID)
 		o.SpacesCount = spaceCounts[r.GUID]
 		o.AppsCount = appCounts[r.GUID]
 		orgs = append(orgs, o)
@@ -405,7 +412,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 		apps := make([]StApp, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
-			apps = append(apps, toStApp(r))
+			apps = append(apps, toStApp(r, cnsiGUID))
 		}
 		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
 
@@ -417,7 +424,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 		apps := make([]StApp, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
-			apps = append(apps, toStApp(r))
+			apps = append(apps, toStApp(r, cnsiGUID))
 		}
 		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
 
@@ -467,7 +474,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		// Name-resolution lookup path: skip enrichment.
 		apps := make([]StApp, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
-			apps = append(apps, toStApp(r))
+			apps = append(apps, toStApp(r, cnsiGUID))
 		}
 		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
 	}
@@ -499,10 +506,25 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	// is intentionally minimal (the summary path carries the full
 	// _meta.unavailable / _meta.errors envelope).
 	routesByApp, _ := fetchRoutesForApps(ctx, cfClient, appGUIDs)
+	// Orgs-by-guid: derives the unique org guids from the spaces we
+	// already fetched and stitches OrgName per row. Mirrors the
+	// getNativeAppsSummary path so frontend can render the CF/Org/Space
+	// cell without a separate orgs-catalog fetch.
+	uniqueOrgGUIDs := make(map[string]struct{})
+	for _, sp := range spaces {
+		if og := relationshipGUID(sp.Relationships.Organization); og != "" {
+			uniqueOrgGUIDs[og] = struct{}{}
+		}
+	}
+	orgGUIDs := make([]string, 0, len(uniqueOrgGUIDs))
+	for og := range uniqueOrgGUIDs {
+		orgGUIDs = append(orgGUIDs, og)
+	}
+	orgs, _ := fetchOrgsByGUIDs(ctx, cfClient, orgGUIDs)
 
 	apps := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		s := toStApp(r)
+		s := toStApp(r, cnsiGUID)
 		if proc, ok := processes[r.GUID]; ok {
 			mem := proc.MemoryInMB
 			disk := proc.DiskInMB
@@ -514,6 +536,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			s.SpaceName = space.Name
 			if orgGuid := relationshipGUID(space.Relationships.Organization); orgGuid != "" {
 				s.OrgGUID = &orgGuid
+				if o, ok := orgs[orgGuid]; ok {
+					s.OrgName = o.Name
+				}
 			}
 		}
 		if rts, ok := routesByApp[r.GUID]; ok {
@@ -575,7 +600,7 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		}
 		spaces := make([]StSpace, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
-			spaces = append(spaces, toStSpace(r))
+			spaces = append(spaces, toStSpace(r, cnsiGUID))
 		}
 		rows = len(spaces)
 		return ctx.JSON(http.StatusOK, StSpacesResponse{Resources: spaces, TotalResults: raw.Pagination.TotalResults})
@@ -633,7 +658,7 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 	if guidsFilter != "" {
 		// Name-resolution lookup path: skip enrichment.
 		for _, r := range raw.Resources {
-			spaces = append(spaces, toStSpace(r))
+			spaces = append(spaces, toStSpace(r, cnsiGUID))
 		}
 	} else {
 		// Enrich each space with per-space app + route counts via two filtered
@@ -649,7 +674,7 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, spaceGUIDs)
 		routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, spaceGUIDs)
 		for _, r := range raw.Resources {
-			s := toStSpace(r)
+			s := toStSpace(r, cnsiGUID)
 			s.AppCount = appCounts[r.GUID]
 			s.RouteCount = routeCounts[r.GUID]
 			spaces = append(spaces, s)
@@ -809,7 +834,7 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 	}
 
 	detail := StOrgDetail{
-		StOrg:  toStOrg(*r),
+		StOrg:  toStOrg(*r, cnsiGUID),
 		Spaces: []StSpace{},
 	}
 
@@ -843,7 +868,7 @@ func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx echo.Context) error
 	}
 
 	detail := StSpaceDetail{
-		StSpace: toStSpace(*r),
+		StSpace: toStSpace(*r, cnsiGUID),
 	}
 
 	// Best-effort SSH-feature lookup. V3 split this off the space resource
@@ -914,7 +939,7 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 
 	spaces := make([]StSpace, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
-		s := toStSpace(r)
+		s := toStSpace(r, cnsiGUID)
 		s.AppCount = appCounts[r.GUID]
 		s.RouteCount = routeCounts[r.GUID]
 		spaces = append(spaces, s)

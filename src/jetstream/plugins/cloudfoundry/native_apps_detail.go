@@ -351,11 +351,11 @@ func (c *CloudFoundrySpecification) getNativeAppDetail(ctx echo.Context) error {
 
 	switch ctx.QueryParam("return") {
 	case "details":
-		return ctx.JSON(http.StatusOK, c.composeAppDetails(reqCtx, cfClient, *app, appGUID))
+		return ctx.JSON(http.StatusOK, c.composeAppDetails(reqCtx, cfClient, *app, cnsiGUID, appGUID))
 	case "summary":
-		return ctx.JSON(http.StatusOK, c.composeAppSummaryEntry(reqCtx, cfClient, *app, appGUID))
+		return ctx.JSON(http.StatusOK, c.composeAppSummaryEntry(reqCtx, cfClient, *app, cnsiGUID, appGUID))
 	default:
-		return ctx.JSON(http.StatusOK, toStApp(*app))
+		return ctx.JSON(http.StatusOK, toStApp(*app, cnsiGUID))
 	}
 }
 
@@ -363,16 +363,20 @@ func (c *CloudFoundrySpecification) getNativeAppDetail(ctx echo.Context) error {
 // single app — base StApp + web-process scale fields. Cheap (one extra
 // CAPI call beyond the app itself); used when the caller wants the
 // memory/disk/instances cells but doesn't need droplet/pkg/build.
-func (c *CloudFoundrySpecification) composeAppSummaryEntry(reqCtx context.Context, cfClient capi.Client, app capi.App, appGUID string) StApp {
+func (c *CloudFoundrySpecification) composeAppSummaryEntry(reqCtx context.Context, cfClient capi.Client, app capi.App, cnsiGUID, appGUID string) StApp {
 	process, _ := fetchWebProcessForApp(reqCtx, cfClient, appGUID)
-	return composeStAppSummary(app, process, nil, []StAppRoute{})
+	// Single-app path: OrgName is not stitched here (the org join is a
+	// batch optimisation that pays off on list responses). Detail-page
+	// consumers resolve org via the dedicated /pp/v1/cf/org/{cnsi}/{org}
+	// fetch anyway, so the empty value is the right default.
+	return composeStAppSummary(app, cnsiGUID, process, nil, "", []StAppRoute{})
 }
 
 // composeAppDetails returns the full StAppDetail envelope for the
 // Summary tab. Sub-resource fetches run concurrently via errgroup.
 // Per-source failures are captured per-fetcher and surface in
 // _meta.unavailable rather than short-circuiting the envelope.
-func (c *CloudFoundrySpecification) composeAppDetails(reqCtx context.Context, cfClient capi.Client, app capi.App, appGUID string) StAppDetail {
+func (c *CloudFoundrySpecification) composeAppDetails(reqCtx context.Context, cfClient capi.Client, app capi.App, cnsiGUID, appGUID string) StAppDetail {
 	var (
 		process    *capi.Process
 		droplet    *capi.Droplet
@@ -416,7 +420,7 @@ func (c *CloudFoundrySpecification) composeAppDetails(reqCtx context.Context, cf
 	_ = g.Wait()
 
 	out := StAppDetail{
-		App:        toStApp(app),
+		App:        toStApp(app, cnsiGUID),
 		SSHEnabled: sshEnabled,
 	}
 

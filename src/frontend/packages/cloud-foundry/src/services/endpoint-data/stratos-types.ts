@@ -37,6 +37,12 @@ export interface StApp {
   // always-emits an array (defaults to []) so consumers can iterate
   // without a null guard.
   orgGuid?: string;
+  // orgName is populated server-side via the same batch space→org join
+  // that resolves spaceName. Optional because detail/write paths skip
+  // the org fetch (the dedicated /pp/v1/cf/org/{cnsi}/{org} resolves it
+  // anyway). Empty when the orgs-by-guid fetch failed — surfaces via
+  // _meta.unavailable.orgName in that case.
+  orgName?: string;
   spaceGuid: string;
   spaceName?: string;
   stackName?: string;
