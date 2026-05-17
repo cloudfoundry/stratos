@@ -8,18 +8,16 @@ import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, pairwise, take, tap } from 'rxjs/operators';
 
 import { AppInputDirective, CustomFormFieldComponent, safeUnsubscribe, FocusDirective, SignalStepHandle, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
+import { endpointEntityType, ActionState, APIResource } from '@stratosui/store';
 import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { cfEntityFactory } from '../../../../cf-entity-factory';
-import { organizationEntityType } from '../../../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
 
 
@@ -56,8 +54,8 @@ interface EditOrganizationForm {
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfOrgService = inject(CloudFoundryOrganizationService);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
   private injector = inject(Injector);
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -164,22 +162,16 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       () => this.validSignal.set(this.editOrgName.valid && this.editOrgName.dirty)
     );
 
-    const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          cfEntityFactory(organizationEntityType),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allOrgsInEndpoint = o)
+    // V3-native: read the org-name list from the EndpointDataService signal
+    // for uniqueness validation. Mirror of create-organization-step. load+
+    // loadDetails idempotent — warm-cache + in-flight dedup.
+    const endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    endpointData.load().subscribe({ error: () => {} });
+    endpointData.loadDetails().subscribe({ error: () => {} });
+    this.allOrgsInEndpoint$ = toObservable(endpointData.orgs, { injector: this.injector }).pipe(
+      filter(orgs => !!orgs && orgs.length > 0),
+      map(orgs => orgs.map(o => o.name)),
+      tap(names => this.allOrgsInEndpoint = names),
     );
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
