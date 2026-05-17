@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, firstValueFrom, merge, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, shareReplay, tap, timeout } from 'rxjs/operators';
+import { EMPTY, firstValueFrom, from, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { catchError, finalize, map, mergeMap, reduce, shareReplay, switchMap, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 import {
@@ -176,42 +176,32 @@ export class EndpointDataService {
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadDetails' });
     this._isLoadingDetails.set(true);
 
-    // Use the bounded ?per_page passthrough so each list call is one CAPI
-    // page rather than a full-drain. On slow CFs the unbounded path could
-    // hit gorouter's 30 s ceiling; even where it doesn't, a single bounded
-    // page of 500 typically completes in well under 12 s. 500 covers most
-    // CFs in one page; if a CF has more rows the home card shows the first
-    // 500, accepted trade-off pending a guid-batch consolidation pattern.
+    // Full-drain pagination: fetch page 1, then pages 2..N in parallel with
+    // bounded concurrency. Replaces the previous ?page=1 single-page cap
+    // that silently truncated lists to 500 rows on CFs with more orgs /
+    // apps / spaces than fit in one page — that was a live regression on
+    // the prod orgs list page (CloudFoundryOrganizationsSignalComponent),
+    // not just the home card.
     //
-    // The bounded backend wraps results in StratosPagedResponse with totals
-    // under `pagination.totalResults`. Tap reads either shape so a future
-    // tightening of the backend wire contract doesn't silently zero out the
-    // count signals.
-    const detailPerPage = 500;
-    type Paged<T> = { resources: T[]; totalResults?: number; pagination?: { totalResults?: number } };
-    const totalOf = <T>(r: Paged<T>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
+    // 500 per page balances per-request latency vs round-trip count.
+    // Concurrency cap of 4 keeps parallel page fetches from saturating
+    // the connection or hitting gorouter back-pressure on slow CFs.
     this._inFlightLoadDetails = merge(
-      this.http.get<Paged<StOrg>>(
-        `/pp/v1/cf/orgs/${this.guid}?per_page=${detailPerPage}&page=1`,
-      ).pipe(
+      this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
         tap(resp => {
           this._orgs.set(resp.resources.map(org => ({ ...org, cnsiGuid: this.guid })));
-          this._orgCount.set(totalOf(resp));
+          this._orgCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('orgs-full', err); return EMPTY; }),
       ),
-      this.http.get<Paged<StApp>>(
-        `/pp/v1/cf/apps/${this.guid}?per_page=${detailPerPage}&page=1`,
-      ).pipe(
+      this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
         tap(resp => {
           this._apps.set(resp.resources.map(app => ({ ...app, cnsiGuid: this.guid })));
-          this._appCount.set(totalOf(resp));
+          this._appCount.set(resp.totalResults);
         }),
         catchError(err => { this.addError('apps-full', err); return EMPTY; }),
       ),
-      this.http.get<Paged<StSpace>>(
-        `/pp/v1/cf/spaces/${this.guid}?per_page=${detailPerPage}&page=1`,
-      ).pipe(
+      this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
         tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.guid })))),
         catchError(err => { this.addError('spaces-full', err); return EMPTY; }),
       ),
@@ -227,6 +217,38 @@ export class EndpointDataService {
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
     return this._inFlightLoadDetails;
+  }
+
+  // Drain all pages for a Stratos-shape list endpoint. Page 1 inline,
+  // pages 2..N in parallel (concurrency=4). Reads totalPages from the
+  // StratosPagedResponse pagination meta (stratos_paging.go:68). Reduces
+  // to a single {resources, totalResults, totalPages} envelope so the
+  // caller can populate count signals from page-1 metadata without an
+  // extra fetch. Tolerates both StratosPagedResponse and the older
+  // flat-envelope shape (totalResults at the top level) — the backend
+  // PR #5337 era still has handlers in transition.
+  private drainPages<T>(urlBase: string): Observable<{ resources: T[]; totalResults: number; totalPages: number }> {
+    const perPage = 500;
+    type Paged<U> = { resources: U[]; totalResults?: number; pagination?: { totalResults?: number; totalPages?: number } };
+    const totalResultsOf = <U>(r: Paged<U>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
+    const fetchPage = (page: number) =>
+      this.http.get<Paged<T>>(`${urlBase}?per_page=${perPage}&page=${page}`);
+    return fetchPage(1).pipe(
+      switchMap(firstResp => {
+        const totalResults = totalResultsOf(firstResp);
+        const totalPages = firstResp.pagination?.totalPages ?? 1;
+        const firstResources = firstResp.resources;
+        if (totalPages <= 1) {
+          return of({ resources: firstResources, totalResults, totalPages });
+        }
+        const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+        return from(remainingPages).pipe(
+          mergeMap(p => fetchPage(p).pipe(map(r => r.resources)), 4 /* concurrency */),
+          reduce((acc, resources) => [...acc, ...resources], [...firstResources]),
+          map(allResources => ({ resources: allResources, totalResults, totalPages })),
+        );
+      }),
+    );
   }
 
   // loadServicesCounts() fetches the four cnsi-scoped services-domain counts
