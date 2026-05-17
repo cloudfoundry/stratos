@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../actions/user-provided-service.actions';
 import { StServiceInstance } from '../../services/endpoint-data/stratos-types';
@@ -125,9 +125,17 @@ export class CloudFoundryUserProvidedServicesService {
         params = params.set('space_guids', spaceGuid);
       }
     }
+    // shareReplay so multiple template async-pipes on the same field share
+    // one HTTP fan-out. Without it, space-detail Summary fires this count
+    // probe ~3-5× per page nav (detailsLoading$ combineLatest + the
+    // template's @if condition + value display), with the early teardown
+    // showing up as ERR_ABORTED in DevTools. refCount:false keeps the
+    // cached emission warm across mid-stream resubscribes — matches the
+    // dedup pattern in EndpointDataService.load() / OrgDataService.load().
     return this.http.get<PagedServiceInstances>(path, { params }).pipe(
       map(resp => totalOf(resp)),
       catchError(() => of(0)),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
   }
 
