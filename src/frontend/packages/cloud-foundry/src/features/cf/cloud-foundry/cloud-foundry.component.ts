@@ -16,6 +16,7 @@ import {
   PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListSort,
 } from '@stratosui/core';
 import type { EndpointModel } from '@stratosui/store';
 
@@ -63,10 +64,29 @@ export class CloudFoundryComponent {
       if (!q) return all;
       return all.filter(e => (e.name ?? '').toLowerCase().includes(q));
     });
+    const sortState: WritableSignal<SignalListSort> = signal({ field: 'name', direction: 'asc' });
+    const sortExtractors: Record<string, (e: EndpointModel) => unknown> = {
+      name: e => e.name ?? '',
+      address: e => e.api_endpoint?.Host ?? '',
+      user: e => e.user?.name ?? '',
+    };
+    const sorted: Signal<EndpointModel[]> = computed(() => {
+      const items = filtered();
+      const { field, direction } = sortState();
+      const extract = sortExtractors[field] ?? sortExtractors.name;
+      const dir = direction === 'desc' ? -1 : 1;
+      return [...items].sort((a, b) => {
+        const av = extract(a), bv = extract(b);
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+      });
+    });
     const pageSize: WritableSignal<number> = signal(24);
     const pageIndex: WritableSignal<number> = signal(0);
     const paged: Signal<EndpointModel[]> = computed(() => {
-      const items = filtered();
+      const items = sorted();
       const sz = pageSize();
       const i = pageIndex();
       return items.slice(i * sz, (i + 1) * sz);
@@ -108,6 +128,7 @@ export class CloudFoundryComponent {
       nameFilter,
       filterColumns: ['name'],
       viewMode: signal('card'),
+      sort: sortState,
     });
   }
 }
