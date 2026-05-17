@@ -53,12 +53,14 @@ export class SshApplicationComponent implements OnInit {
 
   private getBreadcrumbs(
     application: IApp,
+    cfGuid: string,
+    appGuid: string,
   ) {
     return [
       {
         breadcrumbs: [
           { value: 'Applications', routerLink: '/applications' },
-          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.guid}/instances` }
+          { value: application.name, routerLink: `/applications/${cfGuid}/${appGuid}/instances` }
         ]
       },
     ];
@@ -98,7 +100,7 @@ export class SshApplicationComponent implements OnInit {
         }));
 
       this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
-        map(app => this.getBreadcrumbs(app.entity.entity)),
+        map(app => this.getBreadcrumbs(app.entity.entity, cfGuid, appGuid)),
         take(1)
       );
     }
