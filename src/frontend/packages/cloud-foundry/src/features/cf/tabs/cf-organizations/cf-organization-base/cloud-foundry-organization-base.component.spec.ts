@@ -15,6 +15,7 @@ import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../../cf-entity-generator';
+import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
@@ -64,6 +65,14 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
     spaceGuid: 'space-guid'
   };
 
+  // Minimal OrgDataService stand-in: only the methods the base component
+  // touches (load() in ngOnInit, org() in template). Bypasses the registry
+  // so the test doesn't need to wire HttpClient against the native handler.
+  const mockOrgDataService = {
+    org: () => null,
+    load: () => of(undefined),
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -99,6 +108,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
         providers: [
           { provide: CloudFoundryOrganizationService, useValue: mockOrgService },
           { provide: CloudFoundryEndpointService, useValue: mockEndpointService },
+          { provide: OrgDataService, useValue: mockOrgDataService },
         ]
       }
     });
