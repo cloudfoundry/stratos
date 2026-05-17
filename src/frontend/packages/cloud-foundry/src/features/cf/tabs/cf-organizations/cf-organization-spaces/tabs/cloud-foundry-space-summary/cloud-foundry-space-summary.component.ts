@@ -4,7 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
 import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
@@ -74,26 +74,18 @@ export class CloudFoundrySpaceSummaryComponent {
       map(() => false),
       startWith(true)
     );
-    this.name$ = cfSpaceService.space$.pipe(
-      map(space => space.entity.entity.name),
-      take(1)
-    );
   }
 
   deleteSpaceWarn = () => {
-    this.name$.pipe(
-      take(1)
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Space',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, this.deleteSpace);
-    });
+    const name = this.cfSpaceService.spaceDataService.space()?.name;
+    if (!name) return;
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Space',
+      { textToMatch: name },
+      'Delete',
+      true,
+    );
+    this.confirmDialog.open(confirmation, this.deleteSpace);
   }
 
   // Signal-native delete: drives the native DELETE

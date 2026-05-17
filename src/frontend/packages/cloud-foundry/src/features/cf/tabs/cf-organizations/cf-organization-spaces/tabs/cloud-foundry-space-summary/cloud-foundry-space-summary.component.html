@@ -49,7 +49,7 @@
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
             iconFont="stratos-icons" icon="route" label="Routes"
-            value="{{ (cfSpaceService.routes$ | async)?.length }}"
+            value="{{ (cfSpaceService.routesCount$ | async) }}"
           limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>

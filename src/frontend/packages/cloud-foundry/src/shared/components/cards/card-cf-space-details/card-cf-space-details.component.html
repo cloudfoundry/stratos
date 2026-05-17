@@ -34,10 +34,10 @@
           {{ allowSshStatus$ | async }}
         </app-metadata-item>
         <app-metadata-item label="Created At">
-          {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.created_at) | date: 'medium' }}
+          {{ cfSpaceService.spaceDataService.space()?.createdAt | date: 'medium' }}
         </app-metadata-item>
         <app-metadata-item label="Updated At">
-          {{ ((cfSpaceService.space$ | async)?.entity?.metadata?.updated_at) | date: 'medium' }}
+          {{ cfSpaceService.spaceDataService.space()?.updatedAt | date: 'medium' }}
         </app-metadata-item>
       </div>
     </div>
