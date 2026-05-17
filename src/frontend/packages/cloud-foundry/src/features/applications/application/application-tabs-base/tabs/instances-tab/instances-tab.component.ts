@@ -10,6 +10,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 
 import {
   ConfirmationDialogConfig,
@@ -73,6 +74,7 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
   private instancesConfig = inject(CfAppInstancesSignalConfigService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
 
   /** Release callback returned by `dataService.raiseFocusPriority('stats')`. */
   private _releaseFocus?: () => void;
@@ -136,13 +138,22 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Per-row Kill factory wrapping the wave-2 service's killInstance with a
-   * confirmation dialog. Legacy text/style preserved verbatim — see
-   * `cf-app-instances-config.service.ts` listActionTerminate.
+   * Per-row action factory. Terminate is always present (wrapped with a
+   * confirmation dialog — legacy text/style preserved verbatim, see
+   * `cf-app-instances-config.service.ts` listActionTerminate). SSH is
+   * appended when both app-level (`sshEnabled`) and space-level
+   * (`allowSsh`) feature flags are on; elided otherwise per signal-list
+   * convention ("Prefer eliding when the action simply has no meaning").
+   * When present but the row isn't RUNNING, SSH stays visible-disabled so
+   * the kebab shape doesn't shift as instances cycle.
    */
   private readonly buildRowActions = (row: StAppStat): readonly SignalListRowAction<StAppStat>[] => {
     const disabled = this.actionsService.inFlight();
-    return [
+    const detail = this.dataService.appDetail();
+    const space = this.dataService.space();
+    const sshAvailable = !!detail?.sshEnabled && !!space?.allowSsh;
+
+    const actions: SignalListRowAction<StAppStat>[] = [
       {
         label: 'Terminate', icon: 'cancel', danger: true,
         disabled,
@@ -163,5 +174,22 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
         },
       },
     ];
+
+    if (sshAvailable) {
+      actions.push({
+        label: 'SSH', icon: 'terminal',
+        disabled: disabled || row.state !== 'RUNNING',
+        invoke: () => {
+          this.router.navigate([
+            '/applications',
+            this.dataService.cnsiGuid,
+            this.dataService.appGuid,
+            'ssh',
+            row.index,
+          ]);
+        },
+      });
+    }
+    return actions;
   };
 }

@@ -9,7 +9,7 @@ import {
   provideZonelessChangeDetection,
   signal,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -55,6 +55,11 @@ describe('InstancesTabComponent', () => {
   let confirmOpen: ReturnType<typeof vi.fn>;
 
   /** Minimal AppDetailDataService stub. */
+  // SSH gate fields (appDetail/space + cnsiGuid/appGuid) are writable here
+  // so individual tests can flip sshEnabled / allowSsh and assert
+  // visibility / navigation target.
+  const appDetailSig: WritableSignal<any> = signal(undefined);
+  const spaceSig: WritableSignal<any> = signal(undefined);
   const makeDataStub = () => {
     releaseFocus = vi.fn();
     raiseFocusPriority = vi.fn(() => releaseFocus);
@@ -67,6 +72,10 @@ describe('InstancesTabComponent', () => {
       loading: signal({ stats: false } as any).asReadonly(),
       running: signal(false).asReadonly(),
       raiseFocusPriority,
+      appDetail: appDetailSig.asReadonly(),
+      space: spaceSig.asReadonly(),
+      cnsiGuid: 'cnsi-1',
+      appGuid: 'app-1',
     };
   };
 
@@ -234,5 +243,66 @@ describe('InstancesTabComponent', () => {
     // Simulate user confirming.
     await onConfirm();
     expect(killInstance).toHaveBeenCalledWith(2);
+  });
+
+  describe('SSH row action', () => {
+    afterEach(() => {
+      appDetailSig.set(undefined);
+      spaceSig.set(undefined);
+    });
+
+    const rowActionsAt = (row: any) => {
+      const col = component.listConfig.columns.find(c => c.key === 'actions');
+      return col!.actions!(row);
+    };
+
+    it('elides SSH when sshEnabled is false', () => {
+      fixture.detectChanges();
+      appDetailSig.set({ sshEnabled: false });
+      spaceSig.set({ allowSsh: true });
+      const actions = rowActionsAt({ index: 0, state: 'RUNNING' });
+      expect(actions.find(a => a.label === 'SSH')).toBeUndefined();
+    });
+
+    it('elides SSH when allowSsh is false', () => {
+      fixture.detectChanges();
+      appDetailSig.set({ sshEnabled: true });
+      spaceSig.set({ allowSsh: false });
+      const actions = rowActionsAt({ index: 0, state: 'RUNNING' });
+      expect(actions.find(a => a.label === 'SSH')).toBeUndefined();
+    });
+
+    it('shows SSH enabled when both flags on and row is RUNNING', () => {
+      fixture.detectChanges();
+      appDetailSig.set({ sshEnabled: true });
+      spaceSig.set({ allowSsh: true });
+      const actions = rowActionsAt({ index: 0, state: 'RUNNING' });
+      const ssh = actions.find(a => a.label === 'SSH');
+      expect(ssh).toBeTruthy();
+      expect(ssh!.disabled).toBeFalsy();
+    });
+
+    it('shows SSH disabled when row is not RUNNING', () => {
+      fixture.detectChanges();
+      appDetailSig.set({ sshEnabled: true });
+      spaceSig.set({ allowSsh: true });
+      const actions = rowActionsAt({ index: 1, state: 'STARTING' });
+      const ssh = actions.find(a => a.label === 'SSH');
+      expect(ssh).toBeTruthy();
+      expect(ssh!.disabled).toBe(true);
+    });
+
+    it('SSH invoke navigates to the legacy ssh route with cfGuid/appGuid/index', async () => {
+      fixture.detectChanges();
+      appDetailSig.set({ sshEnabled: true });
+      spaceSig.set({ allowSsh: true });
+      const router = TestBed.inject(Router);
+      const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+      const actions = rowActionsAt({ index: 3, state: 'RUNNING' });
+      const ssh = actions.find(a => a.label === 'SSH');
+      ssh!.invoke({ index: 3, state: 'RUNNING' } as any);
+      expect(navigateSpy).toHaveBeenCalledWith(['/applications', 'cnsi-1', 'app-1', 'ssh', 3]);
+    });
   });
 });
