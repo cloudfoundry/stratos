@@ -28,6 +28,7 @@ describe('OrgDataService', () => {
     expect(service.spaces()).toEqual([]);
     expect(service.isLoading()).toBeFalsy();
     expect(service.errors()).toEqual([]);
+    expect(service.lastFetched()).toBeNull();
   });
 
   it('fetches org detail and spaces in parallel', async () => {
@@ -43,6 +44,7 @@ describe('OrgDataService', () => {
     expect(service.spaces().length).toBe(1);
     expect(service.spaceCount()).toBe(1);
     expect(service.isLoading()).toBeFalsy();
+    expect(service.lastFetched()).not.toBeNull();
   });
 
   it('retains org when spaces fetch fails', async () => {
@@ -57,5 +59,36 @@ describe('OrgDataService', () => {
     expect(service.errors().length).toBe(1);
     expect(service.errors()[0].resource).toBe('spaces');
     expect(service.isLoading()).toBeFalsy();
+  });
+
+  it('dedupes concurrent load() calls into a single HTTP fan-out', async () => {
+    const mockOrg = { guid: 'org-1', name: 'My Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] };
+    const mockSpaces: any[] = [];
+
+    service.load().subscribe();
+    service.load().subscribe();
+    service.load().subscribe();
+
+    // Concurrent callers must share one HTTP fan-out — expectOne would fail if
+    // any caller spawned its own request.
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: mockSpaces, totalResults: 0 });
+    await Promise.resolve();
+
+    expect(service.org()?.name).toBe('My Org');
+  });
+
+  it('short-circuits load() once warm (no HTTP on second call)', async () => {
+    const mockOrg = { guid: 'org-1', name: 'My Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] };
+
+    service.load().subscribe();
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [], totalResults: 0 });
+    await Promise.resolve();
+
+    // Second call: cache is hot — expectNone for both URLs.
+    service.load().subscribe();
+    httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1');
+    httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1/spaces');
   });
 });
