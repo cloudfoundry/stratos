@@ -2,31 +2,22 @@ import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { SpaceDataRegistry } from '../../../services/endpoint-data/space-data.registry';
+import { StSpace } from '../../../services/endpoint-data/stratos-types';
 import { createUserRoleInSpace } from '../../../store/types/cf-user.types';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
-import { IApp, IOrgQuotaDefinition, IRoute, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { IApp, IOrgQuotaDefinition, IRoute, ISpaceQuotaDefinition } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import {
-  applicationEntityType,
-  routeEntityType,
-  serviceBindingEntityType,
-  serviceInstancesEntityType,
-  spaceEntityType,
-  spaceQuotaEntityType,
-} from '../../../cf-entity-types';
 import { getStartedAppInstanceCount } from '../../../cf.helpers';
-import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
@@ -39,14 +30,20 @@ import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './clo
 export class CloudFoundrySpaceService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private store = inject<Store<CFAppState>>(Store);
-  private cfUserService = inject(CfUserService);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
   private cfOrgService = inject(CloudFoundryOrganizationService);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private spaceDataRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
 
+  // Registry returns the same instance as the space-base component's provider,
+  // so reads here hit the shared, in-flight-deduped signal — no extra HTTP.
+  readonly spaceDataService = this.spaceDataRegistry.acquire(
+    this.activeRouteCfOrgSpace.cfGuid,
+    this.activeRouteCfOrgSpace.spaceGuid,
+  );
 
   cfGuid: string;
   orgGuid: string;
@@ -63,20 +60,22 @@ export class CloudFoundrySpaceService {
   spaceQuotaDefinition$!: Observable<ISpaceQuotaDefinition | null>;
   allowSsh$!: Observable<string>;
   totalMem$!: Observable<number>;
-  routes$!: Observable<APIResource<IRoute>[]>;
+  // Route count derived from the V3-native StSpace.routeCount aggregate
+  // (server-side fill). The full route list is loaded by the routes-tab
+  // data source separately — this stream exists for the summary tile's
+  // "Routes" card only.
+  routesCount$!: Observable<number>;
   serviceInstancesCount$!: Observable<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
   appInstances$!: Observable<number>;
   apps$!: Observable<APIResource<IApp>[]>;
   appCount$!: Observable<number>;
   loadingApps$!: Observable<boolean>;
-  space$!: Observable<EntityInfo<APIResource<ISpace>>>;
   usersCount$!: Observable<number | null>;
   quotaLink$!: Observable<string[]>;
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-
 
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
@@ -119,29 +118,8 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    this.space$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const relations = [
-          createEntityRelationKey(spaceEntityType, spaceQuotaEntityType),
-          createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
-          createEntityRelationKey(serviceBindingEntityType, applicationEntityType),
-          createEntityRelationKey(spaceEntityType, routeEntityType),
-        ];
-        if (!isAdmin) {
-          // We're only interested in fetching space roles via the space request for non-admins.
-          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
-          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
-          relations.push(
-            createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.DEVELOPER),
-            createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.MANAGER),
-            createEntityRelationKey(spaceEntityType, SpaceUserRoleNames.AUDITOR),
-          );
-        }
-        return cfEntityCatalog.space.store.getEntityService(this.spaceGuid, this.cfGuid, { includeRelations: relations })
-          .entityObs$.pipe(filter(o => !!o && !!o.entity));
-      }),
-      publishReplay(1),
-      refCount()
+    const space$ = toObservable(this.spaceDataService.space, { injector: this.injector }).pipe(
+      filter((s): s is StSpace => !!s),
     );
 
     this.serviceInstancesCount$ = fetchServiceInstancesCount(
@@ -152,10 +130,19 @@ export class CloudFoundrySpaceService {
       this.paginationMonitorFactory);
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
-    this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
-    this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
-    this.spaceQuotaDefinition$ = this.space$.pipe(
-      map(q => q.entity.entity.space_quota_definition ? q.entity.entity.space_quota_definition.entity : null)
+    this.routesCount$ = space$.pipe(map(s => s.routeCount ?? 0));
+    this.allowSsh$ = space$.pipe(map(s => s.allowSsh ? 'true' : 'false'));
+    // V3-native space-quota lookup. quotaGuid mapped from V3
+    // relationships.quota.data.guid by getNativeSpaceDetail. cfEntityCatalog
+    // already serves space-quota entities; just hand it the guid.
+    this.spaceQuotaDefinition$ = space$.pipe(
+      map(s => s.quotaGuid || null),
+      switchMap(quotaGuid => quotaGuid
+        ? cfEntityCatalog.spaceQuota.store.getEntityService(quotaGuid, this.cfGuid, {}).waitForEntity$.pipe(
+          map(qe => qe.entity.entity as ISpaceQuotaDefinition),
+        )
+        : of(null as ISpaceQuotaDefinition | null)),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
     this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
       switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$),
@@ -194,8 +181,13 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseAppObservables() {
-    this.apps$ = this.space$.pipe(
-      switchMap(space => this.cfEndpointService.getAppsInSpaceViaAllApps(space.entity))
+    // V3-native: derive apps for this space from the foundation-wide apps
+    // stream filtered by space_guid (mirrors the cf-org-service pattern).
+    // Old getAppsInSpaceViaAllApps required an APIResource<ISpace> envelope
+    // which we no longer carry.
+    this.apps$ = this.cfEndpointService.apps$.pipe(
+      filter(apps => !!apps),
+      map(allApps => allApps.filter(a => a.entity.space_guid === this.spaceGuid)),
     );
 
     this.appInstances$ = this.apps$.pipe(

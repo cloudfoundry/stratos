@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, Input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -50,6 +51,7 @@ interface EditSpaceForm {
 })
 export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private cfSpaceService = inject(CloudFoundrySpaceService);
+  private injector = inject(Injector);
   private router = inject(Router);
 
   /** See QuotaDefinitionFormComponent for rationale. */
@@ -104,8 +106,17 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
       toggleSsh: new FormControl(false, { nonNullable: true }),
       quotaDefinition: new FormControl<string | number | null>(null),
     });
-    this.space$ = this.cfSpaceService.space$.pipe(
-      map(o => o.entity.entity),
+    // V3-native: source the form-prefill from the SpaceDataService signal.
+    // Map V3 field names (allowSsh, quotaGuid) back onto the form's V2 keys
+    // (allow_ssh, space_quota_definition_guid) so the rest of the form
+    // pipeline stays unchanged.
+    this.space$ = toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector }).pipe(
+      filter((o): o is NonNullable<typeof o> => !!o),
+      map(o => ({
+        name: o.name,
+        allow_ssh: o.allowSsh,
+        space_quota_definition_guid: o.quotaGuid || undefined,
+      })),
       take(1),
       tap(n => {
         this.originalName = n.name;

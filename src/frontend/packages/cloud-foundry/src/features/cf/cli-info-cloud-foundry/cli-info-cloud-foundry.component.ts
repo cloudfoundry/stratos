@@ -11,11 +11,10 @@ import { PageHeaderComponent } from '../../../../../core/src/shared/components/p
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { ISpace } from '../../../cf-api.types';
-import { StOrgDetail } from '../../../services/endpoint-data/stratos-types';
+import { StOrgDetail, StSpace } from '../../../services/endpoint-data/stratos-types';
 import { CFAppState } from '../../../cf-app-state';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
@@ -80,7 +79,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   public endpointOrgSpace$!: Observable<[
     EntityInfo<EndpointModel>,
     StOrgDetail | null,
-    EntityInfo<APIResource<ISpace>>
+    StSpace | null
   ]>;
 
   constructor() {
@@ -130,12 +129,14 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   private setupObservables() {
     const { orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
-    // V3-native org snapshot from OrgDataService signal; space$ still envelope-
-    // shaped pending Phase B migration.
+    // V3-native org + space snapshots from the OrgDataService /
+    // SpaceDataService signals.
     const org$ = orgGuid && this.cfOrgService
       ? toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector })
       : observableOf(null);
-    const space$ = spaceGuid ? this.cfSpaceService.space$ : observableOf(null);
+    const space$ = spaceGuid && this.cfSpaceService
+      ? toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector })
+      : observableOf(null);
     this.endpointOrgSpace$ = combineLatest(
       this.cfEndpointService.endpoint$,
       org$,
@@ -146,7 +147,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
       map(([cf, org, space]) => {
         return {
           orgName: org ? org.name : null,
-          spaceName: space ? space.entity.entity.name : null,
+          spaceName: space ? space.name : null,
           apiEndpoint: getFullEndpointApiUrl(cf.entity),
           username: cf.entity.user ? cf.entity.user.name : ''
         };
@@ -169,8 +170,8 @@ export class CliInfoCloudFoundryComponent implements OnInit {
           });
           if (space) {
             breadcrumbs.push({
-              value: space.entity.entity.name,
-              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}/spaces/${space.entity.metadata.guid}`
+              value: space.name,
+              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}/spaces/${space.guid}`
             });
           }
         }
