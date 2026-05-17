@@ -1,66 +1,64 @@
-@if (isBusyUpdating$ | async; as busy) {
-  <app-page-sub-nav>
-    <div class="summary__sub-nav">
-      @if (applicationService.appSpace$ | async; as space) {
-        <div class="summary__actions">
-          <ng-container
-            *appCfUserPermission="manageAppPermission;spaceGuid:space.guid;endpointGuid:applicationService.cfGuid">
-            <app-page-sub-nav-section>
-              @if (applicationService.applicationState$ | async) {
-                <button class="btn btn-secondary btn-icon" name="edit"
-                  routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
-                  title="Edit">
-                  <span class="material-icons">edit</span>
-                </button>
-              }
-              <button class="btn btn-danger btn-icon" name="delete" (click)="actions.redirectToDelete()" title="Delete">
-                <span class="material-icons">delete</span>
+<app-page-sub-nav>
+  <div class="summary__sub-nav">
+    @if (applicationService.appSpace$ | async; as space) {
+      <div class="summary__actions">
+        <ng-container
+          *appCfUserPermission="manageAppPermission;spaceGuid:space.guid;endpointGuid:applicationService.cfGuid">
+          <app-page-sub-nav-section>
+            @if (applicationService.applicationState$ | async) {
+              <button class="btn btn-secondary btn-icon" name="edit"
+                routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit"
+                title="Edit">
+                <span class="material-icons">edit</span>
               </button>
-            </app-page-sub-nav-section>
-            @if (applicationService.applicationState$ | async; as appState) {
-              <!--
-                appState.actions is null during the initial load window —
-                ApplicationStateService.get() returns the Unknown fallback
-                with actions=null when summary/state aren't populated yet.
-                Guard the block so Angular doesn't try to read .restart /
-                .stop / .start / .restage off null in change-detection.
-              -->
-              @if (appState.actions; as appActions) {
-                <div class="app-page-header__actions">
-                  <app-page-sub-nav-section>
-                    <button class="btn btn-secondary btn-icon" name="restart" [disabled]="busy.updating || !appActions.restart"
-                      (click)="actions.restart()" title="Restart">
-                      <span class="material-icons">refresh</span>
-                    </button>
-                    @if (appActions.stop) {
-                      <button class="btn btn-secondary btn-icon" name="stop" [disabled]="busy.updating"
-                        (click)="actions.stop()" title="Stop">
-                        <span class="material-icons">stop</span>
-                      </button>
-                    } @else {
-                      <button class="btn btn-success btn-icon" name="start"
-                        [disabled]="busy.updating || !appActions.start && !appActions.stop"
-                        (click)="actions.start()" title="Start">
-                        <span class="material-icons">play_arrow</span>
-                      </button>
-                    }
-                    <button class="btn btn-secondary btn-icon" name="restage" [disabled]="busy.updating || !appActions.restage"
-                      (click)="actions.restage()" title="Restage">
-                      <span class="material-icons">redo</span>
-                    </button>
-                  </app-page-sub-nav-section>
-                </div>
-              }
             }
-          </ng-container>
-        </div>
-      }
-      <a class="summary__anchor btn btn-info btn-icon"
-        [class.pointer-events-none]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
-        [class.opacity-50]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
-        href="{{applicationService.applicationUrl$ | async}}" target="_blank" title="Visit">
-        <span class="material-icons">launch</span>
-      </a>
-    </div>
-  </app-page-sub-nav>
-}
+            <button class="btn btn-danger btn-icon" name="delete" (click)="actions.redirectToDelete()" title="Delete">
+              <span class="material-icons">delete</span>
+            </button>
+          </app-page-sub-nav-section>
+          @if (applicationService.applicationState$ | async; as appState) {
+            <!--
+              appState.actions is null during the initial load window —
+              ApplicationStateService.get() returns the Unknown fallback
+              with actions=null when summary/state aren't populated yet.
+              Guard the block so Angular doesn't try to read .restart /
+              .stop / .start / .restage off null in change-detection.
+            -->
+            @if (appState.actions; as appActions) {
+              <div class="app-page-header__actions">
+                <app-page-sub-nav-section>
+                  <button class="btn btn-secondary btn-icon" name="restart" [disabled]="isBusy || !appActions.restart"
+                    (click)="actions.restart()" title="Restart">
+                    <span class="material-icons">refresh</span>
+                  </button>
+                  @if (appActions.stop) {
+                    <button class="btn btn-secondary btn-icon" name="stop" [disabled]="isBusy"
+                      (click)="actions.stop()" title="Stop">
+                      <span class="material-icons">stop</span>
+                    </button>
+                  } @else {
+                    <button class="btn btn-success btn-icon" name="start"
+                      [disabled]="isBusy || !appActions.start && !appActions.stop"
+                      (click)="actions.start()" title="Start">
+                      <span class="material-icons">play_arrow</span>
+                    </button>
+                  }
+                  <button class="btn btn-secondary btn-icon" name="restage" [disabled]="isBusy || !appActions.restage"
+                    (click)="actions.restage()" title="Restage">
+                    <span class="material-icons">redo</span>
+                  </button>
+                </app-page-sub-nav-section>
+              </div>
+            }
+          }
+        </ng-container>
+      </div>
+    }
+    <a class="summary__anchor btn btn-info btn-icon"
+      [class.pointer-events-none]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
+      [class.opacity-50]="(applicationService.applicationUrl$ | async) === null || (applicationService.application$ | async)?.app.entity.state !== 'STARTED'"
+      href="{{applicationService.applicationUrl$ | async}}" target="_blank" title="Visit">
+      <span class="material-icons">launch</span>
+    </a>
+  </div>
+</app-page-sub-nav>

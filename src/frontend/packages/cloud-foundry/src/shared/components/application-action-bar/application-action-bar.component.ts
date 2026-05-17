@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import {
   PageSubNavComponent,
@@ -53,11 +51,13 @@ export class AppApplicationActionBarComponent implements OnInit, OnDestroy {
   private host = inject(ElementRef);
   private progressSvc = inject(AppLifecycleProgressService);
 
-  // Adapt the action service's inFlight signal back to the
-  // {updating: boolean} shape the existing template binding expects.
-  isBusyUpdating$ = toObservable(this.actions.inFlight).pipe(
-    map(inFlight => ({ updating: inFlight })),
-  );
+  // Read the action service's inFlight signal directly in the template via
+  // this getter. The previous toObservable(actions.inFlight) + async-pipe
+  // outer guard added one microtask of delay before the whole action bar
+  // would render on every page load — visible "actions lag" reported on
+  // adepttech dev.84. Signal reads in templates resolve synchronously, so
+  // the bar appears with the rest of the page header.
+  get isBusy(): boolean { return this.actions.inFlight(); }
   manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
 
   ngOnInit(): void {
