@@ -235,6 +235,11 @@ export interface StSpace {
   // (getNativeSpaceDetail). List handlers leave it `false` to avoid
   // an N+1 /v3/spaces/{guid}/features/ssh fetch per space.
   allowSsh: boolean;
+  // V3 relationships.quota.data.guid — empty when no space-specific
+  // quota is linked (org quota is the effective limit then). Drives
+  // cf-space-service.spaceQuotaDefinition$ — replaces the V2 inline
+  // space_quota_definition that used to ride on the includes envelope.
+  quotaGuid?: string;
 }
 
 export interface StOrgDetail extends StOrg {

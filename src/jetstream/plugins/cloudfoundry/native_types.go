@@ -81,6 +81,11 @@ type StSpace struct {
 	// by detail handlers (getNativeSpaceDetail); list handlers leave it at
 	// the default `false` to avoid an N+1 feature fetch per space.
 	AllowSSH bool `json:"allowSsh"`
+	// QuotaGUID mirrors V3 relationships.quota.data.guid. Empty when no
+	// space-specific quota is linked (the org quota is the effective limit
+	// in that case). Always-emit (omitempty) so the wire shape stays
+	// predictable; consumers fall back to the org quota when this is "".
+	QuotaGUID string `json:"quotaGuid,omitempty"`
 }
 
 type StOrgDetail struct {
