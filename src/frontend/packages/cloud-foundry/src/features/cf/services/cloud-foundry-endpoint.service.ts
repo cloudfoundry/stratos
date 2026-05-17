@@ -3,24 +3,24 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Observable, Subscription } from 'rxjs';
 import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
+import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
+import { CfInfoDataService } from '../../../services/endpoint-data/cf-info-data.service';
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
+import { stOrgToAPIResource } from '../../../services/endpoint-data/st-org-adapter';
 
 import {
   EntityService,
-  endpointEntityType,
   EndpointsDataService,
   PaginationMonitorFactory,
   getDefaultRequestState,
-  getPaginationObservables,
   stratosEntityCatalog,
   APIResource,
   EntityInfo,
   EndpointModel,
   EndpointUser,
-  PaginatedAction,
   Store } from '@stratosui/store';
 import { from } from 'rxjs';
 import { GetAllApplications } from '../../../actions/application.actions';
@@ -29,15 +29,10 @@ import { GetSpaceRoutes } from '../../../actions/space.actions';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { cfEntityFactory } from '../../../cf-entity-factory';
 import {
-  domainEntityType,
   organizationEntityType,
-  privateDomainsEntityType,
-  quotaDefinitionEntityType,
   spaceEntityType } from '../../../cf-entity-types';
 import {
-  createEntityRelationKey,
   createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { QParam, QParamJoiners } from '../../../shared/q-param';
@@ -68,6 +63,7 @@ export class CloudFoundryEndpointService {
   private pmf = inject(PaginationMonitorFactory);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
+  private cfInfoDataRegistry = inject(CfInfoDataRegistry);
   private endpointsData = inject(EndpointsDataService);
   private injector = inject(Injector);
 
@@ -88,8 +84,11 @@ export class CloudFoundryEndpointService {
   appCount$!: Observable<number>;
   usersCount$!: Observable<number | null>;
   orgs$!: Observable<APIResource<IOrganization>[]>;
-  info$!: Observable<EntityInfo<APIResource<ICfV2Info>>>;
-  cfInfoEntityService!: EntityService<APIResource<ICfV2Info>>;
+  // V3-native: CF info flows as ICfV2Info directly (no EntityInfo/APIResource
+  // envelope). Field names still match the legacy /v2/info wire shape so
+  // consumers reading p.api_version / p.app_ssh_endpoint etc. keep working.
+  info$!: Observable<ICfV2Info>;
+  cfInfoData!: CfInfoDataService;
   endpoint$!: Observable<EntityInfo<EndpointModel>>;
   /**
    * Sync signal mirror of `endpoint$`. Hot read from anywhere — no race,
@@ -105,30 +104,6 @@ export class CloudFoundryEndpointService {
   connected$!: Observable<boolean>;
   currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
-
-  static createGetAllOrganizations(cfGuid: string) {
-    const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
-    const getAllOrganizationsAction = cfEntityCatalog.org.actions.getMultiple(cfGuid, paginationKey,
-      {
-        includeRelations: [
-          createEntityRelationKey(organizationEntityType, spaceEntityType),
-          createEntityRelationKey(organizationEntityType, domainEntityType),
-          createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
-          createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-        ], populateMissing: false
-      });
-    return getAllOrganizationsAction;
-  }
-  static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
-    const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
-    const getAllOrganizationsAction = cfEntityCatalog.org.actions.getMultiple(cfGuid, paginationKey,
-      {
-        includeRelations: [
-          createEntityRelationKey(organizationEntityType, spaceEntityType),
-        ]
-      }) as PaginatedAction;
-    return getAllOrganizationsAction;
-  }
 
   public static fetchAppCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
     : Observable<number> {
@@ -170,25 +145,6 @@ export class CloudFoundryEndpointService {
     return fetchTotalResults(action, store, pmf);
   }
 
-  // Fetch the cound of organisations in a Cloud Foundry
-  public static fetchOrgCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string): Observable<number> {
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
-    return fetchTotalResults(getAllOrgsAction, store, pmf);
-  }
-
-  public static fetchOrgs(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string):
-    Observable<APIResource<IOrganization>[]> {
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(cfGuid);
-    return getPaginationObservables<APIResource<IOrganization>>({
-      store,
-      action: getAllOrgsAction,
-      paginationMonitor: pmf.create(
-        getAllOrgsAction.paginationKey,
-        cfEntityFactory(organizationEntityType),
-        getAllOrgsAction.flattenPagination
-      )
-    }, getAllOrgsAction.flattenPagination).entities$;
-  }
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
@@ -201,7 +157,12 @@ export class CloudFoundryEndpointService {
     // directly within this service.
     this.cfEndpointEntityService = null as unknown as EntityService<EndpointModel>;
 
-    this.cfInfoEntityService = cfEntityCatalog.cfInfo.store.getEntityService(this.cfGuid);
+    // V3-native CF info: acquire the registry-cached signal and trigger
+    // load() (idempotent — warm-cache short-circuit + in-flight dedup).
+    // Replaces cfEntityCatalog.cfInfo.store.getEntityService — the last
+    // V2-era info fetcher.
+    this.cfInfoData = this.cfInfoDataRegistry.acquire(this.cfGuid);
+    this.cfInfoData.load().subscribe({ error: () => {} });
     this.constructCoreObservables();
     this.constructSecondaryObservable();
   }
@@ -223,9 +184,9 @@ export class CloudFoundryEndpointService {
     // during constructor execution.
     this.endpoint = toSignal(this.endpoint$, { initialValue: undefined, injector: this.injector });
 
-    this.orgs$ = CloudFoundryEndpointService.fetchOrgs(this.store, this.pmf, this.cfGuid);
-
-    this.info$ = this.cfInfoEntityService.waitForEntity$;
+    this.info$ = toObservable(this.cfInfoData.info, { injector: this.injector }).pipe(
+      filter((info): info is ICfV2Info => !!info),
+    );
 
     // V3-native: lazy snapshot of /pp/v1/cf/users/:cnsi. Counts every user
     // visible to the connected principal — admin sees the whole CNSI; non-
@@ -253,14 +214,24 @@ export class CloudFoundryEndpointService {
       { injector: this.injector },
     );
     this.appCount$ = toObservable(this.endpointData.appCount, { injector: this.injector });
+
+    // V3-native orgs pipeline — replaces the legacy
+    // cfEntityCatalog.org.actions.getMultiple(... includeRelations: [...])
+    // path that fired ?include-relations=spaces,domains,quotas,private_domains
+    // on every CF endpoint nav. EndpointDataService.loadDetails() drains all
+    // pages from /pp/v1/cf/orgs/{cnsi} (page 1 inline, pages 2..N parallel)
+    // so the full org list is exposed — bridge StOrg[] back into the legacy
+    // APIResource<IOrganization>[] envelope so add-/edit-organization name-
+    // uniqueness checks (the only remaining consumers) keep compiling.
+    const orgsResources = computed(() => this.endpointData.orgs().map(stOrgToAPIResource));
+    this.orgs$ = toObservable(orgsResources, { injector: this.injector });
   }
 
   private constructSecondaryObservable() {
     this.hasSSHAccess$ = this.info$.pipe(
-      map(p => !!(p.entity.entity &&
-        p.entity.entity.app_ssh_endpoint &&
-        p.entity.entity.app_ssh_host_key_fingerprint &&
-        p.entity.entity.app_ssh_oauth_client))
+      map(info => !!(info.app_ssh_endpoint
+        && info.app_ssh_host_key_fingerprint
+        && info.app_ssh_oauth_client))
     );
     this.totalMem$ = this.apps$.pipe(map(apps => this.getMetricFromApps(apps, 'memory')));
 
