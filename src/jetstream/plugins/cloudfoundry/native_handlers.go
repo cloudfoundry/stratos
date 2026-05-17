@@ -800,7 +800,7 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 
 	r, err := cfClient.Organizations().Get(ctx.Request().Context(), orgGUID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		return echo.NewHTTPError(statusFromCapiError(err), err.Error())
 	}
 
 	detail := StOrgDetail{
@@ -834,7 +834,7 @@ func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx echo.Context) error
 
 	r, err := cfClient.Spaces().Get(ctx.Request().Context(), spaceGUID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		return echo.NewHTTPError(statusFromCapiError(err), err.Error())
 	}
 
 	detail := StSpaceDetail{
