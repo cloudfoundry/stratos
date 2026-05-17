@@ -88,7 +88,11 @@
                 "input": "src/frontend/packages/core/assets",
                 "output": "/core/assets"
               },
-              "src/frontend/packages/core/src/favicon.ico",
+              {
+                "glob": "favicon.ico",
+                "input": "src/frontend/packages/core/src",
+                "output": "/"
+              },
               {
                 "glob": "**/*",
                 "input": "custom-src/frontend/assets/custom",
