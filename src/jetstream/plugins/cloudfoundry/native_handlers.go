@@ -247,12 +247,17 @@ func toStApp(r capi.App) StApp {
 }
 
 func toStSpace(r capi.Space) StSpace {
+	quotaGUID := ""
+	if r.Relationships.Quota != nil {
+		quotaGUID = relationshipGUID(*r.Relationships.Quota)
+	}
 	return StSpace{
 		GUID:      r.GUID,
 		Name:      r.Name,
 		OrgGUID:   relationshipGUID(r.Relationships.Organization),
 		CreatedAt: r.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: r.UpdatedAt.Format(time.RFC3339),
+		QuotaGUID: quotaGUID,
 	}
 }
 
