@@ -8,6 +8,7 @@ export const DIAGNOSTIC_CODE_FAMILIES = [
   'service-call-count',
   'cache-hit',
   'cache-miss',
+  'in-flight-hit',
   'buffer-overflow',
 ] as const;
 
