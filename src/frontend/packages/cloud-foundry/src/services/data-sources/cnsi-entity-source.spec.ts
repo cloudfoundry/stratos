@@ -37,7 +37,7 @@ describe('CnsiEntitySource', () => {
     expect(src.totalResults()).toBe(0);
   });
 
-  it('load() fetches pages sequentially until pagination.next is null', async () => {
+  it('load() drains all pages and stops when pagination.next is null on page 1 or totalPages is reached', async () => {
     const page1 = {
       resources: [new TestItem('a'), new TestItem('b')],
       pagination: { totalResults: 3, totalPages: 2, next: { href: '/pp/v1/cf/test/cnsi-1?page=2&per_page=2' }, previous: null, first: { href: '...' }, last: { href: '...' } }
@@ -54,6 +54,31 @@ describe('CnsiEntitySource', () => {
     expect(src.fetchedPages()).toBe(2);
     expect(src.totalResults()).toBe(3);
     expect(src.error()).toBeNull();
+  });
+
+  it('load() fans pages 2..N out in parallel after page 1 sets totalPages', async () => {
+    // Five pages of one item each; totalPages=5 published on every page.
+    // The parallel drain should issue pages 2..5 concurrently (capped at 4)
+    // rather than sequentially. We assert all items land regardless of
+    // arrival order — the orchestrator's downstream sort/filter handles
+    // presentation.
+    const mkPage = (id: string, page: number, next: boolean) => ({
+      resources: [new TestItem(id)],
+      pagination: { totalResults: 5, totalPages: 5, next: next ? { href: '/?page=' + (page + 1) } : null, previous: null, first: { href: '...' }, last: { href: '...' } }
+    });
+    const responses = [
+      mkPage('a', 1, true),
+      mkPage('b', 2, true),
+      mkPage('c', 3, true),
+      mkPage('d', 4, true),
+      mkPage('e', 5, false),
+    ];
+    const src = new TestSource('cnsi-1', makeHttp(responses));
+    await src.load();
+    const guids = src.items().map(i => i.guid).sort();
+    expect(guids).toEqual(['a', 'b', 'c', 'd', 'e']);
+    expect(src.done()).toBe(true);
+    expect(src.fetchedPages()).toBe(5);
   });
 
   it('load() records error and preserves any items already streamed in', async () => {

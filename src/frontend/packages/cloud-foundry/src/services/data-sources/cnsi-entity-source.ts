@@ -109,27 +109,57 @@ export abstract class CnsiEntitySource<T> {
     this._done.set(false);
 
     try {
-      let page = 1;
-      while (!this._done()) {
-        const resp = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(page)));
-        // Stamp cnsiGuid on each resource — the backend's Stratos-shape DTOs
-        // don't carry it (the source route already identifies the endpoint),
-        // but downstream filters/joins need it once items from multiple
-        // sources are merged in MergeOrchestrator. Subclasses that need to
-        // transform the wire shape provide adaptResource (services-domain
-        // slice) — adapter does cnsiGuid stamping itself.
-        const stamped = this.adaptResource
-          ? (resp.resources as unknown[]).map(r => this.adaptResource!(r, this.cnsiGuid))
-          : resp.resources.map(r => ({ ...r, cnsiGuid: this.cnsiGuid }) as unknown as T);
-        this._items.update(curr => curr.concat(stamped));
-        this._totalResults.set(resp.pagination.totalResults);
-        this._fetchedPages.set(page);
-        if (resp.pagination.next == null) {
-          this._done.set(true);
-        } else {
-          page += 1;
-        }
+      // Stamp cnsiGuid on each resource — the backend's Stratos-shape DTOs
+      // don't carry it (the source route already identifies the endpoint),
+      // but downstream filters/joins need it once items from multiple
+      // sources are merged in MergeOrchestrator. Subclasses that need to
+      // transform the wire shape provide adaptResource (services-domain
+      // slice) — adapter does cnsiGuid stamping itself.
+      const stamp = (resources: T[]): T[] => this.adaptResource
+        ? (resources as unknown[]).map(r => this.adaptResource!(r, this.cnsiGuid))
+        : resources.map(r => ({ ...r, cnsiGuid: this.cnsiGuid }) as unknown as T);
+
+      // Page 1 sequentially — its pagination block tells us totalPages.
+      const first = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(1)));
+      this._items.update(curr => curr.concat(stamp(first.resources)));
+      this._totalResults.set(first.pagination.totalResults);
+      this._fetchedPages.set(1);
+
+      const totalPages = first.pagination.totalPages ?? 1;
+      if (totalPages <= 1 || first.pagination.next == null) {
+        this._done.set(true);
+        return;
       }
+
+      // Pages 2..N in parallel with a small concurrency cap. Sequential
+      // draining was the cause of the app-wall "details trickle in for a
+      // long time" feedback on adepttech dev.84 — N sequential round-trips
+      // for an N-page result, even when CAPI could serve them concurrently.
+      // Matches the orgs/spaces drain pattern shipped in PR #5338.
+      const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+      const concurrency = 4;
+      let cursor = 0;
+      let pageFetchErr: unknown = null;
+      const worker = async () => {
+        while (true) {
+          if (pageFetchErr != null) return;
+          const idx = cursor++;
+          if (idx >= remainingPages.length) return;
+          const page = remainingPages[idx];
+          try {
+            const resp = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(page)));
+            this._items.update(curr => curr.concat(stamp(resp.resources)));
+            this._fetchedPages.update(p => Math.max(p, page));
+          } catch (err) {
+            pageFetchErr = err;
+            return;
+          }
+        }
+      };
+      const workers = Array.from({ length: Math.min(concurrency, remainingPages.length) }, () => worker());
+      await Promise.all(workers);
+      if (pageFetchErr != null) throw pageFetchErr;
+      this._done.set(true);
     } catch (err) {
       this._error.set(err);
     } finally {
