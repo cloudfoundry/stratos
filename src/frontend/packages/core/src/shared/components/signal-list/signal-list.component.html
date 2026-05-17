@@ -120,11 +120,20 @@
         [attr.data-test]="(config.isAnyLoading() && config.totalFilteredResults() > 0) ? 'refresh-loading' : 'refresh'"
         [title]="(config.isAnyLoading() && config.totalFilteredResults() > 0) ? 'Refreshing…' : 'Refresh'"
         class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-100">
-        @if (config.isAnyLoading() && config.totalFilteredResults() > 0) {
-          <div class="spinner spinner-primary h-4 w-4"></div>
-        } @else {
-          <span class="material-icons text-base leading-5">refresh</span>
-        }
+        <!--
+          Fixed h-5 w-5 (20×20) slot for the icon/spinner so peer toolbar
+          items don't shift horizontally each refresh cycle. The material-
+          icons refresh glyph and the spinner have different intrinsic
+          widths; flexbox-centering them inside a fixed box keeps the
+          button (and therefore the toolbar) layout stable.
+        -->
+        <span class="inline-flex items-center justify-center w-5 h-5 align-middle">
+          @if (config.isAnyLoading() && config.totalFilteredResults() > 0) {
+            <div class="spinner spinner-primary h-4 w-4"></div>
+          } @else {
+            <span class="material-icons text-base leading-none">refresh</span>
+          }
+        </span>
       </button>
     }
   </div>
