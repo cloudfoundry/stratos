@@ -157,9 +157,9 @@ export class CfSpacesSignalConfigService {
         }
       }
       // cnsiGuid is needed by SignalListColumn.favorite (key uses
-      // `${cnsiGuid}:${guid}`), but the wire payload doesn't include it
-      // since the URL already scopes to one CNSI. Stamp it on each row.
-      this._orgSpaces.set(out.map(s => ({ ...s, cnsiGuid: this.cnsiGuid })));
+      // `${cnsiGuid}:${guid}`). Backend now echoes it on every StSpace
+      // row, so the wire payload is self-describing — no stamping needed.
+      this._orgSpaces.set(out);
       this._hasLoadedOnce.set(true);
     } catch {
       // Swallow — the empty list and "no spaces" message communicate the

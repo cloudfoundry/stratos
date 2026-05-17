@@ -179,6 +179,35 @@ func fetchSpacesByGUIDs(ctx echo.Context, cfClient capi.Client, spaceGUIDs []str
 	return spaces, nil
 }
 
+// fetchOrgsByGUIDs mirrors fetchSpacesByGUIDs for orgs — used by the
+// apps-list paths to stitch OrgName onto each StApp row from the same
+// fanout that resolves SpaceName. Eliminates a frontend orgs-catalog
+// fetch + per-row resolver previously needed just to render the
+// "CF / Org / Space" cell on the app wall.
+func fetchOrgsByGUIDs(ctx echo.Context, cfClient capi.Client, orgGUIDs []string) (map[string]capi.Organization, error) {
+	if len(orgGUIDs) == 0 {
+		return map[string]capi.Organization{}, nil
+	}
+	orgs := make(map[string]capi.Organization, len(orgGUIDs))
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+		params.Page = page
+		params.Filters["guids"] = orgGUIDs
+
+		raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
+		if err != nil {
+			return nil, err
+		}
+		for _, o := range raw.Resources {
+			orgs[o.GUID] = o
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return orgs, nil
+}
+
 // fetchRoutesForApps issues /v3/routes calls filtered to the given app
 // GUIDs and walks each route's destinations to bucket routes back to the
 // app(s) they map to. Returns a map keyed by app GUID → []StAppRoute.
@@ -236,8 +265,12 @@ func fetchRoutesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []strin
 // successful fetch with no routes mapped). Missing sub-resources surface
 // as row-level _meta.unavailable entries listing the specific fields those
 // sources would have populated.
-func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space, routes []StAppRoute) StApp {
-	s := toStApp(app)
+// orgName is the resolved organization name for app's space, "" when
+// the orgs-by-guid fetch failed or the org wasn't returned. Stitched at
+// the caller from a batched fetchOrgsByGUIDs so the per-app composition
+// remains pure (no per-row CAPI fanout).
+func composeStAppSummary(app capi.App, cnsiGUID string, process *capi.Process, space *capi.Space, orgName string, routes []StAppRoute) StApp {
+	s := toStApp(app, cnsiGUID)
 
 	var unavailable []string
 
@@ -258,6 +291,13 @@ func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space,
 			s.OrgGUID = &orgGuid
 		} else {
 			unavailable = append(unavailable, "orgGuid")
+		}
+		// OrgName stitched best-effort when the caller's orgs-by-guid
+		// fetch succeeded — empty here is silent (mirrors SpaceName's
+		// silent default when space fetch fails) since the frontend
+		// resolver still has the catalog as a fallback.
+		if orgName != "" {
+			s.OrgName = orgName
 		}
 	} else {
 		unavailable = append(unavailable, spaceDerivedFields...)
@@ -282,8 +322,8 @@ func composeStAppSummary(app capi.App, process *capi.Process, space *capi.Space,
 // to composeStAppSummary with space=nil and routes=[] so orgGuid is
 // always unavailable in this path; routes default to empty so the absence
 // is treated as "no routes" rather than "routes fetch failed".
-func toStAppSummary(app capi.App, process *capi.Process) StApp {
-	return composeStAppSummary(app, process, nil, []StAppRoute{})
+func toStAppSummary(app capi.App, cnsiGUID string, process *capi.Process) StApp {
+	return composeStAppSummary(app, cnsiGUID, process, nil, "", []StAppRoute{})
 }
 
 // envelopeMetaForCompositionErrors builds the envelope-level _meta.errors
@@ -341,6 +381,7 @@ func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr error, affect
 // _meta.unavailable lists affected fields, envelope _meta.errors explains
 // root causes.
 func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfClient capi.Client) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
 	params := parseSummaryQueryParams(ctx)
 
 	if derived, field, desc := isDerivedSortField(params.OrderBy); derived {
@@ -369,6 +410,26 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
 	routesByApp, routesErr := fetchRoutesForApps(ctx, cfClient, appGUIDs)
 
+	// Orgs-by-guid for the OrgName stitch. Derive the unique org guids
+	// from the spaces we just fetched — every app's org is reachable
+	// through space.Relationships.Organization. Lazy-non-fatal: org
+	// fetch failure leaves OrgName empty and "orgName" surfaces in
+	// _meta.unavailable per row (composeStAppSummary handles the gap).
+	orgs := map[string]capi.Organization{}
+	if spaceErr == nil {
+		uniqueOrgGUIDs := make(map[string]struct{})
+		for _, sp := range spaces {
+			if og := relationshipGUID(sp.Relationships.Organization); og != "" {
+				uniqueOrgGUIDs[og] = struct{}{}
+			}
+		}
+		orgGUIDs := make([]string, 0, len(uniqueOrgGUIDs))
+		for og := range uniqueOrgGUIDs {
+			orgGUIDs = append(orgGUIDs, og)
+		}
+		orgs, _ = fetchOrgsByGUIDs(ctx, cfClient, orgGUIDs)
+	}
+
 	resources := make([]StApp, 0, len(raw.Resources))
 	for _, r := range raw.Resources {
 		var p *capi.Process
@@ -378,9 +439,15 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 			}
 		}
 		var s *capi.Space
+		var orgName string
 		if spaceErr == nil {
 			if sp, ok := spaces[relationshipGUID(r.Relationships.Space)]; ok {
 				s = &sp
+				if og := relationshipGUID(sp.Relationships.Organization); og != "" {
+					if o, ok := orgs[og]; ok {
+						orgName = o.Name
+					}
+				}
 			}
 		}
 		var rts []StAppRoute
@@ -393,7 +460,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 				rts = []StAppRoute{}
 			}
 		}
-		resources = append(resources, composeStAppSummary(r, p, s, rts))
+		resources = append(resources, composeStAppSummary(r, cnsiGUID, p, s, orgName, rts))
 	}
 
 	response := StratosPagedResponse[StApp]{
@@ -420,6 +487,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	sortField string,
 	desc bool,
 ) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
 	requestedPage := params.Page
 	requestedPerPage := params.PerPage
 
@@ -446,6 +514,22 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
 	routesByApp, routesErr := fetchRoutesForApps(ctx, cfClient, appGUIDs)
 
+	// Orgs-by-guid stitch (mirrors getNativeAppsSummary above).
+	orgs := map[string]capi.Organization{}
+	if spaceErr == nil {
+		uniqueOrgGUIDs := make(map[string]struct{})
+		for _, sp := range spaces {
+			if og := relationshipGUID(sp.Relationships.Organization); og != "" {
+				uniqueOrgGUIDs[og] = struct{}{}
+			}
+		}
+		orgGUIDs := make([]string, 0, len(uniqueOrgGUIDs))
+		for og := range uniqueOrgGUIDs {
+			orgGUIDs = append(orgGUIDs, og)
+		}
+		orgs, _ = fetchOrgsByGUIDs(ctx, cfClient, orgGUIDs)
+	}
+
 	composed := make([]StApp, 0, len(allApps))
 	for _, r := range allApps {
 		var p *capi.Process
@@ -455,9 +539,15 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 			}
 		}
 		var s *capi.Space
+		var orgName string
 		if spaceErr == nil {
 			if sp, ok := spaces[relationshipGUID(r.Relationships.Space)]; ok {
 				s = &sp
+				if og := relationshipGUID(sp.Relationships.Organization); og != "" {
+					if o, ok := orgs[og]; ok {
+						orgName = o.Name
+					}
+				}
 			}
 		}
 		var rts []StAppRoute
@@ -468,7 +558,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 				rts = []StAppRoute{}
 			}
 		}
-		composed = append(composed, composeStAppSummary(r, p, s, rts))
+		composed = append(composed, composeStAppSummary(r, cnsiGUID, p, s, orgName, rts))
 	}
 
 	sortStAppsByDerivedField(composed, sortField, desc)

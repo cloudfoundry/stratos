@@ -107,5 +107,5 @@ func (c *CloudFoundrySpecification) updateNativeOrg(ctx echo.Context) error {
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, toStOrg(*org))
+	return ctx.JSON(http.StatusOK, toStOrg(*org, cnsiGUID))
 }

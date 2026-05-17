@@ -50,19 +50,16 @@ export class OrgDataService {
     this._isLoading.set(true);
     this._errors.set([]);
 
+    // Backend echoes cnsiGuid on StOrg + StSpace; no client-side stamping.
     this._inFlightLoad = merge(
       this.http.get<StOrgDetail>(`/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}`).pipe(
-        tap(org => this._org.set({
-          ...org,
-          cnsiGuid: this.cnsiGuid,
-          spaces: (org.spaces ?? []).map(space => ({ ...space, cnsiGuid: this.cnsiGuid })),
-        })),
+        tap(org => this._org.set(org)),
         catchError(err => { this.addError('org', err); return EMPTY; }),
       ),
       this.http.get<{ resources: StSpace[]; totalResults: number }>(
         `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces`,
       ).pipe(
-        tap(resp => this._spaces.set(resp.resources.map(space => ({ ...space, cnsiGuid: this.cnsiGuid })))),
+        tap(resp => this._spaces.set(resp.resources)),
         catchError(err => { this.addError('spaces', err); return EMPTY; }),
       ),
     ).pipe(

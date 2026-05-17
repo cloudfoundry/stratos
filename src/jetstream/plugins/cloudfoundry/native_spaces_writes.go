@@ -110,7 +110,7 @@ func (c *CloudFoundrySpecification) createNativeSpace(ctx echo.Context) error {
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusCreated, toStSpace(*space))
+	return ctx.JSON(http.StatusCreated, toStSpace(*space, cnsiGUID))
 }
 
 // updateNativeSpace handles PATCH /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid} —
@@ -146,5 +146,5 @@ func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, toStSpace(*space))
+	return ctx.JSON(http.StatusOK, toStSpace(*space, cnsiGUID))
 }
