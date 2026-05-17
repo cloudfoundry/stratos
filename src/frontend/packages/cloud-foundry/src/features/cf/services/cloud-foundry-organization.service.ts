@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
@@ -238,13 +238,19 @@ export class CloudFoundryOrganizationService {
     const orgSnapshot$ = toObservable(this.orgDataService.org, { injector: this.injector }).pipe(
       filter((o): o is StOrgDetail => !!o),
     );
+    // shareReplay so the 4 subscribers on space-detail summary (template
+    // quotaDefinition$ async-pipe, quotaLink$ combineLatest, plus space-
+    // service.spaceQuotaDefinition$ fallback chain) share one
+    // getEntityService(...) subscription instead of each dispatching a
+    // separate /organization_quotas/{guid} fetch.
     this.quotaDefinition$ = orgSnapshot$.pipe(
       map(o => o.quotaGuid),
       filter(quotaGuid => !!quotaGuid),
       switchMap(quotaGuid =>
         cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).waitForEntity$
       ),
-      map(qe => qe.entity.entity)
+      map(qe => qe.entity.entity),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
 
     this.quotaLink$ = orgSnapshot$.pipe(map(o => {
