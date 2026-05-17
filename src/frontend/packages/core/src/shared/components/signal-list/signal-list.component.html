@@ -106,23 +106,28 @@
     }
 
     @if (config.onRefresh) {
+      <!--
+        Refresh button doubles as the refresh-in-progress indicator: when
+        a reload is mid-flight against a populated table, the icon swaps
+        to a spinner in place. Previously the indicator was a separate
+        row above the table body and the table shifted vertically each
+        cycle — visible on adepttech dev.84. Inline keeps layout stable.
+      -->
       <button
         type="button"
         (click)="config.onRefresh!()"
-        title="Refresh"
-        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
-        <span class="material-icons text-base leading-5">refresh</span>
+        [disabled]="config.isAnyLoading() && config.totalFilteredResults() > 0"
+        [attr.data-test]="(config.isAnyLoading() && config.totalFilteredResults() > 0) ? 'refresh-loading' : 'refresh'"
+        [title]="(config.isAnyLoading() && config.totalFilteredResults() > 0) ? 'Refreshing…' : 'Refresh'"
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-100">
+        @if (config.isAnyLoading() && config.totalFilteredResults() > 0) {
+          <div class="spinner spinner-primary h-4 w-4"></div>
+        } @else {
+          <span class="material-icons text-base leading-5">refresh</span>
+        }
       </button>
     }
   </div>
-
-  <!-- Refresh-in-progress indicator (subtle, shown only when data is already present) -->
-  @if (config.isAnyLoading() && config.totalFilteredResults() > 0) {
-    <div data-test="refresh-loading" class="px-4 py-1 text-sm text-content-muted border-b border-content-border flex items-center gap-2">
-      <div class="spinner spinner-primary h-3 w-3"></div>
-      <span>Refreshing…</span>
-    </div>
-  }
   @if (config.errorsByCnsi().size > 0) {
     <div data-test="errors" class="px-4 py-1 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
       @for (entry of config.errorsByCnsi() | keyvalue; track entry.key) {
