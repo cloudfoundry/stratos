@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, Input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -10,8 +11,6 @@ import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, Cus
 import {
   APIResource,
   endpointEntityType,
-  entityCatalog,
-  getPaginationObservables,
   PaginationMonitorFactory
 } from '@stratosui/store';
 import { CreateOrganization } from '../../../../actions/organization.actions';
@@ -19,10 +18,9 @@ import { IOrgQuotaDefinition } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { organizationEntityType } from '../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
 import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { selectCfRequestInfo } from '../../../../store/selectors/api.selectors';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 interface CreateOrganizationForm {
   orgName: FormControl<string>;
@@ -48,6 +46,8 @@ interface CreateOrganizationForm {
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
+  private injector = inject(Injector);
   private fb = inject(FormBuilder);
   private router = inject(Router);
 
@@ -118,22 +118,18 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     this.formStatusSub = this.addOrg.statusChanges.subscribe(
       () => this.validSignal.set(this.addOrg.valid)
     );
-    const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.orgs$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType).getSchema(),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allOrgs = o)
+    // V3-native: read the org-name list from the EndpointDataService signal
+    // (loaded via paginated drain in loadDetails()). Ensure load+details are
+    // triggered in case the user lands here without a parent page having
+    // warmed the registry. Both calls are idempotent (warm-cache short-
+    // circuit + in-flight dedup).
+    const endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    endpointData.load().subscribe({ error: () => {} });
+    endpointData.loadDetails().subscribe({ error: () => {} });
+    this.orgs$ = toObservable(endpointData.orgs, { injector: this.injector }).pipe(
+      filter(orgs => !!orgs && orgs.length > 0),
+      map(orgs => orgs.map(o => o.name)),
+      tap(names => this.allOrgs = names),
     );
 
     const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, this.cfGuid);
