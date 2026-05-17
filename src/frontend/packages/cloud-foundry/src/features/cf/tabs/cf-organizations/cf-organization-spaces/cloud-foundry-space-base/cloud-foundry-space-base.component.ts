@@ -1,9 +1,10 @@
-import { Component, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, map, tap } from 'rxjs/operators';
+import { filter, take, map, tap } from 'rxjs/operators';
 
 import {
   getActionsFromExtensions,
@@ -60,6 +61,7 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
   cfOrgService = inject(CloudFoundryOrganizationService);
   private store = inject<Store<CFAppState>>(Store);
   private confirmDialog = inject(ConfirmationDialogService);
+  private injector = inject(Injector);
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -179,9 +181,14 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
     cfEndpointService: CloudFoundryEndpointService,
     cfOrgService: CloudFoundryOrganizationService
   ) {
+    // Org name comes from the V3-native OrgDataService signal; bridge into the
+    // existing breadcrumb pipeline via toObservable so the rest of the chain
+    // stays the same shape. take(1) preserves the original "freeze first
+    // populated value" behaviour.
+    const orgSignal$ = toObservable(cfOrgService.orgDataService.org, { injector: this.injector });
     this.breadcrumbs$ = combineLatest(
       cfEndpointService.endpoint$,
-      cfOrgService.org$
+      orgSignal$.pipe(filter(org => !!org)),
     ).pipe(
       map(([endpoint, org]) => ([
         {
@@ -191,8 +198,8 @@ export class CloudFoundrySpaceBaseComponent implements OnDestroy {
               routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             },
             {
-              value: org.entity.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}/spaces`
+              value: org.name,
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.guid}/spaces`
             }
           ]
         },

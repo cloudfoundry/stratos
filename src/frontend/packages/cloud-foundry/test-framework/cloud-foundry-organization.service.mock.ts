@@ -14,6 +14,16 @@ export class CloudFoundryOrganizationServiceMock {
       },
       entityRequestInfo: getDefaultRequestState()
     });
+  // Signal-native shim: card-cf-org-user-details and other org-detail consumers
+  // read scalar fields off cfOrgService.orgDataService.org() directly. Returns
+  // null so templates render their `?` chains as empty.
+  orgDataService = {
+    org: () => null,
+    spaces: () => [],
+    isLoading: () => false,
+    errors: () => [],
+    load: () => observableOf(undefined),
+  };
   apps$ = observableOf([]);
   appCount$ = observableOf(0);
   serviceInstancesCount$ = observableOf(0);

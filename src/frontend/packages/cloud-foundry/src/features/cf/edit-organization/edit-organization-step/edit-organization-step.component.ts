@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, Input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -57,6 +58,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfOrgService = inject(CloudFoundryOrganizationService);
+  private injector = inject(Injector);
   private fb = inject(FormBuilder);
   private router = inject(Router);
 
@@ -121,8 +123,15 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
       orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
       quotaDefinition: new FormControl<string | null>(null),
     });
-    this.org$ = this.cfOrgService.org$.pipe(
-      map(o => o.entity.entity),
+    // Source the form-prefill from the V3-native OrgDataService signal. Wait
+    // for the first non-null snapshot (filter), then patch the form once.
+    this.org$ = toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector }).pipe(
+      filter((o): o is NonNullable<typeof o> => !!o),
+      map(o => ({
+        name: o.name,
+        status: o.status,
+        quota_definition_guid: o.quotaGuid || undefined,
+      })),
       take(1),
       tap(n => {
         this.originalName = n.name;

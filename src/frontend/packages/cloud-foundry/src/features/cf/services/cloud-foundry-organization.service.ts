@@ -3,17 +3,18 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
+import { StOrgDetail } from '../../../services/endpoint-data/stratos-types';
 import { createUserRoleInOrg } from '../../../store/types/cf-user.types';
 
 import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { APIResource } from '../../../../../store/src/types/api.types';
 import {
   IApp,
   IDomain,
-  IOrganization,
   IOrgQuotaDefinition,
   ISpace,
   ISpaceQuotaDefinition,
@@ -21,22 +22,13 @@ import {
 import { CFAppState } from '../../../cf-app-state';
 import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
-  domainEntityType,
   organizationEntityType,
-  privateDomainsEntityType,
-  quotaDefinitionEntityType,
-  spaceEntityType,
 } from '../../../cf-entity-types';
 import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.helpers';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../entity-relations/entity-relations.types';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { OrgUserRoleNames } from '../../../store/types/cf-user.types';
 import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
@@ -74,12 +66,19 @@ export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefiniti
 export class CloudFoundryOrganizationService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private store = inject<Store<CFAppState>>(Store);
-  private cfUserService = inject(CfUserService);
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private orgDataRegistry = inject(OrgDataRegistry);
   private injector = inject(Injector);
+
+  // Registry returns the same instance as the org-base component's provider,
+  // so reads here hit the shared, in-flight-deduped signal — no extra HTTP.
+  readonly orgDataService = this.orgDataRegistry.acquire(
+    this.activeRouteCfOrgSpace.cfGuid,
+    this.activeRouteCfOrgSpace.orgGuid,
+  );
 
   orgGuid: string;
   cfGuid: string;
@@ -100,7 +99,6 @@ export class CloudFoundryOrganizationService {
   apps$!: Observable<APIResource<IApp>[]>;
   appCount$!: Observable<number>;
   loadingApps$!: Observable<boolean>;
-  org$!: Observable<EntityInfo<APIResource<IOrganization>>>;
   usersCount$!: Observable<number | null>;
 
   constructor() {
@@ -121,31 +119,6 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const relations = [
-          createEntityRelationKey(organizationEntityType, spaceEntityType),
-          createEntityRelationKey(organizationEntityType, domainEntityType),
-          createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
-          createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-        ];
-        if (!isAdmin) {
-          // We're only interested in fetching org roles via the org request for non-admins.
-          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
-          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
-          relations.push(
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.USER),
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.MANAGER),
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.BILLING_MANAGERS),
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
-          );
-        }
-        return cfEntityCatalog.org.store.getEntityService(this.orgGuid, this.cfGuid, { includeRelations: relations }).waitForEntity$;
-      }),
-      publishReplay(1),
-      refCount()
-    );
-
     this.initialiseOrgObservables();
 
     this.initialiseAppObservables();
@@ -259,11 +232,14 @@ export class CloudFoundryOrganizationService {
     ).entities$.pipe(filter(domains => !!domains));
 
     // V3-native: org no longer carries inline quota_definition. The
-    // quota_definition_guid field (mapped from V3 relationships.quota.data.guid
-    // by v3-native rename) drives a separate cfEntityCatalog fetch — same
+    // quotaGuid field (mapped from V3 relationships.quota.data.guid by the
+    // native handler) drives a separate cfEntityCatalog fetch — same
     // pattern as features/cf/quota-definition/quota-definition.component.ts.
-    this.quotaDefinition$ = this.org$.pipe(
-      map(o => o.entity.entity.quota_definition_guid),
+    const orgSnapshot$ = toObservable(this.orgDataService.org, { injector: this.injector }).pipe(
+      filter((o): o is StOrgDetail => !!o),
+    );
+    this.quotaDefinition$ = orgSnapshot$.pipe(
+      map(o => o.quotaGuid),
       filter(quotaGuid => !!quotaGuid),
       switchMap(quotaGuid =>
         cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).waitForEntity$
@@ -271,8 +247,8 @@ export class CloudFoundryOrganizationService {
       map(qe => qe.entity.entity)
     );
 
-    this.quotaLink$ = this.org$.pipe(map(o => {
-      const quotaDefinitionGuid = o.entity.entity.quota_definition_guid;
+    this.quotaLink$ = orgSnapshot$.pipe(map(o => {
+      const quotaDefinitionGuid = o.quotaGuid;
       return quotaDefinitionGuid && [
         '/cloud-foundry',
         this.cfGuid,

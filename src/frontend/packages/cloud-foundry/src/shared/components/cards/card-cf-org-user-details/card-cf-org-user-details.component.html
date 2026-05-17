@@ -22,13 +22,13 @@
 
         <div class="app-metadata__two-cols">
           <app-metadata-item label="Org Status">
-            {{ ((cfOrgService.org$ | async)?.entity?.entity?.status) | capitalizeFirst}}
+            {{ cfOrgService.orgDataService.org()?.status | capitalizeFirst }}
           </app-metadata-item>
           <app-metadata-item label="Created At">
-            {{ ((cfOrgService.org$ | async)?.entity?.metadata?.created_at) | date:'medium' }}
+            {{ cfOrgService.orgDataService.org()?.createdAt | date:'medium' }}
           </app-metadata-item>
           <app-metadata-item label="Updated At">
-            {{ ((cfOrgService.org$ | async)?.entity?.metadata?.updated_at) | date:'medium' }}
+            {{ cfOrgService.orgDataService.org()?.updatedAt | date:'medium' }}
           </app-metadata-item>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Store } from '@stratosui/store';
@@ -13,7 +14,8 @@ import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { IOrganization, ISpace } from '../../../cf-api.types';
+import { ISpace } from '../../../cf-api.types';
+import { StOrgDetail } from '../../../services/endpoint-data/stratos-types';
 import { CFAppState } from '../../../cf-app-state';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
@@ -56,6 +58,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfOrgService = inject(CloudFoundryOrganizationService, { optional: true });
   private cfSpaceService = inject(CloudFoundrySpaceService, { optional: true });
+  private injector = inject(Injector);
 
 
   permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
@@ -76,7 +79,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   public endpointOrgSpace$!: Observable<[
     EntityInfo<EndpointModel>,
-    EntityInfo<APIResource<IOrganization>>,
+    StOrgDetail | null,
     EntityInfo<APIResource<ISpace>>
   ]>;
 
@@ -127,7 +130,11 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   private setupObservables() {
     const { orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
-    const org$ = orgGuid ? this.cfOrgService.org$ : observableOf(null);
+    // V3-native org snapshot from OrgDataService signal; space$ still envelope-
+    // shaped pending Phase B migration.
+    const org$ = orgGuid && this.cfOrgService
+      ? toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector })
+      : observableOf(null);
     const space$ = spaceGuid ? this.cfSpaceService.space$ : observableOf(null);
     this.endpointOrgSpace$ = combineLatest(
       this.cfEndpointService.endpoint$,
@@ -138,7 +145,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     this.context$ = this.endpointOrgSpace$.pipe(
       map(([cf, org, space]) => {
         return {
-          orgName: org ? org.entity.entity.name : null,
+          orgName: org ? org.name : null,
           spaceName: space ? space.entity.entity.name : null,
           apiEndpoint: getFullEndpointApiUrl(cf.entity),
           username: cf.entity.user ? cf.entity.user.name : ''
@@ -157,13 +164,13 @@ export class CliInfoCloudFoundryComponent implements OnInit {
         }];
         if (org) {
           breadcrumbs.push({
-            value: org.entity.entity.name,
-            routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.entity.metadata.guid}`
+            value: org.name,
+            routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}`
           });
           if (space) {
             breadcrumbs.push({
               value: space.entity.entity.name,
-              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.entity.metadata.guid}/spaces/${space.entity.metadata.guid}`
+              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}/spaces/${space.entity.metadata.guid}`
             });
           }
         }

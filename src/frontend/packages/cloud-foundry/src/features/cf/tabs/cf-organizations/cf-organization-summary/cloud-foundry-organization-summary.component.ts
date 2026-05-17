@@ -4,7 +4,7 @@ import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
@@ -82,28 +82,23 @@ export class CloudFoundryOrganizationSummaryComponent {
   }
 
   deleteOrgWarn() {
-    this.cfOrgService.org$.pipe(
-      map(org => org.entity.entity.name),
-      take(1)
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Organization',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, async () => {
-        const cfGuid = this.cfOrgService.cfGuid;
-        const orgGuid = this.cfOrgService.orgGuid;
-        try {
-          await this.orgsConfig.deleteOrg(cfGuid, orgGuid);
-          this.router.navigate(['/cloud-foundry', cfGuid, 'organizations']);
-        } catch (err: any) {
-          this.snackBar.error(`Failed to delete organization: ${err?.message ?? err}`, 'Close');
-        }
-      });
+    const name = this.cfOrgService.orgDataService.org()?.name;
+    if (!name) return;
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Organization',
+      { textToMatch: name },
+      'Delete',
+      true,
+    );
+    this.confirmDialog.open(confirmation, async () => {
+      const cfGuid = this.cfOrgService.cfGuid;
+      const orgGuid = this.cfOrgService.orgGuid;
+      try {
+        await this.orgsConfig.deleteOrg(cfGuid, orgGuid);
+        this.router.navigate(['/cloud-foundry', cfGuid, 'organizations']);
+      } catch (err: any) {
+        this.snackBar.error(`Failed to delete organization: ${err?.message ?? err}`, 'Close');
+      }
     });
   }
 }
