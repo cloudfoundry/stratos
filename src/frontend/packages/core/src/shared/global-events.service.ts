@@ -220,9 +220,26 @@ export class GlobalEventService {
 
   // Get the event from the event config and event data.
   private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent {
-    const message = typeof config.message === 'function' ? config.message(eventData, appState) : config.message;
-    const link = typeof config.link === 'function' ? config.link(eventData, appState) : config.link;
-    const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.key || config.message;
+    // User-supplied callbacks can crash when eventData is undefined — e.g.
+    // an endpoint-error event whose entity never resolved. Treat any
+    // throw as "no link/message" so the event still emits its key/type
+    // and the row template's `@if (event.link)` guard hides the View
+    // button cleanly.
+    const safe = <T>(fn: () => T, fallback: T): T => {
+      try { return fn(); } catch { return fallback; }
+    };
+    const messageFn = config.message;
+    const linkFn = config.link;
+    const keyFn = config.key;
+    const message = typeof messageFn === 'function'
+      ? safe(() => messageFn(eventData, appState), '')
+      : messageFn;
+    const link = typeof linkFn === 'function'
+      ? safe(() => linkFn(eventData, appState), '')
+      : linkFn;
+    const key = typeof keyFn === 'function'
+      ? safe(() => keyFn(eventData, appState), '')
+      : keyFn || config.message;
     const type = config.type || 'warning';
     return {
       message,
