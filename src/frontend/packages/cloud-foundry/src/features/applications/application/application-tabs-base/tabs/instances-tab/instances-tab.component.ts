@@ -177,7 +177,13 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
 
     if (sshAvailable) {
       actions.push({
-        label: 'SSH', icon: 'terminal',
+        // Use `keyboard` (classic Material Icons) — matches the CLI Info
+        // button on the CF/Org/Space summary pages and is consistent with
+        // the rest of the app for terminal-style entry points. `terminal`
+        // is Material Symbols only; under classic Material Icons it
+        // renders as the literal text "terminal", widening the kebab menu
+        // and pushing the SSH label off alignment.
+        label: 'SSH', icon: 'keyboard',
         disabled: disabled || row.state !== 'RUNNING',
         invoke: () => {
           this.router.navigate([
