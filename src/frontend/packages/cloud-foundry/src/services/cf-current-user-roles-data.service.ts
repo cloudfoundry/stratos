@@ -3,7 +3,7 @@ import {
   CurrentUserRolesDataService,
   PermissionValues,
 } from '@stratosui/store';
-import { Observable, distinctUntilChanged, map } from 'rxjs';
+import { Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
@@ -73,14 +73,31 @@ export class CfCurrentUserRolesDataService {
 
   // ---- observable surface (preserved for legacy checker pipelines) -------
 
+  // Memoize per-endpoint observables so N directive instances on a page
+  // (e.g. edit + delete + restart + restage on the app-action-bar; create-
+  // space / edit-space on cf-org-spaces) share one map+distinctUntilChanged
+  // pipe instead of building N redundant ones. The underlying state$ is
+  // already a multicast store observable so the pipe rebuild was the only
+  // duplicated work, but on pages with several gated buttons the count
+  // adds up — visible as a subtle pause when navigating to a fresh CF
+  // page before any of the buttons appear.
+  private readonly _endpointRolesState$ = new Map<string, Observable<ICfRolesState>>();
+
   cfEndpointRolesState$(endpointGuid: string): Observable<ICfRolesState> {
-    return this.rolesData.state$.pipe(
+    const cached = this._endpointRolesState$.get(endpointGuid);
+    if (cached) {
+      return cached;
+    }
+    const obs$ = this.rolesData.state$.pipe(
       map(state => {
         const all = state?.endpoints?.[CF_ENDPOINT_TYPE] as IAllCfRolesState | undefined;
         return (all ? all[endpointGuid] : null) as ICfRolesState;
       }),
       distinctUntilChanged(),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
+    this._endpointRolesState$.set(endpointGuid, obs$);
+    return obs$;
   }
 
   cfGlobalState$(endpointGuid: string, permission: PermissionValues): Observable<boolean> {
