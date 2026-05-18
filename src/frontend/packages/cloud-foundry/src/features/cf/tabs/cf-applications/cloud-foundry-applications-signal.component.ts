@@ -128,6 +128,10 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
           link: (app: StApp) => ['/applications', app.cnsiGuid, app.guid],
+          // Tag the row link with ?breadcrumbs=cf so the app-detail page
+          // emits the CF-scoped 'Applications' breadcrumb that returns
+          // here, instead of the default global '/applications' wall.
+          linkQueryParams: () => ({ breadcrumbs: 'cf' }),
           render: (app: StApp) => app.name,
           widthHint: '16rem',
         },
