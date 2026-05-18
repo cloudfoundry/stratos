@@ -88,10 +88,10 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
 
   constructor() {
     // Build the columns from the config service, then replace the actions
-    // column's factory with our confirm-wrapped version. Wave-2 service
-    // exposes a no-confirm `buildRowActions` for tests/future surfaces;
-    // the tab layer adds the legacy "Terminate Instance ${index}?"
-    // confirmation dialog (matches legacy CfAppInstancesConfigService text).
+    // column's factory with our confirm-wrapped version. The config
+    // service exposes a no-confirm `buildRowActions` for tests/future
+    // surfaces; the tab layer adds the "Terminate Instance ${index}?"
+    // confirmation dialog.
     const baseColumns = this.instancesConfig.buildColumns();
     const columns: SignalListColumn<StAppStat>[] = baseColumns.map(col => {
       if (col.key === 'actions' && col.kind === 'actions') {
@@ -137,16 +137,11 @@ export class InstancesTabComponent implements OnInit, OnDestroy {
     this._releaseFocus = undefined;
   }
 
-  /**
-   * Per-row action factory. Terminate is always present (wrapped with a
-   * confirmation dialog — legacy text/style preserved verbatim, see
-   * `cf-app-instances-config.service.ts` listActionTerminate). SSH is
-   * appended when both app-level (`sshEnabled`) and space-level
-   * (`allowSsh`) feature flags are on; elided otherwise per signal-list
-   * convention ("Prefer eliding when the action simply has no meaning").
-   * When present but the row isn't RUNNING, SSH stays visible-disabled so
-   * the kebab shape doesn't shift as instances cycle.
-   */
+  // Per-row action factory. Terminate is always present (wrapped with a
+  // confirmation dialog). SSH is appended only when both app-level
+  // (`sshEnabled`) and space-level (`allowSsh`) feature flags are on; when
+  // present but the row isn't RUNNING, SSH stays visible-disabled so the
+  // kebab shape doesn't shift as instances cycle.
   private readonly buildRowActions = (row: StAppStat): readonly SignalListRowAction<StAppStat>[] => {
     const disabled = this.actionsService.inFlight();
     const detail = this.dataService.appDetail();
