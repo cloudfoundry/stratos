@@ -1,9 +1,7 @@
-import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, signal, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, Signal, signal, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 import {
   PageHeaderComponent,
@@ -13,9 +11,10 @@ import {
 } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IServiceBinding } from '../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 
 type BindingStatus = 'pending' | 'busy' | 'success' | 'error';
@@ -36,7 +35,6 @@ interface BindingRow {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     NgClass,
     PageHeaderComponent,
     SteppersComponent,
@@ -49,9 +47,14 @@ export class DetachServiceInstanceComponent {
   private datePipe = inject(DatePipe);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private serviceCatalog = inject(ServiceCatalogDataService);
 
 
-  title$!: Observable<string>;
+  private _instanceSource!: SignalSource<StServiceInstance | null>;
+  readonly title: Signal<string> = computed(() => {
+    const name = this._instanceSource?.value()?.name;
+    return name ? `Unbind apps from '${name}'` : '';
+  });
   cfGuid!: string;
   deleteStarted = signal(false);
 
@@ -110,10 +113,7 @@ export class DetachServiceInstanceComponent {
 
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
-    this.title$ = cfEntityCatalog.serviceInstance.store.getEntityService(serviceInstanceId, this.cfGuid).waitForEntity$.pipe(
-      filter(o => !!o && !!o.entity),
-      map(o => `Unbind apps from '${o.entity.entity.name}'`),
-    );
+    this._instanceSource = this.serviceCatalog.serviceInstance(this.cfGuid, serviceInstanceId);
   }
 
   setSelectedBindings = (selectedBindings: APIResource<IServiceBinding>[]) => {
