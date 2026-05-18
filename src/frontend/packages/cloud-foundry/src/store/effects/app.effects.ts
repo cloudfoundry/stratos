@@ -12,7 +12,7 @@ import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import {
   createAppInstancesMetricAction,
-} from '../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
+} from '../../shared/components/list/list-types/app-instance/cf-app-instances-metrics-action';
 
 // CF effects retention (wave-3 CF-effects audit, 2026-05-12):
 // Retained — ASSIGN_ROUTE_SUCCESS / CF_APP_UPDATE_SUCCESS are still
