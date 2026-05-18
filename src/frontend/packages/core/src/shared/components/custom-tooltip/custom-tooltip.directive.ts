@@ -42,14 +42,35 @@ export class CustomTooltipDirective implements OnDestroy {
       this.hideTooltip();
     }
 
-    this.tooltipElement = this.renderer.createElement('div');
-    this.renderer.addClass(this.tooltipElement, 'custom-tooltip');
+    const el = this.renderer.createElement('div');
+    this.renderer.addClass(el, 'custom-tooltip');
     if (this.tooltipClass) {
-      this.renderer.addClass(this.tooltipElement, this.tooltipClass);
+      this.renderer.addClass(el, this.tooltipClass);
     }
+    this.renderer.setProperty(el, 'innerHTML', this.tooltipText);
 
-    this.renderer.setProperty(this.tooltipElement, 'innerHTML', this.tooltipText);
-    this.renderer.appendChild(document.body, this.tooltipElement);
+    // Apply visual styles BEFORE positioning so getBoundingClientRect()
+    // measures the content-sized box. A bare `<div>` with no styling is
+    // a 100%-wide block — measuring it first would have positioned the
+    // tooltip relative to a viewport-wide rect (and the clamp would have
+    // pinned it to the left edge of the screen, disconnected from the
+    // host button).
+    this.renderer.setStyle(el, 'position', 'fixed');
+    this.renderer.setStyle(el, 'top', '-9999px');
+    this.renderer.setStyle(el, 'left', '-9999px');
+    this.renderer.setStyle(el, 'z-index', '10000');
+    this.renderer.setStyle(el, 'pointer-events', 'none');
+    this.renderer.setStyle(el, 'background-color', '#333');
+    this.renderer.setStyle(el, 'color', 'white');
+    this.renderer.setStyle(el, 'padding', '8px 12px');
+    this.renderer.setStyle(el, 'border-radius', '4px');
+    this.renderer.setStyle(el, 'font-size', '12px');
+    this.renderer.setStyle(el, 'max-width', '200px');
+    this.renderer.setStyle(el, 'word-wrap', 'break-word');
+    this.renderer.setStyle(el, 'box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
+
+    this.tooltipElement = el;
+    this.renderer.appendChild(document.body, el);
 
     this.positionTooltip();
   }
@@ -67,10 +88,30 @@ export class CustomTooltipDirective implements OnDestroy {
     const hostRect = this.elementRef.nativeElement.getBoundingClientRect();
     const tooltipRect = this.tooltipElement.getBoundingClientRect();
 
+    // Auto-flip when the preferred direction has no room. Pairs:
+    // above↔below, left↔right. Falls back to the requested direction if
+    // both sides are tight (the viewport-clamp logic below picks up the
+    // pieces). 8px is the gap between host and tooltip (matches the
+    // explicit `- 8` / `+ 8` offsets in the position calc).
+    let pos = this.position;
+    if (pos === 'above' && hostRect.top - tooltipRect.height - 8 < 8 &&
+        hostRect.bottom + tooltipRect.height + 8 <= window.innerHeight - 8) {
+      pos = 'below';
+    } else if (pos === 'below' && hostRect.bottom + tooltipRect.height + 8 > window.innerHeight - 8 &&
+        hostRect.top - tooltipRect.height - 8 >= 8) {
+      pos = 'above';
+    } else if (pos === 'left' && hostRect.left - tooltipRect.width - 8 < 8 &&
+        hostRect.right + tooltipRect.width + 8 <= window.innerWidth - 8) {
+      pos = 'right';
+    } else if (pos === 'right' && hostRect.right + tooltipRect.width + 8 > window.innerWidth - 8 &&
+        hostRect.left - tooltipRect.width - 8 >= 8) {
+      pos = 'left';
+    }
+
     let top = 0;
     let left = 0;
 
-    switch (this.position) {
+    switch (pos) {
       case 'above':
         top = hostRect.top - tooltipRect.height - 8;
         left = hostRect.left + (hostRect.width - tooltipRect.width) / 2;
@@ -93,19 +134,8 @@ export class CustomTooltipDirective implements OnDestroy {
     top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
     left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
 
-    this.renderer.setStyle(this.tooltipElement, 'position', 'fixed');
     this.renderer.setStyle(this.tooltipElement, 'top', `${top}px`);
     this.renderer.setStyle(this.tooltipElement, 'left', `${left}px`);
-    this.renderer.setStyle(this.tooltipElement, 'z-index', '10000');
-    this.renderer.setStyle(this.tooltipElement, 'pointer-events', 'none');
-    this.renderer.setStyle(this.tooltipElement, 'background-color', '#333');
-    this.renderer.setStyle(this.tooltipElement, 'color', 'white');
-    this.renderer.setStyle(this.tooltipElement, 'padding', '8px 12px');
-    this.renderer.setStyle(this.tooltipElement, 'border-radius', '4px');
-    this.renderer.setStyle(this.tooltipElement, 'font-size', '12px');
-    this.renderer.setStyle(this.tooltipElement, 'max-width', '200px');
-    this.renderer.setStyle(this.tooltipElement, 'word-wrap', 'break-word');
-    this.renderer.setStyle(this.tooltipElement, 'box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
   }
 
   private clearTimeouts() {
