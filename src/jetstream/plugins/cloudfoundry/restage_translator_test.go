@@ -341,3 +341,7 @@ func (p *noTokenProxy) RefreshOAuthToken(_ bool, _, _, _, _, _ string) (api.Toke
 func (p *noTokenProxy) DoProxySingleRequestWithToken(_ string, _ *api.TokenRecord, _, _ string, _ http.Header, _ []byte) (*api.CNSIRequest, error) {
 	return &api.CNSIRequest{}, nil
 }
+
+func (p *noTokenProxy) GetUserTokenInfo(_ string) (*api.JWTUserTokenInfo, error) {
+	return &api.JWTUserTokenInfo{}, nil
+}

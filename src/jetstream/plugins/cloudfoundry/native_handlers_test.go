@@ -26,6 +26,7 @@ type mockNativeCFProxy struct {
 	userID       string
 	cnsiRecord   api.CNSIRecord
 	tokenRecord  api.TokenRecord
+	tokenInfo    *api.JWTUserTokenInfo
 	proxyRequest func(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error)
 }
 
@@ -53,6 +54,13 @@ func (m *mockNativeCFProxy) DoProxySingleRequestWithToken(cnsiGUID string, token
 		return m.proxyRequest(cnsiGUID, token, method, requestURL, headers, body)
 	}
 	return &api.CNSIRequest{}, nil
+}
+
+func (m *mockNativeCFProxy) GetUserTokenInfo(_ string) (*api.JWTUserTokenInfo, error) {
+	if m.tokenInfo != nil {
+		return m.tokenInfo, nil
+	}
+	return &api.JWTUserTokenInfo{UserGUID: "cf-user-default"}, nil
 }
 
 // mustParseURL parses a URL and panics on error — for test setup only.
