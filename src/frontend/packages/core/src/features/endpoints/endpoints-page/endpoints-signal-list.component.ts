@@ -264,7 +264,11 @@ export class EndpointsSignalListComponent {
 
     if (isConnected) {
       out.push({
-        label: 'Disconnect', icon: 'link_off',
+        // `link_off` is Material Symbols only — under the classic
+        // Material Icons font shipped here it fails to compose as a
+        // ligature, widening the kebab cell. `power_settings_new`
+        // composes correctly and conveys disconnect.
+        label: 'Disconnect', icon: 'power_settings_new',
         invoke: () => this.openDisconnectConfirm(ep),
       });
     } else if (connectable) {
