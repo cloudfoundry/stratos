@@ -15,7 +15,8 @@
         }
         @if (tab && tab.link && (tab.hidden$ | async) !== true) {
           <a class="page-side-nav__item"
-            [routerLink]="[tab.link]" [routerLinkActive]="['page-side-nav__item--active']">
+            [routerLink]="[tab.link]" queryParamsHandling="preserve"
+            [routerLinkActive]="['page-side-nav__item--active']">
             @if (tab.icon) {
               <app-custom-icon class="page-side-nav__icon" [fontSet]="tab.iconFont">{{ tab.icon }}
               </app-custom-icon>

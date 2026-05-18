@@ -114,7 +114,12 @@ export const APPLICATIONS_ROUTES: Routes = [
               extensionsActionsKey: StratosActionType.Application
             },
             children: [
-              { path: '', redirectTo: 'summary', pathMatch: 'full' },
+              // Function-form redirect so the ?breadcrumbs= query param
+              // (set by row links on scoped apps walls) survives the
+              // empty-path → summary hop. Default `redirectTo: 'summary'`
+              // strips query params, which broke the "back to CF-scoped
+              // applications" breadcrumb.
+              { path: '', redirectTo: ({ queryParams }) => ({ path: 'summary', queryParams }), pathMatch: 'full' },
               { path: 'summary', component: BuildTabComponent },
               { path: 'instances', component: InstancesTabComponent },
               { path: 'routes', component: RoutesTabComponent },
