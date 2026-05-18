@@ -8,20 +8,8 @@ import type { StAppStat } from '../../../../../services/endpoint-data/stratos-ty
 import { AppInstanceActionsService } from '../../../../services/app-instance-actions.service';
 
 // CF App Instances signal-list config — single-app, per-instance rows of
-// the app-detail Instances tab. Replaces the legacy
-// CfAppInstancesConfigService (ngrx-coupled) with a signal-native
-// configuration that drives the signal-list framework.
-//
-// Source signal is `AppDetailDataService.stats()` — slice 1 already wires
-// the fetch + (slice-2) focus-driven 5s continuous poll. Per-row Kill
-// uses AppInstanceActionsService.killInstance(index); confirmation
-// dialog wiring stays in the consuming component to match peer
-// convention (see application-wall.component for the Delete pattern).
-//
-// Service is tab-scoped (provided in the Instances tab component
-// `providers` array, NOT providedIn:'root') so its filter/sort state
-// resets cleanly when the user navigates between apps. The tab also
-// provides AppInstanceActionsService at the same scope.
+// the app-detail Instances tab. Tab-scoped (NOT providedIn:'root') so
+// filter/sort state resets when the user navigates between apps.
 @Injectable()
 export class CfAppInstancesSignalConfigService {
   private readonly dataService = inject(AppDetailDataService);
@@ -67,9 +55,8 @@ export class CfAppInstancesSignalConfigService {
     );
 
     runInInjectionContext(this.injector, () => {
-      // Filter mirrors legacy `CfAppInstancesConfigService` text filter:
-      // matches against state (e.g. "running", "crashed"), so the user
-      // can find a misbehaving instance by typing its state.
+      // Filter matches against instance state (e.g. "running", "crashed")
+      // so the user can find a misbehaving instance by typing its state.
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((s: StAppStat) => {
@@ -101,15 +88,10 @@ export class CfAppInstancesSignalConfigService {
     });
   }
 
-  // Build the column set for the Instances tab. Mirrors legacy
-  // `CfAppInstancesConfigService.columns` 1:1 — same column ids, same
-  // labels, same sort axes (index, state, memory, disk, cpu, uptime).
-  // Cell rendering uses UtilsService.usageBytes / percent / formatUptime
-  // for visual parity with legacy. The CF Cell column from legacy is
-  // intentionally omitted here — it depends on cf-cell metrics that the
-  // signal-native data path doesn't surface yet; the consuming component
-  // can append it when metrics are available (mirrors legacy's
-  // conditional splice via CfCellHelper.hasCellMetrics).
+  // Builds the column set for the Instances tab. The CF Cell column is
+  // omitted here because it needs cf-cell metrics the signal-native data
+  // path doesn't surface yet; the consuming component appends it when
+  // metrics are available (CfCellHelper.hasCellMetrics gates).
   buildColumns(): SignalListColumn<StAppStat>[] {
     const columns: SignalListColumn<StAppStat>[] = [
       {

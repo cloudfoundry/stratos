@@ -8,25 +8,13 @@ import { AppVariableActionsService } from '../../../../services/app-variable-act
 import { ListAppEnvVar } from './cf-app-variables.types';
 
 // CF App Variables signal-list config — single-app, per-variable rows of
-// the app-detail Variables tab. Replaces the legacy
-// CfAppVariablesListConfigService (ngrx-coupled) with a signal-native
-// configuration that drives the signal-list framework.
+// the app-detail Variables tab. Tab-scoped (NOT providedIn:'root') so
+// filter/sort state resets when the user navigates between apps.
 //
-// Source signal is `AppDetailDataService.envVars()` — the per-app env
-// envelope already fetched as part of slice 1's app-detail composition.
-// User-defined entries live under `environment`; we project that map to
-// `ListAppEnvVar[]` ({name, value}) for the list rows. System / VCAP /
-// running / staging sections continue to render in the "All Variables"
-// code block on the consuming component (read directly from envVars()).
-//
-// Per-row Delete invokes AppVariableActionsService.deleteVariable;
-// confirmation dialog wiring stays in the consuming component to match
-// peer convention (see CfAppRoutesSignalConfigService).
-//
-// Service is tab-scoped (provided in the Variables tab component
-// `providers` array, NOT providedIn:'root') so its filter/sort state
-// resets cleanly when the user navigates between apps. The tab also
-// provides AppVariableActionsService at the same scope.
+// User-defined entries from envVars().environment project to
+// ListAppEnvVar[] for the list rows; system/VCAP/running/staging
+// sections render in the "All Variables" code block on the consuming
+// component (read directly from envVars()).
 @Injectable()
 export class CfAppVariablesSignalConfigService {
   private readonly dataService = inject(AppDetailDataService);
@@ -37,10 +25,7 @@ export class CfAppVariablesSignalConfigService {
     viewMode: 'table',
     pageSize: [25, 25],
     pageIndex: [0, 0],
-    // Default sort mirrors legacy CfAppVariablesListConfigService: sort
-    // by name ascending (natural-sort in legacy; the signal-list
-    // framework uses standard string compare which is close enough for
-    // user-defined env var names).
+    // Default sort by name ascending (standard string compare).
     sort: [
       { field: 'name', direction: 'asc' },
       { field: 'name', direction: 'asc' },
@@ -51,7 +36,7 @@ export class CfAppVariablesSignalConfigService {
   readonly sort = this.state.sort as WritableSignal<SortSpec<ListAppEnvVar>>;
   readonly pageSize = this.state.pageSize;
   readonly pageIndex = this.state.pageIndex;
-  // Legacy text filter ("Filter by Name") matches against name.
+  // Text filter ("Filter by Name") matches against the variable name.
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode = this.state.viewMode;
 
