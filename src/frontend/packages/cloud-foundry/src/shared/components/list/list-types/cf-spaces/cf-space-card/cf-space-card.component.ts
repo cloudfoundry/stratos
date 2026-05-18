@@ -34,7 +34,6 @@ import {
 import { MultilineTitleComponent } from '../../../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
 import { RouterNav } from '../../../../../../../../store/src/actions/router.actions';
 import { EntityMonitorFactory } from '../../../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { EndpointUser } from '../../../../../../../../store/src/types/endpoint.types';
 import { MenuItem } from '../../../../../../../../store/src/types/menu-item.types';
@@ -80,7 +79,6 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   private cfOrgService = inject(CloudFoundryOrganizationService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private emf = inject(EntityMonitorFactory);
   private userFavoriteManager = inject(UserFavoriteManager);
 
@@ -148,13 +146,10 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     );
 
     this.appCount$ = allApps$.pipe(
-      switchMap(allApps => allApps ? observableOf(allApps.length) : CloudFoundryEndpointService.fetchAppCount(
-        this.store,
-        this.paginationMonitorFactory,
-        this.cfEndpointService.cfGuid,
-        this.orgGuid,
-        this.row.metadata.guid
-      ))
+      switchMap(allApps => allApps
+        ? observableOf(allApps.length)
+        : this.cfEndpointService.fetchAppCount(this.orgGuid, this.row.metadata.guid)
+      )
     );
 
     const fetchData$ = observableCombineLatest(
