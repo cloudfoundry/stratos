@@ -228,14 +228,19 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     // Reactive breadcrumb key — re-resolves whenever the URL's
     // ?breadcrumbs= query param changes. Snapshot-only reads broke on
     // tab navigation that re-emits params, and on async query-param
-    // arrival when the route resolves before the param lands.
-    route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
-      this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
-      if (this.latestBreadcrumbs) {
-        this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
-        this.cdr.markForCheck();
-      }
-    });
+    // arrival when the route resolves before the param lands. Seed
+    // synchronously from snapshot so the initial render gets the key,
+    // then subscribe reactively when queryParamMap is available.
+    this.breadcrumbKey = route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null;
+    if (route.queryParamMap) {
+      route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
+        this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
+        if (this.latestBreadcrumbs) {
+          this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
+          this.cdr.markForCheck();
+        }
+      });
+    }
 
     this.user$ = this.userProfileService.userProfile$;
 
