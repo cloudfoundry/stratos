@@ -111,8 +111,9 @@ export class ServiceSummaryComponent implements OnInit, OnDestroy {
       void svc.loadServicesDetails();
     }
     if (this.cfGuid && this.serviceGuid) {
-      this.catalog.serviceOffering(this.cfGuid, this.serviceGuid).subscribe(o => {
-        this._offering.set(o);
+      const source = this.catalog.serviceOffering(this.cfGuid, this.serviceGuid);
+      runInInjectionContext(this.injector, () => {
+        effect(() => this._offering.set(source.value()));
       });
     }
     runInInjectionContext(this.injector, () => {

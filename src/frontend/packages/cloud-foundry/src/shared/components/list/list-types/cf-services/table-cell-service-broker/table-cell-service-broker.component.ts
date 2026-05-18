@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
 
 import { TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IService } from '../../../../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
-import { ServiceCatalogDataService } from '../../../../../../services/endpoint-data/service-catalog-data.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../../../services/endpoint-data/service-catalog-data.service';
+import { SpaceDataRegistry } from '../../../../../../services/endpoint-data/space-data.registry';
+import { SpaceDataService } from '../../../../../../services/endpoint-data/space-data.service';
 import { StServiceBroker } from '../../../../../../services/endpoint-data/stratos-types';
 
 export enum TableCellServiceBrokerComponentMode {
@@ -19,6 +18,11 @@ export enum TableCellServiceBrokerComponentMode {
 export interface TableCellServiceBrokerComponentConfig {
   mode: TableCellServiceBrokerComponentMode;
   altScope?: boolean;
+}
+
+interface SpaceLink {
+  name: string;
+  link: string[];
 }
 
 @Component({
@@ -33,51 +37,81 @@ export interface TableCellServiceBrokerComponentConfig {
 })
 export class TableCellServiceBrokerComponent extends
   TableCellCustom<APIResource<IService>,
-  TableCellServiceBrokerComponentConfig> {
+  TableCellServiceBrokerComponentConfig> implements OnInit, OnDestroy {
 
   private serviceCatalog = inject(ServiceCatalogDataService);
+  private spaceRegistry = inject(SpaceDataRegistry);
+  private injector = inject(Injector);
 
-  @Input()
+  private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
+  private _spaceData: SpaceDataService | null = null;
+  private _spaceKey: { cnsi: string, guid: string } | null = null;
+
+  readonly broker: Signal<StServiceBroker | null> = computed(
+    () => this._brokerSource()?.value() ?? null,
+  );
+
+  readonly spaceLink: Signal<SpaceLink | null> = computed(() => {
+    const space = this._spaceData?.space();
+    const broker = this.broker();
+    if (!space || !broker) return null;
+    return {
+      name: space.name,
+      link: [
+        '/cloud-foundry',
+        broker.cnsiGuid,
+        'organizations',
+        space.orgGuid,
+        'spaces',
+        space.guid,
+        'summary',
+      ],
+    };
+  });
+
   set row(row: APIResource<IService>) {
     super.row = row;
-    if (row && !this.spaceLink$) {
-      this.broker$ = this.serviceCatalog.serviceBroker(
-        this.row.entity.cfGuid,
-        this.row.entity.service_broker_guid,
-      );
-      // Space lookup remains on the legacy ngrx surface — out of scope
-      // for this V2-cutover step. Drops the broker.entity.* wrapper for
-      // the V3-flat StServiceBroker.spaceGuid / cnsiGuid shape.
-      this.spaceLink$ = this.broker$.pipe(
-        filter((broker): broker is StServiceBroker => !!broker && !!broker.space?.guid),
-        switchMap(broker => cfEntityCatalog.space.store.getWithOrganization.getEntityService(
-          broker.space!.guid,
-          broker.cnsiGuid,
-        ).waitForEntity$
-        ),
-        map(e => e.entity),
-        map(space => ({
-          name: space.entity.name,
-          link: ['/cloud-foundry',
-            space.entity.cfGuid,
-            'organizations',
-            space.entity.organization_guid,
-            'spaces',
-            space.metadata.guid,
-            'summary'
-          ]
-        }))
-      );
+    if (!row) {
+      this._brokerSource.set(null);
+      return;
     }
+    this._brokerSource.set(
+      this.serviceCatalog.serviceBroker(row.entity.cfGuid, row.entity.service_broker_guid),
+    );
   }
   get row(): APIResource<IService> {
     return super.row;
   }
 
-  public spaceLink$: Observable<{
-    name: string,
-    link: string[],
-  }>;
-  public broker$: Observable<StServiceBroker | null>;
+  ngOnInit(): void {
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const broker = this.broker();
+        const targetGuid = broker?.space?.guid ?? null;
+        const targetKey = targetGuid && broker
+          ? { cnsi: broker.cnsiGuid, guid: targetGuid }
+          : null;
+        const curr = this._spaceKey;
+        if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
+        if (curr) {
+          this.spaceRegistry.release(curr.cnsi, curr.guid);
+          this._spaceData = null;
+          this._spaceKey = null;
+        }
+        if (targetKey) {
+          this._spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
+          this._spaceData.load().subscribe();
+          this._spaceKey = targetKey;
+        }
+      });
+    });
+  }
 
+  ngOnDestroy(): void {
+    if (this._spaceKey) {
+      this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
+      this._spaceData = null;
+      this._spaceKey = null;
+    }
+  }
 }

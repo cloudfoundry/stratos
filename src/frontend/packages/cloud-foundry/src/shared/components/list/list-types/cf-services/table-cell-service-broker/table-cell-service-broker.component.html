@@ -1,11 +1,11 @@
-@if ((broker$ | async); as broker) {
+@if (broker(); as broker) {
   <div class="service-broker">
     @if (config?.mode === 'NAME') {
       {{ broker.name }}
     }
     @if (config?.mode === 'SCOPE') {
       <div>
-        @if (spaceLink$ | async; as spaceLink) {
+        @if (spaceLink(); as spaceLink) {
           @if (config?.altScope) {
             Space
           } @else {

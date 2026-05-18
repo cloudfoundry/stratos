@@ -12,7 +12,7 @@ import {
 import { ListStateStore, SignalListColumn } from '@stratosui/core';
 
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { ServiceCatalogDataService } from '../../../../../services/endpoint-data/service-catalog-data.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../../services/endpoint-data/service-catalog-data.service';
 import type { StServicePlan } from '../../../../../services/endpoint-data/stratos-types';
 import {
   canShowServicePlanCosts,
@@ -60,10 +60,13 @@ export class CfServicePlansSignalConfigService {
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode = this.state.viewMode;
 
-  // Source data + load state.
+  // Source data + load state. _currentSource holds the active fetch
+  // (refreshed by reloads); the mirror effect set up in initialize()
+  // copies its value/isLoading/error into the public signals below.
   private readonly _source: WritableSignal<StServicePlan[]> = signal([]);
   private readonly _isLoading: WritableSignal<boolean> = signal(false);
   private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+  private readonly _currentSource = signal<SignalSource<StServicePlan[]> | null>(null);
 
   readonly source: Signal<StServicePlan[]> = this._source.asReadonly();
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
@@ -101,42 +104,46 @@ export class CfServicePlansSignalConfigService {
   initialize(cfGuid: string, offeringGuid: string): void {
     this.cfGuid = cfGuid;
     this.offeringGuid = offeringGuid;
-    void this.loadAll();
-  }
-
-  async loadAll(): Promise<void> {
-    if (!this.cfGuid || !this.offeringGuid) return;
-    this._isLoading.set(true);
-    try {
-      const plans = await new Promise<StServicePlan[]>((resolve, reject) => {
-        this.catalog.servicePlansForOffering(this.cfGuid, this.offeringGuid).subscribe({
-          next: resolve,
-          error: reject,
+    // One mirror effect for the lifetime of this service. Tracks both
+    // _currentSource swap (each refresh creates a new SignalSource)
+    // and the inner source's value/isLoading/error transitions, so the
+    // public _source/_isLoading/_errorsByCnsi follow lock-step.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const src = this._currentSource();
+        if (!src) {
+          return;
+        }
+        this._isLoading.set(src.isLoading());
+        const err = src.error();
+        this._errorsByCnsi.update(m => {
+          const next = new Map(m);
+          if (err) {
+            next.set(this.cfGuid, err);
+          } else {
+            next.delete(this.cfGuid);
+          }
+          return next;
         });
+        // Tag each plan with the cnsi guid in case the API didn't (consumer
+        // helpers like ServicePlanPublicComponent and the cost cell expect
+        // it on the row shape for plan-visibility lookups).
+        const tagged = src.value().map(p => ({ ...p, cnsiGuid: p.cnsiGuid || this.cfGuid }));
+        this._source.set(tagged);
       });
-      // Tag each plan with the cnsi guid in case the API didn't (consumer
-      // helpers like ServicePlanPublicComponent and the cost cell expect
-      // it on the row shape for plan-visibility lookups).
-      const tagged = plans.map(p => ({ ...p, cnsiGuid: p.cnsiGuid || this.cfGuid }));
-      this._source.set(tagged);
-      this._errorsByCnsi.update(m => {
-        const next = new Map(m);
-        next.delete(this.cfGuid);
-        return next;
-      });
-    } catch (err) {
-      this._errorsByCnsi.update(m => {
-        const next = new Map(m);
-        next.set(this.cfGuid, err);
-        return next;
-      });
-    } finally {
-      this._isLoading.set(false);
-    }
+    });
+    this.loadAll();
   }
 
-  refresh(): Promise<void> {
-    return this.loadAll();
+  loadAll(): void {
+    if (!this.cfGuid || !this.offeringGuid) return;
+    this._currentSource.set(
+      this.catalog.servicePlansForOffering(this.cfGuid, this.offeringGuid),
+    );
+  }
+
+  refresh(): void {
+    this.loadAll();
   }
 
   clearFilters(): void {

@@ -1,12 +1,11 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, ViewChild, ViewContainerRef, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { take,
-  catchError,
+import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
+import {
   distinctUntilChanged,
   filter,
   map,
@@ -23,8 +22,8 @@ import {
   getPlanAccessibilityV3,
   getServicePlanName,
 } from '../../../../../../cloud-foundry/src/features/service-catalog/services-helper';
-import { ServiceCatalogDataService } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
-import { StServicePlan } from '../../../../../../cloud-foundry/src/services/endpoint-data/stratos-types';
+import { ServiceCatalogDataService, SignalSource } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
+import { StServicePlan, StServicePlanVisibility } from '../../../../../../cloud-foundry/src/services/endpoint-data/stratos-types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
@@ -72,6 +71,12 @@ export class SelectPlanStepComponent implements OnDestroy {
   private modeService = inject(CsiModeService);
   private serviceCatalog = inject(ServiceCatalogDataService);
   private csiState = inject(CsiStateService);
+  private injector = inject(Injector);
+  // The currently-selected plan's visibility fetch. Swapped each time
+  // the form's plan selection changes; the constructor effect derives
+  // selectedPlanAccessibility from this + the cached isPublic flag.
+  private _planVisSource = signal<SignalSource<StServicePlanVisibility | null> | null>(null);
+  private _planIsPublic = signal<boolean>(false);
   // toObservable() must run inside an injection context — lift the
   // bridge to a class field so downstream pipes can subscribe later.
   private csiState$ = toObservable(this.csiState.state);
@@ -101,6 +106,24 @@ export class SelectPlanStepComponent implements OnDestroy {
     // validate to true and the Next button would stay disabled.
     this.stepperForm.statusChanges.subscribe(() => {
       this.validate.set(this.stepperForm.valid);
+    });
+
+    // Derive selectedPlanAccessibility from the active visibility fetch
+    // + cached isPublic flag. When the form selection changes, the tap()
+    // below swaps _planVisSource and _planIsPublic; this effect re-runs
+    // once the new source's value lands.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const src = this._planVisSource();
+        if (!src) {
+          this.selectedPlanAccessibilitySignal.set(null);
+          return;
+        }
+        if (src.isLoading()) return;
+        this.selectedPlanAccessibilitySignal.set(
+          getPlanAccessibilityV3(this._planIsPublic(), src.value()),
+        );
+      });
     });
 
     this.servicePlans$ = this.csiState$.pipe(
@@ -144,14 +167,10 @@ export class SelectPlanStepComponent implements OnDestroy {
         }),
         filter(selectedServicePlan => !!selectedServicePlan),
         tap(selectedServicePlan => {
-          const cfGuid = selectedServicePlan.cnsiGuid;
-          const planGuid = selectedServicePlan.guid;
-          const isPublicPlan = selectedServicePlan.visibilityType === 'public';
-          this.serviceCatalog.planVisibility(cfGuid, planGuid).pipe(
-            catchError(() => observableOf(null)),
-            map(visibility => getPlanAccessibilityV3(isPublicPlan, visibility)),
-            take(1),
-          ).subscribe(cardStatus => this.selectedPlanAccessibilitySignal.set(cardStatus));
+          this._planIsPublic.set(selectedServicePlan.visibilityType === 'public');
+          this._planVisSource.set(
+            this.serviceCatalog.planVisibility(selectedServicePlan.cnsiGuid, selectedServicePlan.guid),
+          );
         })
       );
 
