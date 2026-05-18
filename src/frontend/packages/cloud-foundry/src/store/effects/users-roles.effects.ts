@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { ApplicationRef, Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -15,7 +14,6 @@ import {
   ICFAction
 } from '@stratosui/store';
 import { UpdateCfAction } from '../../../../store/src/types/request.types';
-import { GET_CURRENT_CF_USER_RELATION, GetCurrentCfUserRelations } from '../../actions/permissions.actions';
 import { UsersRolesActions, UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../actions/users-roles.actions';
 import { AddCfUserRole, ChangeCfUserRole, RemoveCfUserRole } from '../../actions/users.actions';
 import { CFAppState } from '../../cf-app-state';
@@ -24,48 +22,26 @@ import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import {
   ManageUsersSetUsernamesHelper } from '../../features/cf/users/manage-users/manage-users-set-usernames/manage-users-set-usernames.component';
 import { CfUserService } from '../../shared/data-services/cf-user.service';
-import { fetchCfUserRole } from '../../user-permissions/cf-user-roles-fetch';
 import { selectCfUsersRoles } from '../selectors/cf-users-roles.selector';
 import { OrgUserRoleNames } from '../types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../types/users-roles.types';
 
-// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
-// Retained — all three actions this effect listens for have live
-// dispatchers:
-//   - GET_CURRENT_CF_USER_RELATION (GetCurrentCfUserRelations) is
-//     dispatched from cf-user-roles-fetch.ts:138 during permissions
-//     bootstrapping for every CF endpoint.
-//   - UsersRolesActions.ClearUpdateState (UsersRolesClearUpdateState)
-//     is dispatched from manage-users-confirm.component.ts:126.
-//   - UsersRolesActions.ExecuteChanges (UsersRolesExecuteChanges) is
-//     dispatched from manage-users.component.ts:140 and
-//     remove-user.component.ts:120.
+// Two remaining live effects: ClearUpdateState (dispatched from
+// manage-users-confirm.component.ts) and ExecuteChanges (dispatched from
+// manage-users.component.ts + remove-user.component.ts). The historic
+// getCurrentUsersPermissions$ effect (V2 per-relation fetch via
+// GetCurrentCfUserRelations) was retired in B.1 — cf-user-roles-fetch
+// now drives a single native handler call and dispatches the bucket-
+// shaped GetCurrentCfUserRelationsComplete actions directly.
 @Injectable({
   providedIn: 'root'
 })
 export class UsersRolesEffects {
-  private httpClient = inject(HttpClient);
   private actions$ = inject(Actions);
   private store = inject<Store<CFAppState>>(Store);
   private cfUserService = inject(CfUserService);
   private appRef = inject(ApplicationRef);
 
-
-  getCurrentUsersPermissions$ = createEffect(() => this.actions$.pipe(
-    ofType<GetCurrentCfUserRelations>(GET_CURRENT_CF_USER_RELATION),
-    switchMap(action => {
-      return fetchCfUserRole(this.store, action, this.httpClient).pipe(
-        map(() => {
-          this.appRef.tick();
-          return { type: action.actions[1] };
-        }),
-        catchError(() => {
-          this.appRef.tick();
-          return [{ type: action.actions[2] }];
-        })
-      );
-    })
-  ));
 
   clearEntityUpdates$ = createEffect(() => this.actions$.pipe(
     ofType<UsersRolesClearUpdateState>(UsersRolesActions.ClearUpdateState),

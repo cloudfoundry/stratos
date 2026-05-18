@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Action, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { combineLatest, defer, from, Observable, of } from 'rxjs';
 import { take, catchError, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
 
@@ -9,9 +9,6 @@ import {
   EndpointsDataService,
   EntityUserRolesEndpoint,
   EntityUserRolesFetch,
-  BaseHttpClientFetcher,
-  flattenPagination,
-  PaginationFlattener,
   ActionState,
   selectPaginationState,
   PaginationEntityState,
@@ -23,11 +20,9 @@ import {
   GET_CURRENT_CF_USER_RELATIONS_FAILED,
   GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
   GetCfUserRelations,
-  GetCurrentCfUserRelations,
   GetCurrentCfUserRelationsComplete } from '../actions/permissions.actions';
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { CFResponse } from '../store/types/cf-api.types';
 
 /**
  * Wire shape returned by GET /pp/v1/cf/current-user-roles/:cnsiGuid
@@ -200,57 +195,6 @@ export function fetchCfCurrentUserRoles(
       return of(false);
     }),
     share(),
-  );
-}
-
-class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
-
-  constructor(httpClient: HttpClient, public url: string, public requestOptions: { [key: string]: any }) {
-    super(httpClient, url, requestOptions, 'page');
-  }
-  public getTotalPages = (res: CFResponse): number => res.total_pages;
-
-  public mergePages = (res: CFResponse[]): CFResponse => {
-    const firstRes = res.shift();
-    const final = res.reduce((finalRes: CFResponse, _currentRes: CFResponse) => {
-      finalRes.resources = [
-        ...finalRes.resources,
-      ];
-      return finalRes;
-    }, firstRes as CFResponse);
-    return final;
-  };
-  public getTotalResults = (res: CFResponse): number => res.total_results;
-  public clearResults = (res: CFResponse): Observable<CFResponse> => of(res);
-}
-
-export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {
-  const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
-  const params = {
-    headers: {
-      'x-cap-cnsi-list': action.endpointGuid,
-      'x-cap-passthrough': 'true'
-    },
-    params: {
-      'results-per-page': '100'
-    }
-  };
-  const get$ = httpClient.get<CFResponse>(
-    url,
-    params
-  );
-  return flattenPagination(
-    (flatAction: Action) => store.dispatch(flatAction),
-    get$,
-    new PermissionFlattener(httpClient, url, params)
-  ).pipe(
-    map(data => {
-      store.dispatch(new GetCurrentCfUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
-      return true;
-    }),
-    take(1),
-    catchError(_err => of(false)),
-    share()
   );
 }
 
