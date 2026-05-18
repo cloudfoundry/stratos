@@ -65,7 +65,7 @@
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances"
             iconFont="stratos-icons" icon="service" label="Service Instances"
-            value="{{ (cfSpaceService.serviceInstancesCount$ | async)}}"
+            value="{{ cfSpaceService.serviceInstancesCount() }}"
           limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
         </app-tile>
         @if ((cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0) {

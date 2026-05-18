@@ -66,7 +66,7 @@
         </app-tile>
         <app-tile>
           <app-card-number-metric iconFont="stratos-icons" icon="service_instance" label="Service Instances"
-            value="{{ (cfOrgService.serviceInstancesCount$ | async) }}"
+            value="{{ cfOrgService.serviceInstancesCount() }}"
           limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
         </app-tile>
         @if ((cfOrgService.userProvidedServiceInstancesCount$ | async) > 0) {

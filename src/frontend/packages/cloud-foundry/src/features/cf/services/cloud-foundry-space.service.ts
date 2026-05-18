@@ -1,4 +1,4 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -18,7 +18,7 @@ import { getStartedAppInstanceCount } from '../../../cf.helpers';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
+import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -33,6 +33,7 @@ export class CloudFoundrySpaceService {
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
   private cfOrgService = inject(CloudFoundryOrganizationService);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
   private spaceDataRegistry = inject(SpaceDataRegistry);
@@ -65,7 +66,7 @@ export class CloudFoundrySpaceService {
   // data source separately — this stream exists for the summary tile's
   // "Routes" card only.
   routesCount$!: Observable<number>;
-  serviceInstancesCount$!: Observable<number>;
+  serviceInstancesCount!: Signal<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
   appInstances$!: Observable<number>;
   apps$!: Observable<APIResource<IApp>[]>;
@@ -122,12 +123,7 @@ export class CloudFoundrySpaceService {
       filter((s): s is StSpace => !!s),
     );
 
-    this.serviceInstancesCount$ = fetchServiceInstancesCount(
-      this.cfGuid,
-      this.orgGuid,
-      this.spaceGuid,
-      this.store,
-      this.paginationMonitorFactory);
+    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, this.spaceGuid).value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routesCount$ = space$.pipe(map(s => s.routeCount ?? 0));

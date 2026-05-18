@@ -1,4 +1,4 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -29,7 +29,7 @@ import { createEntityRelationPaginationKey } from '../../../entity-relations/ent
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
+import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
@@ -69,6 +69,7 @@ export class CloudFoundryOrganizationService {
   private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
   private orgDataRegistry = inject(OrgDataRegistry);
   private injector = inject(Injector);
@@ -91,7 +92,7 @@ export class CloudFoundryOrganizationService {
   // shape difference is invisible to consumers.
   privateDomains$!: Observable<APIResource<IDomain>[]>;
   routes$!: Observable<APIResource<Route>[]>;
-  serviceInstancesCount$!: Observable<number>;
+  serviceInstancesCount!: Signal<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
   routesCount$!: Observable<number>;
   spaces$!: Observable<APIResource<ISpace>[]>;
@@ -153,7 +154,7 @@ export class CloudFoundryOrganizationService {
       }),
     );
 
-    this.serviceInstancesCount$ = fetchServiceInstancesCount(this.cfGuid, this.orgGuid, null, this.store, this.paginationMonitorFactory);
+    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid).value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
 
