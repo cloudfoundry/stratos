@@ -11,7 +11,7 @@ export class CustomTooltipDirective implements OnDestroy {
   @Input('matTooltip') tooltipText: string = '';
   @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
   @Input('matTooltipClass') tooltipClass: string = '';
-  @Input('matTooltipShowDelay') showDelay: number = 500;
+  @Input('matTooltipShowDelay') showDelay: number = 250;
   @Input('matTooltipHideDelay') hideDelay: number = 100;
   @Input('matTooltipDisabled') disabled: boolean = false;
 
@@ -96,7 +96,8 @@ export class CustomTooltipDirective implements OnDestroy {
     this.renderer.setStyle(this.tooltipElement, 'position', 'fixed');
     this.renderer.setStyle(this.tooltipElement, 'top', `${top}px`);
     this.renderer.setStyle(this.tooltipElement, 'left', `${left}px`);
-    this.renderer.setStyle(this.tooltipElement, 'z-index', '1000');
+    this.renderer.setStyle(this.tooltipElement, 'z-index', '10000');
+    this.renderer.setStyle(this.tooltipElement, 'pointer-events', 'none');
     this.renderer.setStyle(this.tooltipElement, 'background-color', '#333');
     this.renderer.setStyle(this.tooltipElement, 'color', 'white');
     this.renderer.setStyle(this.tooltipElement, 'padding', '8px 12px');
