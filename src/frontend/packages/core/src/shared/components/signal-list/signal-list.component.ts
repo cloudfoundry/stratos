@@ -519,7 +519,18 @@ export class SignalListComponent<T> implements AfterViewInit {
   toggleRowActions(row: T, ev: Event): void {
     ev.stopPropagation();
     const key = this.config.getRowKey(row);
+    const willOpen = this.openActionsRowKey() !== key;
     this.openActionsRowKey.update(curr => (curr === key ? null : key));
+    if (willOpen) {
+      // After the menu's DOM lands, scroll it into view. Rows near the
+      // bottom of a scrollable container would otherwise drop the menu
+      // below the fold (it's `position: absolute top-full`).
+      const btn = ev.currentTarget as HTMLElement | null;
+      setTimeout(() => {
+        const menu = btn?.parentElement?.querySelector('[data-test="row-actions-menu"]') as HTMLElement | null;
+        menu?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      }, 0);
+    }
   }
 
   invokeAction(act: SignalListRowAction<T>, row: T, ev: Event): void {
