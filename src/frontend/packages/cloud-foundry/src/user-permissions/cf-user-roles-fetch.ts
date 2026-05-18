@@ -15,7 +15,8 @@ import {
   ActionState,
   selectPaginationState,
   PaginationEntityState,
-  BasePaginatedAction } from '@stratosui/store';
+  BasePaginatedAction,
+  APIResource } from '@stratosui/store';
 import {
   CfUserRelationTypes,
   GET_CURRENT_CF_USER_RELATIONS,
@@ -27,6 +28,21 @@ import {
 import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { CFResponse } from '../store/types/cf-api.types';
+
+/**
+ * Wire shape returned by GET /pp/v1/cf/current-user-roles/:cnsiGuid
+ * (handler: getNativeCurrentUserRoles). Each bucket key matches a
+ * {@link CfUserRelationTypes} enum value; every canonical key is present
+ * (empty buckets serialize as `[]`, never absent). Entry shape mirrors
+ * the legacy V2 envelope so the existing role reducers (which read
+ * `metadata.guid` for org buckets and additionally `entity.organization_guid`
+ * for space buckets) need zero change.
+ */
+export interface CfCurrentUserRolesResponse {
+  buckets: {
+    [relationType: string]: APIResource<{ organization_guid?: string }>[];
+  };
+}
 
 const createEndpointArray = (
   endpointsService: EndpointsDataService,
@@ -85,11 +101,6 @@ interface CfsRequestState {
   [cfGuid: string]: Observable<boolean>[];
 }
 
-interface IEndpointConnectionInfo {
-  guid: string;
-  userGuid: string;
-}
-
 function dispatchRoleRequests(
   endpoints: EntityUserRolesEndpoint[],
   store: Store<AppState>,
@@ -112,8 +123,13 @@ function dispatchRoleRequests(
       requests[endpoint.guid] = [createPaginationCompleteWatcher(store, ffAction)];
       store.dispatch(ffAction);
 
-      // Dispatch requests to fetch roles per role type for current user
-      requests[endpoint.guid].push(...fetchCfUserRoles({ guid: endpoint.guid, userGuid: endpoint.user.guid }, store, httpClient));
+      // Single drained call to the native handler replaces the legacy
+      // 7-sequential-fetch fanout (one per CfUserRelationTypes value
+      // hitting pp/v1/proxy/v2/users/{guid}/{relType}). The handler
+      // emits the 7 buckets in one response; we dispatch one
+      // GetCurrentCfUserRelationsComplete per bucket so the existing
+      // reducer keeps driving each per-relation state slice unchanged.
+      requests[endpoint.guid].push(fetchCfCurrentUserRoles(store, endpoint.guid, httpClient));
 
       // FINISH fetching cf roles for current user
       combineLatest(requests[endpoint.guid]).pipe(
@@ -144,11 +160,47 @@ function handleCfRequests(requests: CfsRequestState): Observable<boolean>[] {
   return allCompleted;
 }
 
-function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppState>, httpClient: HttpClient): Observable<boolean>[] {
-  return Object.values(CfUserRelationTypes).map((type: CfUserRelationTypes) => {
-    const relAction = new GetCurrentCfUserRelations(endpoint.userGuid, type, endpoint.guid);
-    return fetchCfUserRole(store, relAction, httpClient);
-  });
+/**
+ * Single-fetch replacement for the legacy 7-fanout permission fetch.
+ *
+ * Hits GET /pp/v1/cf/current-user-roles/{endpointGuid}. The native
+ * handler (getNativeCurrentUserRoles) makes one /v3/roles?user_guids={me}
+ * call and projects rows into the 7 buckets the frontend reducer
+ * expects. On success we dispatch one GetCurrentCfUserRelationsComplete
+ * per CfUserRelationTypes value off the response, exactly mirroring
+ * the dispatch surface the per-relation flow produced — the reducer
+ * sees the same actions in the same shape.
+ *
+ * Bucket entries arrive as legacy V2 envelopes
+ * ({ metadata: { guid }, entity: { organization_guid? } }) so
+ * downstream reducers (current-cf-user-roles-org/space) keep reading
+ * `metadata.guid` / `entity.organization_guid` unchanged.
+ *
+ * Round-trip count drops 7→1 per CF endpoint per app load — at CAPI
+ * RTTs of 50–200 ms this is the primary perceived-perf lever for
+ * permission-gated action buttons.
+ */
+export function fetchCfCurrentUserRoles(
+  store: Store<AppState>,
+  endpointGuid: string,
+  httpClient: HttpClient
+): Observable<boolean> {
+  return httpClient.get<CfCurrentUserRolesResponse>(`pp/v1/cf/current-user-roles/${endpointGuid}`).pipe(
+    map(response => {
+      const buckets = response?.buckets ?? {};
+      Object.values(CfUserRelationTypes).forEach((relationType: CfUserRelationTypes) => {
+        const data = buckets[relationType] ?? [];
+        store.dispatch(new GetCurrentCfUserRelationsComplete(relationType, endpointGuid, data));
+      });
+      return true;
+    }),
+    take(1),
+    catchError(err => {
+      console.warn('Failed to fetch current user permissions for a cf: ', err);
+      return of(false);
+    }),
+    share(),
+  );
 }
 
 class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
