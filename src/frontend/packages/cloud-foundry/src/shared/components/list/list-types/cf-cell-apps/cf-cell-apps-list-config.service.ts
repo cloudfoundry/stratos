@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@stratosui/store';
 
@@ -5,9 +6,8 @@ import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state'
 import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
 import { ListViewTypes } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { ListView } from '../../../../../../../store/src/actions/list.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
-import { IApp, ISpace } from '../../../../../cf-api.types';
 import { ActiveRouteCfCell } from '../../../../../features/cf/cf-page.types';
+import { StApp } from '../../../../../services/endpoint-data/stratos-types';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 
@@ -17,6 +17,7 @@ import { CfCellApp, CfCellAppsDataSource } from './cf-cell-apps-source';
 export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
   private store = inject(Store<CFAppState>);
   private activeRouteCfCell = inject(ActiveRouteCfCell);
+  private http = inject(HttpClient);
 
   dataSource: CfCellAppsDataSource;
   defaultView = 'table' as ListView;
@@ -29,7 +30,7 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
 
   constructor() {
     super();
-    this.dataSource = new CfCellAppsDataSource(this.store, this.activeRouteCfCell.cfGuid, this.activeRouteCfCell.cellId, this as BaseCfListConfig<CfCellApp>);
+    this.dataSource = new CfCellAppsDataSource(this.store, this.http, this.activeRouteCfCell.cfGuid, this.activeRouteCfCell.cellId, this as BaseCfListConfig<CfCellApp>);
   }
 
   getColumns = (): ITableColumn<CfCellApp>[] => [
@@ -38,10 +39,10 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
       headerCell: () => 'App Name',
       cellFlex: '1',
       cellDefinition: {
-        getAsyncLink: (value: APIResource<IApp>) => `/applications/${value.entity.cfGuid}/${value.metadata.guid}/summary`,
+        getAsyncLink: (value: StApp) => value ? `/applications/${value.cnsiGuid}/${value.guid}/summary` : null,
         asyncValue: {
-          pathToObs: 'appEntityService',
-          pathToValue: 'entity.name'
+          pathToObs: 'app$',
+          pathToValue: 'name'
         }
       },
     },
@@ -59,19 +60,15 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
       headerCell: () => 'Space',
       cellFlex: '1',
       cellDefinition: {
-        getAsyncLink: (value: APIResource<IApp>) => {
-          const spaceEntity = value ? value.entity.space as APIResource<ISpace> : null;
-          if (!spaceEntity) {
-            return;
+        getAsyncLink: (value: StApp) => {
+          if (!value || !value.orgGuid || !value.spaceGuid) {
+            return null;
           }
-          const cf = `/cloud-foundry/${value.entity.cfGuid}/`;
-          const org = `organizations/${spaceEntity.entity.organization.metadata.guid}`;
-          const space = `/spaces/${spaceEntity.metadata.guid}/summary`;
-          return cf + org + space;
+          return `/cloud-foundry/${value.cnsiGuid}/organizations/${value.orgGuid}/spaces/${value.spaceGuid}/summary`;
         },
         asyncValue: {
-          pathToObs: 'appEntityService',
-          pathToValue: 'entity.space.entity.name'
+          pathToObs: 'app$',
+          pathToValue: 'spaceName'
         }
       },
     },
@@ -79,13 +76,15 @@ export class CfCellAppsListConfigService extends BaseCfListConfig<CfCellApp> {
       columnId: 'org', headerCell: () => 'Organization',
       cellFlex: '1',
       cellDefinition: {
-        getAsyncLink: (value: APIResource<IApp>) => {
-          const space = value ? value.entity.space as APIResource<ISpace> : null;
-          return space ? `/cloud-foundry/${value.entity.cfGuid}/organizations/${space.entity.organization.metadata.guid}/summary` : null;
+        getAsyncLink: (value: StApp) => {
+          if (!value || !value.orgGuid) {
+            return null;
+          }
+          return `/cloud-foundry/${value.cnsiGuid}/organizations/${value.orgGuid}/summary`;
         },
         asyncValue: {
-          pathToObs: 'appEntityService',
-          pathToValue: 'entity.space.entity.organization.entity.name'
+          pathToObs: 'app$',
+          pathToValue: 'orgName'
         }
       },
     },
