@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,7 +7,7 @@ import { Store } from '@stratosui/store';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { combineLatest, Observable, of } from 'rxjs';
-import { map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
+import { catchError, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 
 import {
   TailwindSnackBarService,
@@ -26,16 +27,12 @@ import {
   TileGroupComponent
 } from '@stratosui/core';
 import {
-  cfEntityCatalog,
-  applicationEntityType,
-  organizationEntityType,
-  spaceEntityType,
-  createEntityRelationKey,
   ApplicationMonitorService,
   ApplicationService,
   getGuids,
   CfCurrentUserPermissions,
-  CardAppUsageComponent
+  CardAppUsageComponent,
+  StApp,
 } from '@stratosui/cloud-foundry';
 import {
   AppState,
@@ -73,28 +70,27 @@ interface AutoscalerTabPaginationParams {
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (_store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
+  hidden: (
+    _store: Store<AppState>,
+    esf: EntityServiceFactory,
+    activatedRoute: ActivatedRoute,
+    cups: CurrentUserPermissionsService,
+    http: HttpClient,
+  ) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
-    const appEntService = cfEntityCatalog.application.store.getEntityService(appGuid, endpointGuid, {
-      includeRelations: [
-        createEntityRelationKey(applicationEntityType, spaceEntityType),
-        createEntityRelationKey(spaceEntityType, organizationEntityType),
-      ],
-      populateMissing: true
-    });
 
-    const canEditApp$ = appEntService.waitForEntity$.pipe(
+    // Native app detail returns StApp with spaceGuid + orgGuid stitched
+    // server-side (composeStAppWithSpaceOrg). Replaces the legacy
+    // cfEntityCatalog.application.store.getEntityService + includeRelations
+    // app→space→org chain.
+    const canEditApp$ = http.get<StApp>(`/pp/v1/cf/apps/${endpointGuid}/${appGuid}`).pipe(
       switchMap(app => {
-        // Null safety: ensure all nested properties exist before accessing
-        const orgGuid = app?.entity?.entity?.space?.entity?.organization_guid;
-        const spaceGuid = app?.entity?.entity?.space?.metadata?.guid;
-
-        // If required data isn't available, deny permission (hide tab)
+        const orgGuid = app?.orgGuid;
+        const spaceGuid = app?.spaceGuid;
         if (!orgGuid || !spaceGuid) {
           return of(false);
         }
-
         return cups.can(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           endpointGuid,
@@ -102,6 +98,7 @@ interface AutoscalerTabPaginationParams {
           spaceGuid
         );
       }),
+      catchError(() => of(false)),
     );
 
     const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
