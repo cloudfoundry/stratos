@@ -26,7 +26,7 @@ import {
 import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
   ListAppEnvVar,
-} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables.types';
 import {
   CfAppVariablesSignalConfigService,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-signal-config.service';

@@ -1,7 +1,7 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppEnvVarsAction } from '../actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesDelete, AppVariablesEdit } from '../actions/app-variables.actions';
-import { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import { ListAppEnvVar } from '../shared/components/list/list-types/app-variables/cf-app-variables.types';
 
 export interface AppEnvVarActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (appGuid: string, endpointGuid: string) => GetAppEnvVarsAction;
