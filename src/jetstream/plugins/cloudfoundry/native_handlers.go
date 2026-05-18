@@ -426,7 +426,24 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 
 	switch ctx.QueryParam("return") {
 	case "counts":
+		// Optional per-org or per-space scoping for the counts branch — used
+		// by CloudFoundryEndpointService.fetchAppCount when A.#1 retired the
+		// V2 ngrx-pagination count helper. Mirrors the filter names CF v3 uses
+		// on /v3/apps and the same comma-split convention as the list-path
+		// space_guids filter below.
 		params := capi.NewQueryParams().WithPerPage(1)
+		if rawOrgs := ctx.QueryParam("organization_guids"); rawOrgs != "" {
+			orgs := splitNonEmpty(rawOrgs, ",")
+			if len(orgs) > 0 {
+				params = params.WithFilter("organization_guids", orgs...)
+			}
+		}
+		if rawSpaces := ctx.QueryParam("space_guids"); rawSpaces != "" {
+			spaces := splitNonEmpty(rawSpaces, ",")
+			if len(spaces) > 0 {
+				params = params.WithFilter("space_guids", spaces...)
+			}
+		}
 		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
@@ -791,11 +808,11 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 	// drain when the user only wants routes within one space. Empty = legacy
 	// unfiltered drain (full CF Routes list page).
 	//
-	// Only honored on the full-list branch. The ?return=counts branch is
-	// cnsi-wide by design (home-page card, endpoint-data totals); it has no
-	// consumer that needs space-filtered counts today, so adding the filter
-	// there would be dead code.
+	// Honored on the full-list branch and (since A.#1) on the counts branch
+	// too — the per-org Routes summary card needs an organization-scoped
+	// route count without paying for a full route drain.
 	spaceGUIDs := ctx.QueryParam("space_guids")
+	orgGUIDs := ctx.QueryParam("organization_guids")
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
@@ -811,6 +828,18 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 	if ctx.QueryParam("return") == "counts" {
 		// Request per_page=1 — we only need the total count, not all resources.
 		params := capi.NewQueryParams().WithPerPage(1)
+		if orgGUIDs != "" {
+			orgs := splitNonEmpty(orgGUIDs, ",")
+			if len(orgs) > 0 {
+				params = params.WithFilter("organization_guids", orgs...)
+			}
+		}
+		if spaceGUIDs != "" {
+			spaces := splitNonEmpty(spaceGUIDs, ",")
+			if len(spaces) > 0 {
+				params = params.WithFilter("space_guids", spaces...)
+			}
+		}
 		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadGateway, err.Error())

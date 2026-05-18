@@ -976,3 +976,91 @@ func TestGetNativeApps_LegacyReturnCountsUnchanged(t *testing.T) {
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 	assert.Equal(t, 52, resp.TotalResults)
 }
+
+// A.#1: per-org and per-space scoping on the counts tier. Used by
+// CloudFoundryEndpointService.fetchAppCount(orgGuid?, spaceGuid?) to
+// replace the V2 ngrx-pagination count helper without paying for a
+// full apps drain.
+func TestGetNativeApps_ReturnCountsHonorsOrgGuidsFilter(t *testing.T) {
+	var capturedQuery string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			capturedQuery = r.URL.RawQuery
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 7, "total_pages": 7},
+				"resources":  []map[string]interface{}{},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=counts&organization_guids=org-A", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+
+	var resp StAppsResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 7, resp.TotalResults)
+	assert.Contains(t, capturedQuery, "organization_guids=org-A")
+}
+
+func TestGetNativeApps_ReturnCountsHonorsSpaceGuidsFilter(t *testing.T) {
+	var capturedQuery string
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			capturedQuery = r.URL.RawQuery
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 3, "total_pages": 3},
+				"resources":  []map[string]interface{}{},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=counts&space_guids=space-X", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+
+	var resp StAppsResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 3, resp.TotalResults)
+	assert.Contains(t, capturedQuery, "space_guids=space-X")
+}
