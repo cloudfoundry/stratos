@@ -1,41 +1,39 @@
+import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  applicationEntityType,
-  organizationEntityType,
-  spaceEntityType,
-} from '../../../../../../../cloud-foundry/src/cf-entity-types';
 import {
   ListDataSource,
 } from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source';
 import { IListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricApplication, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { FetchCFMetricsPaginatedAction } from '../../../../../actions/cf-metrics.actions';
-import { IApp } from '../../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { createEntityRelationKey } from '../../../../../entity-relations/entity-relations.types';
+import { StApp } from '../../../../../services/endpoint-data/stratos-types';
 
 export interface CfCellApp {
   metric: IMetricApplication;
   appGuid: string;
-  appEntityService: Observable<APIResource<IApp>>;
+  // Native Stratos app shape (spaceName / spaceGuid / orgName / orgGuid
+  // stitched server-side by getNativeAppDetail's default path). The
+  // legacy V2 APIResource<IApp> wrapper is gone — column cellDefinitions
+  // read native flat fields directly.
+  app$: Observable<StApp | null>;
 }
 
 export class CfCellAppsDataSource
   extends ListDataSource<CfCellApp, IMetrics<IMetricVectorResult<IMetricApplication>>> {
 
   static appIdPath = 'metric.application_id';
-  private appEntityServices: { [appGuid: string]: Observable<APIResource<IApp>> };
+  private appCache: { [appGuid: string]: Observable<StApp | null> };
 
   constructor(
     store: Store<CFAppState>,
+    http: HttpClient,
     cfGuid: string,
     cellId: string,
     listConfig: IListConfig<CfCellApp>,
@@ -52,7 +50,6 @@ export class CfCellAppsDataSource
       action,
       schema: cfEntityFactory(action.entityType),
       getRowUniqueId: (row: IMetrics<IMetricVectorResult<IMetricApplication>>) => {
-        // For the pre-transform type, extract ID from metrics response
         if (row && Array.isArray(row) && row.length > 0 && row[0]?.data?.result?.[0]?.metric?.application_id) {
           return row[0].data.result[0].metric.application_id;
         }
@@ -67,34 +64,22 @@ export class CfCellAppsDataSource
         return response[0].data.result.map(res => ({
           metric: res.metric,
           appGuid: res.metric.application_id,
-          appEntityService: this.createAppEntityService(res.metric.application_id, cfGuid)
+          app$: this.fetchApp(http, res.metric.application_id, cfGuid),
         }));
       }),
       listConfig
     });
-    // Override with correct type for post-transform usage
     this.getRowUniqueId = (row: CfCellApp) => row.appGuid;
-    this.appEntityServices = {};
+    this.appCache = {};
   }
 
-  private createAppEntityService(
-    appGuid: string,
-    cfGuid: string
-  ): Observable<APIResource<IApp>> {
-    if (!this.appEntityServices[appGuid]) {
-      this.appEntityServices[appGuid] = cfEntityCatalog.application.store.getEntityService(
-        appGuid,
-        cfGuid, {
-        includeRelations: [
-          createEntityRelationKey(applicationEntityType, spaceEntityType),
-          createEntityRelationKey(spaceEntityType, organizationEntityType)
-        ],
-        populateMissing: true
-      }
-      ).waitForEntity$.pipe(
-        map(entityInfo => entityInfo.entity)
+  private fetchApp(http: HttpClient, appGuid: string, cfGuid: string): Observable<StApp | null> {
+    if (!this.appCache[appGuid]) {
+      this.appCache[appGuid] = http.get<StApp>(`/pp/v1/cf/apps/${cfGuid}/${appGuid}`).pipe(
+        catchError(() => of(null)),
+        shareReplay({ bufferSize: 1, refCount: false }),
       );
     }
-    return this.appEntityServices[appGuid];
+    return this.appCache[appGuid];
   }
 }

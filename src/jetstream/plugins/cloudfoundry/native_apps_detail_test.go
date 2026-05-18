@@ -26,10 +26,14 @@ type fakeAppDetailServer struct {
 	buildsJSON       string
 	sshFeatureJSON   string
 	envJSON          string
+	spaceJSON        string
+	orgJSON          string
 	dropletStatus    int
 	packagesStatus   int
 	buildsStatus     int
 	sshFeatureStatus int
+	spaceStatus      int
+	orgStatus        int
 }
 
 func newAppDetailServer(t *testing.T, cfg fakeAppDetailServer) *httptest.Server {
@@ -72,6 +76,18 @@ func newAppDetailServer(t *testing.T, cfg fakeAppDetailServer) *httptest.Server 
 			_, _ = w.Write([]byte(cfg.sshFeatureJSON))
 		case path == "/v3/apps/app-1/env":
 			_, _ = w.Write([]byte(cfg.envJSON))
+		case path == "/v3/spaces/space-1":
+			if cfg.spaceStatus != 0 {
+				w.WriteHeader(cfg.spaceStatus)
+				return
+			}
+			_, _ = w.Write([]byte(cfg.spaceJSON))
+		case path == "/v3/organizations/org-1":
+			if cfg.orgStatus != 0 {
+				w.WriteHeader(cfg.orgStatus)
+				return
+			}
+			_, _ = w.Write([]byte(cfg.orgJSON))
 		default:
 			http.NotFound(w, r)
 		}
@@ -129,6 +145,17 @@ const (
 		"running_env_json":{},
 		"staging_env_json":{}
 	}`
+
+	stubSpaceJSON = `{
+		"guid":"space-1","name":"my-space",
+		"relationships":{"organization":{"data":{"guid":"org-1"}}},
+		"created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-02T00:00:00Z"
+	}`
+
+	stubOrgJSON = `{
+		"guid":"org-1","name":"my-org",
+		"created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-02T00:00:00Z"
+	}`
 )
 
 // withSpec wires a CloudFoundrySpecification with a mock proxy pointed at
@@ -179,6 +206,48 @@ func TestGetNativeAppDetail_DefaultModeReturnsBasicStApp(t *testing.T) {
 	assert.Nil(t, got.Memory)
 	assert.Nil(t, got.DiskQuota)
 	assert.Equal(t, 0, got.Instances)
+}
+
+func TestGetNativeAppDetail_DefaultModeStitchesSpaceAndOrg(t *testing.T) {
+	ts := newAppDetailServer(t, fakeAppDetailServer{
+		appJSON:   stubAppJSON,
+		spaceJSON: stubSpaceJSON,
+		orgJSON:   stubOrgJSON,
+	})
+	defer ts.Close()
+
+	rec, ctx := newDetailRequest(t, "")
+	require.NoError(t, withSpec(t, ts).getNativeAppDetail(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var got StApp
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&got))
+	assert.Equal(t, "space-1", got.SpaceGUID)
+	assert.Equal(t, "my-space", got.SpaceName)
+	require.NotNil(t, got.OrgGUID)
+	assert.Equal(t, "org-1", *got.OrgGUID)
+	assert.Equal(t, "my-org", got.OrgName)
+}
+
+func TestGetNativeAppDetail_DefaultModeSpaceFetchFailureKeepsAppFields(t *testing.T) {
+	// Space lookup 5xx — stitch silently degrades, base app still returned.
+	ts := newAppDetailServer(t, fakeAppDetailServer{
+		appJSON:     stubAppJSON,
+		spaceStatus: http.StatusInternalServerError,
+	})
+	defer ts.Close()
+
+	rec, ctx := newDetailRequest(t, "")
+	require.NoError(t, withSpec(t, ts).getNativeAppDetail(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var got StApp
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&got))
+	assert.Equal(t, "app-1", got.GUID)
+	assert.Equal(t, "space-1", got.SpaceGUID) // from app.relationships, no fetch needed
+	assert.Empty(t, got.SpaceName)
+	assert.Nil(t, got.OrgGUID)
+	assert.Empty(t, got.OrgName)
 }
 
 // -------- ?return=summary --------

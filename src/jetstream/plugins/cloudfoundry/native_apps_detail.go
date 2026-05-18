@@ -355,8 +355,38 @@ func (c *CloudFoundrySpecification) getNativeAppDetail(ctx echo.Context) error {
 	case "summary":
 		return ctx.JSON(http.StatusOK, c.composeAppSummaryEntry(reqCtx, cfClient, *app, cnsiGUID, appGUID))
 	default:
-		return ctx.JSON(http.StatusOK, toStApp(*app, cnsiGUID))
+		return ctx.JSON(http.StatusOK, composeStAppWithSpaceOrg(reqCtx, cfClient, *app, cnsiGUID))
 	}
+}
+
+// composeStAppWithSpaceOrg returns the base Stratos app shape with
+// space + org names + org guid stitched server-side. The single-app
+// space/org fetches keep frontend consumers (cell-apps, app
+// breadcrumbs) free of separate /pp/v1/cf/space + /pp/v1/cf/org chains
+// just to render an "Org / Space" cell. Failures are non-fatal — empty
+// fields stay empty (omitempty) and consumers fall back to whatever
+// they had before.
+func composeStAppWithSpaceOrg(reqCtx context.Context, cfClient capi.Client, app capi.App, cnsiGUID string) StApp {
+	st := toStApp(app, cnsiGUID)
+	spaceGUID := relationshipGUID(app.Relationships.Space)
+	if spaceGUID == "" {
+		return st
+	}
+	space, sErr := cfClient.Spaces().Get(reqCtx, spaceGUID)
+	if sErr != nil || space == nil {
+		return st
+	}
+	st.SpaceName = space.Name
+	orgGUID := relationshipGUID(space.Relationships.Organization)
+	if orgGUID == "" {
+		return st
+	}
+	og := orgGUID
+	st.OrgGUID = &og
+	if org, oErr := cfClient.Organizations().Get(reqCtx, orgGUID); oErr == nil && org != nil {
+		st.OrgName = org.Name
+	}
+	return st
 }
 
 // composeAppSummaryEntry returns the apps-list-summary-style row for a
