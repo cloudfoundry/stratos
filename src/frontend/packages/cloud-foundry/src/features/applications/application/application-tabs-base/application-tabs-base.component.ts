@@ -215,6 +215,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         breadcrumbs: [{ value: 'Applications', routerLink: '/applications' }]
       },
       {
+        // CF-scoped Applications breadcrumb: emitted when the row link
+        // on the per-CF applications wall (CloudFoundryApplicationsSignal)
+        // passes ?breadcrumbs=cf. Sends the user back to the scoped wall
+        // they came from instead of the global one.
+        key: 'cf',
+        breadcrumbs: [{ value: 'Applications', routerLink: `${baseCFUrl}/applications` }]
+      },
+      {
         key: 'space',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,

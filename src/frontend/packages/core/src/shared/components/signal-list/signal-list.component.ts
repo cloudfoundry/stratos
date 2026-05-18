@@ -83,6 +83,14 @@ export interface SignalListColumn<T> {
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
+  // Optional for kind === 'link'. When set, the value is forwarded as
+  // [queryParams] on the rendered <a [routerLink]>. Use when the
+  // destination route needs a hint about the source — e.g. the
+  // CF-scoped applications wall passes {breadcrumbs:'cf'} so the
+  // app-detail page emits a CF-scoped 'Applications' breadcrumb
+  // (instead of the global one) when navigated to from that wall.
+  // Returning null/undefined omits the query params entirely.
+  linkQueryParams?: (row: T) => Record<string, string | number> | null;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
   // Required when kind === 'compound'. Returns an ordered list of segments;
@@ -492,6 +500,15 @@ export class SignalListComponent<T> implements AfterViewInit {
   rowLink(row: T): readonly (string | number)[] | null {
     const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
     return col?.link?.(row) ?? null;
+  }
+
+  // Mirrors rowLink for the optional query-params accessor on the same
+  // link column. Returned alongside the [routerLink] so the row-level
+  // clickable area carries the same query hint as the name cell's
+  // <a [routerLink] [queryParams]>.
+  rowLinkQueryParams(row: T): Record<string, string | number> | null {
+    const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
+    return col?.linkQueryParams?.(row) ?? null;
   }
 
   // Row key whose kebab menu is currently open. null = no menu open.

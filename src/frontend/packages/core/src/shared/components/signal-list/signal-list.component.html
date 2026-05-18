@@ -183,6 +183,7 @@
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card"
                [routerLink]="rowLink(row)"
+               [queryParams]="rowLinkQueryParams(row)"
                [class]="'border border-content-border rounded bg-content-bg hover:shadow-md transition-shadow relative ' +
                  (rowLink(row) ? 'cursor-pointer' : '')">
             @if (config.cardAccentColor) {
@@ -195,7 +196,7 @@
                   <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
                     <span class="truncate min-w-0" [attr.title]="col.render(row)">
                       @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                        <a [routerLink]="target" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                        <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                       } @else {
                         {{ col.render(row) }}
                       }
@@ -311,7 +312,7 @@
                     <span class="text-content-muted">{{ col.header }}</span>
                     <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
                       @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                        <a [routerLink]="target" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                        <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                       } @else if (col.kind === 'pill') {
                         <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
                       } @else if (col.kind === 'dot') {
@@ -376,6 +377,7 @@
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
             <tr data-test="row"
                 [routerLink]="rowLink(row)"
+                [queryParams]="rowLinkQueryParams(row)"
                 [class]="'border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900 ' +
                   (rowLink(row) ? 'cursor-pointer' : '')">
               @if (favoriteColumn() || actionsColumn()) {
@@ -439,7 +441,7 @@
                     [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge' ? null : col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
-                      <a [routerLink]="target" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
+                      <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                     } @else {
                       {{ col.render(row) }}
                     }
