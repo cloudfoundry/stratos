@@ -117,6 +117,97 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 	})
 }
 
+// getServiceInstanceServiceBindings handles
+//
+//	GET /pp/v1/cf/service_instances/{cnsiGuid}/{instanceGuid}/service_bindings
+//
+// Inverse of getAppServiceBindings — returns the bindings *attached to a
+// service instance* (type=app only). Drives the cf-spaces-service-instances
+// table cell that lists the bound apps per service instance row, and the
+// detach-apps modal that fans deletes out across the same set.
+//
+// Same four-tier ?return= contract as getAppServiceBindings:
+//
+//   - counts   — per_page=1 + flat {totalResults} envelope.
+//   - base     — entity fields only.
+//   - summary  — base + app.name + serviceInstance.{name,type} via
+//     ?include=app,service_instance.
+//   - details  — degrades to summary today (no consumer asks for details).
+func (c *CloudFoundrySpecification) getServiceInstanceServiceBindings(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	instanceGUID := ctx.Param("instanceGuid")
+	if cnsiGUID == "" || instanceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and instanceGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	mode := parseReturnMode(ctx)
+
+	if mode == ReturnCounts {
+		params := capi.NewQueryParams().
+			WithPerPage(1).
+			WithFilter("service_instance_guids", instanceGUID).
+			WithFilter("type", "app")
+		raw, lerr := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
+		if lerr != nil {
+			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		}
+		return ctx.JSON(http.StatusOK, struct {
+			Resources    []StServiceCredentialBinding `json:"resources"`
+			TotalResults int                          `json:"totalResults"`
+		}{
+			Resources:    []StServiceCredentialBinding{},
+			TotalResults: raw.Pagination.TotalResults,
+		})
+	}
+
+	reqCtx := ctx.Request().Context()
+	perPage, page, present := parsePerPageAndPage(ctx)
+	primaryParams := applyPagingParams(
+		capi.NewQueryParams().
+			WithFilter("service_instance_guids", instanceGUID).
+			WithFilter("type", "app"),
+		perPage, page, present,
+	)
+	if mode == ReturnSummary || mode == ReturnDetails {
+		primaryParams = primaryParams.WithInclude("app", "service_instance")
+	}
+
+	rawBindings, listErr := cfClient.ServiceCredentialBindings().List(reqCtx, primaryParams)
+	if listErr != nil {
+		return handleCapiError(ctx, listErr)
+	}
+	bindings := rawBindings.Resources
+
+	siByGUID := map[string]capi.ServiceInstance{}
+	appByGUID := map[string]capi.App{}
+	if mode == ReturnSummary || mode == ReturnDetails {
+		siByGUID = serviceInstancesFromIncluded(rawBindings.Included)
+		appByGUID = appsFromIncluded(rawBindings.Included)
+	}
+
+	out := make([]StServiceCredentialBinding, 0, len(bindings))
+	for _, b := range bindings {
+		out = append(out, toStServiceCredentialBinding(b, cnsiGUID, siByGUID, appByGUID, mode))
+	}
+
+	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceCredentialBinding]{
+		Resources:  out,
+		Pagination: BuildPaginationMeta(ctx, page, perPage, rawBindings.Pagination.TotalResults),
+	})
+}
+
 // serviceInstancesFromIncluded decodes v3's `included.service_instances`
 // block into a guid-keyed map. Set on summary+ requests via
 // ?include=service_instance. Soft-fail on malformed entries.
