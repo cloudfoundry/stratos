@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, computed, Input, OnDestroy, OnInit, Signal, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Store } from '@stratosui/store';
-import { firstValueFrom, Observable, of as observableOf } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import {
@@ -15,12 +15,14 @@ import {
   StackedInputActionsUpdate,
   StepOnNextFunction,
 } from '@stratosui/core';
-import { APIResource, ClearPaginationOfType } from '@stratosui/store';
-import { IOrganization, ISpace } from '../../../../../cf-api.types';
+import { ClearPaginationOfType } from '@stratosui/store';
 import { CFAppState } from '../../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../../cf-entity-catalog';
 import { cfUserEntityType } from '../../../../../cf-entity-types';
 import { CFEntityConfig } from '../../../../../cf-types';
+import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
+import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
+import { SpaceDataRegistry } from '../../../../../services/endpoint-data/space-data.registry';
+import { SpaceDataService } from '../../../../../services/endpoint-data/space-data.service';
 import { SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -38,11 +40,13 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
     StackedInputActionsComponent
   ]
 })
-export class InviteUsersCreateComponent implements OnInit {
+export class InviteUsersCreateComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private userInviteService = inject(UserInviteService);
   private router = inject(Router);
+  private orgRegistry = inject(OrgDataRegistry);
+  private spaceRegistry = inject(SpaceDataRegistry);
 
 
   public stepValid = signal<boolean>(false);
@@ -70,8 +74,10 @@ export class InviteUsersCreateComponent implements OnInit {
   };
   public stateIn = signal<StackedInputActionsState[]>([]);
   public stateIn$: Observable<StackedInputActionsState[]>;
-  public org$!: Observable<APIResource<IOrganization>>;
-  public space$!: Observable<APIResource<ISpace> | null>;
+  public orgName!: Signal<string>;
+  public spaceName!: Signal<string>;
+  private orgData?: OrgDataService;
+  private spaceData?: SpaceDataService;
   public madeChanges = false;
   public isSpace = false;
   public spaceRole: UserInviteSendSpaceRoles = UserInviteSendSpaceRoles.auditor;
@@ -101,20 +107,41 @@ export class InviteUsersCreateComponent implements OnInit {
 
   ngOnInit() {
     this.isSpace = !!this.activeRouteCfOrgSpace.spaceGuid;
-    this.org$ = cfEntityCatalog.org.store.getEntityService(
+
+    // Signal-native org/space name reads via the data registries — replaces
+    // the legacy cfEntityCatalog.{org,space}.store.getEntityService chain.
+    this.orgData = this.orgRegistry.acquire(
+      this.activeRouteCfOrgSpace.cfGuid,
       this.activeRouteCfOrgSpace.orgGuid,
-      this.activeRouteCfOrgSpace.cfGuid,
-      { includeRelations: [], populateMissing: false }
-    ).waitForEntity$.pipe(
-      map(entity => entity.entity)
     );
-    this.space$ = this.isSpace ? cfEntityCatalog.space.store.getEntityService(
-      this.activeRouteCfOrgSpace.spaceGuid,
-      this.activeRouteCfOrgSpace.cfGuid,
-      { includeRelations: [], populateMissing: false }
-    ).waitForEntity$.pipe(
-      map(entity => entity.entity)
-    ) : observableOf(null);
+    this.orgData.load().subscribe();
+    this.orgName = computed(() => this.orgData?.org()?.name ?? '');
+
+    if (this.isSpace) {
+      this.spaceData = this.spaceRegistry.acquire(
+        this.activeRouteCfOrgSpace.cfGuid,
+        this.activeRouteCfOrgSpace.spaceGuid,
+      );
+      this.spaceData.load().subscribe();
+      this.spaceName = computed(() => this.spaceData?.space()?.name ?? '');
+    } else {
+      this.spaceName = computed(() => '');
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.orgData) {
+      this.orgRegistry.release(
+        this.activeRouteCfOrgSpace.cfGuid,
+        this.activeRouteCfOrgSpace.orgGuid,
+      );
+    }
+    if (this.spaceData) {
+      this.spaceRegistry.release(
+        this.activeRouteCfOrgSpace.cfGuid,
+        this.activeRouteCfOrgSpace.spaceGuid,
+      );
+    }
   }
 
   /**
