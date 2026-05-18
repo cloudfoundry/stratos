@@ -355,4 +355,92 @@ describe('EndpointDataService', () => {
       expect(bundle!.plans).toEqual([]);
     });
   });
+
+  // Split loaders: each per-domain method (loadOrgs / loadApps / loadSpaces)
+  // independently caches + dedupes so a consumer that only needs one
+  // signal doesn't trigger the other two drains. loadDetails() composes
+  // all three via merge; this section pins the per-domain behaviour and
+  // the cache-coherence between split loaders and the orchestrator.
+  describe('split per-domain loaders', () => {
+    it('loadOrgs() fires only the orgs drain (no apps/spaces traffic)', async () => {
+      const mockOrgs = [{ guid: 'org-1', cnsiGuid: 'test-cnsi-guid', name: 'Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+      service.loadOrgs().subscribe();
+      expect(service.isLoadingOrgs()).toBeTruthy();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.orgs()).toEqual(mockOrgs);
+      expect(service.orgCount()).toBe(1);
+      expect(service.orgsLastFetched()).not.toBeNull();
+      expect(service.isLoadingOrgs()).toBeFalsy();
+      // Other domains untouched
+      expect(service.apps()).toEqual([]);
+      expect(service.spaces()).toEqual([]);
+      expect(service.appsLastFetched()).toBeNull();
+      expect(service.spacesLastFetched()).toBeNull();
+      httpMock.expectNone(APPS_FULL_URL);
+      httpMock.expectNone(SPACES_FULL_URL);
+    });
+
+    it('loadApps() fires only the apps drain', async () => {
+      const mockApps = [{ guid: 'app-1', cnsiGuid: 'test-cnsi-guid', name: 'A', state: 'STARTED', orgGuid: '', spaceGuid: '', instances: 1, createdAt: '', updatedAt: '' }];
+      service.loadApps().subscribe();
+      expect(service.isLoadingApps()).toBeTruthy();
+      httpMock.expectOne(APPS_FULL_URL).flush({ resources: mockApps, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.apps()).toEqual(mockApps);
+      expect(service.appCount()).toBe(1);
+      expect(service.appsLastFetched()).not.toBeNull();
+      httpMock.expectNone(ORGS_FULL_URL);
+      httpMock.expectNone(SPACES_FULL_URL);
+    });
+
+    it('loadSpaces() fires only the spaces drain', async () => {
+      const mockSpaces = [{ guid: 'sp-1', cnsiGuid: 'test-cnsi-guid', name: 'sp', orgGuid: 'org-1', createdAt: '', updatedAt: '' }];
+      service.loadSpaces().subscribe();
+      expect(service.isLoadingSpaces()).toBeTruthy();
+      httpMock.expectOne(SPACES_FULL_URL).flush({ resources: mockSpaces, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.spaces()).toEqual(mockSpaces);
+      expect(service.spacesLastFetched()).not.toBeNull();
+      httpMock.expectNone(ORGS_FULL_URL);
+      httpMock.expectNone(APPS_FULL_URL);
+    });
+
+    it('per-domain warm cache: a second loadOrgs() does NOT re-fetch', async () => {
+      const mockOrgs = [{ guid: 'org-1', name: 'Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+      service.loadOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      // Cache-hit path
+      service.loadOrgs().subscribe();
+      httpMock.expectNone(ORGS_FULL_URL);
+    });
+
+    it('loadDetails() after a warm loadOrgs() only re-fetches apps + spaces', async () => {
+      // Verifies cache coherence between the split loader and the
+      // orchestrator: orgs already populated → orgs drain skipped, only
+      // apps + spaces fire. Lets a route that pre-warmed one domain
+      // (e.g. cf-orgs list) avoid redundant fetches when a later route
+      // calls loadDetails() for the full picture.
+      const mockOrgs = [{ guid: 'org-1', name: 'Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+      service.loadOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+
+      service.loadDetails().subscribe();
+      // Only apps + spaces drains fire — orgs is cache-hit inside loadDetails
+      httpMock.expectNone(ORGS_FULL_URL);
+      httpMock.expectOne(APPS_FULL_URL).flush({ resources: [], pagination: { totalResults: 0, totalPages: 1 } });
+      httpMock.expectOne(SPACES_FULL_URL).flush({ resources: [], pagination: { totalResults: 0, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.detailsLastFetched()).not.toBeNull();
+    });
+
+    it('in-flight dedup is per-domain: two concurrent loadOrgs() share one drain', () => {
+      service.loadOrgs().subscribe();
+      service.loadOrgs().subscribe();
+      // Single HTTP fires; the second subscriber attaches to the same in-flight
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: [], pagination: { totalResults: 0, totalPages: 1 } });
+    });
+  });
 });

@@ -35,6 +35,20 @@ export class EndpointDataService {
   private readonly _lastFetched = signal<Date | null>(null);
   private readonly _detailsLastFetched = signal<Date | null>(null);
 
+  // Per-domain freshness + load state. Independent of _detailsLastFetched
+  // so each split loader (loadOrgs / loadApps / loadSpaces) gets its own
+  // cache + in-flight guard. loadDetails() is now an orchestrator that
+  // merges the three; cache key for the orchestrator is the union (all
+  // three populated). This lets a single-domain consumer (e.g. cf-orgs
+  // list page) hit only the orgs drain instead of pulling apps + spaces
+  // it never reads.
+  private readonly _orgsLastFetched = signal<Date | null>(null);
+  private readonly _appsLastFetched = signal<Date | null>(null);
+  private readonly _spacesLastFetched = signal<Date | null>(null);
+  private readonly _isLoadingOrgs = signal<boolean>(false);
+  private readonly _isLoadingApps = signal<boolean>(false);
+  private readonly _isLoadingSpaces = signal<boolean>(false);
+
   // Services-domain entities (signal+V3 slice). Counts populated by
   // loadServicesCounts() (home-card fast path); full lists populated by
   // per-entity load methods added per handler rework. List signals remain
@@ -69,6 +83,12 @@ export class EndpointDataService {
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
   readonly detailsLastFetched: Signal<Date | null> = this._detailsLastFetched.asReadonly();
+  readonly orgsLastFetched: Signal<Date | null> = this._orgsLastFetched.asReadonly();
+  readonly appsLastFetched: Signal<Date | null> = this._appsLastFetched.asReadonly();
+  readonly spacesLastFetched: Signal<Date | null> = this._spacesLastFetched.asReadonly();
+  readonly isLoadingOrgs: Signal<boolean> = this._isLoadingOrgs.asReadonly();
+  readonly isLoadingApps: Signal<boolean> = this._isLoadingApps.asReadonly();
+  readonly isLoadingSpaces: Signal<boolean> = this._isLoadingSpaces.asReadonly();
 
   readonly serviceInstances: Signal<StServiceInstance[]> = this._serviceInstances.asReadonly();
   readonly serviceOfferings: Signal<StServiceOffering[]> = this._serviceOfferings.asReadonly();
@@ -97,6 +117,9 @@ export class EndpointDataService {
   // flight requests (ERR_ABORTED), leaving only the last to complete.
   private _inFlightLoad: Observable<void> | null = null;
   private _inFlightLoadDetails: Observable<void> | null = null;
+  private _inFlightLoadOrgs: Observable<void> | null = null;
+  private _inFlightLoadApps: Observable<void> | null = null;
+  private _inFlightLoadSpaces: Observable<void> | null = null;
 
   constructor(
     private readonly http: HttpClient,
@@ -162,8 +185,17 @@ export class EndpointDataService {
     return this._inFlightLoad;
   }
 
-  // loadDetails() fetches the full orgs/apps/spaces lists (paginated
-  // server-side) for detail views and NGRX populate.
+  // loadDetails() is the orchestrator over the three per-domain loaders.
+  // Most consumers should call this — same shape as before, populates
+  // orgs+apps+spaces together. Pages that bind only one domain (e.g. the
+  // cf-orgs list, the cf-spaces list) can call the matching split loader
+  // (loadOrgs / loadApps / loadSpaces) directly to skip the other two
+  // drains they never read.
+  //
+  // Per-domain drains share their own in-flight + cache guards (see
+  // loadOrgs etc.) so a consumer calling loadDetails after loadOrgs
+  // has already populated orgs picks up the cached value and only
+  // fires the apps + spaces drains.
   loadDetails(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadDetails' });
     if (this._detailsLastFetched() !== null && this._orgs().length > 0) {
@@ -177,37 +209,10 @@ export class EndpointDataService {
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadDetails' });
     this._isLoadingDetails.set(true);
 
-    // Full-drain pagination: fetch page 1, then pages 2..N in parallel with
-    // bounded concurrency. Replaces the previous ?page=1 single-page cap
-    // that silently truncated lists to 500 rows on CFs with more orgs /
-    // apps / spaces than fit in one page — that was a live regression on
-    // the prod orgs list page (CloudFoundryOrganizationsSignalComponent),
-    // not just the home card.
-    //
-    // 500 per page balances per-request latency vs round-trip count.
-    // Concurrency cap of 4 keeps parallel page fetches from saturating
-    // the connection or hitting gorouter back-pressure on slow CFs.
-    // Backend echoes cnsiGuid on every StOrg/StApp/StSpace; no
-    // client-side stamping needed here.
     this._inFlightLoadDetails = merge(
-      this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
-        tap(resp => {
-          this._orgs.set(resp.resources);
-          this._orgCount.set(resp.totalResults);
-        }),
-        catchError(err => { this.addError('orgs-full', err); return EMPTY; }),
-      ),
-      this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
-        tap(resp => {
-          this._apps.set(resp.resources);
-          this._appCount.set(resp.totalResults);
-        }),
-        catchError(err => { this.addError('apps-full', err); return EMPTY; }),
-      ),
-      this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
-        tap(resp => this._spaces.set(resp.resources)),
-        catchError(err => { this.addError('spaces-full', err); return EMPTY; }),
-      ),
+      this.loadOrgs(),
+      this.loadApps(),
+      this.loadSpaces(),
     ).pipe(
       timeout(120_000),
       finalize(() => {
@@ -220,6 +225,100 @@ export class EndpointDataService {
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
     return this._inFlightLoadDetails;
+  }
+
+  // loadOrgs() drains /pp/v1/cf/orgs/{guid} (paginated, page-1 inline +
+  // pages 2..N parallel via drainPages). Independent cache + in-flight
+  // guard so consumers that only read orgs() don't pay the cost of the
+  // apps + spaces drains. 500 per page; see drainPages for the
+  // pagination strategy comment.
+  loadOrgs(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadOrgs' });
+    if (this._orgsLastFetched() !== null && this._orgs().length > 0) {
+      this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadOrgs' });
+      return of(undefined);
+    }
+    if (this._inFlightLoadOrgs) {
+      this.diagnostics?.emitCounter('in-flight-hit', { service: 'EndpointDataService', method: 'loadOrgs' });
+      return this._inFlightLoadOrgs;
+    }
+    this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadOrgs' });
+    this._isLoadingOrgs.set(true);
+    this._inFlightLoadOrgs = this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+      tap(resp => {
+        this._orgs.set(resp.resources);
+        this._orgCount.set(resp.totalResults);
+      }),
+      map(() => undefined as void),
+      catchError(err => { this.addError('orgs-full', err); return of(undefined as void); }),
+      finalize(() => {
+        this._isLoadingOrgs.set(false);
+        this._orgsLastFetched.set(new Date());
+        this._inFlightLoadOrgs = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    return this._inFlightLoadOrgs;
+  }
+
+  // loadApps() — see loadOrgs(). Drains /pp/v1/cf/apps/{guid}.
+  loadApps(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadApps' });
+    if (this._appsLastFetched() !== null && this._apps().length > 0) {
+      this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadApps' });
+      return of(undefined);
+    }
+    if (this._inFlightLoadApps) {
+      this.diagnostics?.emitCounter('in-flight-hit', { service: 'EndpointDataService', method: 'loadApps' });
+      return this._inFlightLoadApps;
+    }
+    this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadApps' });
+    this._isLoadingApps.set(true);
+    this._inFlightLoadApps = this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
+      tap(resp => {
+        this._apps.set(resp.resources);
+        this._appCount.set(resp.totalResults);
+      }),
+      map(() => undefined as void),
+      catchError(err => { this.addError('apps-full', err); return of(undefined as void); }),
+      finalize(() => {
+        this._isLoadingApps.set(false);
+        this._appsLastFetched.set(new Date());
+        this._inFlightLoadApps = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    return this._inFlightLoadApps;
+  }
+
+  // loadSpaces() — see loadOrgs(). Drains /pp/v1/cf/spaces/{guid}.
+  // For 2500+-space CFs on adepttech this is the slowest per-CF cost
+  // (~12-15 s wall-clock), so this is the loader to defer or skip when
+  // a consumer only needs orgs/apps.
+  loadSpaces(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadSpaces' });
+    if (this._spacesLastFetched() !== null && this._spaces().length > 0) {
+      this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadSpaces' });
+      return of(undefined);
+    }
+    if (this._inFlightLoadSpaces) {
+      this.diagnostics?.emitCounter('in-flight-hit', { service: 'EndpointDataService', method: 'loadSpaces' });
+      return this._inFlightLoadSpaces;
+    }
+    this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadSpaces' });
+    this._isLoadingSpaces.set(true);
+    this._inFlightLoadSpaces = this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
+      tap(resp => this._spaces.set(resp.resources)),
+      map(() => undefined as void),
+      catchError(err => { this.addError('spaces-full', err); return of(undefined as void); }),
+      finalize(() => {
+        this._isLoadingSpaces.set(false);
+        this._spacesLastFetched.set(new Date());
+        this._inFlightLoadSpaces = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    return this._inFlightLoadSpaces;
   }
 
   // Drain all pages for a Stratos-shape list endpoint. Page 1 inline,
