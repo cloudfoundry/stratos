@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -26,7 +27,8 @@ export interface StratosTabMetadata {
     store: Store<AppState>,
     esf: EntityServiceFactory,
     activatedRoute: ActivatedRoute,
-    cups: CurrentUserPermissionsService
+    cups: CurrentUserPermissionsService,
+    http: HttpClient
   ) => Observable<boolean>;
 }
 

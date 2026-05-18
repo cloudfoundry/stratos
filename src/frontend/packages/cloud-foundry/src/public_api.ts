@@ -140,6 +140,7 @@ export { TableCellTCPRouteComponent } from './shared/components/list/list-types/
 export { cfEntityId, parseCfEntityId, isComposite } from './cf-entity-ref';
 export type { CFEntityRef, CFEntityId } from './cf-entity-ref';
 export { selectCFEntity, selectCFEntities } from './selectors/cf-entity.selectors';
+export type { StApp, StOrg, StSpace, StAppDetail, StOrgDetail } from './services/endpoint-data/stratos-types';
 export { StratosDiagnostics } from './services/diagnostics/stratos-diagnostics.service';
 export { BareGuidLookupGuard } from './services/diagnostics/bare-guid-lookup-guard';
 export { cfApiInterceptor } from './interceptors/cf-api-interceptor';
