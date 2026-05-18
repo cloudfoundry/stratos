@@ -1,7 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, Subscription } from 'rxjs';
-import { take, filter, map, publishReplay, refCount } from 'rxjs/operators';
+import { Observable, Subscription, from } from 'rxjs';
+import { catchError, take, filter, map, publishReplay, refCount } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
 import { CfInfoDataService } from '../../../services/endpoint-data/cf-info-data.service';
@@ -14,31 +16,15 @@ import { stOrgToAPIResource } from '../../../services/endpoint-data/st-org-adapt
 import {
   EntityService,
   EndpointsDataService,
-  PaginationMonitorFactory,
   getDefaultRequestState,
-  stratosEntityCatalog,
   APIResource,
   EntityInfo,
   EndpointModel,
-  EndpointUser,
-  Store } from '@stratosui/store';
-import { from } from 'rxjs';
-import { GetAllApplications } from '../../../actions/application.actions';
-import { GetAllRoutes } from '../../../actions/route.actions';
-import { GetSpaceRoutes } from '../../../actions/space.actions';
+  EndpointUser } from '@stratosui/store';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import {
-  organizationEntityType,
-  spaceEntityType } from '../../../cf-entity-types';
-import {
-  createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import { QParam, QParamJoiners } from '../../../shared/q-param';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { fetchTotalResults } from '../cf.helpers';
 
 export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
   const app1Date = new Date(app1.metadata.updated_at);
@@ -58,13 +44,12 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 })
 export class CloudFoundryEndpointService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private store = inject<Store<CFAppState>>(Store);
   private cfUserService = inject(CfUserService);
-  private pmf = inject(PaginationMonitorFactory);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
   private cfInfoDataRegistry = inject(CfInfoDataRegistry);
   private endpointsData = inject(EndpointsDataService);
+  private http = inject(HttpClient);
   private injector = inject(Injector);
 
 
@@ -105,44 +90,32 @@ export class CloudFoundryEndpointService {
   currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
 
-  public static fetchAppCount(store: Store<CFAppState>, pmf: PaginationMonitorFactory, cfGuid: string, orgGuid?: string, spaceGuid?: string)
-    : Observable<number> {
-    const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
-    const uniqueKey = spaceGuid || orgGuid || cfGuid;
-    const action = new GetAllApplications(createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), cfGuid);
-    action.initialParams = {};
-    action.initialParams.q = [];
-    if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
-    }
-    if (spaceGuid) {
-      action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
-    }
-    return fetchTotalResults(action, store, pmf);
+  // Instance helpers replacing the static V2 ngrx-pagination count fetchers.
+  // Each hits the Jetstream native ?return=counts branch with an optional
+  // organization_guids / space_guids filter — the backend now honors both
+  // filter names on the counts tier (A.#1). Errors fall through to 0 so a
+  // transient CAPI hiccup never throws a count-cell into red.
+  public fetchAppCount(orgGuid?: string, spaceGuid?: string): Observable<number> {
+    return this.fetchCountFor('apps', orgGuid, spaceGuid);
   }
 
-  public static fetchRouteCount(
-    store: Store<CFAppState>,
-    pmf: PaginationMonitorFactory,
-    cfGuid: string,
-    orgGuid?: string,
-    spaceGuid?: string)
-    : Observable<number> {
-    if (spaceGuid) {
-      const spaceAction =
-        new GetSpaceRoutes(spaceGuid, cfGuid, createEntityRelationPaginationKey(spaceEntityType, spaceGuid), [], false, false);
-      return fetchTotalResults(spaceAction, store, pmf);
-    }
+  public fetchRouteCount(orgGuid?: string, spaceGuid?: string): Observable<number> {
+    return this.fetchCountFor('routes', orgGuid, spaceGuid);
+  }
 
-    const parentSchemaKey = orgGuid ? organizationEntityType : 'cf';
-    const uniqueKey = orgGuid || cfGuid;
-    const action = new GetAllRoutes(cfGuid, createEntityRelationPaginationKey(parentSchemaKey, uniqueKey), [], false);
-    action.initialParams = {};
-    action.initialParams.q = [];
+  private fetchCountFor(resource: 'apps' | 'routes', orgGuid?: string, spaceGuid?: string): Observable<number> {
+    const params: string[] = ['return=counts'];
     if (orgGuid) {
-      action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
+      params.push(`organization_guids=${encodeURIComponent(orgGuid)}`);
     }
-    return fetchTotalResults(action, store, pmf);
+    if (spaceGuid) {
+      params.push(`space_guids=${encodeURIComponent(spaceGuid)}`);
+    }
+    const url = `/pp/v1/cf/${resource}/${this.cfGuid}?${params.join('&')}`;
+    return this.http.get<{ totalResults: number }>(url).pipe(
+      map(resp => resp?.totalResults ?? 0),
+      catchError(() => of(0)),
+    );
   }
 
 
@@ -267,14 +240,6 @@ export class CloudFoundryEndpointService {
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
       .map(a => (a.entity as Record<string, any>)[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
-  }
-
-  public fetchDomains() {
-    cfEntityCatalog.domain.api.getMultiple(this.cfGuid, null, {});
-  }
-
-  public deleteOrg(orgGuid: string, endpointGuid: string) {
-    cfEntityCatalog.org.api.remove(orgGuid, endpointGuid);
   }
 
   fetchApps() {

@@ -212,10 +212,7 @@ export class CloudFoundrySpaceService {
   }
 
   private fetchAppCount(): Observable<number> {
-    return CloudFoundryEndpointService.fetchAppCount(
-      this.store,
-      this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
+    return this.cfEndpointService.fetchAppCount(
       this.activeRouteCfOrgSpace.orgGuid,
       this.activeRouteCfOrgSpace.spaceGuid
     );

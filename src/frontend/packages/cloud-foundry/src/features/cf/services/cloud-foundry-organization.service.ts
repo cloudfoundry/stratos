@@ -157,10 +157,7 @@ export class CloudFoundryOrganizationService {
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
 
-    this.routesCount$ = CloudFoundryEndpointService.fetchRouteCount(
-      this.store,
-      this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
+    this.routesCount$ = this.cfEndpointService.fetchRouteCount(
       this.activeRouteCfOrgSpace.orgGuid
     );
   }
@@ -203,12 +200,7 @@ export class CloudFoundryOrganizationService {
   }
 
   private fetchAppCount(): Observable<number> {
-    return CloudFoundryEndpointService.fetchAppCount(
-      this.store,
-      this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
-      this.activeRouteCfOrgSpace.orgGuid
-    );
+    return this.cfEndpointService.fetchAppCount(this.activeRouteCfOrgSpace.orgGuid);
   }
 
 
