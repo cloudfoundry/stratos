@@ -82,7 +82,14 @@ describe('CloudFoundrySpaceBaseComponent', () => {
     appsLoading$: of(false),
     getAppsInOrgViaAllApps: () => of([]),
     getMetricFromApps: () => 0,
-    fetchApps: () => {}
+    fetchApps: () => {},
+    // A.#1 added instance methods on CloudFoundryEndpointService; the
+    // component re-instantiates CloudFoundryOrganizationService via its
+    // own component-level provider (overriding the test's mock org
+    // service), so the real org service runs against this mocked endpoint
+    // and needs the instance count helpers stubbed.
+    fetchAppCount: () => of(0),
+    fetchRouteCount: () => of(0),
   };
 
   const mockActiveRoute = {
