@@ -1,7 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { take,
+  catchError,
   combineLatest as combineLatestOperators,
   distinctUntilChanged,
   filter,
@@ -13,22 +15,32 @@ import { take,
 } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { IOrganization, ISpace } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../entity-relations/entity-relations.types';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
+import { StOrg, StOrgDetail } from '../../../../services/endpoint-data/stratos-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/cf-users-roles.reducer';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
+
+function adaptOrgToApiResource(org: StOrg | StOrgDetail): APIResource<IOrganization> {
+  return {
+    metadata: {
+      guid: org.guid,
+      url: '',
+      created_at: org.createdAt ?? '',
+      updated_at: org.updatedAt ?? '',
+    },
+    entity: {
+      name: org.name,
+      guid: org.guid,
+      cfGuid: org.cnsiGuid,
+    } as IOrganization,
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +49,7 @@ export class CfRolesService {
   private cfUserService = inject(CfUserService);
   private userPerms = inject(CurrentUserPermissionsService);
   private rolesData = inject(CfUsersRolesDataService);
+  private http = inject(HttpClient);
 
 
   existingRoles$: Observable<CfUserRolesSelected>;
@@ -222,9 +235,38 @@ export class CfRolesService {
     return newChanges;
   }
 
+  // V2-shape adapter — manage-users UI was written against ngrx EntityInfo /
+  // APIResource<IOrganization>. Bridging the native StOrg payload into that
+  // shape here keeps the UI files unchanged; a future cleanup can lift the
+  // native shape through the consumers.
   fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
-    return cfEntityCatalog.org.store.getEntityService(orgGuid, cfGuid, { includeRelations: [], populateMissing: false })
-      .waitForEntity$;
+    const fetching: EntityInfo<APIResource<IOrganization>> = {
+      entity: null,
+      entityRequestInfo: {
+        fetching: true,
+        error: false,
+        deleting: { busy: false, deleted: false, error: false, message: '' },
+      } as any,
+    };
+    return this.http.get<StOrgDetail>(`/pp/v1/cf/org/${cfGuid}/${orgGuid}`).pipe(
+      map(detail => ({
+        entity: adaptOrgToApiResource(detail),
+        entityRequestInfo: {
+          fetching: false,
+          error: false,
+          deleting: { busy: false, deleted: false, error: false, message: '' },
+        } as any,
+      }) as EntityInfo<APIResource<IOrganization>>),
+      startWith(fetching),
+      catchError(() => of({
+        entity: null,
+        entityRequestInfo: {
+          fetching: false,
+          error: true,
+          deleting: { busy: false, deleted: false, error: false, message: '' },
+        } as any,
+      } as EntityInfo<APIResource<IOrganization>>)),
+    );
   }
 
   fetchOrgEntity(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {
@@ -236,16 +278,12 @@ export class CfRolesService {
 
   fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
     if (!this.cfOrgs[cfGuid]) {
-      const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
-      const orgs$ = cfEntityCatalog.org.store.getPaginationService(
-        cfGuid,
-        paginationKey,
-        {
-          includeRelations: [
-            createEntityRelationKey(organizationEntityType, spaceEntityType)
-          ], populateMissing: true
-        }
-      ).entities$;
+      const orgs$ = this.http.get<{ resources: StOrg[]; totalResults: number }>(
+        `/pp/v1/cf/orgs/${cfGuid}?per_page=500`,
+      ).pipe(
+        map(resp => (resp?.resources ?? []).map(adaptOrgToApiResource)),
+        catchError(() => of([] as APIResource<IOrganization>[])),
+      );
       this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$).pipe(
         map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name))),
         publishReplay(1),
