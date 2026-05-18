@@ -28,11 +28,32 @@ type nativeCFProxy interface {
 	GetSessionStringValue(ctx echo.Context, key string) (string, error)
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (api.TokenRecord, error)
 	DoProxySingleRequestWithToken(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error)
+	GetUserTokenInfo(token string) (*api.JWTUserTokenInfo, error)
 }
 
 // getUserGUID extracts the logged-in user GUID from the session.
 func (c *CloudFoundrySpecification) getUserGUID(ctx echo.Context) (string, error) {
 	return c.nativeProxy().GetSessionStringValue(ctx, "user_id")
+}
+
+// getCFUserGUIDForEndpoint resolves the CF UAA user GUID from the OAuth
+// token Jetstream stored for the given CF endpoint. getUserGUID() returns
+// the Stratos session user; this returns the user_id claim from the CF
+// token — the value /v3/roles?user_guids= filters expect.
+func (c *CloudFoundrySpecification) getCFUserGUIDForEndpoint(ctx echo.Context, cnsiGUID string) (string, error) {
+	sessionUser, err := c.getUserGUID(ctx)
+	if err != nil {
+		return "", echo.NewHTTPError(http.StatusUnauthorized, "could not determine session user")
+	}
+	tok, ok := c.nativeProxy().GetCNSITokenRecord(cnsiGUID, sessionUser)
+	if !ok {
+		return "", echo.NewHTTPError(http.StatusForbidden, "no token for endpoint")
+	}
+	info, err := c.nativeProxy().GetUserTokenInfo(tok.AuthToken)
+	if err != nil {
+		return "", echo.NewHTTPError(http.StatusBadGateway, "could not parse cf token: "+err.Error())
+	}
+	return info.UserGUID, nil
 }
 
 // nativeProxy returns the portal proxy cast to nativeCFProxy.
