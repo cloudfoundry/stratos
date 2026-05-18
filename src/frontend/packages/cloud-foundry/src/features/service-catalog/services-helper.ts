@@ -1,29 +1,19 @@
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { take, combineLatest, filter, map, share, switchMap } from 'rxjs/operators';
+import { take, combineLatest, filter, map } from 'rxjs/operators';
 
 import { StServicePlan, StServicePlanVisibility } from '../../services/endpoint-data/stratos-types';
 
-import { createEntityRelationPaginationKey } from '../../../../cloud-foundry/src/entity-relations/entity-relations.types';
 import { getIdFromRoute, safeStringToObj } from '../../../../core/src/core/utils.service';
-import { EntityService } from '../../../../store/src/entity-service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { StratosStatus } from '../../../../store/src/types/shared.types';
 import {
   IService,
   IServiceBroker,
   IServiceExtra,
-  IServiceInstance,
   IServicePlan,
   IServicePlanExtra,
   IServicePlanVisibility } from '../../cf-api-svc.types';
-import { CFAppState } from '../../cf-app-state';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
-import { organizationEntityType, servicePlanEntityType, spaceEntityType } from '../../cf-entity-types';
-import { QParam, QParamJoiners } from '../../shared/q-param';
-import { fetchTotalResults } from '../cf/cf.helpers';
 
 // ServicePlanAccessibility — legacy-shape aggregate used by the
 // getServicePlanAccessibility helper below. Lives here (not on the
@@ -90,28 +80,6 @@ export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
   return !!cfId && !!serviceInstanceId;
 };
 
-export const fetchServiceInstancesCount = (
-  cfGuid: string,
-  orgGuid: string = null,
-  spaceGuid: string = null,
-  store: Store<CFAppState>,
-  paginationMonitorFactory: PaginationMonitorFactory): Observable<number> => {
-  const parentSchemaKey = spaceGuid ? spaceEntityType : orgGuid ? organizationEntityType : 'cf';
-  const uniqueKey = spaceGuid || orgGuid || cfGuid;
-  const action = cfEntityCatalog.serviceInstance.actions.getMultiple(
-    cfGuid,
-    createEntityRelationPaginationKey(parentSchemaKey, uniqueKey),
-    { includeRelations: [], populateMissing: false }
-  );
-  if (orgGuid) {
-    action.initialParams.q.push(new QParam('organization_guid', orgGuid, QParamJoiners.in).toString());
-  }
-  if (spaceGuid) {
-    action.initialParams.q.push(new QParam('space_guid', spaceGuid, QParamJoiners.in).toString());
-  }
-  return fetchTotalResults(action, store, paginationMonitorFactory);
-};
-
 export const getServiceName = (serviceEntity: APIResource<IService>): string => {
   if (!serviceEntity || !serviceEntity.entity) {
     return '';
@@ -125,26 +93,6 @@ export const getServiceName = (serviceEntity: APIResource<IService>): string => 
 
 export const getServiceSummaryUrl = (cfGuid: string, serviceGuid: string): string =>
   `/marketplace/${cfGuid}/${serviceGuid}/summary`;
-
-export const getServicePlans = (
-  service$: Observable<APIResource<IService>>,
-  cfGuid: string
-): Observable<APIResource<IServicePlan>[]> => {
-  return service$.pipe(
-    filter(p => !!p),
-    switchMap(service => {
-      if (service.entity.service_plans && service.entity.service_plans.length > 0) {
-        return observableOf(service.entity.service_plans);
-      } else {
-        // Could be a space-scoped service, make a request to fetch the plan
-        const guid = service.metadata.guid;
-        const paginationKey = createEntityRelationPaginationKey(servicePlanEntityType, guid);
-        return cfEntityCatalog.servicePlan.store.getAllForServiceInstance.getPaginationService(
-          guid, cfGuid, paginationKey
-        ).entities$.pipe(share(), take(1));
-      }
-    }));
-};
 
 // Accepts both the V3 nested-ref StServicePlan shape (flat `name`) and the
 // legacy IServicePlan shape (`name` + optional `extraTyped.displayName`).
@@ -270,26 +218,3 @@ export const canShowServicePlanCosts = (servicePlan: StServicePlan | null | unde
   return !!costs && costs.length > 0 && typeof costs[0].amount === 'number';
 };
 
-export const getServiceBrokerName = (
-  serviceBrokerGuid: string,
-  cfGuid: string,
-): Observable<string> => cfEntityCatalog.serviceBroker.store.getEntityService(serviceBrokerGuid, cfGuid, {}).waitForEntity$.pipe(
-  filter(res => !!res),
-  map(a => a.entity.entity.name),
-  take(1)
-);
-
-export const getCfServiceInstance = (
-  serviceInstanceGuid: string,
-  cfGuid: string,
-  includeRelations: string[] = null
-): EntityService<APIResource<IServiceInstance>> => {
-  return cfEntityCatalog.serviceInstance.store.getEntityService(
-    serviceInstanceGuid,
-    cfGuid,
-    {
-      includeRelations,
-      populateMissing: !!includeRelations
-    }
-  );
-};
