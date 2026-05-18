@@ -9,6 +9,8 @@
               @if (!hideSideNavButton) {
                 <button
                   class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                  matTooltip="Toggle menu"
+                  aria-label="Toggle menu"
                   (click)="toggleSidenav()">
                   <span class="material-icons">menu</span>
                 </button>
@@ -77,7 +79,8 @@
               <div class="relative">
                 <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   (click)="toggleTokenMenu()"
-                  title="Copy UAA tokens">
+                  matTooltip="Copy UAA tokens"
+                  aria-label="Copy UAA tokens">
                   <span class="material-icons">vpn_key</span>
                 </button>
                 @if (isTokenMenuOpen) {
@@ -109,6 +112,8 @@
             @if (showHistory) {
               <div class="relative">
                 <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
+                  matTooltip="Recent activity"
+                  aria-label="Recent activity"
                   (click)="toggleHistoryMenu()">
                   <span class="material-icons">schedule</span>
                 </button>
@@ -130,6 +135,8 @@
             @if ((events$ | async).length > 0) {
               <button
                 routerLink="/events"
+                matTooltip="Notifications"
+                aria-label="Notifications"
                 class="page-header-notification-button relative p-2 text-header-text hover:bg-white/10 rounded-md transition-colors">
                 <span class="material-icons">notifications</span>
                 @if ((unreadEventCount$ | async); as count) {
@@ -146,6 +153,8 @@
               <div class="relative">
                 <button id="userMenu"
                   class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
+                  matTooltip="User menu"
+                  aria-label="User menu"
                   (click)="toggleUserMenu()">
                   <app-user-avatar color="header" [allowGravatar]="allowGravatar$ | async" [user]="user$ | async">
                   </app-user-avatar>

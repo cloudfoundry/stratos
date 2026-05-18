@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
   InternalEventSeverity,
@@ -32,6 +32,7 @@ import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
 import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
@@ -46,6 +47,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
   imports: [
     CommonModule,
     RouterModule,
+    CustomTooltipDirective,
     EntityFavoriteStarComponent,
     ExtensionButtonsComponent,
     RecentEntitiesComponent,
@@ -73,6 +75,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
+  // Last [breadcrumbs] input value, retained so the queryParamMap
+  // subscription can re-resolve the active breadcrumb after a key change.
+  private latestBreadcrumbs: IHeaderBreadcrumb[] = null;
   public eventSeverity = InternalEventSeverity;
   public pFavorite!: UserFavorite<IFavoriteMetadata>;
   private pTabs!: IPageSideNavTab[];
@@ -174,6 +179,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
+    this.latestBreadcrumbs = breadcrumbs;
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
     this.cdr.markForCheck();
   }
@@ -219,7 +225,17 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
 
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
-    this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
+    // Reactive breadcrumb key — re-resolves whenever the URL's
+    // ?breadcrumbs= query param changes. Snapshot-only reads broke on
+    // tab navigation that re-emits params, and on async query-param
+    // arrival when the route resolves before the param lands.
+    route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
+      this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
+      if (this.latestBreadcrumbs) {
+        this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
+        this.cdr.markForCheck();
+      }
+    });
 
     this.user$ = this.userProfileService.userProfile$;
 
