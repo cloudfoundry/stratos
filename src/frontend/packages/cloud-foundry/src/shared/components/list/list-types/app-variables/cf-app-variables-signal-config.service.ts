@@ -5,7 +5,7 @@ import { ListStateStore, SignalListColumn, SignalListRowAction } from '@stratosu
 import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import { AppVariableActionsService } from '../../../../services/app-variable-actions.service';
-import { ListAppEnvVar } from './cf-app-variables-data-source';
+import { ListAppEnvVar } from './cf-app-variables.types';
 
 // CF App Variables signal-list config — single-app, per-variable rows of
 // the app-detail Variables tab. Replaces the legacy
