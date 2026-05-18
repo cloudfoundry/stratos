@@ -1,8 +1,8 @@
 <div class="flex flex-col gap-6 p-6">
   <div class="flex flex-col gap-4 text-sm">
-    <p>Invite users to the <b>{{(org$ | async)?.entity.name}}</b> organization@if (isSpace) {
+    <p>Invite users to the <b>{{orgName()}}</b> organization@if (isSpace) {
     <span> and the
-      <b>{{(space$ | async)?.entity.name}}</b> space</span>
+      <b>{{spaceName()}}</b> space</span>
     }.</p>
     <p>A verification email will be sent to each user you invite, they can then follow the link provided
     in the email to activate and set up their account.</p>
