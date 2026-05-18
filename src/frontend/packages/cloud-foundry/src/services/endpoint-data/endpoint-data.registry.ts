@@ -149,13 +149,30 @@ export class EndpointDataRegistry implements OnDestroy {
     return this.cardQueue$.pipe(
       // Run card fast-path loads with bounded concurrency. Chain into the
       // details queue so each endpoint's full-data fetch happens after its
-      // counts land.
+      // counts land — but defer the enqueue via requestIdleCallback so the
+      // home dashboard's first paint doesn't compete with the (much
+      // heavier) full drain for HTTP/1.1 connection-pool slots. 'Home
+      // page is the warm-up for other pages' is the design intent — that
+      // stays true; we just don't punish the user's first impression.
+      // Safari (no requestIdleCallback) falls back to a 500 ms timeout.
       mergeMap(svc => svc.load().pipe(
         // load() uses merge() over 3 HTTP calls and emits once per inner
         // completion, so we can't tap on next() — that would enqueue details
         // 3 times per card. Fire on complete() only.
-        tap({ complete: () => this.detailsQueue$.next(svc) }),
+        tap({ complete: () => this.scheduleIdleEnqueue(() => this.detailsQueue$.next(svc)) }),
       ), this.maxConcurrentCards),
     ).subscribe();
+  }
+
+  // Defer fn until the browser reports idle (rIC) or, on Safari, a
+  // short timeout. 2000 ms timeout on rIC bounds the worst case so a
+  // permanently-busy main thread can't starve background warming.
+  private scheduleIdleEnqueue(fn: () => void): void {
+    const ric = (globalThis as any).requestIdleCallback as undefined | ((cb: () => void, opts?: { timeout?: number }) => unknown);
+    if (typeof ric === 'function') {
+      ric(fn, { timeout: 2000 });
+    } else {
+      setTimeout(fn, 500);
+    }
   }
 }
