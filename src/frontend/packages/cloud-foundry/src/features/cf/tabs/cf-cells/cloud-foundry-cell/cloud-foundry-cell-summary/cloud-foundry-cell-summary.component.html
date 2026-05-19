@@ -37,5 +37,7 @@
 </app-tile-grid>
 
 <div class="cell-summary__health">
-  <app-list></app-list>
+  @if (healthListConfig(); as cfg) {
+    <app-signal-list [config]="cfg"></app-signal-list>
+  }
 </div>
