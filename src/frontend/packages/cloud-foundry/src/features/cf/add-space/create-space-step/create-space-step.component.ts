@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, Input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subscription, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { SignalStepHandle, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { SignalStepHandle, StepOnNextFunction, StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
+import { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -41,6 +41,7 @@ interface CreateSpaceForm {
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
@@ -57,24 +58,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const id = `${this.orgGuid}-${this.spaceName.value}`;
-      const quotaValue = this.quotaDefinition.value;
-      const finalState = await firstValueFrom(
-        cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
-          createSpace: {
-            name: this.spaceName.value,
-            organization_guid: this.orgGuid,
-            space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
-          },
-          orgGuid: this.orgGuid
-        }).pipe(
-          pairwise(),
-          filter(([oldS, newS]) => oldS.creating && !newS.creating),
-          map(([, newS]) => newS),
-        )
-      );
-      if (finalState.error) {
-        throw new Error(`Failed to create space: ${finalState.message}`);
+      const result = await firstValueFrom(this.runCreate());
+      if (!result.success) {
+        throw new Error(result.message ?? 'Failed to create space');
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
@@ -146,23 +132,39 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   validate = () => this.validSignal();
 
-  submit: StepOnNextFunction = () => {
-    const id = `${this.orgGuid}-${this.spaceName.value}`;
+  submit: StepOnNextFunction = () => this.runCreate();
+
+  // Chains POST /pp/v1/cf/spaces/:cnsi (V3-native space create) with an
+  // optional POST /pp/v1/cf/space_quotas/:cnsi/:quotaGuid/relationships/spaces
+  // when the wizard's quota dropdown carries a selection. CF v3 dropped the
+  // inline space_quota_definition_guid field that the V2 legacy action used,
+  // so the apply-quota step lives outside the create call.
+  private runCreate(): Observable<StepOnNextResult> {
     const quotaValue = this.quotaDefinition.value;
-    return cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
-      createSpace: {
-        name: this.spaceName.value,
-        organization_guid: this.orgGuid,
-        space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
-      },
-      orgGuid: this.orgGuid
+    const quotaGuid = quotaValue ? String(quotaValue) : null;
+    return this.http.post<StSpace>(`/pp/v1/cf/spaces/${this.cfGuid}`, {
+      name: this.spaceName.value,
+      relationships: { organization: { data: { guid: this.orgGuid } } },
     }).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.creating && !newS.creating),
-      map(([, newS]) => newS),
-      this.map('Failed to create space: ')
+      switchMap(space => {
+        if (!quotaGuid) {
+          return [space];
+        }
+        return this.http.post(
+          `/pp/v1/cf/space_quotas/${this.cfGuid}/${quotaGuid}/relationships/spaces`,
+          { space_guids: [space.guid] },
+        ).pipe(map(() => space));
+      }),
+      map(() => ({ success: true })),
+      catchError(err => {
+        const message = err?.error?.error || err?.message || `Failed to create space`;
+        return throwError(() => ({ success: false, message } as StepOnNextResult));
+      }),
+      // Convert throwError to a successful emit of the failure result so
+      // the stepper's pipeline can read it without rxjs error semantics.
+      catchError((result: StepOnNextResult) => [result]),
     );
-  };
+  }
 
   ngOnDestroy() {
     this.formStatusSub?.unsubscribe();

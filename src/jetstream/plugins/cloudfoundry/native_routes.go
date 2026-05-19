@@ -84,6 +84,8 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.POST("/cf/organization_quotas/:cnsiGuid/:quotaGuid/relationships/organizations", c.applyOrgQuotaToOrgs)
 	echoGroup.POST("/cf/space_quotas/:cnsiGuid", c.createNativeSpaceQuota)
 	echoGroup.PATCH("/cf/space_quotas/:cnsiGuid/:quotaGuid", c.updateNativeSpaceQuota)
+	echoGroup.POST("/cf/space_quotas/:cnsiGuid/:quotaGuid/relationships/spaces", c.applySpaceQuotaToSpaces)
+	echoGroup.DELETE("/cf/space_quotas/:cnsiGuid/:quotaGuid/relationships/spaces/:spaceGuid", c.removeSpaceQuotaFromSpace)
 	echoGroup.POST("/cf/service_instances/:cnsiGuid", c.createManagedServiceInstance)
 	echoGroup.PATCH("/cf/service_instances/:cnsiGuid/:siGuid", c.updateManagedServiceInstance)
 	echoGroup.POST("/cf/roles/:cnsiGuid", c.createNativeRole)
