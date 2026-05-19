@@ -2,15 +2,13 @@ import { Injectable, computed, inject, signal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
-import { ResetPagination, Store } from '@stratosui/store';
 
-import { CFAppState } from '../../cf-app-state';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { ApplicationService } from '../../features/applications/application.service';
 import { AppDeleteSelectionService } from '../../features/applications/app-delete-selection.service';
 import { AppDetailDataService } from '../../features/applications/app-detail-data.service';
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
+import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
 import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
 
@@ -54,10 +52,10 @@ export class AppApplicationActionsService {
   private lifecycle = inject(AppLifecycleStateService);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
   private apps = inject(CfAppsSignalConfigService);
   private deleteSelection = inject(AppDeleteSelectionService);
+  private statsRegistry = inject(AppStatsDataRegistry);
 
   // In-flight flag delegates to AppLifecycleStateService — the leaf
   // shared-state service used to break the construction cycle with
@@ -221,9 +219,10 @@ export class AppApplicationActionsService {
         // GET /apps/:guid 404s and stats fetches return empty. The
         // onAfter callback handles navigation to /applications instead.
         if (verb !== 'delete') {
-          // Refresh ngrx-backed entity store (legacy consumers still rely on it).
-          cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
-          this.dispatchAppStats();
+          // Invalidate the per-app stats cache so list cards (running-instances)
+          // re-fetch the post-action running count. The app detail page's
+          // own stats signal is refreshed below via dataService.refresh('stats').
+          this.refreshAppStats();
           // Refresh only the signals that can change post-action: app entity
           // (state) and stats (running/total). Skip space/org/domains which
           // physically can't change during a lifecycle op — refreshing them
@@ -259,7 +258,7 @@ export class AppApplicationActionsService {
           at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
           error: firstError ? { code: String(firstError.code), message: String(firstError.message) } : undefined,
         });
-        this.dispatchAppStats();
+        this.refreshAppStats();
         // Failure path may have left CF in a partial state — refresh to
         // pick up whatever the actual current state is.
         void this.dataService.refresh('all');
@@ -298,9 +297,9 @@ export class AppApplicationActionsService {
     return { app, cf: parts[0] ?? '?', org: parts[1] ?? '?', space: parts[2] ?? '?' };
   }
 
-  private dispatchAppStats = () => {
+  private refreshAppStats = () => {
     const { cfGuid, appGuid } = this.applicationService;
-    cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
+    this.statsRegistry.acquire(cfGuid, appGuid).refresh().subscribe();
   };
 
   // After a start/restart/restage success, poll stats every 5 s for up to
@@ -404,11 +403,12 @@ export class AppApplicationActionsService {
         target,
         ({ onProgress }) => this.apps.stopApp(this.applicationService.cfGuid, this.applicationService.appGuid, { onProgress }),
         () => {
-          // On app reaching STOPPED, clear the stats pagination section
-          // so a re-start comes up with fresh instance rows.
-          const { cfGuid, appGuid } = this.applicationService;
-          const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
-          this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
+          // On app reaching STOPPED, invalidate the per-app stats cache
+          // so list cards drop to 0/0 instead of showing stale running
+          // instances. The post-success path above already calls
+          // refreshAppStats() on the running-app op; this is the same
+          // intent for the explicit stop callback.
+          this.refreshAppStats();
         },
       );
     });

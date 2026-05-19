@@ -39,6 +39,20 @@ export class AppStatsDataService {
     if (this._lastFetched() !== null) {
       return of(undefined);
     }
+    return this.fetch();
+  }
+
+  /**
+   * Force a refetch. Used after lifecycle actions (start/stop/restart/restage/scale)
+   * to keep cards showing the post-action running count without waiting
+   * for the cache to expire.
+   */
+  refresh(): Observable<void> {
+    this._lastFetched.set(null);
+    return this.fetch();
+  }
+
+  private fetch(): Observable<void> {
     if (this._inFlightLoad) {
       return this._inFlightLoad;
     }
