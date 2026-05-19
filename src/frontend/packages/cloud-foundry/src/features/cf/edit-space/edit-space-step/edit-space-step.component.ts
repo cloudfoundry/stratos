@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, Input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
-import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
+import { firstValueFrom, Observable, of, Subscription, throwError } from 'rxjs';
+import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -14,12 +15,12 @@ import {
   CustomSlideToggleComponent,
   FocusDirective,
   SignalStepHandle,
-  StepOnNextFunction
+  StepOnNextFunction,
+  StepOnNextResult
 } from '@stratosui/core';
-import { ActionState } from '@stratosui/store';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
+import { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
@@ -53,6 +54,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   private cfSpaceService = inject(CloudFoundrySpaceService);
   private injector = inject(Injector);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
@@ -69,24 +71,24 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
-      const spaceState = await firstValueFrom(this.updateSpace());
-      if (spaceState.error) {
-        throw new Error(`Failed to update space: ${spaceState.message}`);
+      const spaceResult = await firstValueFrom(this.updateSpace());
+      if (!spaceResult.success) {
+        throw new Error(spaceResult.message || 'Failed to update space');
       }
-      const quotaUnchanged = this.originalSpaceQuotaGuid === spaceQuotaGuid ||
-        (!this.originalSpaceQuotaGuid && !spaceQuotaGuid);
-      if (!quotaUnchanged) {
-        const quotaResult = await firstValueFrom(this.updateSpaceQuota());
-        if (!quotaResult.success) {
-          throw new Error(quotaResult.message || 'Failed to update space quota');
-        }
+      if (this.quotaUnchanged()) {
+        await this.router.navigateByUrl(this.redirectUrl);
+        return;
+      }
+      const quotaResult = await firstValueFrom(this.updateSpaceQuota());
+      if (!quotaResult.success) {
+        throw new Error(quotaResult.message || 'Failed to update space quota');
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
   };
 
   originalName: any;
+  originalAllowSsh = false;
   spaceSubscription!: Subscription;
   space!: string;
   space$: Observable<any>;
@@ -121,6 +123,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
       take(1),
       tap(n => {
         this.originalName = n.name;
+        this.originalAllowSsh = !!n.allow_ssh;
         this.originalSpaceQuotaGuid = n.space_quota_definition_guid;
 
         const spaceQuotaGuid = n.space_quota_definition_guid ? n.space_quota_definition_guid : 0;
@@ -163,57 +166,81 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   }
 
   submit: StepOnNextFunction = () => {
-    const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
-
     return this.updateSpace().pipe(
-      switchMap((spaceStateAction) => {
-        let message = '';
-
-        if (spaceStateAction.error) {
-          message = spaceStateAction.message;
-
-          return of({
-            success: false,
-            redirect: false,
-            message: `Failed to update space: ${message}`
-          });
+      switchMap(spaceResult => {
+        if (!spaceResult.success) {
+          return of({ success: false, redirect: false, message: spaceResult.message });
         }
-
-        if (this.originalSpaceQuotaGuid === spaceQuotaGuid ||
-          (!this.originalSpaceQuotaGuid && !spaceQuotaGuid)) {
+        if (this.quotaUnchanged()) {
           return of({ success: true, redirect: true });
         }
-
         return this.updateSpaceQuota();
       }),
     );
   };
 
-  updateSpace() {
-    return cfEntityCatalog.space.api.update<ActionState>(this.spaceGuid, this.cfGuid, {
-      name: this.editSpaceForm.value.spaceName,
-      allow_ssh: this.editSpaceForm.value.toggleSsh as boolean,
-    }).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.busy && !newS.busy),
-      map(([, newS]) => newS),
+  private quotaUnchanged(): boolean {
+    const next = this.editSpaceForm.value.quotaDefinition;
+    return this.originalSpaceQuotaGuid === next ||
+      (!this.originalSpaceQuotaGuid && !next);
+  }
+
+  // Two-leg update: PATCH /pp/v1/cf/spaces/:cnsi/:spaceGuid (name) then
+  // PUT /pp/v1/cf/spaces/:cnsi/:spaceGuid/features/ssh (allow_ssh) when
+  // the toggle changed. CF v3 lifted SSH out of the space attributes
+  // endpoint into a separate feature, so the two-call chain stands in
+  // for the legacy single V2 PATCH /v2/spaces/{guid}.
+  updateSpace(): Observable<StepOnNextResult> {
+    const name = this.editSpaceForm.value.spaceName as string;
+    const allowSsh = !!this.editSpaceForm.value.toggleSsh;
+    const sshChanged = allowSsh !== this.originalAllowSsh;
+    return this.http.patch<StSpace>(`/pp/v1/cf/spaces/${this.cfGuid}/${this.spaceGuid}`, { name }).pipe(
+      switchMap(() => {
+        if (!sshChanged) {
+          return of(true);
+        }
+        return this.http.put(
+          `/pp/v1/cf/spaces/${this.cfGuid}/${this.spaceGuid}/features/ssh`,
+          { enabled: allowSsh },
+        ).pipe(map(() => true));
+      }),
+      map(() => ({ success: true })),
+      catchError(err => {
+        const message = err?.error?.error || err?.message || `Failed to update space`;
+        return throwError(() => ({ success: false, message } as StepOnNextResult));
+      }),
+      catchError((result: StepOnNextResult) => [result]),
     );
   }
 
-  updateSpaceQuota() {
-    const spaceQuotaGuid = this.editSpaceForm.value.quotaDefinition;
-    const mon = spaceQuotaGuid ?
-      cfEntityCatalog.spaceQuota.api.associateWithSpace<ActionState>(this.spaceGuid, this.cfGuid, String(spaceQuotaGuid)) :
-      cfEntityCatalog.spaceQuota.api.disassociateFromSpace<ActionState>(this.spaceGuid, this.cfGuid, this.originalSpaceQuotaGuid);
-    return mon.pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.busy && !newS.busy),
-      map(([, newS]) => newS),
-      map(stateAction => ({
-        success: !stateAction.error,
-        redirect: !stateAction.error,
-        message: !stateAction.error ? '' : `Failed to update space quota: ${stateAction.message}`
-      }))
+  // V3 has no single endpoint that "switches" a quota on a space — either
+  // attach (POST /v3/space_quotas/{quotaGuid}/relationships/spaces) or
+  // detach (DELETE same path + /{spaceGuid}). On a quota change we just
+  // need the new attachment; remove the previous attachment first when
+  // one existed so the space ends up only with the new quota.
+  updateSpaceQuota(): Observable<StepOnNextResult> {
+    const next = this.editSpaceForm.value.quotaDefinition;
+    const nextGuid = next ? String(next) : null;
+    const oldGuid = this.originalSpaceQuotaGuid || null;
+
+    const detach$ = oldGuid
+      ? this.http.delete(`/pp/v1/cf/space_quotas/${this.cfGuid}/${oldGuid}/relationships/spaces/${this.spaceGuid}`)
+      : of(null);
+
+    return detach$.pipe(
+      switchMap(() => {
+        if (!nextGuid) {
+          return of({ success: true, redirect: true } as StepOnNextResult);
+        }
+        return this.http.post(
+          `/pp/v1/cf/space_quotas/${this.cfGuid}/${nextGuid}/relationships/spaces`,
+          { space_guids: [this.spaceGuid] },
+        ).pipe(map(() => ({ success: true, redirect: true } as StepOnNextResult)));
+      }),
+      catchError(err => {
+        const message = err?.error?.error || err?.message || `Failed to update space quota`;
+        return of({ success: false, redirect: false, message: `Failed to update space quota: ${message}` } as StepOnNextResult);
+      }),
     );
   }
 

@@ -77,6 +77,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.PATCH("/cf/orgs/:cnsiGuid/:orgGuid", c.updateNativeOrg)
 	echoGroup.POST("/cf/spaces/:cnsiGuid", c.createNativeSpace)
 	echoGroup.PATCH("/cf/spaces/:cnsiGuid/:spaceGuid", c.updateNativeSpace)
+	echoGroup.PUT("/cf/spaces/:cnsiGuid/:spaceGuid/features/ssh", c.setSpaceSshFeature)
 	echoGroup.POST("/cf/routes/:cnsiGuid", c.createNativeRoute)
 	echoGroup.POST("/cf/apps/:cnsiGuid", c.createNativeApp)
 	echoGroup.POST("/cf/organization_quotas/:cnsiGuid", c.createNativeOrgQuota)
