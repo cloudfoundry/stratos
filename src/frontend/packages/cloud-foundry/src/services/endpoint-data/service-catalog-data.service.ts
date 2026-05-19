@@ -59,6 +59,22 @@ export class ServiceCatalogDataService {
     );
   }
 
+  // Lists service offerings filtered to those reachable from a given
+  // space. Backs the add-service-instance wizard's Select Service step.
+  // Backend forwards `?space_guids=` to /v3/service_offerings.
+  serviceOfferingsInSpace(cnsiGuid: string, spaceGuid: string): SignalSource<StServiceOffering[]> {
+    const params = new HttpParams()
+      .set('space_guids', spaceGuid)
+      .set('return', 'summary');
+    return this.signalize(
+      this.http.get<PagedResp<StServiceOffering>>(
+        `/pp/v1/cf/service_offerings/${cnsiGuid}`,
+        { params },
+      ).pipe(map(resp => resp?.resources ?? [])),
+      [],
+    );
+  }
+
   servicePlansForOffering(cnsiGuid: string, offeringGuid: string): SignalSource<StServicePlan[]> {
     const params = new HttpParams()
       .set('service_offering', offeringGuid)
