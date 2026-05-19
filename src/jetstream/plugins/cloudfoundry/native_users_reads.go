@@ -96,6 +96,43 @@ func (c *CloudFoundrySpecification) getNativeUsers(ctx echo.Context) error {
 	})
 }
 
+// getNativeUserDetail handles GET /pp/v1/cf/users/{cnsiGuid}/{userGuid}.
+//
+// Single-resource sibling for the users list handler. Returns the StUser
+// shape with the user's role buckets pre-joined (same /v3/roles?user_guids
+// drain the list handler runs, scoped to one identity here). Used by the
+// cf-user.service.getUser fallback path that fires when an admin can't
+// hit the bulk /v3/users endpoint and needs to resolve a single user by
+// GUID — replaces the legacy cfEntityCatalog.user.store.getEntityService
+// observable.
+func (c *CloudFoundrySpecification) getNativeUserDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	userGUID := ctx.Param("userGuid")
+	if cnsiGUID == "" || userGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and userGuid are required")
+	}
+
+	callerUserGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, callerUserGUID)
+	if err != nil {
+		return err
+	}
+
+	user, gerr := cfClient.Users().Get(ctx.Request().Context(), userGUID)
+	if gerr != nil {
+		return handleCapiError(ctx, gerr)
+	}
+
+	orgRolesByUser, spaceRolesByUser := buildUserRoleBuckets(ctx.Request().Context(), cfClient, []string{userGUID})
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, toStUser(*user, cnsiGUID, orgRolesByUser[userGUID], spaceRolesByUser[userGUID]))
+}
+
 // buildUserRoleBuckets fetches roles for the supplied user GUIDs and
 // returns per-user org/space role buckets. Soft-fails on /v3/roles
 // errors — returns empty maps so the caller emits empty role arrays
