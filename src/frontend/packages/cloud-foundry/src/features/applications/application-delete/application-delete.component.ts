@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EffectRef, Injector, OnDestroy, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { filter, map, pairwise, shareReplay, startWith, take, tap } from 'rxjs/operators';
 
 import {
   LoadingPageComponent,
@@ -10,11 +10,6 @@ import {
   StepComponent,
   SteppersComponent } from '@stratosui/core';
 import {
-  EntityMonitor,
-  APIResource } from '@stratosui/store';
-import {
-  IApp,
-  cfEntityCatalog,
   ApplicationService } from '@stratosui/cloud-foundry';
 
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
@@ -41,13 +36,15 @@ import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker
     AppServiceBindingsPickerComponent,
   ],
 })
-export class ApplicationDeleteComponent {
+export class ApplicationDeleteComponent implements OnDestroy {
   private applicationService = inject(ApplicationService);
   private apps = inject(CfAppsSignalConfigService);
   private selection = inject(AppDeleteSelectionService);
   private dataService = inject(AppDetailDataService);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private router = inject(Router);
+  private injector = inject(Injector);
+  private errorRedirectEffect?: EffectRef;
 
   // Hot path (clicked trash on summary): selection.target() is populated
   // by AppApplicationActionsService.redirectToDelete() before navigation
@@ -87,8 +84,6 @@ export class ApplicationDeleteComponent {
   // in parallel and their load flags gate their respective stepper steps.
   public fetchingApplicationData$!: Observable<boolean>;
 
-  public appMonitor!: EntityMonitor<APIResource<IApp>>;
-
   public cancelUrl: string;
 
   // The wizard now collects selections only; it does not execute the
@@ -125,18 +120,29 @@ export class ApplicationDeleteComponent {
   constructor() {
     const applicationService = this.applicationService;
 
-    this.setupAppMonitor();
     this.cancelUrl = `/applications/${applicationService.cfGuid}/${applicationService.appGuid}`;
 
-    this.fetchingApplicationData$ = this.finishedFetchingApplication().pipe(
-      filter(finished => finished),
-      take(1),
-      map(() => false),
-      shareReplay(1),
-      startWith(true)
+    // Top-level spinner gates on the parent data service's app load. The
+    // wizard's stepper steps gate on routes/bindings load flags below.
+    this.fetchingApplicationData$ = toObservable(
+      computed(() => this.dataService.loading().app),
+      { injector: this.injector },
     );
 
-    cfEntityCatalog.application.api.get(applicationService.appGuid, applicationService.cfGuid, {});
+    // Redirect to the app wall if the app fetch errors out — covers
+    // direct-URL navigation to a deleted/non-existent app.
+    runInInjectionContext(this.injector, () => {
+      this.errorRedirectEffect = effect(() => {
+        if (this.dataService.errors().app) {
+          this.router.navigate(['/applications']);
+        }
+      });
+    });
+
+    // Kick a fresh app fetch so the wizard renders against current state
+    // even on direct-URL load (the parent data service may already have it
+    // cached from a prior visit).
+    void this.dataService.refresh('app');
 
     // Parallel signal-native fetches for related entities. Failures surface
     // as empty lists — the stepper skips the empty step and the user can
@@ -161,34 +167,8 @@ export class ApplicationDeleteComponent {
       });
   }
 
-  private setupAppMonitor() {
-    this.appMonitor = this.getApplicationMonitor();
-  }
-
-  public redirectToAppWall() {
-    this.router.navigate(['/applications']);
-  }
-
-  public getApplicationMonitor() {
-    return cfEntityCatalog.application.store.getEntityMonitor(this.applicationService.appGuid);
-  }
-
-  /**
-   * Returns an observable that emits a if the application fetch has finished or not.
-   * Redirects to the app wall if we encounter an error when fetching the application.
-   */
-  private finishedFetchingApplication() {
-    return this.appMonitor.entityRequest$.pipe(
-      tap(entityRequestInfo => {
-        if (entityRequestInfo.error) {
-          this.redirectToAppWall();
-        }
-      }),
-      pairwise(),
-      map(([oldEntityRequestInfo, entityRequestInfo]) => {
-        return !entityRequestInfo.error && (oldEntityRequestInfo.fetching && !entityRequestInfo.fetching);
-      })
-    );
+  ngOnDestroy() {
+    this.errorRedirectEffect?.destroy();
   }
 
   public setSelectedServiceBindings(selected: StServiceCredentialBinding[]) {
