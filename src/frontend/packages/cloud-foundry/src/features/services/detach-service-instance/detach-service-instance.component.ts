@@ -9,12 +9,10 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceBinding } from '../../../cf-api-svc.types';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
-import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 
 type BindingStatus = 'pending' | 'busy' | 'success' | 'error';
@@ -64,19 +62,19 @@ export class DetachServiceInstanceComponent {
   private statusByGuid = signal<Record<string, BindingStatus>>({});
   private errorByGuid = signal<Record<string, string>>({});
   // Selected bindings, set by the upstream <app-detach-apps> step.
-  private _selectedBindings = signal<APIResource<IServiceBinding>[]>([]);
+  private _selectedBindings = signal<StServiceCredentialBinding[]>([]);
 
   rows = computed<BindingRow[]>(() => {
     const bindings = this._selectedBindings();
     const statuses = this.statusByGuid();
     const errors = this.errorByGuid();
     return bindings.map(b => ({
-      guid: b.metadata.guid,
-      appName: b.entity.app.entity.name,
-      appGuid: b.entity.app.metadata.guid,
-      bindingDate: this.datePipe.transform(b.metadata.created_at, 'medium') ?? '',
-      status: statuses[b.metadata.guid] ?? 'pending',
-      errorMessage: errors[b.metadata.guid],
+      guid: b.guid,
+      appName: b.app?.name ?? '',
+      appGuid: b.app?.guid ?? '',
+      bindingDate: this.datePipe.transform(b.createdAt, 'medium') ?? '',
+      status: statuses[b.guid] ?? 'pending',
+      errorMessage: errors[b.guid],
     }));
   });
 
@@ -99,12 +97,12 @@ export class DetachServiceInstanceComponent {
       // even if the network is slow.
       this.statusByGuid.update(prev => {
         const next = { ...prev };
-        for (const b of bindings) next[b.metadata.guid] = 'busy';
+        for (const b of bindings) next[b.guid] = 'busy';
         return next;
       });
 
       // Fire all deletes in parallel; settle whichever way each lands.
-      await Promise.all(bindings.map(b => this.detachOne(b.metadata.guid)));
+      await Promise.all(bindings.map(b => this.detachOne(b.guid)));
     },
   };
 
@@ -116,7 +114,7 @@ export class DetachServiceInstanceComponent {
     this._instanceSource = this.serviceCatalog.serviceInstance(this.cfGuid, serviceInstanceId);
   }
 
-  setSelectedBindings = (selectedBindings: APIResource<IServiceBinding>[]) => {
+  setSelectedBindings = (selectedBindings: StServiceCredentialBinding[]) => {
     this._selectedBindings.set(selectedBindings);
   }
 

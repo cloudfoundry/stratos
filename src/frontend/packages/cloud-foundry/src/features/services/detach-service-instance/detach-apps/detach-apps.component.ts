@@ -1,15 +1,31 @@
-
-import { Component, EventEmitter, OnDestroy, Output, inject, ChangeDetectionStrategy } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
-
-import { ListComponent, ListConfig, SignalStepHandle } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IServiceBinding } from '../../../../cf-api-svc.types';
+import { DatePipe } from '@angular/common';
 import {
-  DetachAppsListConfigService,
-} from '../../../../shared/components/list/list-types/detach-apps/detach-apps-list-config.service';
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+  Signal,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { of as observableOf } from 'rxjs';
+
+import {
+  BoundListSelectionState,
+  ListSelectionStore,
+  SignalStepHandle,
+} from '@stratosui/core';
+import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceCredentialBinding } from '../../../../services/endpoint-data/stratos-types';
+
+interface DetachAppRow {
+  binding: StServiceCredentialBinding;
+  appName: string;
+  bindingDate: string;
+}
 
 @Component({
   selector: 'app-detach-apps',
@@ -17,48 +33,70 @@ import {
   styleUrls: ['./detach-apps.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    ListComponent
-],
+  imports: [],
   providers: [
-    {
-      provide: ListConfig,
-      useClass: DetachAppsListConfigService
-    }
-  ]
+    DatePipe,
+    ListSelectionStore,
+  ],
 })
-export class DetachAppsComponent implements OnDestroy {
-  private config = inject(ListConfig<APIResource>);
+export class DetachAppsComponent {
+  private datePipe = inject(DatePipe);
+  private serviceCatalog = inject(ServiceCatalogDataService);
+  private selectionStore = inject<ListSelectionStore<StServiceCredentialBinding>>(ListSelectionStore);
 
-  validate$: Observable<boolean>;
-  @Output()
-  public selectedApps = new EventEmitter<APIResource<IServiceBinding>[]>();
-  selectedSub: Subscription;
+  @Output() selectedApps = new EventEmitter<StServiceCredentialBinding[]>();
 
-  // FWT-957: signal-native step handle. Validity is "at least one app
-  // selected"; no submit (the parent's confirm step handles the actual
-  // detach), so the step auto-succeeds on Next.
+  private bindingsSource: SignalSource<StServiceCredentialBinding[]>;
+  selection: BoundListSelectionState<StServiceCredentialBinding>;
+
+  readonly isLoading: Signal<boolean>;
+  readonly rows: Signal<DetachAppRow[]>;
+  readonly bindings: Signal<StServiceCredentialBinding[]>;
+
   signalHandle: SignalStepHandle;
 
   constructor() {
-    this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
-      (selectedApps) => {
-        this.selectedApps.emit(Array.from(selectedApps.values()));
-      }
-    );
+    const activatedRoute = inject(ActivatedRoute);
+    const { serviceInstanceId, endpointId } = activatedRoute.snapshot.params;
 
-    this.validate$ = this.config.getDataSource().selectedRows$.pipe(
-      map(rows => Array.from(rows.values()).length > 0)
-    );
+    this.bindingsSource = this.serviceCatalog.serviceBindingsForInstance(endpointId, serviceInstanceId);
+    this.selection = this.selectionStore.bind(b => b.guid);
 
-    const validSignal = toSignal(this.validate$.pipe(startWith(false)), { initialValue: false });
-    this.signalHandle = { valid: validSignal };
+    this.isLoading = this.bindingsSource.isLoading;
+    this.bindings = computed(() => this.bindingsSource.value() ?? []);
+    this.rows = computed(() => this.bindings().map(b => ({
+      binding: b,
+      appName: b.app?.name ?? '',
+      bindingDate: this.datePipe.transform(b.createdAt, 'medium') ?? '',
+    })));
+
+    this.signalHandle = { valid: this.selection.isSelecting };
+
+    // Emit the current selection upstream whenever it changes. The parent
+    // step reads this list in its confirm phase to drive per-binding deletes.
+    effect(() => {
+      const selected = Array.from(this.selection.selectedRows().values());
+      this.selectedApps.emit(selected);
+    });
   }
 
-  ngOnDestroy() {
-    this.selectedSub.unsubscribe();
+  isAllSelected = computed(() => this.selection.isAllSelected(this.bindings()));
+
+  toggleAll(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.selection.selectAll(this.bindings());
+    }
+  }
+
+  isRowSelected(b: StServiceCredentialBinding): boolean {
+    return this.selection.selectedRows().has(b.guid);
+  }
+
+  toggleRow(b: StServiceCredentialBinding): void {
+    this.selection.toggle(b);
   }
 
   onNext = () => observableOf({ success: true });
-
 }
