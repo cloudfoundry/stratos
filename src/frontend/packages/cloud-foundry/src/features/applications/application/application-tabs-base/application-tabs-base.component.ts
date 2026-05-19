@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, EffectRef, Injector, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -25,7 +25,6 @@ import {
   RouterNav,
   entityCatalog,
   EntitySchema,
-  ActionState,
   EndpointModel,
   IFavoriteMetadata,
   UserFavoriteManager
@@ -33,7 +32,6 @@ import {
 import {
   CFAppState,
   applicationEntityType,
-  UpdateExistingApplication,
   IApp,
   CF_ENDPOINT_TYPE,
   ApplicationService,
@@ -45,6 +43,7 @@ import { StOrg, StSpace } from '../../../../services/endpoint-data/stratos-types
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
 import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
 import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
+import { AppDetailDataService } from '../../app-detail-data.service';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -74,6 +73,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private userFavoriteManager = inject(UserFavoriteManager);
   private cfEndpoints = inject(CfEndpointsDataService);
   private lifecycleProgress = inject(AppLifecycleProgressService);
+  private detail = inject(AppDetailDataService);
+  private injector = inject(Injector);
+  private errorRedirectEffect?: EffectRef;
   public appState$!: Observable<ApplicationStateData>;
   public schema: EntitySchema;
   public favorite$: Observable<any>;
@@ -191,7 +193,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   isFetching$!: Observable<boolean>;
   applicationActions$!: Observable<string[]>;
   summaryDataChanging$!: Observable<boolean>;
-  appSub$!: Subscription;
   stratosProjectSub!: Subscription;
 
   tabLinks: IPageSideNavTab[];
@@ -285,34 +286,30 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ];
   }
 
-  private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
-  }
-
   ngOnInit() {
     // Activate the lifecycle-progress overlay service. The service needs an
     // injection context for its effect(), which is why activation is deferred
     // to ngOnInit rather than happening in the constructor.
     this.lifecycleProgress.initialize();
 
-    this.appSub$ = this.applicationService.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
-      if (
-        requestInfo.deleting.deleted ||
-        requestInfo.error
-      ) {
-        this.store.dispatch(new RouterNav({ path: ['applications'] }));
-      }
+    // Navigate away if the app fetch errors out (deleted from another tab,
+    // permission revoked, 404 on direct URL after backend restart, etc.).
+    // The legacy ngrx path also handled the post-delete redirect, but the
+    // delete flow now owns its own nav (AppApplicationActionsService.
+    // deleteWithCleanup → router.navigate('/applications')).
+    runInInjectionContext(this.injector, () => {
+      this.errorRedirectEffect = effect(() => {
+        if (this.detail.errors().app) {
+          this.store.dispatch(new RouterNav({ path: ['applications'] }));
+        }
+      });
     });
 
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
-    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
-      map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
-        return { updating };
-      }),
-      startWith({ updating: true })
+    this.isBusyUpdating$ = toObservable(this.detail.updating, { injector: this.injector }).pipe(
+      map(updating => ({ updating })),
+      startWith({ updating: true }),
     );
 
     const initialFetch$ = observableCombineLatest(
@@ -334,6 +331,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.lifecycleProgress.destroy();
-    safeUnsubscribe(this.appSub$, this.stratosProjectSub);
+    this.errorRedirectEffect?.destroy();
+    safeUnsubscribe(this.stratosProjectSub);
   }
 }

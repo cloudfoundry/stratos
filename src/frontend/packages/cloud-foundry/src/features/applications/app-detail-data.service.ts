@@ -91,6 +91,11 @@ export class AppDetailDataService {
   // lastPolledAt — consumed by card-app-status "updating…" threshold.
   private readonly _lastPolledAt = signal<Date | null>(null);
 
+  // _updating — flipped while a PATCH /pp/v1/cf/apps/:cnsi/:guid is in flight.
+  // Surfaced via the public `updating` signal; consumed by tabs-base to dim
+  // the summary section during edits.
+  private readonly _updating = signal<boolean>(false);
+
   /**
    * Focus-priority set — consumers that are actively viewing a kind raise
    * its priority via `raiseFocusPriority(kind)` to opt that kind into a
@@ -128,6 +133,7 @@ export class AppDetailDataService {
   readonly loading: Signal<Record<EntityKind, boolean>> = this._loading.asReadonly();
   readonly errors: Signal<Record<EntityKind, StratosError | null>> = this._errors.asReadonly();
   readonly lastPolledAt: Signal<Date | null> = this._lastPolledAt.asReadonly();
+  readonly updating: Signal<boolean> = this._updating.asReadonly();
 
   /**
    * Per-app routes signal. Null until the first fetch resolves so the
@@ -340,6 +346,36 @@ export class AppDetailDataService {
     }
 
     this._lastPolledAt.set(new Date());
+  }
+
+  /**
+   * Stratos-shape PATCH on the app. Wraps PATCH /pp/v1/cf/apps/:cnsi/:guid
+   * which fans the body's optional fields out to the corresponding CAPI v3
+   * sub-calls (name, enable_ssh, scale, env vars). Flips `updating` for the
+   * duration; the summary card dims itself off this signal. Refreshes the
+   * app entity on success so callers don't have to.
+   *
+   * Body fields are the native PATCH shape: name?, enable_ssh?, memory?,
+   * disk_quota?, instances?, environment_json?.
+   */
+  async update(body: {
+    name?: string;
+    enable_ssh?: boolean;
+    memory?: number;
+    disk_quota?: number;
+    instances?: number;
+    environment_json?: Record<string, unknown>;
+  }): Promise<void> {
+    this._updating.set(true);
+    try {
+      await firstValueFrom(this.http.patch(
+        `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}`,
+        body,
+      ));
+      await this.refresh('app');
+    } finally {
+      this._updating.set(false);
+    }
   }
 
   // ---------------------------------------------------------------------------
