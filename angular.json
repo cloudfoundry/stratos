@@ -121,6 +121,7 @@
               }
             ],
             "styles": [
+              "src/frontend/packages/theme/styles/tailwind.css",
               "src/frontend/packages/theme/styles/main.scss",
               "src/frontend/packages/theme/theme-transitions.scss",
               "src/frontend/packages/core/src/styles.scss",
