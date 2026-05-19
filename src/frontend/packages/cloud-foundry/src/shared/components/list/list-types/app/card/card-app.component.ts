@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, Injector, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -56,6 +56,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   private appStateService = inject(ApplicationStateService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private statsRegistry = inject(AppStatsDataRegistry);
+  private injector = inject(Injector);
 
 
   applicationState$!: Observable<ApplicationStateData>;
@@ -80,7 +81,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
     const stats = this.statsRegistry.acquire(this.row.entity.cfGuid, this.row.metadata.guid);
     const stateSignal = computed(() => this.appStateService.get(this.row.entity, stats.stats()));
-    this.applicationState$ = toObservable(stateSignal);
+    this.applicationState$ = toObservable(stateSignal, { injector: this.injector });
     this.appStatus$ = this.applicationState$.pipe(map(state => state.indicator));
     stats.load().subscribe();
   }

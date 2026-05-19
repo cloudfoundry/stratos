@@ -72,7 +72,7 @@ export class AppStatsDataService {
         return EMPTY;
       }),
       timeout(60_000),
-      map(() => void 0),
+      map((): void => undefined),
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());

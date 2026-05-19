@@ -430,22 +430,9 @@ describe('ApplicationService (facade shim)', () => {
     expect(seen).toContain('STOPPED');
   });
 
-  // -------------------------------------------------------------------------
-  // entityService — structural sanity
-  // -------------------------------------------------------------------------
-
-  it('entityService is defined and has key ngrx shape', () => {
-    expect(svc.entityService).toBeDefined();
-  });
-
-  // -------------------------------------------------------------------------
-  // updateApplication method
-  // -------------------------------------------------------------------------
-
-  it('updateApplication delegates to cfEntityCatalog.application.api.update', () => {
-    // The stub's update() returns a pipe-able object — just verify no throw.
-    expect(() =>
-      svc.updateApplication({ name: 'new-name' } as any)
-    ).not.toThrow();
-  });
+  // entityService accessor and updateApplication method were dropped in
+  // the W2 ngrx-strip; both were thin passthroughs to cfEntityCatalog
+  // primitives that no longer exist. The signal-native replacements live
+  // on AppDetailDataService (.app() / .update()) and are covered by
+  // app-detail-data.service.spec.
 });

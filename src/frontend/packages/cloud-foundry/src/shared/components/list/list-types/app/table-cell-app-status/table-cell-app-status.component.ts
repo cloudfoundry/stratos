@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, Injector, Input, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 
@@ -20,6 +20,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
   private appStateService = inject(ApplicationStateService);
   private statsRegistry = inject(AppStatsDataRegistry);
+  private injector = inject(Injector);
 
   applicationState!: ApplicationStateData;
   @Input()
@@ -39,7 +40,7 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
   ngOnInit() {
     const stats = this.statsRegistry.acquire(this.row.entity.cfGuid, this.row.metadata.guid);
     const stateSignal = computed(() => this.appStateService.get(this.row.entity, stats.stats()));
-    this.fetchAppState$ = toObservable(stateSignal);
+    this.fetchAppState$ = toObservable(stateSignal, { injector: this.injector });
     this.applicationState = this.appStateService.get(this.row.entity, null);
     stats.load().subscribe();
   }
