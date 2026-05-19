@@ -1,8 +1,24 @@
 @import 'tailwindcss';
 
+/* Tailwind v4 plugins — replaces v3 plugins: [require(...)] in tailwind.config.js.
+ * Plugin packages remain @tailwindcss/forms + @tailwindcss/typography (peer
+ * dependencies declare v4 compatibility); only the load mechanism changes. */
+@plugin "@tailwindcss/forms" {
+  strategy: class;
+}
+@plugin "@tailwindcss/typography";
+
 /* darkMode: 'class' from v3 config. Matches descendants of .dark; keeps
  * stratos's `.dark` and `.dark-theme` distinction unchanged. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* v3 safelist — classes referenced dynamically (template variable
+ * interpolation, runtime class names) that the JIT scanner cannot see.
+ * v4 uses @source inline() with brace expansion for the same effect. */
+@source inline("bg-brand-{400,500,600}");
+@source inline("bg-accent-shade-{400,500,600}");
+@source inline("bg-danger-shade-{400,500,600}");
+@source inline("from-app-bg bg-gradient-to-t");
 
 /* ============================================================
  * @theme — translated from tailwind.config.v3-legacy.js
