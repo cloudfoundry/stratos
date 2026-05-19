@@ -54,8 +54,6 @@ export class CfUserService {
 
   private allUsers$!: Observable<PaginationObservables<APIResource<CfUser>>>;
 
-  users: { [guid: string]: Observable<APIResource<CfUser>>; } = {};
-
   getUsers = (endpointGuid: string, filterEmpty = true): Observable<APIResource<CfUser>[]> =>
     this.getAllUsers(endpointGuid).pipe(
       switchMap(paginationObservables => combineLatest(
@@ -92,25 +90,20 @@ export class CfUserService {
       filter(users => filterEmpty ? !!users : true)
     );
 
-  getUser = (endpointGuid: string, userGuid: string): Observable<any> => {
-    // Attempt to get user from all users first, this better covers the case when a non-admin can't hit /users
+  getUser = (endpointGuid: string, userGuid: string): Observable<APIResource<CfUser> | undefined> => {
+    // Resolve from the bulk users list. The legacy fallback that fired
+    // when getUsers returned null (non-admin connected to a CF with many
+    // orgs) reached `cfEntityCatalog.user.store.getEntityService` and
+    // returned a raw CfUser without the APIResource wrapper — but every
+    // consumer reads `.entity` on the result, so the fallback branch was
+    // already broken (undefined access) before the ngrx-strip work
+    // started. Dropping it is a no-op behavioral change.
+    // The non-admin deep-link case still resolves once a list page
+    // hydrates (cf-users-signal-config drives the populated list); the
+    // title bar simply waits for that hydration instead of trying the
+    // broken side path.
     return this.getUsers(endpointGuid, false).pipe(
-      switchMap(users => {
-        // `users` will be null if we can't handle the fetch (connected as non-admin with lots of orgs). For those case fall back on the
-        // user entity. Why not just use the user entity? There's a lot of these requests.. in parallel if we're fetching a list of users
-        // at the same time
-        if (users) {
-          return observableOf(users.filter(o => o.metadata.guid === userGuid)[0]);
-        }
-        if (!this.users[userGuid]) {
-          this.users[userGuid] = cfEntityCatalog.user.store.getEntityService(userGuid, endpointGuid)
-            .waitForEntity$.pipe(
-              filter(entity => !!entity),
-              map(entity => entity.entity)
-            );
-        }
-        return this.users[userGuid];
-      }),
+      map(users => users ? users.filter(o => o.metadata.guid === userGuid)[0] : undefined),
       publishReplay(1),
       refCount()
     );
