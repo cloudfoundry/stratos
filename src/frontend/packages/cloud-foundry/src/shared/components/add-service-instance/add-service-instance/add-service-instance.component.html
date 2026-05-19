@@ -1,7 +1,7 @@
 <app-page-header>
   {{ title$ | async }}
 </app-page-header>
-@if (initialisedService$ | async; as inited) {
+@if (initialisedService(); as inited) {
   <div class="add-service-instance">
     <app-steppers [cancel]="modeService.cancelUrl">
       @if (serviceType === serviceTypes.SERVICE) {
