@@ -14,15 +14,6 @@ import {
   createAppInstancesMetricAction,
 } from '../../shared/components/list/list-types/app-instance/cf-app-instances-metrics-action';
 
-// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
-// Retained — ASSIGN_ROUTE_SUCCESS / CF_APP_UPDATE_SUCCESS are still
-// auto-emitted by the cfEntityCatalog API request pipeline whenever a
-// route is assigned (cfEntityCatalog.application.api.assignRoute, see
-// create-application-step3.component.ts:138) or an application is
-// updated (cfEntityCatalog.application.api.update, see
-// application.service.ts:341 and the AppVariablesEffect at
-// app-variables.effects.ts:22). Both side-effects (refresh app summary,
-// clear cell metrics on scale-up) still fire at runtime.
 @Injectable({
   providedIn: 'root'
 })

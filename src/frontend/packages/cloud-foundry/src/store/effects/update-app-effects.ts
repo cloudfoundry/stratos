@@ -7,13 +7,6 @@ import { AppMetadataTypes } from '../../actions/app-metadata.actions';
 import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 
-// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
-// Retained — CF_APP_UPDATE_SUCCESS auto-emits whenever
-// UpdateExistingApplication completes via the request pipeline, and
-// the parent action is dispatched live via cfEntityCatalog.application.api.update
-// from application.service.ts:341 and AppVariablesEffect at
-// app-variables.effects.ts:22. Effect refreshes env-vars/stats/summary
-// metadata after the underlying app update.
 @Injectable()
 export class UpdateAppEffects {
   private actions$ = inject(Actions);
