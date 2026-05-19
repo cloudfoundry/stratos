@@ -1,19 +1,16 @@
 import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { SpaceDataRegistry } from '../../../services/endpoint-data/space-data.registry';
-import { StSpace } from '../../../services/endpoint-data/stratos-types';
+import { StOrgQuota, StSpace, StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
 import { createUserRoleInSpace } from '../../../store/types/cf-user.types';
 
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
 import { APIResource } from '../../../../../store/src/types/api.types';
-import { IApp, IOrgQuotaDefinition, IRoute, ISpaceQuotaDefinition } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { IApp } from '../../../cf-api.types';
 import { getStartedAppInstanceCount } from '../../../cf.helpers';
 import {
   CloudFoundryUserProvidedServicesService,
@@ -22,16 +19,15 @@ import { ServiceCatalogDataService } from '../../../services/endpoint-data/servi
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService, createOrgQuotaDefinition } from './cloud-foundry-organization.service';
+import { CloudFoundryOrganizationService } from './cloud-foundry-organization.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CloudFoundrySpaceService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private store = inject<Store<CFAppState>>(Store);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfEndpointService = inject(CloudFoundryEndpointService);
+  private quotaData = inject(QuotaDataService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
   private serviceCatalog = inject(ServiceCatalogDataService);
   private cfOrgService = inject(CloudFoundryOrganizationService);
@@ -54,11 +50,14 @@ export class CloudFoundrySpaceService {
    * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
    * a mock quota with everything allowed will be used
    */
-  quotaDefinition$!: Observable<ISpaceQuotaDefinition | IOrgQuotaDefinition>;
-  /**
-   * Actual Space Quota. In almost all cases `quotaDefinition$` should be used instead
-   */
-  spaceQuotaDefinition$!: Observable<ISpaceQuotaDefinition | null>;
+  // V3-shape: emits the effective quota (StSpaceQuota when the space has
+  // its own quota, else falls back to org's StOrgQuota). Consumers must
+  // read V3 camelCase fields (totalMemoryInMB etc.). Returns null if
+  // neither quota is set — template branches replace the legacy
+  // `createOrgQuotaDefinition()` mock with explicit "None" rendering.
+  quotaDefinition$!: Observable<StSpaceQuota | StOrgQuota | null>;
+  /** Actual Space Quota (null when the space inherits the org quota). */
+  spaceQuotaDefinition$!: Observable<StSpaceQuota | null>;
   allowSsh$!: Observable<string>;
   totalMem$!: Observable<number>;
   // Route count derived from the V3-native StSpace.routeCount aggregate
@@ -129,26 +128,23 @@ export class CloudFoundrySpaceService {
     this.routesCount$ = space$.pipe(map(s => s.routeCount ?? 0));
     this.allowSsh$ = space$.pipe(map(s => s.allowSsh ? 'true' : 'false'));
     // V3-native space-quota lookup. quotaGuid mapped from V3
-    // relationships.quota.data.guid by getNativeSpaceDetail. cfEntityCatalog
-    // already serves space-quota entities; just hand it the guid.
+    // relationships.quota.data.guid by getNativeSpaceDetail. The
+    // QuotaDataService returns a SignalSource; we bridge to Observable
+    // for backwards-compat templates and chain into the org-quota
+    // fallback below.
     this.spaceQuotaDefinition$ = space$.pipe(
       map(s => s.quotaGuid || null),
       switchMap(quotaGuid => quotaGuid
-        ? cfEntityCatalog.spaceQuota.store.getEntityService(quotaGuid, this.cfGuid, {}).waitForEntity$.pipe(
-          map(qe => qe.entity.entity as ISpaceQuotaDefinition),
-        )
-        : of(null as ISpaceQuotaDefinition | null)),
+        ? toObservable(this.quotaData.spaceQuota(this.cfGuid, quotaGuid).value, { injector: this.injector })
+        : of(null as StSpaceQuota | null)),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
+    // Effective quota: prefer space-specific, fall back to org. Org-quota
+    // emission can itself be null (org has no quota set) — caller renders
+    // that as "None" rather than substituting a fake "everything allowed"
+    // shim (the V3 -1 = Unlimited semantics make the shim redundant).
     this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
-      switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$),
-      map(def => def ?
-        {
-          ...def,
-          organization_guid: this.orgGuid,
-        } :
-        createOrgQuotaDefinition()
-      )
+      switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$.pipe(map(q => q ?? null))),
     );
     this.quotaLink$ = combineLatest(this.quotaDefinition$, this.spaceQuotaDefinition$).pipe(
       map(([quota, spaceQuota]) => {

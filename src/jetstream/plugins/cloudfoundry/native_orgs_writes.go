@@ -11,6 +11,43 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// createNativeOrg handles POST /pp/v1/cf/orgs/{cnsiGuid} — Stratos-shape
+// wrapper around CF V3 POST /v3/organizations. Sync write: V3 returns 201
+// with the created organization. Body shape mirrors
+// capi.OrganizationCreateRequest = {name, suspended?, metadata?}.
+func (c *CloudFoundrySpecification) createNativeOrg(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	if cnsiGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
+	}
+
+	var req capi.OrganizationCreateRequest
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	if req.Name == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "name is required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	org, createErr := cfClient.Organizations().Create(ctx.Request().Context(), &req)
+	if createErr != nil {
+		return handleCapiError(ctx, createErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusCreated, toStOrg(*org, cnsiGUID))
+}
+
 // deleteNativeOrg handles DELETE /pp/v1/cf/orgs/{cnsiGuid}/{orgGuid} —
 // Stratos-shape write wrapper around CF V3 /v3/organizations/{guid}.
 //

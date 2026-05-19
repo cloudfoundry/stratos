@@ -48,6 +48,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/cf/organization_quotas/:cnsiGuid", c.getNativeOrgQuotas)
 	echoGroup.GET("/cf/organization_quotas/:cnsiGuid/:quotaGuid", c.getNativeOrgQuotaDetail)
 	echoGroup.GET("/cf/space_quotas/:cnsiGuid", c.getNativeSpaceQuotas)
+	echoGroup.GET("/cf/space_quotas/:cnsiGuid/:quotaGuid", c.getNativeSpaceQuotaDetail)
 	echoGroup.GET("/cf/audit_events/:cnsiGuid", c.getNativeAuditEvents)
 	echoGroup.GET("/cf/org/:cnsiGuid/:orgGuid/events", c.getNativeOrgAuditEvents)
 	echoGroup.GET("/cf/space/:cnsiGuid/:spaceGuid/events", c.getNativeSpaceAuditEvents)
@@ -72,6 +73,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	})
 
 	// Phase 1C write-side completion
+	echoGroup.POST("/cf/orgs/:cnsiGuid", c.createNativeOrg)
 	echoGroup.PATCH("/cf/orgs/:cnsiGuid/:orgGuid", c.updateNativeOrg)
 	echoGroup.POST("/cf/spaces/:cnsiGuid", c.createNativeSpace)
 	echoGroup.PATCH("/cf/spaces/:cnsiGuid/:spaceGuid", c.updateNativeSpace)
@@ -79,6 +81,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	echoGroup.POST("/cf/apps/:cnsiGuid", c.createNativeApp)
 	echoGroup.POST("/cf/organization_quotas/:cnsiGuid", c.createNativeOrgQuota)
 	echoGroup.PATCH("/cf/organization_quotas/:cnsiGuid/:quotaGuid", c.updateNativeOrgQuota)
+	echoGroup.POST("/cf/organization_quotas/:cnsiGuid/:quotaGuid/relationships/organizations", c.applyOrgQuotaToOrgs)
 	echoGroup.POST("/cf/space_quotas/:cnsiGuid", c.createNativeSpaceQuota)
 	echoGroup.PATCH("/cf/space_quotas/:cnsiGuid/:quotaGuid", c.updateNativeSpaceQuota)
 	echoGroup.POST("/cf/service_instances/:cnsiGuid", c.createManagedServiceInstance)

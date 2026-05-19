@@ -1,24 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { BooleanIndicatorComponent } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { CardNumberMetricComponent } from '../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
-import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
-import { TileGridComponent } from '../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
-import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
-import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { IOrganization, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import {
+  BooleanIndicatorComponent,
+  CardNumberMetricComponent,
+  CurrentUserPermissionsService,
+  CustomTooltipDirective,
+  IHeaderBreadcrumb,
+  LoadingPageComponent,
+  PageHeaderComponent,
+  PageSubNavComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+} from '@stratosui/core';
+import { EndpointModel } from '@stratosui/store';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import { StOrgDetail, StSpace, StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -51,17 +52,14 @@ export const QUOTA_SPACE_GUID = 'space';
   ]
 })
 export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
-  declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
-  declare cfGuid: string;
-  declare orgGuid: string;
-  declare spaceGuid: string;
-  declare quotaGuid: string;
-  editLink$!: Observable<string[]>;
+  readonly spaceQuotaDefinition: Signal<StSpaceQuota | null>;
+  readonly detailsLoading: Signal<boolean>;
+  // Observable bridge for <app-loading-page>.
+  readonly detailsLoading$: Observable<boolean>;
+  readonly editLink: Signal<string[]>;
+  readonly canEditQuota: Signal<boolean>;
+
   editParams!: object;
-  declare detailsLoading$: Observable<boolean>;
-  spaceSubscriber!: Subscription;
-  public canEditQuota$: Observable<boolean>;
   public isOrg = false;
 
   constructor() {
@@ -69,70 +67,70 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
     const activatedRoute = inject(ActivatedRoute);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const quotaData = inject(QuotaDataService);
 
     super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
-    this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid, spaceGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid);
+    this.canEditQuota = toSignal(
+      currentUserPermissionsService.can(CfCurrentUserPermissions.SPACE_QUOTA_EDIT, cfGuid, orgGuid),
+      { initialValue: false },
+    );
     this.isOrg = !spaceGuid;
     this.editParams = { [QUOTA_SPACE_GUID]: spaceGuid };
-  }
 
-  setupQuotaDefinitionObservable() {
-    const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.space$.pipe(map(space => space.entity.space_quota_definition_guid));
-    const entityInfo$ = quotaGuid$.pipe(
-      take(1),
-      switchMap(quotaGuid => cfEntityCatalog.spaceQuota.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
-    );
+    const resolvedQuotaGuid: Signal<string | null> = computed(() => {
+      if (this.quotaGuid) return this.quotaGuid;
+      return this.space()?.quotaGuid ?? null;
+    });
 
-    this.quotaDefinition$ = entityInfo$.pipe(
-      filter(definition => !!definition && !!definition.entity),
-      map(definition => definition.entity)
-    );
-    this.detailsLoading$ = entityInfo$.pipe(
-      filter(definition => !!definition),
-      map(definition => definition.entityRequestInfo.fetching)
-    );
+    const sourceSignal = computed(() => {
+      const guid = resolvedQuotaGuid();
+      return guid ? quotaData.spaceQuota(this.cfGuid, guid) : null;
+    });
+    this.spaceQuotaDefinition = computed(() => sourceSignal()?.value() ?? null);
+    this.detailsLoading = computed(() => sourceSignal()?.isLoading() ?? false);
+    this.detailsLoading$ = toObservable(this.detailsLoading);
 
-    this.editLink$ = quotaGuid$.pipe(
-      map(quotaGuid => [
+    this.editLink = computed(() => {
+      const guid = resolvedQuotaGuid();
+      return guid ? [
         '/cloud-foundry',
         this.cfGuid,
         'organizations',
         this.orgGuid,
         'space-quota-definitions',
-        quotaGuid,
+        guid,
         'edit-space-quota'
-      ])
-    );
+      ] : [];
+    });
   }
 
-  protected getBreadcrumbs(
+  protected override getBreadcrumbs(
     endpoint: EndpointModel,
-    org: APIResource<IOrganization>,
-    space: APIResource<ISpace>
-  ) {
+    org: StOrgDetail | null,
+    space: StSpace | null,
+  ): IHeaderBreadcrumb[] {
+    if (!org) return [];
     const baseCFUrl = `/cloud-foundry/${this.cfGuid}`;
-    const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
+    const baseOrgUrl = `${baseCFUrl}/organizations/${org.guid}`;
 
     const breadcrumbs: IHeaderBreadcrumb[] = [
       {
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-          { value: org.entity.name, routerLink: `${baseOrgUrl}/space-quota-definitions` },
+          { value: org.name, routerLink: `${baseOrgUrl}/space-quota-definitions` },
         ] },
     ];
 
     if (space) {
-      const baseSpaceUrl = `${baseCFUrl}/organizations/${org.metadata.guid}/spaces/${space.metadata.guid}`;
-
+      const baseSpaceUrl = `${baseCFUrl}/organizations/${org.guid}/spaces/${space.guid}`;
       breadcrumbs.push({
         key: 'space',
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-          { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` },
-          { value: space.entity.name, routerLink: `${baseSpaceUrl}/summary` },
+          { value: org.name, routerLink: `${baseOrgUrl}/spaces` },
+          { value: space.name, routerLink: `${baseSpaceUrl}/summary` },
         ]
       });
     }

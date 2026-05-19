@@ -1,17 +1,14 @@
-import { Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, Signal, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { filter, map, pairwise, tap } from 'rxjs/operators';
+import { firstValueFrom, Subscription } from 'rxjs';
 
-import { safeUnsubscribe, SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
-import { ActionState, APIResource, AppState } from '@stratosui/store';
-import { ISpaceQuotaDefinition } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { SignalStepHandle } from '@stratosui/core';
+import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
+import { StSpaceQuota } from '../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
-
+import { formToSpaceQuotaUpdateBody } from '../../quota-definition-form/quota-form-mapping';
 
 @Component({
   selector: 'app-edit-space-quota-step',
@@ -27,27 +24,19 @@ import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-
 ]
 })
 export class EditSpaceQuotaStepComponent implements OnDestroy {
-  private store = inject<Store<AppState>>(Store);
   private activatedRoute = inject(ActivatedRoute);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private router = inject(Router);
+  private quotaData = inject(QuotaDataService);
 
-
-  spaceQuotaSubscription!: Subscription;
   cfGuid: string;
   spaceQuotaGuid: string;
-  allQuotas!: string[];
-  spaceQuotaDefinition$!: Observable<APIResource<ISpaceQuotaDefinition>>;
-  quota!: ISpaceQuotaDefinition;
+  readonly quota: Signal<StSpaceQuota | null>;
+  private source: SignalSource<StSpaceQuota | null>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
   @Input() redirectUrl!: string;
 
-  /**
-   * FWT-957: validity mirrored from the embedded SpaceQuotaDefinitionFormComponent.
-   * The form is conditionally rendered (@if quota), so we wire the
-   * subscription via the ViewChild setter once the child appears.
-   */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
   private _form?: SpaceQuotaDefinitionFormComponent;
@@ -70,43 +59,26 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const finalState = await firstValueFrom(
-        cfEntityCatalog.spaceQuota.api.update<ActionState>(this.spaceQuotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
-          pairwise(),
-          filter(([oldV, newV]) => oldV.busy && !newV.busy),
-          map(([, newV]) => newV),
-        )
-      );
-      if (finalState.error) {
-        throw new Error(`Failed to update space quota: ${finalState.message}`);
+      const formValues = this.form.formGroup.getRawValue();
+      const body = formToSpaceQuotaUpdateBody(formValues);
+      try {
+        await firstValueFrom(this.quotaData.updateSpaceQuota(this.cfGuid, this.spaceQuotaGuid, body));
+      } catch (err: unknown) {
+        throw new Error(`Failed to update space quota: ${err instanceof Error ? err.message : String(err)}`);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
   };
 
   constructor() {
-
     this.cfGuid = this.activeRouteCfOrgSpace.cfGuid;
     this.spaceQuotaGuid = this.activatedRoute.snapshot.params.quotaId;
 
-    this.fetchQuotaDefinition();
-  }
-
-  fetchQuotaDefinition() {
-    this.spaceQuotaDefinition$ = cfEntityCatalog.spaceQuota.store.getEntityService(
-      this.spaceQuotaGuid,
-      this.cfGuid,
-      {}
-    ).waitForEntity$.pipe(
-      map(data => data.entity),
-      tap((resource) => this.quota = resource.entity)
-    );
-
-    this.spaceQuotaSubscription = this.spaceQuotaDefinition$.subscribe();
+    this.source = this.quotaData.spaceQuota(this.cfGuid, this.spaceQuotaGuid);
+    this.quota = computed(() => this.source.value());
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.spaceQuotaSubscription);
     this.formStatusSub?.unsubscribe();
   }
 }

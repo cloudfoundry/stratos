@@ -1,27 +1,27 @@
 import { ActivatedRoute } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { Signal, computed, effect, inject } from '@angular/core';
 
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { APIResource } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { IOrganization, IOrgQuotaDefinition, ISpace, ISpaceQuotaDefinition } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
+import { SpaceDataRegistry } from '../../../services/endpoint-data/space-data.registry';
+import { StOrgDetail, StSpace } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
+// Shared base for the org + space quota detail pages. Owns the route-
+// param-driven cf/org/space/quota guids plus the org + space signal
+// sources sourced via the per-entity registries. Concrete subclasses add
+// their quota-specific signal source + a getBreadcrumbs() override.
 export class QuotaDefinitionBaseComponent {
-  breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
-  quotaDefinition$!: Observable<APIResource<IOrgQuotaDefinition | ISpaceQuotaDefinition>>;
-  org$!: Observable<APIResource<IOrganization>>;
-  space$!: Observable<APIResource<ISpace>>;
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
   quotaGuid: string;
-  detailsLoading$!: Observable<boolean>;
-  orgSubscriber!: Subscription;
+
+  readonly org: Signal<StOrgDetail | null>;
+  readonly space: Signal<StSpace | null>;
+  readonly breadcrumbs: Signal<IHeaderBreadcrumb[]>;
 
   constructor(
     protected endpoints: CfEndpointsDataService,
@@ -32,46 +32,44 @@ export class QuotaDefinitionBaseComponent {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid || activatedRoute.snapshot.queryParams.orgGuid;
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || activatedRoute.snapshot.queryParams.spaceGuid;
     this.quotaGuid = activatedRoute.snapshot.params.quotaId || activatedRoute.snapshot.queryParams.quotaGuid;
-    this.setupOrgObservable();
-    this.setupSpaceObservable();
-    this.setupBreadcrumbs();
-  }
 
-  setupOrgObservable() {
-    if (this.orgGuid) {
-      this.org$ = cfEntityCatalog.org.store.getEntityService(this.orgGuid, this.cfGuid).waitForEntity$.pipe(
-        map(data => data.entity),
-      );
+    const orgRegistry = inject(OrgDataRegistry);
+    const spaceRegistry = inject(SpaceDataRegistry);
+    const orgService = this.orgGuid ? orgRegistry.acquire(this.cfGuid, this.orgGuid) : null;
+    const spaceService = this.spaceGuid ? spaceRegistry.acquire(this.cfGuid, this.spaceGuid) : null;
+
+    this.org = orgService ? orgService.org : computed<StOrgDetail | null>(() => null);
+    this.space = spaceService ? spaceService.space : computed<StSpace | null>(() => null);
+
+    // Kick the loads so the signals populate. Both services dedupe in
+    // flight, so re-acquiring during the same view is cheap.
+    if (orgService) {
+      orgService.load().subscribe();
     }
-  }
-
-  setupSpaceObservable() {
-    if (this.spaceGuid) {
-      this.space$ = cfEntityCatalog.space.store.getEntityService(this.spaceGuid, this.cfGuid).waitForEntity$.pipe(
-        map(data => data.entity),
-      );
+    if (spaceService) {
+      spaceService.load().subscribe();
     }
-  }
 
-  private setupBreadcrumbs() {
-    const endpoints$ = toObservable(this.endpoints.all);
-    const org$ = this.org$ ? this.org$ : of(null);
-    const space$ = this.space$ ? this.space$ : of(null);
-    this.breadcrumbs$ = combineLatest(endpoints$, org$, space$).pipe(
-      map(([endpoints, org, space]) => this.getBreadcrumbs(endpoints[this.cfGuid], org, space)),
-      take(1)
-    );
-  }
+    this.breadcrumbs = computed(() => {
+      const endpoint = this.endpoints.all()[this.cfGuid];
+      if (!endpoint) return [];
+      return this.getBreadcrumbs(endpoint, this.org(), this.space());
+    });
 
-  protected setupQuotaDefinitionObservable() {
-    throw new Error('Method not implemented.');
+    // Subscriptions are bookkeeping — refcounted-release tied to view destroy.
+    effect((onCleanup) => {
+      onCleanup(() => {
+        if (orgService) orgRegistry.release(this.cfGuid, this.orgGuid);
+        if (spaceService) spaceRegistry.release(this.cfGuid, this.spaceGuid);
+      });
+    });
   }
 
   protected getBreadcrumbs(
     _endpoint: EndpointModel,
-    _org: APIResource<IOrganization>,
-    _space: APIResource<ISpace>
-  ): any {
-    return null;
+    _org: StOrgDetail | null,
+    _space: StSpace | null,
+  ): IHeaderBreadcrumb[] {
+    return [];
   }
 }

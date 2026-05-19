@@ -1,10 +1,9 @@
 @if (isCf) {
-  <app-page-header [breadcrumbs]="breadcrumbs$ | async">
-    <h1>{{ (quotaDefinition$ | async)?.entity?.name }}</h1>
-    @if (canEditQuota$ | async) {
+  <app-page-header [breadcrumbs]="breadcrumbs()">
+    <h1>{{ quotaDefinition()?.name }}</h1>
+    @if (canEditQuota()) {
       <div class="page-header-right">
-        <!-- Show edit button in top blue bar -->
-        <button class="btn btn-icon" name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+        <button class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
           <span class="material-icons">edit</span>
         </button>
       </div>
@@ -14,23 +13,22 @@
 
 @if (!isCf) {
   <app-page-sub-nav>
-    <!-- Show edit button inline with header-->
-    @if (canEditQuota$ | async) {
-      <button class="btn btn-icon" name="edit" [routerLink]="editLink$ | async" [queryParams]="editParams" matTooltip="Edit">
+    @if (canEditQuota()) {
+      <button class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
         <span class="material-icons">edit</span>
       </button>
     }
   </app-page-sub-nav>
 }
 
-@if (quotaDefinition$ | async; as quotaDefinition) {
+@if (quotaDefinition(); as quotaDefinition) {
   <div class="quota-definition-base quota-definition-page">
     <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
       <div class="quota-definition-base__name-sub-text">Name</div>
-      <h2 class="quota-definition-base__name">{{ quotaDefinition.entity.name }}</h2>
+      <h2 class="quota-definition-base__name">{{ quotaDefinition.name }}</h2>
       <div class="quota-definition-base__basic-services">
         <div class="quota-definition-base__basic-services-label">Non Basic Services Allowed:</div>
-        <app-boolean-indicator [isTrue]="quotaDefinition.entity?.non_basic_services_allowed" type="yes-no" subtle="true">
+        <app-boolean-indicator [isTrue]="quotaDefinition.paidServicesAllowed" type="yes-no" subtle="true">
         </app-boolean-indicator>
       </div>
       <app-tile-grid fit="true">
@@ -39,12 +37,12 @@
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="memory" label="Maximum Memory Usage" units="mb"
-              value="{{ quotaDefinition.entity?.memory_limit }}">
+              value="{{ quotaDefinition.totalMemoryInMB }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="memory" label="Maximum Application Instance Memory Usage"
-              units="mb" value="{{ quotaDefinition.entity?.instance_memory_limit }}">
+              units="mb" value="{{ quotaDefinition.totalInstanceMemoryInMB }}">
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
@@ -52,12 +50,12 @@
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="application_instance" iconFont="stratos-icons"  label="Maximum Application Instances"
-              value="{{ quotaDefinition.entity?.app_instance_limit }}">
+              value="{{ quotaDefinition.totalInstances }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="apps" label="Maximum Application Tasks"
-              value="{{ quotaDefinition.entity?.app_task_limit }}">
+              value="{{ quotaDefinition.totalAppTasks }}">
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
@@ -65,12 +63,12 @@
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="service" iconFont="stratos-icons" label="Maximum Services"
-              value="{{ quotaDefinition.entity?.total_services }}">
+              value="{{ quotaDefinition.totalServiceInstances }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="service" iconFont="stratos-icons" label="Maximum Service Keys"
-              value="{{ quotaDefinition.entity?.total_service_keys }}">
+              value="{{ quotaDefinition.totalServiceKeys }}">
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
@@ -78,19 +76,19 @@
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons" label="Maximum Routes"
-              value="{{ quotaDefinition.entity?.total_routes }}">
+              value="{{ quotaDefinition.totalRoutes }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons"
-              label="Maximum Reserved Route Ports" value="{{ quotaDefinition.entity?.total_reserved_route_ports }}">
+              label="Maximum Reserved Route Ports" value="{{ quotaDefinition.totalReservedPorts }}">
             </app-card-number-metric>
           </app-tile>
         </app-tile-group>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
             <app-card-number-metric labelAtTop="true" icon="domain" label="Maximum Private Domains"
-              value="{{ quotaDefinition.entity?.total_private_domains }}">
+              value="{{ quotaDefinition.totalDomains }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile></app-tile>

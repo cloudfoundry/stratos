@@ -1,18 +1,14 @@
-
-import { Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnDestroy, Signal, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, filter, map, pairwise, tap } from 'rxjs/operators';
+import { firstValueFrom, Subscription } from 'rxjs';
 
-import { safeUnsubscribe, SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
-import { AppState, ActionState, APIResource } from '@stratosui/store';
-import { IOrgQuotaDefinition } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { SignalStepHandle } from '@stratosui/core';
+import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
+import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
-
+import { formToOrgQuotaWriteBody } from '../../quota-definition-form/quota-form-mapping';
 
 @Component({
   selector: 'app-edit-quota-step',
@@ -28,25 +24,18 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
 ]
 })
 export class EditQuotaStepComponent implements OnDestroy {
-  private store = inject<Store<AppState>>(Store);
   private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
-
+  private quotaData = inject(QuotaDataService);
 
   cfGuid: string;
   quotaGuid: string;
-  quotaDefinition$!: Observable<APIResource<IOrgQuotaDefinition>>;
-  quotaSubscription!: Subscription;
-  quota!: IOrgQuotaDefinition;
+  readonly quota: Signal<StOrgQuota | null>;
+  private source: SignalSource<StOrgQuota | null>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
   @Input() redirectUrl!: string;
 
-  /**
-   * FWT-957: validity mirrored from the embedded QuotaDefinitionFormComponent.
-   * The form is conditionally rendered (@if quota), so we wire the
-   * subscription via the ViewChild setter once the child appears.
-   */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
   private _form?: QuotaDefinitionFormComponent;
@@ -69,15 +58,12 @@ export class EditQuotaStepComponent implements OnDestroy {
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const finalState = await firstValueFrom(
-        cfEntityCatalog.quotaDefinition.api.update<ActionState>(this.quotaGuid, this.cfGuid, this.form.formGroup.getRawValue()).pipe(
-          pairwise(),
-          filter(([oldV, newV]) => oldV.busy && !newV.busy),
-          map(([, newV]) => newV),
-        )
-      );
-      if (finalState.error) {
-        throw new Error(`Failed to update quota: ${finalState.message}`);
+      const formValues = this.form.formGroup.getRawValue();
+      const body = formToOrgQuotaWriteBody(formValues);
+      try {
+        await firstValueFrom(this.quotaData.updateOrgQuota(this.cfGuid, this.quotaGuid, body));
+      } catch (err: unknown) {
+        throw new Error(`Failed to update quota: ${err instanceof Error ? err.message : String(err)}`);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
@@ -85,25 +71,14 @@ export class EditQuotaStepComponent implements OnDestroy {
 
   constructor() {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.quotaGuid = this.activatedRoute.snapshot.params.quotaId;
 
-    this.fetchQuotaDefinition();
-  }
-
-  fetchQuotaDefinition() {
-    this.quotaDefinition$ = cfEntityCatalog.quotaDefinition.store.getEntityService(this.quotaGuid, this.cfGuid, {}).waitForEntity$.pipe(
-      take(1),
-      map(data => data.entity),
-      tap((resource) => this.quota = resource.entity)
-    );
-
-    this.quotaSubscription = this.quotaDefinition$.subscribe();
+    this.source = this.quotaData.orgQuota(this.cfGuid, this.quotaGuid);
+    this.quota = computed(() => this.source.value());
   }
 
   ngOnDestroy() {
-    safeUnsubscribe(this.quotaSubscription);
     this.formStatusSub?.unsubscribe();
   }
 }

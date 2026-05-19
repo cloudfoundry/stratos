@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
@@ -18,8 +17,9 @@ import {
   StepOnNextFunction
 } from '@stratosui/core';
 import { ActionState } from '@stratosui/store';
-import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
+import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
@@ -95,11 +95,12 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   originalSpaceQuotaGuid!: string;
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
     const activatedRoute = inject(ActivatedRoute);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const orgRegistry = inject(OrgDataRegistry);
+    const quotaData = inject(QuotaDataService);
 
-    super(store, activatedRoute, activeRouteCfOrgSpace);
+    super(activatedRoute, activeRouteCfOrgSpace, orgRegistry, quotaData);
     this.spaceGuid = activatedRoute.snapshot.params.spaceId;
     this.editSpaceForm = new FormGroup<EditSpaceForm>({
       spaceName: new FormControl('', { nonNullable: true, validators: [this.spaceNameTakenValidator()] }),
@@ -136,12 +137,17 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
 
   /** Name uniqueness check used by the base class's spaceNameTakenValidator. */
   isNameUnique = (spaceName: string = null): boolean => {
-    if (this.allSpacesInOrg) {
-      return this.allSpacesInOrg
-        .filter(o => o !== this.originalName)
-        .indexOf(spaceName ? spaceName : this.editSpaceForm.value.spaceName || '') === -1;
+    const names = this.allSpacesInOrg();
+    // Signal returns [] before the org-data load completes — treat as
+    // "no known siblings yet, name is OK" so the form validator doesn't
+    // false-positive during construction. Also guards against the
+    // initial validator pass running before editSpaceForm is assigned.
+    if (!names || names.length === 0 || !this.editSpaceForm) {
+      return true;
     }
-    return true;
+    return names
+      .filter(o => o !== this.originalName)
+      .indexOf(spaceName ? spaceName : this.editSpaceForm.value.spaceName || '') === -1;
   };
 
   /** Form-level validity gate for the Update button. Reads the signal. */

@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, Input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { filter, map, pairwise } from 'rxjs/operators';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { SignalStepHandle, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { CFAppState } from '../../../../cf-app-state';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
+import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -82,7 +82,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   cfUrl!: string;
   createSpaceForm!: FormGroup<CreateSpaceForm>;
-  quotaSubscription!: Subscription;
+  private injector = inject(Injector);
 
   get spaceName(): FormControl<string> {
     return this.createSpaceForm ? this.createSpaceForm.get('spaceName') as FormControl<string> : new FormControl('', { nonNullable: true });
@@ -100,11 +100,12 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
     const activatedRoute = inject(ActivatedRoute);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const orgRegistry = inject(OrgDataRegistry);
+    const quotaData = inject(QuotaDataService);
 
-    super(store, activatedRoute, activeRouteCfOrgSpace);
+    super(activatedRoute, activeRouteCfOrgSpace, orgRegistry, quotaData);
   }
 
   ngOnInit() {
@@ -117,17 +118,30 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       () => this.validSignal.set(this.createSpaceForm.valid)
     );
 
-    this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {
-      if (quotas.length > 0) {
-        this.createSpaceForm.patchValue({
-          quotaDefinition: 0
-        });
-      }
-    }));
+    // Auto-pick the placeholder ("None") option once the base's quota
+    // signal populates. Guarded so we only patch once — re-patching on
+    // every quota-list re-emit would stomp the user's manual selection.
+    let patched = false;
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        if (patched) return;
+        if (this.quotaDefinitions().length > 0) {
+          patched = true;
+          this.createSpaceForm.patchValue({ quotaDefinition: 0 });
+        }
+      });
+    });
   }
 
   isNameUnique = (spaceName: string = null) => {
-    return this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true;
+    const names = this.allSpacesInOrg();
+    // Signal returns [] before the org-data load completes. Treat as "no
+    // siblings yet, name is OK" so the validator doesn't false-positive
+    // during the initial pass that fires before the form is built.
+    if (!names || names.length === 0) {
+      return true;
+    }
+    return names.indexOf(spaceName || this.spaceName.value) === -1;
   };
 
   validate = () => this.validSignal();
@@ -151,7 +165,6 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   };
 
   ngOnDestroy() {
-    this.quotaSubscription.unsubscribe();
     this.formStatusSub?.unsubscribe();
     this.destroy();
   }

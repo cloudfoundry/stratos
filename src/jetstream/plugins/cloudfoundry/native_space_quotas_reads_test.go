@@ -266,3 +266,68 @@ func TestGetNativeSpaceQuotas_CountsFastPath(t *testing.T) {
 	assert.Equal(t, 11, resp.TotalResults)
 	assert.Empty(t, resp.Resources)
 }
+
+// TestGetNativeSpaceQuotaDetail_ReturnsMappedQuota verifies the single-
+// detail handler drives CAPI SpaceQuotas().Get(guid) and maps the
+// returned capi.SpaceQuotaV3 onto a flat StSpaceQuota. Mirrors the
+// org-quota detail handler's contract.
+func TestGetNativeSpaceQuotaDetail_ReturnsMappedQuota(t *testing.T) {
+	hits := 0
+	capiServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/space_quotas/sq-1" && r.Method == http.MethodGet:
+			hits++
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+				"guid":"sq-1",
+				"created_at":"2026-04-22T12:00:00Z",
+				"updated_at":"2026-04-22T12:00:00Z",
+				"name":"small",
+				"apps":{"total_memory_in_mb":2048,"total_instance_memory_in_mb":1024,"total_instances":50,"total_app_tasks":25},
+				"services":{"paid_services_allowed":true,"total_service_instances":10,"total_service_keys":10},
+				"routes":{"total_routes":50,"total_reserved_ports":5},
+				"relationships":{
+					"organization":{"data":{"guid":"org-1"}},
+					"spaces":{"data":[{"guid":"space-a"}]}
+				}
+			}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer capiServer.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(capiServer.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/space_quotas/cnsi-1/sq-1", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid/:quotaGuid")
+	c.SetParamNames("cnsiGuid", "quotaGuid")
+	c.SetParamValues("cnsi-1", "sq-1")
+
+	require.NoError(t, plugin.getNativeSpaceQuotaDetail(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, hits)
+
+	var q StSpaceQuota
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &q))
+	assert.Equal(t, "sq-1", q.GUID)
+	assert.Equal(t, "small", q.Name)
+	assert.Equal(t, 2048, q.TotalMemoryInMB)
+	assert.Equal(t, 50, q.TotalRoutes)
+	assert.Equal(t, "org-1", q.OrganizationGUID)
+	assert.Equal(t, 1, q.SpaceCount)
+	assert.Equal(t, "cnsi-1", q.CnsiGUID)
+}
