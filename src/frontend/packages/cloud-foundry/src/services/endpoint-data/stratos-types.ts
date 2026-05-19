@@ -496,6 +496,7 @@ export interface StServiceOffering {
   description?: string;
   tags?: string[];
   available?: boolean;            // v3 `available` (legacy UI label "Public")
+  bindable?: boolean;             // v3 `bindable` — drives marketplace Bindable column
   shareable?: boolean;
   requires?: string[];
   documentationUrl?: string;

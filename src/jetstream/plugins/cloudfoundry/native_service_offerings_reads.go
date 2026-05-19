@@ -342,6 +342,8 @@ func toStServiceOffering(o capi.ServiceOffering, cnsiGUID string, brokerByGUID m
 	}
 	available := o.Available
 	out.Available = &available
+	bindable := o.Bindable
+	out.Bindable = &bindable
 
 	brokerGUID := relationshipGUID(o.Relationships.ServiceBroker)
 	if brokerGUID != "" {

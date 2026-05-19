@@ -1,8 +1,7 @@
 import { Component , ChangeDetectionStrategy } from '@angular/core';
 
 import { BooleanIndicatorComponent, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService } from '../../../../../../cf-api-svc.types';
+import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-table-cell-service-bindable',
@@ -13,4 +12,4 @@ import { IService } from '../../../../../../cf-api-svc.types';
     BooleanIndicatorComponent
   ]
 })
-export class TableCellServiceBindableComponent extends TableCellCustom<APIResource<IService>>  { }
+export class TableCellServiceBindableComponent extends TableCellCustom<StServiceOffering>  { }

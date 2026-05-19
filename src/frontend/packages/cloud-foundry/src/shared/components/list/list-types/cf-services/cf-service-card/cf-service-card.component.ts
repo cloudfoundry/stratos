@@ -3,7 +3,6 @@ import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core
 import { Store } from '@stratosui/store';
 
 import {
-  AppChip,
   CardCell,
   MetaCardComponent,
   MetaCardItemComponent,
@@ -12,12 +11,11 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { APIResource, EntityServiceFactory, RouterNav } from '@stratosui/store';
+import { EntityServiceFactory, RouterNav } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../cf-app-state';
-import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
-import { getServiceName } from '../../../../../../features/service-catalog/services-helper';
 import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
+import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
@@ -31,10 +29,6 @@ import { TableCellServiceCfBreadcrumbsComponent } from '../table-cell-service-cf
 import { TableCellServiceReferencesComponent } from '../table-cell-service-references/table-cell-service-references.component';
 import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-cell-service-tags.component';
 
-export interface ServiceTag {
-  value: string;
-  key: APIResource<IService>;
-}
 @Component({
   selector: 'app-cf-service-card',
   templateUrl: './cf-service-card.component.html',
@@ -59,14 +53,15 @@ export interface ServiceTag {
     TableCellServiceTagsComponent,
   ]
 })
-export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
+export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   private store = inject<Store<CFAppState>>(Store);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
 
-  serviceEntity: APIResource<IService>;
-  cfOrgSpace: CfOrgSpaceLabelService;
-  extraInfo: IServiceExtra;
-  tags: AppChip<ServiceTag>[] = [];
+  offering!: StServiceOffering;
+  cfOrgSpace!: CfOrgSpaceLabelService;
+  // Cached lookup of providerDisplayName from brokerCatalogMetadata. The
+  // legacy code JSON-parsed entity.extra; the backend now decodes it.
+  providerDisplayName: string | null = null;
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
   };
@@ -77,29 +72,30 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> {
   @Input() disableCardClick = false;
 
   @Input()
-  set row(row: APIResource<IService>) {
+  set row(row: StServiceOffering) {
     super.row = row;
     if (row) {
-      this.serviceEntity = row;
-      this.extraInfo = null;
-      if (this.serviceEntity.entity.extra) {
-        try {
-          this.extraInfo = JSON.parse(this.serviceEntity.entity.extra);
-        } catch { /* intentionally empty */ }
-      }
+      this.offering = row;
+      const meta = row.brokerCatalogMetadata;
+      const provider = meta?.providerDisplayName;
+      this.providerDisplayName = typeof provider === 'string' ? provider : null;
 
       if (!this.cfOrgSpace) {
-        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.cfRoles, this.serviceEntity.entity.cfGuid);
+        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.cfRoles, row.cnsiGuid);
       }
     }
   }
 
-  getDisplayName() {
-    return getServiceName(this.serviceEntity);
+  getDisplayName(): string {
+    if (!this.offering) return '';
+    const meta = this.offering.brokerCatalogMetadata;
+    const display = meta?.displayName;
+    if (typeof display === 'string' && display) return display;
+    return this.offering.name;
   }
 
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({
-      path: ['marketplace', this.serviceEntity.entity.cfGuid, this.serviceEntity.metadata.guid]
+      path: ['marketplace', this.offering.cnsiGuid, this.offering.guid]
     }));
 }

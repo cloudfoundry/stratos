@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellServiceBrokerComponent, TableCellServiceBrokerComponentMode } from './table-cell-service-broker.component';
 import { ServiceCatalogDataService, SignalSource } from '../../../../../../services/endpoint-data/service-catalog-data.service';
-import { StServiceBroker } from '../../../../../../services/endpoint-data/stratos-types';
+import { StServiceBroker, StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 
 describe('TableCellServiceBrokerComponent', () => {
   let component: TableCellServiceBrokerComponent;
@@ -55,10 +55,14 @@ describe('TableCellServiceBrokerComponent', () => {
 
   it('resolves broker via ServiceCatalogDataService when row is assigned', () => {
     component.config = { mode: TableCellServiceBrokerComponentMode.NAME };
-    component.row = {
-      entity: { service_broker_guid: 'broker-7', cfGuid: 'cnsi-1' },
-      metadata: { guid: 'svc-1' },
-    } as any;
+    const offering: StServiceOffering = {
+      guid: 'svc-1',
+      cnsiGuid: 'cnsi-1',
+      name: 'svc',
+      broker: { guid: 'broker-7' },
+      createdAt: '2026-01-01T00:00:00Z',
+    };
+    component.row = offering;
     fixture.detectChanges();
 
     expect(lastBrokerLookup).toEqual({ cnsiGuid: 'cnsi-1', brokerGuid: 'broker-7' });

@@ -16,12 +16,7 @@ import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService } from '../../../cf-api-svc.types';
-import {
-  offeringToApiResource,
-  ServicesWallService,
-} from '../../../features/services/services/services-wall.service';
+import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
@@ -63,20 +58,17 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   // spaceGuid) pair. Set in the csiState effect below.
   private offeringsSource = signal<ReturnType<ServicesWallService['getServicesInSpaceSource']> | null>(null);
 
-  // Mapped to legacy APIResource shape (cf-service-card still consumes
-  // it) and sorted by label. Retires when cf-service-card migrates to
-  // StServiceOffering directly.
-  readonly services: Signal<APIResource<IService>[]> = computed(() => {
+  // Sorted by displayName/name. cf-service-card consumes StServiceOffering
+  // directly now — no V2-envelope adapter step.
+  readonly services: Signal<StServiceOffering[]> = computed(() => {
     const source = this.offeringsSource();
     if (!source) return [];
     const offerings: StServiceOffering[] = source.value() ?? [];
-    return [...offerings]
-      .sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? ''))
-      .map(offeringToApiResource);
+    return [...offerings].sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? ''));
   });
   // Bridge the signal to Observable for the template's `services$ |
   // async` binding (and downstream RxJS composition below).
-  services$: Observable<APIResource<IService>[]> = toObservable(this.services);
+  services$: Observable<StServiceOffering[]> = toObservable(this.services);
 
   readonly isFetching: Signal<boolean> = computed(() => !!this.offeringsSource()?.isLoading());
   isFetching$: Observable<boolean> = toObservable(this.isFetching);
@@ -84,7 +76,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   cfGuid!: string;
   stepperForm: FormGroup<SelectServiceForm>;
   validate = signal<boolean>(false);
-  selectedService$: Observable<APIResource<IService>>;
+  selectedService$: Observable<StServiceOffering>;
 
   // Lifecycle management for subscriptions
   private destroyed$ = new Subject<void>();
@@ -129,7 +121,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     if (!source || source.isLoading()) return;
     const services = this.services();
     if (services.length === 1) {
-      const guid = services[0]?.metadata?.guid;
+      const guid = services[0]?.guid;
       if (guid) {
         this.stepperForm.controls.service.setValue(guid);
       }
@@ -147,7 +139,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       this.services$,
       this.stepperForm.controls.service.statusChanges
     ]).pipe(
-      map(([services, _change]) => services.filter(a => a?.metadata?.guid === this.stepperForm.controls.service.value)[0]),
+      map(([services, _change]) => services.filter(a => a?.guid === this.stepperForm.controls.service.value)[0]),
       filter(p => !!p),
       takeUntil(this.destroyed$)
     );

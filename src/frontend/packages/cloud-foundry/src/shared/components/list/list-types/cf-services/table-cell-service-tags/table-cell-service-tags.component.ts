@@ -2,9 +2,11 @@ import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { of } from 'rxjs';
 
 import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService } from '../../../../../../cf-api-svc.types';
-import { ServiceTag } from '../cf-service-card/cf-service-card.component';
+import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
+
+export interface ServiceTag {
+  value: string;
+}
 
 @Component({
   selector: 'app-table-cell-service-tags',
@@ -15,22 +17,22 @@ import { ServiceTag } from '../cf-service-card/cf-service-card.component';
     AppChipsComponent
   ]
 })
-export class TableCellServiceTagsComponent extends TableCellCustom<APIResource<IService>> {
+export class TableCellServiceTagsComponent extends TableCellCustom<StServiceOffering> {
 
   tags: AppChip<ServiceTag>[] = [];
 
   @Input()
-  set row(pService: APIResource<IService>) {
-    super.row = pService;
-    if (!pService) {
+  set row(offering: StServiceOffering) {
+    super.row = offering;
+    if (!offering) {
       return;
     }
-    this.tags = pService.entity.tags.map(t => ({
+    this.tags = (offering.tags ?? []).map(t => ({
       value: t,
       hideClearButton$: of(true)
     }));
   }
-  get row(): APIResource<IService> {
+  get row(): StServiceOffering {
     return super.row;
   }
 

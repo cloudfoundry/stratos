@@ -233,6 +233,10 @@ type StServiceOffering struct {
 	Description           string                 `json:"description,omitempty"`
 	Tags                  []string               `json:"tags,omitempty"`
 	Available             *bool                  `json:"available,omitempty"`
+	// Bindable mirrors capi.ServiceOffering.Bindable. Drives the marketplace
+	// card's Bindable column (replaces the V2 IService.bindable read).
+	// Pointer so summary+ tiers emit it while base omits.
+	Bindable              *bool                  `json:"bindable,omitempty"`
 	Shareable             *bool                  `json:"shareable,omitempty"`
 	Requires              []string               `json:"requires,omitempty"`
 	DocumentationURL      string                 `json:"documentationUrl,omitempty"`

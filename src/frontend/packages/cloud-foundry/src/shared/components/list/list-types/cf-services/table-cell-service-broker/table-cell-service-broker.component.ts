@@ -3,12 +3,10 @@ import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal
 import { RouterModule } from '@angular/router';
 
 import { TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService } from '../../../../../../cf-api-svc.types';
 import { ServiceCatalogDataService, SignalSource } from '../../../../../../services/endpoint-data/service-catalog-data.service';
 import { SpaceDataRegistry } from '../../../../../../services/endpoint-data/space-data.registry';
 import { SpaceDataService } from '../../../../../../services/endpoint-data/space-data.service';
-import { StServiceBroker } from '../../../../../../services/endpoint-data/stratos-types';
+import { StServiceBroker, StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 
 export enum TableCellServiceBrokerComponentMode {
   NAME = 'NAME',
@@ -36,7 +34,7 @@ interface SpaceLink {
   ]
 })
 export class TableCellServiceBrokerComponent extends
-  TableCellCustom<APIResource<IService>,
+  TableCellCustom<StServiceOffering,
   TableCellServiceBrokerComponentConfig> implements OnInit, OnDestroy {
 
   private serviceCatalog = inject(ServiceCatalogDataService);
@@ -69,17 +67,17 @@ export class TableCellServiceBrokerComponent extends
     };
   });
 
-  set row(row: APIResource<IService>) {
+  set row(row: StServiceOffering) {
     super.row = row;
-    if (!row) {
+    if (!row || !row.broker?.guid) {
       this._brokerSource.set(null);
       return;
     }
     this._brokerSource.set(
-      this.serviceCatalog.serviceBroker(row.entity.cfGuid, row.entity.service_broker_guid),
+      this.serviceCatalog.serviceBroker(row.cnsiGuid, row.broker.guid),
     );
   }
-  get row(): APIResource<IService> {
+  get row(): StServiceOffering {
     return super.row;
   }
 
