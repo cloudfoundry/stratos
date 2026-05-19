@@ -64,7 +64,7 @@ export interface ListSubNavAddAction {
           [disabled]="isAddDisabled()"
           (click)="addAction.invoke()"
           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
-                 bg-primary text-white hover:bg-opacity-90 transition-all duration-150
+                 bg-primary text-white hover:bg-primary/90 transition-all duration-150
                  disabled:opacity-50 disabled:cursor-not-allowed">
           <span class="material-icons text-base leading-5">{{ addAction.icon ?? 'add' }}</span>
           <span>{{ addAction.label }}</span>

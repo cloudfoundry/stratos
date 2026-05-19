@@ -26,7 +26,7 @@
                     <form [formGroup]="editTriggerForm" validate class="flex flex-wrap items-center gap-2 text-sm">
                       <span>If average</span>
                       @if (metricTypes.length > 1) {
-                        <div class="form-group min-w-0 flex-shrink-0">
+                        <div class="form-group min-w-0 shrink-0">
                           <input type="text" name="metric_type" formControlName="metric_type"
                             placeholder="Metric Type" required class="input-sm"
                             list="metricTypeList">
@@ -40,7 +40,7 @@
                         </div>
                       }
                       @if (metricTypes.length > 1) {
-                        <div class="form-group min-w-0 flex-shrink-0">
+                        <div class="form-group min-w-0 shrink-0">
                           <select name="operator" formControlName="operator" required class="select-sm">
                             <option value="" disabled>Operator</option>
                             @for (operator of operatorTypes; track $index) {
@@ -51,27 +51,27 @@
                           </select>
                         </div>
                       }
-                      <div class="form-group min-w-0 flex-shrink-0">
+                      <div class="form-group min-w-0 shrink-0">
                         <input type="number" name="threshold" formControlName="threshold" required
                           placeholder="Threshold" class="input-sm">
                       </div>
                       @if (getMetricUnit(editMetricType) === '') {
-                        <div class="form-group min-w-0 flex-shrink-0">
+                        <div class="form-group min-w-0 shrink-0">
                           <input type="text" name="unit" formControlName="unit" placeholder="Unit" class="input-sm">
                         </div>
                       }
                       <span>{{getMetricUnit(editMetricType)}} for</span>
-                      <div class="form-group min-w-0 flex-shrink-0">
+                      <div class="form-group min-w-0 shrink-0">
                         <input type="number" name="breach_duration_secs" formControlName="breach_duration_secs"
                           placeholder="Breach Duration" class="input-sm">
                       </div>
                       <span>seconds, then {{editScaleType==='upper'?'add':'remove'}}</span>
-                      <div class="form-group min-w-0 flex-shrink-0">
+                      <div class="form-group min-w-0 shrink-0">
                         <input type="number" name="adjustment" formControlName="adjustment" required
                           placeholder="Adjustment" class="input-sm">
                       </div>
                       @if (metricTypes.length > 1) {
-                        <div class="form-group min-w-0 flex-shrink-0">
+                        <div class="form-group min-w-0 shrink-0">
                           <select name="adjustment_type" formControlName="adjustment_type" required class="select-sm">
                             <option value="" disabled>Adjustment Type</option>
                             <option [value]="'value'">instances</option>
@@ -80,7 +80,7 @@
                         </div>
                       }
                       <span>. Cooldown:</span>
-                      <div class="form-group min-w-0 flex-shrink-0">
+                      <div class="form-group min-w-0 shrink-0">
                         <input type="number" name="cool_down_secs" formControlName="cool_down_secs"
                           placeholder="Cooldown" class="input-sm">
                       </div>

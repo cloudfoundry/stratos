@@ -11,7 +11,7 @@
             [title]="iconMode ? 'Expand sidebar' : ''"
             >
             <img
-              class="nav-logo-img h-8 w-8 flex-shrink-0 rounded-lg"
+              class="nav-logo-img h-8 w-8 shrink-0 rounded-lg"
               [src]="iconMode ? navLogoIcon() : navLogo()"
               [alt]="displayName()"
               >
@@ -62,7 +62,7 @@
               [routerLinkActive]="['router-link-active']"
               [title]="iconMode ? tab.label : ''"
               >
-              <span class="nav-item-icon flex-shrink-0 h-6 w-6 flex items-center justify-center ml-4">
+              <span class="nav-item-icon shrink-0 h-6 w-6 flex items-center justify-center ml-4">
                 <span class="text-xl"
                 [ngClass]="tab.matIconFont || 'material-icons'">{{ tab.matIcon || getIconName(tab) }}</span>
               </span>
@@ -94,7 +94,7 @@
         (click)="signOut()"
         [title]="iconMode ? 'Sign Out' : ''"
         >
-        <span class="material-icons text-xl flex-shrink-0">
+        <span class="material-icons text-xl shrink-0">
           exit_to_app
         </span>
         <span class="logout-text ml-3 text-sm font-medium" [class.hidden]="iconMode">
