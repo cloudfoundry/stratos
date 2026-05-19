@@ -9,7 +9,8 @@ import { ServiceCatalogDataService } from './service-catalog-data.service';
 // /cf/service_offerings/:cnsi/:offeringGuid (detail), /cf/service_plans
 // filtered by service_offering, /cf/service_brokers/:cnsi/:brokerGuid,
 // /cf/service_plans/:cnsi/:planGuid/visibility. Each call hits one backend
-// endpoint with no auto-drain.
+// endpoint with no auto-drain and returns a SignalSource — value flips
+// synchronously after req.flush() completes.
 
 describe('ServiceCatalogDataService', () => {
   let service: ServiceCatalogDataService;
@@ -29,30 +30,33 @@ describe('ServiceCatalogDataService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('serviceOffering hits /cf/service_offerings/:cnsi/:offeringGuid?return=details', async () => {
-    const promise = new Promise<any>(resolve => service.serviceOffering('cnsi-1', 'off-1').subscribe(resolve));
+  it('serviceOffering hits /cf/service_offerings/:cnsi/:offeringGuid?return=details', () => {
+    const source = service.serviceOffering('cnsi-1', 'off-1');
+    expect(source.isLoading()).toBe(true);
 
     const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_offerings/cnsi-1/off-1' && r.params.get('return') === 'details');
     expect(req.request.method).toBe('GET');
     req.flush({ guid: 'off-1', name: 'premium', description: 'd', broker: { guid: 'b-1', name: 'b1' }, tags: [], available: true, cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' });
 
-    const res = await promise;
-    expect(res.guid).toBe('off-1');
-    expect(res.broker?.name).toBe('b1');
+    expect(source.isLoading()).toBe(false);
+    const res = source.value();
+    expect(res?.guid).toBe('off-1');
+    expect(res?.broker?.name).toBe('b1');
   });
 
-  it('serviceOffering returns null on 404', async () => {
-    const promise = new Promise<any>(resolve => service.serviceOffering('cnsi-1', 'missing').subscribe(resolve));
+  it('serviceOffering returns null on 404', () => {
+    const source = service.serviceOffering('cnsi-1', 'missing');
 
     const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_offerings/cnsi-1/missing' && r.params.get('return') === 'details');
     req.flush({ message: 'not found' }, { status: 404, statusText: 'Not Found' });
 
-    const res = await promise;
-    expect(res).toBeNull();
+    expect(source.value()).toBeNull();
+    expect(source.isLoading()).toBe(false);
+    expect(source.error()).toBeNull();
   });
 
-  it('servicePlansForOffering filters via ?service_offering and requests summary tier', async () => {
-    const promise = new Promise<any>(resolve => service.servicePlansForOffering('cnsi-1', 'off-1').subscribe(resolve));
+  it('servicePlansForOffering filters via ?service_offering and requests summary tier', () => {
+    const source = service.servicePlansForOffering('cnsi-1', 'off-1');
 
     const req = httpMock.expectOne(r =>
       r.url === '/pp/v1/cf/service_plans/cnsi-1'
@@ -74,15 +78,15 @@ describe('ServiceCatalogDataService', () => {
       pagination: { totalResults: 1 },
     });
 
-    const plans = await promise;
+    const plans = source.value();
     expect(plans).toHaveLength(1);
     expect(plans[0].guid).toBe('plan-1');
     expect(plans[0].serviceOffering?.name).toBe('redis');
     expect(plans[0].serviceOffering?.broker?.name).toBe('alpha');
   });
 
-  it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid?return=details and reads nested-ref shape', async () => {
-    const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'broker-7').subscribe(resolve));
+  it('serviceBroker hits /cf/service_brokers/:cnsi/:brokerGuid?return=details and reads nested-ref shape', () => {
+    const source = service.serviceBroker('cnsi-1', 'broker-7');
 
     const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_brokers/cnsi-1/broker-7' && r.params.get('return') === 'details');
     expect(req.request.method).toBe('GET');
@@ -101,32 +105,31 @@ describe('ServiceCatalogDataService', () => {
       _meta: { unavailable: ['authUsername'] },
     });
 
-    const broker = await promise;
-    expect(broker.guid).toBe('broker-7');
-    expect(broker.space?.guid).toBe('space-1');
-    expect(broker.space?.name).toBe('alpha');
-    expect(broker._meta?.unavailable).toEqual(['authUsername']);
+    const broker = source.value();
+    expect(broker?.guid).toBe('broker-7');
+    expect(broker?.space?.guid).toBe('space-1');
+    expect(broker?.space?.name).toBe('alpha');
+    expect(broker?._meta?.unavailable).toEqual(['authUsername']);
   });
 
-  it('serviceBroker returns null on 404', async () => {
-    const promise = new Promise<any>(resolve => service.serviceBroker('cnsi-1', 'missing').subscribe(resolve));
+  it('serviceBroker returns null on 404', () => {
+    const source = service.serviceBroker('cnsi-1', 'missing');
 
     const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_brokers/cnsi-1/missing');
     req.flush({}, { status: 404, statusText: 'Not Found' });
 
-    const res = await promise;
-    expect(res).toBeNull();
+    expect(source.value()).toBeNull();
   });
 
-  it('planVisibility hits /cf/service_plans/:cnsi/:planGuid/visibility', async () => {
-    const promise = new Promise<any>(resolve => service.planVisibility('cnsi-1', 'plan-1').subscribe(resolve));
+  it('planVisibility hits /cf/service_plans/:cnsi/:planGuid/visibility', () => {
+    const source = service.planVisibility('cnsi-1', 'plan-1');
 
     const req = httpMock.expectOne('/pp/v1/cf/service_plans/cnsi-1/plan-1/visibility');
     expect(req.request.method).toBe('GET');
     req.flush({ type: 'organization', organizations: [{ guid: 'org-1', name: 'first' }] });
 
-    const vis = await promise;
-    expect(vis.type).toBe('organization');
-    expect(vis.organizations).toHaveLength(1);
+    const vis = source.value();
+    expect(vis?.type).toBe('organization');
+    expect(vis?.organizations).toHaveLength(1);
   });
 });

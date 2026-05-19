@@ -36,6 +36,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
       errors: () => [],
       load: () => of(undefined),
     },
+    serviceInstancesCount: (() => 0) as unknown as import('@angular/core').Signal<number>,
     userProvidedServiceInstancesCount$: of(0)
   };
 

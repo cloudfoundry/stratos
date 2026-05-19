@@ -1,14 +1,13 @@
 import { ComponentFixture, ComponentFixtureAutoDetect, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Observable, of, throwError } from 'rxjs';
 
 import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
-import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServicePlan, StServicePlanVisibility } from '../../../services/endpoint-data/stratos-types';
 import { ServicePlanPublicComponent } from './service-plan-public.component';
 
@@ -16,11 +15,19 @@ class ServiceCatalogDataServiceStub {
   visibilityResponse: StServicePlanVisibility | null = { type: 'public' };
   errorOnVisibility = false;
 
-  planVisibility(_cnsi: string, _planGuid: string): Observable<StServicePlanVisibility | null> {
+  planVisibility(_cnsi: string, _planGuid: string): SignalSource<StServicePlanVisibility | null> {
     if (this.errorOnVisibility) {
-      return throwError(() => new Error('forced error'));
+      return {
+        value: signal<StServicePlanVisibility | null>(null).asReadonly(),
+        isLoading: signal(false).asReadonly(),
+        error: signal(new HttpErrorResponse({ status: 500, statusText: 'forced error' })).asReadonly(),
+      };
     }
-    return of(this.visibilityResponse);
+    return {
+      value: signal(this.visibilityResponse).asReadonly(),
+      isLoading: signal(false).asReadonly(),
+      error: signal<HttpErrorResponse | null>(null).asReadonly(),
+    };
   }
 }
 
