@@ -107,10 +107,18 @@ export class ServiceCatalogDataService {
     );
   }
 
+  // `?return=summary` so the backend resolves the
+  // servicePlan → serviceOffering chain on the SI envelope. Base mode
+  // returns only relationship guids, leaving `servicePlan.serviceOffering`
+  // empty — and the add-service-instance edit flow reads
+  // `si.servicePlan.serviceOffering.guid` to derive the offering guid for
+  // the wizard's service step.
   serviceInstance(cnsiGuid: string, instanceGuid: string): SignalSource<StServiceInstance | null> {
+    const params = new HttpParams().set('return', 'summary');
     return this.signalize(
       this.http.get<StServiceInstance>(
         `/pp/v1/cf/service_instances/${cnsiGuid}/${instanceGuid}`,
+        { params },
       ).pipe(this.catchAs404Null()),
       null,
     );
