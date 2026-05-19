@@ -10,7 +10,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@stratosui/store';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { filter, take, tap } from 'rxjs/operators';
@@ -129,7 +128,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
   // Mirror the cross-step loading state so step1's handle can drive
   // [blocked] reactively without leaning on async pipes inside the
   // template — keeps the template purely declarative on the handle.
-  private isLoadingSignal = toSignal(this.cfOrgSpaceService.isLoading$, { initialValue: false });
+  private isLoadingSignal = this.cfOrgSpaceService.isLoading;
 
   step1Handle: SignalStepHandle = {
     valid: this.step1Valid.asReadonly(),
@@ -176,13 +175,13 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     this.paginationStateSub = appWallPaginationState.pipe(filter(pag => !!pag), take(1), tap(pag => {
       const { cf, org, space } = pag.clientPagination.filter.items;
       if (cf) {
-        this.cfOrgSpaceService.cf.select.next(cf);
+        this.cfOrgSpaceService.cf.select.set(cf);
       }
       if (cf && org) {
-        this.cfOrgSpaceService.org.select.next(org);
+        this.cfOrgSpaceService.org.select.set(org);
       }
       if (cf && org && space) {
-        this.cfOrgSpaceService.space.select.next(space);
+        this.cfOrgSpaceService.space.select.set(space);
       }
     })).subscribe();
   }

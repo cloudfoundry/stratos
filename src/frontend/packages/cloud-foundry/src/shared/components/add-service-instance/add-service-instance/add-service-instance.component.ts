@@ -15,7 +15,7 @@ import {
   runInInjectionContext,
   signal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of as observableOf, Subject, Subscription, firstValueFrom } from 'rxjs';
 import {
@@ -187,7 +187,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private specifyDetailsValidSub?: Subscription;
   private specifyDetailsInitSub?: Subscription;
 
-  private isLoadingSignal = toSignal(this.cfOrgSpaceService.isLoading$, { initialValue: false });
+  private isLoadingSignal = this.cfOrgSpaceService.isLoading;
   private skipAppsSignal = signal<boolean>(false);
   private skipAppsSub?: Subscription;
 
@@ -461,7 +461,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     try {
       let ok = true;
       if (this.inMarketplaceMode) {
-        ok = await firstValueFrom(this.initialiseForMarketplaceMode());
+        ok = await this.initialiseForMarketplaceMode();
       } else if (this.modeService.isEditServiceInstanceMode()) {
         ok = await this.configureForEditServiceInstanceMode();
       } else if (this.modeService.isAppServicesMode()) {
@@ -526,15 +526,35 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     return Promise.resolve(false);
   }
 
+  // Resolves once a Signal<T[]> emits a non-empty array. Returns
+  // immediately if the signal already holds entries. Used to wait on
+  // upstream signal-backed lists (e.g. CfOrgSpaceDataService.cf.list)
+  // before proceeding with selection.
+  private awaitNonEmpty<T>(sig: Signal<T[]>): Promise<T[]> {
+    const initial = sig();
+    if (initial && initial.length > 0) return Promise.resolve(initial);
+    return new Promise(resolve => {
+      runInInjectionContext(this.injector, () => {
+        const ref = effect(() => {
+          const v = sig();
+          if (v && v.length > 0) {
+            ref.destroy();
+            resolve(v);
+          }
+        });
+      });
+    });
+  }
+
   // ─────────────────────────────────────────────────────────────────────
   // Step-driven event handlers
   // ─────────────────────────────────────────────────────────────────────
 
   onNext = () => {
     try {
-      const cfGuid = this.cfOrgSpaceService.cf.select.getValue();
-      const orgGuid = this.cfOrgSpaceService.org.select.getValue();
-      const spaceGuid = this.cfOrgSpaceService.space.select.getValue();
+      const cfGuid = this.cfOrgSpaceService.cf.select();
+      const orgGuid = this.cfOrgSpaceService.org.select();
+      const spaceGuid = this.cfOrgSpaceService.space.select();
 
       if (!cfGuid) {
         console.error('onNext: Cloud Foundry endpoint not selected');
@@ -766,22 +786,24 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
-  // Marketplace mode kept on the Observable surface; cf.list$ +
-  // serviceName$ are already signal-backed via toObservable wrappers at
-  // their source. The dispatcher bridges via firstValueFrom.
-  private initialiseForMarketplaceMode(): Observable<boolean> {
+  // Marketplace mode setup. Resolves the route params, primes csi state,
+  // awaits the connected CF endpoint list signal, and selects the
+  // requested endpoint. The serviceName$ subscription stays — it just
+  // imperatively updates the title as the helper resolves.
+  private async initialiseForMarketplaceMode(): Promise<boolean> {
     const { endpointId, serviceId } = this.activatedRoute.snapshot.params;
 
     if (!endpointId) {
-      console.error('initialiseForMarketplaceMode: endpointId is missing from route params');
-      this.errorMessage = 'Cannot initialize service instance creation: Cloud Foundry endpoint ID is required';
-      return observableOf(false);
+      return this.failSetup(
+        'initialiseForMarketplaceMode: endpointId is missing from route params',
+        'Cannot initialize service instance creation: Cloud Foundry endpoint ID is required',
+      );
     }
-
     if (!serviceId) {
-      console.error('initialiseForMarketplaceMode: serviceId is missing from route params');
-      this.errorMessage = 'Cannot initialize service instance creation: Service ID is required';
-      return observableOf(false);
+      return this.failSetup(
+        'initialiseForMarketplaceMode: serviceId is missing from route params',
+        'Cannot initialize service instance creation: Service ID is required',
+      );
     }
 
     try {
@@ -800,18 +822,15 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       }
       this.csiState.setServiceGuid(serviceId);
     } catch (error) {
-      console.error('initialiseForMarketplaceMode: Error during service configuration', {
-        endpointId,
-        serviceId,
-        error
-      });
-      this.errorMessage = 'Failed to configure service instance creation.';
-      return observableOf(false);
+      return this.failSetup(
+        `initialiseForMarketplaceMode: Error during service configuration (endpointId=${endpointId}, serviceId=${serviceId}): ${error instanceof Error ? error.message : String(error)}`,
+        'Failed to configure service instance creation.',
+      );
     }
 
-    // Subscribe to service name and update title imperatively
-    // Use setTimeout to schedule title update outside current change detection cycle
-    // This prevents ExpressionChangedAfterItHasBeenCheckedError
+    // Title is set imperatively as the helper resolves the service name.
+    // setTimeout pushes each update past the current change-detection
+    // cycle to avoid ExpressionChangedAfterItHasBeenChecked.
     this.cSIHelperService.serviceName$.pipe(
       map(label => `Create Instance: ${label || 'Service'}`),
       catchError(error => {
@@ -827,28 +846,24 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       setTimeout(() => this._title.set(title), 0);
     });
     this.marketPlaceMode = true;
-    return this.cfOrgSpaceService.cf.list$.pipe(
-      filter(p => !!p),
-      take(1),
-      tap(e => {
-        if (!e || e.length === 0) {
-          console.error('initialiseForMarketplaceMode: No Cloud Foundry endpoints available');
-          throw new Error('No Cloud Foundry endpoints available');
-        }
-        this.cfOrgSpaceService.cf.select.next(endpointId);
-      }),
-      map(_o => true),
-      catchError(error => {
-        console.error('initialiseForMarketplaceMode: Failed to initialize marketplace mode', {
-          endpointId,
-          serviceId,
-          error
-        });
-        this.errorMessage = 'Failed to initialize service creation. Please ensure your Cloud Foundry connection is active.';
-        return observableOf(false);
-      }),
-      takeUntil(this.destroyed$)
-    );
+
+    let endpoints: ReadonlyArray<unknown>;
+    try {
+      endpoints = await this.awaitNonEmpty(this.cfOrgSpaceService.cf.list);
+    } catch (error) {
+      return this.failSetup(
+        `initialiseForMarketplaceMode: Failed to await connected CF endpoints (endpointId=${endpointId}): ${error instanceof Error ? error.message : String(error)}`,
+        'Failed to initialize service creation. Please ensure your Cloud Foundry connection is active.',
+      );
+    }
+    if (endpoints.length === 0) {
+      return this.failSetup(
+        'initialiseForMarketplaceMode: No Cloud Foundry endpoints available',
+        'No Cloud Foundry endpoints available',
+      );
+    }
+    this.cfOrgSpaceService.cf.select.set(endpointId);
+    return true;
   }
 
   ngOnDestroy(): void {

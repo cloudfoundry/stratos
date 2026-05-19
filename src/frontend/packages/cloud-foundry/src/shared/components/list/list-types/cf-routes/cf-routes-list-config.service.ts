@@ -1,7 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
@@ -75,15 +76,18 @@ export class CfRoutesListConfigService extends CfRoutesListConfigBase implements
     ];
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
 
-    this.getInitialised = () => combineLatest(
-      cfOrgSpaceService.cf.list$,
-      cfOrgSpaceService.org.list$,
-      cfOrgSpaceService.space.list$,
-    ).pipe(
-      map(loading => !loading),
-      startWith(true)
-    );
+    // The framework consumes getInitialised as an Observable<boolean>.
+    // Express loading-complete as a signal-side computed (true while
+    // any list is unpopulated) and bridge to Observable here, in the
+    // constructor's injection context — the arrow returned to the
+    // framework just hands the captured Observable back.
+    const initialised$ = toObservable(computed(() =>
+      cfOrgSpaceService.cf.list().length === 0
+        || cfOrgSpaceService.org.list().length === 0
+        || cfOrgSpaceService.space.list().length === 0,
+    )).pipe(startWith(true));
+    this.getInitialised = () => initialised$;
 
-    cfOrgSpaceService.cf.select.next(cfService.cfGuid);
+    cfOrgSpaceService.cf.select.set(cfService.cfGuid);
   }
 }
