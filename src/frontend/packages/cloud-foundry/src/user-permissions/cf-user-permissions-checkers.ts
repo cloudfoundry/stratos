@@ -1,4 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import {
@@ -15,9 +17,10 @@ import {
   PermissionTypes,
 } from '@stratosui/core';
 import { PermissionValues } from '@stratosui/store';
-import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
-import { cfEntityCatalog } from '../cf-entity-catalog';
+import { CFFeatureFlagTypes } from '../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
+import { getFeatureFlagsSource } from './feature-flags-cache';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
 import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import {
@@ -111,6 +114,8 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 @Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
   private roles = inject(CfCurrentUserRolesSignalService);
+  private http = inject(HttpClient);
+  private injector = inject(Injector);
 
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
 
@@ -232,20 +237,23 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => {
-        const createFFObs = (guid: string) =>
-          // For admins we don't have the ff list which is usually fetched right at the start,
-          // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
-          cfEntityCatalog.featureFlag.store.getPaginationService(guid).entities$;
+        const createFFObs = (guid: string): Observable<StFeatureFlag[]> => {
+          // For admins the role-fetch barrier does not prime feature flags
+          // for us, so trigger an idempotent load() here. The shared cache
+          // (feature-flags-cache.ts) collapses concurrent + repeat loads
+          // for the same cnsi, so this is safe to call on every check.
+          const src = getFeatureFlagsSource(guid, this.http);
+          src.load();
+          return toObservable(src.items, { injector: this.injector });
+        };
         return combineLatest(guids.map(createFFObs));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-      // startWith(false), // Don't start with anything, this ensures first value out can be trusted. Should never get to the point where
-      // nothing is returned
       distinctUntilChanged(),
     );
   }
 
-  private checkFeatureFlag(featureFlags: IFeatureFlag[], permission: CFFeatureFlagTypes) {
+  private checkFeatureFlag(featureFlags: StFeatureFlag[], permission: CFFeatureFlagTypes) {
     const flag = featureFlags.find(ff => ff.name === permission.toString());
     if (!flag) {
       return false;
