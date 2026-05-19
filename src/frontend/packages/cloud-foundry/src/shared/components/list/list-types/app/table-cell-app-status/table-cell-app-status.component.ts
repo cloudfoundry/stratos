@@ -1,11 +1,11 @@
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { startWith } from 'rxjs/operators';
 
 import { ApplicationStateComponent, TableCellCustom } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../../../../cf-api.types';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { AppStatsDataRegistry } from '../../../../../../services/endpoint-data/app-stats-data.registry';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 
 @Component({
@@ -19,6 +19,7 @@ import { ApplicationStateData, ApplicationStateService } from '../../../../../se
 })
 export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IApp>> implements OnInit {
   private appStateService = inject(ApplicationStateService);
+  private statsRegistry = inject(AppStatsDataRegistry);
 
   applicationState!: ApplicationStateData;
   @Input()
@@ -36,15 +37,11 @@ export class TableCellAppStatusComponent extends TableCellCustom<APIResource<IAp
   public initialStateOnly = false;
 
   ngOnInit() {
-    const applicationState = this.appStateService.get(this.row.entity, null);
-    this.fetchAppState$ = ApplicationService.getApplicationState(
-      this.appStateService,
-      this.row.entity,
-      this.row.metadata.guid,
-      this.row.entity.cfGuid)
-      .pipe(
-        startWith(applicationState)
-      );
+    const stats = this.statsRegistry.acquire(this.row.entity.cfGuid, this.row.metadata.guid);
+    const stateSignal = computed(() => this.appStateService.get(this.row.entity, stats.stats()));
+    this.fetchAppState$ = toObservable(stateSignal);
+    this.applicationState = this.appStateService.get(this.row.entity, null);
+    stats.load().subscribe();
   }
 
 }

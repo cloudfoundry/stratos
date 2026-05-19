@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
@@ -22,7 +23,7 @@ import { UserFavoriteManager } from '../../../../../../../../store/src/user-favo
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { AppStatsDataRegistry } from '../../../../../../services/endpoint-data/app-stats-data.registry';
 import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { ApplicationStateData, ApplicationStateService } from '../../../../../services/application-state.service';
 import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
@@ -54,6 +55,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   private cfRoles = inject(CfCurrentUserRolesSignalService);
   private appStateService = inject(ApplicationStateService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private statsRegistry = inject(AppStatsDataRegistry);
 
 
   applicationState$!: Observable<ApplicationStateData>;
@@ -76,17 +78,10 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
 
     this.favorite = this.userFavoriteManager.getFavorite(this.row, applicationEntityType, CF_ENDPOINT_TYPE);
 
-    const initState = this.appStateService.get(this.row.entity, null);
-    this.applicationState$ = ApplicationService.getApplicationState(
-      this.appStateService,
-      this.row.entity,
-      this.row.metadata.guid,
-      this.row.entity.cfGuid
-    ).pipe(
-      startWith(initState)
-    );
-    this.appStatus$ = this.applicationState$.pipe(
-      map(state => state.indicator),
-    );
+    const stats = this.statsRegistry.acquire(this.row.entity.cfGuid, this.row.metadata.guid);
+    const stateSignal = computed(() => this.appStateService.get(this.row.entity, stats.stats()));
+    this.applicationState$ = toObservable(stateSignal);
+    this.appStatus$ = this.applicationState$.pipe(map(state => state.indicator));
+    stats.load().subscribe();
   }
 }

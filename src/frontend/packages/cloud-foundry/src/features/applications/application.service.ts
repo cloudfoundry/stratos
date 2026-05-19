@@ -31,7 +31,7 @@ import { CfEndpointsDataService } from '../../services/domain-data/cf-endpoints-
 import { StDomain, StOrg, StSpace } from '../../services/endpoint-data/stratos-types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
+import { ApplicationStateData } from '../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppStat } from '../../store/types/app-metadata.types';
@@ -76,26 +76,6 @@ export interface ApplicationData {
  */
 @Injectable()
 export class ApplicationService {
-  // Static utility — used by app list cards, the home compact-app-card, and
-  // the table-cell app status renderer. Independent of the per-app detail
-  // page lifecycle; pulls live stats from the legacy ngrx paginator and
-  // composes via ApplicationStateService. Stays here because consumers
-  // already import ApplicationService for the static call.
-  static getApplicationState(
-    appStateService: ApplicationStateService,
-    app: IApp,
-    appGuid: string,
-    cfGuid: string,
-  ): Observable<ApplicationStateData> {
-    return cfEntityCatalog.appStats.store
-      .getPaginationMonitor(appGuid, cfGuid).currentPage$
-      .pipe(
-        map(appInstancesPages => appStateService.get(app, appInstancesPages)),
-        publishReplay(1),
-        refCount(),
-      );
-  }
-
   cfGuid = inject(CF_GUID);
   appGuid = inject(APP_GUID);
   private store = inject<Store<CFAppState>>(Store);

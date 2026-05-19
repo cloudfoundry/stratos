@@ -1,15 +1,11 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal } from '@angular/core';
 import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
 
 import { BREADCRUMB_URL_PARAM, ApplicationStateIconComponent } from '@stratosui/core';
 import { StratosStatus } from '@stratosui/store';
-import { CFAppState } from '../../../../cf-app-state';
+import { AppStatsDataRegistry } from '../../../../services/endpoint-data/app-stats-data.registry';
 import { ApplicationStateData, ApplicationStateService } from '../../../../shared/services/application-state.service';
-import { ApplicationService } from '../../../applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
 
 
@@ -28,9 +24,9 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
   ]
 })
 export class CompactAppCardComponent implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
   private appStateService = inject(ApplicationStateService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+  private statsRegistry = inject(AppStatsDataRegistry);
 
 
   @Input() app!: any;
@@ -40,9 +36,9 @@ export class CompactAppCardComponent implements OnInit {
   @Input() showDate = true;
   @Input() dateMode!: string;
 
-  applicationState$!: Observable<ApplicationStateData>;
+  applicationState: Signal<ApplicationStateData> = signal({ label: '', indicator: StratosStatus.NONE, actions: null });
 
-  appStatus$!: Observable<StratosStatus>;
+  appStatus: Signal<StratosStatus> = computed(() => this.applicationState().indicator);
 
   bcType!: any;
   ngOnInit() {
@@ -57,18 +53,9 @@ export class CompactAppCardComponent implements OnInit {
       return;
     }
 
-    const initState = this.appStateService.get(this.app.entity, null);
-    this.applicationState$ = ApplicationService.getApplicationState(
-      this.appStateService,
-      this.app.entity,
-      this.app.metadata.guid,
-      this.endpoint
-    ).pipe(
-      startWith(initState)
-    );
-    this.appStatus$ = this.applicationState$.pipe(
-      map(state => state.indicator)
-    );
+    const stats = this.statsRegistry.acquire(this.endpoint, this.app.metadata.guid);
+    this.applicationState = computed(() => this.appStateService.get(this.app.entity, stats.stats()));
+    stats.load().subscribe();
   }
 
   private setBreadcrumbType = (activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) => {
@@ -86,4 +73,3 @@ export class CompactAppCardComponent implements OnInit {
     };
   }
 }
-
