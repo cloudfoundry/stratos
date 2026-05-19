@@ -2,9 +2,9 @@
 <form [formGroup]="setDomainHost" class="stepper-form">
   <app-form-field>
     <app-select placeholder="Domain" name="domain" formControlName="domain">
-      @for (domain of (domains$ | async); track domain) {
-        <app-option [value]="domain.metadata.guid">
-          <span>{{ domain.entity.name }}</span>
+      @for (domain of (domains$ | async); track domain.guid) {
+        <app-option [value]="domain.guid">
+          <span>{{ domain.name }}</span>
         </app-option>
       }
     </app-select>
