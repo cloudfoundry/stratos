@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 .autoscaler-tab {
   @apply flex relative w-full;
   &__actions {

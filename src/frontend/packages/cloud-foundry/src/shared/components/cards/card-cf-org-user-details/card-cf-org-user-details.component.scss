@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 .app-metadata {
   @apply flex flex-row;
 
@@ -13,4 +15,3 @@
 .card-title {
   @apply font-medium;
 }
-

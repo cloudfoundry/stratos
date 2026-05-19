@@ -1,5 +1,7 @@
 @use '../../../../sass/mixins';
 
+@reference 'tailwindcss';
+
 .page-container {
   display: flex;
   flex-direction: column;

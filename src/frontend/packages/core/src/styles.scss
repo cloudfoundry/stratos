@@ -8,6 +8,8 @@
 // Import Tailwind animations for custom components
 @use './shared/styles/tailwind-animations.scss';
 
+@reference 'tailwindcss';
+
 // Base styles are handled by Tailwind in main.css
 // Override font family to match existing design
 body {
