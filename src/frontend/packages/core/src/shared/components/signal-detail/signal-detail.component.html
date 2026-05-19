@@ -14,7 +14,7 @@
                 <span class="signal-detail-breadcrumb truncate">{{ c.label }}</span>
               }
               @if (!$last) {
-                <span class="material-icons text-base opacity-50 flex-shrink-0">chevron_right</span>
+                <span class="material-icons text-base opacity-50 shrink-0">chevron_right</span>
               }
             }
           </div>
@@ -27,7 +27,7 @@
       </div>
       @if (visibleHeaderActions().length > 0) {
         <div data-test="signal-detail-header-actions"
-             class="signal-detail-toolbar-right flex items-center gap-2 flex-shrink-0">
+             class="signal-detail-toolbar-right flex items-center gap-2 shrink-0">
           @for (act of visibleHeaderActions(); track act.label) {
             <button data-test="signal-detail-header-action"
                     [class]="headerActionClasses(act)"

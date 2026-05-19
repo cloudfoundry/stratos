@@ -7,7 +7,7 @@
           <div class="steppers-headers flex flex-wrap sm:flex-nowrap items-center justify-center mb-8 gap-2 overflow-x-auto">
             @for (step of steps; track $index; let i = $index; let isLast = $last) {
               <div
-                class="steppers-header flex items-center flex-shrink-0 min-w-0"
+                class="steppers-header flex items-center shrink-0 min-w-0"
              [ngClass]="{
                'steppers-header--active': step.active,
                'steppers-header--busy': step.blocked || step.showBusy
@@ -15,7 +15,7 @@
                 @if (steps.length !== 1) {
                   <div class="steppers-header-inner flex items-center min-w-0">
                     <!-- Step indicator -->
-                    <div class="steppers-header-indicator relative flex items-center justify-center flex-shrink-0">
+                    <div class="steppers-header-indicator relative flex items-center justify-center shrink-0">
                       <!-- Loading spinner -->
                       @if ((step.blocked || step.showBusy)) {
                         <div
@@ -55,7 +55,7 @@
                 <!-- Connector line -->
                 @if (!isLast) {
                   <div
-                    class="steppers-header-connector w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 flex-shrink-0 hidden sm:block"
+                    class="steppers-header-connector w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 shrink-0 hidden sm:block"
                [ngClass]="{
                  'steppers-header-connector--complete': step.complete,
                  'steppers-header-connector--incomplete': !step.complete
