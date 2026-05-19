@@ -174,6 +174,7 @@
     "@playwright/test": "^1.49.1",
     "@schematics/angular": "21.2.7",
     "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/postcss": "^4.3.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/d3-dispatch": "^3.0.7",
     "@types/d3-drag": "^3.0.7",

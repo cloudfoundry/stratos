@@ -1,13 +1,10 @@
-const path = require('path');
-
-// Explicit absolute config path: vitest runs from sub-packages where
-// tailwindcss's default config resolution (relative to process.cwd())
-// can't find the monorepo-root tailwind.config.js, causing
-// `Cannot read properties of undefined (reading 'config')`.
+// Tailwind v4 PostCSS pipeline.
+// v4 has native CSS Nesting and Lightning-CSS-based vendor prefixing,
+// so the v3 helpers (tailwindcss/nesting + autoprefixer) are gone.
+// @tailwindcss/postcss reads @import "tailwindcss" / @theme blocks from
+// the entry stylesheet; there is no separate config-file argument in v4.
 module.exports = {
   plugins: [
-    require('tailwindcss/nesting'),
-    require('tailwindcss')({ config: path.join(__dirname, 'tailwind.config.js') }),
-    require('autoprefixer'),
+    require('@tailwindcss/postcss'),
   ],
 };
