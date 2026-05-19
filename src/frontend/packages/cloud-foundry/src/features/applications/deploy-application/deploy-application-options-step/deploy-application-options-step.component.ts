@@ -10,16 +10,13 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
 import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
-import { IDomain } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
   ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { StEnvVars } from '../../../../services/endpoint-data/stratos-types';
+import { StDomain, StDomainsResponse, StEnvVars, StStack, StStacksResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 interface DeployOptionsForm {
@@ -69,8 +66,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
 
   valid$: Observable<boolean>;
-  domains$!: Observable<APIResource<IDomain>[]>;
-  stacks$!: Observable<APIResource<IDomain>[]>;
+  domains$!: Observable<StDomain[]>;
+  stacks$!: Observable<StStack[]>;
   deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
   appGuid!: string;
@@ -152,18 +149,21 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
     );
 
-    // Create the domains list for the domains drop down
+    // Create the domains list for the domains drop down. cf push overrides
+    // do not support tcp routes (no way to specify port), so filter them out.
     this.domains$ = cfDetails$.pipe(
-      switchMap(cfDetails =>
-        cfEntityCatalog.domain.store.getOrganizationDomains.getPaginationService(cfDetails.org, cfDetails.cloudFoundry).entities$
-      ),
-      // cf push overrides do not support tcp routes (no way to specify port)
-      map(domains => domains.filter(domain => domain.entity.router_group_type !== 'tcp')),
+      switchMap(cfDetails => this.http.get<StDomainsResponse>(
+        `/pp/v1/cf/org/${cfDetails.cloudFoundry}/${cfDetails.org}/private_domains`,
+      )),
+      map(resp => (resp?.resources ?? []).filter(d => !d.supportedProtocols?.includes('tcp'))),
       share()
     );
 
     this.stacks$ = cfDetails$.pipe(
-      switchMap(cfDetails => cfEntityCatalog.stack.store.getPaginationService(null, cfDetails.cloudFoundry).entities$),
+      switchMap(cfDetails => this.http.get<StStacksResponse>(
+        `/pp/v1/cf/stacks/${cfDetails.cloudFoundry}`,
+      )),
+      map(resp => resp?.resources ?? []),
       share()
     );
 
