@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -18,6 +19,7 @@ import { IDomain } from '../../../../cf-api.types';
 import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
   ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { StEnvVars } from '../../../../services/endpoint-data/stratos-types';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 interface DeployOptionsForm {
@@ -57,6 +59,7 @@ interface DeployOptionsForm {
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private store = inject<Store<CFAppState>>(Store);
+  private http = inject(HttpClient);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private activatedRoute = inject(ActivatedRoute);
   private deployData = inject(CfDeployAppDataService);
@@ -190,12 +193,18 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       }
     }));
 
-    // Extract any existing values from the app's env var and assign to form
+    // Extract any existing values from the app's env var and assign to form.
+    // Redeploy path: the wizard was launched against an existing app and the
+    // STRATOS_PROJECT env var (written by a prior deploy step) carries the
+    // overrides we want to preseed.
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
-        switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
-        map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
+        switchMap(([, cfDetails]) => this.http.get<StEnvVars>(
+          `/pp/v1/cf/apps/${cfDetails.cloudFoundry}/${this.appGuid}/env`,
+        )),
+        map(env => this.appEnvVarsService.FetchStratosProject(env?.environment)),
+        filter((proj): proj is NonNullable<typeof proj> => !!proj),
         take(1)
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
     }
