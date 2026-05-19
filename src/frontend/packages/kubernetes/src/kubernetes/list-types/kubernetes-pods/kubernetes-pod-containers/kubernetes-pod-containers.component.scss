@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 /* Container icon — mat-icon sizing not expressible in Tailwind */
 .pod-container-icon {
   @apply flex items-center;

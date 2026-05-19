@@ -1,4 +1,4 @@
-@tailwind components;
+@reference 'tailwindcss';
 
 @layer components {
   .custom-button-toggle-group {
