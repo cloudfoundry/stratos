@@ -11,7 +11,6 @@ import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 @Component({
   selector: 'lib-git-endpoint-details',
   templateUrl: './git-endpoint-details.component.html',
-  styleUrls: ['./git-endpoint-details.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush

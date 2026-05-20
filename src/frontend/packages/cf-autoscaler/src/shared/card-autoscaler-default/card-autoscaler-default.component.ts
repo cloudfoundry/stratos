@@ -22,7 +22,6 @@ import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
 @Component({
   selector: 'app-card-autoscaler-default',
   templateUrl: './card-autoscaler-default.component.html',
-  styleUrls: ['./card-autoscaler-default.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
