@@ -8,7 +8,6 @@ import { CreateSpaceQuotaStepComponent } from './create-space-quota-step/create-
 @Component({
   selector: 'app-add-space-quota',
   templateUrl: './add-space-quota.component.html',
-  styleUrls: ['./add-space-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

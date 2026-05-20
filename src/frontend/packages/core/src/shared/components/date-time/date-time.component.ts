@@ -12,7 +12,6 @@ import { format, parse, setHours, setMinutes, isValid, isEqual } from 'date-fns'
     ReactiveFormsModule
 ],
   templateUrl: './date-time.component.html',
-  styleUrls: ['./date-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DateTimeComponent implements OnDestroy {

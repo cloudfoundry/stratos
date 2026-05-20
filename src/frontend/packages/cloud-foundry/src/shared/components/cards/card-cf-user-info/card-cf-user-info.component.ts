@@ -12,7 +12,6 @@ import { CloudFoundryEndpointService } from '../../../../features/cf/services/cl
 @Component({
   selector: 'app-card-cf-user-info',
   templateUrl: './card-cf-user-info.component.html',
-  styleUrls: ['./card-cf-user-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

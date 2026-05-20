@@ -1,6 +1,6 @@
 @if ((status$ | async); as status) {
   <div
-    class="app-card-status absolute top-0 left-0 w-full h-1 rounded-t-lg"
+    class="absolute top-0 left-0 w-full h-1 rounded-t-lg transition-colors duration-[1ms] ease-in"
      [ngClass]="{
        'bg-success-shade-500': status === cardStatus.OK,
        'bg-warning-shade-500': status === cardStatus.WARNING,

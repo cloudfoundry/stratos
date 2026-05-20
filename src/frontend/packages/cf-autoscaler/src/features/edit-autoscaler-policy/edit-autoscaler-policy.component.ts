@@ -32,7 +32,6 @@ import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 @Component({
   selector: 'app-edit-autoscaler-policy',
   templateUrl: './edit-autoscaler-policy.component.html',
-  styleUrls: ['./edit-autoscaler-policy.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },

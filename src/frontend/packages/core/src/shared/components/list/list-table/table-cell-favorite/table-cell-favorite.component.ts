@@ -81,7 +81,6 @@ export interface TableCellFavoriteComponentConfig<T, Y extends IFavoriteMetadata
 @Component({
 selector: 'app-table-cell-favorite',
   templateUrl: './table-cell-favorite.component.html',
-  styleUrls: ['./table-cell-favorite.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

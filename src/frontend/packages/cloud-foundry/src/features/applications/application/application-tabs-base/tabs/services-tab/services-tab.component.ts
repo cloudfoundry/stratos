@@ -56,7 +56,6 @@ import type { StServiceCredentialBinding } from '../../../../../../services/endp
 @Component({
   selector: 'app-services-tab',
   templateUrl: './services-tab.component.html',
-  styleUrls: ['./services-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

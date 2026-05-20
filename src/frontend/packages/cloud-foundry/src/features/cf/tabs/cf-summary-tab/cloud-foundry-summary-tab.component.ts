@@ -25,7 +25,6 @@ import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoin
 @Component({
   selector: 'app-cloud-foundry-summary-tab',
   templateUrl: './cloud-foundry-summary-tab.component.html',
-  styleUrls: ['./cloud-foundry-summary-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

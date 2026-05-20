@@ -16,7 +16,6 @@ import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.compon
 @Component({
   selector: 'app-edit-space',
   templateUrl: './edit-space.component.html',
-  styleUrls: ['./edit-space.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,

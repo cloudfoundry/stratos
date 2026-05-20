@@ -14,7 +14,6 @@ interface BackupCheckboxConfig {
 @Component({
   selector: 'app-backup-checkbox-cell',
   templateUrl: './backup-checkbox-cell.component.html',
-  styleUrls: ['./backup-checkbox-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

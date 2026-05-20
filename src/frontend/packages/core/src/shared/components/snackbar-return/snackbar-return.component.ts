@@ -8,7 +8,6 @@ import { RouterNav, AppState } from '@stratosui/store';
 @Component({
   selector: 'app-snackbar-return',
   templateUrl: './snackbar-return.component.html',
-  styleUrls: ['./snackbar-return.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush

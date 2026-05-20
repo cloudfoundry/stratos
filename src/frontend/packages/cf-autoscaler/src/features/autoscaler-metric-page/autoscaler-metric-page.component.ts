@@ -19,7 +19,6 @@ import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-ut
 @Component({
   selector: 'app-autoscaler-metric-page',
   templateUrl: './autoscaler-metric-page.component.html',
-  styleUrls: ['./autoscaler-metric-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

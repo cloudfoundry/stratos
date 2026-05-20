@@ -13,7 +13,6 @@ export interface TableCellSidePanelConfig<T> {
 @Component({
   selector: 'app-table-cell-side-panel',
   templateUrl: './table-cell-side-panel.component.html',
-  styleUrls: ['./table-cell-side-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })

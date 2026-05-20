@@ -26,7 +26,6 @@ export interface IAppTileData extends ITileData {
 @Component({
   selector: 'app-new-application-base-step',
   templateUrl: './new-application-base-step.component.html',
-  styleUrls: ['./new-application-base-step.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

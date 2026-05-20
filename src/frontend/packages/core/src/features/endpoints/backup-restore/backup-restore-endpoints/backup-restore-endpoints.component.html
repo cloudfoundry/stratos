@@ -4,7 +4,7 @@
 
 <app-steppers cancel="/endpoints">
   <app-step [hideNextButton]="true" [signalHandle]="signalHandle">
-    <div class="tiles">
+    <div class="flex-1">
       <p>Create a backup of endpoints and their connection details or restore from an existing backup.</p>
       <app-tile-selector [options]="tileSelectorConfig" (selection)="selectedTile = $event"></app-tile-selector>
     </div>
