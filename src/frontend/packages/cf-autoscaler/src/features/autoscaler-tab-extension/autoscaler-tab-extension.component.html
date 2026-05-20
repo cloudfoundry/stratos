@@ -1,32 +1,32 @@
 <app-page-sub-nav>
   @if (appAutoscalerPolicy$ | async; as policy) {
-    <button class="btn nav-button-with-text" name="edit" (click)="updatePolicyPage()">
-      <span class="nav-button-with-text__span">
-        <app-custom-icon class="nav-button-with-text__icon">edit</app-custom-icon> Edit Policy
+    <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="edit" (click)="updatePolicyPage()">
+      <span class="flex items-center">
+        <app-custom-icon class="mr-1.5">edit</app-custom-icon> Edit Policy
       </span>
     </button>
-    <button class="btn nav-button-with-text" name="delete" (click)="disableAutoscaler()">
-      <span class="nav-button-with-text__span">
-        <app-custom-icon class="nav-button-with-text__icon">delete</app-custom-icon> Delete Policy
+    <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="delete" (click)="disableAutoscaler()">
+      <span class="flex items-center">
+        <app-custom-icon class="mr-1.5">delete</app-custom-icon> Delete Policy
       </span>
     </button>
     @if (canManageCredentials()) {
-      <button class="btn nav-button-with-text" name="credential" (click)="manageCredentialPage()">
-        <span class="nav-button-with-text__span">
-          <app-custom-icon class="nav-button-with-text__icon">vpn_key</app-custom-icon> Manage Credentials
+      <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="credential" (click)="manageCredentialPage()">
+        <span class="flex items-center">
+          <app-custom-icon class="mr-1.5">vpn_key</app-custom-icon> Manage Credentials
         </span>
       </button>
     }
   } @else {
-    <button class="btn nav-button-with-text" name="add" (click)="updatePolicyPage(true)">
-      <span class="nav-button-with-text__span">
-        <app-custom-icon class="nav-button-with-text__icon">add</app-custom-icon> Create Policy
+    <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="add" (click)="updatePolicyPage(true)">
+      <span class="flex items-center">
+        <app-custom-icon class="mr-1.5">add</app-custom-icon> Create Policy
       </span>
     </button>
   }
 </app-page-sub-nav>
-<div class="autoscaler-tab">
-  <app-tile-grid class="app-autoscaler-tile-grid-100">
+<div class="flex relative w-full">
+  <app-tile-grid class="w-full">
     @if (appAutoscalerPolicy$ | async; as policy) {
       <app-tile-group>
         @if (policy.enabled) {
@@ -35,7 +35,7 @@
           </app-tile>
         }
         @if (policy.enabled) {
-          <app-tile class="autoscaler-tab__latest-metrics">
+          <app-tile class="flex-[2] min-h-[200px]">
             @if (policy.scaling_rules.length === 0) {
               <app-card-app-usage></app-card-app-usage>
             }
@@ -45,10 +45,10 @@
                   <app-card-title>Latest Metrics</app-card-title>
                 </app-card-header>
                 <app-card-content>
-                  <div class="app-metadata">
+                  <div class="flex flex-row">
                     @for (metric of appAutoscalerAppMetricNames$ | async; track metric) {
-                      <div class="app-metadata__two-cols">
-                        <app-metadata-item label={{metric.name}}>
+                      <div class="pr-10">
+                        <app-metadata-item class="my-0" label={{metric.name}}>
                           @if (appAutoscalerAppMetrics[metric.name] | async; as metricData) {
                             <canvas baseChart [type]="'doughnut'"
                               [data]="getGaugeData(metricData)"
@@ -61,7 +61,7 @@
                     }
                   </div>
                 </app-card-content>
-                <app-card-actions class="autoscaler-tab__actions">
+                <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
                   <app-polling-indicator [manualPoll]="true" (poll)="loadLatestMetricsUponPolicy()">
                   </app-polling-indicator>
                   <button (click)="metricChartPage()" class="btn btn-icon" aria-label="Open metric chart">
@@ -84,7 +84,7 @@
                   <app-card-title>Scaling Rules </app-card-title>
                 </app-card-header>
                 <app-card-content>
-                  <div class="app-metadata app-metadata-table">
+                  <div class="block pb-2">
                     <div class="overflow-x-auto">
                       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
@@ -120,7 +120,7 @@
                       </table>
                     </div>
                     @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length === 0) {
-                      <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
+                      <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
                         >No scaling rules.
                       </div>
                     }
@@ -141,7 +141,7 @@
                   </app-card-title>
                 </app-card-header>
                 <app-card-content>
-                  <div class="app-metadata app-metadata-table autoscaler-table-policy-specific">
+                  <div class="block pb-2 autoscaler-table-policy-specific">
                     <div class="overflow-x-auto">
                       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
@@ -188,13 +188,13 @@
                       </table>
                     </div>
                     @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length === 0) {
-                      <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
+                      <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                       No specific date schedule.</div>
                     }
                   </div>
                   <br />
-                  <div class="app-metadata app-metadata-table autoscaler-table-policy-recurring">
+                  <div class="block pb-2 autoscaler-table-policy-recurring">
                     <div class="overflow-x-auto">
                       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
@@ -253,7 +253,7 @@
                       </table>
                     </div>
                     @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length === 0) {
-                      <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
+                      <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                       No recurring schedule.</div>
                     }
@@ -266,20 +266,20 @@
       </div>
     }
     @if (showAutoscalerHistory$ | async) {
-      <app-tile-group class="autoscaler-tile-events">
+      <app-tile-group class="flex-col">
         @if ((appAutoscalerPolicy$ | async) === false) {
-          <span class="autoscaler-tile-events__no-policy">
+          <span class="flex items-center mb-3 p-3.5">
             {{noPolicyMessageFirstLine}}. {{noPolicyMessageSecondLine.text}}
           </span>
         }
         @if (appAutoscalerScalingHistory$ | async; as scalingHistory) {
           <app-tile>
             <app-card>
-              <app-card-header class="autoscaler-tile-events__header">
+              <app-card-header class="flex flex-1 h-10 justify-between pt-0">
                 <app-card-title>Latest Events </app-card-title>
               </app-card-header>
               <app-card-content>
-                <div class="app-metadata app-metadata-table">
+                <div class="block pb-2">
                   <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead class="bg-gray-50 dark:bg-gray-800">
@@ -320,13 +320,13 @@
                     </table>
                   </div>
                   @if (scalingHistory.length === 0) {
-                    <div class="autoscaler-tab-table-no-record text-center py-8 text-gray-500 dark:text-gray-400"
+                    <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
                       >
                     No events.</div>
                   }
                 </div>
               </app-card-content>
-              <app-card-actions class="autoscaler-tab__actions">
+              <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
                 <app-polling-indicator (poll)="fetchScalingHistory()"
                   [manualPoll]="(scalingHistoryLoading$ | async) === false"
                   [isPolling]="(scalingHistoryLoading$ | async)">

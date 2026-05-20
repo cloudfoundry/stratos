@@ -112,7 +112,6 @@ interface AutoscalerTabPaginationParams {
 @Component({
   selector: 'app-autoscaler-tab-extension',
   templateUrl: './autoscaler-tab-extension.component.html',
-  styleUrls: ['./autoscaler-tab-extension.component.scss'],
   providers: [
     ApplicationMonitorService
   ],

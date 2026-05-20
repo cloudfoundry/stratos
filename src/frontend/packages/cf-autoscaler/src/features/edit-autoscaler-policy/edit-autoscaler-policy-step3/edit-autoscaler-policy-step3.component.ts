@@ -39,7 +39,6 @@ interface EditRecurringScheduleForm {
 @Component({
   selector: 'app-edit-autoscaler-policy-step3',
   templateUrl: './edit-autoscaler-policy-step3.component.html',
-  styleUrls: ['./edit-autoscaler-policy-step3.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }

@@ -40,7 +40,6 @@ interface EditSpecificDateForm {
 @Component({
   selector: 'app-edit-autoscaler-policy-step4',
   templateUrl: './edit-autoscaler-policy-step4.component.html',
-  styleUrls: ['./edit-autoscaler-policy-step4.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
