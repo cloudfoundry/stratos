@@ -15,7 +15,14 @@ import { test, expect } from '../../fixtures/test-base';
  * across any modal open/close cycle**, regardless of how the modal is closed.
  */
 test.describe('Endpoints — Register modal close paths', () => {
-  const ADD_BUTTON = '#stratos-add-endpoint';
+  // The Register Endpoint button moved from the page-header
+  // (id="stratos-add-endpoint") into the list-sub-nav row above the
+  // endpoints list. The sub-nav button identifies itself with
+  // data-test="list-sub-nav-add" — there's exactly one of these on
+  // /endpoints so this scoping is sufficient. If a second list with a
+  // sub-nav add ever lands on the page, narrow with
+  // `app-endpoints-signal-list [data-test="list-sub-nav-add"]`.
+  const ADD_BUTTON = '[data-test="list-sub-nav-add"]';
   // The <app-endpoint-register-modal> host element collapses to 0x0 (the modal
   // content is fixed-positioned, taken out of flow). Use toHaveCount to check
   // presence instead of toBeVisible on the host.

@@ -148,7 +148,7 @@
   }
 
   <!-- Body: loading / empty state / table -->
-  <div #scrollBody class="relative flex-1 overflow-auto">
+  <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto">
     @if (config.isAnyLoading() && config.totalFilteredResults() === 0) {
       <div data-test="loading" class="flex items-center justify-center p-8 h-full">
         <div class="flex items-center space-x-3 text-content-muted">
