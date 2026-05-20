@@ -14,7 +14,6 @@ export interface CFAppCLIInfoContext {
 @Component({
   selector: 'app-cli-info',
   templateUrl: './cli-info.component.html',
-  styleUrls: ['./cli-info.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

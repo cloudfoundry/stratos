@@ -7,7 +7,6 @@ import { StServiceOffering } from '../../../services/endpoint-data/stratos-types
 @Component({
   selector: 'app-service-icon',
   templateUrl: './service-icon.component.html',
-  styleUrls: ['./service-icon.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

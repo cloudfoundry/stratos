@@ -22,7 +22,6 @@ import {
 @Component({
   selector: 'app-table-cell-service',
   templateUrl: './table-cell-service.component.html',
-  styleUrls: ['./table-cell-service.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

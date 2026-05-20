@@ -1,7 +1,7 @@
 <app-loading-page [isLoading]="isLoading$" text="Retrieving Git Details">
   <div>
     @if (hasRepo$ | async; as hasRepo) {
-      <app-tile-grid class="gitscm-tab">
+      <app-tile-grid>
         <app-tile-group class="tile-group-3-cols">
           @if (data.stratosProject(); as stratosProject) {
             <app-tile>
@@ -10,7 +10,7 @@
                   <h3 class="text-lg font-semibold">Deployment Information</h3>
                 </div>
                 <div class="card-body">
-                  <div class="gitscm-tab__deployment">
+                  <div>
                     <app-metadata-item label="Repository">
                       <a href="{{(gitSCMRepo$ | async)?.html_url}}"
                       target="_blank">{{stratosProject.deploySource.project }}</a>
@@ -21,7 +21,7 @@
                         {{ stratosProject.deploySource.branch}}
                       </a>
                     </app-metadata-item>
-                    <div class="gitscm-tab__deployment__commit">
+                    <div>
                       <div>
                         <app-metadata-item label="Commit">
                           <a href="{{(commit$ | async)?.html_url}}"
@@ -29,11 +29,11 @@
                         </app-metadata-item>
                       </div>
                       @if ((isHead$ | async) === false) {
-                        <div class="gitscm-tab__deployment__commit-warning">
+                        <div class="flex flex-row">
                           <div>
                             <span class="material-icons text-yellow-500">warning</span>
                           </div>
-                          <div class="gitscm-tab__deployment__commit-warning__msg">The
+                          <div class="pl-6">The
                             {{ stratosProject.deploySource.branch }}
                           branch has been updated since this app was deployed. Redeploy to update</div>
                         </div>
@@ -51,17 +51,17 @@
               <div class="card">
                 <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Repository Details</h3>
-                  <div class="gitscm-tab__avatar">
+                  <div>
                     <img src={{gitSCMRepo.owner.avatar_url}} alt="Repository owner avatar" class="h-12 w-12 rounded-full">
                   </div>
                 </div>
                 <div class="card-body">
                   <div>
                     <app-metadata-item label="Full Name">
-                      <div class="gitscm-tab__repo__name">
-                        <a href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
+                      <div class="flex items-center break-all">
+                        <a class="flex-1" href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
                         @if (gitSCMRepo.private) {
-                          <span class="material-icons gitscm-tab__repo__name--icon"
+                          <span class="material-icons text-[18px] h-[18px] leading-[18px] ml-[5px] mr-0 w-[18px]"
                             title="Private Repo">
                           lock</span>
                         }
@@ -89,7 +89,7 @@
               <div class="card">
                 <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Commit Details</h3>
-                  <div class="gitscm-tab__avatar">
+                  <div>
                     <img src={{commitInfo.author.avatar_url}} alt="Commit author avatar" class="h-12 w-12 rounded-full">
                   </div>
                 </div>

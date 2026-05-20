@@ -38,7 +38,6 @@ import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pip
 @Component({
   selector: 'app-gitscm-tab',
   templateUrl: './gitscm-tab.component.html',
-  styleUrls: ['./gitscm-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
