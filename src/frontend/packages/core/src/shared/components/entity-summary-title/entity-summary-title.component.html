@@ -1,30 +1,30 @@
-<div class="entity-summary">
-  <div class="entity-summary__header-section">
+<div class="my-[10px]">
+  <div class="flex m-[10px]">
     <!-- <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image" src="{{ imagePath }}"> -->
     @if (image) {
-      <img class="entity-summary__img" title="{{ title }}'s image" [src]="image"
+      <img class="grow-0 shrink-0 basis-16 max-h-16 self-center h-16 object-contain w-16" title="{{ title }}'s image" [src]="image"
         (error)="failedImageLoad()" alt="{{ title }}">
     } @else {
-      <app-custom-icon class="entity-summary__logo" fontSet="{{fallBackIconFont}}">{{fallBackIcon}}</app-custom-icon>
+      <app-custom-icon class="grow-0 shrink-0 basis-16 max-h-16 text-[54px]" fontSet="{{fallBackIconFont}}">{{fallBackIcon}}</app-custom-icon>
     }
 
-    <div class="entity-summary__header-inner">
-      <div class="entity-summary__header-wrapper">
-        <h1 class="entity-summary__header">{{ title }} </h1>
+    <div class="flex-1 ml-[10px]">
+      <div class="flex items-baseline">
+        <h1 class="m-0">{{ title }} </h1>
         @if (info) {
-          <app-custom-icon class="entity-summary__header-info" matTooltip="{{ info }}">
+          <app-custom-icon class="text-xl ml-[10px] opacity-40" matTooltip="{{ info }}">
           info</app-custom-icon>
         }
       </div>
       @if (subTitle) {
-        <div class="entity-summary__sub-header"> {{ subTitle }}</div>
+        <div class="text-base -mt-[3px] opacity-60"> {{ subTitle }}</div>
       }
       @if (subText) {
-        <div class="entity-summary__sub-text"> {{ subText }}</div>
+        <div class="text-base opacity-60 pt-[10px]"> {{ subText }}</div>
       }
     </div>
   </div>
-  <div class="entity-summary__content">
+  <div class="mt-0 -mx-[20px] -mb-[20px] pt-0 px-[20px] pb-[20px]">
     <ng-content></ng-content>
   </div>
 </div>
