@@ -186,6 +186,10 @@ export interface SignalListDropdown {
   options: Signal<SignalListDropdownOption[]>;
   selected: WritableSignal<string | null>;
   disabled?: Signal<boolean>;
+  // Fires on the first user interaction with the dropdown (focus / mousedown).
+  // Lets the host service defer expensive option-population work until the user
+  // actually opens the menu — paint-fast pages, populate-on-demand dropdowns.
+  onOpen?: () => void;
 }
 
 export type SignalListViewMode = 'table' | 'card';
