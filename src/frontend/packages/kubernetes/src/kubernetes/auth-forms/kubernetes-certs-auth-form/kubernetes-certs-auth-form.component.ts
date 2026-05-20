@@ -14,7 +14,6 @@ interface CertsAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-certs-auth-form',
   templateUrl: './kubernetes-certs-auth-form.component.html',
-  styleUrls: ['./kubernetes-certs-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

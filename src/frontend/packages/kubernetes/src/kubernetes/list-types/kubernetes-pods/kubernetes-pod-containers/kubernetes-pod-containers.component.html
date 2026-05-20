@@ -2,7 +2,7 @@
   <div class="flex flex-col pl-[54px]">
     @for (container of containers; track container; let last = $last) {
       <div class="flex flex-row h-[100px]">
-        <div class="pod-container-icon">
+        <div class="flex items-center h-15 w-[50px]">
           @if (icon[container.isInit]; as iconDetail) {
             <span [class]="iconDetail.font"
               [ngClass]="{'pl-1': iconDetail.icon === 'container'}" [matTooltip]="iconDetail.tooltip">

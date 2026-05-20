@@ -63,7 +63,6 @@ interface KubernetesResourceViewerResource {
 @Component({
 selector: 'app-kubernetes-resource-viewer',
   templateUrl: './kubernetes-resource-viewer.component.html',
-  styleUrls: ['./kubernetes-resource-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

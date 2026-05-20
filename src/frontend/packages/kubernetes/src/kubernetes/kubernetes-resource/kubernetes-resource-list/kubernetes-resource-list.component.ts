@@ -77,7 +77,6 @@ const namespaceColumnId = 'namespace';
 @Component({
   selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
-  styleUrls: ['./kubernetes-resource-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

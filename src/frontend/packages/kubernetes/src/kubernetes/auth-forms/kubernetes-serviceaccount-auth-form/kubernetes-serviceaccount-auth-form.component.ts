@@ -11,7 +11,6 @@ interface ServiceAccountAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-serviceaccount-auth-form',
   templateUrl: './kubernetes-serviceaccount-auth-form.component.html',
-  styleUrls: ['./kubernetes-serviceaccount-auth-form.component.scss'],
   standalone: true,
   imports: [ReactiveFormsModule]
 })

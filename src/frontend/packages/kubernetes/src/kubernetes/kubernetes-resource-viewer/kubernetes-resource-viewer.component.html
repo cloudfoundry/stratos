@@ -2,7 +2,7 @@
 
   @if (resource$ | async; as resource) {
     <div>
-      <div class="resource-preview__side-by-side">
+      <div class="flex space-x-10">
         <app-metadata-item label="API Version">{{ resource.apiVersion }}</app-metadata-item>
         <app-metadata-item label="Kind">{{ resource.kind | titlecase }}</app-metadata-item>
         <div class="flex items-center">
@@ -11,7 +11,7 @@
           }
         </div>
       </div>
-      <div class="resource-preview__side-by-side">
+      <div class="flex space-x-10">
         <app-metadata-item label="Created">{{ resource.creationTimestamp | date:'medium' }}</app-metadata-item>
         <app-metadata-item label="Age">{{ resource.age }}</app-metadata-item>
       </div>
@@ -48,7 +48,7 @@
 </app-sidepanel-preview>
 
 <ng-template #header>
-  <div class="resource-preview__header">
+  <div class="flex justify-end">
     <button class="btn-icon" name="delete" (click)="deleteWarn()" title="Delete">
       <span class="material-icons">delete</span>
     </button>
