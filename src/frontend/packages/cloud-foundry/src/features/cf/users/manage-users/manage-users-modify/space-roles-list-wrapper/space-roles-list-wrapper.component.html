@@ -1,1 +1,34 @@
-<app-list></app-list>
+@if (initialised()) {
+  <app-signal-list [config]="listConfig()">
+    <ng-template appSignalListCell="manager" let-space>
+      <app-cf-role-checkbox
+        [cfGuid]="space.cnsiGuid"
+        [orgGuid]="space.orgGuid"
+        [orgName]="orgName()"
+        [spaceName]="space.name"
+        [spaceGuid]="space.guid"
+        [role]="MANAGER">
+      </app-cf-role-checkbox>
+    </ng-template>
+    <ng-template appSignalListCell="auditor" let-space>
+      <app-cf-role-checkbox
+        [cfGuid]="space.cnsiGuid"
+        [orgGuid]="space.orgGuid"
+        [orgName]="orgName()"
+        [spaceName]="space.name"
+        [spaceGuid]="space.guid"
+        [role]="AUDITOR">
+      </app-cf-role-checkbox>
+    </ng-template>
+    <ng-template appSignalListCell="developer" let-space>
+      <app-cf-role-checkbox
+        [cfGuid]="space.cnsiGuid"
+        [orgGuid]="space.orgGuid"
+        [orgName]="orgName()"
+        [spaceName]="space.name"
+        [spaceGuid]="space.guid"
+        [role]="DEVELOPER">
+      </app-cf-role-checkbox>
+    </ng-template>
+  </app-signal-list>
+}
