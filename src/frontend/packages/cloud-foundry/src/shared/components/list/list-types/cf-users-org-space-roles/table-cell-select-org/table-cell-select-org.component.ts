@@ -20,7 +20,6 @@ import { CfUsersRolesDataService } from '../../../../../../services/domain-data/
 @Component({
   selector: 'app-table-cell-select-org',
   templateUrl: './table-cell-select-org.component.html',
-  styleUrls: ['./table-cell-select-org.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
