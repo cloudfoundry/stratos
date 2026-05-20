@@ -22,7 +22,6 @@ interface ICreateServiceTilesData extends ITileData {
 @Component({
   selector: 'app-add-service-instance-base-step',
   templateUrl: './add-service-instance-base-step.component.html',
-  styleUrls: ['./add-service-instance-base-step.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
