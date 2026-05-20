@@ -1164,8 +1164,7 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
           name: app.entity.domain_url,
         }),
         // V3 routes arrive flat (no metadata wrapper); fall back to entity.guid
-        // when the V2 path is absent. Same shape-collision band-aid we apply
-        // in cf-routes-data-source-base.ts.
+        // when the V2 path is absent.
         getGuid: (entity: any) => entity?.metadata?.guid ?? entity?.guid
       }
     }

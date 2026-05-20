@@ -21,14 +21,13 @@ import {
   SetClientFilter
 } from '@stratosui/store';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
-import { CFFeatureFlagTypes, IApp, ISpace } from '../../cf-api.types';
+import { CFFeatureFlagTypes, IApp, IRoute, ISpace } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
 import { applicationEntityType } from '../../cf-entity-types';
 import { CFEntityConfig } from '../../cf-types';
-import { ListCfRoute } from '../../shared/components/list/list-types/cf-routes/cf-routes-data-source-base';
 import { ICfRolesState } from '../../store/types/cf-current-user-roles.types';
 import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import {
@@ -361,7 +360,7 @@ export function fetchTotalResults(
   );
 }
 
-type CfOrgSpaceFilterTypes = IApp | ListCfRoute | IServiceInstance;
+type CfOrgSpaceFilterTypes = IApp | IRoute | IServiceInstance;
 export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filtering is done remotely when maxedResults are hit (see `setMultiFilter`)
   if (!!paginationState.maxedState.isMaxedMode && !paginationState.maxedState.ignoreMaxed) {
