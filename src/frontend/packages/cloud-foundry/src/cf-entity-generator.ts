@@ -137,7 +137,6 @@ import {
   QuotaDefinitionActionBuilder,
   quotaDefinitionActionBuilder,
 } from './entity-action-builders/quota-definition.action-builders';
-import { RoutesActionBuilders, routesActionBuilders } from './entity-action-builders/routes.action-builder';
 import { SecurityGroupBuilders, securityGroupBuilders } from './entity-action-builders/security-groups.action-builder';
 import {
   ServiceBindingActionBuilders,
@@ -172,12 +171,10 @@ import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-
 import { populatePaginationFromParent } from './entity-relations/entity-relations';
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { updateApplicationRoutesReducer } from './store/reducers/application-route.reducer';
 import { cfUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
-import { routeReducer, updateAppSummaryRoutesReducer } from './store/reducers/routes.reducer';
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
 import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
@@ -556,9 +553,6 @@ function generateCFAppSummaryEntity(endpointDefinition: StratosEndpointExtension
     labelPlural: 'App Summaries',
   };
   cfEntityCatalog.appSummary = new StratosCatalogEntity<IFavoriteMetadata, IAppSummary, AppSummaryActionBuilders>(definition, {
-    dataReducers: [
-      updateAppSummaryRoutesReducer,
-    ],
     actionBuilders: appSummaryActionBuilders,
     entityBuilder: {
       getMetadata: ent => ({
@@ -1149,16 +1143,10 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
   };
   cfEntityCatalog.route = new StratosCatalogEntity<
     IFavoriteMetadata,
-    APIResource<IRoute>,
-    RoutesActionBuilders,
-    RoutesActionBuilders
+    APIResource<IRoute>
   >(
     definition,
     {
-      actionBuilders: routesActionBuilders,
-      dataReducers: [
-        routeReducer,
-      ],
       entityBuilder: {
         getMetadata: app => ({
           name: app.entity.domain_url,
@@ -1324,9 +1312,6 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
   >(
     applicationDefinition,
     {
-      dataReducers: [
-        updateApplicationRoutesReducer(),
-      ],
       entityBuilder: {
         getMetadata: app => ({
           name: app.entity.name,

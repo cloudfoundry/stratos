@@ -97,7 +97,6 @@ export { UserRoleLabels } from './store/types/users-roles.types';
 export { RemoveCfUserRole } from './actions/users.actions';
 
 // CF Route Actions
-export { GetAppRoutes } from './actions/application-service-routes.actions';
 
 // CF Selectors
 export { selectCfEntity } from './store/selectors/api.selectors';
