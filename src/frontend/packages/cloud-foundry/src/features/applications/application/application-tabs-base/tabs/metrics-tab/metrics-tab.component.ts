@@ -15,7 +15,6 @@ import { ApplicationService } from '../../../../application.service';
 @Component({
   selector: 'app-metrics-tab',
   templateUrl: './metrics-tab.component.html',
-  styleUrls: ['./metrics-tab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

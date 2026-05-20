@@ -1,5 +1,5 @@
 @if (selectedState || stateKey === allStateKeys.BUSY) {
-  <div class="stateful-icon">
+  <div class="flex items-center justify-center leading-6 h-6 w-6">
     @if (stateKey !== allStateKeys.BUSY) {
       <app-custom-icon [inline]="inline"
         [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"

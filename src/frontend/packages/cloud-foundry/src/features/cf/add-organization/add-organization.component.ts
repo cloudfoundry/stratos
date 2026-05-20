@@ -10,7 +10,6 @@ import { CreateOrganizationStepComponent } from './create-organization-step/crea
 @Component({
   selector: 'app-add-organization',
   templateUrl: './add-organization.component.html',
-  styleUrls: ['./add-organization.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

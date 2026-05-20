@@ -13,7 +13,6 @@ import { EditQuotaStepComponent } from './edit-quota-step/edit-quota-step.compon
 @Component({
   selector: 'app-edit-quota',
   templateUrl: './edit-quota.component.html',
-  styleUrls: ['./edit-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

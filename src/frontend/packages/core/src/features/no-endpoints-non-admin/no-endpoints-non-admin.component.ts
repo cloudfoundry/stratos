@@ -8,7 +8,6 @@ import { NoContentMessageComponent } from '../../shared/components/no-content-me
 @Component({
   selector: 'app-no-endpoints-non-admin',
   templateUrl: './no-endpoints-non-admin.component.html',
-  styleUrls: ['./no-endpoints-non-admin.component.scss'],
   standalone: true,
   imports: [
     PageHeaderComponent,

@@ -1,7 +1,7 @@
 @if (value$ | async; as value) {
   <div>
     @if (value < HIDE_VALUE) {
-      <app-progress-bar class="routing-indicator" mode="determinate" [value]="value"></app-progress-bar>
+      <app-progress-bar class="h-[3px]" mode="determinate" [value]="value"></app-progress-bar>
     }
   </div>
 }

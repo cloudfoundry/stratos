@@ -23,7 +23,6 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
 @Component({
   selector: 'app-card-status',
   templateUrl: './card-status.component.html',
-  styleUrls: ['./card-status.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -11,7 +11,6 @@ import { EditSpaceQuotaStepComponent } from './edit-space-quota-step/edit-space-
 @Component({
   selector: 'app-edit-space-quota',
   templateUrl: './edit-space-quota.component.html',
-  styleUrls: ['./edit-space-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

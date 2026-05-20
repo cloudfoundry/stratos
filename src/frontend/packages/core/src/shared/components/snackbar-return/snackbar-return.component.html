@@ -1,7 +1,7 @@
-<div class="app-snackbar-return mat-simple-snackbar">
+<div class="flex justify-between items-center h-full leading-5 opacity-100 mat-simple-snackbar">
   <span>{{ message }}</span>
   @if (returnUrl) {
-    <div class="app-snackbar-return-action mat-simple-snackbar-action">
+    <div class="shrink-0 -mt-2 -mr-2 -mb-2 ml-2 mat-simple-snackbar-action">
       <button class="btn btn-ghost" type="button" (click)="return()">{{ returnLabel }}</button>
       <button class="btn btn-ghost" type="button" (click)="dismiss()">Dismiss</button>
     </div>

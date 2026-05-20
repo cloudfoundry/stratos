@@ -7,7 +7,6 @@ import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 @Component({
   selector: 'app-routing-indicator',
   templateUrl: './routing-indicator.component.html',
-  styleUrls: ['./routing-indicator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

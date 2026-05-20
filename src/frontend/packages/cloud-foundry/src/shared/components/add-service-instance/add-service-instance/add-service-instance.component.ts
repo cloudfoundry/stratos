@@ -59,7 +59,6 @@ import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-de
 @Component({
   selector: 'app-add-service-instance',
   templateUrl: './add-service-instance.component.html',
-  styleUrls: ['./add-service-instance.component.scss'],
   providers: [
     CreateServiceInstanceHelperServiceFactory,
     TitleCasePipe,

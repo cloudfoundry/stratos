@@ -2,7 +2,7 @@
   {{ title$ | async }}
 </app-page-header>
 @if (initialisedService(); as inited) {
-  <div class="add-service-instance">
+  <div class="h-full">
     <app-steppers [cancel]="modeService.cancelUrl">
       @if (serviceType === serviceTypes.SERVICE) {
         @if (modeService.viewDetail.showSelectCf && !isSpaceScoped()) {

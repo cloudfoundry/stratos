@@ -19,7 +19,6 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
 @Component({
   selector: 'app-stateful-icon',
   templateUrl: './stateful-icon.component.html',
-  styleUrls: ['./stateful-icon.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

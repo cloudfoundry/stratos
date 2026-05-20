@@ -7,7 +7,6 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 @Component({
   selector: 'app-application-state-icon',
   templateUrl: './application-state-icon.component.html',
-  styleUrls: ['./application-state-icon.component.scss'],
   standalone: true,
   imports: [
     NgClass,

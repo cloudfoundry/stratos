@@ -11,7 +11,6 @@ import { CreateSpaceStepComponent } from './create-space-step/create-space-step.
 @Component({
   selector: 'app-add-space',
   templateUrl: './add-space.component.html',
-  styleUrls: ['./add-space.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

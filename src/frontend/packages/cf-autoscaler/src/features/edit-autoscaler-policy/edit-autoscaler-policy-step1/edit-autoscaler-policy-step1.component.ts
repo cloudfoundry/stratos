@@ -22,7 +22,6 @@ interface EditLimitForm {
 @Component({
   selector: 'app-edit-autoscaler-policy-step1',
   templateUrl: './edit-autoscaler-policy-step1.component.html',
-  styleUrls: ['./edit-autoscaler-policy-step1.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
