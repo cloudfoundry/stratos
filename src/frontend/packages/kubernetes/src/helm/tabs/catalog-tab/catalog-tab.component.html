@@ -1,7 +1,7 @@
 <div class="flex flex-row max-h-full">
   @if (!hide) {
     <div class="flex flex-col max-h-full overflow-auto"
-      [ngClass]="{'charts__repos--collapse': collapsed, 'charts__repos--expand': !collapsed}">
+      [ngClass]="{'mr-0 min-w-0 w-0': collapsed, 'mr-2.5 min-w-[200px] w-auto': !collapsed}">
       <h3 class="text-base my-1.5">Filter By Repository</h3>
       <app-form-field>
         <input appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"

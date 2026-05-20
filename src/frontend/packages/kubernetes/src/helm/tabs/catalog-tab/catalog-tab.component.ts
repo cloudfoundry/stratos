@@ -22,7 +22,6 @@ import { ChartItemComponent } from '../../monocular/chart-item/chart-item.compon
 @Component({
   selector: 'app-catalog-tab',
   templateUrl: './catalog-tab.component.html',
-  styleUrls: ['./catalog-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

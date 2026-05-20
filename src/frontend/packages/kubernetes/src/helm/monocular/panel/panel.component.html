@@ -1,6 +1,6 @@
-<div [ngClass]="{ 'panel': true, 'panel--background': background, 'panel--container': container, 'panel--border': border }">
+<div class="p-8" [ngClass]="{ 'bg-gray-50': background, 'w-4/5 mx-auto': container, 'rounded-lg border border-gray-300': border }">
   @if (title.length > 0) {
-    <h1 class="panel__title">{{ title }}</h1>
+    <h1 class="mt-0">{{ title }}</h1>
   }
   <ng-content></ng-content>
 </div>

@@ -1,12 +1,12 @@
 <app-page-sub-nav>
   @if (namespaces$) {
-    <div class="sub-nav-menu-button">
+    <div class="rounded ml-5 w-[200px]">
       <div class="relative inline-block">
-        <button class="btn btn-ghost sub-nav-menu-button__btn"
+        <button class="btn btn-ghost w-full leading-7 py-0 pr-2 pl-3"
           [class.opacity-50]="!isNamespacedView"
           (click)="menuOpen = !menuOpen">
           @if (selectedNamespace) {
-            <span class="stratos-icons sub-nav-menu-button__icon">namespace</span>
+            <span class="stratos-icons">namespace</span>
           }
           <span class="flex-1 overflow-hidden text-left truncate whitespace-nowrap">{{ selectedNamespace || 'All namespaces'}}</span>
           <span class="material-symbols-outlined m-0 ml-2.5">arrow_drop_down</span>
