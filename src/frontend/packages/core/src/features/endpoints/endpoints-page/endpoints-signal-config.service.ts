@@ -223,7 +223,7 @@ export class EndpointsSignalConfigService {
   //   ssoAllowed           — opt this endpoint into SSO redirect flows
   //   createSystemEndpoint — admin: register as system-wide vs per-user endpoint
   //   caCert               — optional PEM-encoded CA cert override
-  async register(opts: RegisterEndpointOptions): Promise<ActionState> {
+  async register(opts: RegisterEndpointOptions): Promise<ActionState & { guid?: string }> {
     const {
       endpointType,
       endpointSubType,

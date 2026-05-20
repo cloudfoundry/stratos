@@ -173,7 +173,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     });
 
     const data: ConnectEndpointConfig = {
-      guid: result.message,
+      guid: result.guid ?? '',
       name,
       type: type || '',
       subType: subType || '',
@@ -190,7 +190,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       setTimeout(() => {
         const entities = this.endpointsSignals.endpoints();
         const dupes = Object.values(entities).filter(e =>
-          e.api_endpoint?.Host === urlHost && e.guid !== result.message
+          e.api_endpoint?.Host === urlHost && e.guid !== result.guid
         );
         if (dupes.length > 0) {
           const names = dupes.map(e => e.name).join(', ');
