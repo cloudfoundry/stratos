@@ -1,11 +1,11 @@
 @if (row.name === dataSource.editRow?.name) {
-  <div class="cell-edit-variable">
+  <div class="w-full">
     <input class="input" name="envVarValue" [value]="dataSource.editRow?.value"
       (input)="dataSource.editRow.value = $event.target.value" />
   </div>
 }
 @if (row.name !== dataSource.editRow?.name) {
-  <span class="cell-value-variable" role="button" tabindex="0"
+  <span class="cursor-pointer" role="button" tabindex="0"
     (click)="showPopup()"
     (keydown.enter)="showPopup()"
     (keydown.space)="showPopup(); $event.preventDefault()">{{row.value}}</span>

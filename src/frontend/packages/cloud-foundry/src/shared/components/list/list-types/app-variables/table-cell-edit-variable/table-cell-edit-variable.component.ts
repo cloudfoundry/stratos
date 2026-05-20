@@ -7,7 +7,6 @@ import { ListAppEnvVar } from '../cf-app-variables.types';
 @Component({
   selector: 'app-table-cell-edit-variable',
   templateUrl: './table-cell-edit-variable.component.html',
-  styleUrls: ['./table-cell-edit-variable.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []
