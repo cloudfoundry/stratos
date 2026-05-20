@@ -38,7 +38,6 @@ interface EditTriggerForm {
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',
   templateUrl: './edit-autoscaler-policy-step2.component.html',
-  styleUrls: ['./edit-autoscaler-policy-step2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }

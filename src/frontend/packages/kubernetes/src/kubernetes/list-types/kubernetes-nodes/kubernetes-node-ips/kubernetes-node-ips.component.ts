@@ -8,7 +8,6 @@ import { KubernetesAddressExternal, KubernetesAddressInternal, KubernetesNode } 
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-ips',
   templateUrl: './kubernetes-node-ips.component.html',
-  styleUrls: ['./kubernetes-node-ips.component.scss'],
   standalone: true,
   imports: [
     CustomTooltipDirective,
