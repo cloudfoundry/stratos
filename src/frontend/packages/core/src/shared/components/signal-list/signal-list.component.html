@@ -10,6 +10,8 @@
           <select
             [attr.id]="'dropdown-' + dd.label"
             [disabled]="dd.disabled ? dd.disabled() : false"
+            (mousedown)="dd.onOpen?.()"
+            (focus)="dd.onOpen?.()"
             (change)="onDropdownChange(dd, $any($event.target).value)"
             class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text disabled:opacity-40 disabled:cursor-not-allowed">
             @for (opt of dd.options(); track opt.value ?? opt.label) {

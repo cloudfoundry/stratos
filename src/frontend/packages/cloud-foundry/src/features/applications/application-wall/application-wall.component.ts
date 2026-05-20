@@ -258,21 +258,31 @@ export class ApplicationWallComponent implements OnInit {
     // L5 sub-nav can read totalFilteredResults as a stable Signal.
     (this as { totalApplications: Signal<number> }).totalApplications =
       this.appsConfig.view.totalFilteredResults;
+    // First user interaction with ANY of the toolbar dropdowns triggers a
+    // one-shot org/space catalog fetch via ensureNamesLoaded(). This keeps
+    // the apps wall mount fast — eager fetch on init was saturating the
+    // network for many seconds and blocking `waitForLoadState('networkidle')`
+    // in e2e plus making the page feel laggy on re-entry. The service-side
+    // call is idempotent and dedupes burst opens to a single fanout.
+    const onDropdownOpen = () => { void this.appsConfig.ensureNamesLoaded(); };
     const dropdowns: SignalListDropdown[] = [
       {
         label: 'Cloud Foundry',
         options: this.appsConfig.cnsiOptions,
         selected: this.appsConfig.selectedCnsi,
+        onOpen: onDropdownOpen,
       },
       {
         label: 'Organization',
         options: this.appsConfig.orgOptions,
         selected: this.appsConfig.selectedOrg,
+        onOpen: onDropdownOpen,
       },
       {
         label: 'Space',
         options: this.appsConfig.spaceOptions,
         selected: this.appsConfig.selectedSpace,
+        onOpen: onDropdownOpen,
       },
     ];
     const stateColor = (app: StApp): SignalListPillColor => {
