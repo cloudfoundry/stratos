@@ -30,7 +30,6 @@ import { CardNumberMetricComponent } from '../../../../../../../../core/src/shar
 @Component({
   selector: 'app-cloud-foundry-cell-summary',
   templateUrl: './cloud-foundry-cell-summary.component.html',
-  styleUrls: ['./cloud-foundry-cell-summary.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

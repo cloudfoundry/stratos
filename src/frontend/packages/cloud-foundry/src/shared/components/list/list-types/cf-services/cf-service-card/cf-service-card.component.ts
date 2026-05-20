@@ -32,7 +32,6 @@ import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-
 @Component({
   selector: 'app-cf-service-card',
   templateUrl: './cf-service-card.component.html',
-  styleUrls: ['./cf-service-card.component.scss'],
   providers: [EntityServiceFactory],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,

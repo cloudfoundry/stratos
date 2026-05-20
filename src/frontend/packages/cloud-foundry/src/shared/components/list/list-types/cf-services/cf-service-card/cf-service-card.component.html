@@ -1,9 +1,9 @@
 @if (!!offering) {
-  <app-meta-card class="service-card" [clickAction]="!disableCardClick ? goToServiceInstances:null"
+  <app-meta-card [clickAction]="!disableCardClick ? goToServiceInstances:null"
     >
     <app-meta-card-title noMargin="true">
-      <div class="service-card__title">
-        <app-multiline-title class="service-card__title__link">{{ getDisplayName() }}</app-multiline-title>
+      <div class="flex flex-row justify-between w-full">
+        <app-multiline-title>{{ getDisplayName() }}</app-multiline-title>
         <app-service-icon [service]="offering"></app-service-icon>
       </div>
     </app-meta-card-title>

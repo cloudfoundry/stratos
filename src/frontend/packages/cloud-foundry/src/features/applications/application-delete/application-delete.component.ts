@@ -24,7 +24,6 @@ import { AppServiceBindingsPickerComponent } from './app-service-bindings-picker
 @Component({
   selector: 'app-application-delete',
   templateUrl: './application-delete.component.html',
-  styleUrls: ['./application-delete.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

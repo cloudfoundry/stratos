@@ -9,13 +9,13 @@
          on each step — the stepper subscribes to onHidden changes and
          re-filters its visible step list reactively. -->
     <app-step title="Routes" [hidden]="!routesLoaded() || appRoutes().length === 0" [signalHandle]="routesStepHandle">
-      <div class="app-delete__monitors">
+      <div class="flex flex-col w-full">
         <p>Please select any attached application routes you would like to delete.</p>
         <div class="mt-3 rounded border border-content-border p-4">
           <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
           <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Routes</h3>
           <app-routes-picker
-            class="app-delete__step-table"
+            class="w-full"
             [routes]="appRoutes()"
             (selectedChange)="setSelectedRoutes($event)">
           </app-routes-picker>
@@ -23,21 +23,21 @@
       </div>
     </app-step>
     <app-step title="Service Instances" [hidden]="!bindingsLoaded() || appBindings().length === 0" [signalHandle]="bindingsStepHandle">
-      <div class="app-delete__monitors">
+      <div class="flex flex-col w-full">
         <p>Please select any attached application service instances you would like to unbind.</p>
         <div class="mt-3 rounded border border-content-border p-4">
           <h2 class="text-xl font-semibold text-content-text m-0">{{ appName() || 'Application' }}</h2>
           <h3 class="text-sm font-medium text-content-muted mt-2 mb-1 uppercase tracking-wide">Service Instances</h3>
           <app-service-bindings-picker
-            class="app-delete__step-table"
+            class="w-full"
             [bindings]="appBindings()"
             (selectedChange)="setSelectedServiceBindings($event)">
           </app-service-bindings-picker>
         </div>
       </div>
     </app-step>
-    <app-step title="Confirm" class="app-delete__monitors" [signalHandle]="confirmStepHandle">
-      <div class="app-delete__monitors">
+    <app-step title="Confirm" class="flex flex-col w-full" [signalHandle]="confirmStepHandle">
+      <div class="flex flex-col w-full">
         <p>Please confirm that you would like to delete the following application@if ((selectedRoutes && selectedRoutes.length) || (selectedServiceBindings && selectedServiceBindings.length)) {
           <span
             >
