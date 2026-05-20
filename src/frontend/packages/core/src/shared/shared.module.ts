@@ -55,7 +55,6 @@ import { listTableComponents } from './components/list/list-table/table-componen
 import { TableComponent } from './components/list/list-table/table.component';
 import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
-import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
 import {
   TableCellEndpointNameComponent,
 } from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
@@ -423,7 +422,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
   providers: [
     ListConfig,
     EndpointListHelper,
-    EndpointsListConfigService,
     ConfirmationDialogService,
     InternalEventMonitorFactory,
     MetricsRangeSelectorService,
