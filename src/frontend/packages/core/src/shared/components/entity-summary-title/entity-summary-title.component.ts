@@ -11,7 +11,6 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
     CustomTooltipDirective
 ],
   templateUrl: './entity-summary-title.component.html',
-  styleUrls: ['./entity-summary-title.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntitySummaryTitleComponent {
