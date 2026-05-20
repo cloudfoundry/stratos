@@ -3,7 +3,6 @@ import { NgModule, inject } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
 
 import { APIEffect } from './effects/api.effects';
-import { ApiKeyEffect } from './effects/apiKey.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { MetricsEffect } from './effects/metrics.effects';
@@ -44,7 +43,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
       RecursiveDeleteEffect,
       UserFavoritesEffect,
       PermissionsEffects,
-      ApiKeyEffect
     ])
   ]
 })

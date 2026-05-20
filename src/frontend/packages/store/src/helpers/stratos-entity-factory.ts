@@ -4,7 +4,6 @@ export const userFavouritesEntityType = 'userFavorites';
 export const endpointEntityType = 'endpoint';
 export const userProfileEntityType = 'userProfile';
 export const systemInfoEntityType = 'systemInfo';
-export const apiKeyEntityType = 'apiKey';
 
 export const metricEntityType = 'metrics';
 
@@ -31,9 +30,6 @@ entityCache[endpointEntityType] = EndpointSchema;
 
 const UserProfileInfoSchema = new StratosEntitySchema(userProfileEntityType, 'id');
 entityCache[userProfileEntityType] = UserProfileInfoSchema;
-
-const ApiKeySchema = new StratosEntitySchema(apiKeyEntityType, 'guid');
-entityCache[apiKeyEntityType] = ApiKeySchema;
 
 const MetricSchema = new StratosEntitySchema(metricEntityType, 'guid');
 entityCache[metricEntityType] = MetricSchema;

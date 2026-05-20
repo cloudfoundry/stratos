@@ -1,11 +1,9 @@
-import { ApiKey } from './apiKey.types';
 import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
 } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { IEntityMetadata } from './entity-catalog/entity-catalog.types';
 import {
-  ApiKeyActionBuilder,
   SystemInfoActionBuilder,
   UserFavoriteActionBuilder,
   UserProfileActionBuilder,
@@ -34,12 +32,6 @@ export class StratosEntityCatalog {
   >;
 
   metricsEndpoint!: StratosCatalogEndpointEntity;
-
-  apiKey!: StratosCatalogEntity<
-    IEntityMetadata,
-    ApiKey,
-    ApiKeyActionBuilder
-  >;
 }
 
 export const stratosEntityCatalog = new StratosEntityCatalog();

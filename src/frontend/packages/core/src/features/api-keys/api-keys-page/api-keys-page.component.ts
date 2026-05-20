@@ -1,16 +1,24 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
+
+import {
+  CardContentComponent,
+  CardHeaderComponent,
+  CardWrapperComponent,
+  SignalListComponent,
+  SignalListConfig,
+} from '@stratosui/core';
+import { ApiKey } from '@stratosui/store';
+
+import { ApiKeysDataService } from '../api-keys-data.service';
+import {
+  ApiKeysSignalConfigService,
+} from '../../../shared/components/list/list-types/apiKeys/api-keys-signal-config.service';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
-import { stratosEntityCatalog } from '@stratosui/store';
-import { Observable, Subject } from 'rxjs';
-import { take, defaultIfEmpty, map, startWith } from 'rxjs/operators';
-
-import { ApiKeyListConfigService } from '../../../shared/components/list/list-types/apiKeys/apiKey-list-config.service';
-import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { ListComponent } from '../../../shared/components/list/list.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -19,61 +27,54 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
   selector: 'app-api-keys-page',
   templateUrl: './api-keys-page.component.html',
   styleUrls: ['./api-keys-page.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: ApiKeyListConfigService}], changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ApiKeysSignalConfigService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
     CustomIconComponent,
     CustomTooltipDirective,
     PageHeaderComponent,
-    ListComponent,
+    SignalListComponent,
     NoContentMessageComponent,
-    ProductNameComponent
-  ]
+    ProductNameComponent,
+    CardWrapperComponent,
+    CardHeaderComponent,
+    CardContentComponent,
+  ],
 })
 export class ApiKeysPageComponent {
   private dialog = inject(TailwindDialogService);
+  private dataService = inject(ApiKeysDataService);
+  private listConfigService = inject(ApiKeysSignalConfigService);
 
+  public keyDetails: WritableSignal<ApiKey | null> = signal(null);
 
-  public keyDetails = new Subject<string>();
-  public keyDetails$ = this.keyDetails.asObservable();
+  // null until the first fetch settles so the empty-state and the list
+  // both stay hidden during initial load. After fetch: true if there
+  // are keys, false otherwise — matches the legacy hasKeys$ tri-state.
+  public hasKeys: Signal<boolean | null> = computed(() => {
+    if (this.dataService.lastFetched() === null) return null;
+    return this.dataService.apiKeys().length > 0;
+  });
 
-  /* tslint:disable:ban-types  */
-  // This is intentionally typed, property can be null and there's different logic associated with it
-  public hasKeys$: Observable<boolean>;
-  /* tslint:enable */
+  public readonly listConfig: SignalListConfig<ApiKey>;
 
   constructor() {
-    this.hasKeys$ = stratosEntityCatalog.apiKey.store.getPaginationService().entities$.pipe(
-      map(entities => entities && !!entities.length),
-      startWith(null),
+    this.listConfig = this.listConfigService.buildConfig();
+    void this.dataService.load();
+  }
+
+  async addApiKey(): Promise<void> {
+    const newKey = await firstValueFrom(
+      this.dialog.open(AddApiKeyDialogComponent, { disableClose: true }).afterClosed(),
     );
+    if (newKey) {
+      this.keyDetails.set(newKey);
+    }
   }
 
-  addApiKey() {
-    this.showDialog().pipe(take(1), defaultIfEmpty(null)).subscribe(key => {
-      if (key) { this.keyDetails.next(key); }
-    });
+  clearKeyDetails(): void {
+    this.keyDetails.set(null);
   }
-
-  clearKeyDetails() {
-    this.keyDetails.next(null);
-  }
-
-  private showDialog(): Observable<string> {
-    return this.dialog.open(AddApiKeyDialogComponent, {
-      disableClose: true,
-    }).afterClosed().pipe(
-      map(newApiKey => {
-        if (newApiKey && newApiKey.guid) {
-          stratosEntityCatalog.apiKey.api.getMultiple();
-          return newApiKey;
-        }
-        return null;
-      })
-    );
-  }
-
 }

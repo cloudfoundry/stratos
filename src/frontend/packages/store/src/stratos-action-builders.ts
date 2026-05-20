@@ -1,4 +1,3 @@
-import { AddApiKey, DeleteApiKey, GetAllApiKeys } from './actions/apiKey.actions';
 import { GetSystemInfo } from './actions/system.actions';
 import {
   GetUserFavoritesAction,
@@ -66,19 +65,3 @@ export const userProfileActionBuilder: UserProfileActionBuilder = {
   updatePassword: (guid: string, passwordChanges: UserProfilePasswordUpdate) => new UpdateUserPasswordAction(guid, passwordChanges)
 };
 
-export interface ApiKeyActionBuilder extends OrchestratedActionBuilders {
-  create: (
-    comment: string
-  ) => AddApiKey;
-  delete: (
-    guid: string
-  ) => DeleteApiKey;
-  getMultiple: (
-
-  ) => GetAllApiKeys;
-}
-export const apiKeyActionBuilder: ApiKeyActionBuilder = {
-  create: (comment: string) => new AddApiKey(comment),
-  delete: (guid: string) => new DeleteApiKey(guid),
-  getMultiple: () => new GetAllApiKeys()
-};
