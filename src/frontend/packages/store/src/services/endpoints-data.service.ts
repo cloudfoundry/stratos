@@ -294,7 +294,8 @@ export class EndpointsDataService {
     }
 
     const stagingGuid = '<New Endpoint>' + opts.name;
-    return this.runMutation(stagingGuid, 'POST', ENDPOINTS_URL, body, e => {
+    let registeredGuid = '';
+    const result = await this.runMutation(stagingGuid, 'POST', ENDPOINTS_URL, body, e => {
       const message = 'There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. ' +
         httpErrorResponseToSafeString(e);
       if (e?.status === 403) {
@@ -302,10 +303,17 @@ export class EndpointsDataService {
       }
       return message;
     }, async endpoint => {
+      // The POST response body is the new CNSIRecord — capture its guid so the
+      // caller (create-endpoint stepper) can carry it into the connect step.
+      registeredGuid = endpoint?.guid || '';
       // Refresh full endpoint set so the new entry shows up keyed by real guid.
       await this.getAll(false).catch(() => {/* surfaced on _error */});
       return endpoint;
     });
+    if (!result.error && registeredGuid) {
+      result.message = registeredGuid;
+    }
+    return result;
   }
 
   async connect(guid: string, opts: EndpointConnectOptions): Promise<ActionState> {
