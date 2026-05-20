@@ -6,7 +6,6 @@ import { MAT_DIALOG_DATA, TailwindDialogRef, CodeBlockComponent } from '@stratos
 @Component({
   selector: 'app-env-var-view',
   templateUrl: './env-var-view.component.html',
-  styleUrls: ['./env-var-view.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

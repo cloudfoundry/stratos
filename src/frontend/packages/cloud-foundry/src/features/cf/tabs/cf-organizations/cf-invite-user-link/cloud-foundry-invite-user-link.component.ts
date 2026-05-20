@@ -17,7 +17,6 @@ interface UserInviteStepperLink {
 @Component({
   selector: 'app-cloud-foundry-invite-user-link',
   templateUrl: './cloud-foundry-invite-user-link.component.html',
-  styleUrls: ['./cloud-foundry-invite-user-link.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
