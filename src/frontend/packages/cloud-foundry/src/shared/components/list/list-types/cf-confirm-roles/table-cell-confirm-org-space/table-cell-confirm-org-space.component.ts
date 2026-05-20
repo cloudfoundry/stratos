@@ -7,7 +7,6 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 @Component({
   selector: 'app-table-cell-confirm-org-space',
   templateUrl: './table-cell-confirm-org-space.component.html',
-  styleUrls: ['./table-cell-confirm-org-space.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

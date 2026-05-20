@@ -8,7 +8,6 @@ import { KubernetesNode } from '../../../store/kube.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-node-labels',
   templateUrl: './kubernetes-node-labels.component.html',
-  styleUrls: ['./kubernetes-node-labels.component.scss'],
   standalone: true,
   imports: [
     CustomTooltipDirective,

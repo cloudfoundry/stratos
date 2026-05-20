@@ -22,7 +22,6 @@ import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.comp
 @Component({
   selector: 'app-app-autoscaler-metric-chart-card',
   templateUrl: './app-autoscaler-metric-chart-card.component.html',
-  styleUrls: ['./app-autoscaler-metric-chart-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

@@ -9,7 +9,6 @@ import { KubernetesNode } from '../../../store/kube.types';
 @Component({
   selector: 'app-kubernetes-node-link',
   templateUrl: './kubernetes-node-link.component.html',
-  styleUrls: ['./kubernetes-node-link.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RouterLink, CustomTooltipDirective]
