@@ -265,6 +265,26 @@
                       [class.cursor-not-allowed]="isRadioDisabled(col, row)"
                       [class.opacity-40]="isRadioDisabled(col, row)" />
                   </div>
+                } @else if (col.kind === 'checkbox' && col.checkbox) {
+                  <div class="flex justify-between items-center gap-2 text-sm py-0.5">
+                    <span class="text-content-muted">{{ col.header }}</span>
+                    <input
+                      data-test="row-checkbox"
+                      type="checkbox"
+                      [checked]="isCheckboxSelected(col, row)"
+                      [disabled]="isCheckboxDisabled(col, row)"
+                      (click)="onToggleCheckbox(col, row, $event)"
+                      [class.cursor-pointer]="!isCheckboxDisabled(col, row)"
+                      [class.cursor-not-allowed]="isCheckboxDisabled(col, row)"
+                      [class.opacity-40]="isCheckboxDisabled(col, row)" />
+                  </div>
+                } @else if (col.kind === 'template' && cellTemplateFor(col); as tpl) {
+                  <div class="flex justify-between items-start gap-2 text-sm py-0.5">
+                    <span class="text-content-muted shrink-0">{{ col.header }}</span>
+                    <div class="min-w-0 text-right">
+                      <ng-container *ngTemplateOutlet="tpl; context: { $implicit: row, row: row }"></ng-container>
+                    </div>
+                  </div>
                 } @else if (col.kind === 'gauge' && col.gauge) {
                   <div class="flex items-center gap-2 text-sm py-0.5" data-test="row-gauge">
                     <span class="text-content-muted shrink-0">{{ col.header }}</span>
@@ -436,9 +456,9 @@
                   <!-- Suppressed: rendered in the leading controls cell -->
                 } @else {
                 <td class="px-3 py-2 text-sm text-content-text"
-                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'gauge'"
-                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge'"
-                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'gauge' ? null : col.render(row)">
+                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
+                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
+                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">
                   @if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
@@ -533,6 +553,18 @@
                       [class.cursor-pointer]="!isRadioDisabled(col, row)"
                       [class.cursor-not-allowed]="isRadioDisabled(col, row)"
                       [class.opacity-40]="isRadioDisabled(col, row)" />
+                  } @else if (col.kind === 'checkbox' && col.checkbox) {
+                    <input
+                      data-test="row-checkbox"
+                      type="checkbox"
+                      [checked]="isCheckboxSelected(col, row)"
+                      [disabled]="isCheckboxDisabled(col, row)"
+                      (click)="onToggleCheckbox(col, row, $event)"
+                      [class.cursor-pointer]="!isCheckboxDisabled(col, row)"
+                      [class.cursor-not-allowed]="isCheckboxDisabled(col, row)"
+                      [class.opacity-40]="isCheckboxDisabled(col, row)" />
+                  } @else if (col.kind === 'template' && cellTemplateFor(col); as tpl) {
+                    <ng-container *ngTemplateOutlet="tpl; context: { $implicit: row, row: row }"></ng-container>
                   } @else if (col.kind === 'gauge' && col.gauge) {
                     <app-usage-gauge
                       data-test="row-gauge"

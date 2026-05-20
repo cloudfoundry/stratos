@@ -4,6 +4,7 @@ import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { SignalListComponent } from './signal-list.component';
 import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption } from './signal-list.component';
+import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 
 // SignalListComponent now applies [routerLink] to the card / table row when a
 // link column is present, so the RouterLink directive needs a router injector.
@@ -501,6 +502,153 @@ describe('SignalListComponent', () => {
       expect(fixture.componentInstance.selected()).toBe('two');
       expect(radios[0].checked).toBe(false);
       expect(radios[1].checked).toBe(true);
+    });
+  });
+
+  describe('checkbox-select column (kind: checkbox)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`
+    })
+    class CheckboxHost {
+      items = signal([
+        { name: 'one' },
+        { name: 'two' },
+        { name: 'three-disabled' },
+      ]);
+      selected = signal<ReadonlySet<string>>(new Set<string>());
+      pageIndex = signal(0);
+      pageSize = signal(10);
+      config: SignalListConfig<{ name: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(3).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: this.pageIndex,
+        pageSize: this.pageSize,
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          {
+            header: 'Pick', key: 'pick',
+            kind: 'checkbox',
+            render: () => '',
+            checkbox: {
+              selectedKeys: this.selected,
+              isDisabled: (r) => r.name === 'three-disabled',
+            },
+          },
+          { header: 'Name', render: r => r.name },
+        ],
+        getRowKey: r => r.name,
+      };
+    }
+
+    it('renders one checkbox per row', () => {
+      const fixture = TestBed.createComponent(CheckboxHost);
+      fixture.detectChanges();
+      const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]');
+      expect(boxes.length).toBe(3);
+    });
+
+    it('clicking a checkbox adds the row key to the selection set', () => {
+      const fixture = TestBed.createComponent(CheckboxHost);
+      fixture.detectChanges();
+      const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]') as NodeListOf<HTMLInputElement>;
+      boxes[0].click();
+      fixture.detectChanges();
+      boxes[1].click();
+      fixture.detectChanges();
+      const selected = fixture.componentInstance.selected();
+      expect(selected.has('one')).toBe(true);
+      expect(selected.has('two')).toBe(true);
+      expect(selected.size).toBe(2);
+    });
+
+    it('clicking a selected checkbox removes the row key', () => {
+      const fixture = TestBed.createComponent(CheckboxHost);
+      fixture.componentInstance.selected.set(new Set(['one']));
+      fixture.detectChanges();
+      const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]') as NodeListOf<HTMLInputElement>;
+      expect(boxes[0].checked).toBe(true);
+      boxes[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected().size).toBe(0);
+    });
+
+    it('disabled rows render disabled checkbox and clicks are no-ops', () => {
+      const fixture = TestBed.createComponent(CheckboxHost);
+      fixture.detectChanges();
+      const boxes = fixture.nativeElement.querySelectorAll('[data-test="row-checkbox"]') as NodeListOf<HTMLInputElement>;
+      expect(boxes[2].disabled).toBe(true);
+      boxes[2].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected().has('three-disabled')).toBe(false);
+    });
+  });
+
+  describe('template column (kind: template)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent, SignalListCellTemplateDirective],
+      template: `
+        <app-signal-list [config]="config">
+          <ng-template appSignalListCell="custom" let-row>
+            <span data-test="custom-cell">CUSTOM:{{ row.name }}</span>
+          </ng-template>
+        </app-signal-list>
+      `,
+    })
+    class TemplateHost {
+      items = signal([
+        { name: 'one' },
+        { name: 'two' },
+      ]);
+      pageIndex = signal(0);
+      pageSize = signal(10);
+      config: SignalListConfig<{ name: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(2).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: this.pageIndex,
+        pageSize: this.pageSize,
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          { header: 'Name', render: r => r.name },
+          {
+            header: 'Custom', key: 'custom',
+            kind: 'template',
+            templateName: 'custom',
+            render: () => '',
+          },
+        ],
+        getRowKey: r => r.name,
+      };
+    }
+
+    it('renders the named template once per row with the row context', () => {
+      const fixture = TestBed.createComponent(TemplateHost);
+      fixture.detectChanges();
+      const cells = fixture.nativeElement.querySelectorAll('[data-test="custom-cell"]');
+      expect(cells.length).toBe(2);
+      expect(cells[0].textContent).toContain('CUSTOM:one');
+      expect(cells[1].textContent).toContain('CUSTOM:two');
+    });
+
+    it('falls through cleanly when templateName has no matching ng-template', () => {
+      const fixture = TestBed.createComponent(TemplateHost);
+      // Mutate config so templateName references a missing template.
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        columns: [
+          { header: 'Name', render: r => r.name },
+          { header: 'Custom', key: 'custom', kind: 'template', templateName: 'missing', render: () => '' },
+        ],
+      };
+      fixture.detectChanges();
+      // Should not throw; missing-template cells just render empty.
+      expect(fixture.nativeElement.querySelectorAll('[data-test="custom-cell"]').length).toBe(0);
     });
   });
 });
