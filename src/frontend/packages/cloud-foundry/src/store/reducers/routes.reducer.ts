@@ -2,7 +2,7 @@ import { IRequestEntityTypeState } from '../../../../store/src/app-state';
 import { APIResource } from '../../../../store/src/types/api.types';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
 import { ASSIGN_ROUTE_SUCCESS, AssignRouteToApplication } from '../../actions/application-service-routes.actions';
-import { DeleteRoute, RouteEvents, UnmapRoute } from '../../actions/route.actions';
+import { DeleteRoute, RouteEvents } from '../../actions/route.actions';
 import { IAppSummary, IRoute } from '../../cf-api.types';
 
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute<string>>>, action: APISuccessOrFailedAction): IRequestEntityTypeState<APIResource<IRoute<string>>> {
@@ -18,17 +18,6 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute<s
         }
       };
     }
-    case RouteEvents.UNMAP_ROUTE_SUCCESS: {
-      const unmapRouteAction = action.apiAction as UnmapRoute;
-      const removeAppRoute = state[unmapRouteAction.routeGuid];
-      return {
-        ...state,
-        [unmapRouteAction.routeGuid]: {
-          ...removeAppRoute,
-          entity: removeAppFromRoute(removeAppRoute.entity, unmapRouteAction.appGuid),
-        }
-      };
-    }
     default:
       return state;
   }
@@ -37,12 +26,6 @@ export function updateAppSummaryRoutesReducer(state: IRequestEntityTypeState<IAp
   let currentState: IAppSummary;
   let routeGuid: string;
   switch (action.type) {
-    case RouteEvents.UNMAP_ROUTE_SUCCESS: {
-      const unmapRouteAction = action.apiAction as UnmapRoute;
-      currentState = state[unmapRouteAction.appGuid];
-      routeGuid = unmapRouteAction.routeGuid;
-      return newState(currentState, unmapRouteAction.appGuid, routeGuid, state);
-    }
     case RouteEvents.DELETE_SUCCESS: {
       const deleteAction = action.apiAction as DeleteRoute;
       routeGuid = deleteAction.guid;
@@ -90,12 +73,5 @@ function addAppFromRoute(entity: IRoute<string>, appGuid: string): IRoute<string
     ...entity,
     apps: [...oldApps, appGuid]
   };
-}
-
-function removeAppFromRoute(entity: IRoute<string>, appGuid: string): IRoute<string> {
-  return entity.apps ? {
-    ...entity,
-    apps: entity.apps.filter((app: string) => app !== appGuid)
-  } : entity;
 }
 

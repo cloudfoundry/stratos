@@ -1,6 +1,6 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { GetAppRoutes } from '../actions/application-service-routes.actions';
-import { CreateRoute, DeleteRoute, GetAllRoutes, NewRoute, UnmapRoute } from '../actions/route.actions';
+import { CreateRoute, DeleteRoute, GetAllRoutes, NewRoute } from '../actions/route.actions';
 import { GetSpaceRoutes } from '../actions/space.actions';
 import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
@@ -19,12 +19,6 @@ export interface RoutesActionBuilders extends OrchestratedActionBuilders {
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
   ) => GetAllRoutes;
-  unmap: (
-    guid: string,
-    appGuid: string,
-    endpointGuid: string,
-    clearPaginationKey?: string
-  ) => UnmapRoute;
   getAllForApplication: (
     applicationGuid: string,
     endpointGuid: string,
@@ -67,17 +61,6 @@ export const routesActionBuilders: RoutesActionBuilders = {
     paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllRoutes(endpointGuid, paginationKey, includeRelations, populateMissing),
-  unmap: (
-    guid: string,
-    appGuid: string,
-    endpointGuid: string,
-    clearPaginationKey?: string
-  ) => new UnmapRoute(
-    guid,
-    appGuid,
-    endpointGuid,
-    clearPaginationKey
-  ),
   getAllForApplication: (
     applicationGuid: string,
     endpointGuid: string,

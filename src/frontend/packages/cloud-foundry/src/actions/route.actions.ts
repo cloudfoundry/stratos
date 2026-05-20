@@ -24,9 +24,6 @@ export const RouteEvents = {
   DELETE: '[Application Routes] Delete',
   DELETE_SUCCESS: '[Application Routes] Delete success',
   DELETE_FAILED: '[Application Routes] Delete failed',
-  UNMAP_ROUTE: '[Application Routes] Unmap route',
-  UNMAP_ROUTE_SUCCESS: '[Application Routes] Unmap route success',
-  UNMAP_ROUTE_FAILED: '[Application Routes] Unmap route failed'
 };
 
 export interface NewRoute {
@@ -97,30 +94,6 @@ export class DeleteRoute extends BaseRouteAction {
     RouteEvents.DELETE_FAILED
   ];
   removeEntityOnDelete = true;
-}
-
-export class UnmapRoute extends BaseRouteAction {
-  /**
-   * The key of the pagination section to remove the route from. Note, this should not be called `paginationKey`
-   */
-  constructor(
-    public routeGuid: string,
-    public appGuid: string,
-    public endpointGuid: string,
-    public clearPaginationKey?: string,
-  ) {
-    super(routeGuid, endpointGuid, appGuid);
-    this.options = new HttpRequest(
-      'DELETE',
-      `routes/${routeGuid}/apps/${appGuid}`
-    );
-  }
-  actions = [
-    RouteEvents.UNMAP_ROUTE,
-    RouteEvents.UNMAP_ROUTE_SUCCESS,
-    RouteEvents.UNMAP_ROUTE_FAILED
-  ];
-  updatingKey = 'unmapping';
 }
 
 export class GetAllRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, ICFAction {

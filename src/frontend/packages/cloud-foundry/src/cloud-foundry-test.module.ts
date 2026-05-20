@@ -17,7 +17,6 @@ import { AppEffects } from './store/effects/app.effects';
 import { CloudFoundryEffects } from './store/effects/cloud-foundry.effects';
 import { DeployAppEffects } from './store/effects/deploy-app.effects';
 import { CfValidateEffects } from './store/effects/request.effects';
-import { RouteEffect } from './store/effects/route.effects';
 import { ServiceInstanceEffects } from './store/effects/service-instance.effects';
 import { UpdateAppEffects } from './store/effects/update-app-effects';
 import { UsersRolesEffects } from './store/effects/users-roles.effects';
@@ -30,7 +29,6 @@ import { UsersRolesEffects } from './store/effects/users-roles.effects';
     EffectsModule.forFeature([
       DeployAppEffects,
       CloudFoundryEffects,
-      RouteEffect,
       ServiceInstanceEffects,
       AppEffects,
       UpdateAppEffects,
