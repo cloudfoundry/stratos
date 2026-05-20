@@ -1,15 +1,15 @@
 @let v = view();
 
-<app-meta-card class="service-summary">
+<app-meta-card>
   <app-meta-card-title>
-    <div class="service-summary__title">
-      <div class="service-summary__title__link">Summary</div>
+    <div class="flex flex-row justify-between">
+      <div>Summary</div>
     </div>
   </app-meta-card-title>
   <app-meta-card-item customStyle="long-text">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
-      <span class="service-summary__description">
+      <span class="leading-normal">
         {{ v.description }}
       </span>
     </app-meta-card-value>

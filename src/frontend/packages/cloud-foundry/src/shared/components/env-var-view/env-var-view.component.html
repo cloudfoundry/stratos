@@ -1,21 +1,21 @@
-<div class="env-var-view">
+<div class="flex flex-col">
   <h2 class="dialog-title">
     Environment Variables
   </h2>
-  <div class="dialog-content env-var-view__content">
+  <div class="dialog-content">
     <app-code-block>
       <ng-container>
-        <pre class="env-var-view__content__key">{{data.key}}=@if (!isObject(data.value)) {
+        <pre class="mb-0">{{data.key}}=@if (!isObject(data.value)) {
           <span>{{data.value}}</span>
         }</pre>
         @if (isObject(data.value)) {
-          <pre class="env-var-view__content__value">{{ data.value | json }}</pre>
+          <pre class="mt-0 whitespace-pre-wrap">{{ data.value | json }}</pre>
         }
       </ng-container>
     </app-code-block>
   </div>
 
-  <div class="dialog-actions env-var-view__actions">
+  <div class="dialog-actions flex flex-row-reverse justify-self-start">
     <button class="btn btn-primary" (click)="dialogRef.close()">Close</button>
   </div>
 </div>

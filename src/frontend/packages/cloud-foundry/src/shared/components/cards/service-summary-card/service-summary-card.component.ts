@@ -44,7 +44,6 @@ interface SummaryView {
 @Component({
   selector: 'app-service-summary-card',
   templateUrl: './service-summary-card.component.html',
-  styleUrls: ['./service-summary-card.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
