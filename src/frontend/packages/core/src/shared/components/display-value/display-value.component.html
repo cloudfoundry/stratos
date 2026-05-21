@@ -1,8 +1,8 @@
-<div class="display-value">
+<div class="min-w-[200px]">
   @if (label) {
-    <div class="display-value__label">{{label}}</div>
+    <div class="font-bold text-sm mb-2.5">{{label}}</div>
   }
-  <div class="display-value__value">
+  <div>
     @if (displayCustom.children.length === 0) {
       <span>{{value}}</span>
     }

@@ -26,7 +26,6 @@ export interface StackedInputActionsUpdate { values: { [key: string]: string }; 
 @Component({
   selector: 'app-stacked-input-actions',
   templateUrl: './stacked-input-actions.component.html',
-  styleUrls: ['./stacked-input-actions.component.scss'],
   standalone: true,
   imports: [
     CustomIconComponent

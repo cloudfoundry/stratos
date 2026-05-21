@@ -1,14 +1,14 @@
-<div class="start-end-date">
-  <div class="start-end-date__selector">
+<div class="flex items-center flex-wrap w-full">
+  <div class="flex-none px-[5px]">
     <app-date-time [(dateTime)]="start"></app-date-time>
   </div>
-  <div class="start-end-date__arrow">
+  <div class="px-[5px]">
     to
   </div>
-  <div class="start-end-date__selector">
+  <div class="flex-none px-[5px]">
     <app-date-time [(dateTime)]="end"></app-date-time>
   </div>
 </div>
-<div class="invalid-message">
+<div class="text-xs min-h-4">
   {{ validMessage }}
 </div>
