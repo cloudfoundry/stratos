@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -38,8 +38,6 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
 @Component({
   selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
-  styleUrls: ['./console-uaa-wizard.component.scss'],
-  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
     CommonModule,

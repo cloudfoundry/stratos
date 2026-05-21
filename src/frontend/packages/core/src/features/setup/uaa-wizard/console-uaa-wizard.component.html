@@ -1,16 +1,16 @@
-<div class="page-container setup">
+<div class="setup flex flex-col h-full">
   <app-page-header hideMenu="true" [showHistory]="false">
     <h1>{{title}} Setup with Cloud Foundry UAA</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
-    <app-steppers>
+    <app-steppers class="flex flex-1 my-6">
       <app-step title="UAA Endpoint" [signalHandle]="uaaFormStepHandle">
         <div class="space-y-6">
           <p class="text-content-text">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
           with
         your UAA:</p>
-        <form [formGroup]="uaaForm" class="space-y-6">
+        <form [formGroup]="uaaForm" class="space-y-6 min-w-[400px] w-full">
           <div class="space-y-4">
             <div class="form-field">
               <label class="form-label" for="apiUrl">UAA Endpoint URL</label>
@@ -91,7 +91,7 @@
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
         <p class="text-content-text">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
-        <form class="space-y-4">
+        <form class="space-y-4 min-w-[400px] w-full">
           <div class="form-field">
             <label class="form-label" for="uaaScope">UAA Scope</label>
             <select id="uaaScope" class="input" [(ngModel)]="selectedScope" name="UAAScope">

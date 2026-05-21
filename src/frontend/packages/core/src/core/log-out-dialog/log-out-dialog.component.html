@@ -1,15 +1,15 @@
-<div class="logout-dialog__outer">
-  <app-progress-bar class="logout-dialog__progress" mode="determinate" [value]="percentage">
+<div class="m-[-24px_-24px_0] p-[24px_50px] relative">
+  <app-progress-bar class="absolute inset-x-0 top-0" mode="determinate" [value]="percentage">
   </app-progress-bar>
-  <div class="dialog-content logout-dialog__content">
-    <div class="logout-dialog__message">
+  <div class="dialog-content p-5">
+    <div class="flex flex-row items-center">
       <i class="material-icons">pan_tool</i>
-      <div>
+      <div class="flex-1 text-lg font-bold">
         Are you still there?
       </div>
     </div>
   </div>
-  <div class="dialog-actions logout-dialog__actions">
+  <div class="dialog-actions justify-center">
     <button class="btn btn-primary" (click)="dialogRef.close(true)">Yes</button>
   </div>
 </div>
