@@ -1,30 +1,30 @@
-<div>
+<div class="flex items-center">
   @if (connectable) {
     @if (row.connectionStatus === 'connected' ) {
       @if (config?.showLabel) {
-        <span>Connected @if (row.local) {
-          <span>(local)</span>
+        <span class="mr-2">Connected @if (row.local) {
+          <span class="mr-2">(local)</span>
         }</span>
       }
       <app-custom-icon fontSet="stratos-icons">endpoints_connected</app-custom-icon>
     }
     @if (row.connectionStatus === 'disconnected') {
       @if (config?.showLabel) {
-        <span>Disconnected @if (row.local) {
-          <span>(local)</span>
+        <span class="mr-2">Disconnected @if (row.local) {
+          <span class="mr-2">(local)</span>
         }</span>
       }
       <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
     }
     @if (row.connectionStatus === 'checking') {
       @if (config?.showLabel) {
-        <span>Updating </span>
+        <span class="mr-2">Updating </span>
       }
       <app-spinner [diameter]="20"></app-spinner>
     }
     @if (!row.connectionStatus || row.connectionStatus === 'unknown') {
       @if (config?.showLabel) {
-        <span>Unknown </span>
+        <span class="mr-2">Unknown </span>
       }
       <app-custom-icon>help_outline</app-custom-icon>
     }
@@ -32,25 +32,25 @@
     @if (row?.endpoint_metadata?.status; as status) {
       @if (status === 'Synchronized') {
         @if (config?.showLabel) {
-          <span>Synchronized </span>
+          <span class="mr-2">Synchronized </span>
         }
         <app-custom-icon>cloud_done</app-custom-icon>
       }
       @if (status === 'Synchronizing') {
         @if (config?.showLabel) {
-          <span>Synchronizing </span>
+          <span class="mr-2">Synchronizing </span>
         }
         <app-spinner [diameter]="20"></app-spinner>
       }
       @if (status === 'Pending') {
         @if (config?.showLabel) {
-          <span>Sync Pending</span>
+          <span class="mr-2">Sync Pending</span>
         }
         <app-custom-icon>hourglass_empty</app-custom-icon>
       }
       @if (status === 'Failed') {
         @if (config?.showLabel) {
-          <span>Synchronization failed</span>
+          <span class="mr-2">Synchronization failed</span>
         }
         <app-custom-icon>sync_problem</app-custom-icon>
       }
