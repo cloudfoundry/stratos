@@ -12,7 +12,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
 @Component({
   selector: 'app-deploy-application-step2-1',
   templateUrl: './deploy-application-step2-1.component.html',
-  styleUrls: ['./deploy-application-step2-1.component.scss'],
+  host: { class: 'app-host-flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: []

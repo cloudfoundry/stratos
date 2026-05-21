@@ -25,7 +25,7 @@ interface CreateSpaceForm {
 @Component({
   selector: 'app-create-space-step',
   templateUrl: './create-space-step.component.html',
-  styleUrls: ['./create-space-step.component.scss'],
+  host: { class: 'app-host-flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

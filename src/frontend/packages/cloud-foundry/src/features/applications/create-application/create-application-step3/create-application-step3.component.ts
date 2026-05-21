@@ -21,7 +21,7 @@ interface DomainHostForm {
 @Component({
   selector: 'app-create-application-step3',
   templateUrl: './create-application-step3.component.html',
-  styleUrls: ['./create-application-step3.component.scss'],
+  host: { class: 'app-host-flex-1' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

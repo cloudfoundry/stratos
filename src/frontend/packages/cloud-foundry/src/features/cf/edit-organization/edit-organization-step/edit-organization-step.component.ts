@@ -30,7 +30,7 @@ interface EditOrganizationForm {
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
-  styleUrls: ['./edit-organization-step.component.scss'],
+  host: { class: 'app-host-flex-1' },
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganizationService,

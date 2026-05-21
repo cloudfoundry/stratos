@@ -34,7 +34,7 @@ import type { StApp, StRoute } from '../../../../../../../services/endpoint-data
 @Component({
   selector: 'app-cloud-foundry-space-routes-signal',
   templateUrl: './cloud-foundry-space-routes-signal.component.html',
-  styleUrls: ['./cloud-foundry-space-routes-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

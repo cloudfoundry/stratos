@@ -30,7 +30,7 @@ interface DetachAppRow {
 @Component({
   selector: 'app-detach-apps',
   templateUrl: './detach-apps.component.html',
-  styleUrls: ['./detach-apps.component.scss'],
+  host: { class: 'app-host-flex-1' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],

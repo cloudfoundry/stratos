@@ -18,7 +18,7 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
-  styleUrls: ['./create-application-step1.component.scss'],
+  host: { class: 'app-host-flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
