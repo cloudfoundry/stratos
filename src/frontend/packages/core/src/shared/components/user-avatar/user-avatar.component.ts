@@ -7,7 +7,6 @@ import { MD5 } from './md5';
 @Component({
   selector: 'app-user-avatar',
   templateUrl: './user-avatar.component.html',
-  styleUrls: ['./user-avatar.component.scss'],
   standalone: true,
   imports: [
     CommonModule
