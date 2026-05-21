@@ -9,7 +9,7 @@
 <app-steppers cancel="/user-profile">
   <app-step [title]="'Edit User Profile'" [signalHandle]="signalHandle" finishButtonText="Save">
     <div>
-      <form [formGroup]="editProfileForm" validate class="edit-profile edit-profile__group">
+      <form [formGroup]="editProfileForm" validate class="mt-2.5 flex flex-col max-w-full">
         <app-form-field>
           <input appInput placeholder="Given Name" formControlName="givenName">
         </app-form-field>
@@ -37,7 +37,7 @@
           </app-form-field>
         }
         @if ((canChangePassword | async)) {
-          <div class="edit-profile__group">
+          <div class="flex flex-col max-w-full">
             <p>Change Password (Leave blank to keep current password)</p>
             @if (!needsPasswordForEmailChange) {
               <app-form-field>
