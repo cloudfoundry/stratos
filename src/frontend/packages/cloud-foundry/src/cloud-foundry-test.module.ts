@@ -17,7 +17,6 @@ import { CloudFoundryEffects } from './store/effects/cloud-foundry.effects';
 import { DeployAppEffects } from './store/effects/deploy-app.effects';
 import { CfValidateEffects } from './store/effects/request.effects';
 import { ServiceInstanceEffects } from './store/effects/service-instance.effects';
-import { UpdateAppEffects } from './store/effects/update-app-effects';
 import { UsersRolesEffects } from './store/effects/users-roles.effects';
 
 @NgModule({
@@ -29,7 +28,6 @@ import { UsersRolesEffects } from './store/effects/users-roles.effects';
       DeployAppEffects,
       CloudFoundryEffects,
       ServiceInstanceEffects,
-      UpdateAppEffects,
       CfValidateEffects,
       UsersRolesEffects
     ]),

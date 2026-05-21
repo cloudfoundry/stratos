@@ -8,7 +8,6 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { CfValidateEffects } from './effects/request.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
-import { UpdateAppEffects } from './effects/update-app-effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.service';
 
@@ -19,7 +18,6 @@ import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.serv
       DeployAppEffects,
       CloudFoundryEffects,
       ServiceInstanceEffects,
-      UpdateAppEffects,
       CfValidateEffects,
       UsersRolesEffects
     ]),
