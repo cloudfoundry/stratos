@@ -1,19 +1,24 @@
-<div class="sidepanel-preview" [ngClass]="{'sidepanel-preview__preview': sidePanelService.previewMode()}">
-  <div class="sidepanel-preview__header">
-    <h1>{{ title }}</h1>
+<div class="flex flex-col bg-[var(--card-bg)] text-[var(--content-text)]"
+  [ngClass]="sidePanelService.previewMode() ? 'h-[calc(100vh-57px)]' : 'h-screen'">
+  <div class="flex bg-[var(--card-header-bg)] border-b border-[var(--content-border)]"
+    [ngClass]="sidePanelService.previewMode() ? 'h-[48px] flex-[0_0_48px]' : 'h-14 flex-[0_0_56px]'">
+    <h1 class="self-center ml-3 text-[var(--content-text)]"
+      [ngClass]="sidePanelService.previewMode() ? 'text-[16px]' : 'text-xl'">{{ title }}</h1>
     @if (favorite) {
-      <app-entity-favorite-star [small]="true" class="sidepanel-preview__favorite" [favorite]="favorite"></app-entity-favorite-star>
+      <app-entity-favorite-star [small]="true" class="flex items-center ml-[10px] opacity-60" [favorite]="favorite"></app-entity-favorite-star>
     }
-    <div  class="sidepanel-preview__custom">
+    <div class="self-center flex-1 mx-[10px] mr-[50px]">
       @if (header) {
         <ng-container [cdkPortalOutlet]="header"></ng-container>
       }
     </div>
-    <button class="sidepanel__close btn btn-icon" type="button" (click)="sidePanelService.hide()">
+    <button class="btn btn-icon absolute right-[5px]"
+      [ngClass]="sidePanelService.previewMode() ? 'top-[3px]' : 'top-[7px]'"
+      type="button" (click)="sidePanelService.hide()">
       <app-custom-icon>close</app-custom-icon>
     </button>
   </div>
-  <div class="sidepanel-preview__content">
+  <div class="flex-1 overflow-y-auto p-[12px_15px] relative bg-[var(--card-bg)]">
     <ng-content></ng-content>
   </div>
 </div>
