@@ -16,7 +16,6 @@ import {
   appSummaryEntityType,
   buildpackEntityType,
   cfEventEntityType,
-  cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
@@ -55,9 +54,6 @@ entityCache[appStatsEntityType] = AppStatSchema;
 
 const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[appEnvVarsEntityType] = AppEnvVarSchema;
-
-const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);
-entityCache[cfInfoEntityType] = CFInfoSchema;
 
 const EventSchema = new CFEntitySchema(cfEventEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[cfEventEntityType] = EventSchema;

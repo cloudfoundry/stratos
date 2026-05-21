@@ -18,7 +18,6 @@ import {
   IApp,
   IAppSummary,
   IBuildpack,
-  ICfV2Info,
   IDomain,
   IFeatureFlag,
   IOrganization,
@@ -37,7 +36,6 @@ import { AppSummaryActionBuilders } from './entity-action-builders/application-s
 import { ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
 import { BuildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
 import { CfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
-import { CfInfoDefinitionActionBuilders } from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
@@ -91,12 +89,6 @@ export class CfEntityCatalog {
   public privateDomain!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IPrivateDomain>
-  >;
-
-  public cfInfo!: StratosBaseCatalogEntity<
-    IFavoriteMetadata,
-    APIResource<ICfV2Info>,
-    CfInfoDefinitionActionBuilders
   >;
 
   public appStats!: StratosBaseCatalogEntity<

@@ -36,6 +36,16 @@ export class CfInfoDataService {
     private readonly diagnostics?: StratosDiagnostics,
   ) {}
 
+  /**
+   * Bypass the warm-cache short-circuit and force a fresh `/pp/v1/cf/info/{cnsi}`
+   * fetch. Used by the CF endpoint health-check pulse — load() would otherwise
+   * return the cached value forever once warm. In-flight dedup still applies.
+   */
+  refresh(): Observable<void> {
+    this._lastFetched.set(null);
+    return this.load();
+  }
+
   load(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'CfInfoDataService', method: 'load' });
     if (this._lastFetched() !== null && this._info() !== null) {

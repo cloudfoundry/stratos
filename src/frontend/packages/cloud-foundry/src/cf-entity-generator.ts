@@ -47,6 +47,7 @@ import {
   StSpaceQuota,
   StStack,
 } from './services/endpoint-data/stratos-types';
+import { refreshCfInfo } from './services/endpoint-data/cf-info-helper';
 import { v3EntitiesFromResponse, v3PaginationConfig, v3SingleResourceMapper } from './v3-native';
 import {
   IService,
@@ -62,7 +63,6 @@ import {
   IApp,
   IAppSummary,
   IBuildpack,
-  ICfV2Info,
   IDomain,
   IFeatureFlag,
   IOrganization,
@@ -83,7 +83,6 @@ import {
   appSummaryEntityType,
   buildpackEntityType,
   cfEventEntityType,
-  cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
@@ -122,10 +121,6 @@ import {
 import { applicationActionBuilder, ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
 import { BuildpackActionBuilders, buildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
 import { CfEventActionBuilders, cfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
-import {
-  CfInfoDefinitionActionBuilders,
-  cfInfoDefinitionActionBuilders,
-} from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders, domainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders, featureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
 import {
@@ -287,7 +282,12 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     },
     listDetailsComponent: CfEndpointDetailsComponent,
     renderPriority: 1,
-    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => cfEntityCatalog.cfInfo.api.get(endpoint.guid)),
+    // W-e: was `cfEntityCatalog.cfInfo.api.get(endpoint.guid)` which dispatched
+    // a GetCFInfo ngrx action handled by CloudFoundryEffects.fetchInfo$ — both
+    // the action class and the effect are gone. refreshCfInfo() bypasses
+    // CfInfoDataService's warm-cache short-circuit so the periodic endpoint
+    // health pulse still produces a fresh /pp/v1/cf/info/{guid} fetch.
+    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => refreshCfInfo(endpoint.guid)),
     getEndpointIdFromEntity: (entity: CfAPIResource) => entity.entity.cfGuid,
     globalPreRequest: (request, action) => {
       return addCfRelationParams(request, action);
@@ -436,7 +436,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateCFBuildPackEntity(endpointDefinition),
     generateCFAppStatsEntity(endpointDefinition),
     generateCFUserProvidedServiceInstanceEntity(endpointDefinition),
-    generateCFInfoEntity(endpointDefinition),
     generateCFPrivateDomainEntity(endpointDefinition),
     generateCFSpaceQuotaEntity(endpointDefinition),
     generateCFAppSummaryEntity(endpointDefinition),
@@ -604,29 +603,6 @@ function generateCFPrivateDomainEntity(endpointDefinition: StratosEndpointExtens
   cfEntityCatalog.privateDomain = new StratosCatalogEntity<IFavoriteMetadata, APIResource<IPrivateDomain>>(definition, {
   });
   return cfEntityCatalog.privateDomain;
-}
-
-function generateCFInfoEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const cfInfoDefinition: IStratosEntityDefinition = {
-    type: cfInfoEntityType,
-    schema: cfEntityFactory(cfInfoEntityType),
-    label: 'Cloud Foundry Info',
-    labelPlural: 'Cloud Foundry Infos',
-    endpoint: endpointDefinition
-  };
-  cfEntityCatalog.cfInfo = new StratosCatalogEntity<IFavoriteMetadata, APIResource<ICfV2Info>, CfInfoDefinitionActionBuilders>(
-    cfInfoDefinition,
-    {
-      actionBuilders: cfInfoDefinitionActionBuilders,
-      entityBuilder: {
-        getMetadata: info => ({
-          name: info.entity.name,
-        }),
-        getGuid: entity => entity.metadata.guid
-      }
-    }
-  );
-  return cfEntityCatalog.cfInfo;
 }
 
 function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
