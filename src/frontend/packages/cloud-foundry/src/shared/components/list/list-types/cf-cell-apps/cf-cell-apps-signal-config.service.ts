@@ -1,8 +1,9 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore } from '@stratosui/core';
+import { MetricQueryConfig, MetricQueryType, MetricsDataService, MetricsRequest } from '@stratosui/store';
 
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import { StApp } from '../../../../../services/endpoint-data/stratos-types';
@@ -34,22 +35,13 @@ interface PrometheusVectorResult {
   value?: [number, string];
 }
 
-interface PrometheusResponseEnvelope {
-  [cnsiGuid: string]: {
-    status?: string;
-    data?: {
-      resultType?: string;
-      result?: PrometheusVectorResult[];
-    };
-  };
-}
-
 // CPU-percentage metric exposes one vector per running app instance,
 // labelled with application_id + instance_index. Used as the source-of-
 // truth for "which apps are on this cell right now". HEALTHY metrics
 // are cell-level; this one is per-instance and is what the legacy
 // CfCellAppsDataSource queried as well.
 const METRIC_CPU = 'firehose_container_metric_cpu_percentage';
+const CELL_METRICS_BASE_URL = '/pp/v1/metrics/cf/cells';
 
 // CF Cell Apps list config — single-CNSI, single-cell, read-only.
 // Drives the Apps tab on the cell-detail page. Replaces
@@ -60,6 +52,7 @@ const METRIC_CPU = 'firehose_container_metric_cpu_percentage';
 @Injectable({ providedIn: 'root' })
 export class CfCellAppsSignalConfigService {
   private readonly http = inject(HttpClient);
+  private readonly metricsDataService = inject(MetricsDataService);
 
   private cnsiGuid = '';
   private cellId = '';
@@ -141,15 +134,16 @@ export class CfCellAppsSignalConfigService {
   }
 
   private async fetchPlacements(): Promise<{ appGuid: string; instanceIndex: number }[] | null> {
-    const query = `${METRIC_CPU}{bosh_job_id="${this.cellId}"}`;
-    const url = `/pp/v1/metrics/cf/cells/query?query=${encodeURIComponent(query)}`;
+    const req: MetricsRequest = {
+      endpointGuid: this.cnsiGuid,
+      url: CELL_METRICS_BASE_URL,
+      query: new MetricQueryConfig(`${METRIC_CPU}{bosh_job_id="${this.cellId}"}`),
+      queryType: MetricQueryType.QUERY,
+      windowValue: null,
+    };
     try {
-      const resp = await firstValueFrom(
-        this.http.get<PrometheusResponseEnvelope>(url, {
-          headers: new HttpHeaders({ 'x-cap-cnsi-list': this.cnsiGuid }),
-        }),
-      );
-      const result = resp?.[this.cnsiGuid]?.data?.result ?? [];
+      const metrics = await this.metricsDataService.fetch<PrometheusVectorResult>(req);
+      const result = (metrics?.data?.result ?? []) as PrometheusVectorResult[];
       const out: { appGuid: string; instanceIndex: number }[] = [];
       for (const r of result) {
         const appGuid = r.metric?.application_id;

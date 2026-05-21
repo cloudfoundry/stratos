@@ -8,9 +8,20 @@ import {
   ChartDataTypes,
   getMetricsChartConfigBuilder
 } from '@stratosui/core';
-import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication } from '@stratosui/store';
-import { FetchApplicationChartMetricsAction } from '../../../../../../actions/cf-metrics.actions';
+import { MetricQueryConfig, MetricQueryType, MetricsRequest, IMetricMatrixResult, IMetricApplication } from '@stratosui/store';
 import { ApplicationService } from '../../../../application.service';
+
+const APP_METRICS_BASE_URL = '/pp/v1/metrics';
+
+function buildAppMetricRequest(appGuid: string, cfGuid: string, metric: string): MetricsRequest {
+  return {
+    endpointGuid: cfGuid,
+    url: `${APP_METRICS_BASE_URL}/cf/app/${appGuid}`,
+    query: new MetricQueryConfig(metric),
+    queryType: MetricQueryType.RANGE_QUERY,
+    windowValue: null,
+  };
+}
 
 @Component({
   selector: 'app-metrics-tab',
@@ -31,32 +42,22 @@ export class MetricsTabComponent {
   ][];
 
   constructor() {
+    const appGuid = this.applicationService.appGuid;
+    const cfGuid = this.applicationService.cfGuid;
     const chartConfigBuilder = getMetricsChartConfigBuilder<IMetricApplication>(result => `Instance ${result.metric.instance_index}`);
     this.instanceMetricConfigs = [
       chartConfigBuilder(
-        new FetchApplicationChartMetricsAction(
-          this.applicationService.appGuid,
-          this.applicationService.cfGuid,
-          new MetricQueryConfig('firehose_container_metric_cpu_percentage')
-        ),
+        buildAppMetricRequest(appGuid, cfGuid, 'firehose_container_metric_cpu_percentage'),
         'CPU Usage (%)',
         ChartDataTypes.CPU_PERCENT
       ),
       chartConfigBuilder(
-        new FetchApplicationChartMetricsAction(
-          this.applicationService.appGuid,
-          this.applicationService.cfGuid,
-          new MetricQueryConfig('firehose_container_metric_memory_bytes')
-        ),
+        buildAppMetricRequest(appGuid, cfGuid, 'firehose_container_metric_memory_bytes'),
         'Memory Usage (MB)',
         ChartDataTypes.BYTES
       ),
       chartConfigBuilder(
-        new FetchApplicationChartMetricsAction(
-          this.applicationService.appGuid,
-          this.applicationService.cfGuid,
-          new MetricQueryConfig('firehose_container_metric_disk_bytes')
-        ),
+        buildAppMetricRequest(appGuid, cfGuid, 'firehose_container_metric_disk_bytes'),
         'Disk Usage (MB)',
         ChartDataTypes.BYTES
       )

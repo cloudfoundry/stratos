@@ -1,8 +1,9 @@
 import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 
 import { MetricsChartComponent, MetricsConfig, MetricsLineChartConfig, MetricsChartHelpers, MetricsRangeSelectorComponent } from '@stratosui/core';
-import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication, MetricQueryType } from '@stratosui/store';
-import { FetchApplicationMetricsAction } from '../../../actions/cf-metrics.actions';
+import { MetricQueryConfig, IMetricMatrixResult, IMetricApplication, MetricQueryType, MetricsRequest } from '@stratosui/store';
+
+const APP_METRICS_BASE_URL = '/pp/v1/metrics';
 
 @Component({
   selector: 'app-application-instance-chart',
@@ -46,17 +47,19 @@ export class ApplicationInstanceChartComponent implements OnInit {
 
   ngOnInit() {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
+    const request: MetricsRequest = {
+      endpointGuid: this.endpointGuid,
+      url: `${APP_METRICS_BASE_URL}/cf/app/${this.appGuid}`,
+      query: new MetricQueryConfig(this.queryString),
+      queryType: this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY,
+      windowValue: null,
+    };
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.mapSeriesItemValue(),
-      metricsAction: new FetchApplicationMetricsAction(
-        this.appGuid,
-        this.endpointGuid,
-        new MetricQueryConfig(this.queryString),
-        this.queryRange ? MetricQueryType.RANGE_QUERY : MetricQueryType.QUERY
-      ),
+      request,
     };
   }
 

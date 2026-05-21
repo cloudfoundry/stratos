@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '../cards/card/card.component';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
-import { EntityMonitorFactory, IMetrics, MetricQueryType } from '@stratosui/store';
+import { MetricQueryType } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
@@ -30,10 +30,9 @@ import { StartEndDateComponent } from '../start-end-date/start-end-date.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsParentRangeSelectorComponent implements AfterContentInit, OnDestroy {
-  private entityMonitorFactory = inject(EntityMonitorFactory);
   rangeSelectorManager = inject(MetricsRangeSelectorManagerService);
 
-  private actionSub!: Subscription;
+  private requestSub!: Subscription;
 
   @ContentChildren(MetricsChartComponent)
   private metricsCharts!: QueryList<MetricsChartComponent>;
@@ -44,33 +43,29 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
     if (!this.metricsCharts || !this.metricsCharts.first) {
       return;
     }
-    const action = this.metricsCharts.first.metricsConfig.metricsAction;
-    const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.guid,
-      action
-    );
-    this.rangeSelectorManager.init(metricsMonitor, action);
-    this.actionSub = this.rangeSelectorManager.metricsAction$.subscribe(newAction => {
-      if (newAction) {
+    const baseRequest = this.metricsCharts.first.metricsConfig.request;
+    this.rangeSelectorManager.init(baseRequest);
+    this.requestSub = this.rangeSelectorManager.request$.subscribe(next => {
+      if (next) {
         this.metricsCharts.forEach(chart => {
-          const oldAction = chart.metricsConfig.metricsAction;
-          chart.metricsAction = {
-            ...oldAction,
-            queryType: newAction.queryType,
+          const oldRequest = chart.currentRequest;
+          chart.applyRequest({
+            ...oldRequest,
+            queryType: next.queryType,
             query: {
-              ...oldAction.query,
-              params: newAction.query.params
+              ...oldRequest.query,
+              params: next.query.params,
             },
-            windowValue: newAction.windowValue
-          };
+            windowValue: next.windowValue,
+          });
         });
       }
     });
   }
 
   ngOnDestroy() {
-    if (this.actionSub) {
-      this.actionSub.unsubscribe();
+    if (this.requestSub) {
+      this.requestSub.unsubscribe();
     }
   }
 

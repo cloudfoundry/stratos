@@ -1,19 +1,16 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
-import { Store } from '@ngrx/store';
 import {
-  MetricsAction,
-  EntityMonitor,
   ChartSeries,
   IMetrics,
   MetricResultTypes,
+  MetricsDataService,
   MetricsFilterSeries,
-  AppState,
-  EntityMonitorFactory,
+  MetricsObservation,
+  MetricsRequest,
 } from '@stratosui/store';
-import { combineLatest, Observable, Subscription, timer } from 'rxjs';
-import { debounce, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { CardWrapperComponent } from '../cards/card/card.component';
@@ -24,7 +21,7 @@ import { MetricsChartManager } from './metrics.component.manager';
 const MAX_SERIES_IN_TOOLTIP = 16;
 
 export interface MetricsConfig<T = any> {
-  metricsAction: MetricsAction;
+  request: MetricsRequest;
   getSeriesName: (item: T) => string;
   mapSeriesItemName?: (value: any) => string | Date;
   mapSeriesItemValue?: (value: any) => any;
@@ -46,8 +43,7 @@ export interface MetricsConfig<T = any> {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
-  private store = inject<Store<AppState>>(Store);
-  private entityMonitorFactory = inject(EntityMonitorFactory);
+  private metricsDataService = inject(MetricsDataService);
 
   @Input()
   public metricsConfig!: MetricsConfig;
@@ -59,18 +55,49 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @ContentChild(MetricsRangeSelectorComponent, { static: true })
   public timeRangeSelector: MetricsRangeSelectorComponent;
 
-  @Input()
-  set metricsAction(action: MetricsAction) {
-    this.commitAction(action);
-  }
-
   public hasMultipleInstances = false;
 
   public chartTypes = MetricsChartTypes;
 
-  private timeSelectorSub!: Subscription;
+  // Writable signal that drives MetricsDataService.observe(). Range
+  // selector (or parent range selector) writes here; chart re-fetches.
+  private readonly requestSignal = signal<MetricsRequest | null>(null);
 
-  public results$!: Observable<IMetrics<any> | ChartSeries<any>[] | null>;
+  // Read-only accessor for the parent range selector — used to merge
+  // new query params into each child chart's current request.
+  public get currentRequest(): MetricsRequest {
+    return this.requestSignal();
+  }
+
+  public applyRequest(req: MetricsRequest) {
+    this.requestSignal.set(req);
+  }
+
+  private observation!: MetricsObservation;
+
+  public results = computed<ChartSeries<any>[] | null>(() => {
+    const metrics = this.observation?.metrics();
+    if (!metrics) {
+      return null;
+    }
+    const mapped = this.mapMetricsToChartData(metrics, this.metricsConfig);
+    const filtered = this.metricsConfig.filterSeries ? this.metricsConfig.filterSeries(mapped) : mapped;
+    if (!filtered.length) {
+      return [];
+    }
+    const { start, end, step } = (metrics.query.params || {}) as { start: number, end: number, step: number };
+    this.hasMultipleInstances = filtered.length > 1;
+    return this.postFetchMiddleware(filtered, [start, end, step]);
+  });
+
+  public hasResults = computed(() => {
+    const r = this.results();
+    return !!r && r.length > 0;
+  });
+
+  public isFetching = computed(() => this.observation ? this.observation.fetching() && !this.observation.metrics() : true);
+  public isRefreshing = computed(() => this.observation ? this.observation.fetching() && !!this.observation.metrics() : false);
+
   public chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -98,12 +125,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     }
   };
 
-  public metricsMonitor: EntityMonitor<IMetrics>;
-
-  private committedAction!: MetricsAction;
-
-  public isRefreshing$!: Observable<boolean>;
-  public isFetching$!: Observable<boolean>;
   private sort(metricsArray: ChartSeries[]) {
     if (this.metricsConfig.sort) {
       const newMetricsArray = [
@@ -116,8 +137,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   private postFetchMiddleware(metricsArray: ChartSeries[], params: [number, number, number]) {
     const [start, end, step] = params;
     const sortedArray = this.sort(metricsArray);
+    let result = sortedArray;
     if (start && end && step) {
-      return MetricsChartManager.fillOutTimeOrderedChartSeries(
+      result = MetricsChartManager.fillOutTimeOrderedChartSeries(
         sortedArray,
         start,
         end,
@@ -125,80 +147,27 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         this.metricsConfig,
       );
     }
-    return sortedArray;
+    this.convertToChartJsData(result);
+    return result;
   }
 
   ngOnInit() {
-    this.committedAction = this.metricsConfig.metricsAction;
-    this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      this.metricsConfig.metricsAction.guid,
-      this.committedAction
-    );
-
-    const baseResults$ = this.metricsMonitor.entity$.pipe(
-      distinctUntilChanged((oldMetrics, newMetrics) => {
-        return oldMetrics && oldMetrics.data === newMetrics.data;
-      }),
-
-    );
-
-    this.results$ = baseResults$.pipe(
-      map(metrics => {
-        if (!metrics) {
-          this.chartJsData = { labels: [], datasets: [] };
-          return metrics;
-        }
-        const mapMetricsData = this.mapMetricsToChartData(metrics, this.metricsConfig);
-        const metricsArray = this.metricsConfig.filterSeries ? this.metricsConfig.filterSeries(mapMetricsData) : mapMetricsData;
-        if (!metricsArray.length) {
-          this.chartJsData = { labels: [], datasets: [] };
-          return [];
-        }
-
-        // Convert to Chart.js format
-        this.convertToChartJsData(metricsArray);
-
-        const query = metrics.query;
-        const { start, end, step } = query.params as { start: number, end: number, step: number };
-        this.hasMultipleInstances = metricsArray.length > 1;
-        return this.postFetchMiddleware(metricsArray, [start, end, step]);
-      }),
-      distinctUntilChanged()
-    );
-
-    this.isRefreshing$ = combineLatest(
-      this.results$,
-      this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
-    ).pipe(
-      debounce(([_results, fetching]) => {
-        return !fetching ? timer(800) : timer(0);
-      }),
-      map(([results, fetching]) => results && fetching),
-      distinctUntilChanged()
-    );
-
-    this.isFetching$ = combineLatest(
-      this.results$.pipe(startWith(null)),
-      this.metricsMonitor.isFetchingEntity$.pipe(startWith(true))
-    ).pipe(
-      map(([results, fetching]) => !results && fetching),
-      distinctUntilChanged(),
-      startWith(true),
-    );
+    this.requestSignal.set(this.metricsConfig.request);
+    this.observation = this.metricsDataService.observe(this.requestSignal);
   }
 
   ngAfterContentInit() {
     if (this.timeRangeSelector) {
-      this.timeRangeSelector.baseAction = this.metricsConfig.metricsAction;
-      this.timeSelectorSub = this.timeRangeSelector.metricsAction.subscribe((action: MetricsAction) => {
-        this.commitAction(action);
+      this.timeRangeSelector.baseRequest = this.metricsConfig.request;
+      this.timeRangeSelector.request.pipe(takeUntilDestroyed()).subscribe((req: MetricsRequest) => {
+        this.requestSignal.set(req);
       });
     }
   }
 
   ngOnDestroy() {
-    if (this.timeSelectorSub) {
-      this.timeSelectorSub.unsubscribe();
+    if (this.observation) {
+      this.observation.stop();
     }
   }
 
@@ -217,11 +186,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     } else {
       return [];
     }
-  }
-
-  private commitAction(action: MetricsAction) {
-    this.committedAction = action;
-    this.store.dispatch(action);
   }
 
   public getTooltipName(model: { name: { toLocaleString: () => any; }; }) {
@@ -248,7 +212,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
       return;
     }
 
-    // Get all unique timestamps across all series
     const allTimestamps = new Set<number>();
     metricsArray.forEach(series => {
       series.series.forEach(point => {
@@ -260,7 +223,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
     const labels = sortedTimestamps.map(timestamp => new Date(timestamp).toLocaleTimeString());
 
-    // Convert each series to Chart.js dataset
     const datasets = metricsArray.map((series, index) => {
       const data = sortedTimestamps.map(timestamp => {
         const point = series.series.find(p => {
@@ -284,7 +246,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
 
     this.chartJsData = { labels, datasets };
 
-    // Update chart options with axis labels
     if (this.chartConfig && this.chartOptions?.scales) {
       if (this.chartOptions.scales.x && 'title' in this.chartOptions.scales.x && this.chartOptions.scales.x.title) {
         this.chartOptions.scales.x.title.text = this.chartConfig.xAxisLabel || '';

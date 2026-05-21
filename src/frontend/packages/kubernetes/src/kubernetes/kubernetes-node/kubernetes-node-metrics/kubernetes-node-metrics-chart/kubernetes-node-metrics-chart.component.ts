@@ -5,9 +5,12 @@ import { CardWrapperComponent } from '../../../../../../core/src/shared/componen
 import { MetricsChartComponent, MetricsConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
 import { MetricsChartHelpers } from '../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
+import { MetricQueryConfig } from '../../../../../../store/src/actions/metrics.actions';
+import { MetricsRequest } from '../../../../../../store/src/services/metrics-data.service';
 import { IMetricMatrixResult } from '../../../../../../store/src/types/base-metric.types';
-import { IMetricApplication } from '../../../../../../store/src/types/metric.types';
-import { FetchKubernetesMetricsAction } from '../../../store/kubernetes.actions';
+import { IMetricApplication, MetricQueryType } from '../../../../../../store/src/types/metric.types';
+
+const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,17 +46,20 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
 
   ngOnInit() {
     this.instanceChartConfig = MetricsChartHelpers.buildChartConfig(this.yAxisLabel);
-    const query = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
+    const queryString = `${this.metricName}{instance="${this.nodeName}"}[1h]&time=${(new Date()).getTime() / 1000}`;
+    const request: MetricsRequest = {
+      endpointGuid: this.endpointGuid,
+      url: `${KUBE_METRICS_BASE_URL}/${this.nodeName}`,
+      query: new MetricQueryConfig(queryString),
+      queryType: MetricQueryType.QUERY,
+      windowValue: null,
+    };
     this.instanceMetricConfig = {
       getSeriesName: result => (result.metric as any).name ? (result.metric as any).name : (result.metric as any).id || result.metric.__name__ || 'unknown',
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: this.getmapSeriesItemValue(),
-      metricsAction: new FetchKubernetesMetricsAction(
-        this.nodeName,
-        this.endpointGuid,
-        query,
-      ),
+      request,
     };
   }
 

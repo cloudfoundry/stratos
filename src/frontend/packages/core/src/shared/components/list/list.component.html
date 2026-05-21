@@ -17,17 +17,6 @@
             <div class="list-component__header__left--text">{{
             config.text?.title }}</div>
           }
-          <!-- Time range selector -->
-          @if (config.showCustomTime && (isAddingOrSelecting$ | async) === false) {
-            <div class="list-component__header__left--metrics-range"
-              >
-              <app-metrics-range-selector [baseAction]="config.getDataSource().masterAction"
-                (metricsAction)="config.getDataSource().updateMetricsAction($event)" [times]="config.customTimeWindows"
-                [selectedTimeValue]="config.customTimeInitialValue" [pollInterval]="config.customTimePollingInterval"
-                [validate]="config.customTimeValidation">
-              </app-metrics-range-selector>
-            </div>
-          }
           <!-- Multi actions (those applied to selection) -->
           @if ((dataSource.isSelecting$ | async)) {
             <div class="list-component__header__left--multi-actions">
