@@ -7,7 +7,6 @@ import { TableCellCustom } from '../../list.types';
 @Component({
   selector: 'app-table-cell-edit',
   templateUrl: './table-cell-edit.component.html',
-  styleUrls: ['./table-cell-edit.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
