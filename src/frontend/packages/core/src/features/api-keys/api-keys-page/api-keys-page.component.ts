@@ -26,7 +26,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 @Component({
   selector: 'app-api-keys-page',
   templateUrl: './api-keys-page.component.html',
-  styleUrls: ['./api-keys-page.component.scss'],
   providers: [ApiKeysSignalConfigService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,

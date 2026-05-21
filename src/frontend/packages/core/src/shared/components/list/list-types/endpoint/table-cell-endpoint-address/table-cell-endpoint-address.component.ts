@@ -14,7 +14,6 @@ import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoi
 @Component({
   selector: 'app-table-cell-endpoint-address',
   templateUrl: './table-cell-endpoint-address.component.html',
-  styleUrls: ['./table-cell-endpoint-address.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
