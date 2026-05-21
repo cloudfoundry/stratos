@@ -259,6 +259,18 @@ export type {
 } from './services/endpoints-data.service';
 export { EndpointDisconnectCleanupService } from './services/endpoint-disconnect-cleanup.service';
 
+// W-a1 — signal-native metrics data service. Replaces the V2
+// MetricsAction / EntityServiceFactory / getPaginationObservables paths
+// for CF metric fetches. PR-A2 deletes cf-metrics.actions.ts +
+// metrics.effects.ts once all consumers (chart component + range
+// selectors + 4 call sites) migrate to this service.
+export { MetricsDataService } from './services/metrics-data.service';
+export type {
+  MetricsFetchState,
+  MetricsObservation,
+  MetricsRequest,
+} from './services/metrics-data.service';
+
 // W36-C Wave 1 — signal-native auth data service. Single bridge over the
 // legacy `auth` ngrx slice. Replaces direct `store.select(s => s.auth)`
 // reads in `AuthSignalService` and consolidates `VerifySession` / `RouterNav`
