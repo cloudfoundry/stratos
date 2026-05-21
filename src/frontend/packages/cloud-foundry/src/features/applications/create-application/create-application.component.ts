@@ -10,17 +10,12 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Store } from '@stratosui/store';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
 
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { applicationEntityType } from '../../../cf-entity-types';
-import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { selectCfPaginationState } from '../../../store/selectors/pagination.selectors';
+import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 
@@ -42,11 +37,9 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 
-  paginationStateSub?: Subscription;
-
-  private store = inject(Store<CFAppState>);
   private cdr = inject(ChangeDetectorRef);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private appsConfig = inject(CfAppsSignalConfigService);
 
   // FWT-959 Part 2 (Partition B): SignalStepHandle wiring for the 3-step
   // create-application flow. Cross-step state (CF/org/space + new app
@@ -167,26 +160,24 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
-    // We will auto select endpoint/org/space that have been selected on the app wall.
+    // Auto-select endpoint/org/space from the apps wall's current filter
+    // selections — root-scoped CfAppsSignalConfigService holds them in
+    // signals, so the stepper reads them directly without a store hop.
     this.cfOrgSpaceService.enableAutoSelectors();
-    // FIXME: This has been broken for a while (setting cf will clear org + space after org and space has been set)
-    // With new tools (set initial/enable auto) this should be easier to fix
-    const appWallPaginationState = this.store.select(selectCfPaginationState(applicationEntityType, CfAppsDataSource.paginationKey));
-    this.paginationStateSub = appWallPaginationState.pipe(filter(pag => !!pag), take(1), tap(pag => {
-      const { cf, org, space } = pag.clientPagination.filter.items;
-      if (cf) {
-        this.cfOrgSpaceService.cf.select.set(cf);
-      }
-      if (cf && org) {
-        this.cfOrgSpaceService.org.select.set(org);
-      }
-      if (cf && org && space) {
-        this.cfOrgSpaceService.space.select.set(space);
-      }
-    })).subscribe();
+    const cf = this.appsConfig.selectedCnsi();
+    const org = this.appsConfig.selectedOrg();
+    const space = this.appsConfig.selectedSpace();
+    if (cf) {
+      this.cfOrgSpaceService.cf.select.set(cf);
+    }
+    if (cf && org) {
+      this.cfOrgSpaceService.org.select.set(org);
+    }
+    if (cf && org && space) {
+      this.cfOrgSpaceService.space.select.set(space);
+    }
   }
   ngOnDestroy(): void {
-    this.paginationStateSub?.unsubscribe();
     this.step1Sub?.unsubscribe();
     this.step2Sub?.unsubscribe();
     this.step3Sub?.unsubscribe();

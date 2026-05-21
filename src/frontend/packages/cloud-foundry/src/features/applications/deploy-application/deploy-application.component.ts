@@ -21,14 +21,12 @@ import {
   DeleteDeployAppSection,
   StoreCFSettings } from '../../../actions/deploy-applications.actions';
 import { CFAppState } from '@stratosui/cloud-foundry';
-import { getCFEntityKey } from '../../../cf-entity-helpers';
-import { applicationEntityType } from '@stratosui/cloud-foundry';
 import {
   selectApplicationSource } from '../../../store/selectors/deploy-application.selector';
 import { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
-import { RouterNav, selectPaginationState } from '@stratosui/store';
+import { RouterNav } from '@stratosui/store';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
-import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
@@ -66,6 +64,7 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
 export class DeployApplicationComponent implements OnInit, OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private appsConfig = inject(CfAppsSignalConfigService);
   private activatedRoute = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private deployData = inject(CfDeployAppDataService);
@@ -78,7 +77,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   skipConfig$: Observable<boolean> = observableOf(false);
   isRedeploy: boolean;
   selectedSourceType$: Observable<SourceType>;
-  entityKey: string;
 
   // Reactive deploy button text — switches to "Redeploy" when the
   // wizard is invoked with an existing appGuid. Step 4's handle reads
@@ -361,7 +359,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     const activatedRoute = this.activatedRoute;
     const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
 
-    this.entityKey = getCFEntityKey(applicationEntityType);
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     this.isRedeploy = !!this.appGuid;
 
@@ -418,21 +415,21 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         })
       ).subscribe());
     } else {
-      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(this.entityKey, CfAppsDataSource.paginationKey)).pipe(
-        filter((pag) => !!pag),
-        tap(pag => {
-          const { cf, org, space } = pag.clientPagination.filter.items;
-          if (cf) {
-            this.cfOrgSpaceService.cf.select.set(cf);
-          }
-          if (org) {
-            this.cfOrgSpaceService.org.select.set(org);
-          }
-          if (space) {
-            this.cfOrgSpaceService.space.select.set(space);
-          }
-        })
-      ).subscribe());
+      // Auto-select endpoint/org/space from the apps wall's current filter
+      // (root-scoped CfAppsSignalConfigService keeps them in signals — read
+      // directly instead of round-tripping through ngrx pagination state).
+      const cf = this.appsConfig.selectedCnsi();
+      const org = this.appsConfig.selectedOrg();
+      const space = this.appsConfig.selectedSpace();
+      if (cf) {
+        this.cfOrgSpaceService.cf.select.set(cf);
+      }
+      if (org) {
+        this.cfOrgSpaceService.org.select.set(org);
+      }
+      if (space) {
+        this.cfOrgSpaceService.space.select.set(space);
+      }
       // Delete any state in deployApplication
       this.store.dispatch(new DeleteDeployAppSection());
     }
