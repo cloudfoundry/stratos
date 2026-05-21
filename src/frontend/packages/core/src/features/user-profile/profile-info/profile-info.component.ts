@@ -23,7 +23,6 @@ import { AppChipsComponent } from '../../../shared/components/chips/chips.compon
 @Component({
   selector: 'app-profile-info',
   templateUrl: './profile-info.component.html',
-  styleUrls: ['./profile-info.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

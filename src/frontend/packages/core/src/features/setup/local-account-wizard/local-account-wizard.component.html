@@ -1,10 +1,10 @@
-<div class="page-container setup">
+<div class="setup flex flex-col h-full">
   <app-page-header hideMenu="true" [showHistory]="false">
     <h1>{{title}} Setup with Local Admin Account</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
-    <app-steppers>
+    <app-steppers class="flex flex-1 my-6">
       <app-step title="Local Account Information" [signalHandle]="signalHandle">
         <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
           text="Please wait - this will take a few moments">
@@ -16,7 +16,7 @@
                   class="font-mono bg-gray-100 px-2 py-1 rounded text-sm">admin</span>
                 and the password that you choose below.</p>
             </div>
-            <form [formGroup]="passwordForm" class="space-y-4">
+            <form [formGroup]="passwordForm" class="space-y-4 min-w-[400px] w-full">
               <div class="space-y-4">
                 <div class="form-field">
                   <label class="form-label" for="adminPassword">Password</label>

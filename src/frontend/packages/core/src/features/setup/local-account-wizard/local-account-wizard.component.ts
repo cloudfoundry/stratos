@@ -32,7 +32,6 @@ interface LocalAccountForm {
 @Component({
 selector: 'app-local-account-wizard',
   templateUrl: './local-account-wizard.component.html',
-  styleUrls: ['./local-account-wizard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
