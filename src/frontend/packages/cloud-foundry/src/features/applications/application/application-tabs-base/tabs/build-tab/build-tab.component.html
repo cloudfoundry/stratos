@@ -1,5 +1,5 @@
 @if (data.appDetail(); as detail) {
-  <div class="summary">
+  <div>
     <app-tile-grid>
       <app-tile-group class="tile-group-3-cols">
         <app-tile>
@@ -17,7 +17,7 @@
       @if (detail.build?.error; as errorMsg) {
         <app-tile-group class="tile-group-1-cols">
           <app-tile>
-            <div class="card bg-yellow-50 border-yellow-400 border-l-4 summary__staging-error">
+            <div class="card bg-yellow-50 border-yellow-400 border-l-4 items-center flex">
               <span class="material-icons text-yellow-500">warning</span>
               <div>{{ errorMsg }}</div>
             </div>
@@ -31,9 +31,9 @@
               <h3 class="text-lg font-semibold">Application Info</h3>
             </div>
             <div class="card-body">
-              <div class="app-metadata">
-                <div class="app-metadata__two-cols">
-                  <app-metadata-item icon="memory" label="Memory Quota">{{ detail.process?.memoryMb | mbToHumanSize }}
+              <div class="flex flex-row">
+                <div class="flex-1">
+                  <app-metadata-item class="mt-0" icon="memory" label="Memory Quota">{{ detail.process?.memoryMb | mbToHumanSize }}
                   </app-metadata-item>
                   <app-metadata-item icon="storage" label="Disk Quota">{{ detail.process?.diskMb | mbToHumanSize }}
                   </app-metadata-item>
@@ -46,8 +46,8 @@
                     {{ sshStatus$ | async }}
                   </app-metadata-item>
                 </div>
-                <div class="app-metadata__two-cols">
-                  <app-metadata-item icon="touch_app" label="App State">{{ detail.app.state }}</app-metadata-item>
+                <div class="flex-1">
+                  <app-metadata-item class="mt-0" icon="touch_app" label="App State">{{ detail.app.state }}</app-metadata-item>
                   <app-metadata-item icon="card_travel" label="Package State">{{ detail.pkg?.state ?? '-' }}
                   </app-metadata-item>
                   <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
@@ -98,7 +98,7 @@
                 }
               </app-metadata-item>
               @if (data.org()) {
-                <app-metadata-item icon="keyboard" label="CLI Info" class="cli-link">
+                <app-metadata-item icon="keyboard" label="CLI Info" class="mt-6">
                   <a [routerLink]="['/applications/' + applicationService.cfGuid + '/' + detail.app.guid + '/cli']">View</a>
                 </app-metadata-item>
               }
@@ -140,9 +140,9 @@
                     </app-metadata-item>
                   }
                   @case ('gitscm') {
-                    <div class="summary__gitscm">
-                      <div>
-                        <app-metadata-item [iconFont]="deploySource.icon.fontName" [icon]="deploySource.icon.iconName"
+                    <div class="flex">
+                      <div class="flex-1">
+                        <app-metadata-item class="mt-0" [iconFont]="deploySource.icon.fontName" [icon]="deploySource.icon.iconName"
                           label="SCM">
                           {{deploySource.label}}
                         </app-metadata-item>
@@ -157,8 +157,8 @@
                           }
                         </app-metadata-item>
                       </div>
-                      <div>
-                        <app-metadata-item icon="call_split" label="Branch">
+                      <div class="flex-1">
+                        <app-metadata-item class="mt-0" icon="call_split" label="Branch">
                           @if (!!(gitRepo$ | async)) {
                             <a href="{{ (gitRepo$ | async)?.html_url }}/tree/{{ deploySource.branch }}" rel="noopener noreferrer"
                               target="_blank">

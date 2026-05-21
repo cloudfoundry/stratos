@@ -38,7 +38,6 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
 @Component({
   selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
-  styleUrls: ['./build-tab.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

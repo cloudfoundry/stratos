@@ -1,30 +1,30 @@
-<div class="deploy-app-local">
+<div>
   @if (!hideTitle) {
     @if (sourceType === 'file') {
-      <div class="deploy-app-local__title">Deploy from local Application File archive</div>
+      <div class="font-semibold my-6">Deploy from local Application File archive</div>
     }
     @if (sourceType === 'folder') {
-      <div class="deploy-app-local__title">Deploy from local Application Folder</div>
+      <div class="font-semibold my-6">Deploy from local Application Folder</div>
     }
   }
   @if (sourceType === 'file') {
     <div>
-      <input #localPathSelectFile fileread="localPathFile" type="file" class="deploy-app-local__input"
+      <input #localPathSelectFile fileread="localPathFile" type="file" class="h-0 invisible w-0"
         name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" /> Choose an
-        <button (click)="localPathSelectFile.click()" class="btn btn-primary">Application Archive
+        <button (click)="localPathSelectFile.click()" class="btn btn-primary mx-px">Application Archive
         file</button>
       </div>
     }
     @if (sourceType === 'folder') {
       <div>
-        <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="deploy-app-local__input"
+        <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="h-0 invisible w-0"
           name="localPathSelectFolder" id="localPathSelectFolder" (change)="onFileChange($event)" /> Choose an
-          <button (click)="localPathSelectFolder.click()" class="btn btn-primary">Application
+          <button (click)="localPathSelectFolder.click()" class="btn btn-primary mx-px">Application
           Folder</button>
         </div>
       }
       @if (sourceData(); as source) {
-        <div class="deploy-app-local__info">
+        <div class="mt-6">
           @if (source.summaryType === 'file') {
             <div>
               <div>File Upload</div>
@@ -41,20 +41,20 @@
               <app-metadata-item icon="insert_drive_file" label="Files">{{ source.files }}</app-metadata-item>
               <app-metadata-item icon="folder" label="Folders">{{ source.folders }}</app-metadata-item>
               @if (!!source.manifestFile) {
-                <div class="deploy-app-local__indicator">
+                <div class="items-center flex mb-3">
                   <span class="material-icons">done</span>
                   <span>Manifest file detected</span>
                 </div>
               }
               @if (!!source.cfIgnoreFile) {
-                <div class="deploy-app-local__indicator">
+                <div class="items-center flex mb-3">
                   <span class="material-icons">done</span>
                   <span>.cfignore file was detected and applied ({{source.excludes.length}} files excluded)</span>
                 </div>
               }
             </div>
           }
-          <p class="deploy-app-local__next">Press Next to begin upload of source files.</p>
+          <p class="pt-6">Press Next to begin upload of source files.</p>
         </div>
       }
     </div>
