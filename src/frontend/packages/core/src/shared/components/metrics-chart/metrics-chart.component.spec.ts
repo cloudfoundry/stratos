@@ -56,15 +56,6 @@ describe.skip('MetricsChartComponent', () => {
     component = fixture.componentInstance;
     component.chartConfig = new MetricsLineChartConfig();
     component.chartConfig.xAxisLabel = 'Time';
-    // TODO: Don't use action in another package
-    // component.metricsConfig = {
-    //   metricsAction: new FetchApplicationMetricsAction(
-    //     '1',
-    //     '2',
-    //     new MetricQueryConfig('test'),
-    //   ),
-    //   getSeriesName: () => 'test'
-    // };
     fixture.detectChanges();
   });
 

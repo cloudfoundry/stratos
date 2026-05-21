@@ -37,7 +37,6 @@ class MockCloudFoundryCellService {
   cellMetric$ = observableOf(null);
 
   healthy$ = observableOf(null);
-  healthyMetricId = null;
   cpus$ = observableOf(null);
 
   usageContainers$ = observableOf(null);

@@ -19,7 +19,6 @@ import {
   IStratosEntityDefinition,
   JetstreamError,
   JetstreamResponse,
-  metricEntityType,
   PaginatedAction,
   PaginationEntityState,
   RequestInfoState,
@@ -443,7 +442,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     generateCFAppSummaryEntity(endpointDefinition),
     generateCFAppEnvVarEntity(endpointDefinition),
     generateCFQuotaDefinitionEntity(endpointDefinition),
-    generateCFMetrics(endpointDefinition)
   ];
 }
 
@@ -1422,18 +1420,3 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
   return cfEntityCatalog.org;
 }
 
-function generateCFMetrics(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition: IStratosEntityDefinition = {
-    type: metricEntityType,
-    schema: cfEntityFactory(metricEntityType),
-    label: 'CF Metric',
-    labelPlural: 'CF Metrics',
-    endpoint: endpointDefinition,
-  };
-  cfEntityCatalog.metric = new StratosCatalogEntity<IFavoriteMetadata>(
-    definition,
-    {
-    }
-  );
-  return cfEntityCatalog.metric;
-}

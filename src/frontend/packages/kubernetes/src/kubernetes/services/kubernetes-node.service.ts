@@ -1,19 +1,19 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { AppState, Store } from '@stratosui/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
-import { MetricQueryConfig, MetricsAction } from '../../../../store/src/actions/metrics.actions';
-import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
+import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
+import { MetricsDataService, MetricsRequest } from '../../../../store/src/services/metrics-data.service';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
-import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
+const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
 
 export enum KubeNodeMetric {
   CPU = 'container_cpu_usage_seconds_total',
@@ -26,8 +26,8 @@ export enum KubeNodeMetric {
 export class KubernetesNodeService {
   kubeEndpointService = inject(KubernetesEndpointService);
   activatedRoute = inject(ActivatedRoute);
-  store = inject<Store<AppState>>(Store);
-  entityMonitorFactory = inject(EntityMonitorFactory);
+  private metricsDataService = inject(MetricsDataService);
+  private injector = inject(Injector);
 
   public nodeName: string;
   public kubeGuid: string;
@@ -60,23 +60,23 @@ export class KubernetesNodeService {
   public setupMetricObservable(metric: KubeNodeMetric, metricStatistic: MetricStatistic) {
     const containerFilter = ',container!="POD", container!=""';
     const query = `${metricStatistic}(${metricStatistic}_over_time(${metric}{kubernetes_io_hostname="${this.nodeName}"${containerFilter}}[1h]))`;
-    const metricsAction = new FetchKubernetesMetricsAction(this.nodeName, this.kubeGuid, query);
-    const metricsId = MetricsAction.buildMetricKey(this.nodeName, new MetricQueryConfig(query), true, MetricQueryType.QUERY);
-    const metricsMonitor = this.entityMonitorFactory.create<any>(metricsId, metricsAction);
-    this.store.dispatch(metricsAction);
-    const pollSub = metricsMonitor.poll(30000, () => this.store.dispatch(metricsAction),
-      request => ({ busy: request.fetching, error: request.error, message: request.message }))
-      .subscribe();
-    return {
-      entity$: metricsMonitor.entity$.pipe(filter(metrics => !!metrics), map(metrics => {
-        const result = metrics.data && metrics.data.result;
-        if (!!result && result.length === 1) {
-          return result[0].value[1];
-        } else {
-          return 0;
-        }
-      })),
-      pollerSub: pollSub
+    const request: MetricsRequest = {
+      endpointGuid: this.kubeGuid,
+      url: `${KUBE_METRICS_BASE_URL}/${this.nodeName}`,
+      query: new MetricQueryConfig(query),
+      queryType: MetricQueryType.QUERY,
+      windowValue: null,
     };
+    const requestSignal = signal(request);
+    const observation = this.metricsDataService.observe<any>(requestSignal, { pollIntervalMs: 30000 });
+    const entity$ = toObservable(observation.metrics, { injector: this.injector }).pipe(
+      filter(metrics => !!metrics),
+      map(metrics => {
+        const result = metrics?.data?.result;
+        return result && result.length === 1 ? Number(result[0].value[1]) : 0;
+      })
+    );
+    const pollerSub: Subscription = { unsubscribe: () => observation.stop() } as Subscription;
+    return { entity$, pollerSub };
   }
 }

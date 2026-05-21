@@ -5,7 +5,6 @@ import { EffectsModule } from '@ngrx/effects';
 import { APIEffect } from './effects/api.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { EndpointApiError } from './effects/endpoint-api-errors.effects';
-import { MetricsEffect } from './effects/metrics.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { PermissionsEffects } from './effects/permissions.effect';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
@@ -38,7 +37,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
       RouterEffect,
       SystemEffects,
       SetClientFilterEffect,
-      MetricsEffect,
       UserProfileEffect,
       RecursiveDeleteEffect,
       UserFavoritesEffect,

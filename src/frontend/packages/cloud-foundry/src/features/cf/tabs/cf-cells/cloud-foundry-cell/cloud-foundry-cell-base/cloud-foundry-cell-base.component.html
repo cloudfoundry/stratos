@@ -3,6 +3,6 @@
     <h1> Cell: {{ name }}</h1>
   }
 </app-page-header>
-<app-loading-page [entityId]="waitForEntityId" [entitySchema]="waitForEntitySchema" [text]="'Retrieving cell'">
+<app-loading-page [isLoading]="isLoading$" [text]="'Retrieving cell'">
   <router-outlet></router-outlet>
 </app-loading-page>

@@ -1,7 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { getCFCompositeEntityId } from '../../../cloud-foundry/src/store/selectors/api.selectors';
-import { EntitySchema, metricEntityType } from '@stratosui/store';
+import { EntitySchema } from '@stratosui/store';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
 export const appAutoscalerHealthEntityType = 'autoscalerHealth';
@@ -73,9 +73,6 @@ entityCache[appAutoscalerAppMetricEntityType] = new AutoscalerEntitySchema(
   {},
   { idAttribute: getCFCompositeEntityId }
 );
-
-const MetricSchema = new AutoscalerEntitySchema(metricEntityType);
-entityCache[metricEntityType] = MetricSchema;
 
 export function autoscalerEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

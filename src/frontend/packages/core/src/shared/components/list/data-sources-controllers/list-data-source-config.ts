@@ -1,4 +1,4 @@
-import { Action, AppState, EntitySchema, PaginatedAction, Store } from '@stratosui/store';
+import { AppState, EntitySchema, PaginatedAction, Store } from '@stratosui/store';
 import { Observable, OperatorFunction } from 'rxjs';
 
 import { IListConfig } from '../list.component.types';
@@ -91,13 +91,6 @@ export interface IListDataSourceConfig<A, T> {
    * A function that will be called instead of the default refresh
    */
   refresh?: () => void;
-
-  /**
-   * A function that will be called instead of the default update metrics action
-   *
-   * This will only be called when metrics-range-selector component is enabled/used
-   */
-  handleTimeWindowChange?: (action: Action) => void;
 
   /**
    * A function which fetches an observable containing a specific row's state

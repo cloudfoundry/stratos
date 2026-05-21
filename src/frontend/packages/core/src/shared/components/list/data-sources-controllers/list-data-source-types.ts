@@ -7,7 +7,6 @@ import {
   IRequestEntityTypeState,
   ListFilter,
   ListSort,
-  MetricsAction,
   PaginatedAction,
   PaginationEntityState,
   PaginationParam,
@@ -137,7 +136,6 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
   setMultiFilter(changes: ListPaginationMultiFilterChange[], params: PaginationParam): void;
   refresh(): void;
 
-  updateMetricsAction(newAction: MetricsAction): void;
   /**
    * Ensure that list maxed status is ignored. This will result in all results being shown when previously ignored
    */

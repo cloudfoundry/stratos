@@ -81,7 +81,6 @@ export {
 export {
   STRATOS_ENDPOINT_TYPE,
   endpointEntityType,
-  metricEntityType,
   stratosEntityFactory,
   userFavouritesEntityType,
 } from './helpers/stratos-entity-factory';
@@ -220,7 +219,7 @@ export {
   MetricResultTypes,
 } from './types/base-metric.types';
 export { generateStratosEntities } from './stratos-entity-generator';
-export { MetricQueryConfig, MetricsAction } from './actions/metrics.actions';
+export { MetricQueryConfig } from './actions/metrics.actions';
 export { defaultClientPaginationPageSize } from './reducers/pagination-reducer/pagination-reducer-reset-pagination';
 export { appReducers } from './reducers.module';
 export { EntityCatalogTestModule, EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES } from './entity-catalog-test.module';
