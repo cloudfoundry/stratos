@@ -26,7 +26,7 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../service
 @Component({
   selector: 'app-cloud-foundry-users',
   templateUrl: './cloud-foundry-users.component.html',
-  styleUrls: ['./cloud-foundry-users.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

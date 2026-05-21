@@ -31,7 +31,7 @@ import type { StApp } from '../../../../services/endpoint-data/stratos-types';
 @Component({
   selector: 'app-cloud-foundry-applications-signal',
   templateUrl: './cloud-foundry-applications-signal.component.html',
-  styleUrls: ['./cloud-foundry-applications-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

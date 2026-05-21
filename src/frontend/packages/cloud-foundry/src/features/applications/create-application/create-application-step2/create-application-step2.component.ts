@@ -17,7 +17,7 @@ interface CreateApplicationForm {
 @Component({
 selector: 'app-create-application-step2',
   templateUrl: './create-application-step2.component.html',
-  styleUrls: ['./create-application-step2.component.scss'],
+  host: { class: 'app-host-flex-1' },
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ],

@@ -35,7 +35,7 @@ import type { StUser, StUserSpaceRole } from '../../../../../../../services/endp
 @Component({
   selector: 'app-cloud-foundry-space-users',
   templateUrl: './cloud-foundry-space-users.component.html',
-  styleUrls: ['./cloud-foundry-space-users.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -37,7 +37,7 @@ import type { StServiceInstance } from '../../../../../../../services/endpoint-d
 @Component({
   selector: 'app-cloud-foundry-space-user-service-instances-signal',
   templateUrl: './cloud-foundry-space-user-service-instances-signal.component.html',
-  styleUrls: ['./cloud-foundry-space-user-service-instances-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -20,7 +20,7 @@ interface CreateOrganizationForm {
 @Component({
   selector: 'app-create-organization-step',
   templateUrl: './create-organization-step.component.html',
-  styleUrls: ['./create-organization-step.component.scss'],
+  host: { class: 'app-host-flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

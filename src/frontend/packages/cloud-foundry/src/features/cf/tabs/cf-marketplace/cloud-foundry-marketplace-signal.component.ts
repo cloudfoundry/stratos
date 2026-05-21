@@ -27,7 +27,7 @@ import type { StServiceOffering } from '../../../../services/endpoint-data/strat
 @Component({
   selector: 'app-cloud-foundry-marketplace-signal',
   templateUrl: './cloud-foundry-marketplace-signal.component.html',
-  styleUrls: ['./cloud-foundry-marketplace-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

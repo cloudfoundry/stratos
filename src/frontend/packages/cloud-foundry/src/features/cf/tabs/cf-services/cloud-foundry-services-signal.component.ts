@@ -32,7 +32,7 @@ import type { StServiceInstance } from '../../../../services/endpoint-data/strat
 @Component({
   selector: 'app-cloud-foundry-services-signal',
   templateUrl: './cloud-foundry-services-signal.component.html',
-  styleUrls: ['./cloud-foundry-services-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

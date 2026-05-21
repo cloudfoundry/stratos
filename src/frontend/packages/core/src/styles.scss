@@ -35,3 +35,12 @@ body {
 .dark-theme-supported {
   @apply hidden;
 }
+
+// Host-element layout utilities. Applied via `host: { class: '...' }` in
+// component decorators to eliminate single-rule :host stylesheets.
+.app-host-fill {
+  @apply block h-full min-h-0;
+}
+.app-host-flex-1 {
+  @apply flex-1;
+}

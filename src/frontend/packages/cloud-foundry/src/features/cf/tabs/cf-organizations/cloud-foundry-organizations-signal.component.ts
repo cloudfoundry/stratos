@@ -37,7 +37,7 @@ import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
 @Component({
   selector: 'app-cloud-foundry-organizations-signal',
   templateUrl: './cloud-foundry-organizations-signal.component.html',
-  styleUrls: ['./cloud-foundry-organizations-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

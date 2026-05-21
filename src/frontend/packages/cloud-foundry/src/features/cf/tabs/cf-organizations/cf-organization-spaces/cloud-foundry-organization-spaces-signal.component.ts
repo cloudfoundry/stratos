@@ -32,7 +32,7 @@ import type { StSpace } from '../../../../../services/endpoint-data/stratos-type
 @Component({
   selector: 'app-cloud-foundry-organization-spaces-signal',
   templateUrl: './cloud-foundry-organization-spaces-signal.component.html',
-  styleUrls: ['./cloud-foundry-organization-spaces-signal.component.scss'],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

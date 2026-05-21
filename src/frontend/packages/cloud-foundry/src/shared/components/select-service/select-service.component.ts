@@ -33,7 +33,7 @@ interface SelectServiceForm {
 @Component({
   selector: 'app-select-service',
   templateUrl: './select-service.component.html',
-  styleUrls: ['./select-service.component.scss'],
+  host: { class: 'app-host-flex-1' },
   providers: [
     ServicesWallService
   ],
