@@ -1,5 +1,5 @@
 @if (endpoint$ | async; as endpoint) {
-  <div class="endpoint-name-cell">
+  <div class="flex items-center">
     @if (endpoint.canShowLink) {
       <a routerLink="{{ endpoint.link }}">{{ endpoint.name }}</a>
     }
@@ -8,7 +8,7 @@
     }
     @if (!!endpoint.system_shared_token) {
       <app-custom-icon
-        matTooltip="This endpoint's connection is shared by the administrator" class="endpoint-name-cell__icon">share
+        matTooltip="This endpoint's connection is shared by the administrator" class="text-[20px] h-5 w-5 pl-2">share
       </app-custom-icon>
     }
   </div>

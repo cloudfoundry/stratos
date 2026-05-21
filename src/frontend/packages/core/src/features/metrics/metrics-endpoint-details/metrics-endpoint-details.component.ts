@@ -21,7 +21,6 @@ interface MetricsDetailsInfo {
 @Component({
   selector: 'app-metrics-endpoint-details',
   templateUrl: './metrics-endpoint-details.component.html',
-  styleUrls: ['./metrics-endpoint-details.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

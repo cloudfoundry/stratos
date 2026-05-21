@@ -18,7 +18,6 @@ export interface RowWithEndpointId {
 @Component({
   selector: 'app-table-cell-endpoint-name',
   templateUrl: './table-cell-endpoint-name.component.html',
-  styleUrls: ['./table-cell-endpoint-name.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

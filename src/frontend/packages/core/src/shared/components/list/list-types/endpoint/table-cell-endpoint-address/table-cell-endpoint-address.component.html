@@ -1,7 +1,7 @@
 @if (endpointAddress$ | async; as address) {
-  <div class="endpoint-address-cell">
+  <div class="flex items-center">
     <div>{{ address }}</div>
-    <app-copy-to-clipboard class="endpoint-address-cell__copy" [compact]="true" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false">
+    <app-copy-to-clipboard class="w-6" [compact]="true" [text]="address" tooltip="Copy to clipboard" [showSuccessText]="false">
     </app-copy-to-clipboard>
     @if (isDuplicate$ | async) {
       <span class="material-icons text-warning-shade-600 dark:text-warning-shade-300 ml-1 text-[20px] leading-none"

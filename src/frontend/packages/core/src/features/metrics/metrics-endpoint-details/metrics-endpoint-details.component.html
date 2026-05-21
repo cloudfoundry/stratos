@@ -1,8 +1,8 @@
 @if (data$ | async; as info) {
-  <div class="metrics-details">
-    <div class="metrics-details__line">
+  <div class="flex flex-col">
+    <div class="flex items-center">
       @if (info.warning) {
-        <app-custom-icon class="metrics-details__icon text-warning">warning</app-custom-icon>
+        <app-custom-icon class="flex items-center justify-center mr-2 text-warning">warning</app-custom-icon>
       }
       {{ info.ok }}
       @if (info.total > 0) {

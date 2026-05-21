@@ -11,7 +11,6 @@ import { ITableTextMaxed } from '../list-table/table.types';
 @Component({
   selector: 'app-max-list-message',
   templateUrl: './max-list-message.component.html',
-  styleUrls: ['./max-list-message.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
