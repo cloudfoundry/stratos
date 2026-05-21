@@ -1,4 +1,4 @@
-import { EntitySchema, metricEntityType, APIResource } from '@stratosui/store';
+import { EntitySchema, APIResource } from '@stratosui/store';
 import {
   CFApplicationEntitySchema,
   CFEntitySchema,
@@ -91,9 +91,6 @@ const ServiceSchema = new CFEntitySchema(serviceEntityType, {
 const ServiceNoPlansSchema = new CFEntitySchema(serviceEntityType, {
 }, { idAttribute: getCFCompositeEntityId });
 entityCache[serviceEntityType] = ServiceSchema;
-
-const MetricSchema = new CFEntitySchema(metricEntityType);
-entityCache[metricEntityType] = MetricSchema;
 
 const SpaceQuotaSchema = new CFEntitySchema(spaceQuotaEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[spaceQuotaEntityType] = SpaceQuotaSchema;

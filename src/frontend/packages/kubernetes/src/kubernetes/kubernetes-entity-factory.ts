@@ -2,7 +2,6 @@ import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
 import { EntitySchema } from '../../../store/src/helpers/entity-schema';
-import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import {
   getGuidFromKubeDeploymentObj,
   getGuidFromKubeNamespaceObj,
@@ -112,8 +111,6 @@ entityCache[analysisReportEntityType] = new KubernetesEntitySchema(
   {},
   { idAttribute: 'id' }
 );
-
-entityCache[metricEntityType] = new KubernetesEntitySchema(metricEntityType);
 
 export function addKubernetesEntitySchema(key: string, newSchema: EntitySchema) {
   entityCache[key] = newSchema;

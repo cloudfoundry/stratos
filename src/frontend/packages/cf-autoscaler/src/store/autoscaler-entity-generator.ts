@@ -3,7 +3,6 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
   StratosEndpointExtensionDefinition,
-  metricEntityType,
   APIResource,
   IFavoriteMetadata
 } from '@stratosui/store';
@@ -46,7 +45,6 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
     generateAppMetricEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition),
     generateCredentialEntity(endpointDefinition),
   ];
 }
@@ -119,13 +117,3 @@ function generateAppMetricEntity(endpointDefinition: StratosEndpointExtensionDef
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
 }
 
-function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: metricEntityType,
-    schema: autoscalerEntityFactory(metricEntityType),
-    label: 'Autoscaler Metric',
-    labelPlural: 'Autoscaler Metrics',
-    endpoint: endpointDefinition,
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
-}

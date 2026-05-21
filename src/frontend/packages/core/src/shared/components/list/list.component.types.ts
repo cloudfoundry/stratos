@@ -3,7 +3,6 @@ import { ActionState, ListView } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map, startWith, switchMap } from 'rxjs/operators';
 
-import { ITimeRange } from '../../services/metrics-range-selector.types';
 import { ListDataSource } from './data-sources-controllers/list-data-source';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { CardTypes } from './list-cards/card/card.component';
@@ -102,26 +101,6 @@ export interface IListConfig<T> {
    * Allow selection regardless of number or visibility of multi actions
    */
   allowSelection?: boolean;
-  /**
-   * For metrics based data show a metrics range selector
-   */
-  showCustomTime?: boolean;
-  /**
-   * Custom time window to show in metrics range selector
-   */
-  customTimeWindows?: ITimeRange[];
-  /**
-   * Custom time window validation for metrics range selector
-   */
-  customTimeValidation?: (start: Date, end: Date) => string;
-  /**
-   * Custom time polling interval. Falsy for disabled.
-   */
-  customTimePollingInterval?: number;
-  /**
-   * When enabled set the initial value
-   */
-  customTimeInitialValue?: string;
 }
 
 // Simple list config does not need getDataSource

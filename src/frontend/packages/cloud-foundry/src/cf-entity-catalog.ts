@@ -206,10 +206,6 @@ export class CfEntityCatalog {
     OrganizationActionBuilders
   >;
 
-  public metric!: StratosBaseCatalogEntity<
-    IFavoriteMetadata
-  >;
-
   public userProvidedService!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IUserProvidedServiceInstance>,

@@ -18,7 +18,6 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
-import { metricEntityType } from '../../../store/src/helpers/stratos-entity-factory';
 import { entityFetchedWithoutError } from '../../../store/src/operators';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
@@ -234,7 +233,6 @@ export class KubeEntityCatalog {
   public dashboard: StratosCatalogEntity<IFavoriteMetadata, KubeDashboardStatus, KubeDashboardActionBuilders>;
   public analysisReport: StratosCatalogEntity<undefined, AnalysisReport, AnalysisReportsActionBuilders>;
   public configMap: StratosCatalogEntity<IFavoriteMetadata, KubernetesConfigMap, KubeResourceActionBuilders>;
-  public metrics: StratosCatalogEntity;
 
   public secrets: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
   public pvc: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
@@ -384,7 +382,6 @@ export class KubeEntityCatalog {
         },
       ]
     });
-    this.metrics = this.generateMetricEntity(endpointDef);
     this.secrets = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'secrets',
       icon: 'config_maps',
@@ -590,16 +587,6 @@ export class KubeEntityCatalog {
       endpoint: endpointDefinition
     }, {
       actionBuilders: analysisReportsActionBuilders
-    });
-  }
-
-  private generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-    return new StratosCatalogEntity({
-      type: metricEntityType,
-      schema: kubernetesEntityFactory(metricEntityType),
-      label: 'Kubernetes Metric',
-      labelPlural: 'Kubernetes Metrics',
-      endpoint: endpointDefinition,
     });
   }
 

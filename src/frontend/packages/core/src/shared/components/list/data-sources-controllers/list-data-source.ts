@@ -10,7 +10,6 @@ import {
   ListFilter,
   ListSort,
   LocalPaginationHelpers,
-  MetricsAction,
   PaginatedAction,
   PaginationEntityState,
   PaginationMonitor,
@@ -143,7 +142,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
-  protected metricsAction: MetricsAction;
   public entitySelectConfig: EntitySelectConfig;
 
   public refresh: () => void;
@@ -399,7 +397,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       if (Array.isArray(this.action)) {
         this.action.forEach(action => this.store.dispatch(action));
       } else {
-        this.store.dispatch(this.metricsAction || this.masterAction);
+        this.store.dispatch(this.masterAction);
       }
     };
   }
@@ -585,16 +583,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   public setMultiFilter(_changes: ListPaginationMultiFilterChange[], _params: PaginationParam) {
 
-  }
-
-  public updateMetricsAction(newAction: MetricsAction) {
-    this.metricsAction = newAction;
-
-    if (this.config.handleTimeWindowChange) {
-      this.config.handleTimeWindowChange(newAction);
-    } else {
-      this.store.dispatch(newAction);
-    }
   }
 
   public showAllAfterMax() {

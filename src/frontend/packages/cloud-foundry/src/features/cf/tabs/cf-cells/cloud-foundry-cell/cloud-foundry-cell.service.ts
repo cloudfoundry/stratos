@@ -50,7 +50,6 @@ export class CloudFoundryCellService {
   cellMetric$!: Observable<IMetricCell>;
 
   healthy$!: Observable<string>;
-  healthyMetricId!: string;
   cpus$!: Observable<string>;
 
   usageContainers$!: Observable<string>;
@@ -89,10 +88,7 @@ export class CloudFoundryCellService {
     // pagination probe but without the ngrx round-trip.
     const healthMetric$ = defer(() => from(this.probeHealthMetric())).pipe(shareReplay(1));
     this.cellMetric$ = healthMetric$.pipe(
-      switchMap(metric => {
-        this.healthyMetricId = `${this.cfGuid}-${this.cellId}:${metric}:value:${MetricQueryType.QUERY}:`;
-        return this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell>;
-      })
+      switchMap(metric => this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell>)
     );
     this.healthy$ = healthMetric$.pipe(
       switchMap(metric => this.generate(metric))

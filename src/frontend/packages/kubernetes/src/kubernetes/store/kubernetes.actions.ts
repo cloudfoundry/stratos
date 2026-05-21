@@ -3,7 +3,6 @@ export type SortDirection = 'asc' | 'desc' | '';
 import { getActions } from '@stratosui/store';
 import { ApiRequestTypes } from '@stratosui/store';
 
-import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../../store/src/types/request.types';
@@ -345,33 +344,3 @@ export class GetKubernetesDashboard implements KubeSingleEntityAction {
   guid: string;
 }
 
-function getKubeMetricsAction(guid: string): string {
-  return `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
-}
-
-export class FetchKubernetesMetricsAction extends MetricsAction {
-  constructor(guid: string, cfGuid: string, metricQuery: string) {
-    super(
-      guid,
-      cfGuid,
-      new MetricQueryConfig(metricQuery),
-      getKubeMetricsAction(guid),
-      undefined,
-      undefined,
-      undefined,
-      KUBERNETES_ENDPOINT_TYPE
-    );
-  }
-}
-
-export class FetchKubernetesChartMetricsAction extends MetricsChartAction {
-  constructor(guid: string, cfGuid: string, metricQuery: string) {
-    super(
-      guid,
-      cfGuid,
-      new MetricQueryConfig(metricQuery),
-      getKubeMetricsAction(guid),
-      KUBERNETES_ENDPOINT_TYPE
-    );
-  }
-}
