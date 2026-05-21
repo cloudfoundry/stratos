@@ -8,7 +8,7 @@ import { ListConfigProvider } from '../list-config-provider.types';
 @Component({
   selector: 'app-list-view',
   templateUrl: './list-view.component.html',
-  styleUrls: ['./list-view.component.scss'],
+  host: { class: 'flex flex-col flex-1 min-h-0' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

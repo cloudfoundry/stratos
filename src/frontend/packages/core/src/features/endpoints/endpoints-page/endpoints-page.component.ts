@@ -36,7 +36,7 @@ import { EndpointsSignalListComponent } from './endpoints-signal-list.component'
 @Component({
   selector: 'app-endpoints-page',
   templateUrl: './endpoints-page.component.html',
-  styleUrls: ['./endpoints-page.component.scss'],
+  host: { class: 'flex flex-col h-full min-h-0' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

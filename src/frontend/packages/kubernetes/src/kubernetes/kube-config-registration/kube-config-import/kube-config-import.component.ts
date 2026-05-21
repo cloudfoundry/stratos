@@ -66,7 +66,7 @@ function createSignalWrapper<T>(initialValue: T) {
 @Component({
 selector: 'app-kube-config-import',
   templateUrl: './kube-config-import.component.html',
-  styleUrls: ['./kube-config-import.component.scss'],
+  host: { class: 'flex flex-1' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

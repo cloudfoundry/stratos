@@ -18,7 +18,7 @@ interface ISetupData<T> {
 @Component({
   selector: 'app-card',
   templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss'],
+  host: { class: 'relative' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: []

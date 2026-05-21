@@ -19,7 +19,7 @@ export interface EndpointMissingMessageParts {
 @Component({
   selector: 'app-endpoints-missing',
   templateUrl: './endpoints-missing.component.html',
-  styleUrls: ['./endpoints-missing.component.scss'],
+  host: { class: 'block relative overflow-visible' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

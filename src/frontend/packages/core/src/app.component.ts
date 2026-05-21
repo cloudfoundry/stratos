@@ -15,7 +15,7 @@ import { LoggedInService } from './logged-in.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  host: { class: 'flex flex-col flex-1 h-screen min-h-0' },
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

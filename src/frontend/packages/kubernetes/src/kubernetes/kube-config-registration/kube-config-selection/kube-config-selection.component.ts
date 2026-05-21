@@ -31,7 +31,7 @@ export interface KubeConfigTableListDataSource extends ITableListDataSource<Kube
 @Component({
 selector: 'app-kube-config-selection',
   templateUrl: './kube-config-selection.component.html',
-  styleUrls: ['./kube-config-selection.component.scss'],
+  host: { class: 'flex flex-1' },
   providers: [
     KubeConfigHelper
   ],
