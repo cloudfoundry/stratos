@@ -57,7 +57,6 @@ export {
   organizationEntityType,
   quotaDefinitionEntityType,
   cfEventEntityType,
-  cfInfoEntityType,
   cfUserEntityType,
   appSummaryEntityType,
   appStatsEntityType,

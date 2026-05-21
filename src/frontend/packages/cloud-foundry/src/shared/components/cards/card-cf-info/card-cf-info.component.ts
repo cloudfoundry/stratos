@@ -37,9 +37,10 @@ export class CardCfInfoComponent implements OnInit {
   private autoscalerInfoData = inject(AutoscalerInfoDataService);
 
   // Signal bridges over the existing observables. The data they carry is
-  // already V3-native (the effect under cfEntityCatalog.cfInfo.api.get
-  // hits /pp/v1/cf/info/{cnsi}); these are template-side signal reads,
-  // not a data-path migration.
+  // already V3-native — `cfEndpointService.info$` is a toObservable() bridge
+  // over CfInfoDataService's signal, which fetches /pp/v1/cf/info/{cnsi}
+  // directly (W-e dropped the ngrx GetCFInfo effect intermediary). These
+  // are template-side signal reads, not a data-path migration.
   readonly endpointInfo = this.cfEndpointService.endpoint;
   readonly info = toSignal(this.cfEndpointService.info$, { initialValue: null as any });
   readonly hasSSHAccess = toSignal(this.cfEndpointService.hasSSHAccess$, { initialValue: false });
