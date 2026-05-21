@@ -30,7 +30,6 @@ import { AppLifecycleProgressService } from '../app-lifecycle-progress/app-lifec
 @Component({
   selector: 'app-application-action-bar',
   templateUrl: './application-action-bar.component.html',
-  styleUrls: ['./application-action-bar.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

@@ -12,7 +12,6 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
 @Component({
   selector: 'app-card-cf-org-user-details',
   templateUrl: './card-cf-org-user-details.component.html',
-  styleUrls: ['./card-cf-org-user-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

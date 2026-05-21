@@ -1,12 +1,12 @@
 <div class="usage-card">
   <div class="custom-card">
     <div class="card-content">
-      <div class="app-metadata">
-        <div class="app-metadata__two-cols">
-          <app-metadata-item icon="title" label="Description">{{ description() }}</app-metadata-item>
+      <div class="flex flex-row">
+        <div class="flex-1">
+          <app-metadata-item class="mt-0" icon="title" label="Description">{{ description() }}</app-metadata-item>
           <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="apiUrl()">
-            <div class="app-metadata__address">
-              <div class="app-metadata__address__value">{{ apiUrl() }}</div>
+            <div class="flex min-h-6">
+              <div class="items-center flex mr-7 break-all">{{ apiUrl() }}</div>
             </div>
           </app-metadata-item>
           <app-metadata-item icon="info_outline" label="CF API Version">
@@ -17,8 +17,8 @@
             {{ v }}</app-metadata-item>
           }
         </div>
-        <div class="app-metadata__two-cols">
-          <app-metadata-item icon="person" label="Account Username">
+        <div class="flex-1">
+          <app-metadata-item class="mt-0" icon="person" label="Account Username">
             {{ endpointInfo()?.entity?.user?.name }}
             @if (endpointInfo()?.entity?.user?.admin) {
               <span> (Administrator)</span>
@@ -27,12 +27,12 @@
           <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Access">
           {{ hasSSHAccess() ? 'Available' : 'Not available' }}</app-metadata-item>
           <app-metadata-item icon="email" label="User Invitation Support">
-            <div class="user-invites">
+            <div>
               @if (canConfigureInvites()) {
                 @if (invitesConfigured()) {
-                  Configured - <button class="btn btn-ghost" (click)="deConfigureUserInvites()">Disable</button>
+                  Configured - <button class="btn btn-ghost [line-height:initial] m-0 min-w-[auto] p-0" (click)="deConfigureUserInvites()">Disable</button>
                 } @else {
-                  Not Configured - <button class="btn btn-ghost"
+                  Not Configured - <button class="btn btn-ghost [line-height:initial] m-0 min-w-[auto] p-0"
                   (click)="configureUserInvites()">Configure</button>
                 }
               } @else {

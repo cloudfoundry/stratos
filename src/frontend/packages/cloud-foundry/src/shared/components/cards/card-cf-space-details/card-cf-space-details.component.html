@@ -1,12 +1,12 @@
 <div class="cf-space-usage">
   <div class="custom-card">
     <div class="card-header">
-      <h2 class="card-title">Summary</h2>
+      <h2 class="font-medium">Summary</h2>
     </div>
     <div class="card-content">
-      <div class="app-metadata">
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="User Space Role/s">
+      <div class="flex flex-row">
+        <div class="flex-1">
+          <app-metadata-item class="mt-0" label="User Space Role/s">
             {{ (cfSpaceService.userRole$ | async) }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
@@ -29,8 +29,8 @@
           </app-boolean-indicator>
         </app-metadata-item>
       </div>
-      <div class="app-metadata__two-cols">
-        <app-metadata-item label="SSH Access">
+      <div class="flex-1">
+        <app-metadata-item class="mt-0" label="SSH Access">
           {{ allowSshStatus$ | async }}
         </app-metadata-item>
         <app-metadata-item label="Created At">
