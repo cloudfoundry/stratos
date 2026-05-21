@@ -12,7 +12,6 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
 @Component({
   selector: 'app-card-cf-space-details',
   templateUrl: './card-cf-space-details.component.html',
-  styleUrls: ['./card-cf-space-details.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

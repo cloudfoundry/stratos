@@ -8,7 +8,6 @@ import { IServiceInstance } from '../../../cf-api-svc.types';
 @Component({
   selector: 'app-service-instance-last-op',
   templateUrl: './service-instance-last-op.component.html',
-  styleUrls: ['./service-instance-last-op.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

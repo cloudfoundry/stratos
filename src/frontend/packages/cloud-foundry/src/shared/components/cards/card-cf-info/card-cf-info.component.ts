@@ -22,7 +22,6 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
 @Component({
   selector: 'app-card-cf-info',
   templateUrl: './card-cf-info.component.html',
-  styleUrls: ['./card-cf-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
