@@ -6,7 +6,6 @@ import { DateTimeComponent } from '../date-time/date-time.component';
 @Component({
   selector: 'app-start-end-date',
   templateUrl: './start-end-date.component.html',
-  styleUrls: ['./start-end-date.component.scss'],
   standalone: true,
   imports: [
     DateTimeComponent

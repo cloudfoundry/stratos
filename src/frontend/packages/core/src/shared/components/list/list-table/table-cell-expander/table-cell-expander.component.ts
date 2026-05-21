@@ -13,7 +13,6 @@ export interface TableCellExpanderConfig {
 @Component({
   selector: 'app-table-cell-expander',
   templateUrl: './table-cell-expander.component.html',
-  styleUrls: ['./table-cell-expander.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],

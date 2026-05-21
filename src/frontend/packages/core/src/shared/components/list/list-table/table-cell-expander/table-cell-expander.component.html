@@ -1,10 +1,10 @@
-<div class="expander cursor-pointer inline-flex items-center justify-center w-6 h-6"
+<div class="cursor-pointer inline-flex items-center justify-center w-6 h-6"
      role="button" tabindex="0"
      (click)="toggle()"
      (keydown.enter)="toggle()"
      (keydown.space)="toggle(); $event.preventDefault()"
      [@indicatorRotate]="expandedService.expanded[rowId] ? 'expanded': 'collapsed'">
-  <div class="expander__icon-container">
+  <div class="h-[18px] w-[8px]">
     <span class="material-icons text-sm transition-transform duration-200"
           [class.rotate-90]="expandedService.expanded[rowId]">
       chevron_right
