@@ -9,7 +9,6 @@ import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-met
 @Component({
   selector: 'app-favorites-side-panel',
   templateUrl: './favorites-side-panel.component.html',
-  styleUrls: ['./favorites-side-panel.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

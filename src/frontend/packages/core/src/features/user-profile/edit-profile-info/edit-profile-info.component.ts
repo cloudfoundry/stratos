@@ -31,7 +31,6 @@ interface EditProfileForm {
 @Component({
   selector: 'app-edit-profile-info',
   templateUrl: './edit-profile-info.component.html',
-  styleUrls: ['./edit-profile-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }

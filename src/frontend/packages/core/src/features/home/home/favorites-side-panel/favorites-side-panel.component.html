@@ -2,7 +2,7 @@
   @if (favorites$ | async; as favs) {
     <div>
       @for (entity of favs; track entity) {
-        <app-favorites-meta-card class="fav-side-panel__card" [favoriteEntity]="entity"></app-favorites-meta-card>
+        <app-favorites-meta-card class="flex flex-col mb-1.5" [favoriteEntity]="entity"></app-favorites-meta-card>
       }
     </div>
   }

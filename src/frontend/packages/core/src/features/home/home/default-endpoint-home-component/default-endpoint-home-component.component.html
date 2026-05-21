@@ -1,8 +1,8 @@
 @if (url) {
-  <div class="default-home-card">
+  <div class="m-4">
     <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="url">
-      <div class="default-home-card__address">
-        <div class="default-home-card__address__value">{{ url }}</div>
+      <div class="flex min-h-6">
+        <div class="flex items-center mr-7 break-all">{{ url }}</div>
       </div>
     </app-metadata-item>
   </div>

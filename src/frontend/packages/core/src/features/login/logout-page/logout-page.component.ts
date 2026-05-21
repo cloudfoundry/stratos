@@ -13,7 +13,6 @@ import { AppProgressBarComponent } from '../../../shared/components/progress-bar
 @Component({
 selector: 'app-logout-page',
   templateUrl: './logout-page.component.html',
-  styleUrls: ['./logout-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

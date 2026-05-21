@@ -10,7 +10,6 @@ import { MetadataItemComponent } from '../../../../shared/components/metadata-it
 @Component({
   selector: 'app-default-endpoint-home-component',
   templateUrl: './default-endpoint-home-component.component.html',
-  styleUrls: ['./default-endpoint-home-component.component.scss'],
   standalone: true,
   imports: [
     MetadataItemComponent
