@@ -34,7 +34,7 @@ export interface MonacoEditorOptions {
 @Component({
   selector: 'app-monaco-editor',
   templateUrl: './monaco-editor.component.html',
-  styleUrls: ['./monaco-editor.component.scss'],
+  host: { class: 'block w-full h-full' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [

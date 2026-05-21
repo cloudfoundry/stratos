@@ -2,6 +2,6 @@
 
   <router-outlet></router-outlet>
   @if (userId$ | async; as userId) {
-    <div class="user-id" id="__stratos-userid__">{{userId}}</div>
+    <div class="hidden" id="__stratos-userid__">{{userId}}</div>
   }
 </span>

@@ -42,7 +42,7 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
 @Component({
   selector: 'app-endpoints-signal-list',
   templateUrl: './endpoints-signal-list.component.html',
-  styleUrls: ['./endpoints-signal-list.component.scss'],
+  host: { class: 'flex flex-col flex-1 min-h-0' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ListSubNavComponent, SignalListComponent],
