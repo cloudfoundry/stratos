@@ -6,7 +6,6 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angu
   standalone: true,
   imports: [CommonModule],
   templateUrl: './copy-to-clipboard.component.html',
-  styleUrls: ['./copy-to-clipboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CopyToClipboardComponent implements OnInit {

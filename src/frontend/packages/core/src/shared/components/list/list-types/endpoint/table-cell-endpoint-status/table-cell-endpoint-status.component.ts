@@ -8,7 +8,6 @@ import { CustomIconComponent } from '../../../../../../shared/components/custom-
 @Component({
   selector: 'app-table-cell-endpoint-status',
   templateUrl: './table-cell-endpoint-status.component.html',
-  styleUrls: ['./table-cell-endpoint-status.component.scss'],
   standalone: true,
   imports: [
     CustomIconComponent
