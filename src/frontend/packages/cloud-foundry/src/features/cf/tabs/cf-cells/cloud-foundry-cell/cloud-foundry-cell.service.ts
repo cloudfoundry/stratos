@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { combineLatest, defer, Observable, from } from 'rxjs';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { MetricsConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.component';
 import { MetricsLineChartConfig } from '../../../../../../../core/src/shared/components/metrics-chart/metrics-chart.types';
@@ -9,15 +8,12 @@ import {
   MetricsChartHelpers,
 } from '../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
-import { AppState } from '../../../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../../../store/src/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../../../../store/src/monitors/pagination-monitor.factory';
-import { EndpointsDataService } from '../../../../../../../store/src/services/endpoints-data.service';
-import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { MetricsDataService, MetricsRequest } from '../../../../../../../store/src/services/metrics-data.service';
+import { IMetricMatrixResult, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
-import { FetchCFCellMetricsAction } from '../../../../../actions/cf-metrics.actions';
-import { CfCellHelper } from '../../../cf-cell.helpers';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
+
+const CELL_METRICS_BASE_URL = '/pp/v1/metrics/cf/cells';
 
 
 export const enum CellMetrics {
@@ -46,7 +42,7 @@ export const enum CellMetrics {
   providedIn: 'root'
 })
 export class CloudFoundryCellService {
-  private entityServiceFactory = inject(EntityServiceFactory);
+  private metricsDataService = inject(MetricsDataService);
 
 
   cfGuid!: string;
@@ -71,9 +67,6 @@ export class CloudFoundryCellService {
 
   constructor() {
     const activeRouteCfCell = inject(ActiveRouteCfCell);
-    const store = inject<Store<AppState>>(Store);
-    const paginationMonitorFactory = inject(PaginationMonitorFactory);
-    const endpointsService = inject(EndpointsDataService);
 
 
     this.cellId = activeRouteCfCell.cellId;
@@ -91,18 +84,18 @@ export class CloudFoundryCellService {
     this.usageDisk$ = this.generateUsage(this.remainingDisk$, this.totalDisk$);
     this.usageMemory$ = this.generateUsage(this.remainingMemory$, this.totalMemory$);
 
-    const cellHelper = new CfCellHelper(store, paginationMonitorFactory, endpointsService);
-    const action$ = cellHelper.createCellMetricAction(this.cfGuid);
-    this.cellMetric$ = action$.pipe(
-      switchMap(action => {
-        this.healthyMetricId = action.guid;
-        return this.generate(action.query.metric as CellMetrics, true);
+    // Probe both the post-v2.31 and pre-v2.31 health metrics; the first
+    // one that returns a value wins. Mirrors the previous CfCellHelper
+    // pagination probe but without the ngrx round-trip.
+    const healthMetric$ = defer(() => from(this.probeHealthMetric())).pipe(shareReplay(1));
+    this.cellMetric$ = healthMetric$.pipe(
+      switchMap(metric => {
+        this.healthyMetricId = `${this.cfGuid}-${this.cellId}:${metric}:value:${MetricQueryType.QUERY}:`;
+        return this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell>;
       })
     );
-    this.healthy$ = action$.pipe(
-      switchMap(action => {
-        return this.generate(action.query.metric as CellMetrics, false);
-      })
+    this.healthy$ = healthMetric$.pipe(
+      switchMap(metric => this.generate(metric))
     );
   }
 
@@ -114,12 +107,13 @@ export class CloudFoundryCellService {
       getSeriesName: (result: IMetricMatrixResult<IMetricCell>) => `Cell ${result.metric.bosh_job_id}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       mapSeriesItemValue,
-      metricsAction: new FetchCFCellMetricsAction(
-        this.cfGuid,
-        this.cellId,
-        new MetricQueryConfig(queryString + `{bosh_job_id="${this.cellId}"}`, {}),
-        queryRange
-      ),
+      request: {
+        endpointGuid: this.cfGuid,
+        url: CELL_METRICS_BASE_URL,
+        query: new MetricQueryConfig(queryString + `{bosh_job_id="${this.cellId}"}`, {}),
+        queryType: queryRange,
+        windowValue: null,
+      },
     };
   }
 
@@ -131,30 +125,53 @@ export class CloudFoundryCellService {
     return lineChartConfig;
   }
 
-  private generate(metric: CellMetrics, isMetric = false, customAction?: FetchCFCellMetricsAction): Observable<any> {
-    const action = customAction || new FetchCFCellMetricsAction(
-      this.cfGuid,
-      this.cellId,
-      new MetricQueryConfig(metric + `{bosh_job_id="${this.cellId}"}`, {}),
-      MetricQueryType.QUERY,
-      false
-    );
-    return this.entityServiceFactory.create<IMetrics<IMetricVectorResult<IMetricCell>>>(
-      action.guid,
-      action,
-    ).waitForEntity$.pipe(
-      map(entityInfo => entityInfo.entity),
+  private generate(metric: string): Observable<string> {
+    return this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, false) as Observable<string>;
+  }
+
+  // Single-value vector lookup. If `returnMetric` is true, returns the
+  // sample's `metric` label-set (used for the health-metric probe);
+  // otherwise returns the sample value or null.
+  private generateForMetric<T>(metric: string, returnMetric: boolean): Observable<IMetricCell | string | null> {
+    const req: MetricsRequest = this.cellMetricRequest(metric);
+    return from(this.metricsDataService.fetch<T>(req)).pipe(
       map(entity => {
-        if (!entity.data || !entity.data.result) {
+        const data = entity?.data as any;
+        if (!data || !data.result || data.result.length === 0) {
           return null;
         }
-        if (isMetric) {
-          return entity.data.result[0].metric;
+        if (returnMetric) {
+          return data.result[0].metric as IMetricCell;
         }
-        const res = entity.data.result;
-        return res && res.length ? entity.data.result[0].value[1] : null;
+        return data.result[0].value ? data.result[0].value[1] : null;
       })
     );
+  }
+
+  private cellMetricRequest(metric: string): MetricsRequest {
+    return {
+      endpointGuid: this.cfGuid,
+      url: CELL_METRICS_BASE_URL,
+      query: new MetricQueryConfig(`${metric}{bosh_job_id="${this.cellId}"}`, {}),
+      queryType: MetricQueryType.QUERY,
+      windowValue: null,
+    };
+  }
+
+  // Picks the live health metric. Newer Diego (v2.31+) emits
+  // `HEALTHY` (garden_health_check_failed); older Diego emits
+  // `HEALTHY_DEP` (unhealthy_cell). We try the new one first and fall
+  // back if it returns no samples for this cell.
+  private async probeHealthMetric(): Promise<CellMetrics.HEALTHY | CellMetrics.HEALTHY_DEP> {
+    const tryFetch = async (metric: CellMetrics) => {
+      const m = await this.metricsDataService.fetch<any>(this.cellMetricRequest(metric));
+      const result = m?.data?.result as any[] | undefined;
+      return result && result.length > 0;
+    };
+    if (await tryFetch(CellMetrics.HEALTHY)) {
+      return CellMetrics.HEALTHY;
+    }
+    return CellMetrics.HEALTHY_DEP;
   }
 
   private generateUsage(remaining$: Observable<string>, total$: Observable<string>): Observable<any> {

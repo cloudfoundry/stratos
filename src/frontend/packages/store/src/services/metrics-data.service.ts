@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { DestroyRef, Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Injectable, Injector, Signal, computed, effect, inject, runInInjectionContext, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { MetricQueryConfig, getFullMetricQueryQuery } from '../actions/metrics.actions';
@@ -42,6 +42,7 @@ export interface MetricsObservation<T = any> {
 @Injectable({ providedIn: 'root' })
 export class MetricsDataService {
   private readonly http = inject(HttpClient);
+  private readonly injector = inject(Injector);
 
   // One-shot fetch. Mirrors metrics.effects.ts:metrics$ — same URL build,
   // same x-cap-cnsi-list header, same response unwrap. Returns the IMetrics
@@ -104,28 +105,25 @@ export class MetricsDataService {
       }
     };
 
-    effect(() => {
-      const req = request();
-      // Restart polling on each request change.
-      if (timerId !== null) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-      untracked(() => { void runFetch(req); });
-      const interval = typeof options.pollIntervalMs === 'number'
-        ? options.pollIntervalMs
-        : options.pollIntervalMs?.();
-      if (interval && interval > 0 && req) {
-        timerId = setInterval(() => { void runFetch(request()); }, interval);
-      }
-    });
-
-    inject(DestroyRef).onDestroy(() => {
-      if (timerId !== null) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-      inFlightToken++;
+    // observe() may be called from inside an Angular lifecycle hook
+    // (e.g. ngOnInit), which is not itself an injection context. We
+    // anchor effect() to the service's captured injector so the
+    // signal -> fetch wire works regardless of caller context.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const req = request();
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        untracked(() => { void runFetch(req); });
+        const interval = typeof options.pollIntervalMs === 'number'
+          ? options.pollIntervalMs
+          : options.pollIntervalMs?.();
+        if (interval && interval > 0 && req) {
+          timerId = setInterval(() => { void runFetch(request()); }, interval);
+        }
+      });
     });
 
     return {

@@ -1,7 +1,6 @@
 import { ApplicationRef, Injectable, NgZone, inject } from '@angular/core';
-import { MetricsAction, MetricQueryType, EntityMonitor, IMetrics } from '@stratosui/store';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, takeWhile, tap } from 'rxjs/operators';
+import { MetricsRequest, MetricQueryType } from '@stratosui/store';
+import { Subject } from 'rxjs';
 import { isValid, isEqual } from 'date-fns';
 
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
@@ -28,21 +27,17 @@ export class MetricsRangeSelectorManagerService {
 
   public times = this.metricRangeService.times;
 
-  public metricsMonitor: EntityMonitor<IMetrics>;
-
   private readonly startIndex = 0;
 
   private readonly endIndex = 1;
 
   public startEnd: [Date, Date] = [null, null];
 
-  private initSub: Subscription;
-
   public selectedTimeRangeValue: ITimeRange;
 
-  public metricsAction$ = new Subject<MetricsAction>();
+  public request$ = new Subject<MetricsRequest>();
 
-  private baseAction: MetricsAction;
+  private baseRequest: MetricsRequest;
 
   private pollIndex: number;
 
@@ -61,50 +56,26 @@ export class MetricsRangeSelectorManagerService {
     this.startEnd[index] = date;
     const [start, end] = this.startEnd;
     if (start && end) {
-      const action = this.metricRangeService.getNewDateRangeAction(this.baseAction, start, end);
+      const next = this.metricRangeService.getNewDateRangeRequest(this.baseRequest, start, end);
       this.commit = () => {
         this.committedStartEnd = [
           this.startEnd[0],
           this.startEnd[1]
         ];
-        this.commitAction(action);
+        this.commitRequest(next);
       };
     }
   }
 
-  private setTimeWindowFromStore(metrics: IMetrics) {
-    const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
-    const isDifferent = (!start || !end) || !isEqual(start, this.start) || !isEqual(end, this.end);
-    if (isDifferent) {
-      this.committedStartEnd = [start, end];
+  public init(baseRequest: MetricsRequest) {
+    this.baseRequest = baseRequest;
+    if (!this.selectedTimeRange) {
+      const { timeRange } = this.metricRangeService.resolveTimeRange(baseRequest.windowValue);
+      this.selectedTimeRange = timeRange;
     }
-    this.selectedTimeRange = timeRange;
-  }
-
-  public init(entityMonitor: EntityMonitor<IMetrics>, baseAction: MetricsAction) {
-    this.baseAction = baseAction;
-    this.initSub = entityMonitor.entity$.pipe(
-      tap(metrics => {
-        if (metrics && !this.selectedTimeRange) {
-          this.setTimeWindowFromStore(metrics);
-        }
-      }),
-      debounceTime(0),
-      tap(metrics => {
-        // entity$ emits null first.
-        // If its still null after the debounce then we run setTimeWindowFromStore to get default selection
-        if (!metrics && !this.selectedTimeRange) {
-          this.setTimeWindowFromStore(metrics);
-        }
-      }),
-      takeWhile(metrics => !metrics)
-    ).subscribe();
   }
 
   public destroy() {
-    if (this.initSub) {
-      this.initSub.unsubscribe();
-    }
     this.endWindowPoll();
   }
 
@@ -145,10 +116,8 @@ export class MetricsRangeSelectorManagerService {
     this.ngZone.runOutsideAngular(() => {
       this.pollIndex = window.setInterval(
         () => {
-          if (timeWindow.value != null && this.baseAction) {
-            this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
-            // ZONELESS: Trigger change detection after periodic metrics update
-            // This runs outside Angular zone but needs to notify Angular of state changes
+          if (timeWindow.value != null && this.baseRequest) {
+            this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
             this.ngZone.run(() => this.appRef.tick());
           }
         },
@@ -168,14 +137,14 @@ export class MetricsRangeSelectorManagerService {
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
+    this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
     if (timeWindow.value) {
       this.startWindowPoll(timeWindow);
     }
   }
 
-  private commitAction(action: MetricsAction) {
-    this.metricsAction$.next(action);
+  private commitRequest(request: MetricsRequest) {
+    this.request$.next(request);
     this.commit = null;
   }
 

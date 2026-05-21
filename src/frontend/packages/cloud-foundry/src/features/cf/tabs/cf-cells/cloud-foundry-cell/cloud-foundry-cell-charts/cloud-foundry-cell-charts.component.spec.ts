@@ -12,7 +12,6 @@ import { CloudFoundryTestingModule } from '../../../../../../cloud-foundry-test.
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellChartsComponent } from './cloud-foundry-cell-charts.component';
-import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 
 class MockCloudFoundryCellService {
   cfGuid = 'cfGuid';
@@ -21,12 +20,13 @@ class MockCloudFoundryCellService {
   buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<any> => ({
     getSeriesName: (result: any) => `${result}`,
     mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-    metricsAction: new FetchCFCellMetricsAction(
-      'guid',
-      'cellId',
-      new MetricQueryConfig(queryString, {}),
-      queryRange,
-    ),
+    request: {
+      endpointGuid: 'cfGuid',
+      url: '/pp/v1/metrics/cf/cells',
+      query: new MetricQueryConfig(queryString, {}),
+      queryType: queryRange,
+      windowValue: null,
+    },
   })
 
   buildChartConfig = (yAxisLabel: string): MetricsLineChartConfig => ({

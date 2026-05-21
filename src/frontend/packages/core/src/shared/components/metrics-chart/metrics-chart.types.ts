@@ -1,7 +1,7 @@
-import { MetricsAction } from '@stratosui/store';
+import { MetricsRequest } from '@stratosui/store';
 
 export interface IMetricsConfig<T = any> {
-  metricsAction: MetricsAction;
+  request: MetricsRequest;
   getSeriesName: (obj: T) => string;
   mapSeriesItemName?: (anything: any) => any;
   mapSeriesItemValue?: (anything: any) => any;
@@ -25,7 +25,7 @@ export class MetricsLineChartConfig implements IMetricsChartConfig {
   chartType = MetricsChartTypes.LINE;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  autoScale = true; // This should be on by default
+  autoScale = true;
   yAxisTicks?: any[];
   yAxisTickFormatting?: YAxisTickFormattingFunc;
 }
