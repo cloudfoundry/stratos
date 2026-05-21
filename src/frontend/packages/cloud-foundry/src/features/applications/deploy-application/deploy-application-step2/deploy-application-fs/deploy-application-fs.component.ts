@@ -17,7 +17,6 @@ import { DeployApplicationFsUtils } from "./deploy-application-fs-utils";
 @Component({
   selector: "app-deploy-application-fs",
   templateUrl: "./deploy-application-fs.component.html",
-  styleUrls: ["./deploy-application-fs.component.scss"],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
