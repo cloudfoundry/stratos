@@ -35,7 +35,6 @@ export class AppChip<T = string> implements IAppChip<T> {
     ClickStopPropagationDirective
   ],
   templateUrl: './chips.component.html',
-  styleUrls: ['./chips.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppChipsComponent implements OnInit {

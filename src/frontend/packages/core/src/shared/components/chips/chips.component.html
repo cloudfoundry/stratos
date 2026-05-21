@@ -2,13 +2,13 @@
   <span class="text-content-muted">None</span>
 }
 @if (chips && chips.length) {
-  <div class="app-chips flex flex-wrap gap-2"
+  <div class="flex flex-wrap gap-2 my-[5px]"
     [ngClass]="{'flex-col': stacked, 'flex-row-reverse': orientation==='rtl'}"
     >
     @for (chip of chips | slice:0:limit; track chip.key ?? chip.value; let i = $index) {
       <div class="chip app-chip inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full border"
         [ngClass]="getChipClasses(chip.color)">
-        <div class="app-chip__container flex items-center gap-1">
+        <div class="flex items-center gap-1">
           @if (!!chip.url) {
             <a
               class="app-chip__link hover:underline"
@@ -17,7 +17,7 @@
               {{chip[displayProperty]}}
             </a>
           } @else {
-            <div class="app-chip__label">{{chip[displayProperty]}}</div>
+            <div class="flex-1 h-[18px] leading-[18px] break-all">{{chip[displayProperty]}}</div>
           }
           @if (chip.clearAction && (chip.hideClearButton$ | async) === false) {
             @if (!chip.busy || (chip.busy | async) === false) {
@@ -25,13 +25,13 @@
                 (click)="chip.clearAction(chip)"
                 (keydown.enter)="chip.clearAction(chip)"
                 (keydown.space)="chip.clearAction(chip); $event.preventDefault()"
-                class="material-icons text-sm app-chip__close cursor-pointer hover:text-red-600">
+                class="material-icons text-[15px] h-[15px] w-[15px] flex-none ml-[5px] cursor-pointer hover:text-red-600">
                 close
               </span>
             }
             @if (chip.busy && (chip.busy | async)) {
               <div
-                class="app-chip__busy-spinner">
+                class="flex-none ml-[5px]">
                 <div class="spinner w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
               </div>
             }
@@ -40,8 +40,7 @@
       </div>
     }
     @if (chips.length > lowerLimit) {
-      <button class="btn btn-sm btn-primary app-chips__limit"
-        [ngClass]="{'app-chips__show-more': atLowerLimit, 'app-chips__show-less': !atLowerLimit}"
+      <button class="btn btn-sm btn-primary cursor-pointer font-light min-w-0 px-[5px]"
         (click)="toggleLimit()"
         appClickStopPropagation>
         @if (atLowerLimit) {

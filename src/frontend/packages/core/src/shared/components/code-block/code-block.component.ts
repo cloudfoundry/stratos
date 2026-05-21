@@ -11,7 +11,6 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
     CopyToClipboardComponent
   ],
   templateUrl: './code-block.component.html',
-  styleUrls: ['./code-block.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {

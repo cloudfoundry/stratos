@@ -1,11 +1,11 @@
-<div class="app-code-block relative rounded-md"
-  [ngClass]="{ 'app-code-block__pre': codeBlockStyle === 'pre'}">
-  <div class="app-code-block__content p-4 font-mono text-sm overflow-x-auto" #preBlock>
+<div class="relative rounded-md p-[10px_20px] bg-[var(--code-block-bg)] border border-[var(--code-block-border)] text-[var(--code-block-text)]"
+  [class.px-\[20px\]]="codeBlockStyle === 'pre'">
+  <div class="flex flex-col justify-center p-4 font-mono text-sm overflow-x-auto mr-[20px]" #preBlock>
     <ng-content></ng-content>
   </div>
   @if (!hideCopy) {
     <app-copy-to-clipboard
-      class="app-code-block__copy absolute top-2 right-2"
+      class="absolute top-[10px] right-[20px]"
       [text]="text"
       [compact]="true">
     </app-copy-to-clipboard>
