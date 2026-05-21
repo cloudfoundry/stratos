@@ -24,7 +24,6 @@ interface EndpointForm {
 @Component({
   selector: 'app-connect-endpoint',
   templateUrl: './connect-endpoint.component.html',
-  styleUrls: ['./connect-endpoint.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

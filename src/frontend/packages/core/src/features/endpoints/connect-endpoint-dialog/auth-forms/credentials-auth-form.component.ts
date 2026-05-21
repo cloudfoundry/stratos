@@ -14,7 +14,6 @@ interface CredentialsAuthForm {
 @Component({
   selector: 'app-credentials-auth-form',
   templateUrl: './credentials-auth-form.component.html',
-  styleUrls: ['./credentials-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

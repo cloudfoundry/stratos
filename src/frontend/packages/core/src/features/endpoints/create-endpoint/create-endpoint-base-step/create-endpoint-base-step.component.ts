@@ -22,7 +22,6 @@ import { TileSelectorComponent } from '../../../../shared/components/tile-select
 @Component({
   selector: 'app-create-endpoint-base-step',
   templateUrl: './create-endpoint-base-step.component.html',
-  styleUrls: ['./create-endpoint-base-step.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

@@ -1,6 +1,6 @@
-<form class="connect flex flex-col gap-4" [formGroup]="endpointForm" (ngSubmit)="formSubmit && connectService.submit()">
+<form class="flex flex-col gap-4" [formGroup]="endpointForm" (ngSubmit)="formSubmit && connectService.submit()">
   @if (authTypesForEndpoint.length > 1) {
-    <app-form-field class="connect__auth-type">
+    <app-form-field class="w-full">
       <app-select (selectionChange)="authChanged($event)" id="authType" name="authType" formControlName="authType"
         placeholder="Auth Type">
         @for (auth of authTypesForEndpoint; track auth) {

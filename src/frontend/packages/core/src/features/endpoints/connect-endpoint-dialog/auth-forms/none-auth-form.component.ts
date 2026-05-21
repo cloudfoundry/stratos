@@ -11,7 +11,6 @@ export interface NoneAuthFormValue {}
 @Component({
   selector: 'app-none-auth-form',
   templateUrl: './none-auth-form.component.html',
-  styleUrls: ['./none-auth-form.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush
