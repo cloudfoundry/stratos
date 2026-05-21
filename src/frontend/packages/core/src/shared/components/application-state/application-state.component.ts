@@ -9,7 +9,6 @@ import { ApplicationStateIconComponent } from './application-state-icon/applicat
 @Component({
   selector: 'app-application-state',
   templateUrl: './application-state.component.html',
-  styleUrls: ['./application-state.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

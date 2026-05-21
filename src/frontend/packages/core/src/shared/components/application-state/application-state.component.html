@@ -1,12 +1,12 @@
-<div class="app-state" [ngClass]="{'app-state__with-icon': !hideIcon}">
+<div class="flex flex-row items-center" [class.h-\[25px\]]="!hideIcon">
   @if (!hideIcon) {
-    <app-application-state-icon [status]="status$ | async "></app-application-state-icon>
+    <app-application-state-icon class="pr-[5px]" [status]="status$ | async "></app-application-state-icon>
   }
-  <span class="app-state__label">{{ label$ | async }}</span>
+  <span class="overflow-hidden text-ellipsis">{{ label$ | async }}</span>
   @if (!initialStateOnly && (subLabel$ | async); as subLabel) {
     <span>
       <span>&nbsp;-&nbsp;</span>
-      <span class="app-state__sub-label">{{ subLabel$ | async }}</span>
+      <span class="overflow-hidden text-ellipsis">{{ subLabel$ | async }}</span>
     </span>
   }
 </div>
