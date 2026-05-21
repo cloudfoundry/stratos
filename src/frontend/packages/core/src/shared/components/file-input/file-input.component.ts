@@ -9,7 +9,6 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 @Component({
   selector: 'app-file-input',
   templateUrl: './file-input.component.html',
-  styleUrls: ['./file-input.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
