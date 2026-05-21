@@ -1,7 +1,13 @@
-<div class="upload-progress" [ngClass]="{'upload-progress-done': value === 100}">
-  <app-custom-icon class="upload-progress__icon">cloud_upload</app-custom-icon>
-  <app-custom-icon class="upload-progress__done">done</app-custom-icon>
-  <div class="upload-progress__spinner">
+<div class="relative w-[140px] h-[140px] align-middle">
+  <app-custom-icon class="absolute h-[140px] w-[140px] text-[96px] pt-4 border-4 border-solid rounded-full text-center transition-opacity duration-1000"
+    [class.opacity-0]="value === 100"
+    [class.opacity-100]="value !== 100">cloud_upload</app-custom-icon>
+  <app-custom-icon class="absolute h-[140px] w-[140px] text-[96px] pt-4 border-4 border-solid rounded-full text-center transition-opacity duration-1000"
+    [class.opacity-100]="value === 100"
+    [class.opacity-0]="value !== 100">done</app-custom-icon>
+  <div class="absolute w-[140px] h-[140px] transition-opacity duration-1000"
+    [class.opacity-0]="value === 100"
+    [class.opacity-100]="value !== 100">
     <custom-progress-bar [value]="value" mode="determinate" color="primary"></custom-progress-bar>
   </div>
 </div>

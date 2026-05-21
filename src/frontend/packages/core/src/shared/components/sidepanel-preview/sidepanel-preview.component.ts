@@ -10,7 +10,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 @Component({
   selector: 'app-sidepanel-preview',
   templateUrl: './sidepanel-preview.component.html',
-  styleUrls: ['./sidepanel-preview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
