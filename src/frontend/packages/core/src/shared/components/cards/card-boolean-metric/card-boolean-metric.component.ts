@@ -6,7 +6,6 @@ import { RouterNav, AppState } from '@stratosui/store';
 @Component({
   selector: 'app-card-boolean-metric',
   templateUrl: './card-boolean-metric.component.html',
-  styleUrls: ['./card-boolean-metric.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

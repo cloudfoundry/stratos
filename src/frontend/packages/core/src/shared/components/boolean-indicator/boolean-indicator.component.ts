@@ -32,7 +32,6 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
 @Component({
   selector: 'app-boolean-indicator',
   templateUrl: './boolean-indicator.component.html',
-  styleUrls: ['./boolean-indicator.component.scss'],
   standalone: true,
   imports: [
     CommonModule

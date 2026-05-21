@@ -7,7 +7,6 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 @Component({
   selector: 'app-upgrade-page',
   templateUrl: './upgrade-page.component.html',
-  styleUrls: ['./upgrade-page.component.scss'],
   standalone: true,
   imports: [
     IntroScreenComponent,
