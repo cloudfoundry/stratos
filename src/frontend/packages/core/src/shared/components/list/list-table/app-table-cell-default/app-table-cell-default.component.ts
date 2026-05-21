@@ -12,7 +12,6 @@ import { CustomIconComponent } from '../../../../../shared/components/custom-mat
 @Component({
   selector: 'app-table-cell-default',
   templateUrl: 'app-table-cell-default.component.html',
-  styleUrls: ['app-table-cell-default.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

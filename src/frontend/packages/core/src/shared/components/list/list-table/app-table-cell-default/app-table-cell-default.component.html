@@ -7,8 +7,8 @@
   <span class="link">
     @if (showShortLink) {
       @if (linkValue) {
-        <div class="link__short">
-          <a class="link__short__icon" [href]="linkValue" [attr.target]="linkTarget" (click)="$event.stopPropagation()">
+        <div class="flex">
+          <a class="text-[17px]" [href]="linkValue" [attr.target]="linkTarget" (click)="$event.stopPropagation()">
             <app-custom-icon>launch</app-custom-icon>
           </a>
           <a [href]="linkValue" [attr.target]="linkTarget">View</a>
