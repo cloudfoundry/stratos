@@ -1,16 +1,13 @@
-import { AfterViewInit, Component, Input, OnDestroy, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
 
-import { SignalStepHandle, StepOnNextFunction } from '@stratosui/core';
-import { RequestInfoState } from '@stratosui/store';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { SignalStepHandle } from '@stratosui/core';
+import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
-
+import { formToOrgQuotaWriteBody } from '../../quota-definition-form/quota-form-mapping';
 
 @Component({
   selector: 'app-create-quota-step',
@@ -27,10 +24,9 @@ import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-
 })
 export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
   private router = inject(Router);
+  private quotaData = inject(QuotaDataService);
 
-  quotasSubscription!: Subscription;
   cfGuid: string;
-  quotaForm!: FormGroup;
 
   @ViewChild('form', { static: true })
   form!: QuotaDefinitionFormComponent;
@@ -38,11 +34,6 @@ export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
   /** FWT-957: post-success navigation target supplied by parent. */
   @Input() redirectUrl!: string;
 
-  /**
-   * FWT-957: validity is mirrored from the embedded QuotaDefinitionFormComponent
-   * via a statusChanges subscription wired in ngAfterViewInit. Plain signal
-   * read so the SignalStepHandle.valid contract holds.
-   */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
 
@@ -50,15 +41,11 @@ export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
       const formValues = this.form.formGroup.getRawValue();
-      const finalState = await firstValueFrom(
-        cfEntityCatalog.quotaDefinition.api.create<RequestInfoState>(formValues.name, this.cfGuid, formValues).pipe(
-          pairwise(),
-          filter(([oldV, newV]) => oldV.creating && !newV.creating),
-          map(([, newV]) => newV),
-        )
-      );
-      if (finalState.error) {
-        throw new Error(`Failed to create quota: ${finalState.message}`);
+      const body = formToOrgQuotaWriteBody(formValues);
+      try {
+        await firstValueFrom(this.quotaData.createOrgQuota(this.cfGuid, body));
+      } catch (err: unknown) {
+        throw new Error(`Failed to create quota: ${err instanceof Error ? err.message : String(err)}`);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
@@ -66,7 +53,6 @@ export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
   }
 

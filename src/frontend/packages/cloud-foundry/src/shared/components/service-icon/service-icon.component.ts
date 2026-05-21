@@ -2,8 +2,7 @@ import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/cor
 import { CommonModule } from '@angular/common';
 
 import { CustomIconComponent } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService, IServiceExtra } from '../../../cf-api-svc.types';
+import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-service-icon',
@@ -20,18 +19,16 @@ export class ServiceIconComponent implements OnInit {
 
   image = '';
 
-  extraInfo: IServiceExtra;
-  @Input() service: APIResource<IService>;
-
+  @Input() service!: StServiceOffering | null;
   @Input() addMenuPadding = false;
   constructor() { }
 
   ngOnInit() {
-    if (this.service && this.service.entity) {
-      this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
-      if (this.extraInfo && this.extraInfo.imageUrl) {
-        this.image = this.extraInfo.imageUrl;
-      }
+    // brokerCatalogMetadata is already a decoded map; the V2 path JSON-parsed
+    // entity.extra. imageUrl is the only field this component reads.
+    const imageUrl = this.service?.brokerCatalogMetadata?.imageUrl;
+    if (typeof imageUrl === 'string') {
+      this.image = imageUrl;
     }
   }
 

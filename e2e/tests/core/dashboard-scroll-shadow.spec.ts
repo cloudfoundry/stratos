@@ -328,7 +328,17 @@ test.describe('Dashboard Content Scroll Shadow', () => {
         return;
       }
       await appsNav.click();
-      await page.waitForLoadState('networkidle');
+      // Wait deterministically for the signal-list scroll body to render
+      // rather than networkidle. networkidle can take >30s on /applications
+      // under parallel test load because of the org/space catalog fetch
+      // (lazy-loaded now via dropdown onOpen but visible-row resolver +
+      // app-stats batched poll can keep traffic flowing); the actual
+      // visual state we're checking is settled by the time the list
+      // paints. Fall through on timeout — the assertions below still
+      // run their own state evaluation.
+      await page.locator('app-signal-list [data-test="scroll-body"]')
+        .waitFor({ state: 'visible', timeout: 30000 })
+        .catch(() => {});
       await page.waitForTimeout(1000);
 
       // The dashboard shadow should exist but the list component has its own
@@ -336,7 +346,10 @@ test.describe('Dashboard Content Scroll Shadow', () => {
       // typically fill their container without overflow at the dashboard level
       const state = await page.evaluate((sel: string) => {
         const dashboardShadow = document.querySelector(sel) as HTMLElement;
-        const listShadow = document.querySelector('.list-component__body div[class*="bg-gradient-to-t"]') as HTMLElement;
+        // Post W36 list-component retirement: shadow lives at
+        // app-signal-list > div > [data-test="scroll-fade"]. The legacy
+        // .list-component__body container is gone.
+        const listShadow = document.querySelector('app-signal-list [data-test="scroll-fade"]') as HTMLElement;
 
         return {
           dashboardShadowExists: !!dashboardShadow,

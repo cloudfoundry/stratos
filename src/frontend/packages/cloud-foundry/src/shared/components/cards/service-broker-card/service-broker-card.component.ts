@@ -1,9 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, OnDestroy, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-
-import { Observable, of } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import {
   BooleanIndicatorComponent,
@@ -14,8 +11,9 @@ import {
   MetaCardTitleComponent,
   MetaCardValueComponent,
 } from '@stratosui/core';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { ServiceCatalogDataService } from '../../../../services/endpoint-data/service-catalog-data.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
+import { SpaceDataRegistry } from '../../../../services/endpoint-data/space-data.registry';
+import { SpaceDataService } from '../../../../services/endpoint-data/space-data.service';
 import { StServiceBroker } from '../../../../services/endpoint-data/stratos-types';
 import { TristateValueComponent } from '../../tristate-value/tristate-value.component';
 
@@ -27,16 +25,12 @@ interface BrokerSpaceLink {
 /**
  * ServiceBrokerCardComponent — service-offering Summary tab broker card.
  *
- * Signal-native rewrite (Stage 9b-2): inputs are the CNSI guid and the
- * offering's broker guid (read from the StServiceOffering on the parent
- * Summary component). The broker resource itself is fetched through
- * ServiceCatalogDataService.serviceBroker — same V3-native handler that
- * Stage 9b-1's instances tab uses, so the rendered shape (incl. the
- * tristate-aware authUsername) is consistent across the page.
- *
- * Space lookup remains on the legacy ngrx surface — same compromise as
- * the table-cell-service-broker variant; will move when the space-detail
- * migration lands.
+ * Signal-native: inputs are the CNSI guid and the offering's broker guid
+ * (read from the StServiceOffering on the parent Summary component). The
+ * broker resource is fetched through ServiceCatalogDataService.serviceBroker
+ * (V3-native, returns SignalSource); the optional space lookup goes through
+ * SpaceDataRegistry — same per-(cnsi, spaceGuid) caching every other space
+ * detail consumer uses.
  */
 @Component({
   selector: 'app-service-broker-card',
@@ -56,63 +50,89 @@ interface BrokerSpaceLink {
     TristateValueComponent,
   ],
 })
-export class ServiceBrokerCardComponent {
+export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
   private serviceCatalog = inject(ServiceCatalogDataService);
+  private spaceRegistry = inject(SpaceDataRegistry);
+  private injector = inject(Injector);
 
-  private _cfGuid = '';
-  private _brokerGuid = '';
+  private readonly _cfGuid = signal('');
+  private readonly _brokerGuid = signal('');
+  private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
 
-  broker$: Observable<StServiceBroker | null> = of(null);
-  spaceLink$: Observable<BrokerSpaceLink | null> = of(null);
+  // Acquired SpaceDataService (or null when no broker.space.guid yet).
+  // The registry refCounts per (cnsi, spaceGuid); we release on swap +
+  // destroy so warm caches stay shared with other consumers.
+  private _spaceData: SpaceDataService | null = null;
+  private _spaceKey: { cnsi: string, guid: string } | null = null;
+
+  readonly broker: Signal<StServiceBroker | null> = computed(
+    () => this._brokerSource()?.value() ?? null,
+  );
+
+  readonly spaceLink: Signal<BrokerSpaceLink | null> = computed(() => {
+    const cfGuid = this._cfGuid();
+    const space = this._spaceData?.space();
+    if (!space || !cfGuid) return null;
+    return {
+      name: space.name,
+      link: ['/cloud-foundry', cfGuid, 'organizations', space.orgGuid, 'spaces', space.guid, 'summary'],
+    };
+  });
 
   @Input()
   set cfGuid(value: string) {
-    this._cfGuid = value ?? '';
-    this.refreshStreams();
+    this._cfGuid.set(value ?? '');
+    this.refreshBroker();
   }
 
   @Input()
   set brokerGuid(value: string | null | undefined) {
-    this._brokerGuid = value ?? '';
-    this.refreshStreams();
+    this._brokerGuid.set(value ?? '');
+    this.refreshBroker();
   }
 
-  private refreshStreams(): void {
-    if (!this._cfGuid || !this._brokerGuid) {
-      this.broker$ = of(null);
-      this.spaceLink$ = of(null);
+  private refreshBroker(): void {
+    const cfGuid = this._cfGuid();
+    const brokerGuid = this._brokerGuid();
+    if (!cfGuid || !brokerGuid) {
+      this._brokerSource.set(null);
       return;
     }
-    const cfGuid = this._cfGuid;
-    const brokerGuid = this._brokerGuid;
+    this._brokerSource.set(this.serviceCatalog.serviceBroker(cfGuid, brokerGuid));
+  }
 
-    this.broker$ = of(brokerGuid).pipe(
-      filter((g): g is string => !!g),
-      distinctUntilChanged(),
-      switchMap(g => this.serviceCatalog.serviceBroker(cfGuid, g)),
-    );
-
-    this.spaceLink$ = this.broker$.pipe(
-      switchMap<StServiceBroker | null, Observable<BrokerSpaceLink | null>>(broker => {
-        if (!broker || !broker.space?.guid) {
-          return of(null);
+  ngOnInit(): void {
+    // Acquire/release SpaceDataService when broker.space.guid changes.
+    // Effect re-runs on broker swap (new SignalSource) and on broker
+    // value flip (HTTP landed) — same shape regardless of which triggered
+    // the change.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const broker = this.broker();
+        const cfGuid = this._cfGuid();
+        const targetGuid = broker?.space?.guid ?? null;
+        const targetKey = targetGuid && cfGuid ? { cnsi: cfGuid, guid: targetGuid } : null;
+        const curr = this._spaceKey;
+        if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
+        if (curr) {
+          this.spaceRegistry.release(curr.cnsi, curr.guid);
+          this._spaceData = null;
+          this._spaceKey = null;
         }
-        return cfEntityCatalog.space.store.getEntityService(broker.space.guid, cfGuid).waitForEntity$.pipe(
-          filter(e => !!e && !!e.entity && !!e.entity.entity && !!e.entity.metadata),
-          map(e => ({
-            name: e.entity.entity.name,
-            link: [
-              '/cloud-foundry',
-              cfGuid,
-              'organizations',
-              e.entity.entity.organization_guid,
-              'spaces',
-              e.entity.metadata.guid,
-              'summary',
-            ],
-          })),
-        );
-      }),
-    );
+        if (targetKey) {
+          this._spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
+          this._spaceData.load().subscribe();
+          this._spaceKey = targetKey;
+        }
+      });
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this._spaceKey) {
+      this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
+      this._spaceData = null;
+      this._spaceKey = null;
+    }
   }
 }

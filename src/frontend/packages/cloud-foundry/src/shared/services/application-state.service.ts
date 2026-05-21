@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 
 import { StratosStatus, StratosStatusMetadata } from '@stratosui/store';
-import { AppStat } from '../../store/types/app-metadata.types';
 
 export interface ApplicationStateData extends StratosStatusMetadata {
   actions: {
@@ -189,7 +188,7 @@ export class ApplicationStateService {
    * @param summary - the application summary metadata (either from summary or entity)
    * @param appInstances - the application instances metadata (from the app stats API call)
    */
-  get(summary: { state?: string, instances?: number, package_state?: string, package_updated_at?: string } | null, appInstances: AppStat[] | null): ApplicationStateData {
+  get(summary: { state?: string, instances?: number, package_state?: string, package_updated_at?: string } | null, appInstances: ReadonlyArray<{ state: string }> | null): ApplicationStateData {
     const appState: string = summary ? (summary.state || 'UNKNOWN') : 'UNKNOWN';
     const pkgState = this.getPackageState(appState, summary);
     const wildcard: any = (this.stateMetadata as any)['?'];
@@ -277,7 +276,7 @@ export class ApplicationStateService {
    * @param appInstances - the application instances metadata (from the app stats API call)
    * @returns Object with instance count metadata
    */
-  private getCounts(summary: { instances?: number } | null, appInstances: AppStat[] | null): { running: number, starting: number, okay: number, expected: number, crashed: number, flapping: number } {
+  private getCounts(summary: { instances?: number } | null, appInstances: ReadonlyArray<{ state: string }> | null): { running: number, starting: number, okay: number, expected: number, crashed: number, flapping: number } {
     const counts: { running: number, starting: number, okay: number, expected: number, crashed: number, flapping: number } = {
       running: 0,
       starting: 0,
@@ -319,7 +318,7 @@ export class ApplicationStateService {
    * @param appInstances - the application instances metadata (from the app stats API call)
    * @param instanceState - the instance state to use when filtering the app instance metadata
    */
-  private getCount(value: number | undefined, appInstances: AppStat[] | null, instanceState: string): number {
+  private getCount(value: number | undefined, appInstances: ReadonlyArray<{ state: string }> | null, instanceState: string): number {
     // Use a value if one available
     if (value) {
       return value;
@@ -351,7 +350,7 @@ export class ApplicationStateService {
    * @param summary - the application summary metadata (either from summary or entity)
    * @param appInstances - the application instances metadata (from the app stats API call)
    */
-  getInstanceState(summary: { state?: string, instances?: number } | null, appInstances: AppStat[] | null): ApplicationStateData {
+  getInstanceState(summary: { state?: string, instances?: number } | null, appInstances: ReadonlyArray<{ state: string }> | null): ApplicationStateData {
     const appState: string = summary ? (summary.state || 'UNKNOWN') : 'UNKNOWN';
     if (appState !== 'STARTED') {
       return this.getStateForIndicator(StratosStatus.TENTATIVE);

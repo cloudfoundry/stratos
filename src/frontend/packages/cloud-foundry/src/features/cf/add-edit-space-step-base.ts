@@ -1,65 +1,45 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { take, filter, map, tap } from 'rxjs/operators';
+import { Signal, computed } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { StepOnNextResult } from '@stratosui/core';
-import { getPaginationKey, APIResource } from '@stratosui/store';
-import { ISpaceQuotaDefinition } from '../../cf-api.types';
-import { CFAppState } from '../../cf-app-state';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
-import { organizationEntityType } from '../../cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
+import { OrgDataRegistry } from '../../services/endpoint-data/org-data.registry';
+import { QuotaDataService } from '../../services/endpoint-data/quota-data.service';
+import { StSpaceQuota } from '../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export class AddEditSpaceStepBase {
-  fetchSpacesSubscription: Subscription;
   orgGuid: string;
   cfGuid: string;
-  allSpacesInOrg!: string[];
-  allSpacesInOrg$: Observable<string[]>;
   /** Name uniqueness check; subclasses implement. Used by spaceNameTakenValidator. */
   isNameUnique!: (spaceName: string) => boolean;
-  quotaDefinitions$: Observable<APIResource<ISpaceQuotaDefinition>[]>;
-  hasSpaceQuotas$: Observable<boolean>;
+
+  readonly allSpacesInOrg: Signal<string[]>;
+  readonly quotaDefinitions: Signal<StSpaceQuota[]>;
+  readonly hasSpaceQuotas: Signal<boolean>;
 
   constructor(
-    protected store: Store<CFAppState>,
     protected activatedRoute: ActivatedRoute,
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    protected orgRegistry: OrgDataRegistry,
+    protected quotaData: QuotaDataService,
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
-    this.allSpacesInOrg$ = cfEntityCatalog.space.store.getAllInOrganization.getPaginationService(
-      this.orgGuid,
-      this.cfGuid,
-      getPaginationKey(organizationEntityType, this.orgGuid), {
-      flatten: true }
-    ).entities$.pipe(
-      filter(spaces => !!spaces),
-      map(spaces => spaces.map(space => space.entity.name)),
-      tap(spaceNames => this.allSpacesInOrg = spaceNames),
-      take(1),
-    );
-    this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
-    this.quotaDefinitions$ = cfEntityCatalog.spaceQuota.store.getAllInOrganization.getPaginationService(
-      this.orgGuid,
-      this.cfGuid,
-      createEntityRelationPaginationKey(organizationEntityType, this.orgGuid)
-    ).entities$.pipe(
-      filter(o => !!o),
-      take(1)
-    );
+    const orgService = this.orgRegistry.acquire(this.cfGuid, this.orgGuid);
+    orgService.load().subscribe();
+    this.allSpacesInOrg = computed(() => orgService.spaces().map(s => s.name));
 
-    this.hasSpaceQuotas$ = this.quotaDefinitions$.pipe(
-      map(q => q && q.length > 0)
-    );
+    const quotaSource = this.quotaData.spaceQuotasInOrg(this.cfGuid, this.orgGuid);
+    this.quotaDefinitions = quotaSource.value;
+    this.hasSpaceQuotas = computed(() => this.quotaDefinitions().length > 0);
   }
 
   destroy(): void {
-    this.fetchSpacesSubscription.unsubscribe();
+    this.orgRegistry.release(this.cfGuid, this.orgGuid);
   }
 
   spaceNameTakenValidator = (): ValidatorFn => {

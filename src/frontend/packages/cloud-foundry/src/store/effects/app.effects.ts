@@ -7,22 +7,11 @@ import { endpointHasMetrics } from '../../../../core/src/features/endpoints/endp
 import { EndpointOnlyAppState } from '../../../../store/src/app-state';
 import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
 import { APISuccessOrFailedAction } from '../../../../store/src/types/request.types';
-import { ASSIGN_ROUTE_SUCCESS } from '../../actions/application-service-routes.actions';
 import { CF_APP_UPDATE_SUCCESS, UpdateExistingApplication } from '../../actions/application.actions';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
 import {
   createAppInstancesMetricAction,
 } from '../../shared/components/list/list-types/app-instance/cf-app-instances-metrics-action';
 
-// CF effects retention (wave-3 CF-effects audit, 2026-05-12):
-// Retained — ASSIGN_ROUTE_SUCCESS / CF_APP_UPDATE_SUCCESS are still
-// auto-emitted by the cfEntityCatalog API request pipeline whenever a
-// route is assigned (cfEntityCatalog.application.api.assignRoute, see
-// create-application-step3.component.ts:138) or an application is
-// updated (cfEntityCatalog.application.api.update, see
-// application.service.ts:341 and the AppVariablesEffect at
-// app-variables.effects.ts:22). Both side-effects (refresh app summary,
-// clear cell metrics on scale-up) still fire at runtime.
 @Injectable({
   providedIn: 'root'
 })
@@ -32,14 +21,6 @@ export class AppEffects {
   private appRef = inject(ApplicationRef);
   private endpointsService = inject(EndpointsDataService);
 
-
-   updateSummary$ = createEffect(() => this.actions$.pipe(
-    ofType<APISuccessOrFailedAction>(ASSIGN_ROUTE_SUCCESS),
-    map(action => {
-      cfEntityCatalog.appSummary.api.get(action.apiAction.guid, action.apiAction.endpointGuid);
-      this.appRef.tick();
-    }),
-  ), { dispatch: false });
 
    clearCellMetrics$ = createEffect(() => this.actions$.pipe(
     ofType<APISuccessOrFailedAction>(CF_APP_UPDATE_SUCCESS),

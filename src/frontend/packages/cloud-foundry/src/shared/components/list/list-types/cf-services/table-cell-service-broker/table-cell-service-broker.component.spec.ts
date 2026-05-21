@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { firstValueFrom, of } from 'rxjs';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellServiceBrokerComponent, TableCellServiceBrokerComponentMode } from './table-cell-service-broker.component';
-import { ServiceCatalogDataService } from '../../../../../../services/endpoint-data/service-catalog-data.service';
-import { StServiceBroker } from '../../../../../../services/endpoint-data/stratos-types';
+import { ServiceCatalogDataService, SignalSource } from '../../../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceBroker, StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 
 describe('TableCellServiceBrokerComponent', () => {
   let component: TableCellServiceBrokerComponent;
@@ -15,7 +15,7 @@ describe('TableCellServiceBrokerComponent', () => {
   beforeEach(async () => {
     lastBrokerLookup = null;
     const serviceCatalogStub: Partial<ServiceCatalogDataService> = {
-      serviceBroker: (cnsiGuid: string, brokerGuid: string) => {
+      serviceBroker: (cnsiGuid: string, brokerGuid: string): SignalSource<StServiceBroker | null> => {
         lastBrokerLookup = { cnsiGuid, brokerGuid };
         const broker: StServiceBroker = {
           guid: brokerGuid,
@@ -28,7 +28,11 @@ describe('TableCellServiceBrokerComponent', () => {
           createdAt: '',
           updatedAt: '',
         };
-        return of(broker);
+        return {
+          value: signal<StServiceBroker | null>(broker).asReadonly(),
+          isLoading: signal(false).asReadonly(),
+          error: signal<HttpErrorResponse | null>(null).asReadonly(),
+        };
       },
     };
 
@@ -49,16 +53,19 @@ describe('TableCellServiceBrokerComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('resolves broker$ via ServiceCatalogDataService when row is assigned', async () => {
+  it('resolves broker via ServiceCatalogDataService when row is assigned', () => {
     component.config = { mode: TableCellServiceBrokerComponentMode.NAME };
-    component.row = {
-      entity: { service_broker_guid: 'broker-7', cfGuid: 'cnsi-1' },
-      metadata: { guid: 'svc-1' },
-    } as any;
+    const offering: StServiceOffering = {
+      guid: 'svc-1',
+      cnsiGuid: 'cnsi-1',
+      name: 'svc',
+      broker: { guid: 'broker-7' },
+      createdAt: '2026-01-01T00:00:00Z',
+    };
+    component.row = offering;
     fixture.detectChanges();
 
-    const broker = await firstValueFrom(component.broker$);
     expect(lastBrokerLookup).toEqual({ cnsiGuid: 'cnsi-1', brokerGuid: 'broker-7' });
-    expect(broker?.name).toBe('global-broker');
+    expect(component.broker()?.name).toBe('global-broker');
   });
 });

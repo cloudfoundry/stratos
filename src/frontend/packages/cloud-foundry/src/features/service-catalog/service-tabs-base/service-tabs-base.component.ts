@@ -13,8 +13,6 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 
 import {
   IHeaderBreadcrumb,
@@ -27,7 +25,7 @@ import { CfCurrentUserPermissions, CfUserPermissionDirective } from '@stratosui/
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
-import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import {
   StServiceBroker,
   StServiceOffering,
@@ -103,7 +101,14 @@ export class ServiceTabsBaseComponent implements OnInit, OnDestroy {
   ];
 
   private readonly _offering = signal<StServiceOffering | null>(null);
-  private readonly _broker = signal<StServiceBroker | null>(null);
+  // _brokerSource holds the currently-active broker fetch (or null when
+  // no broker guid is known). The broker computed below follows both
+  // _brokerSource (offering swap) and the held source's value signal
+  // (HTTP response landing) — one computed, two reactive layers.
+  private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
+  private readonly _broker = computed<StServiceBroker | null>(
+    () => this._brokerSource()?.value() ?? null,
+  );
   private readonly _endpointService = signal<EndpointDataService | null>(null);
 
   readonly serviceLabel: Signal<string> = computed(() => this._offering()?.name ?? '');
@@ -157,24 +162,20 @@ export class ServiceTabsBaseComponent implements OnInit, OnDestroy {
       void svc.loadServicesDetails();
     }
     if (this.cfGuid && this.serviceGuid) {
-      this.catalog.serviceOffering(this.cfGuid, this.serviceGuid).pipe(
-        catchError(() => of(null)),
-      ).subscribe(o => this._offering.set(o));
+      const offeringSource = this.catalog.serviceOffering(this.cfGuid, this.serviceGuid);
+      runInInjectionContext(this.injector, () => {
+        effect(() => this._offering.set(offeringSource.value()));
+      });
     }
     runInInjectionContext(this.injector, () => {
-      // When the offering lands and carries a broker ref, fetch the
-      // broker once. The space-scoped query-params signal recomputes
-      // automatically from _broker.
+      // When the offering lands and carries a broker ref, swap the
+      // active broker source. The _broker computed follows both this
+      // and the source's emitted value.
       effect(() => {
-        const off = this._offering();
-        const brokerGuid = off?.broker?.guid;
-        if (!brokerGuid) {
-          this._broker.set(null);
-          return;
-        }
-        this.catalog.serviceBroker(this.cfGuid, brokerGuid).pipe(
-          catchError(() => of(null)),
-        ).subscribe(b => this._broker.set(b));
+        const brokerGuid = this._offering()?.broker?.guid;
+        this._brokerSource.set(
+          brokerGuid ? this.catalog.serviceBroker(this.cfGuid, brokerGuid) : null,
+        );
       });
     });
   }

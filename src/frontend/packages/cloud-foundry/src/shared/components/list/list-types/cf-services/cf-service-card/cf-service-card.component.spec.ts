@@ -11,7 +11,21 @@ import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITI
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
 import { generateCFEntities } from '../../../../../../cf-entity-generator';
+import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 import { CfServiceCardComponent } from './cf-service-card.component';
+
+const makeOffering = (overrides: Partial<StServiceOffering> = {}): StServiceOffering => ({
+  guid: 'offering-guid',
+  cnsiGuid: 'cnsi-guid',
+  name: 'svc',
+  description: '',
+  tags: [],
+  requires: [],
+  available: true,
+  bindable: true,
+  createdAt: '2026-01-01T00:00:00Z',
+  ...overrides,
+});
 
 describe('CfServiceCardComponent', () => {
   let component: CfServiceCardComponent;
@@ -51,23 +65,7 @@ describe('CfServiceCardComponent', () => {
 
     fixture = TestBed.createComponent(CfServiceCardComponent);
     component = fixture.componentInstance;
-    component.row = {
-      entity: {
-        label: '',
-        description: '',
-        active: 1,
-        bindable: 1,
-        unique_id: '',
-        extra: '',
-        tags: [''],
-        requires: [''],
-        service_broker_guid: 'service_broker_guid',
-        plan_updateable: 1,
-        service_plans_url: '',
-        service_plans: [],
-      },
-      metadata: null,
-    };
+    component.row = makeOffering();
     fixture.detectChanges();
   });
 
@@ -82,13 +80,7 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('active field should be false/NO', () => {
-    component.row = {
-      ...component.serviceEntity,
-      entity: {
-        ...component.serviceEntity.entity,
-        active: 0
-      }
-    };
+    component.row = makeOffering({ available: false });
     fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
     fixture.detectChanges();
 
@@ -104,13 +96,7 @@ describe('CfServiceCardComponent', () => {
   });
 
   it('bindable field should be false/NO', () => {
-    component.row = {
-      ...component.serviceEntity,
-      entity: {
-        ...component.serviceEntity.entity,
-        bindable: 0
-      }
-    };
+    component.row = makeOffering({ bindable: false });
     fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
     fixture.detectChanges();
 

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@stratosui/store';
 import {
@@ -13,11 +14,8 @@ import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarServic
 import { RouterNav } from '@stratosui/store';
 import { CFAppState } from '@stratosui/cloud-foundry';
 import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { spaceEntityType } from '../../../../cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
-import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import type { StApp, StAppsResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 
 @Component({
@@ -40,6 +38,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private injector = inject(Injector);
   private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
 
 
   @Input() appGuid!: string;
@@ -103,13 +102,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
       appGuid$.subscribe(guid => {
         this.validSubject.next(!!guid);
         this.appGuid = guid;
-
-        // Update the root app wall list
-        cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
-          includeRelations: CfAppsDataSource.includeRelations });
-
-        // Pre-fetch the app env vars
-        cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
+        // Pre-fetches the app wall + env vars used to live here to warm
+        // the legacy ngrx state. AppDetailDataService and
+        // CfAppsSignalConfigService both fetch fresh on next mount, so
+        // dropping the pre-fetches is functionally a no-op modulo a
+        // one-time HTTP saved.
       })
     );
 
@@ -157,16 +154,17 @@ export class DeployApplicationStep3Component implements OnDestroy {
           const appName = this.deployer.appData.Name;
           const cfGuid = this.deployer.cfGuid;
           const spaceGuid = this.deployer.spaceGuid;
-          const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
-          return cfEntityCatalog.application.store.getAllInSpace
-            .getPaginationService(spaceGuid, cfGuid, paginationKey)
-            .entities$.pipe(
-              filter(apps => Array.isArray(apps) && apps.length > 0),
-              map(apps => apps.find(a => a.entity?.name === appName)),
-              filter(app => !!app),
-              map(app => app.metadata.guid),
-              take(1),
-            );
+          // Native handler returns apps for the space; client-side filter
+          // for the just-deployed name. Single HTTP call replaces the
+          // legacy ngrx pagination that walked the space-apps list.
+          return this.http.get<StAppsResponse>(
+            `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
+          ).pipe(
+            map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)),
+            filter((app): app is StApp => !!app),
+            map(app => app.guid),
+            take(1),
+          );
         }),
       ).subscribe(guid => {
         this.deployer.applicationGuid$.next(guid);
@@ -254,18 +252,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   };
 
   goToAppSummary() {
-    // Take user to applications
+    // Take user to applications. AppDetailDataService on the destination
+    // page fetches app entity + env vars fresh on mount — the legacy
+    // pre-fetches that used to live here were warming ngrx state that
+    // nothing reads anymore.
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
-
-      // Ensure the application package_state is correct
-      cfEntityCatalog.application.api.get(
-        this.appGuid,
-        cfGuid,
-        { includeRelations: [], populateMissing: false }
-      );
-      // this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
       this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }
   }

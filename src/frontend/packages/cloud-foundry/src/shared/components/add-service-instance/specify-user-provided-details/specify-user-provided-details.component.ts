@@ -26,7 +26,6 @@ import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subs
 import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
@@ -337,8 +336,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
           if (!req.success) {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
-            // Refetch env vars for app, since they have been changed by CF
-            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid);
+            // Bind succeeded — CF mutates VCAP_SERVICES on the app. Refresh
+            // env vars on AppDetailDataService when bind happened from inside
+            // the app-detail route hierarchy (the injector resolved). Outside
+            // that hierarchy the env-vars tab fetches fresh on next mount, so
+            // a no-op here is correct — no need to prime legacy ngrx state.
+            if (this.appDetailData && data.bindAppGuid) {
+              this.appDetailData.refresh('envVars').catch(() => { /* swallow — surface via _errors signal */ });
+            }
             return { success: true, redirect: true };
           }
         })

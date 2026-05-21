@@ -37,8 +37,7 @@ export class CfAppRoutesSignalConfigService {
     viewMode: 'table',
     pageSize: [25, 25],
     pageIndex: [0, 0],
-    // Default sort mirrors legacy CfRoutesListConfigBase: most recent
-    // route first via metadata.created_at -> StRoute.createdAt.
+    // Default: most recent route first via StRoute.createdAt.
     sort: [
       { field: 'createdAt', direction: 'desc' },
       { field: 'createdAt', direction: 'desc' },

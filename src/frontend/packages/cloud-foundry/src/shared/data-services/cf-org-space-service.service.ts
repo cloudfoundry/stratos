@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import { ListPaginationMultiFilterChange, naturalCompare, valueOrCommonFalsy } from '@stratosui/core';
@@ -31,10 +31,16 @@ export function spreadPaginationParams(params: PaginationParam): PaginationParam
 
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
+  // Bridge layer for the legacy IListMultiFilterConfig interface in the
+  // core list framework, which still requires `list$: Observable<...>`
+  // and `loading$: Observable<boolean>`. See
+  // project_ilistmultifilterconfig_signal_debt — retires when that
+  // interface migrates to Signal.
   return {
     key,
     label,
-    ...cfOrgSpaceItem,
+    select: cfOrgSpaceItem.select,
+    loading$: cfOrgSpaceItem.loading$,
     list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
       return entities.map(entity => ({
         label: entity.name,
@@ -46,16 +52,31 @@ export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSp
 }
 
 /**
- * Legacy CfOrgSpaceItem shape. The `list$` and `loading$` observables, and
- * the `select` BehaviorSubject, are signal-backed shims kept for consumers
- * that haven't migrated off rxjs yet. New consumers should read the
- * service's `orgList`/`spaceList` signals and write to the underlying
- * signals directly when those become public.
+ * Signal-native cf/org/space picker state. `list` / `loading` / `select`
+ * are signals; consumers read via signal-call and write via `.set()`.
+ *
+ * `list$` and `loading$` are deprecated bridge views retained only for
+ * `createCfOrgSpaceFilterConfig` → `IListMultiFilterConfig` in the core
+ * list framework. They retire when the list framework multi-filter API
+ * migrates to Signal. See `project_ilistmultifilterconfig_signal_debt`.
  */
 export interface CfOrgSpaceItem<T = any> {
-  list$: Observable<T[]>;
-  loading$: Observable<boolean>;
-  select: BehaviorSubject<string>;
+  list: Signal<T[]>;
+  loading: Signal<boolean>;
+  /**
+   * Source-of-truth WritableSignal augmented with `next`/`asObservable`
+   * compat for the framework `IListMultiFilterConfig.select` slot.
+   * Consumers should use `select.set(v)` and `select()`; the augmentation
+   * methods are only there so the framework keeps working.
+   */
+  select: WritableSignal<string | null> & {
+    next: (v: string | null) => void;
+    asObservable: () => Observable<string | null>;
+  };
+  /** @deprecated Bridge for `IListMultiFilterConfig.list$`. */
+  readonly list$: Observable<T[]>;
+  /** @deprecated Bridge for `IListMultiFilterConfig.loading$`. */
+  readonly loading$: Observable<boolean>;
 }
 
 export const createCfOrSpaceMultipleFilterFn = (
@@ -198,11 +219,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
     return [...list].sort((a, b) => naturalCompare(a.name, b.name));
   });
 
-  // === Public CfOrgSpaceItem shim API (legacy rxjs surface) ===
+  // === Public signal-native CfOrgSpaceItem API ===
   public cf!: CfOrgSpaceItem<EndpointModel>;
   public org!: CfOrgSpaceItem<IOrganization>;
   public space!: CfOrgSpaceItem<ISpace>;
-  public isLoading$: Observable<boolean>;
+  public isLoading!: Signal<boolean>;
 
   // setInitialValuesFromAction support (services-wall persisted filter)
   public initialValues$!: Observable<any>;
@@ -211,26 +232,37 @@ export class CfOrgSpaceDataService implements OnDestroy {
   constructor() {
     this.debug.log('service:construct');
 
-    // Build legacy shims. select is a BehaviorSubject backed by the signal;
-    // list$/loading$ are toObservable(signal).
+    // Build the signal-native picker triples. `list` / `loading` are
+    // signals; `select` is a WritableSignal augmented with `.next` /
+    // `.asObservable` so the legacy `IListMultiFilterConfig.select`
+    // contract keeps working. The Observable bridge views `list$` /
+    // `loading$` are kept narrowly for the framework's filter config
+    // (see `project_ilistmultifilterconfig_signal_debt`).
+    const cfLoading = computed(() => this.connectedCfList().length === 0);
     this.cf = {
+      list: this.connectedCfList,
+      loading: cfLoading,
+      select: this.augmentSelect(this._cfSelected, 'cf'),
       list$: toObservable(this.connectedCfList) as Observable<EndpointModel[]>,
-      loading$: toObservable(computed(() => this.connectedCfList().length === 0)),
-      select: this.makeSelectShim(this._cfSelected, 'cf'),
+      loading$: toObservable(cfLoading),
     };
     this.org = {
+      list: this.orgList as Signal<IOrganization[]>,
+      loading: this._orgFetching.asReadonly(),
+      select: this.augmentSelect(this._orgSelected, 'org'),
       list$: toObservable(this.orgList) as Observable<IOrganization[]>,
       loading$: toObservable(this._orgFetching),
-      select: this.makeSelectShim(this._orgSelected, 'org'),
     };
     this.space = {
+      list: this.spaceList as Signal<ISpace[]>,
+      loading: this._spaceFetching.asReadonly(),
+      select: this.augmentSelect(this._spaceSelected, 'space'),
       list$: toObservable(this.spaceList) as Observable<ISpace[]>,
       loading$: toObservable(this._spaceFetching),
-      select: this.makeSelectShim(this._spaceSelected, 'space'),
     };
-    this.isLoading$ = toObservable(computed(() =>
+    this.isLoading = computed(() =>
       this.connectedCfList().length === 0 || this._orgFetching() || this._spaceFetching()
-    ));
+    );
 
     // === Effects ===
 
@@ -319,23 +351,32 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   /**
-   * Legacy BehaviorSubject shim backed by a WritableSignal. Calling
-   * `.next(v)` writes the signal; the signal is the source of truth for
-   * the cascade and auto-pick effects. Signal updates emit on the
-   * BehaviorSubject so existing `| async` and `.subscribe()` consumers
-   * keep working. Retire this shim when consumers migrate to signals.
+   * Augments a `WritableSignal<string | null>` with the `.next` and
+   * `.asObservable` methods that the core list framework's
+   * `IListMultiFilterConfig.select` slot still requires. Consumers read
+   * via `select()` and write via `select.set(v)`; the augmentation is
+   * only there so the framework binding keeps working. Retires when the
+   * list framework multi-filter API migrates to Signal — see
+   * `project_ilistmultifilterconfig_signal_debt`.
    */
-  private makeSelectShim(sig: WritableSignal<string | null>, kind: 'cf' | 'org' | 'space'): BehaviorSubject<string> {
-    const bs = new BehaviorSubject<string>(sig() as any);
-    const innerNext = bs.next.bind(bs);
-    effect(() => {
-      const v = sig();
-      innerNext(v as any);
+  private augmentSelect(
+    sig: WritableSignal<string | null>,
+    kind: 'cf' | 'org' | 'space',
+  ): WritableSignal<string | null> & {
+    next: (v: string | null) => void;
+    asObservable: () => Observable<string | null>;
+  } {
+    const obs = toObservable(sig);
+    const augmented = sig as WritableSignal<string | null> & {
+      next: (v: string | null) => void;
+      asObservable: () => Observable<string | null>;
+    };
+    augmented.next = (v: string | null) => {
+      sig.set(v);
       this.debug.log(`${kind}:select-change`, { to: v });
-    });
-    bs.next = (v: string) => sig.set(v as any);
-    bs.getValue = () => sig() as any;
-    return bs;
+    };
+    augmented.asObservable = () => obs;
+    return augmented;
   }
 
   /**

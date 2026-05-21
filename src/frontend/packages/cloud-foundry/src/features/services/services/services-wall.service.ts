@@ -1,20 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
-import { serviceEntityType } from '../../../cf-entity-types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 
+/**
+ * Lists the service offerings reachable from a given (cnsi, space). Thin
+ * pass-through over `ServiceCatalogDataService.serviceOfferingsInSpace`,
+ * kept as its own service so consumers can be provider-injected with a
+ * mockable seam in tests.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ServicesWallService {
+  private serviceCatalog = inject(ServiceCatalogDataService);
 
-  getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
-    return createEntityRelationPaginationKey(serviceEntityType, `${cfGuid}-${spaceGuid}`);
+  getServicesInSpaceSource(cfGuid: string, spaceGuid: string): SignalSource<StServiceOffering[]> {
+    return this.serviceCatalog.serviceOfferingsInSpace(cfGuid, spaceGuid);
   }
-
-  getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
-    const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
-    return cfEntityCatalog.service.store.getAllInSpace.getPaginationService(cfGuid, paginationKey, spaceGuid).entities$;
-  };
 }

@@ -1,8 +1,6 @@
-
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, OnDestroy, OnInit, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -10,29 +8,16 @@ import {
   CustomFormFieldComponent,
   FocusDirective,
   UnlimitedInputComponent,
-  safeUnsubscribe
 } from '@stratosui/core';
-import { endpointEntityType } from '@stratosui/store';
-import { IQuotaDefinition } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import { StOrgQuota } from '../../../services/endpoint-data/stratos-types';
 import { cfOsDebugLog } from '../../../shared/data-services/cf-org-space-debug';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { OrgQuotaFormValues, orgQuotaToFormValues } from './quota-form-mapping';
 
-export interface QuotaFormValues {
-  name: string;
-  totalServices: number;
-  totalRoutes: number;
-  memoryLimit: number;
-  appTasksLimit: number;
-  totalPrivateDomains: number;
-  totalServiceKeys: number;
-  instanceMemoryLimit: number;
-  nonBasicServicesAllowed: boolean;
-  totalReservedRoutePorts: number;
-  appInstanceLimit: number;
-}
+// Re-export for legacy step-component imports.
+export type QuotaFormValues = OrgQuotaFormValues;
 
 @Component({
   selector: 'app-quota-definition-form',
@@ -52,41 +37,34 @@ export interface QuotaFormValues {
 ]
 })
 export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
-  /**
-   * Signal that reflects formGroup.valid. Reading this in a template
-   * binding (via form.valid()) registers the consuming component as a
-   * dependent, so Angular auto-marks it dirty when the signal changes,
-   * regardless of OnPush / ngTemplateOutlet boundaries.
-   */
+  // Signal that reflects formGroup.valid for OnPush-friendly change detection.
   private validSignal = signal(false);
 
-  quotasSubscription!: Subscription;
   private formStatusSub?: Subscription;
   cfGuid: string;
-  allQuotas!: string[];
+  allQuotas: string[] = [];
   formGroup!: FormGroup<{
     name: FormControl<string>;
-    totalServices: FormControl<number>;
-    totalRoutes: FormControl<number>;
-    memoryLimit: FormControl<number>;
-    instanceMemoryLimit: FormControl<number>;
+    totalServices: FormControl<number | string>;
+    totalRoutes: FormControl<number | string>;
+    memoryLimit: FormControl<number | string>;
+    instanceMemoryLimit: FormControl<number | string>;
     nonBasicServicesAllowed: FormControl<boolean>;
-    totalReservedRoutePorts: FormControl<number>;
-    appInstanceLimit: FormControl<number>;
-    totalServiceKeys: FormControl<number>;
-    totalPrivateDomains: FormControl<number>;
-    appTasksLimit: FormControl<number>;
+    totalReservedRoutePorts: FormControl<number | string>;
+    appInstanceLimit: FormControl<number | string>;
+    totalServiceKeys: FormControl<number | string>;
+    totalPrivateDomains: FormControl<number | string>;
+    appTasksLimit: FormControl<number | string>;
   }>;
 
-  @Input() quota!: IQuotaDefinition;
+  @Input() quota: StOrgQuota | null = null;
+
+  private quotaData = inject(QuotaDataService);
+  private injector = inject(Injector);
 
   constructor() {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    // FWT-917 diagnostic: confirm the form received a usable cfGuid via
-    // the route. If empty, the create/edit POST will hit the wrong CF or
-    // 404, and the form's "name already taken" validator can't run.
     cfOsDebugLog('quotaForm:construct', {
       cfGuid: this.cfGuid,
       hasQuota: !!this.quota,
@@ -94,9 +72,6 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // FWT-917 diagnostic: log the @Input quota on init (for edit flows).
-    // If hasQuota is false on an edit screen, the parent step component
-    // failed to thread the entity into the form.
     cfOsDebugLog('quotaForm:init', {
       cfGuid: this.cfGuid,
       hasQuota: !!this.quota,
@@ -104,12 +79,6 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     });
     this.setupForm();
     this.fetchQuotasDefinitions();
-    // Mirror formGroup.valid into a signal. The template binding
-    // [valid]="step1.validate()" calls this.valid(), which reads the
-    // signal; any change to the signal causes Angular to mark the
-    // consuming component dirty automatically — no need for tick() or
-    // manual markForCheck — and it works across ngTemplateOutlet /
-    // OnPush boundaries.
     this.validSignal.set(this.formGroup.valid);
     this.formStatusSub = this.formGroup.statusChanges.subscribe(
       () => this.validSignal.set(this.formGroup.valid)
@@ -117,33 +86,39 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   setupForm() {
-    const quota: any = this.quota || {};
+    const initial: OrgQuotaFormValues | null = this.quota ? orgQuotaToFormValues(this.quota) : null;
 
     this.formGroup = new FormGroup({
-      name: new FormControl(quota.name || '', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
-      totalServices: new FormControl(quota.total_services, { nonNullable: true }),
-      totalRoutes: new FormControl(quota.total_routes, { nonNullable: true }),
-      memoryLimit: new FormControl(quota.memory_limit, { nonNullable: true }),
-      instanceMemoryLimit: new FormControl(quota.instance_memory_limit, { nonNullable: true }),
-      nonBasicServicesAllowed: new FormControl(quota.non_basic_services_allowed || false, { nonNullable: true }),
-      totalReservedRoutePorts: new FormControl(quota.total_reserved_route_ports, { nonNullable: true }),
-      appInstanceLimit: new FormControl(quota.app_instance_limit, { nonNullable: true }),
-      totalServiceKeys: new FormControl(quota.total_service_keys, { nonNullable: true }),
-      totalPrivateDomains: new FormControl(quota.total_private_domains, { nonNullable: true }),
-      appTasksLimit: new FormControl(quota.app_task_limit, { nonNullable: true }),
+      name: new FormControl(initial?.name ?? '', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
+      totalServices: new FormControl<number | string>(initial?.totalServices ?? '', { nonNullable: true }),
+      totalRoutes: new FormControl<number | string>(initial?.totalRoutes ?? '', { nonNullable: true }),
+      memoryLimit: new FormControl<number | string>(initial?.memoryLimit ?? '', { nonNullable: true }),
+      instanceMemoryLimit: new FormControl<number | string>(initial?.instanceMemoryLimit ?? '', { nonNullable: true }),
+      nonBasicServicesAllowed: new FormControl(initial?.nonBasicServicesAllowed ?? false, { nonNullable: true }),
+      totalReservedRoutePorts: new FormControl<number | string>(initial?.totalReservedRoutePorts ?? '', { nonNullable: true }),
+      appInstanceLimit: new FormControl<number | string>(initial?.appInstanceLimit ?? '', { nonNullable: true }),
+      totalServiceKeys: new FormControl<number | string>(initial?.totalServiceKeys ?? '', { nonNullable: true }),
+      totalPrivateDomains: new FormControl<number | string>(initial?.totalPrivateDomains ?? '', { nonNullable: true }),
+      appTasksLimit: new FormControl<number | string>(initial?.appTasksLimit ?? '', { nonNullable: true }),
     });
   }
 
   fetchQuotasDefinitions() {
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, this.cfGuid);
-    const quotaDefinitions$ = cfEntityCatalog.quotaDefinition.store.getPaginationService(quotaPaginationKey, this.cfGuid, {})
-      .entities$.pipe(
-        filter(o => !!o),
-        map(o => o.map(org => org.entity.name)),
-        tap((o: string[]) => this.allQuotas = o)
-      );
-
-    this.quotasSubscription = quotaDefinitions$.subscribe();
+    // SignalSource pulls the foundation's org quotas in a single
+    // /pp/v1/cf/organization_quotas/:cnsi call; we mirror the names into
+    // `allQuotas` for the name-taken validator to consult on each
+    // statusChange.
+    const source = this.quotaData.orgQuotas(this.cfGuid);
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const list = source.value();
+        if (list && list.length) {
+          this.allQuotas = list.map(q => q.name);
+          // Re-trigger validation if the form already exists.
+          this.formGroup?.controls.name.updateValueAndValidity({ emitEvent: false });
+        }
+      });
+    });
   }
 
   nameTakenValidator = (): ValidatorFn => {
@@ -151,7 +126,6 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
       if (!this.validateNameTaken(formField.value)) {
         return { nameTaken: { value: formField.value } };
       }
-
       return null;
     };
   }
@@ -160,20 +134,15 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     if (this.quota && value === this.quota.name) {
       return true;
     }
-
     if (this.allQuotas) {
       return this.allQuotas.indexOf(value ?? this.formGroup.value.name ?? '') === -1;
     }
-
     return true;
   }
 
-  // Read the signal so the template binding that calls this method
-  // registers as a dependent and auto-refreshes when status changes.
   valid = () => this.validSignal();
 
   ngOnDestroy() {
-    safeUnsubscribe(this.quotasSubscription);
     this.formStatusSub?.unsubscribe();
   }
 }

@@ -1,22 +1,16 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, map, pairwise, publishReplay, refCount, take, withLatestFrom } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, withLatestFrom } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
-  ActionState,
   APIResource,
   EntityInfo,
-  EntityService,
-  PaginationObservables,
   RequestInfoState,
   rootUpdatingKey,
-  Store
 } from '@stratosui/store';
-import { AppMetadataTypes } from '../../actions/app-metadata.actions';
-import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../actions/application.actions';
-import { CFAppState } from '../../cf-app-state';
+import { GetApplication } from '../../actions/application.actions';
 import {
   applicationEntityType,
   domainEntityType,
@@ -29,10 +23,8 @@ import {
 import { IApp, IAppSummary } from '../../cf-api.types';
 import { CfEndpointsDataService } from '../../services/domain-data/cf-endpoints-data.service';
 import { StDomain, StOrg, StSpace } from '../../services/endpoint-data/stratos-types';
-import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
-import { ApplicationStateData, ApplicationStateService } from '../../shared/services/application-state.service';
-import { ApplicationEnvVarsHelper } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationStateData } from '../../shared/services/application-state.service';
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppStat } from '../../store/types/app-metadata.types';
 import { stToLegacy } from '../../services/v3-to-legacy-adapter';
@@ -68,72 +60,13 @@ export interface ApplicationData {
  * Component-scoped at application-base.component (matches the data
  * service's lifetime). Was providedIn: 'root' historically; that was
  * an injection-token bug — APP_GUID/CF_GUID come from the route.
- *
- * entityService and appEnvVars are kept from the legacy ngrx path
- * because the variables tab accesses
- * ngrx-specific properties (poll(), action, entities$) that cannot
- * be replaced without a full ngrx removal — which is deferred.
  */
 @Injectable()
 export class ApplicationService {
-  // Static utility — used by app list cards, the home compact-app-card, and
-  // the table-cell app status renderer. Independent of the per-app detail
-  // page lifecycle; pulls live stats from the legacy ngrx paginator and
-  // composes via ApplicationStateService. Stays here because consumers
-  // already import ApplicationService for the static call.
-  static getApplicationState(
-    appStateService: ApplicationStateService,
-    app: IApp,
-    appGuid: string,
-    cfGuid: string,
-  ): Observable<ApplicationStateData> {
-    return cfEntityCatalog.appStats.store
-      .getPaginationMonitor(appGuid, cfGuid).currentPage$
-      .pipe(
-        map(appInstancesPages => appStateService.get(app, appInstancesPages)),
-        publishReplay(1),
-        refCount(),
-      );
-  }
-
   cfGuid = inject(CF_GUID);
   appGuid = inject(APP_GUID);
-  private store = inject<Store<CFAppState>>(Store);
-  private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private detail = inject(AppDetailDataService);
   private cfEndpoints = inject(CfEndpointsDataService);
-
-  // ---------------------------------------------------------------------------
-  // Legacy ngrx EntityService — kept for application-tabs-base
-  // (entityMonitor.entityRequest$, updatingSection$).
-  // ---------------------------------------------------------------------------
-  public entityService: EntityService<APIResource<IApp>>;
-  private appSummaryEntityService: EntityService<IAppSummary>;
-
-  // ---------------------------------------------------------------------------
-  // Legacy ngrx paginator — kept for variables-tab (appEnvVars.entities$).
-  // ---------------------------------------------------------------------------
-  appEnvVars: PaginationObservables<APIResource>;
-
-  constructor() {
-    const cfGuid = this.cfGuid;
-    const appGuid = this.appGuid;
-
-    this.entityService = cfEntityCatalog.application.store.getEntityService(
-      appGuid,
-      cfGuid,
-      {
-        includeRelations: createGetApplicationAction(appGuid, cfGuid).includeRelations,
-        populateMissing: true
-      }
-    );
-    this.appSummaryEntityService = cfEntityCatalog.appSummary.store.getEntityService(
-      appGuid,
-      cfGuid
-    );
-
-    this.appEnvVars = this.appEnvVarsService.createEnvVarsObs(appGuid, cfGuid);
-  }
 
   // ---------------------------------------------------------------------------
   // Signal → Observable bridges
@@ -311,16 +244,6 @@ export class ApplicationService {
   // ---------------------------------------------------------------------------
 
   /**
-   * getApplicationEnvVarsMonitor — kept for compatibility with components that
-   * need a direct entity monitor on env vars.
-   */
-  public getApplicationEnvVarsMonitor() {
-    return cfEntityCatalog.appEnvVar.store.getEntityMonitor(
-      this.appGuid
-    );
-  }
-
-  /**
    * isEntityComplete — utility used by some consumers.
    */
   isEntityComplete(value: any, requestInfo: { fetching: boolean }): boolean {
@@ -329,28 +252,6 @@ export class ApplicationService {
     } else {
       return !!value;
     }
-  }
-
-  /**
-   * updateApplication — dispatch a legacy ngrx update action and wait for it
-   * to settle. Keeps the edit-application step working unchanged.
-   */
-  updateApplication(
-    updatedApplication: UpdateApplication,
-    updateEntities?: AppMetadataTypes[],
-    existingApplication?: IApp): Observable<ActionState> {
-    return cfEntityCatalog.application.api.update<ActionState>(
-      this.appGuid,
-      this.cfGuid,
-      { ...updatedApplication },
-      existingApplication,
-      updateEntities
-    ).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.busy && !newS.busy),
-      map(([, newS]) => newS),
-      take(1)
-    );
   }
 }
 

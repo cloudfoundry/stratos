@@ -42,7 +42,6 @@ import { DomainActionBuilders } from './entity-action-builders/domin.action-buil
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
-import { RoutesActionBuilders } from './entity-action-builders/routes.action-builder';
 import { SecurityGroupBuilders } from './entity-action-builders/security-groups.action-builder';
 import { ServiceBindingActionBuilders } from './entity-action-builders/service-binding.action-builders';
 import { ServiceBrokerActionBuilders } from './entity-action-builders/service-broker.entity-builders';
@@ -174,8 +173,7 @@ export class CfEntityCatalog {
 
   public route!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    APIResource<IRoute>,
-    RoutesActionBuilders
+    APIResource<IRoute>
   >;
 
   public stack!: StratosBaseCatalogEntity<

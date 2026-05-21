@@ -278,7 +278,7 @@ export class EndpointsDataService {
     throw new Error(`Endpoint ${guid} not found`);
   }
 
-  async register(opts: EndpointRegisterOptions): Promise<ActionState> {
+  async register(opts: EndpointRegisterOptions): Promise<ActionState & { guid?: string }> {
     const body = new FormData();
     body.set('endpoint_type', opts.endpointType);
     body.set('cnsi_name', opts.name);
@@ -496,7 +496,7 @@ export class EndpointsDataService {
     body: FormData | null,
     errorMessageHandler: (e: HttpErrorResponse) => string,
     onSuccess?: (endpoint: EndpointModel) => Promise<EndpointModel | void> | void,
-  ): Promise<ActionState> {
+  ): Promise<ActionState & { guid?: string }> {
     this.markFetching(guid, true);
     try {
       const params = new HttpParams();
@@ -510,7 +510,14 @@ export class EndpointsDataService {
         await onSuccess(result);
       }
       this.markFetching(guid, false);
-      return { busy: false, error: false, message: '' };
+      // Surface the response's authoritative guid alongside the
+      // ActionState. For register() this is the freshly-assigned guid
+      // (the input `guid` is a synthetic staging key) — callers like
+      // the connect stepper depend on it to wire the next step. For
+      // connect / disconnect / unregister the guid is already known
+      // by the caller, but always returning it keeps the contract
+      // symmetric.
+      return { busy: false, error: false, message: '', guid: result?.guid ?? guid };
     } catch (err) {
       const message = errorMessageHandler(err as HttpErrorResponse);
       this.markFetching(guid, false, message);

@@ -16,7 +16,34 @@ import {
 
 import { ApplicationDeleteComponent } from './application-delete.component';
 import { AppDeleteSelectionService } from '../app-delete-selection.service';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+
+function makeStubAppDetailDataService() {
+  const _errors = signal<Record<string, unknown | null>>({
+    app: null, summary: null, stats: null, envVars: null,
+    space: null, org: null, domains: null, routes: null, serviceBindings: null,
+  });
+  const _loading = signal<Record<string, boolean>>({
+    app: false, summary: false, stats: false, envVars: false,
+    space: false, org: false, domains: false, routes: false, serviceBindings: false,
+  });
+  return {
+    errors: _errors.asReadonly(),
+    loading: _loading.asReadonly(),
+    app: signal(undefined).asReadonly(),
+    summary: signal(undefined).asReadonly(),
+    stats: signal([]).asReadonly(),
+    envVars: signal(undefined).asReadonly(),
+    space: signal(undefined).asReadonly(),
+    org: signal(undefined).asReadonly(),
+    domains: signal([]).asReadonly(),
+    routes: signal(null).asReadonly(),
+    serviceBindings: signal(null).asReadonly(),
+    refresh: vi.fn().mockResolvedValue(undefined),
+    update: vi.fn().mockResolvedValue(undefined),
+  };
+}
 
 function makeStubSignalConfigService() {
   const pageIndex = signal(0);
@@ -76,6 +103,7 @@ describe('ApplicationDeleteComponent', () => {
         TabNavService,
         DatePipe,
         { provide: CfAppsSignalConfigService, useValue: stubSignalConfig },
+        { provide: AppDetailDataService, useValue: makeStubAppDetailDataService() },
         AppDeleteSelectionService,
       ]
     }).compileComponents();

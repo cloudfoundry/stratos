@@ -62,22 +62,31 @@ const quotaDefinitionEntitySchema = cfEntityFactory(quotaDefinitionEntityType);
 const spaceQuotaEntitySchema = cfEntityFactory(spaceQuotaEntityType);
 
 const UNLIMITED = -1;
+// Legacy ngrx action — write path now goes through QuotaDataService.
+// V3-shape form values can be number | string (UnlimitedInputComponent
+// emits '' for unlimited); coerce to number for the V2 wire body kept
+// here only because the action classes are still pinned through
+// cf-entity-catalog wiring.
+function toNumber(v: number | string | undefined): number {
+  const n = Number(v);
+  return isNaN(n) || v === '' || v == null ? UNLIMITED : n;
+}
 function orgSpaceQuotaFormValuesToApiObject(formValues: QuotaFormValues, isOrg = true, orgGuid?: string): IQuotaDefinition {
   const res: IQuotaDefinition = {
     name: formValues.name,
-    total_services: formValues.totalServices || UNLIMITED,
-    total_routes: formValues.totalRoutes || UNLIMITED,
-    memory_limit: formValues.memoryLimit,
-    app_task_limit: formValues.appTasksLimit || UNLIMITED,
-    total_service_keys: formValues.totalServiceKeys || UNLIMITED,
-    instance_memory_limit: formValues.instanceMemoryLimit || UNLIMITED,
+    total_services: toNumber(formValues.totalServices),
+    total_routes: toNumber(formValues.totalRoutes),
+    memory_limit: toNumber(formValues.memoryLimit),
+    app_task_limit: toNumber(formValues.appTasksLimit),
+    total_service_keys: toNumber(formValues.totalServiceKeys),
+    instance_memory_limit: toNumber(formValues.instanceMemoryLimit),
     non_basic_services_allowed: formValues.nonBasicServicesAllowed,
-    total_reserved_route_ports: formValues.totalReservedRoutePorts || UNLIMITED,
-    app_instance_limit: formValues.appInstanceLimit || UNLIMITED,
+    total_reserved_route_ports: toNumber(formValues.totalReservedRoutePorts),
+    app_instance_limit: toNumber(formValues.appInstanceLimit),
   };
   if (isOrg) {
     // Required for org quotas
-    res.total_private_domains = formValues.totalPrivateDomains || UNLIMITED;
+    res.total_private_domains = toNumber(formValues.totalPrivateDomains);
   } else if (orgGuid) {
     // Required for creating space quota
     res.organization_guid = orgGuid;

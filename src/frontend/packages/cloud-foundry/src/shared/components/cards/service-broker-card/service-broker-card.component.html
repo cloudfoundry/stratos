@@ -1,5 +1,5 @@
-@let broker = broker$ | async;
-@let spaceLink = spaceLink$ | async;
+@let b = broker();
+@let sl = spaceLink();
 
 <app-meta-card class="service-broker">
   <app-meta-card-title>
@@ -8,11 +8,11 @@
   <app-meta-card-item>
     <app-meta-card-item>
       <app-meta-card-key>Name</app-meta-card-key>
-      <app-meta-card-value>{{ broker?.name }}</app-meta-card-value>
+      <app-meta-card-value>{{ b?.name }}</app-meta-card-value>
     </app-meta-card-item>
     <app-meta-card-key>Broker Link</app-meta-card-key>
     <app-meta-card-value>
-      <a [href]="broker?.url" target="_blank" appClickStopPropagation>
+      <a [href]="b?.url" target="_blank" appClickStopPropagation>
         <span class="material-icons">launch</span>
       </a>
     </app-meta-card-value>
@@ -21,22 +21,22 @@
     <app-meta-card-key>Auth Username</app-meta-card-key>
     <app-meta-card-value>
       <app-tristate-value
-        [value]="broker?.authUsername"
-        [unavailable]="broker?._meta?.unavailable?.includes('authUsername') ?? false">
+        [value]="b?.authUsername"
+        [unavailable]="b?._meta?.unavailable?.includes('authUsername') ?? false">
       </app-tristate-value>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Space Scoped</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="!!broker?.space?.guid" type="yes-no">
+      <app-boolean-indicator [isTrue]="!!b?.space?.guid" type="yes-no">
       </app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
-  @if (broker?.space?.guid && spaceLink) {
+  @if (b?.space?.guid && sl) {
     <app-meta-card-item>
       <app-meta-card-key>Space</app-meta-card-key>
-      <app-meta-card-value><a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a></app-meta-card-value>
+      <app-meta-card-value><a [routerLink]="sl.link">{{ sl.name }}</a></app-meta-card-value>
     </app-meta-card-item>
   }
 </app-meta-card>

@@ -24,7 +24,6 @@ import {
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
-import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
 
 export const GET_SPACES = '[Space] Get all';
@@ -91,43 +90,6 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     'order-direction-field': 'name',
     'order-by': 'name'
   };
-}
-
-export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public spaceGuid: string,
-    public endpointGuid: string,
-    public paginationKey: string,
-    public includeRelations = [
-      createEntityRelationKey(routeEntityType, domainEntityType),
-      createEntityRelationKey(routeEntityType, applicationEntityType)
-    ],
-    public populateMissing = true,
-    public flattenPagination = true
-  ) {
-    super();
-    this.options = new HttpRequest(
-      'GET',
-      `spaces/${spaceGuid}/routes`
-    );
-    this.parentGuid = spaceGuid;
-  }
-  actions = [
-    RouteEvents.GET_SPACE_ALL,
-    RouteEvents.GET_SPACE_ALL_SUCCESS,
-    RouteEvents.GET_SPACE_ALL_FAILED
-  ];
-  initialParams = {
-    'results-per-page': 100,
-    page: 1,
-    'order-direction': 'desc',
-    'order-direction-field': 'creation',
-  };
-  parentGuid: string;
-  entity = cfEntityFactory(routeEntityType);
-  entityType = routeEntityType;
-  options: HttpRequest<any>;
-  parentEntityConfig = new CFEntityConfig(spaceEntityType);
 }
 
 export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {

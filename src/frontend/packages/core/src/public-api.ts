@@ -146,7 +146,8 @@ export { AppActionMonitorComponent } from './shared/components/app-action-monito
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
-export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction } from './shared/components/signal-list/signal-list.component';
+export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction, SignalListCheckboxBinding, SignalListRadioBinding, SignalListGaugeBinding } from './shared/components/signal-list/signal-list.component';
+export { SignalListCellTemplateDirective } from './shared/components/signal-list/signal-list-cell-template.directive';
 export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } from './shared/components/signal-list/list-state-store.service';
 export { ListFilterStore, BoundListFilterState, ListFilterDefaults } from './shared/components/signal-list/list-filter-store.service';
 export { ListSelectionStore, BoundListSelectionState } from './shared/components/signal-list/list-selection-store.service';

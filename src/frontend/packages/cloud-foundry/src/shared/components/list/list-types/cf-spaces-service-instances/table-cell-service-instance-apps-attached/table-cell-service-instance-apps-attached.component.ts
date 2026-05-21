@@ -1,18 +1,15 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, Input, OnInit, Signal, computed, inject, signal } from '@angular/core';
 
 import { AppChipsComponent, AppChip } from '../../../../../../../../core/src/shared/components/chips/chips.component';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IServiceInstance } from '../../../../../../cf-api-svc.types';
 import {
-  applicationEntityType,
-  serviceBindingEntityType,
-  serviceInstancesEntityType } from '../../../../../../cf-entity-types';
-import { createEntityRelationKey } from '../../../../../../entity-relations/entity-relations.types';
-import { getCfServiceInstance } from '../../../../../../features/service-catalog/services-helper';
+  ServiceCatalogDataService,
+  SignalSource,
+} from '../../../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceCredentialBinding } from '../../../../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-table-cell-service-instance-apps-attached',
@@ -28,59 +25,52 @@ export class TableCellServiceInstanceAppsAttachedComponent
   extends TableCellCustom<APIResource<IServiceInstance>>
   implements OnInit {
 
-  boundApps$!: Observable<AppChip[]>;
-  config$ = new BehaviorSubject<any>(null);
-  row$ = new BehaviorSubject<APIResource<IServiceInstance> | null>(null);
+  private serviceCatalog = inject(ServiceCatalogDataService);
+
+  private readonly _bindingsSource = signal<SignalSource<StServiceCredentialBinding[]> | null>(null);
+  // Breadcrumb config arrives via @Input config; cached so the computed
+  // chips signal can read it without re-subscribing.
+  private readonly _config = signal<{ breadcrumbs?: string } | null>(null);
+
+  readonly boundApps: Signal<AppChip[]> = computed(() => {
+    const bindings = this._bindingsSource()?.value() ?? [];
+    const breadcrumbs = this._config()?.breadcrumbs;
+    const cfGuid = this.row?.entity?.cfGuid;
+    if (!cfGuid) return [];
+    return bindings
+      .filter(b => !!b.app)
+      .map(b => ({
+        value: b.app!.name ?? '',
+        url: {
+          link: `/applications/${cfGuid}/${b.app!.guid}`,
+          params: { breadcrumbs },
+        },
+      }));
+  });
 
   @Input()
-  set config(config: any) {
+  set config(config: { breadcrumbs?: string } | null) {
     super.config = config;
-    this.config$.next(config);
+    this._config.set(config);
   }
 
   @Input()
   set row(row: APIResource<IServiceInstance>) {
     super.row = row;
-    this.row$.next(row);
+    if (!row) {
+      this._bindingsSource.set(null);
+      return;
+    }
+    this._bindingsSource.set(
+      this.serviceCatalog.serviceBindingsForInstance(row.entity.cfGuid, row.metadata.guid),
+    );
+  }
+  get row(): APIResource<IServiceInstance> {
+    return super.row;
   }
 
   ngOnInit() {
-    this.boundApps$ = combineLatest([
-      this.config$.asObservable().pipe(take(1)),
-      this.row$
-    ]).pipe(
-      filter(([config, row]) => !!config && !!row),
-      take(1),
-      switchMap(([config, row]) => {
-        // The row is an instance of SI... but we need to confirm that it has the SI --> binding --> app relation in place (it probably
-        // won't).
-        return combineLatest([
-          of(config),
-          getCfServiceInstance(
-            row.metadata.guid,
-            row.entity.cfGuid,
-            [
-              createEntityRelationKey(serviceInstancesEntityType, serviceBindingEntityType),
-              createEntityRelationKey(serviceBindingEntityType, applicationEntityType)
-            ]
-          ).waitForEntity$
-        ]);
-      }),
-      map(([config, si]) => {
-        return si.entity.entity.service_bindings
-          .filter(binding => !!binding.entity.app)
-          .map(binding => {
-            return {
-              value: binding.entity.app.entity.name,
-              url: {
-                link: `/applications/${binding.entity.cfGuid}/${binding.entity.app.metadata.guid}`,
-                params: {
-                  breadcrumbs: config.breadcrumbs
-                } }
-            };
-          });
-      })
-    );
+    // Setters fire before ngOnInit, so no work needed here today; reserved
+    // for any cross-input wiring future requirements add.
   }
-
 }

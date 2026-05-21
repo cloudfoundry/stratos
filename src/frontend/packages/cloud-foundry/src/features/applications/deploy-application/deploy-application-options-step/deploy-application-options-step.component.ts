@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -9,15 +10,13 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
 import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
 import { CFAppState } from '../../../../cf-app-state';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
-import { IDomain } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import {
   ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { StDomain, StDomainsResponse, StEnvVars, StStack, StStacksResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 interface DeployOptionsForm {
@@ -57,6 +56,7 @@ interface DeployOptionsForm {
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private store = inject<Store<CFAppState>>(Store);
+  private http = inject(HttpClient);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private activatedRoute = inject(ActivatedRoute);
   private deployData = inject(CfDeployAppDataService);
@@ -66,8 +66,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
 
   valid$: Observable<boolean>;
-  domains$!: Observable<APIResource<IDomain>[]>;
-  stacks$!: Observable<APIResource<IDomain>[]>;
+  domains$!: Observable<StDomain[]>;
+  stacks$!: Observable<StStack[]>;
   deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
   appGuid!: string;
@@ -149,18 +149,21 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
     );
 
-    // Create the domains list for the domains drop down
+    // Create the domains list for the domains drop down. cf push overrides
+    // do not support tcp routes (no way to specify port), so filter them out.
     this.domains$ = cfDetails$.pipe(
-      switchMap(cfDetails =>
-        cfEntityCatalog.domain.store.getOrganizationDomains.getPaginationService(cfDetails.org, cfDetails.cloudFoundry).entities$
-      ),
-      // cf push overrides do not support tcp routes (no way to specify port)
-      map(domains => domains.filter(domain => domain.entity.router_group_type !== 'tcp')),
+      switchMap(cfDetails => this.http.get<StDomainsResponse>(
+        `/pp/v1/cf/org/${cfDetails.cloudFoundry}/${cfDetails.org}/private_domains`,
+      )),
+      map(resp => (resp?.resources ?? []).filter(d => !d.supportedProtocols?.includes('tcp'))),
       share()
     );
 
     this.stacks$ = cfDetails$.pipe(
-      switchMap(cfDetails => cfEntityCatalog.stack.store.getPaginationService(null, cfDetails.cloudFoundry).entities$),
+      switchMap(cfDetails => this.http.get<StStacksResponse>(
+        `/pp/v1/cf/stacks/${cfDetails.cloudFoundry}`,
+      )),
+      map(resp => resp?.resources ?? []),
       share()
     );
 
@@ -190,12 +193,18 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       }
     }));
 
-    // Extract any existing values from the app's env var and assign to form
+    // Extract any existing values from the app's env var and assign to form.
+    // Redeploy path: the wizard was launched against an existing app and the
+    // STRATOS_PROJECT env var (written by a prior deploy step) carries the
+    // overrides we want to preseed.
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
-        switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
-        map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
+        switchMap(([, cfDetails]) => this.http.get<StEnvVars>(
+          `/pp/v1/cf/apps/${cfDetails.cloudFoundry}/${this.appGuid}/env`,
+        )),
+        map(env => this.appEnvVarsService.FetchStratosProject(env?.environment)),
+        filter((proj): proj is NonNullable<typeof proj> => !!proj),
         take(1)
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
     }

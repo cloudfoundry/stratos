@@ -1,47 +1,44 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { ClickStopPropagationDirective, TableCellCustom } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { IService, IServiceExtra } from '../../../../../../cf-api-svc.types';
+import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-table-cell-service-references',
   templateUrl: './table-cell-service-references.component.html',
   styleUrls: ['./table-cell-service-references.component.scss'],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ClickStopPropagationDirective
 ]
 })
-export class TableCellServiceReferencesComponent extends TableCellCustom<APIResource<IService>> {
-
-  extraInfo!: IServiceExtra;
+export class TableCellServiceReferencesComponent extends TableCellCustom<StServiceOffering> {
 
   @Input()
-  set row(pService: APIResource<IService>) {
-    super.row = pService;
-    if (!!pService && !!pService.entity.extra && !this.extraInfo) {
-      try {
-        this.extraInfo = JSON.parse(pService.entity.extra);
-      } catch { /* intentionally empty */ }
-    }
-
+  set row(offering: StServiceOffering) {
+    super.row = offering;
+  }
+  get row(): StServiceOffering {
+    return super.row;
   }
 
-  hasDocumentationUrl() {
-    return !!(this.getDocumentationUrl());
+  // brokerCatalogMetadata carries the docs/support URL extras that the
+  // V2 marketplace read from a JSON-encoded `entity.extra` string.
+  // Backend decodes the JSON to a map already; consumers read keys
+  // directly. Returns undefined when the broker didn't publish either
+  // URL — template @if guards collapse the row in that case.
+
+  hasDocumentationUrl(): boolean {
+    return !!this.getDocumentationUrl();
   }
-  getDocumentationUrl() {
-    return this.extraInfo && this.extraInfo.documentationUrl;
+  getDocumentationUrl(): string | undefined {
+    return this.row?.brokerCatalogMetadata?.documentationUrl as string | undefined;
   }
 
-  hasSupportUrl() {
-    return !!(this.getSupportUrl());
+  hasSupportUrl(): boolean {
+    return !!this.getSupportUrl();
   }
-
-  getSupportUrl() {
-    return this.extraInfo && this.extraInfo.supportUrl;
+  getSupportUrl(): string | undefined {
+    return this.row?.brokerCatalogMetadata?.supportUrl as string | undefined;
   }
-
 }

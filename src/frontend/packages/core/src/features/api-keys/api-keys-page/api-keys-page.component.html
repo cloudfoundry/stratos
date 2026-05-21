@@ -7,7 +7,7 @@
   </div>
 </app-page-header>
 
-@if (keyDetails$ | async; as keyDetails) {
+@if (keyDetails(); as details) {
   <div class="keys-page__new">
     <app-card class="keys-page__card">
       <app-card-header>
@@ -17,7 +17,7 @@
         <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
         <p><i>Please safely record these details, there is no later way to view them</i></p>
         <ul>
-          <li id="apikey-secret">Secret: {{keyDetails.secret}}</li>
+          <li id="apikey-secret">Secret: {{ details.secret }}</li>
         </ul>
         <button (click)="clearKeyDetails()" class="btn btn-danger" type="button">Close</button>
       </app-card-content>
@@ -25,10 +25,10 @@
   </div>
 }
 
-@if ((hasKeys$ | async) === true) {
-  <app-list></app-list>
+@if (hasKeys() === true) {
+  <app-signal-list [config]="listConfig"></app-signal-list>
 }
-@if ((hasKeys$ | async) === false) {
+@if (hasKeys() === false) {
   <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'"
   [secondLine]="{
       text: ''

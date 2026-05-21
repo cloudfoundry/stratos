@@ -13,12 +13,10 @@ import { CfUserService } from './shared/data-services/cf-user.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryReducersModule } from './store/cloud-foundry.reducers.module';
 import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
-import { AppVariablesEffect } from './store/effects/app-variables.effects';
 import { AppEffects } from './store/effects/app.effects';
 import { CloudFoundryEffects } from './store/effects/cloud-foundry.effects';
 import { DeployAppEffects } from './store/effects/deploy-app.effects';
 import { CfValidateEffects } from './store/effects/request.effects';
-import { RouteEffect } from './store/effects/route.effects';
 import { ServiceInstanceEffects } from './store/effects/service-instance.effects';
 import { UpdateAppEffects } from './store/effects/update-app-effects';
 import { UsersRolesEffects } from './store/effects/users-roles.effects';
@@ -29,10 +27,8 @@ import { UsersRolesEffects } from './store/effects/users-roles.effects';
     CloudFoundryReducersModule,
     EffectsModule.forRoot([]),
     EffectsModule.forFeature([
-      AppVariablesEffect,
       DeployAppEffects,
       CloudFoundryEffects,
-      RouteEffect,
       ServiceInstanceEffects,
       AppEffects,
       UpdateAppEffects,

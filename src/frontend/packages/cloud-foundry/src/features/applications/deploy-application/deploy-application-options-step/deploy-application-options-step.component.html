@@ -46,9 +46,9 @@
         <div class="form-field">
           <select class="input" name="domain" formControlName="domain">
             <option value="" disabled>Domain</option>
-            @for (domain of domains$ | async; track domain) {
-              <option [value]="domain.entity.name">
-                {{ domain.entity.name }}
+            @for (domain of domains$ | async; track domain.guid) {
+              <option [value]="domain.name">
+                {{ domain.name }}
               </option>
             }
           </select>
@@ -73,9 +73,9 @@
         <div class="form-field">
           <select class="input" name="stack" formControlName="stack">
             <option value="">Stack</option>
-            @for (stack of stacks$ | async; track stack) {
-              <option [value]="stack.entity.name">
-                {{ stack.entity.name }}
+            @for (stack of stacks$ | async; track stack.guid) {
+              <option [value]="stack.name">
+                {{ stack.name }}
               </option>
             }
           </select>

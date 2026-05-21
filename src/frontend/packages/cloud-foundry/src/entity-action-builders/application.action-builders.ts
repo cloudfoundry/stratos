@@ -1,6 +1,5 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
-import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import {
   CreateNewApplication,
   DeleteApplication,
@@ -35,7 +34,6 @@ export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
     { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
   ) => GetAllApplications;
   restage: (guid: string, endpointGuid: string) => RestageApplication;
-  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => AssignRouteToApplication;
   getAllInSpace: (
     spaceGuid: string,
     endpointGuid: string,
@@ -67,11 +65,6 @@ export const applicationActionBuilder: ApplicationActionBuilders = {
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllApplications(paginationKey, endpointGuid, includeRelations, populateMissing),
   restage: (guid: string, endpointGuid: string) => new RestageApplication(guid, endpointGuid),
-  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => new AssignRouteToApplication(
-    applicationGuid,
-    routeGuid,
-    endpointGuid
-  ),
   getAllInSpace: (
     spaceGuid: string,
     endpointGuid: string,

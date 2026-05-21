@@ -49,6 +49,57 @@ func (c *CloudFoundrySpecification) createNativeOrgQuota(ctx echo.Context) error
 	return ctx.JSON(http.StatusCreated, toStOrgQuota(*q, cnsiGUID))
 }
 
+// applyOrgQuotaToOrgs handles POST /pp/v1/cf/organization_quotas/{cnsiGuid}/{quotaGuid}/relationships/organizations —
+// Stratos-shape wrapper around CF V3 POST
+// /v3/organization_quotas/{quota_guid}/relationships/organizations. Used
+// when assigning an org quota to a newly-created organization or
+// changing the quota on an existing one.
+//
+// Body shape: { "data": [{ "guid": "<org_guid>" }, ...] }.
+func (c *CloudFoundrySpecification) applyOrgQuotaToOrgs(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	quotaGUID := ctx.Param("quotaGuid")
+	if cnsiGUID == "" || quotaGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and quotaGuid are required")
+	}
+
+	var req struct {
+		Data []struct {
+			GUID string `json:"guid"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	orgGUIDs := make([]string, 0, len(req.Data))
+	for _, d := range req.Data {
+		if d.GUID != "" {
+			orgGUIDs = append(orgGUIDs, d.GUID)
+		}
+	}
+	if len(orgGUIDs) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "data must contain at least one org guid")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	rel, applyErr := cfClient.OrganizationQuotas().ApplyToOrganizations(ctx.Request().Context(), quotaGUID, orgGUIDs)
+	if applyErr != nil {
+		return handleCapiError(ctx, applyErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, rel)
+}
+
 // updateNativeOrgQuota handles PATCH /pp/v1/cf/organization_quotas/{cnsiGuid}/{quotaGuid} —
 // Stratos-shape wrapper around CF V3 PATCH /v3/organization_quotas/{guid}.
 func (c *CloudFoundrySpecification) updateNativeOrgQuota(ctx echo.Context) error {

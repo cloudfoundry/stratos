@@ -3,12 +3,12 @@
   @if (!isMarketplaceMode) {
     <app-form-field>
       <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
-        [disabled]="(cfOrgSpaceService.cf.loading$ | async) || isRedeploy"
-        [ngModel]="cfOrgSpaceService.cf.select.getValue()"
+        [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy"
+        [ngModel]="cfOrgSpaceService.cf.select()"
         (selectionChange)="onCfChange($event.value)" required name="cf"
-        [appFocus]="(cfOrgSpaceService.cf.loading$ | async) === false">
+        [appFocus]="!cfOrgSpaceService.cf.loading()">
         <app-option [value]="null">None</app-option>
-        @for (cf of cfOrgSpaceService.cf.list$ | async; track cf) {
+        @for (cf of cfOrgSpaceService.cf.list(); track cf) {
           <app-option [value]="cf.guid" [label]="cf.name">
             <span>{{ cf.name }}</span>
           </app-option>
@@ -18,25 +18,25 @@
   }
   <app-form-field>
     <app-select id="org" #orgSelect="ngModel" placeholder="Organization" [autoSelectSingleOption]="false"
-      [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy"
-      [ngModel]="cfOrgSpaceService.org.select.getValue()"
+      [disabled]="!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy"
+      [ngModel]="cfOrgSpaceService.org.select()"
       (selectionChange)="onOrgChange($event.value)" required name="org"
-      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy)">
+      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy)">
       <app-option [value]="null">None</app-option>
-      @for (org of cfOrgSpaceService.org.list$ | async; track org) {
+      @for (org of cfOrgSpaceService.org.list(); track org) {
         <app-option [value]="org.guid" [label]="org.name">
           <span>{{ org.name }}</span>
         </app-option>
       }
     </app-select>
-    @if ((hasOrgs$ | async) === false) {
+    @if (!hasOrgs()) {
       <app-error>There are no organizations in this Cloud Foundry</app-error>
     }
   </app-form-field>
   <app-form-field>
     <app-select id="space" #spaceSelect="ngModel" placeholder="Space" [autoSelectSingleOption]="false"
-      [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy"
-      [ngModel]="cfOrgSpaceService.space.select.getValue()"
+      [disabled]="!cfOrgSpaceService.org.select() || cfOrgSpaceService.space.loading() || isRedeploy"
+      [ngModel]="cfOrgSpaceService.space.select()"
       (selectionChange)="onSpaceChange($event.value)" required name="space">
       <app-option [value]="null">None</app-option>
       @for (space of spaces$ | async; track space) {

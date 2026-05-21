@@ -148,3 +148,44 @@ func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, toStSpace(*space, cnsiGUID))
 }
+
+// setSpaceSshFeature handles
+//   PUT /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}/features/ssh
+// Body: { "enabled": true|false }.
+// Wraps CF V3 PATCH /v3/spaces/{guid}/features/ssh. V3 lifted SSH out
+// of the space attributes endpoint into a separate feature toggle, so
+// the edit-space-step wizard chains PATCH /v3/spaces (name) + this call
+// (ssh) to match the legacy V2 PATCH /v2/spaces/{guid} that handled both
+// inline.
+func (c *CloudFoundrySpecification) setSpaceSshFeature(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	spaceGUID := ctx.Param("spaceGuid")
+	if cnsiGUID == "" || spaceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and spaceGuid are required")
+	}
+
+	var body struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	feat, updErr := cfClient.Spaces().UpdateFeature(ctx.Request().Context(), spaceGUID, "ssh", body.Enabled)
+	if updErr != nil {
+		return handleCapiError(ctx, updErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, feat)
+}

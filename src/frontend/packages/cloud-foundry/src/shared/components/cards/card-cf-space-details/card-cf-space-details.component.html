@@ -24,7 +24,7 @@
           }
         </app-metadata-item>
         <app-metadata-item label="Provision Paid Services">
-          <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.non_basic_services_allowed"
+          <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.paidServicesAllowed"
             type="yes-no">
           </app-boolean-indicator>
         </app-metadata-item>

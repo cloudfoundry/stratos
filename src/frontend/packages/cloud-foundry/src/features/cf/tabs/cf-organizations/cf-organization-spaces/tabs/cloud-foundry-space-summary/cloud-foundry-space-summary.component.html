@@ -42,7 +42,7 @@
           <app-tile>
             <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
               value="{{ (cfSpaceService.appInstances$ | async) }}"
-            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalInstances}}"></app-card-number-metric>
           </app-tile>
         }
         <app-tile>
@@ -50,7 +50,7 @@
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
             iconFont="stratos-icons" icon="route" label="Routes"
             value="{{ (cfSpaceService.routesCount$ | async) }}"
-          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
+          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalRoutes}}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
 
@@ -65,8 +65,8 @@
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances"
             iconFont="stratos-icons" icon="service" label="Service Instances"
-            value="{{ (cfSpaceService.serviceInstancesCount$ | async)}}"
-          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+            value="{{ cfSpaceService.serviceInstancesCount() }}"
+          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalServiceInstances }}"></app-card-number-metric>
         </app-tile>
         @if ((cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0) {
           <app-tile>
@@ -78,7 +78,7 @@
           <app-tile>
             <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
               value="{{ (cfSpaceService.totalMem$ | async) }}"
-            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalMemoryInMB }}"></app-card-number-metric>
           </app-tile>
         }
       </app-tile-group>

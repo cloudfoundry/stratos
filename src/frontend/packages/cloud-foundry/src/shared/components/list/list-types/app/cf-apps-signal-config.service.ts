@@ -75,6 +75,15 @@ export class CfAppsSignalConfigService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
+  // Lazy org/space catalog loading. loadNames() runs an org+per-org-spaces
+  // fanout that on multi-CNSI walls saturates the network for many seconds,
+  // preventing `waitForLoadState('networkidle')` and (more importantly)
+  // making the page feel slow on re-entry. We now defer loadNames until a
+  // filter dropdown is first opened. This promise is the dedupe guard so
+  // multiple dropdown opens during the in-flight window collapse to one
+  // fanout. Cleared on each initialize() so a new mount can re-fetch.
+  private _namesLoadingPromise: Promise<void> | null = null;
+
   // View mode (table / card). Default mirrors the legacy Stratos app wall.
   readonly viewMode = this.state.viewMode;
 
@@ -330,12 +339,24 @@ export class CfAppsSignalConfigService {
     // when one of its tracked signals changes, and lockedSpaceGuid isn't a
     // signal — so we nudge a benign one (filterField → its current value).
     this.filterField.set(this.filterField());
-    // Fire-and-forget org/space name resolution. Populates the lookup maps
-    // that orgOptions/spaceOptions read for their labels. Failures per CF
-    // are swallowed — if an endpoint is unreachable the dropdown falls back
-    // to guid for that CF's items, which is preferable to blocking the
-    // whole app-wall on a slow or broken CF.
-    void this.loadNames(cnsiGuids);
+    // Lazy org/space name resolution. Previously fired here eagerly; now
+    // deferred to `ensureNamesLoaded()`, called from the filter-dropdown
+    // onOpen hook. The page paints fast and `networkidle` settles within
+    // a few hundred ms, instead of being held busy for many seconds by
+    // the per-org spaces fanout. Visible row cells still resolve names
+    // on demand via startVisibleRowResolver below.
+    //
+    // EXCEPTION: if a previous mount left a CF/org/space selected, the
+    // stale-selection effect (`if (org != null && !orgValues.has(org))`)
+    // would clear the user's filter as soon as `_hasLoadedOnce` becomes
+    // true — because orgOptions/spaceOptions are derived from the maps
+    // loadNames populates, and they're empty until then. Eager-load in
+    // that case so the dropdown values that back the selection are
+    // present when the effect fires.
+    this._namesLoadingPromise = null;
+    if (this.selectedCnsi() != null || this.selectedOrg() != null || this.selectedSpace() != null) {
+      void this.ensureNamesLoaded(cnsiGuids);
+    }
     // Wire the visible-row resolver: every time view.pagedItems changes
     // (page navigation, sort, filter), collect the (cnsi, orgGuid) and
     // (cnsi, spaceGuid) pairs that aren't already resolved (catalog or
@@ -376,6 +397,25 @@ export class CfAppsSignalConfigService {
   // budget. Higher concurrency wouldn't help — CAPI is the bottleneck —
   // and risks compounding 504s under load.
   private static readonly SPACES_CHUNK_CONCURRENCY = 3;
+
+  // Idempotent wrapper around loadNames. Called from the filter-dropdown
+  // onOpen hook so the org+space catalog is fetched only on the first user
+  // interaction with the toolbar dropdowns. Repeated calls during the
+  // in-flight window collapse to the same promise; subsequent calls after
+  // completion are no-ops because the cached promise resolves immediately.
+  // Reset by initialize() so a fresh mount re-fetches.
+  ensureNamesLoaded(cnsiGuids: readonly string[] = []): Promise<void> {
+    if (this._namesLoadingPromise) return this._namesLoadingPromise;
+    // Caller may omit cnsiGuids when the service already knows the scope —
+    // derive from connected endpoints in that case so the dropdown
+    // onOpen handler doesn't have to forward the guids list.
+    const guids = cnsiGuids.length > 0
+      ? cnsiGuids
+      : this.connectedEndpoints().map(ep => ep.guid);
+    if (!guids.length) return Promise.resolve();
+    this._namesLoadingPromise = this.loadNames(guids);
+    return this._namesLoadingPromise;
+  }
 
   private async loadNames(cnsiGuids: readonly string[]): Promise<void> {
     const gen = ++this._initGen;

@@ -1,6 +1,6 @@
 <div class="edit-space-quota">
   <div>Specify the parameters of the space quota</div>
-  @if (quota) {
-    <app-space-quota-definition-form [quota]="quota" #form></app-space-quota-definition-form>
+  @if (quota(); as q) {
+    <app-space-quota-definition-form [quota]="q" #form></app-space-quota-definition-form>
   }
 </div>

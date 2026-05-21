@@ -84,3 +84,79 @@ func (c *CloudFoundrySpecification) updateNativeSpaceQuota(ctx echo.Context) err
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, toStSpaceQuota(*q, cnsiGUID))
 }
+
+// applySpaceQuotaToSpaces handles
+//   POST /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}/relationships/spaces
+// Body: { "space_guids": ["guid1", "guid2", ...] }.
+// Wraps CF V3 POST /v3/space_quotas/{guid}/relationships/spaces, which
+// attaches the quota to one or more spaces in a single call.
+// CF v3 dropped space-quota assignment at space-create time (the V2
+// `space_quota_definition_guid` field on spaces); the wizard now
+// chains create-space + apply-quota.
+func (c *CloudFoundrySpecification) applySpaceQuotaToSpaces(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	quotaGUID := ctx.Param("quotaGuid")
+	if cnsiGUID == "" || quotaGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and quotaGuid are required")
+	}
+
+	var body struct {
+		SpaceGUIDs []string `json:"space_guids"`
+	}
+	if err := json.NewDecoder(ctx.Request().Body).Decode(&body); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
+	}
+	if len(body.SpaceGUIDs) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "space_guids must not be empty")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	rel, applyErr := cfClient.SpaceQuotas().ApplyToSpaces(ctx.Request().Context(), quotaGUID, body.SpaceGUIDs)
+	if applyErr != nil {
+		return handleCapiError(ctx, applyErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, rel)
+}
+
+// removeSpaceQuotaFromSpace handles
+//   DELETE /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}/relationships/spaces/{spaceGuid}
+// Wraps CF V3 DELETE /v3/space_quotas/{guid}/relationships/spaces/{space_guid}.
+// Edit-space-step calls this when the user clears the quota on an existing
+// space; v3 has no single endpoint to "switch" quota on a space, so the
+// flow becomes remove-old + apply-new.
+func (c *CloudFoundrySpecification) removeSpaceQuotaFromSpace(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	quotaGUID := ctx.Param("quotaGuid")
+	spaceGUID := ctx.Param("spaceGuid")
+	if cnsiGUID == "" || quotaGUID == "" || spaceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid, quotaGuid, and spaceGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	if remErr := cfClient.SpaceQuotas().RemoveFromSpace(ctx.Request().Context(), quotaGUID, spaceGUID); remErr != nil {
+		return handleCapiError(ctx, remErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.NoContent(http.StatusNoContent)
+}

@@ -447,7 +447,7 @@ describe('V3-native org sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
 
     const req = httpMock.expectOne(
@@ -464,7 +464,7 @@ describe('V3-native org sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
 
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
@@ -503,7 +503,7 @@ describe('V3-native org sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'shared-org-1', name: 'org-on-A' }],
@@ -513,7 +513,7 @@ describe('V3-native org sourcing', () => {
     TestBed.tick();
     expect(service.orgList().map(o => o.name)).toEqual(['org-on-A']);
 
-    service.cf.select.next('cf-B');
+    service.cf.select.set('cf-B');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-B')).flush({
       resources: [{ guid: 'shared-org-1', name: 'org-on-B' }],
@@ -530,19 +530,19 @@ describe('V3-native org sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
-    service.org.select.next('org-1');
-    service.space.select.next('space-1');
+    service.cf.select.set('cf-A');
+    service.org.select.set('org-1');
+    service.space.select.set('space-1');
     TestBed.tick();
 
     // Drain any in-flight requests so verify() is clean.
     httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
 
-    service.cf.select.next('cf-B');
+    service.cf.select.set('cf-B');
     TestBed.tick();
 
-    expect(service.org.select.getValue()).toBeFalsy();
-    expect(service.space.select.getValue()).toBeFalsy();
+    expect(service.org.select()).toBeFalsy();
+    expect(service.space.select()).toBeFalsy();
 
     httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
     httpMock.verify();
@@ -555,7 +555,7 @@ describe('V3-native org sourcing', () => {
     const emissions: { guid: string }[][] = [];
     const sub = service.org.list$.subscribe(list => emissions.push(list as any));
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'org-1', name: 'alpha' }],
@@ -610,14 +610,14 @@ describe('V3-native space sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'org-1', name: 'alpha' }],
       totalResults: 1,
     });
 
-    service.org.select.next('org-1');
+    service.org.select.set('org-1');
     TestBed.tick();
 
     const req = httpMock.expectOne(
@@ -634,14 +634,14 @@ describe('V3-native space sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'org-1', name: 'alpha' }],
       totalResults: 1,
     });
 
-    service.org.select.next('org-1');
+    service.org.select.set('org-1');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/org/cf-A/org-1/spaces')).flush({
       resources: [
@@ -663,18 +663,18 @@ describe('V3-native space sourcing', () => {
     const service = TestBed.inject(CfOrgSpaceDataService);
     const httpMock = TestBed.inject(HttpTestingController);
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
 
-    service.org.select.next('org-1');
-    service.space.select.next('space-1');
+    service.org.select.set('org-1');
+    service.space.select.set('space-1');
     TestBed.tick();
     httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
 
-    service.org.select.next('org-2');
+    service.org.select.set('org-2');
     TestBed.tick();
-    expect(service.space.select.getValue()).toBeFalsy();
+    expect(service.space.select()).toBeFalsy();
 
     httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
     httpMock.verify();
@@ -687,14 +687,14 @@ describe('V3-native space sourcing', () => {
     const emissions: { guid: string }[][] = [];
     const sub = service.space.list$.subscribe(list => emissions.push(list as any));
 
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'org-1', name: 'alpha' }],
       totalResults: 1,
     });
 
-    service.org.select.next('org-1');
+    service.org.select.set('org-1');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/org/cf-A/org-1/spaces')).flush({
       resources: [{ guid: 'space-a', name: 'development' }],
@@ -756,7 +756,7 @@ describe('V3-native auto-selectors', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     service.enableAutoSelectors();
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'only-org', name: 'solo' }],
@@ -765,7 +765,7 @@ describe('V3-native auto-selectors', () => {
     await Promise.resolve();
     TestBed.tick();
 
-    expect(service.org.select.getValue()).toBe('only-org');
+    expect(service.org.select()).toBe('only-org');
     httpMock.match(() => true).forEach(req => req.flush({ resources: [], totalResults: 0 }));
     httpMock.verify();
   });
@@ -775,7 +775,7 @@ describe('V3-native auto-selectors', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     service.enableAutoSelectors();
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [
@@ -787,7 +787,7 @@ describe('V3-native auto-selectors', () => {
     await Promise.resolve();
     TestBed.tick();
 
-    expect(service.org.select.getValue()).toBeFalsy();
+    expect(service.org.select()).toBeFalsy();
     httpMock.verify();
   });
 
@@ -796,7 +796,7 @@ describe('V3-native auto-selectors', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     // Note: no service.enableAutoSelectors() call.
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'only-org', name: 'solo' }],
@@ -805,7 +805,7 @@ describe('V3-native auto-selectors', () => {
     await Promise.resolve();
     TestBed.tick();
 
-    expect(service.org.select.getValue()).toBeFalsy();
+    expect(service.org.select()).toBeFalsy();
     httpMock.verify();
   });
 
@@ -814,7 +814,7 @@ describe('V3-native auto-selectors', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     service.enableAutoSelectors();
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'only-org', name: 'solo' }],
@@ -831,7 +831,7 @@ describe('V3-native auto-selectors', () => {
     await Promise.resolve();
     TestBed.tick();
 
-    expect(service.space.select.getValue()).toBe('only-space');
+    expect(service.space.select()).toBe('only-space');
     httpMock.verify();
   });
 
@@ -840,7 +840,7 @@ describe('V3-native auto-selectors', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     service.enableAutoSelectors();
-    service.cf.select.next('cf-A');
+    service.cf.select.set('cf-A');
     TestBed.tick();
     httpMock.expectOne(r => r.url.startsWith('/pp/v1/cf/orgs/cf-A')).flush({
       resources: [{ guid: 'only-org', name: 'solo' }],
@@ -859,7 +859,7 @@ describe('V3-native auto-selectors', () => {
     await Promise.resolve();
     TestBed.tick();
 
-    expect(service.space.select.getValue()).toBeFalsy();
+    expect(service.space.select()).toBeFalsy();
     httpMock.verify();
   });
 });

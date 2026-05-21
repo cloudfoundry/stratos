@@ -24,9 +24,9 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
 
-// Signal-native replacement for CloudFoundrySpaceAppsComponent.
-// Scoped to one space under one CF endpoint (cfGuid + spaceGuid supplied
-// by the route-level services). Reuses CfAppsSignalConfigService — the
+// Signal-native space-apps tab. Scoped to one space under one CF
+// endpoint (cfGuid + spaceGuid supplied by the route-level services).
+// Reuses CfAppsSignalConfigService — the
 // same singleton that drives the multi-CNSI app wall — via its
 // initializeForSpace() entry point, which pins the locked space scope
 // and builds a single-CNSI orchestrator.

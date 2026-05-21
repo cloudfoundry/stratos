@@ -5,14 +5,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router } from '@angular/router';
-import { APIResource } from '@stratosui/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
 import { PaginationMonitorFactory, EntityServiceFactory, EntityMonitorFactory, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { CloudFoundryTestingModule } from "@test-framework/cf";
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { IServiceBinding } from '../../../cf-api-svc.types';
+import { StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
 import { DetachServiceInstanceComponent } from "./detach-service-instance.component";
 
 const cfGuid = 'test-cf-guid';
@@ -51,13 +50,14 @@ function configureModule(routerStub: { navigate: ReturnType<typeof vi.fn> }) {
   }).compileComponents();
 }
 
-function makeBinding(guid: string, appName: string): APIResource<IServiceBinding> {
+function makeBinding(guid: string, appName: string): StServiceCredentialBinding {
   return {
-    metadata: { guid, created_at: '2026-05-09T00:00:00Z' } as any,
-    entity: {
-      app: { metadata: { guid: `app-${guid}` }, entity: { name: appName } },
-      service_instance_guid: serviceInstanceId,
-    } as any,
+    guid,
+    cnsiGuid: cfGuid,
+    type: 'app',
+    serviceInstance: { guid: serviceInstanceId },
+    app: { guid: `app-${guid}`, name: appName },
+    createdAt: '2026-05-09T00:00:00Z',
   };
 }
 
@@ -88,7 +88,7 @@ describe('DetachServiceInstanceComponent', () => {
 describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWithJob)', () => {
   let routerStub: { navigate: ReturnType<typeof vi.fn> };
 
-  async function bootstrap(bindings: APIResource<IServiceBinding>[]) {
+  async function bootstrap(bindings: StServiceCredentialBinding[]) {
     routerStub = { navigate: vi.fn().mockResolvedValue(true) };
     await configureModule(routerStub);
     const ech = TestBed.inject(EntityCatalogHelper);
@@ -96,8 +96,11 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
 
     const fixture = TestBed.createComponent(DetachServiceInstanceComponent);
     const component = fixture.componentInstance;
-    component.setSelectedBindings(bindings);
+    // detectChanges first so the <app-detach-apps> child mounts and runs its
+    // initial "empty selection" emit; setSelectedBindings then overrides with
+    // the test's chosen bindings (mirroring the user's Step 1 selection).
     fixture.detectChanges();
+    component.setSelectedBindings(bindings);
     return { fixture, component, httpMock: TestBed.inject(HttpTestingController) };
   }
 

@@ -1,14 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { Observable, of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
-import { ServiceCatalogDataService } from '../../../../services/endpoint-data/service-catalog-data.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceBroker } from '../../../../services/endpoint-data/stratos-types';
 import { ServiceBrokerCardComponent } from './service-broker-card.component';
 
@@ -26,8 +25,12 @@ class ServiceCatalogDataServiceStub {
     _meta: { unavailable: ['authUsername'] },
   };
 
-  serviceBroker(_cnsi: string, _broker: string): Observable<StServiceBroker | null> {
-    return of(this.brokerResponse);
+  serviceBroker(_cnsi: string, _broker: string): SignalSource<StServiceBroker | null> {
+    return {
+      value: signal(this.brokerResponse).asReadonly(),
+      isLoading: signal(false).asReadonly(),
+      error: signal<HttpErrorResponse | null>(null).asReadonly(),
+    };
   }
 }
 

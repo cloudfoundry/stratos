@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, Input } from '@angular/core';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, Input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subscription, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { SignalStepHandle, StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { SignalStepHandle, StepOnNextFunction, StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
+import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
+import { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -41,6 +41,7 @@ interface CreateSpaceForm {
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private http = inject(HttpClient);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
@@ -57,24 +58,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const id = `${this.orgGuid}-${this.spaceName.value}`;
-      const quotaValue = this.quotaDefinition.value;
-      const finalState = await firstValueFrom(
-        cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
-          createSpace: {
-            name: this.spaceName.value,
-            organization_guid: this.orgGuid,
-            space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
-          },
-          orgGuid: this.orgGuid
-        }).pipe(
-          pairwise(),
-          filter(([oldS, newS]) => oldS.creating && !newS.creating),
-          map(([, newS]) => newS),
-        )
-      );
-      if (finalState.error) {
-        throw new Error(`Failed to create space: ${finalState.message}`);
+      const result = await firstValueFrom(this.runCreate());
+      if (!result.success) {
+        throw new Error(result.message ?? 'Failed to create space');
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
@@ -82,7 +68,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   cfUrl!: string;
   createSpaceForm!: FormGroup<CreateSpaceForm>;
-  quotaSubscription!: Subscription;
+  private injector = inject(Injector);
 
   get spaceName(): FormControl<string> {
     return this.createSpaceForm ? this.createSpaceForm.get('spaceName') as FormControl<string> : new FormControl('', { nonNullable: true });
@@ -100,11 +86,12 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
     const activatedRoute = inject(ActivatedRoute);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const orgRegistry = inject(OrgDataRegistry);
+    const quotaData = inject(QuotaDataService);
 
-    super(store, activatedRoute, activeRouteCfOrgSpace);
+    super(activatedRoute, activeRouteCfOrgSpace, orgRegistry, quotaData);
   }
 
   ngOnInit() {
@@ -117,41 +104,69 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       () => this.validSignal.set(this.createSpaceForm.valid)
     );
 
-    this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {
-      if (quotas.length > 0) {
-        this.createSpaceForm.patchValue({
-          quotaDefinition: 0
-        });
-      }
-    }));
+    // Auto-pick the placeholder ("None") option once the base's quota
+    // signal populates. Guarded so we only patch once — re-patching on
+    // every quota-list re-emit would stomp the user's manual selection.
+    let patched = false;
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        if (patched) return;
+        if (this.quotaDefinitions().length > 0) {
+          patched = true;
+          this.createSpaceForm.patchValue({ quotaDefinition: 0 });
+        }
+      });
+    });
   }
 
   isNameUnique = (spaceName: string = null) => {
-    return this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true;
+    const names = this.allSpacesInOrg();
+    // Signal returns [] before the org-data load completes. Treat as "no
+    // siblings yet, name is OK" so the validator doesn't false-positive
+    // during the initial pass that fires before the form is built.
+    if (!names || names.length === 0) {
+      return true;
+    }
+    return names.indexOf(spaceName || this.spaceName.value) === -1;
   };
 
   validate = () => this.validSignal();
 
-  submit: StepOnNextFunction = () => {
-    const id = `${this.orgGuid}-${this.spaceName.value}`;
+  submit: StepOnNextFunction = () => this.runCreate();
+
+  // Chains POST /pp/v1/cf/spaces/:cnsi (V3-native space create) with an
+  // optional POST /pp/v1/cf/space_quotas/:cnsi/:quotaGuid/relationships/spaces
+  // when the wizard's quota dropdown carries a selection. CF v3 dropped the
+  // inline space_quota_definition_guid field that the V2 legacy action used,
+  // so the apply-quota step lives outside the create call.
+  private runCreate(): Observable<StepOnNextResult> {
     const quotaValue = this.quotaDefinition.value;
-    return cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
-      createSpace: {
-        name: this.spaceName.value,
-        organization_guid: this.orgGuid,
-        space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
-      },
-      orgGuid: this.orgGuid
+    const quotaGuid = quotaValue ? String(quotaValue) : null;
+    return this.http.post<StSpace>(`/pp/v1/cf/spaces/${this.cfGuid}`, {
+      name: this.spaceName.value,
+      relationships: { organization: { data: { guid: this.orgGuid } } },
     }).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.creating && !newS.creating),
-      map(([, newS]) => newS),
-      this.map('Failed to create space: ')
+      switchMap(space => {
+        if (!quotaGuid) {
+          return [space];
+        }
+        return this.http.post(
+          `/pp/v1/cf/space_quotas/${this.cfGuid}/${quotaGuid}/relationships/spaces`,
+          { space_guids: [space.guid] },
+        ).pipe(map(() => space));
+      }),
+      map(() => ({ success: true })),
+      catchError(err => {
+        const message = err?.error?.error || err?.message || `Failed to create space`;
+        return throwError(() => ({ success: false, message } as StepOnNextResult));
+      }),
+      // Convert throwError to a successful emit of the failure result so
+      // the stepper's pipeline can read it without rxjs error semantics.
+      catchError((result: StepOnNextResult) => [result]),
     );
-  };
+  }
 
   ngOnDestroy() {
-    this.quotaSubscription.unsubscribe();
     this.formStatusSub?.unsubscribe();
     this.destroy();
   }

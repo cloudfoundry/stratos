@@ -6,7 +6,7 @@ import { filter, map, startWith, tap } from 'rxjs/operators';
 
 import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { AppStatsDataRegistry } from '../../../services/endpoint-data/app-stats-data.registry';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
@@ -61,6 +61,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   show$!: Observable<boolean>;
 
   private readonly registry = inject(EndpointDataRegistry);
+  private readonly statsRegistry = inject(AppStatsDataRegistry);
   private readonly injector = inject(Injector);
   private statsRequested = new Set<string>();
 
@@ -141,7 +142,7 @@ export class CardCfRecentAppsComponent implements OnInit {
       const key = `${this.endpoint}:${app.metadata.guid}`;
       if (this.statsRequested.has(key)) return;
       this.statsRequested.add(key);
-      cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.endpoint);
+      this.statsRegistry.acquire(this.endpoint, app.metadata.guid).load();
     });
   }
 

@@ -19,13 +19,11 @@ import {
 
 import { EndpointsSignalService } from '../../../../../../core/signals/endpoints-signal.service';
 import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../../core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { createMetaCardMenuItemSeparator } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
-import { BaseEndpointsDataSource } from '../base-endpoints-data-source';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
 import { SessionService } from '../../../../../services/session.service';
@@ -127,71 +125,16 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.connectionStatus = this.endpointCatalogEntity.definition.unConnectable ? 'connected' : row.connectionStatus;
     }
     this.updateInnerComponent();
-
-    // Try to create the card menu now that we have a row
-    this.createCardMenuIfReady();
   }
   get row(): EndpointModel {
     return super.row;
   }
-
-  private _dataSource!: BaseEndpointsDataSource;
-
-  @Input()
-  set dataSource(ds: BaseEndpointsDataSource) {
-    super.dataSource = ds;
-    this._dataSource = ds;
-
-    // Try to create the card menu now that we have a dataSource
-    this.createCardMenuIfReady();
-
-    this.updateCardStatus();
-  }
-
-  get dataSource(): BaseEndpointsDataSource {
-    return this._dataSource;
-  }
-
-  private createCardMenuIfReady() {
-    // Don't show card menu if the ds only provides a single endpoint type (for instance the cf endpoint page)
-    if (this.dataSource && !this.dataSource.dsEndpointType && !this.cardMenu && this.row) {
-      if (this.endpointListHelper) {
-        try {
-          const actions = this.endpointListHelper.endpointActions(true);
-
-          this.cardMenu = actions.map(endpointAction => {
-            const separator = endpointAction.label === '-';
-            return {
-              label: endpointAction.label,
-              action: () => endpointAction.action(this.row),
-              can: endpointAction.createVisible ? endpointAction.createVisible(this.rowObs) : of(true),
-              separator
-            };
-          });
-
-          // Add a copy address to clipboard - this should always be visible
-          this.cardMenu.push(createMetaCardMenuItemSeparator());
-          this.cardMenu.push({
-            label: 'Copy address to Clipboard',
-            action: () => this.copyToClipboard.copyToClipboard(),
-            can: of(true),
-            separator: false
-          });
-
-          // Force at least one action to be visible so the menu shows
-          if (this.cardMenu.length > 0) {
-            // Ensure the last item (copy to clipboard) is always visible
-            const lastItem = this.cardMenu[this.cardMenu.length - 1];
-            if (lastItem && !lastItem.separator) {
-              lastItem.can = of(true);
-            }
-          }
-        } catch (error) {
-          console.error('❌ Error creating card menu:', error);
-        }
-      }
-    }
-  }
+  // V2 BaseEndpointsDataSource was deleted in W12 — the kubernetes
+  // card consumer never bound [dataSource] and the V2 endpoints list
+  // (only other consumer) was the only path that did. Card menu +
+  // cardStatus$ are now driven by direct consumer template bindings
+  // when needed, not the data-source narrowing the V2 list-config
+  // pipeline used to inject.
 
   constructor() {
     super();
@@ -245,17 +188,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     }
     this.component.row = this.row;
     this.componentRef.changeDetectorRef.detectChanges();
-
-    this.updateCardStatus();
-  }
-
-  updateCardStatus() {
-    if (this.row && this.dataSource && this.dataSource.getRowState && !this.cardStatus$) {
-      this.cardStatus$ = this.dataSource.getRowState(this.row).pipe(
-        map(rowState => rowState.error ? StratosStatus.ERROR : null),
-        startWith(null)
-      );
-    }
   }
 
   editEndpoint() {

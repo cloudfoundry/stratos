@@ -4,8 +4,8 @@
     <app-form-field>
       <app-label>Service</app-label>
       <app-select class="form-control" formControlName="service">
-        @for (service of services$ | async; track service) {
-          <app-option [value]="service.metadata.guid">{{ service.entity.label }}</app-option>
+        @for (service of services$ | async; track service.guid) {
+          <app-option [value]="service.guid">{{ service.name }}</app-option>
         }
       </app-select>
     </app-form-field>

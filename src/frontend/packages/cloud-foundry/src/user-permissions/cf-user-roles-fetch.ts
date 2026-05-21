@@ -1,18 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { combineLatest, defer, from, Observable, of } from 'rxjs';
-import { take, catchError, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, map, share, switchMap, tap } from 'rxjs/operators';
 
 import {
   AppState,
-  entityCatalog,
   EndpointsDataService,
   EntityUserRolesEndpoint,
   EntityUserRolesFetch,
-  ActionState,
-  selectPaginationState,
-  PaginationEntityState,
-  BasePaginatedAction,
   APIResource } from '@stratosui/store';
 import {
   CfUserRelationTypes,
@@ -21,8 +16,8 @@ import {
   GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
   GetCfUserRelations,
   GetCurrentCfUserRelationsComplete } from '../actions/permissions.actions';
-import { cfEntityCatalog } from '../cf-entity-catalog';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { getFeatureFlagsSource } from './feature-flags-cache';
 
 /**
  * Wire shape returned by GET /pp/v1/cf/current-user-roles/:cnsiGuid
@@ -113,10 +108,16 @@ function dispatchRoleRequests(
       // START fetching cf roles for current user
       store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS));
 
-      // Dispatch feature flags fetch actions
-      const ffAction = cfEntityCatalog.featureFlag.actions.getMultiple(endpoint.guid);
-      requests[endpoint.guid] = [createPaginationCompleteWatcher(store, ffAction)];
-      store.dispatch(ffAction);
+      // Prime the shared feature-flags cache so downstream permission
+      // checkers (cf-user-permissions-checkers) read flags from the same
+      // CnsiFeatureFlagsSource we drain here. Completion signal feeds
+      // the same role-fetch barrier that the legacy ngrx pagination
+      // watcher used to drive.
+      const ffSource = getFeatureFlagsSource(endpoint.guid, httpClient);
+      requests[endpoint.guid] = [from(ffSource.load()).pipe(
+        map(() => true),
+        catchError(() => of(false)),
+      )];
 
       // Single drained call to the native handler replaces the legacy
       // 7-sequential-fetch fanout (one per CfUserRelationTypes value
@@ -198,25 +199,3 @@ export function fetchCfCurrentUserRoles(
   );
 }
 
-const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) => {
-  const entityKey = entityCatalog.getEntityKey(action);
-  return store.select(selectPaginationState(entityKey, action.paginationKey));
-};
-
-/**
- * Using the given action wait until the associated pagination section changes from busy to not busy
- */
-const createPaginationCompleteWatcher = (store: Store<AppState>, action: BasePaginatedAction): Observable<boolean> =>
-  fetchPaginationStateFromAction(store, action).pipe(
-    map((paginationState: PaginationEntityState) => {
-      const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return pageRequest ? pageRequest.busy : true;
-    }),
-    pairwise(),
-    map(([oldFetching, newFetching]) => {
-      return oldFetching === true && newFetching === false;
-    }),
-    skipWhile(completed => !completed),
-    take(1),
-  );

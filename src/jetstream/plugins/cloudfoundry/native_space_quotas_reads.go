@@ -68,6 +68,38 @@ func (c *CloudFoundrySpecification) getNativeSpaceQuotas(ctx echo.Context) error
 	})
 }
 
+// getNativeSpaceQuotaDetail handles GET /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}.
+//
+// Returns a single space quota by GUID as a flat StSpaceQuota. Drives
+// the Space Quota detail page (and any single-quota lookup that
+// previously hit V2's space_quota_definitions/{guid}).
+func (c *CloudFoundrySpecification) getNativeSpaceQuotaDetail(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	quotaGUID := ctx.Param("quotaGuid")
+	if cnsiGUID == "" || quotaGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and quotaGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+
+	q, getErr := cfClient.SpaceQuotas().Get(ctx.Request().Context(), quotaGUID)
+	if getErr != nil {
+		return handleCapiError(ctx, getErr)
+	}
+
+	return ctx.JSON(http.StatusOK, toStSpaceQuota(*q, cnsiGUID))
+}
+
 // toStSpaceQuota maps a capi.SpaceQuotaV3 onto a Stratos-shape
 // StSpaceQuota. Same nil-int → -1 ("Unlimited") coercion as
 // toStOrgQuota; the parent OrganizationGUID is read off the

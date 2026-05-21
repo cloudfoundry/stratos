@@ -9,7 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@stratosui/store';
@@ -145,7 +145,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   // onNext.data into step2_2.onEnter via enterData).
   private pendingFsFileInfo?: unknown;
 
-  private isLoadingSignal = toSignal(this.cfOrgSpaceService.isLoading$, { initialValue: false });
+  private isLoadingSignal = this.cfOrgSpaceService.isLoading;
 
   @ViewChild('step1', { static: false })
   set step1Ref(v: CreateApplicationStep1Component | undefined) {
@@ -280,9 +280,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       // onNext — dispatch StoreCFSettings using the values currently
       // in CfOrgSpaceDataService.
       this.store.dispatch(new StoreCFSettings({
-        cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
-        org: this.cfOrgSpaceService.org.select.getValue(),
-        space: this.cfOrgSpaceService.space.select.getValue()
+        cloudFoundry: this.cfOrgSpaceService.cf.select(),
+        org: this.cfOrgSpaceService.org.select(),
+        space: this.cfOrgSpaceService.space.select()
       }));
     },
   };
@@ -398,16 +398,16 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // Has the endpoint ID been specified in the URL?
     const endpoint = this.activatedRoute.snapshot.queryParams[AUTO_SELECT_CF_URL_PARAM];
     if (endpoint) {
-      this.cfOrgSpaceService.cf.select.next(endpoint);
+      this.cfOrgSpaceService.cf.select.set(endpoint);
     }
 
     if (this.appGuid) {
       this.initCfOrgSpaceService.push(this.cfDetails$.pipe(
         filter(p => !!p),
         tap(p => {
-          this.cfOrgSpaceService.cf.select.next(p.cloudFoundry);
-          this.cfOrgSpaceService.org.select.next(p.org);
-          this.cfOrgSpaceService.space.select.next(p.space);
+          this.cfOrgSpaceService.cf.select.set(p.cloudFoundry);
+          this.cfOrgSpaceService.org.select.set(p.org);
+          this.cfOrgSpaceService.space.select.set(p.space);
         })
       ).subscribe());
       // In case user has specified the query param manually
@@ -423,13 +423,13 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         tap(pag => {
           const { cf, org, space } = pag.clientPagination.filter.items;
           if (cf) {
-            this.cfOrgSpaceService.cf.select.next(cf);
+            this.cfOrgSpaceService.cf.select.set(cf);
           }
           if (org) {
-            this.cfOrgSpaceService.org.select.next(org);
+            this.cfOrgSpaceService.org.select.set(org);
           }
           if (space) {
-            this.cfOrgSpaceService.space.select.next(space);
+            this.cfOrgSpaceService.space.select.set(space);
           }
         })
       ).subscribe());

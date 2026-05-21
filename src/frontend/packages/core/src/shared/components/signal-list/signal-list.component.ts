@@ -1,8 +1,9 @@
-import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
+import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ContentChildren, QueryList, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
+import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -39,6 +40,18 @@ export interface SignalListGaugeBinding<T> {
   readonly valueText?: (row: T) => string;
   readonly warningAt?: number;
   readonly errorAt?: number;
+}
+
+// Binding for a `kind: 'checkbox'` column. Multi-row selection: the
+// consumer owns the writable signal holding the set of selected row
+// keys (per config.getRowKey). The list renders one checkbox per row
+// that reads/writes the set, and offers an optional `isDisabled`
+// predicate so non-selectable rows render as a dimmed disabled
+// checkbox. Mirrors `radio` but for multi-select — wired the same way
+// in the SignalListColumn descriptor.
+export interface SignalListCheckboxBinding<T> {
+  readonly selectedKeys: WritableSignal<ReadonlySet<string>>;
+  readonly isDisabled?: (row: T) => boolean;
 }
 
 // Binding for a `kind: 'radio'` column. Single-row selection: the
@@ -79,7 +92,7 @@ export interface SignalListColumn<T> {
   // when the column is sortable. Defaults to the header text.
   key?: string;
   // Presentation hint. Default is 'text'.
-  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions' | 'radio' | 'gauge';
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions' | 'radio' | 'checkbox' | 'gauge' | 'template';
   // Required when kind === 'link'. Returns the router-link target array,
   // or null to render as plain text.
   link?: (row: T) => readonly (string | number)[] | null;
@@ -141,6 +154,17 @@ export interface SignalListColumn<T> {
   // if already selected — radio behavior is single-select, so re-click
   // is a no-op). Disabled rows show a dimmed radio that doesn't react.
   radio?: SignalListRadioBinding<T>;
+  // Required when kind === 'checkbox'. See SignalListCheckboxBinding.
+  // The cell renders a checkbox bound to the consumer's selectedKeys
+  // signal — toggling adds/removes the row's key from the set. Disabled
+  // rows render a dimmed checkbox that doesn't react.
+  checkbox?: SignalListCheckboxBinding<T>;
+  // Required when kind === 'template'. Names the <ng-template
+  // appSignalListCell="..."> in the consumer's content projection that
+  // should render this cell. The template receives the row as both
+  // $implicit and `row` context, so consumers can use either
+  // `let-row` or `let-row="row"`.
+  templateName?: string;
   // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
   // <col> in the table's <colgroup>. Unset columns share remaining width
   // equally under the fixed table layout.
@@ -162,6 +186,10 @@ export interface SignalListDropdown {
   options: Signal<SignalListDropdownOption[]>;
   selected: WritableSignal<string | null>;
   disabled?: Signal<boolean>;
+  // Fires on the first user interaction with the dropdown (focus / mousedown).
+  // Lets the host service defer expensive option-population work until the user
+  // actually opens the menu — paint-fast pages, populate-on-demand dropdowns.
+  onOpen?: () => void;
 }
 
 export type SignalListViewMode = 'table' | 'card';
@@ -280,6 +308,12 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Used by the helm catalog tab to render <app-chart-item> per row.
   @ContentChild('cardTemplate', { read: TemplateRef })
   cardTemplate?: TemplateRef<{ $implicit: T }>;
+
+  // Named cell templates supplied by the host page. Each tagged with
+  // `appSignalListCell="<name>"`; columns of `kind: 'template'` reference
+  // them by name via SignalListColumn.templateName.
+  @ContentChildren(SignalListCellTemplateDirective)
+  cellTemplates?: QueryList<SignalListCellTemplateDirective<T>>;
 
   @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
 
@@ -574,6 +608,36 @@ export class SignalListComponent<T> implements AfterViewInit {
     ev.stopPropagation();
     if (!col.radio || this.isRadioDisabled(col, row)) return;
     col.radio.selectedKey.set(this.config.getRowKey(row));
+  }
+
+  // Checkbox-select helpers --------------------------------------------
+
+  isCheckboxSelected(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.checkbox && col.checkbox.selectedKeys().has(this.config.getRowKey(row));
+  }
+
+  isCheckboxDisabled(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.checkbox?.isDisabled && col.checkbox.isDisabled(row);
+  }
+
+  onToggleCheckbox(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    if (!col.checkbox || this.isCheckboxDisabled(col, row)) return;
+    const key = this.config.getRowKey(row);
+    const next = new Set(col.checkbox.selectedKeys());
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    col.checkbox.selectedKeys.set(next);
+  }
+
+  // Cell-template helpers ----------------------------------------------
+
+  cellTemplateFor(col: SignalListColumn<T>): TemplateRef<{ $implicit: T; row: T }> | undefined {
+    if (col.kind !== 'template' || !col.templateName || !this.cellTemplates) return undefined;
+    return this.cellTemplates.find(d => d.name === col.templateName)?.template;
   }
 
   // Compound-cell overflow ---------------------------------------------

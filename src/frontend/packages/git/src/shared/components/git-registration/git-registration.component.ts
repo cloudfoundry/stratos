@@ -404,7 +404,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       createSystemEndpoint,
     });
     const data: ConnectEndpointConfig = {
-      guid: result.message,
+      guid: result.guid ?? '',
       name,
       type: GIT_ENDPOINT_TYPE,
       subType: this.epSubType,

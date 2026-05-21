@@ -11,11 +11,10 @@ import { defer, firstValueFrom, from, Observable, of as observableOf, Subscripti
 import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
-import { AppMetadataTypes } from '../../../../../cloud-foundry/src/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
 import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { AppDetailDataService } from '../app-detail-data.service';
 import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -65,6 +64,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private apps = inject(CfAppsSignalConfigService);
   private router = inject(Router);
+  private detail = inject(AppDetailDataService);
 
 
   editAppForm: FormGroup<EditApplicationForm>;
@@ -212,33 +212,27 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       : observableOf({ success: true });
 
     const other$: Observable<{ success: boolean; message?: string }> = hasOther
-      ? this.applicationService.updateApplication(otherUpdates, [AppMetadataTypes.SUMMARY]).pipe(
-          map(v => ({
-            success: !v.error,
-            message: v.error ? `Could not update application: ${v.message}` : undefined,
-          })),
+      ? defer(() => from(this.detail.update(otherUpdates as { name?: string; enable_ssh?: boolean }))).pipe(
+          map(() => ({ success: true })),
         )
       : observableOf({ success: true });
 
     return scale$.pipe(
       take(1),
-      // After scale resolves, run the legacy update (if any). A scale
+      // After scale resolves, run the name/ssh PATCH (if any). A scale
       // failure short-circuits the other update so we don't half-persist.
       switchMap(scaleRes => {
         if (!scaleRes.success) return observableOf(scaleRes);
         return other$.pipe(take(1));
       }),
-      // Refresh the local app entity cache once all writes complete so the
-      // summary card reflects the new memory/disk/instances/ssh values.
-      // Also refresh per-instance stats — the legacy updateApplication path
-      // used AppMetadataTypes.STATS to do this implicitly; scaleApp bypasses
-      // ngrx, so without an explicit getMultiple here the Instances tab's
-      // table freezes at whatever state the last poll saw (typically
-      // "STARTING" for the newly-created container).
+      // Refresh per-instance stats after a scale so the Instances tab's
+      // table reflects the new container count. detail.update() already
+      // refreshed the app entity on success — only stats needs a separate
+      // kick (scaleApp goes through the async-job path and doesn't touch
+      // AppDetailDataService).
       tap(res => {
         if (res.success && hasScale) {
-          cfEntityCatalog.application.api.get(appGuid, cfGuid, {});
-          cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
+          void this.detail.refresh('stats');
         }
       }),
       map(res => ({ ...res, redirect: res.success })),

@@ -190,6 +190,9 @@ describe('CfAppsSignalConfigService', () => {
     const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
+    // Group C made loadNames lazy — explicitly trigger the catalog fetch
+    // the way the filter-dropdown onOpen hook now does in real use.
+    void svc.ensureNamesLoaded(['cnsi-1']);
     await svc.loadAll();
     await Promise.resolve();
     await Promise.resolve();
@@ -448,6 +451,7 @@ describe('CfAppsSignalConfigService', () => {
     const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     // Wait for orgs catalog → org-batched spaces drain to populate the
     // catalog signals.
     for (let i = 0; i < 8; i++) { await Promise.resolve(); TestBed.tick(); }
@@ -546,6 +550,7 @@ describe('CfAppsSignalConfigService', () => {
     const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     for (let i = 0; i < 6; i++) { await Promise.resolve(); TestBed.tick(); }
     expect(svc.spaceNames().get('space-dup')).toBe('from-catalog');
   });
@@ -607,6 +612,7 @@ describe('CfAppsSignalConfigService', () => {
     const svc = makeSvc(httpMock, cf);
 
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     seedApps(svc, apps);
     // Now release the orgs catalog so loadNames computes priority + drains.
     expect(orgsResolveSubject).not.toBeNull();
@@ -646,6 +652,7 @@ describe('CfAppsSignalConfigService', () => {
     const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     for (let i = 0; i < 12; i++) { await Promise.resolve(); TestBed.tick(); }
 
     expect(spacesUrls.length).toBe(3);
@@ -683,6 +690,7 @@ describe('CfAppsSignalConfigService', () => {
     const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     // Drain microtasks until the priority chunk request is open.
     for (let i = 0; i < 6; i++) { await Promise.resolve(); TestBed.tick(); }
     expect(subjects.length).toBe(1); // only priority is in flight before resolution
@@ -724,12 +732,14 @@ describe('CfAppsSignalConfigService', () => {
     const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
     expect(subjects.length).toBe(1);
 
     // Second initialize() bumps the generation; the still-pending gen-1
     // chunk must NOT merge into _spacesByCnsi when it eventually resolves.
     svc.initialize(['cnsi-1']);
+    void svc.ensureNamesLoaded(['cnsi-1']);
     for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
 
     // Resolve the stale request with a space that would otherwise leak in.

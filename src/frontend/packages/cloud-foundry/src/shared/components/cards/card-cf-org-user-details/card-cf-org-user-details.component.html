@@ -15,7 +15,7 @@
             </a>
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
-            <app-boolean-indicator [isTrue]="(cfOrgService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no">
+            <app-boolean-indicator [isTrue]="(cfOrgService.quotaDefinition$ | async)?.paidServicesAllowed" type="yes-no">
             </app-boolean-indicator>
           </app-metadata-item>
         </div>

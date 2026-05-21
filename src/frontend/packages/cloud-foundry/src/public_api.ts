@@ -97,7 +97,6 @@ export { UserRoleLabels } from './store/types/users-roles.types';
 export { RemoveCfUserRole } from './actions/users.actions';
 
 // CF Route Actions
-export { GetAppRoutes } from './actions/application-service-routes.actions';
 
 // CF Selectors
 export { selectCfEntity } from './store/selectors/api.selectors';
@@ -133,8 +132,6 @@ export { CfUserPermissionDirective } from './shared/directives/cf-user-permissio
 // List Table Cell Components
 export { TableCellAppInstancesComponent } from './shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 export { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
-export { TableCellRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
-export { TableCellTCPRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
 
 // FWT-934 entity-key namespacing + diagnostics channel
 export { cfEntityId, parseCfEntityId, isComposite } from './cf-entity-ref';

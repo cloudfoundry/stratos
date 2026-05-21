@@ -207,7 +207,6 @@ export {
 export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './reducers/routing.reducer';
-export { GetAllApiKeys } from './actions/apiKey.actions';
 export { getListStateObservables } from './reducers/list.reducer';
 export { EntitySchema } from './helpers/entity-schema';
 export type {

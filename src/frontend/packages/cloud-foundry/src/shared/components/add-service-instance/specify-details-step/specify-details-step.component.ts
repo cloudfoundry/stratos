@@ -29,7 +29,6 @@ import {
 import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult, StratosJobError } from '../../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
@@ -368,8 +367,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         message: `Failed to create service instance binding: ${bindResult?.message ?? 'unknown error'}`,
       };
     }
-    // Refetch env vars for app, since they have been changed by CF
-    cfEntityCatalog.appEnvVar.api.getMultiple(state.bindAppGuid, state.cfGuid);
+    // CF mutated VCAP_SERVICES on the bound app. We routeToServices below
+    // (away from any app-detail route), so the legacy ngrx prefetch was
+    // priming state nothing on this navigation reads. The app's env-vars
+    // tab fetches fresh on next mount via AppDetailDataService —
+    // dropping the prefetch is functionally a no-op.
     return this.routeToServices(`Service instance "${siName}" created and bound.`);
   }
 

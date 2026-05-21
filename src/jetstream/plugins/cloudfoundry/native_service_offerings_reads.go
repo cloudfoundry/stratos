@@ -91,6 +91,16 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 	if mode == ReturnSummary || mode == ReturnDetails {
 		listParams = listParams.WithFields("service_broker", "guid", "name")
 	}
+	// Optional space scoping: ?space_guids=g1,g2,... forwards as
+	// /v3/service_offerings?space_guids=g1,g2 — used by the
+	// add-service-instance wizard's Select Service step to show
+	// only the offerings reachable from the wizard's selected space.
+	if rawSpaces := ctx.QueryParam("space_guids"); rawSpaces != "" {
+		spaces := splitNonEmpty(rawSpaces, ",")
+		if len(spaces) > 0 {
+			listParams = listParams.WithFilter("space_guids", spaces...)
+		}
+	}
 	rawOfferings, listErr := cfClient.ServiceOfferings().List(ctx.Request().Context(), listParams)
 	if listErr != nil {
 		return handleCapiError(ctx, listErr)
@@ -332,6 +342,8 @@ func toStServiceOffering(o capi.ServiceOffering, cnsiGUID string, brokerByGUID m
 	}
 	available := o.Available
 	out.Available = &available
+	bindable := o.BrokerCatalog.Features.Bindable
+	out.Bindable = &bindable
 
 	brokerGUID := relationshipGUID(o.Relationships.ServiceBroker)
 	if brokerGUID != "" {
