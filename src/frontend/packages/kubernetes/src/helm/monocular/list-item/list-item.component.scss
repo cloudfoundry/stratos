@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 .list-item {
   @apply rounded-lg overflow-hidden border border-gray-300 bg-gray-100 transition-transform duration-200;
 }

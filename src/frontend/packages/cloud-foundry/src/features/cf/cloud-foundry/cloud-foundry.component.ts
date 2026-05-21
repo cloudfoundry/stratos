@@ -80,7 +80,7 @@ export class CloudFoundryComponent {
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
-        return av < bv ? -1 * dir : av > bv ? 1 * dir : 0;
+        return String(av).localeCompare(String(bv), undefined, { sensitivity: 'base', numeric: true }) * dir;
       });
     });
     const pageSize: WritableSignal<number> = signal(24);

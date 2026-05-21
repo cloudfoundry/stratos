@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@reference 'tailwindcss';
 
 /* Restore page-title typography on bare <h1> elements.
  *
@@ -49,17 +47,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* CSS Custom Properties for theme customization */
+/* CSS Custom Properties for theme customization.
+ * Brand colors (--color-primary etc.) are declared in the @theme block
+ * above and emitted at :root; .dark-theme below overrides them at runtime.
+ * Everything in this :root block is a runtime CSS variable consumed by
+ * non-utility CSS rules (var(--nav-bg) etc.); StratosThemeService writes
+ * here to switch themes. */
 :root {
-  /* Brand colors - these will be overridden by StratosThemeService */
-  --color-primary: #3b82f6;
-  --color-secondary: #60a5fa;
-  --color-accent: #60a5fa;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
-
   /* Navigation colors - these will be overridden by StratosThemeService */
   --nav-bg: #1e293b;
   --nav-text: #ffffff;
@@ -794,7 +788,7 @@ router-outlet + * {
 
 /* Modal styles */
 .modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 z-50;
+  @apply fixed inset-0 bg-black/50 z-50;
 }
 
 .modal {

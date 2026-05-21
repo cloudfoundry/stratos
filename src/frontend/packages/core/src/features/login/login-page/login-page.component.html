@@ -24,7 +24,7 @@
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
       <img
-        class="login-logo h-12 w-12 flex-shrink-0"
+        class="login-logo h-12 w-12 shrink-0"
         [src]="themeLogo()"
         [alt]="themeDisplayName() || 'Logo'"
         />
@@ -111,7 +111,7 @@
       }"
       role="alert"
       >
-      <span class="material-icons text-red-500 dark:text-red-400 flex-shrink-0">error_outline</span>
+      <span class="material-icons text-red-500 dark:text-red-400 shrink-0">error_outline</span>
       <span>{{ displayMessage }}</span>
     </div>
   }

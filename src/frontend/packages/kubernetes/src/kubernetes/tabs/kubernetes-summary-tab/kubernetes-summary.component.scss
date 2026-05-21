@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 /* Styles targeting child component host elements — not expressible in Tailwind */
 :host ::ng-deep app-tile-grid app-tile:nth-child(2) {
   display: flex;

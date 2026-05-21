@@ -12,7 +12,7 @@
         }
         @if (menuOpen) {
           <div
-            class="absolute right-0 mt-1 w-56 bg-white dark:bg-neutral-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+            class="absolute right-0 mt-1 w-56 bg-white dark:bg-neutral-800 rounded-md shadow-lg ring-1 ring-black/5 z-50">
             <div class="py-1">
               @for (analyzer of analyzers; track analyzer) {
                 <button (click)="runAnalysis(analyzer.id); menuOpen = false"

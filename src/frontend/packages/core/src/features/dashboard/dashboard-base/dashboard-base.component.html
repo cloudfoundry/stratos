@@ -5,7 +5,7 @@
     <!-- Side navigation drawer -->
     @if (mainNavState$ | async; as navState) {
       <div #sidenav
-        class="dashboard-side-nav bg-nav-bg text-nav-text h-full flex-shrink-0 transition-all duration-300 ease-in-out shadow-lg"
+        class="dashboard-side-nav bg-nav-bg text-nav-text h-full shrink-0 transition-all duration-300 ease-in-out shadow-lg"
          [ngClass]="{
            'fixed inset-y-0 left-0 z-50': navState.mode === 'over',
            'w-64': (navState.mode === 'side' && !navState.iconMode) || (navState.mode === 'over'),
