@@ -16,7 +16,6 @@ import {
 import { CFAppState } from '../../cf-app-state';
 import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../cf-entity-types';
 import { createEntityRelationPaginationKey } from '../../entity-relations/entity-relations.types';
-import { getCurrentUserCFGlobalStates } from '../../store/selectors/cf-current-user-role.selectors';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { cfEntityCatalog } from '../../cf-entity-catalog';
 import { cfEntityFactory } from '../../cf-entity-factory';
@@ -457,9 +456,9 @@ export class CfUserService {
   };
 
   public isConnectedUserAdmin = (cfGuid: string): Observable<boolean> =>
-    this.store.select(getCurrentUserCFGlobalStates(cfGuid)).pipe(
+    this.cfRoles.cfEndpointRolesState$(cfGuid).pipe(
       filter(state => !!state),
-      map(state => state.isAdmin),
+      map(state => state.global.isAdmin),
       take(1)
     );
 }
