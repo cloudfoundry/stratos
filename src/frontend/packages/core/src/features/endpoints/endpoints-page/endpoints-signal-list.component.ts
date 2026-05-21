@@ -28,6 +28,8 @@ import {
   SignalListPillColor,
   SignalListRowAction,
 } from '../../../shared/components/signal-list/signal-list.component';
+import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
+import { TableCellEndpointAddressComponent } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { ConnectEndpointDialogComponent } from '../connect-endpoint-dialog/connect-endpoint-dialog.component';
@@ -45,7 +47,13 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
   host: { class: 'flex flex-col flex-1 min-h-0' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ListSubNavComponent, SignalListComponent],
+  imports: [
+    CommonModule,
+    ListSubNavComponent,
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+    TableCellEndpointAddressComponent,
+  ],
 })
 export class EndpointsSignalListComponent {
   private store = inject<Store<AppState>>(Store);
@@ -169,7 +177,12 @@ export class EndpointsSignalListComponent {
         },
         {
           header: 'Address', key: 'address', sortField: addressOf,
-          kind: 'text',
+          // Cell projected via <ng-template appSignalListCell="address">
+          // in this component's HTML — restores the FWT-929 duplicate-URL
+          // warning that the signal-list migration dropped when it
+          // collapsed the Address column to plain text.
+          kind: 'template',
+          templateName: 'address',
           render: addressOf,
           widthHint: '24rem',
         },

@@ -1,4 +1,8 @@
 <app-list-sub-nav title="Total Endpoints" [count]="totalEndpoints" [addAction]="addAction"></app-list-sub-nav>
 @if (listConfig(); as config) {
-  <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
+  <app-signal-list [config]="config" class="flex-1 min-h-0">
+    <ng-template appSignalListCell="address" let-row>
+      <app-table-cell-endpoint-address [row]="row"></app-table-cell-endpoint-address>
+    </ng-template>
+  </app-signal-list>
 }
