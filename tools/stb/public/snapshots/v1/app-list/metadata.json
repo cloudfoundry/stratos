@@ -1,0 +1,14 @@
+{
+  "id": "app-list",
+  "name": "App list",
+  "selectorTokens": [
+    { "selector": "body", "tokens": ["--color-brand-50"] },
+    { "selector": "nav", "tokens": ["--nav-bg", "--nav-text"] },
+    { "selector": "main h1", "tokens": ["--color-brand-900"] },
+    { "selector": ".app-card", "tokens": ["--color-brand-200"] },
+    { "selector": ".app-card h2", "tokens": ["--color-brand-700"] },
+    { "selector": ".status-success", "tokens": ["--color-success"] },
+    { "selector": ".status-warning", "tokens": ["--color-warning"] },
+    { "selector": ".status-danger", "tokens": ["--color-danger"] }
+  ]
+}

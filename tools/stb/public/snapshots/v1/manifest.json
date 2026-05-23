@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "stratosCommit": "stub",
+  "capturedAt": "2026-05-23T00:00:00Z",
+  "scenes": [
+    { "id": "login", "name": "Login", "archetype": "auth", "thumbnail": null },
+    { "id": "app-list", "name": "App list", "archetype": "list-cards", "thumbnail": null }
+  ]
+}

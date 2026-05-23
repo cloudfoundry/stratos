@@ -1,0 +1,26 @@
+body { margin: 0; font-family: system-ui, sans-serif; }
+.login-container {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; background-color: var(--color-brand-50);
+}
+.login-card {
+  background-color: var(--color-brand-50);
+  border: 1px solid var(--color-brand-200);
+  padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.login-card h1 { color: var(--color-brand-900); margin-top: 0; }
+.login-card label { display: block; margin: 1rem 0 0.25rem; color: var(--color-brand-800); }
+.login-card input { width: 100%; padding: 0.5rem; border: 1px solid var(--color-brand-300); }
+.btn-primary {
+  background-color: var(--color-brand-500); color: white;
+  border: none; padding: 0.6rem 1rem; border-radius: 4px;
+  margin-top: 1rem; cursor: pointer;
+}
+.btn-primary:hover { background-color: var(--color-brand-600); }
+
+.dark-theme .login-container { background-color: var(--color-brand-900); }
+.dark-theme .login-card {
+  background-color: var(--color-brand-800);
+  border-color: var(--color-brand-700);
+}
+.dark-theme .login-card h1, .dark-theme .login-card label { color: var(--color-brand-50); }
