@@ -4,7 +4,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../../services/data-sources/cnsi-apps-source';
+import { CnsiRoutesSource } from '../../../../../services/data-sources/cnsi-routes-source';
+import { CnsiServiceBindingsSource } from '../../../../../services/data-sources/cnsi-service-bindings-source';
 import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
+import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
 import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
@@ -149,6 +152,8 @@ export class CfAppsSignalConfigService {
   // toolbar selection) so the per-space tab can pin scope without the
   // dropdown — and so clearFilters() doesn't drop scope.
   private _lockedSpaceGuid = '';
+
+  private readonly endpointRegistry = inject(EndpointDataRegistry);
 
   constructor(private readonly http: HttpClient) {
     const cfService = inject(CloudFoundryService, { optional: true });
@@ -323,7 +328,7 @@ export class CfAppsSignalConfigService {
     // alongside the dedup sets so previously-resolved names don't bleed
     // across initialize() calls.
     this.clearResolverState();
-    const sources = cnsiGuids.map(guid => new CnsiAppsSource(guid, this.http));
+    const sources = cnsiGuids.map(guid => new CnsiAppsSource(guid, this.http, this.endpointRegistry.acquire(guid)));
     this.orchestrator = new MergeOrchestrator<StApp>(sources);
     this.view = new ViewPipeline<StApp>(
       this.orchestrator.allItems,
@@ -848,16 +853,19 @@ export class CfAppsSignalConfigService {
 
   // Deletes a service credential binding through the async-job contract.
   // Managed bindings produce a 202 + polls; user-provided bindings resolve
-  // synchronously via the backend's 200+COMPLETE synthesis. writeWithJob
-  // handles both shapes uniformly.
+  // synchronously via the backend's 200+COMPLETE synthesis. Routed through
+  // CnsiServiceBindingsSource so the binding row is dropped from
+  // EndpointDataService._serviceCredentialBindings on success and the
+  // serviceBinding.delete cascade fires (marks apps + SI stale).
   async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<void> {
-    const call = this.http.delete(`/pp/v1/cf/service_bindings/${cnsiGuid}/${bindingGuid}`, { observe: 'response' });
-    await writeWithJob(this.http, call);
+    const eds = this.endpointRegistry.acquire(cnsiGuid);
+    const source = new CnsiServiceBindingsSource(cnsiGuid, this.http, eds);
+    await source.delete(bindingGuid);
   }
 
-  // Deletes a CF route through the async-job contract. CF v3 returns 202 +
-  // Location header for route deletes; writeWithJob handles the resolve /
-  // poll / terminal-state dance so callers just await a promise.
+  // Deletes a CF route through CnsiRoutesSource. The source handles
+  // writeWithJob, patches its own _items, and fires the route.delete
+  // cascade (marks apps stale so app-detail route lists refetch).
   //
   // Used by the signal-native delete stepper when the user opts to delete
   // attached routes alongside the app. Throws StratosJobError on FAILED
@@ -865,8 +873,9 @@ export class CfAppsSignalConfigService {
   // (the route may fail to delete because the app delete already cascaded
   // through CF's reference checks).
   async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    const call = this.http.delete(`/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}`, { observe: 'response' });
-    await writeWithJob(this.http, call);
+    const eds = this.endpointRegistry.acquire(cnsiGuid);
+    const source = new CnsiRoutesSource(cnsiGuid, this.http, eds);
+    await source.delete(routeGuid);
   }
 
   // Lifecycle actions. The CF v3 /v3/apps/{guid}/actions/{action} endpoints
