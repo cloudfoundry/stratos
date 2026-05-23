@@ -21,3 +21,7 @@ body {
 .stb-color-native { width: 3rem; height: 2rem; padding: 0; border: 1px solid var(--border, #ccc); }
 .stb-color-text { flex: 1; padding: 0.25rem; font-family: var(--font-mono, monospace); }
 .stb-close { padding: 0.25rem 0.5rem; margin-left: auto; }
+
+.stb-scene-tabs { display: flex; border-bottom: 1px solid var(--border, #ddd); background: var(--card, white); }
+.stb-scene-tab { padding: 0.5rem 1rem; border: none; background: none; cursor: pointer; font: inherit; color: var(--foreground); }
+.stb-scene-tab.active { border-bottom: 2px solid var(--primary); font-weight: 600; }
