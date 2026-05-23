@@ -3,6 +3,7 @@ import { mountTokenSidebar } from '@/ui/token-sidebar';
 import { mountSceneTabs } from '@/ui/scene-tabs';
 import { createPreviewPane } from '@/ui/preview-pane';
 import { openColorPicker } from '@/ui/color-picker';
+import { createHighlightWiring } from '@/ui/highlight';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 
@@ -39,7 +40,18 @@ async function main() {
 
   await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
 
+  const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
+
+  const preview = createPreviewPane({
+    onElementSelected: (_selector, tokens) => {
+      if (tokens.length === 0) return;
+      wiring.scrollSidebarToToken(sidebarHost, tokens[0]!);
+      wiring.flashSidebarRows(sidebarHost, tokens);
+    },
+  });
+  preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
+
   mountTokenSidebar(sidebarHost, {
     onSwatchClick: (token) => {
       const dark = previewDark.value;
@@ -58,12 +70,10 @@ async function main() {
         },
       });
     },
+    onHover: (tokenName) => preview.highlightToken(tokenName),
   });
 
   mountEditorPane(app.querySelector('.stb-editor-host') as HTMLElement);
-
-  const preview = createPreviewPane();
-  preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
 }
 
 main();

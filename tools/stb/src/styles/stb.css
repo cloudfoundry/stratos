@@ -25,3 +25,5 @@ body {
 .stb-scene-tabs { display: flex; border-bottom: 1px solid var(--border, #ddd); background: var(--card, white); }
 .stb-scene-tab { padding: 0.5rem 1rem; border: none; background: none; cursor: pointer; font: inherit; color: var(--foreground); }
 .stb-scene-tab.active { border-bottom: 2px solid var(--primary); font-weight: 600; }
+
+.stb-flash { background-color: var(--warning, #ffeaa7); transition: background-color 0.3s; }
