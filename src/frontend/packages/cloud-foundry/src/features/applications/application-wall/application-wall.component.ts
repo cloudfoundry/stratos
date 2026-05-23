@@ -255,9 +255,9 @@ export class ApplicationWallComponent implements OnInit {
     this.appsConfig.clearLockedSpace();
     this.appsConfig.initialize(cnsiGuids);
     // appsConfig.view exists only after initialize(); assign here so the
-    // L5 sub-nav can read totalFilteredResults as a stable Signal.
+    // L5 sub-nav can read the unfiltered total as a stable Signal.
     (this as { totalApplications: Signal<number> }).totalApplications =
-      this.appsConfig.view.totalFilteredResults;
+      this.appsConfig.view.totalItems;
     // First user interaction with ANY of the toolbar dropdowns triggers a
     // one-shot org/space catalog fetch via ensureNamesLoaded(). This keeps
     // the apps wall mount fast — eager fetch on init was saturating the

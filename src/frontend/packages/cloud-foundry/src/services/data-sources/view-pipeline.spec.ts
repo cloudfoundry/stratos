@@ -23,11 +23,24 @@ describe('ViewPipeline', () => {
     expect(pipe.filteredItems().map(r => r.name)).toEqual(['alpha', 'gamma', 'delta', 'epsilon']);
     expect(pipe.sortedItems().map(r => r.name)).toEqual(['gamma', 'alpha', 'epsilon', 'delta']);
     expect(pipe.pagedItems().map(r => r.name)).toEqual(['gamma', 'alpha']);
+    expect(pipe.totalItems()).toBe(5);
     expect(pipe.totalFilteredResults()).toBe(4);
     expect(pipe.totalPages()).toBe(2);
 
     pageIndex.set(1);
     expect(pipe.pagedItems().map(r => r.name)).toEqual(['epsilon', 'delta']);
+  });
+
+  it('totalItems stays unfiltered when filter narrows the view', () => {
+    const items = signal<Row[]>([
+      { name: 'a', created: 1 },
+      { name: 'b', created: 2 },
+      { name: 'c', created: 3 },
+    ]).asReadonly();
+    const filter = signal<(r: Row) => boolean>(r => r.name === 'zzz');
+    const pipe = new ViewPipeline<Row>(items, filter, signal({ field: 'created', direction: 'asc' }), signal(10), signal(0));
+    expect(pipe.totalItems()).toBe(3);
+    expect(pipe.totalFilteredResults()).toBe(0);
   });
 
   it('descending sort', () => {

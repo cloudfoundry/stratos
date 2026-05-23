@@ -79,7 +79,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     this.quotasConfig.initialize(cfGuid);
     void this.quotasConfig.loadAll();
     (this as { totalSpaceQuotas: Signal<number> }).totalSpaceQuotas =
-      this.quotasConfig.view.totalFilteredResults;
+      this.quotasConfig.view.totalItems;
     this.createSpaceQuotaAction = {
       label: 'Create Space Quota',
       icon: 'add',

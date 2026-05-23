@@ -100,7 +100,7 @@ export class CloudFoundryOrganizationsSignalComponent {
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
     this.orgsConfig.initialize(cfGuid);
     (this as { totalOrganizations: Signal<number> }).totalOrganizations =
-      this.orgsConfig.view.totalFilteredResults;
+      this.orgsConfig.view.totalItems;
     this.canCreateOrganization = toSignal(
       currentUserPermissionsService.can(CfCurrentUserPermissions.ORGANIZATION_CREATE, cfGuid),
       { initialValue: false },

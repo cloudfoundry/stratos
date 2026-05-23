@@ -116,7 +116,7 @@ export class EndpointsSignalListComponent {
 
   constructor() {
     this.endpointsConfig.initialize();
-    (this as { totalEndpoints: Signal<number> }).totalEndpoints = this.endpointsConfig.view.totalFilteredResults;
+    (this as { totalEndpoints: Signal<number> }).totalEndpoints = this.endpointsConfig.view.totalItems;
 
     const typeLabel = (ep: EndpointModel): string => {
       const def = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);

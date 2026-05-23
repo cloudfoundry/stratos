@@ -61,7 +61,7 @@ export class CloudFoundryOrganizationUsersComponent {
     const cfGuid = this.cfEndpointService.cfGuid;
     const orgGuid = this.cfOrgService.orgGuid;
     this.usersConfig.initializeForOrg(cfGuid, orgGuid);
-    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalFilteredResults;
+    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
 
     const renderUsername = (u: StUser): string =>
       u.username && u.username.length > 0 ? u.username : (u.presentationName ?? u.guid);
