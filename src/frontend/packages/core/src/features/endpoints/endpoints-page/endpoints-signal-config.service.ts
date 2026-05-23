@@ -21,6 +21,7 @@ import { naturalCompare } from '../../../shared/utils/natural-sort';
 export interface SortSpec<T = unknown> {
   field: string;
   direction: 'asc' | 'desc';
+  caseSensitive?: boolean;
   _phantom?: T;
 }
 
@@ -81,7 +82,7 @@ export class ViewPipeline<T> {
           return (av - bv) * sign;
         }
         if (typeof av === 'string' && typeof bv === 'string') {
-          return naturalCompare(av, bv) * sign;
+          return naturalCompare(av, bv, spec.caseSensitive) * sign;
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });

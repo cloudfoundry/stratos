@@ -153,7 +153,9 @@ function isSort(v: unknown): v is SignalListSort {
   // sessions and trips ViewPipeline into reading `row[""] = undefined`,
   // collapsing every row to "equal" and emitting insertion order. Reject
   // here so bind() falls back to the caller's named defaults.
-  return typeof s.field === 'string'
-    && s.field.length > 0
-    && (s.direction === 'asc' || s.direction === 'desc');
+  if (typeof s.field !== 'string' || s.field.length === 0) return false;
+  if (s.direction !== 'asc' && s.direction !== 'desc') return false;
+  // `caseSensitive` is optional; missing or boolean both pass.
+  if (s.caseSensitive !== undefined && typeof s.caseSensitive !== 'boolean') return false;
+  return true;
 }

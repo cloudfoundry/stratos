@@ -73,6 +73,21 @@
           class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
           <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'asc'">sort</span>
         </button>
+        <button
+          type="button"
+          data-test="sort-case-toggle"
+          (click)="toggleSortCaseSensitive()"
+          [title]="config.sort!().caseSensitive ? 'Match Case: on' : 'Match Case: off'"
+          [attr.aria-pressed]="!!config.sort!().caseSensitive"
+          class="px-2 py-1 border rounded text-xs font-semibold leading-5 min-w-[2rem]"
+          [class.bg-content-bg]="!config.sort!().caseSensitive"
+          [class.border-content-border]="!config.sort!().caseSensitive"
+          [class.text-content-muted]="!config.sort!().caseSensitive"
+          [class.bg-primary-50]="config.sort!().caseSensitive"
+          [class.border-primary-500]="config.sort!().caseSensitive"
+          [class.text-primary-700]="config.sort!().caseSensitive"
+          [class.dark:bg-primary-900]="config.sort!().caseSensitive"
+          [class.dark:text-primary-300]="config.sort!().caseSensitive">Aa</button>
       </div>
     }
 

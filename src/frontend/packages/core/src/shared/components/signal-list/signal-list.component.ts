@@ -174,6 +174,11 @@ export interface SignalListColumn<T> {
 export interface SignalListSort {
   readonly field: string;
   readonly direction: 'asc' | 'desc';
+  // Per-list case-sensitivity toggle. Default is undefined === false, i.e.
+  // case-insensitive natural sort. Flipping to true switches the underlying
+  // Intl.Collator from { sensitivity: 'base' } to { sensitivity: 'variant' },
+  // so "Aa" sorts ahead of "aa". Persisted in the list-state store.
+  readonly caseSensitive?: boolean;
 }
 
 export interface SignalListDropdownOption {
@@ -755,7 +760,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   onSortFieldChange(field: string): void {
     if (!this.config.sort) return;
     const current = this.config.sort();
-    this.config.sort.set({ field, direction: current.direction });
+    this.config.sort.set({ field, direction: current.direction, caseSensitive: current.caseSensitive });
     this.config.pageIndex.set(0);
   }
 
@@ -765,6 +770,18 @@ export class SignalListComponent<T> implements AfterViewInit {
     this.config.sort.set({
       field: current.field,
       direction: current.direction === 'asc' ? 'desc' : 'asc',
+      caseSensitive: current.caseSensitive,
+    });
+    this.config.pageIndex.set(0);
+  }
+
+  toggleSortCaseSensitive(): void {
+    if (!this.config.sort) return;
+    const current = this.config.sort();
+    this.config.sort.set({
+      field: current.field,
+      direction: current.direction,
+      caseSensitive: !current.caseSensitive,
     });
     this.config.pageIndex.set(0);
   }
