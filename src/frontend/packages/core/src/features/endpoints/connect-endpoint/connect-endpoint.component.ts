@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
+import { rememberedUsernameKey } from '../remembered-username';
 
 /**
  * Base interface for the endpoint form structure.
@@ -123,6 +124,11 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     });
     // Add authValues as a separate group to handle dynamic auth type switching
     this.endpointForm.addControl('authValues', this.fb.group(this.autoSelected.form || {}));
+    // Prefill the username from the last successful connect (stored in
+    // localStorage by connect.service on success) — backend EndpointModel
+    // clears endpoint.user on disconnect, so the dialog otherwise opens
+    // empty even when the same user is reconnecting.
+    this.prefillRememberedUsername(config.guid);
     this.authChanged();
 
     // Template container reference is not available at construction
@@ -196,6 +202,21 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
     return a.length === b.length && a.filter(item => b.indexOf(item) < 0).length === 0;
+  }
+
+  private prefillRememberedUsername(endpointGuid: string): void {
+    const authValues = this.endpointForm.get('authValues');
+    if (!authValues || !authValues.get('username')) {
+      return;
+    }
+    try {
+      const stored = window.localStorage?.getItem(rememberedUsernameKey(endpointGuid));
+      if (stored) {
+        authValues.patchValue({ username: stored });
+      }
+    } catch {
+      // Private mode / quota — silent fail, no prefill.
+    }
   }
 
   private getData(): ConnectEndpointData {
