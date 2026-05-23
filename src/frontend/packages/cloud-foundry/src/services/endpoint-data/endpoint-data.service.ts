@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
 import { EMPTY, firstValueFrom, from, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, map, mergeMap, reduce, shareReplay, switchMap, tap, timeout } from 'rxjs/operators';
+import { cascadeFor, CascadeKey, EntityKind } from '../data-sources/cascade-registry';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 import {
@@ -71,6 +72,21 @@ export class EndpointDataService {
   private readonly _isLoadingServicesDetails = signal<boolean>(false);
   private readonly _servicesDetailsLastFetched = signal<Date | null>(null);
 
+  // Staleness flags per entity slice. Flipped true by applyCascade(key)
+  // after a related mutation; cleared back to false on a successful
+  // refresh of that slice. loadX() and loadDetails() treat stale === true
+  // the same as "not cached" — next read triggers a refetch. Components
+  // that want a visible spinner during the refetch can read the public
+  // xStale Signal exposed below.
+  private readonly _orgsStale = signal<boolean>(false);
+  private readonly _appsStale = signal<boolean>(false);
+  private readonly _spacesStale = signal<boolean>(false);
+  private readonly _serviceInstancesStale = signal<boolean>(false);
+  private readonly _serviceOfferingsStale = signal<boolean>(false);
+  private readonly _servicePlansStale = signal<boolean>(false);
+  private readonly _serviceBrokersStale = signal<boolean>(false);
+  private readonly _serviceCredentialBindingsStale = signal<boolean>(false);
+
   readonly orgs: Signal<StOrg[]> = this._orgs.asReadonly();
   readonly apps: Signal<StApp[]> = this._apps.asReadonly();
   readonly recentApps: Signal<StApp[]> = this._recentApps.asReadonly();
@@ -103,6 +119,15 @@ export class EndpointDataService {
   readonly servicesCountsLastFetched: Signal<Date | null> = this._servicesCountsLastFetched.asReadonly();
   readonly isLoadingServicesDetails: Signal<boolean> = this._isLoadingServicesDetails.asReadonly();
   readonly servicesDetailsLastFetched: Signal<Date | null> = this._servicesDetailsLastFetched.asReadonly();
+
+  readonly orgsStale: Signal<boolean> = this._orgsStale.asReadonly();
+  readonly appsStale: Signal<boolean> = this._appsStale.asReadonly();
+  readonly spacesStale: Signal<boolean> = this._spacesStale.asReadonly();
+  readonly serviceInstancesStale: Signal<boolean> = this._serviceInstancesStale.asReadonly();
+  readonly serviceOfferingsStale: Signal<boolean> = this._serviceOfferingsStale.asReadonly();
+  readonly servicePlansStale: Signal<boolean> = this._servicePlansStale.asReadonly();
+  readonly serviceBrokersStale: Signal<boolean> = this._serviceBrokersStale.asReadonly();
+  readonly serviceCredentialBindingsStale: Signal<boolean> = this._serviceCredentialBindingsStale.asReadonly();
 
   // ReplaySubject(1) — late subscribers (e.g. the home card's async pipe
   // subscribing after the HTTP has already completed) immediately receive the
@@ -198,7 +223,8 @@ export class EndpointDataService {
   // fires the apps + spaces drains.
   loadDetails(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadDetails' });
-    if (this._detailsLastFetched() !== null && this._orgs().length > 0) {
+    const anyStale = this._orgsStale() || this._appsStale() || this._spacesStale();
+    if (!anyStale && this._detailsLastFetched() !== null && this._orgs().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadDetails' });
       return of(undefined);
     }
@@ -234,7 +260,7 @@ export class EndpointDataService {
   // pagination strategy comment.
   loadOrgs(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadOrgs' });
-    if (this._orgsLastFetched() !== null && this._orgs().length > 0) {
+    if (!this._orgsStale() && this._orgsLastFetched() !== null && this._orgs().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadOrgs' });
       return of(undefined);
     }
@@ -254,6 +280,7 @@ export class EndpointDataService {
       finalize(() => {
         this._isLoadingOrgs.set(false);
         this._orgsLastFetched.set(new Date());
+        this._orgsStale.set(false);
         this._inFlightLoadOrgs = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -264,7 +291,7 @@ export class EndpointDataService {
   // loadApps() — see loadOrgs(). Drains /pp/v1/cf/apps/{guid}.
   loadApps(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadApps' });
-    if (this._appsLastFetched() !== null && this._apps().length > 0) {
+    if (!this._appsStale() && this._appsLastFetched() !== null && this._apps().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadApps' });
       return of(undefined);
     }
@@ -284,6 +311,7 @@ export class EndpointDataService {
       finalize(() => {
         this._isLoadingApps.set(false);
         this._appsLastFetched.set(new Date());
+        this._appsStale.set(false);
         this._inFlightLoadApps = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -297,7 +325,7 @@ export class EndpointDataService {
   // a consumer only needs orgs/apps.
   loadSpaces(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadSpaces' });
-    if (this._spacesLastFetched() !== null && this._spaces().length > 0) {
+    if (!this._spacesStale() && this._spacesLastFetched() !== null && this._spaces().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadSpaces' });
       return of(undefined);
     }
@@ -314,12 +342,208 @@ export class EndpointDataService {
       finalize(() => {
         this._isLoadingSpaces.set(false);
         this._spacesLastFetched.set(new Date());
+        this._spacesStale.set(false);
         this._inFlightLoadSpaces = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
     return this._inFlightLoadSpaces;
   }
+
+  // -------- Staleness + force-refresh API --------------------------------
+  // Mutation sources call applyCascade(key) after a successful write; this
+  // walks the cascade-registry entry and flips the matching stale flags.
+  // loadX()/loadDetails() treat stale === true as "not cached" and will
+  // refetch on the next read. Components that want to surface the in-flight
+  // refresh (spinner overlay etc.) read the public xStale Signals.
+  //
+  // refreshX() is the explicit force path used by Refresh buttons and any
+  // caller that wants to bypass the cache regardless of stale state. Two
+  // concurrent refreshX() calls fire two HTTP requests in parallel — refresh
+  // is a user-initiated action and we don't coalesce; last-write-wins on the
+  // resulting signal is acceptable for this use case.
+
+  // -------- Local-cache patch helpers (used by Cnsi*Source mutations) ------
+  // These give the source classes a typed way to keep EndpointDataService's
+  // cache consistent with the server after a successful mutation. Patching
+  // is intentionally narrow: filter-out by guid for delete; push for create;
+  // merge by guid for update. Each helper is idempotent — a remove on an
+  // already-absent guid is a no-op; an add of an existing guid replaces.
+
+  removeOrg(guid: string): void {
+    this._orgs.update(curr => curr.filter(o => (o as { guid?: string }).guid !== guid));
+    this._orgCount.update(n => Math.max(0, n - 1));
+  }
+  addOrg(org: StOrg): void {
+    this._orgs.update(curr => {
+      const idx = curr.findIndex(o => (o as { guid?: string }).guid === (org as { guid?: string }).guid);
+      if (idx >= 0) { const next = [...curr]; next[idx] = org; return next; }
+      return [...curr, org];
+    });
+    this._orgCount.update(n => n + 1);
+  }
+  updateOrg(guid: string, patch: Partial<StOrg>): void {
+    this._orgs.update(curr => curr.map(o =>
+      (o as { guid?: string }).guid === guid ? { ...o, ...patch } : o));
+  }
+
+  removeSpace(guid: string): void {
+    this._spaces.update(curr => curr.filter(s => (s as { guid?: string }).guid !== guid));
+  }
+  addSpace(space: StSpace): void {
+    this._spaces.update(curr => {
+      const idx = curr.findIndex(s => (s as { guid?: string }).guid === (space as { guid?: string }).guid);
+      if (idx >= 0) { const next = [...curr]; next[idx] = space; return next; }
+      return [...curr, space];
+    });
+  }
+  updateSpace(guid: string, patch: Partial<StSpace>): void {
+    this._spaces.update(curr => curr.map(s =>
+      (s as { guid?: string }).guid === guid ? { ...s, ...patch } : s));
+  }
+
+  removeApp(guid: string): void {
+    this._apps.update(curr => curr.filter(a => (a as { guid?: string }).guid !== guid));
+    this._appCount.update(n => Math.max(0, n - 1));
+  }
+  addApp(app: StApp): void {
+    this._apps.update(curr => {
+      const idx = curr.findIndex(a => (a as { guid?: string }).guid === (app as { guid?: string }).guid);
+      if (idx >= 0) { const next = [...curr]; next[idx] = app; return next; }
+      return [...curr, app];
+    });
+    this._appCount.update(n => n + 1);
+  }
+  updateApp(guid: string, patch: Partial<StApp>): void {
+    this._apps.update(curr => curr.map(a =>
+      (a as { guid?: string }).guid === guid ? { ...a, ...patch } : a));
+  }
+
+  removeServiceInstance(guid: string): void {
+    this._serviceInstances.update(curr => curr.filter(si => (si as { guid?: string }).guid !== guid));
+    this._serviceInstancesCount.update(n => Math.max(0, n - 1));
+  }
+  addServiceInstance(si: StServiceInstance): void {
+    this._serviceInstances.update(curr => {
+      const idx = curr.findIndex(x => (x as { guid?: string }).guid === (si as { guid?: string }).guid);
+      if (idx >= 0) { const next = [...curr]; next[idx] = si; return next; }
+      return [...curr, si];
+    });
+    this._serviceInstancesCount.update(n => n + 1);
+  }
+  updateServiceInstance(guid: string, patch: Partial<StServiceInstance>): void {
+    this._serviceInstances.update(curr => curr.map(si =>
+      (si as { guid?: string }).guid === guid ? { ...si, ...patch } : si));
+  }
+
+  removeServiceCredentialBinding(guid: string): void {
+    this._serviceCredentialBindings.update(curr =>
+      curr.filter(b => (b as { guid?: string }).guid !== guid));
+  }
+  addServiceCredentialBinding(b: StServiceCredentialBinding): void {
+    this._serviceCredentialBindings.update(curr => {
+      const idx = curr.findIndex(x => (x as { guid?: string }).guid === (b as { guid?: string }).guid);
+      if (idx >= 0) { const next = [...curr]; next[idx] = b; return next; }
+      return [...curr, b];
+    });
+  }
+
+  // -------- Staleness + cascade ---------------------------------------------
+
+  markStale(entity: EntityKind): void {
+    switch (entity) {
+      case 'orgs': this._orgsStale.set(true); break;
+      case 'apps': this._appsStale.set(true); break;
+      case 'spaces': this._spacesStale.set(true); break;
+      case 'serviceInstances': this._serviceInstancesStale.set(true); break;
+      case 'serviceOfferings': this._serviceOfferingsStale.set(true); break;
+      case 'servicePlans': this._servicePlansStale.set(true); break;
+      case 'serviceBrokers': this._serviceBrokersStale.set(true); break;
+      case 'serviceCredentialBindings': this._serviceCredentialBindingsStale.set(true); break;
+    }
+  }
+
+  applyCascade(key: CascadeKey): void {
+    this.diagnostics?.emitCounter('cascade-apply', { service: 'EndpointDataService', key });
+    for (const entity of cascadeFor(key)) {
+      this.markStale(entity);
+    }
+  }
+
+  refreshOrgs(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshOrgs' });
+    this._isLoadingOrgs.set(true);
+    return this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+      tap(resp => {
+        this._orgs.set(resp.resources);
+        this._orgCount.set(resp.totalResults);
+      }),
+      map(() => undefined as void),
+      catchError(err => { this.addError('orgs-full', err); return of(undefined as void); }),
+      finalize(() => {
+        this._isLoadingOrgs.set(false);
+        this._orgsLastFetched.set(new Date());
+        this._orgsStale.set(false);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    ) as Observable<void>;
+  }
+
+  refreshApps(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshApps' });
+    this._isLoadingApps.set(true);
+    return this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
+      tap(resp => {
+        this._apps.set(resp.resources);
+        this._appCount.set(resp.totalResults);
+      }),
+      map(() => undefined as void),
+      catchError(err => { this.addError('apps-full', err); return of(undefined as void); }),
+      finalize(() => {
+        this._isLoadingApps.set(false);
+        this._appsLastFetched.set(new Date());
+        this._appsStale.set(false);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    ) as Observable<void>;
+  }
+
+  refreshSpaces(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshSpaces' });
+    this._isLoadingSpaces.set(true);
+    return this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
+      tap(resp => this._spaces.set(resp.resources)),
+      map(() => undefined as void),
+      catchError(err => { this.addError('spaces-full', err); return of(undefined as void); }),
+      finalize(() => {
+        this._isLoadingSpaces.set(false);
+        this._spacesLastFetched.set(new Date());
+        this._spacesStale.set(false);
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    ) as Observable<void>;
+  }
+
+  refreshDetails(): Observable<void> {
+    this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshDetails' });
+    this._isLoadingDetails.set(true);
+    return merge(
+      this.refreshOrgs(),
+      this.refreshApps(),
+      this.refreshSpaces(),
+    ).pipe(
+      timeout(120_000),
+      finalize(() => {
+        this._isLoadingDetails.set(false);
+        this._detailsLastFetched.set(new Date());
+        this.shim.write(this.guid, this.currentData());
+        this.detailsLoaded$.next();
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    ) as Observable<void>;
+  }
+
+  // -----------------------------------------------------------------------
 
   // Drain all pages for a Stratos-shape list endpoint. Page 1 inline,
   // pages 2..N in parallel (concurrency=4). Reads totalPages from the

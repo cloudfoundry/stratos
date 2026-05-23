@@ -443,4 +443,210 @@ describe('EndpointDataService', () => {
       httpMock.expectOne(ORGS_FULL_URL).flush({ resources: [], pagination: { totalResults: 0, totalPages: 1 } });
     });
   });
+
+  describe('staleness + refresh + cascade (Phase 1)', () => {
+    const mockOrgs = [{ guid: 'org-1', name: 'Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '' }];
+    const mockApps = [{ guid: 'app-1', cnsiGuid: 'test-cnsi-guid', name: 'A', state: 'STARTED', orgGuid: '', spaceGuid: '', instances: 1, createdAt: '', updatedAt: '' }];
+    const mockSpaces = [{ guid: 'sp-1', cnsiGuid: 'test-cnsi-guid', name: 'sp', orgGuid: 'org-1', createdAt: '', updatedAt: '' }];
+
+    it('stale signals default false', () => {
+      expect(service.orgsStale()).toBe(false);
+      expect(service.appsStale()).toBe(false);
+      expect(service.spacesStale()).toBe(false);
+      expect(service.serviceInstancesStale()).toBe(false);
+      expect(service.serviceOfferingsStale()).toBe(false);
+      expect(service.servicePlansStale()).toBe(false);
+      expect(service.serviceBrokersStale()).toBe(false);
+      expect(service.serviceCredentialBindingsStale()).toBe(false);
+    });
+
+    it('markStale flips the matching slice', () => {
+      service.markStale('orgs');
+      expect(service.orgsStale()).toBe(true);
+      expect(service.appsStale()).toBe(false);
+      service.markStale('apps');
+      expect(service.appsStale()).toBe(true);
+    });
+
+    it('applyCascade("org.delete") marks spaces+apps+serviceInstances+bindings stale', () => {
+      service.applyCascade('org.delete');
+      expect(service.spacesStale()).toBe(true);
+      expect(service.appsStale()).toBe(true);
+      expect(service.serviceInstancesStale()).toBe(true);
+      expect(service.serviceCredentialBindingsStale()).toBe(true);
+      // Orgs itself is NOT in the cascade — the source patches its own slice
+      expect(service.orgsStale()).toBe(false);
+    });
+
+    it('applyCascade("space.delete") marks apps+SI+bindings stale (no orgs/spaces)', () => {
+      service.applyCascade('space.delete');
+      expect(service.appsStale()).toBe(true);
+      expect(service.serviceInstancesStale()).toBe(true);
+      expect(service.serviceCredentialBindingsStale()).toBe(true);
+      expect(service.orgsStale()).toBe(false);
+      expect(service.spacesStale()).toBe(false);
+    });
+
+    it('loadOrgs() refetches when stale even with warm cache', async () => {
+      // Warm the cache first
+      service.loadOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.orgsLastFetched()).not.toBeNull();
+
+      // Mark stale — next loadOrgs() should refetch
+      service.markStale('orgs');
+      expect(service.orgsStale()).toBe(true);
+      service.loadOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      // Refetch clears stale
+      expect(service.orgsStale()).toBe(false);
+    });
+
+    it('loadDetails() refetches when any slice is stale', async () => {
+      // Warm cache
+      service.loadDetails().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      httpMock.expectOne(APPS_FULL_URL).flush({ resources: mockApps, pagination: { totalResults: 1, totalPages: 1 } });
+      httpMock.expectOne(SPACES_FULL_URL).flush({ resources: mockSpaces, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      // Mark just apps stale → loadDetails sees anyStale=true → bypasses cache.
+      // Inner loadX calls then re-evaluate: only apps re-fetches (the others
+      // remain non-stale with warm caches).
+      service.markStale('apps');
+      service.loadDetails().subscribe();
+      httpMock.expectNone(ORGS_FULL_URL);
+      httpMock.expectOne(APPS_FULL_URL).flush({ resources: mockApps, pagination: { totalResults: 1, totalPages: 1 } });
+      httpMock.expectNone(SPACES_FULL_URL);
+      await Promise.resolve();
+      expect(service.appsStale()).toBe(false);
+    });
+
+    it('refreshOrgs() fires unconditionally and clears stale', async () => {
+      // Cold start — no prior load
+      service.refreshOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.orgs()).toEqual(mockOrgs);
+      expect(service.orgsLastFetched()).not.toBeNull();
+
+      // Warm cache — refreshOrgs() still fires (no cache check)
+      service.refreshOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+    });
+
+    it('refreshOrgs() clears _orgsStale on success', async () => {
+      service.markStale('orgs');
+      expect(service.orgsStale()).toBe(true);
+      service.refreshOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.orgsStale()).toBe(false);
+    });
+
+    it('refreshDetails() fires all three drains in parallel', async () => {
+      service.refreshDetails().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      httpMock.expectOne(APPS_FULL_URL).flush({ resources: mockApps, pagination: { totalResults: 1, totalPages: 1 } });
+      httpMock.expectOne(SPACES_FULL_URL).flush({ resources: mockSpaces, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.orgs()).toEqual(mockOrgs);
+      expect(service.apps()).toEqual(mockApps);
+      expect(service.spaces()).toEqual(mockSpaces);
+    });
+
+    it('two concurrent refreshOrgs() fire two HTTP requests (no coalesce)', () => {
+      service.refreshOrgs().subscribe();
+      service.refreshOrgs().subscribe();
+      // Two independent fetches — refresh is an explicit user action and we
+      // don't coalesce. Last-write-wins on the signal is acceptable.
+      const reqs = httpMock.match(ORGS_FULL_URL);
+      expect(reqs.length).toBe(2);
+      reqs.forEach(r => r.flush({ resources: [], pagination: { totalResults: 0, totalPages: 1 } }));
+    });
+
+    it('cache-hit path stays cache-hit when not stale (no behavior change for happy path)', async () => {
+      service.loadOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: mockOrgs, pagination: { totalResults: 1, totalPages: 1 } });
+      await Promise.resolve();
+      // Not stale → second loadOrgs() short-circuits
+      service.loadOrgs().subscribe();
+      httpMock.expectNone(ORGS_FULL_URL);
+    });
+  });
+
+  describe('local-cache patch helpers (Phase 2)', () => {
+    const orgA = { guid: 'a', name: 'A' } as any;
+    const orgB = { guid: 'b', name: 'B' } as any;
+    const spA = { guid: 'sp-a', name: 'sa' } as any;
+    const appA = { guid: 'app-a', name: 'A' } as any;
+    const siA = { guid: 'si-a', name: 'mydb' } as any;
+
+    it('removeOrg drops the matching guid + decrements orgCount', async () => {
+      service.loadOrgs().subscribe();
+      httpMock.expectOne(ORGS_FULL_URL).flush({ resources: [orgA, orgB], pagination: { totalResults: 2, totalPages: 1 } });
+      await Promise.resolve();
+      expect(service.orgs().length).toBe(2);
+      expect(service.orgCount()).toBe(2);
+      service.removeOrg('a');
+      expect(service.orgs().map(o => o.guid)).toEqual(['b']);
+      expect(service.orgCount()).toBe(1);
+    });
+
+    it('removeOrg is idempotent — absent guid is a no-op', () => {
+      service.removeOrg('nonexistent');  // no throw
+      expect(service.orgs()).toEqual([]);
+      expect(service.orgCount()).toBe(0);
+    });
+
+    it('addOrg appends new guid; replaces existing guid', () => {
+      service.addOrg(orgA);
+      expect(service.orgs().map(o => o.guid)).toEqual(['a']);
+      expect(service.orgCount()).toBe(1);
+      service.addOrg({ guid: 'a', name: 'A renamed' } as any);
+      expect(service.orgs()).toHaveLength(1);
+      expect(service.orgs()[0].name).toBe('A renamed');
+    });
+
+    it('updateOrg merges by guid; misses are no-op', () => {
+      service.addOrg(orgA);
+      service.updateOrg('a', { name: 'A renamed' });
+      expect(service.orgs()[0].name).toBe('A renamed');
+      service.updateOrg('absent', { name: 'X' });  // no throw, no change
+      expect(service.orgs()[0].name).toBe('A renamed');
+    });
+
+    it('removeSpace / addSpace / updateSpace work', () => {
+      service.addSpace(spA);
+      expect(service.spaces().map(s => s.guid)).toEqual(['sp-a']);
+      service.updateSpace('sp-a', { name: 'sa-renamed' } as any);
+      expect(service.spaces()[0].name).toBe('sa-renamed');
+      service.removeSpace('sp-a');
+      expect(service.spaces()).toEqual([]);
+    });
+
+    it('removeApp / addApp / updateApp work + appCount tracked', () => {
+      service.addApp(appA);
+      expect(service.apps()).toHaveLength(1);
+      expect(service.appCount()).toBe(1);
+      service.updateApp('app-a', { name: 'A renamed' } as any);
+      expect(service.apps()[0].name).toBe('A renamed');
+      service.removeApp('app-a');
+      expect(service.apps()).toEqual([]);
+      expect(service.appCount()).toBe(0);
+    });
+
+    it('removeServiceInstance / addServiceInstance / updateServiceInstance work + count tracked', () => {
+      service.addServiceInstance(siA);
+      expect(service.serviceInstances()).toHaveLength(1);
+      expect(service.serviceInstancesCount()).toBe(1);
+      service.updateServiceInstance('si-a', { name: 'renamed' } as any);
+      expect(service.serviceInstances()[0].name).toBe('renamed');
+      service.removeServiceInstance('si-a');
+      expect(service.serviceInstances()).toEqual([]);
+      expect(service.serviceInstancesCount()).toBe(0);
+    });
+  });
 });
