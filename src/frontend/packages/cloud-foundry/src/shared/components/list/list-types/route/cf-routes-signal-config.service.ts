@@ -6,8 +6,8 @@ import { ListStateStore } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { CnsiRoutesSource } from '../../../../../services/data-sources/cnsi-routes-source';
 import type { StRoute, StRoutesResponse } from '../../../../../services/endpoint-data/stratos-types';
-import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 
 // Routes list config service — single-CNSI, single-space. Analog of
 // CfSpacesSignalConfigService, but routes are not carried on
@@ -45,10 +45,12 @@ export class CfRoutesSignalConfigService {
   readonly pageSize = this.state.pageSize;
   readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
-  // Org filter — used by the CF-level routes page where routes across
-  // every org show up; empty = no org constraint. The per-space page
-  // doesn't populate this (it's already scoped).
+  // Org / Space filters — used by the CF-level routes page where routes
+  // across every org show up; null = no constraint. The per-space page
+  // doesn't populate either (it's already scoped via spaceGuid).
+  // Selecting an org constrains the Space dropdown to spaces in that org.
   readonly selectedOrg: WritableSignal<string | null> = signal(null);
+  readonly selectedSpace: WritableSignal<string | null> = signal(null);
   readonly viewMode = this.state.viewMode;
 
   // Raw route list as returned by the backend for this CNSI. We keep the
@@ -97,15 +99,29 @@ export class CfRoutesSignalConfigService {
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         const org = this.selectedOrg();
+        const space = this.selectedSpace();
         // orgGuidBySpaceGuid is a computed reading spaces(); accessing it
         // inside the effect re-registers the dependency so the filter
         // re-derives when spaces load or the user switches orgs.
         const orgGuidBySpaceGuid = this.orgGuidBySpaceGuid();
         this.filter.set((r: StRoute) => {
           if (org && orgGuidBySpaceGuid.get(r.spaceGuid) !== org) return false;
+          if (space && r.spaceGuid !== space) return false;
           if (q && !((r.url ?? '').toLowerCase().includes(q))) return false;
           return true;
         });
+      });
+      // Reset Space when Org changes — the cascade rule. Stale space
+      // selections in a now-hidden org would silently filter to empty.
+      effect(() => {
+        const org = this.selectedOrg();
+        const space = this.selectedSpace();
+        if (!space) return;
+        if (org === null) return;
+        const orgGuidBySpaceGuid = this.orgGuidBySpaceGuid();
+        if (orgGuidBySpaceGuid.get(space) !== org) {
+          this.selectedSpace.set(null);
+        }
       });
     });
     this.destroyRef.onDestroy(() => {
@@ -158,15 +174,46 @@ export class CfRoutesSignalConfigService {
   });
 
   // Org options for the CF-level page's Organization filter dropdown.
-  // "All" is prepended as the null-value option. Sorted by name so the
-  // picker reads naturally regardless of CAPI's emission order.
+  // "All" is prepended as the null-value option. Sorted natural-order
+  // (numeric-aware) so "org-2" comes before "org-10".
   readonly orgOptions: Signal<SignalListDropdownOption[]> = computed(() => {
     const orgs = this.endpointDataService?.orgs() ?? [];
     const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-    const sorted = [...orgs].sort((a, b) => a.name.localeCompare(b.name));
+    const sorted = [...orgs].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
     for (const o of sorted) {
       opts.push({ label: o.name, value: o.guid });
     }
+    return opts;
+  });
+
+  // Space options — cascade-aware.
+  // - Org selected: list spaces in that org, label = space name, natural sort.
+  // - Org = All: list every space, label = "<space> - <org>", sorted by
+  //   space name then org name (both natural-sort). Lets the user pick a
+  //   space directly without first narrowing to an org.
+  readonly spaceOptions: Signal<SignalListDropdownOption[]> = computed(() => {
+    const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+    const spaces = this.endpointDataService?.spaces() ?? [];
+    const org = this.selectedOrg();
+    if (org) {
+      const sorted = spaces
+        .filter(s => s.orgGuid === org)
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      for (const s of sorted) opts.push({ label: s.name, value: s.guid });
+      return opts;
+    }
+    const orgNameByGuid = new Map((this.endpointDataService?.orgs() ?? []).map(o => [o.guid, o.name]));
+    const augmented = spaces.map(s => ({
+      guid: s.guid,
+      spaceName: s.name,
+      orgName: orgNameByGuid.get(s.orgGuid) ?? '',
+    }));
+    augmented.sort((a, b) => {
+      const bySpace = a.spaceName.localeCompare(b.spaceName, undefined, { numeric: true });
+      if (bySpace !== 0) return bySpace;
+      return a.orgName.localeCompare(b.orgName, undefined, { numeric: true });
+    });
+    for (const s of augmented) opts.push({ label: `${s.spaceName} - ${s.orgName}`, value: s.guid });
     return opts;
   });
 
@@ -188,6 +235,7 @@ export class CfRoutesSignalConfigService {
   clearFilters(): void {
     this.nameFilter.set('');
     this.selectedOrg.set(null);
+    this.selectedSpace.set(null);
     this.sort.set({ field: 'url', direction: 'asc' });
     this.pageIndex.set(0);
   }
@@ -195,9 +243,11 @@ export class CfRoutesSignalConfigService {
   async refresh(): Promise<void> {
     await this.fetchRoutes();
     // Also refresh apps so recently-mapped routes pick up new names.
+    // refreshApps() bypasses the cache guard — user-driven refresh always
+    // re-fetches.
     if (this.endpointDataService) {
       try {
-        await firstValueFrom(this.endpointDataService.loadDetails());
+        await firstValueFrom(this.endpointDataService.refreshApps());
       } catch {
         // As above — StError surfacing owns user-visible messaging.
       }
@@ -213,8 +263,13 @@ export class CfRoutesSignalConfigService {
   }
 
   async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    const call = this.http.delete(`/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}`, { observe: 'response' });
-    await writeWithJob(this.http, call);
-    await this.refresh();
+    const eds = this.registry.acquire(cnsiGuid);
+    const source = new CnsiRoutesSource(cnsiGuid, this.http, eds);
+    await source.delete(routeGuid);
+    // The local _routes list lives on this config service (via fetchRoutes),
+    // not the source — the source's _items is discarded. Re-fetch the list
+    // so the just-deleted row leaves the view. The applyCascade in delete()
+    // also marks apps stale for the cross-tab UX.
+    await this.fetchRoutes();
   }
 }

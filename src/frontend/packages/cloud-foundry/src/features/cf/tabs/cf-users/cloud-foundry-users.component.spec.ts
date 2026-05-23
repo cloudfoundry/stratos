@@ -38,9 +38,13 @@ function makeStubSignalConfigService(opts?: {
     pageIndex,
     view,
     nameFilter: signal(''),
+    selectedOrg: signal<string | null>(null),
+    selectedSpace: signal<string | null>(null),
     viewMode: signal<'card' | 'table'>('table'),
     orgNameByGuid: signal(opts?.orgNames ?? new Map<string, string>()).asReadonly(),
     spaceNameByGuid: signal(opts?.spaceNames ?? new Map<string, string>()).asReadonly(),
+    orgOptions: signal([{ label: 'All', value: null }]).asReadonly(),
+    spaceOptions: signal([{ label: 'All', value: null }]).asReadonly(),
     hasLoadedOnce: signal(true).asReadonly(),
   };
 }

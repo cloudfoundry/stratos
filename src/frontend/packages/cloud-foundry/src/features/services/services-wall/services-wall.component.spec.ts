@@ -44,10 +44,14 @@ function makeStubSignalConfigService() {
     view,
     orchestrator,
     selectedCnsi: signal<string | null>(null),
+    selectedOrg: signal<string | null>(null),
+    selectedSpace: signal<string | null>(null),
     nameFilter: signal(''),
     filterField: signal('name'),
     viewMode: signal<'card' | 'table'>('card'),
     cnsiOptions: signal([allOption]).asReadonly(),
+    orgOptions: signal([allOption]).asReadonly(),
+    spaceOptions: signal([allOption]).asReadonly(),
     endpointNames: signal(new Map<string, string>([['cnsi-1', 'CF 1']])).asReadonly(),
   };
 }
@@ -137,13 +141,15 @@ describe('ServicesWallComponent', () => {
     expect(serviceCol!.render!(ups)).toBe('User Provided');
   });
 
-  it('wires the CF filter dropdown into listConfig (no Org/Space)', async () => {
+  it('wires the CF / Organization / Space filter dropdowns into listConfig', async () => {
     await component.ngOnInit();
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.nameFilter).toBe(stubSignalConfig.nameFilter);
     expect(cfg!.filterDropdowns).toBeDefined();
-    expect(cfg!.filterDropdowns!.map(d => d.label)).toEqual(['Cloud Foundry']);
+    expect(cfg!.filterDropdowns!.map(d => d.label)).toEqual(['Cloud Foundry', 'Organization', 'Space']);
     expect(cfg!.filterDropdowns![0].selected).toBe(stubSignalConfig.selectedCnsi);
+    expect(cfg!.filterDropdowns![1].selected).toBe(stubSignalConfig.selectedOrg);
+    expect(cfg!.filterDropdowns![2].selected).toBe(stubSignalConfig.selectedSpace);
   });
 });

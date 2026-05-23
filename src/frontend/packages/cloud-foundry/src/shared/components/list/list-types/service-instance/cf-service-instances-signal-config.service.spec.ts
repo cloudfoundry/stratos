@@ -47,6 +47,8 @@ type FakeDs = {
   isLoadingServicesDetails: () => boolean;
   serviceInstancesAndBrokers: () => { instances: StServiceInstance[], brokers: any[] } | null;
   setServiceInstancesAndBrokers: ReturnType<typeof vi.fn>;
+  orgs: () => Array<{ guid: string; name: string }>;
+  spaces: () => Array<{ guid: string; name: string; orgGuid: string }>;
 };
 
 function makeRegistry(entries: Array<Partial<FakeDs> & { guid: string }>): { registry: EndpointDataRegistry; fakes: Map<string, FakeDs> } {
@@ -57,6 +59,8 @@ function makeRegistry(entries: Array<Partial<FakeDs> & { guid: string }>): { reg
       isLoadingServicesDetails: e.isLoadingServicesDetails ?? (() => false),
       serviceInstancesAndBrokers: e.serviceInstancesAndBrokers ?? (() => null),
       setServiceInstancesAndBrokers: vi.fn(),
+      orgs: e.orgs ?? (() => []),
+      spaces: e.spaces ?? (() => []),
     });
   }
   const registry = {
@@ -68,11 +72,14 @@ function makeRegistry(entries: Array<Partial<FakeDs> & { guid: string }>): { reg
           isLoadingServicesDetails: () => false,
           serviceInstancesAndBrokers: () => null,
           setServiceInstancesAndBrokers: vi.fn(),
+          orgs: () => [],
+          spaces: () => [],
         };
         fakes.set(guid, f);
       }
       return f as any;
     }),
+    release: vi.fn(),
   } as unknown as EndpointDataRegistry;
   return { registry, fakes };
 }

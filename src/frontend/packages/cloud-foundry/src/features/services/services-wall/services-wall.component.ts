@@ -146,6 +146,16 @@ export class ServicesWallComponent implements OnInit {
         options: this.instancesConfig.cnsiOptions,
         selected: this.instancesConfig.selectedCnsi,
       },
+      {
+        label: 'Organization',
+        options: this.instancesConfig.orgOptions,
+        selected: this.instancesConfig.selectedOrg,
+      },
+      {
+        label: 'Space',
+        options: this.instancesConfig.spaceOptions,
+        selected: this.instancesConfig.selectedSpace,
+      },
     ];
 
     const renderService = (si: StServiceInstance): string =>
