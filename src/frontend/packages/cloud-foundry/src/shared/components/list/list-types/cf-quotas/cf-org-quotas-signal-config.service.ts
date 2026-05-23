@@ -41,6 +41,12 @@ export class CfOrgQuotasSignalConfigService {
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
 
+  // True while a load / refresh request is in flight. The toolbar's
+  // refresh button reads this to drive its spinner — wiring straight to
+  // hasLoadedOnce gave a one-shot spinner on initial load only.
+  private readonly _loading: WritableSignal<boolean> = signal(false);
+  readonly loading: Signal<boolean> = this._loading.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StOrgQuota) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<StOrgQuota>;
@@ -70,16 +76,26 @@ export class CfOrgQuotasSignalConfigService {
 
   async loadAll(): Promise<void> {
     if (!this.source) return;
-    await this.source.load();
-    this._orgQuotas.set([...this.source.items()]);
-    this._hasLoadedOnce.set(true);
+    this._loading.set(true);
+    try {
+      await this.source.load();
+      this._orgQuotas.set([...this.source.items()]);
+      this._hasLoadedOnce.set(true);
+    } finally {
+      this._loading.set(false);
+    }
   }
 
   async refresh(): Promise<void> {
     if (!this.source) return;
-    await this.source.refresh();
-    this._orgQuotas.set([...this.source.items()]);
-    this._hasLoadedOnce.set(true);
+    this._loading.set(true);
+    try {
+      await this.source.refresh();
+      this._orgQuotas.set([...this.source.items()]);
+      this._hasLoadedOnce.set(true);
+    } finally {
+      this._loading.set(false);
+    }
   }
 
   clearFilters(): void {
