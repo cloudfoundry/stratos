@@ -326,6 +326,30 @@ export class SignalListComponent<T> implements AfterViewInit {
   // has reached the bottom of the list.
   readonly hasOverflow = signal(false);
 
+  // True while a refresh-button click is in flight. Used to drive the
+  // inline button spinner uniformly across list pages — many config
+  // services still wire isAnyLoading to !hasLoadedOnce() (which only
+  // flips during initial load), so without this internal signal the
+  // refresh button stays static on every subsequent click. Reset in a
+  // finally after onRefresh resolves, regardless of error.
+  readonly isRefreshing = signal(false);
+
+  // Click handler for the refresh button — wraps config.onRefresh so the
+  // internal isRefreshing signal flips around the call. Components that
+  // wire onRefresh return either void or Promise<void>; either way the
+  // refresh state clears once the promise resolves (or synchronously on
+  // void return).
+  async invokeRefresh(): Promise<void> {
+    const fn = this.config?.onRefresh;
+    if (!fn) return;
+    this.isRefreshing.set(true);
+    try {
+      await fn();
+    } finally {
+      this.isRefreshing.set(false);
+    }
+  }
+
   private resizeObserver?: ResizeObserver;
   private mutationObserver?: MutationObserver;
   private onScroll = () => this.measureOverflow();
