@@ -91,4 +91,27 @@ describe('SpaceDataService', () => {
     service.load().subscribe();
     httpMock.expectNone('/pp/v1/cf/spaces/cnsi-1/sp-1');
   });
+
+  it('patch() merges partial updates into the cached space', async () => {
+    const mockSpace = {
+      guid: 'sp-1', name: 'Old', orgGuid: 'org-1',
+      createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1',
+      appCount: 0, routeCount: 0, allowSsh: false, quotaGuid: 'q-1',
+    };
+    service.load().subscribe();
+    httpMock.expectOne('/pp/v1/cf/spaces/cnsi-1/sp-1').flush(mockSpace);
+    await Promise.resolve();
+
+    service.patch({ name: 'New', allowSsh: true });
+
+    expect(service.space()?.name).toBe('New');
+    expect(service.space()?.allowSsh).toBe(true);
+    expect(service.space()?.quotaGuid).toBe('q-1');
+    expect(service.space()?.orgGuid).toBe('org-1');
+  });
+
+  it('patch() is a no-op before the first load', () => {
+    service.patch({ name: 'X' });
+    expect(service.space()).toBeNull();
+  });
 });

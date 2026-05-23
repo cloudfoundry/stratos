@@ -208,6 +208,13 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
           { enabled: allowSsh },
         ).pipe(map(() => true));
       }),
+      tap(() => {
+        // Patch the SpaceDataService cache so the auto-navigate to /summary
+        // shows the new values without a hard reload — CnsiSpacesSource only
+        // updates the EndpointData _spaces list, not the detail signal that
+        // the summary view reads from.
+        this.cfSpaceService.spaceDataService.patch({ name, allowSsh });
+      }),
       map(() => ({ success: true })),
       catchError(err => {
         const message = err?.error?.error || err?.message || `Failed to update space`;
@@ -248,7 +255,12 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
           { space_guids: [this.spaceGuid] },
         ).pipe(map(() => ({ success: true, redirect: true } as StepOnNextResult)));
       }),
-      tap(() => eds.applyCascade('space.update')),
+      tap(() => {
+        eds.applyCascade('space.update');
+        // Mirror the new quota onto the detail cache so the summary's
+        // "Quota Definition" row reflects the change without a reload.
+        this.cfSpaceService.spaceDataService.patch({ quotaGuid: nextGuid ?? undefined });
+      }),
       catchError(err => {
         const message = err?.error?.error || err?.message || `Failed to update space quota`;
         return of({ success: false, redirect: false, message: `Failed to update space quota: ${message}` } as StepOnNextResult);

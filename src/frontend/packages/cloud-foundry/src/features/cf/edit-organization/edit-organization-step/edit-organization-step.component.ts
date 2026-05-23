@@ -87,6 +87,14 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
           // so the orgs list re-fetches.
           eds.applyCascade('org.update');
         }
+        // Patch the OrgDataService cache so the auto-navigate to /summary
+        // shows the new values without a hard reload — CnsiOrgsSource only
+        // updates the EndpointData _orgs list, not the detail signal that
+        // the summary view reads from.
+        this.cfOrgService.orgDataService.patch({
+          name: newName,
+          ...(newQuotaGuid !== this.originalQuotaGuid ? { quotaGuid: newQuotaGuid ?? undefined } : {}),
+        });
       } catch (err: unknown) {
         throw new Error(`Failed to update organization: ${err instanceof Error ? err.message : String(err)}`);
       } finally {

@@ -75,6 +75,15 @@ export class OrgDataService {
     return this._inFlightLoad;
   }
 
+  // Merge a partial update into the cached org detail. Called by stepper
+  // submit handlers after a successful CnsiOrgsSource.update so the
+  // /summary view reflects the new name immediately — the EndpointData
+  // _orgs list cache already patches in place, but this signal is read
+  // independently and would otherwise stay stale until hard reload.
+  patch(p: Partial<StOrgDetail>): void {
+    this._org.update(curr => curr ? { ...curr, ...p } : curr);
+  }
+
   private addError(resource: string, err: unknown): void {
     this._errors.update(errors => [...errors, {
       resource,
