@@ -1,6 +1,6 @@
 <app-page-sub-nav>
   <button class="btn btn-secondary btn-icon" name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/cli" title="CLI Info">
-    <span class="material-icons">terminal</span>
+    <span class="material-icons stratos-icons">terminal</span>
   </button>
   <app-polling-indicator class="ml-auto"
     [manualPoll]="(cfEndpointService.appsLoading$ | async) === false"
