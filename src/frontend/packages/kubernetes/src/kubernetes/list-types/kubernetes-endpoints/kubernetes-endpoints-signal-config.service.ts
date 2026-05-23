@@ -161,10 +161,9 @@ export class KubernetesEndpointsSignalConfigService {
       totalPages: this.view.totalPages,
       pageIndex: this.pageIndex,
       pageSize: this.pageSize,
-      // Endpoints projection is synchronous off the store — no async
-      // load to track. `false` keeps the toolbar's loading affordance
-      // off (matches the legacy behaviour, which had no spinner here).
-      isAnyLoading: signal(false),
+      // Bound to the shared EndpointsDataService loading signal so the
+      // toolbar refresh button swaps to the spinner during getAll().
+      isAnyLoading: this.endpointsData.loading,
       errorsByCnsi: signal(new Map()),
       columns,
       getRowKey: (ep: EndpointModel) => ep.guid,
