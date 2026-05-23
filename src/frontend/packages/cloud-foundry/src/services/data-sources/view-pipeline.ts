@@ -8,6 +8,9 @@ export interface SortSpec<T = unknown> {
   // without an explicit cast at the boundary.
   field: string;
   direction: 'asc' | 'desc';
+  // Optional per-list match-case toggle. Default (undefined === false) is
+  // case-insensitive natural sort.
+  caseSensitive?: boolean;
   // Keep the generic so existing callers that parameterize SortSpec<StApp>
   // continue to type-check.
   _phantom?: T;
@@ -59,10 +62,10 @@ export class ViewPipeline<T> {
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * sign;
         }
-        // Natural string sort: case-insensitive + numeric-aware.
-        // Single source of truth lives in @stratosui/core/naturalCompare.
+        // Natural string sort: numeric-aware. Per-list case-sensitivity
+        // override comes from spec.caseSensitive (default false).
         if (typeof av === 'string' && typeof bv === 'string') {
-          return naturalCompare(av, bv) * sign;
+          return naturalCompare(av, bv, spec.caseSensitive) * sign;
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });
