@@ -243,12 +243,11 @@ export class CloudFoundryEndpointService {
   }
 
   fetchApps() {
-    // Signal-native refresh: re-runs loadDetails() which re-populates the
-    // apps signal. Internal call sites (org / space services) called this
-    // for "make sure the apps cache is warm before reading appsPagObs" —
-    // the new pipeline already enqueues loadDetails on acquire(), so this
-    // is now an explicit re-fetch (e.g. user-initiated refresh button).
-    this.endpointData.loadDetails().subscribe();
+    // Signal-native refresh: refreshDetails() forces a re-fetch of
+    // orgs+apps+spaces, bypassing the cache guard that loadDetails()
+    // honours. This is the user-initiated refresh entry point — the
+    // initial-hydration path is loadDetails() on registry acquire.
+    this.endpointData.refreshDetails().subscribe();
   }
 
 }

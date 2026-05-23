@@ -5,8 +5,8 @@ import { ListStateStore } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { CnsiOrgsSource } from '../../../../../services/data-sources/cnsi-orgs-source';
 import type { StOrg } from '../../../../../services/endpoint-data/stratos-types';
-import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 
 // Orgs list config service — single-CNSI analog to CfAppsSignalConfigService.
 // Unlike apps, the orgs view always lives under an explicit /cloud-foundry/:cnsi
@@ -28,6 +28,7 @@ export class CfOrgsSignalConfigService {
   // matching fall through with the wrong page-context guid.
   private endpointDataService: WritableSignal<EndpointDataService | undefined> = signal(undefined);
   private cnsiGuid = '';
+  private orgsSource: CnsiOrgsSource | null = null;
 
   private readonly state = inject(ListStateStore).bind('cf-orgs', {
     viewMode: 'card',
@@ -71,6 +72,7 @@ export class CfOrgsSignalConfigService {
     this.cnsiGuid = cnsiGuid;
     const ds = this.registry.acquire(cnsiGuid);
     this.endpointDataService.set(ds);
+    this.orgsSource = new CnsiOrgsSource(cnsiGuid, this.http, ds);
     // Build the view pipeline over the orgs signal; re-filter on filter
     // / sort changes, re-paginate on page changes. ViewPipeline already
     // handles the memoization layers.
@@ -120,9 +122,11 @@ export class CfOrgsSignalConfigService {
     const ds = this.endpointDataService();
     if (!ds) return;
     try {
-      await firstValueFrom(ds.loadDetails());
+      // refreshOrgs() bypasses the cache guard — explicit user-driven refresh
+      // always re-fetches, vs loadDetails() which short-circuits on warm cache.
+      await firstValueFrom(ds.refreshOrgs());
     } catch {
-      // loadDetails() surfaces errors via its own StError stream; swallowing
+      // refreshOrgs() surfaces errors via its own StError stream; swallowing
       // here keeps the Refresh button's promise from rejecting the caller.
     }
   }
@@ -135,13 +139,14 @@ export class CfOrgsSignalConfigService {
     });
   }
 
-  // Delete an org via the CF V3 async-job contract. The backend handler
-  // (DELETE /pp/v1/cf/orgs/:cnsi/:orgGuid) mirrors the app-delete shape —
-  // 202 + Location from CF, fast-path 200 from Stratos, or job handoff
-  // with polling via writeWithJob.
-  async deleteOrg(cnsiGuid: string, orgGuid: string): Promise<void> {
-    const call = this.http.delete(`/pp/v1/cf/orgs/${cnsiGuid}/${orgGuid}`, { observe: 'response' });
-    await writeWithJob(this.http, call);
-    await this.refresh();
+  // Delete an org via CnsiOrgsSource. The source handles writeWithJob,
+  // patches EndpointDataService._orgs in place, and fires the org.delete
+  // cascade so spaces/apps/SI/bindings get marked stale (for repaint when
+  // the user navigates to those tabs).
+  async deleteOrg(_cnsiGuid: string, orgGuid: string): Promise<void> {
+    if (!this.orgsSource) {
+      throw new Error('CfOrgsSignalConfigService: initialize() not called before deleteOrg');
+    }
+    await this.orgsSource.delete(orgGuid);
   }
 }

@@ -5,8 +5,9 @@ import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
 
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { CnsiSpacesSource } from '../../../../../services/data-sources/cnsi-spaces-source';
+import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
-import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 
 /**
  * Wire shape of /pp/v1/cf/org/{cnsi}/{org}/spaces. Mirrors
@@ -38,6 +39,7 @@ interface PagedSpaces {
 export class CfSpacesSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly injector = inject(Injector);
+  private readonly endpointRegistry = inject(EndpointDataRegistry);
 
   private cnsiGuid = '';
   private orgGuid = '';
@@ -121,9 +123,9 @@ export class CfSpacesSignalConfigService {
   }
 
   async deleteSpace(cnsiGuid: string, spaceGuid: string): Promise<void> {
-    const call = this.http.delete(`/pp/v1/cf/spaces/${cnsiGuid}/${spaceGuid}`, { observe: 'response' });
-    await writeWithJob(this.http, call);
-    await this.refresh();
+    const eds = this.endpointRegistry.acquire(cnsiGuid);
+    const source = new CnsiSpacesSource(cnsiGuid, this.http, eds);
+    await source.delete(spaceGuid);
   }
 
   /**
