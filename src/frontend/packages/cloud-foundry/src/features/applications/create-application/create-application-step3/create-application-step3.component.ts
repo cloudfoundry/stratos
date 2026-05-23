@@ -1,15 +1,18 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@stratosui/store';
-import { Observable, of as observableOf, throwError } from 'rxjs';
+import { from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
 import { CFAppState } from '@stratosui/cloud-foundry';
-import type { StApp, StDomain, StRoute } from '../../../../services/endpoint-data/stratos-types';
+import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
+import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import type { StDomain } from '../../../../services/endpoint-data/stratos-types';
 import { selectNewAppState } from '../../../../store/selectors/create-application.selectors';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 
@@ -35,11 +38,18 @@ interface DomainHostForm {
     { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
-export class CreateApplicationStep3Component implements OnInit {
+export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   private store = inject(Store<CFAppState>);
   private http = inject(HttpClient);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
 
   setDomainHost: FormGroup<DomainHostForm>;
+
+  // Acquired CNSI guid + acquire-count so destroy releases each acquire
+  // exactly once. createApp always acquires; createRoute acquires only
+  // when the user supplied a host+domain.
+  private acquiredCnsi: string | null = null;
+  private acquireCount = 0;
 
   constructor() {
     this.setDomainHost = new FormGroup({
@@ -83,10 +93,14 @@ export class CreateApplicationStep3Component implements OnInit {
   private createApp(): Observable<string> {
     const { cloudFoundryDetails, name } = this.newAppData;
     const { cloudFoundry, space } = cloudFoundryDetails;
-    return this.http.post<StApp>(`/pp/v1/cf/apps/${cloudFoundry}`, {
+    const eds = this.endpointDataRegistry.acquire(cloudFoundry);
+    this.acquiredCnsi = cloudFoundry;
+    this.acquireCount++;
+    const source = new CnsiAppsSource(cloudFoundry, this.http, eds);
+    return from(source.create({
       name,
       relationships: { space: { data: { guid: space } } },
-    }).pipe(
+    })).pipe(
       map(app => app.guid),
       this.tagError('Could not create application'),
     );
@@ -100,16 +114,28 @@ export class CreateApplicationStep3Component implements OnInit {
     if (!selectedDomainGuid || !hostName) {
       return observableOf(null);
     }
-    return this.http.post<StRoute>(`/pp/v1/cf/routes/${cloudFoundry}`, {
+    const eds = this.endpointDataRegistry.acquire(cloudFoundry);
+    this.acquiredCnsi = cloudFoundry;
+    this.acquireCount++;
+    const source = new CnsiRoutesSource(cloudFoundry, this.http, eds);
+    return from(source.create({
       host: hostName,
       relationships: {
         space: { data: { guid: space } },
         domain: { data: { guid: selectedDomainGuid } },
       },
-    }).pipe(
+    })).pipe(
       map(route => route.guid),
       this.tagError('Application created. Could not create route'),
     );
+  }
+
+  ngOnDestroy() {
+    if (this.acquiredCnsi) {
+      for (let i = 0; i < this.acquireCount; i++) {
+        this.endpointDataRegistry.release(this.acquiredCnsi);
+      }
+    }
   }
 
   private associateRoute(cnsiGuid: string, appGuid: string, routeGuid: string): Observable<void> {

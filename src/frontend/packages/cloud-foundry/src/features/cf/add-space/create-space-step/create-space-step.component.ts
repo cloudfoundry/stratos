@@ -5,14 +5,15 @@ import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, Subscription, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { firstValueFrom, from, Observable, Subscription, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { SignalStepHandle, StepOnNextFunction, StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { CnsiSpacesSource } from '../../../../services/data-sources/cnsi-spaces-source';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
-import { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -42,6 +43,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
@@ -134,18 +136,22 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   submit: StepOnNextFunction = () => this.runCreate();
 
-  // Chains POST /pp/v1/cf/spaces/:cnsi (V3-native space create) with an
-  // optional POST /pp/v1/cf/space_quotas/:cnsi/:quotaGuid/relationships/spaces
-  // when the wizard's quota dropdown carries a selection. CF v3 dropped the
-  // inline space_quota_definition_guid field that the V2 legacy action used,
-  // so the apply-quota step lives outside the create call.
+  // Routes the V3-native space create through CnsiSpacesSource so the
+  // new space lands in EndpointDataService._spaces and fires the
+  // space.create cascade — direct http.post bypassed the cache and the
+  // new row didn't appear in the spaces list until a hard reload.
+  // Quota-apply still uses a raw http.post; space_quotas don't have an
+  // EDS cache to patch, so the cascade alone is enough to invalidate
+  // any consumer reading quota_guid off the space.
   private runCreate(): Observable<StepOnNextResult> {
     const quotaValue = this.quotaDefinition.value;
     const quotaGuid = quotaValue ? String(quotaValue) : null;
-    return this.http.post<StSpace>(`/pp/v1/cf/spaces/${this.cfGuid}`, {
+    const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+    const source = new CnsiSpacesSource(this.cfGuid, this.http, eds);
+    return from(source.create({
       name: this.spaceName.value,
       relationships: { organization: { data: { guid: this.orgGuid } } },
-    }).pipe(
+    })).pipe(
       switchMap(space => {
         if (!quotaGuid) {
           return [space];
@@ -163,6 +169,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       // Convert throwError to a successful emit of the failure result so
       // the stepper's pipeline can read it without rxjs error semantics.
       catchError((result: StepOnNextResult) => [result]),
+      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
   }
 

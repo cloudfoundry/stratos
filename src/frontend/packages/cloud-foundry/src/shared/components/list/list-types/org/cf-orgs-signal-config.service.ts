@@ -149,4 +149,18 @@ export class CfOrgsSignalConfigService {
     }
     await this.orgsSource.delete(orgGuid);
   }
+
+  // Create an org via CnsiOrgsSource. The source POSTs to /pp/v1/cf/orgs,
+  // patches EndpointDataService._orgs with the new entry, and fires the
+  // org.create cascade. Without going through here, callers that POST
+  // directly (e.g. OrgWriteService) leave the canonical _orgs cache
+  // stale — the new org won't appear in the list until a hard reload.
+  // Returns the created StOrg so the caller can chain (e.g. apply a
+  // quota to the new org's guid).
+  async createOrg(payload: unknown): Promise<StOrg> {
+    if (!this.orgsSource) {
+      throw new Error('CfOrgsSignalConfigService: initialize() not called before createOrg');
+    }
+    return await this.orgsSource.create(payload);
+  }
 }

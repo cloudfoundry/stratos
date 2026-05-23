@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, Injector, Input, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -6,9 +7,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle, TailwindSnackBarService } from '@stratosui/core';
+import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
-import { OrgWriteService } from '../../../../services/endpoint-data/org-write.service';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
 import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 
@@ -35,11 +36,12 @@ interface CreateOrganizationForm {
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   private endpointDataRegistry = inject(EndpointDataRegistry);
-  private orgWriteService = inject(OrgWriteService);
+  private http = inject(HttpClient);
   private quotaData = inject(QuotaDataService);
   private injector = inject(Injector);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private snackBar = inject(TailwindSnackBarService);
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
@@ -53,9 +55,21 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       const name = this.orgName.value;
       const quotaGuid = this.quotaDefinition.value;
       try {
-        const org = await firstValueFrom(this.orgWriteService.createOrg(this.cfGuid, { name }));
-        if (quotaGuid) {
-          await firstValueFrom(this.quotaData.applyOrgQuotaToOrgs(this.cfGuid, quotaGuid, [org.guid]));
+        // Route through CnsiOrgsSource so the new org is added to
+        // EndpointDataService._orgs immediately and org.create cascade
+        // fires. The previous OrgWriteService.createOrg path was a thin
+        // http.post that left the canonical cache stale — the new org
+        // didn't appear in the list until a hard reload.
+        const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+        try {
+          const source = new CnsiOrgsSource(this.cfGuid, this.http, eds);
+          const org = await source.create({ name });
+          if (quotaGuid) {
+            await firstValueFrom(this.quotaData.applyOrgQuotaToOrgs(this.cfGuid, quotaGuid, [org.guid]));
+          }
+          this.snackBar.open(`Organization "${name}" created`);
+        } finally {
+          this.endpointDataRegistry.release(this.cfGuid);
         }
       } catch (err: unknown) {
         throw new Error(`Failed to create organization: ${err instanceof Error ? err.message : String(err)}`);
