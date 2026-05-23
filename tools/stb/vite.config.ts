@@ -8,14 +8,12 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
-  test: {
-    environment: 'jsdom',
-    include: ['tests/**/*.test.ts'],
-    exclude: ['tests/integration/**'],
-  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+  },
+  test: {
+    workspace: './vitest.workspace.ts',
   },
 });
