@@ -8,10 +8,20 @@
   <div class="metadata-item__content" [ngClass]="{'metadata-item__content-label-only': metadataValue.childNodes.length === 0}">
     @if (label) {
       <div [ngClass]="{'metadata-item__label-only': metadataValue.childNodes.length === 0}" class="metadata-item__label">
-        <div [ngClass]="{'metadata-item__label-copy': clipboardValue}">{{ label }}</div>
+        <span>{{ label }}</span>
         @if (clipboardValue) {
-          <app-copy-to-clipboard [compact]="true" [text]="clipboardValue" tooltip="Copy to clipboard" [showSuccessText]="false">
-          </app-copy-to-clipboard>
+          <!-- Inline copy glyph: sits next to the label like a textual
+               trailing character. nbsp gives breathing room without using
+               flex gap (which would re-introduce a separate baseline). -->
+          <span class="metadata-item__copy-spacer">&nbsp;&nbsp;</span>
+          <span
+            class="material-icons metadata-item__copy"
+            role="button"
+            tabindex="0"
+            [title]="copied() ? 'Copied' : 'Copy to clipboard'"
+            (click)="copyToClipboard()"
+            (keydown.enter)="copyToClipboard()"
+            (keydown.space)="copyToClipboard(); $event.preventDefault()">{{ copied() ? 'check_circle' : 'content_copy' }}</span>
         }
       </div>
     }

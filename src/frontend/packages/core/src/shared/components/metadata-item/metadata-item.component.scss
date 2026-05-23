@@ -23,7 +23,6 @@
     }
   }
   &__label {
-    display: flex;
     flex: 1;
     color: var(--content-muted);
     padding-bottom: 3px;
@@ -37,8 +36,23 @@
     color: var(--content-text);
   }
 
-  &__label-copy {
-    flex: none;
-    margin-right: 24px;
+  // Inline copy glyph that sits next to the label like a trailing character.
+  // 14px so it doesn't tower over the label text; vertical-align middle
+  // keeps it riding the same baseline rather than sitting low.
+  &__copy {
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    vertical-align: middle;
+    color: var(--content-muted);
+    transition: color 0.15s;
+
+    &:hover {
+      color: var(--content-text);
+    }
+  }
+
+  &__copy-spacer {
+    user-select: none;
   }
 }
