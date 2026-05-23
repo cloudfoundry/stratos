@@ -91,4 +91,24 @@ describe('OrgDataService', () => {
     httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1');
     httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1/spaces');
   });
+
+  it('patch() merges partial updates into the cached org detail', async () => {
+    const mockOrg = { guid: 'org-1', name: 'Old', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [], quotaGuid: 'q-1' };
+    service.load().subscribe();
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [], totalResults: 0 });
+    await Promise.resolve();
+
+    service.patch({ name: 'New', quotaGuid: 'q-2' });
+
+    expect(service.org()?.name).toBe('New');
+    expect(service.org()?.quotaGuid).toBe('q-2');
+    expect(service.org()?.status).toBe('active');
+    expect(service.org()?.guid).toBe('org-1');
+  });
+
+  it('patch() is a no-op before the first load', () => {
+    service.patch({ name: 'X' });
+    expect(service.org()).toBeNull();
+  });
 });
