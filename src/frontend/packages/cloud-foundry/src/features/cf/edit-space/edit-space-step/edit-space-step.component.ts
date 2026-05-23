@@ -4,7 +4,7 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription, throwError } from 'rxjs';
+import { firstValueFrom, from, Observable, of, Subscription, throwError } from 'rxjs';
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
@@ -18,9 +18,10 @@ import {
   StepOnNextFunction,
   StepOnNextResult
 } from '@stratosui/core';
+import { CnsiSpacesSource } from '../../../../services/data-sources/cnsi-spaces-source';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
-import { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
@@ -55,6 +56,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   private injector = inject(Injector);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
@@ -185,16 +187,18 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
       (!this.originalSpaceQuotaGuid && !next);
   }
 
-  // Two-leg update: PATCH /pp/v1/cf/spaces/:cnsi/:spaceGuid (name) then
-  // PUT /pp/v1/cf/spaces/:cnsi/:spaceGuid/features/ssh (allow_ssh) when
-  // the toggle changed. CF v3 lifted SSH out of the space attributes
-  // endpoint into a separate feature, so the two-call chain stands in
-  // for the legacy single V2 PATCH /v2/spaces/{guid}.
+  // Two-leg update routes the name PATCH through CnsiSpacesSource so the
+  // canonical EndpointDataService._spaces row updates immediately + the
+  // space.update cascade fires. The SSH feature PUT is a side endpoint
+  // (CF v3 lifted SSH out of the space attributes endpoint) and isn't
+  // cached on EDS, so it stays as a raw http.put.
   updateSpace(): Observable<StepOnNextResult> {
     const name = this.editSpaceForm.value.spaceName as string;
     const allowSsh = !!this.editSpaceForm.value.toggleSsh;
     const sshChanged = allowSsh !== this.originalAllowSsh;
-    return this.http.patch<StSpace>(`/pp/v1/cf/spaces/${this.cfGuid}/${this.spaceGuid}`, { name }).pipe(
+    const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+    const source = new CnsiSpacesSource(this.cfGuid, this.http, eds);
+    return from(source.update(this.spaceGuid, { name })).pipe(
       switchMap(() => {
         if (!sshChanged) {
           return of(true);
@@ -210,6 +214,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
         return throwError(() => ({ success: false, message } as StepOnNextResult));
       }),
       catchError((result: StepOnNextResult) => [result]),
+      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
   }
 
@@ -218,10 +223,16 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   // detach (DELETE same path + /{spaceGuid}). On a quota change we just
   // need the new attachment; remove the previous attachment first when
   // one existed so the space ends up only with the new quota.
+  //
+  // After either leg completes, we mark the space cache stale so the
+  // spaces list (which renders the quota name) re-fetches the updated
+  // quotaGuid — space_quotas isn't cached on EDS, but the space row's
+  // quotaGuid field is the source of truth for the displayed quota.
   updateSpaceQuota(): Observable<StepOnNextResult> {
     const next = this.editSpaceForm.value.quotaDefinition;
     const nextGuid = next ? String(next) : null;
     const oldGuid = this.originalSpaceQuotaGuid || null;
+    const eds = this.endpointDataRegistry.acquire(this.cfGuid);
 
     const detach$ = oldGuid
       ? this.http.delete(`/pp/v1/cf/space_quotas/${this.cfGuid}/${oldGuid}/relationships/spaces/${this.spaceGuid}`)
@@ -237,10 +248,12 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
           { space_guids: [this.spaceGuid] },
         ).pipe(map(() => ({ success: true, redirect: true } as StepOnNextResult)));
       }),
+      tap(() => eds.applyCascade('space.update')),
       catchError(err => {
         const message = err?.error?.error || err?.message || `Failed to update space quota`;
         return of({ success: false, redirect: false, message: `Failed to update space quota: ${message}` } as StepOnNextResult);
       }),
+      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
   }
 

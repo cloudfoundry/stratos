@@ -6,9 +6,10 @@ import { Router } from '@angular/router';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
+import { HttpClient } from '@angular/common/http';
 import { AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, FocusDirective, SignalStepHandle, safeUnsubscribe } from '@stratosui/core';
+import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
-import { OrgWriteService } from '../../../../services/endpoint-data/org-write.service';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
 import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 import {
@@ -51,7 +52,7 @@ interface EditOrganizationForm {
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   private cfOrgService = inject(CloudFoundryOrganizationService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
-  private orgWriteService = inject(OrgWriteService);
+  private http = inject(HttpClient);
   private quotaData = inject(QuotaDataService);
   private injector = inject(Injector);
   private fb = inject(FormBuilder);
@@ -68,16 +69,28 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     submit: async () => {
       const newName = this.orgName.value;
       const newQuotaGuid = this.quotaDefinition.value;
+      // Route the org PATCH through CnsiOrgsSource so the canonical
+      // EndpointDataService._orgs row updates immediately and the
+      // org.update cascade fires. The previous OrgWriteService.updateOrg
+      // path was a thin http.patch that left the canonical cache stale.
+      const eds = this.endpointDataRegistry.acquire(this.cfGuid);
       try {
-        await firstValueFrom(this.orgWriteService.updateOrg(this.cfGuid, this.orgGuid, {
+        const source = new CnsiOrgsSource(this.cfGuid, this.http, eds);
+        await source.update(this.orgGuid, {
           name: newName,
           suspended: !this.status,
-        }));
+        });
         if (newQuotaGuid && newQuotaGuid !== this.originalQuotaGuid) {
           await firstValueFrom(this.quotaData.applyOrgQuotaToOrgs(this.cfGuid, newQuotaGuid, [this.orgGuid]));
+          // org_quotas isn't cached on EDS but the org row's quotaGuid
+          // is the source of truth for the displayed quota — mark stale
+          // so the orgs list re-fetches.
+          eds.applyCascade('org.update');
         }
       } catch (err: unknown) {
         throw new Error(`Failed to update organization: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        this.endpointDataRegistry.release(this.cfGuid);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

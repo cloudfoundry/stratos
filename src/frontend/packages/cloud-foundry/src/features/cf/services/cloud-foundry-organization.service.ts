@@ -114,15 +114,6 @@ export class CloudFoundryOrganizationService {
     this.initialiseObservables();
   }
 
-  public deleteSpace(spaceGuid: string, _orgGuid: string, endpointGuid: string): void {
-    // V3-native DELETE /pp/v1/cf/spaces/:cnsi/:guid — fire-and-forget.
-    // Callers that need outcome tracking should consume the http response
-    // directly (none today; the only caller dispatches and walks away).
-    this.http.delete(`/pp/v1/cf/spaces/${endpointGuid}/${spaceGuid}`).subscribe({
-      error: () => {/* swallow — UI consumer reads via row refresh */},
-    });
-  }
-
   public fetchApps() {
     this.cfEndpointService.fetchApps();
   }

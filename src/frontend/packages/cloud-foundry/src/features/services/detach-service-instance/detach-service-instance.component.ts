@@ -1,6 +1,6 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, Signal, signal, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, OnDestroy, Signal, signal, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
@@ -10,7 +10,8 @@ import {
   SteppersComponent,
 } from '@stratosui/core';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
-import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import { CnsiServiceBindingsSource } from '../../../services/data-sources/cnsi-service-bindings-source';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
@@ -41,11 +42,17 @@ interface BindingRow {
   ],
   providers: [DatePipe]
 })
-export class DetachServiceInstanceComponent {
+export class DetachServiceInstanceComponent implements OnDestroy {
   private datePipe = inject(DatePipe);
   private router = inject(Router);
   private http = inject(HttpClient);
   private serviceCatalog = inject(ServiceCatalogDataService);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
+
+  // Single source instance reused across the parallel delete calls; the
+  // EDS lookup happens once in the constructor so each delete patches the
+  // same canonical _serviceCredentialBindings list.
+  private bindingsSource!: CnsiServiceBindingsSource;
 
 
   private _instanceSource!: SignalSource<StServiceInstance | null>;
@@ -112,6 +119,12 @@ export class DetachServiceInstanceComponent {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
     this._instanceSource = this.serviceCatalog.serviceInstance(this.cfGuid, serviceInstanceId);
+    const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+    this.bindingsSource = new CnsiServiceBindingsSource(this.cfGuid, this.http, eds);
+  }
+
+  ngOnDestroy() {
+    this.endpointDataRegistry.release(this.cfGuid);
   }
 
   setSelectedBindings = (selectedBindings: StServiceCredentialBinding[]) => {
@@ -120,11 +133,11 @@ export class DetachServiceInstanceComponent {
 
   private async detachOne(bindingGuid: string): Promise<void> {
     try {
-      const call = this.http.delete(
-        `/pp/v1/cf/service_bindings/${this.cfGuid}/${bindingGuid}`,
-        { observe: 'response' as const },
-      );
-      await writeWithJob(this.http, call);
+      // Route through CnsiServiceBindingsSource so the canonical
+      // EDS._serviceCredentialBindings list updates and the
+      // serviceBinding.delete cascade fires (apps/SI consumers
+      // re-fetch their binding rollups).
+      await this.bindingsSource.delete(bindingGuid);
       this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'success' }));
     } catch (err: unknown) {
       const message = err instanceof StratosJobError

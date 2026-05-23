@@ -7,6 +7,8 @@ import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService, ApplicationStateData } from '../../shared/services/application-state.service';
 import { IApp, IAppSummary } from '../../cf-api.types';
 import { APIResource } from '@stratosui/store';
+import { CnsiAppsSource } from '../../services/data-sources/cnsi-apps-source';
+import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   StAppDetail,
@@ -52,6 +54,7 @@ export class AppDetailDataService {
   private readonly prefs = inject(AppDetailPrefs);
   private readonly lifecycle = inject(AppLifecycleStateService);
   private readonly appStateService = inject(ApplicationStateService);
+  private readonly endpointDataRegistry = inject(EndpointDataRegistry);
 
   cnsiGuid!: string;
   appGuid!: string;
@@ -367,13 +370,17 @@ export class AppDetailDataService {
     environment_json?: Record<string, unknown>;
   }): Promise<void> {
     this._updating.set(true);
+    // Route the PATCH through CnsiAppsSource so the canonical
+    // EDS._apps row updates immediately + the app.update cascade fires.
+    // The local refresh() below still re-fetches the rich detail
+    // (stats/env/routes) that the per-app cache doesn't track.
+    const eds = this.endpointDataRegistry.acquire(this.cnsiGuid);
     try {
-      await firstValueFrom(this.http.patch(
-        `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}`,
-        body,
-      ));
+      const source = new CnsiAppsSource(this.cnsiGuid, this.http, eds);
+      await source.update(this.appGuid, body);
       await this.refresh('app');
     } finally {
+      this.endpointDataRegistry.release(this.cnsiGuid);
       this._updating.set(false);
     }
   }
