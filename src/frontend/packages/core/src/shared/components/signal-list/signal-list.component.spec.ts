@@ -67,6 +67,34 @@ describe('SignalListComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).toBeNull();
   });
 
+  it('drives the spinner from invokeRefresh even when isAnyLoading stays false', async () => {
+    // Many config services wire isAnyLoading to !hasLoadedOnce() which is
+    // permanently false after the first load. The internal isRefreshing
+    // signal — flipped by invokeRefresh — is what keeps the spinner alive
+    // across subsequent refresh clicks.
+    let resolveRefresh!: () => void;
+    const refreshPromise = new Promise<void>(r => { resolveRefresh = r; });
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      onRefresh: () => refreshPromise,
+    };
+    fixture.detectChanges();
+    const component = fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
+
+    expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).not.toBeNull();
+    const result = component.invokeRefresh();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] .spinner')).not.toBeNull();
+
+    resolveRefresh();
+    await result;
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).toBeNull();
+  });
+
   it('renders the full loading indicator when no items and isAnyLoading is true', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
