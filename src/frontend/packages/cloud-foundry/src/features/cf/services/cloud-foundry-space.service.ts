@@ -81,6 +81,14 @@ export class CloudFoundrySpaceService {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
 
+    // Kick off the space load so consumers reading spaceDataService.space
+    // signal get a populated value. Mirrors CloudFoundryOrganizationService
+    // which loads the org on construction — direct-URL routes that don't
+    // pass through cloud-foundry-space-base (notably /edit-space) would
+    // otherwise see space()===null and prefill with empty form values.
+    // Warm-cache short-circuit makes it a no-op when the signal is hot.
+    this.spaceDataService.load().subscribe({ error: () => {} });
+
     this.initialiseObservables();
   }
 
