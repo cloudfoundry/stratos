@@ -14,6 +14,8 @@ import { take,
   switchMap,
 } from 'rxjs/operators';
 
+import { naturalCompare } from '@stratosui/core';
+
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
 import { IOrganization, ISpace } from '../../../../cf-api.types';
@@ -285,7 +287,7 @@ export class CfRolesService {
         catchError(() => of([] as APIResource<IOrganization>[])),
       );
       this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$).pipe(
-        map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name))),
+        map(orgs => orgs.sort((a, b) => naturalCompare(a.entity.name, b.entity.name))),
         publishReplay(1),
         refCount()
       );

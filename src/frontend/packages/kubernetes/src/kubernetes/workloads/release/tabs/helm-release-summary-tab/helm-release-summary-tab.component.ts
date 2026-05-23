@@ -3,7 +3,7 @@ import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy,
 import { RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService } from '@stratosui/core';
+import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
 import { AppState, RouterNav } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
@@ -150,8 +150,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         distinctUntilChanged(),
         map((chartData: any) => ({
           ...chartData,
-          containersChartData: chartData.containersChartData.sort((a: any, b: any) => a.name.localeCompare(b.name)),
-          podsChartData: chartData.podsChartData.sort((a: any, b: any) => a.name.localeCompare(b.name))
+          containersChartData: chartData.containersChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name)),
+          podsChartData: chartData.podsChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name))
         })
         )
       );
@@ -190,7 +190,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           });
         }
         this.applyAnalysis(resources, this.analysisReport);
-        return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+        return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
       });
 
       this.resources$ = toObservable(resourcesComputed);

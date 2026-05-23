@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, Injector, OnDestroy, ViewChild, Vie
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
+import { naturalCompare } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import {
@@ -153,7 +154,7 @@ export class SelectPlanStepComponent implements OnDestroy {
           this.clearNoPlans();
         }
       }),
-      map(plans => [...plans].sort((a, b) => this.getDisplayName(a).localeCompare(this.getDisplayName(b)))),
+      map(plans => [...plans].sort((a, b) => naturalCompare(this.getDisplayName(a), this.getDisplayName(b)))),
       publishReplay(1),
       refCount(),
     );

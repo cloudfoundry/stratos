@@ -9,6 +9,7 @@ import { take, defaultIfEmpty, filter, map } from 'rxjs/operators';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../../core/utils.service';
+import { naturalCompare } from '../../../../shared/utils/natural-sort';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
@@ -124,7 +125,7 @@ export class BackupEndpointsComponent implements OnDestroy {
     // same data; loading state comes from `loading()`.
     const endpoints$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       filter(entities => !!entities),
-      map(endpoints => [...endpoints].sort((a, b) => a.name.localeCompare(b.name)))
+      map(endpoints => [...endpoints].sort((a, b) => naturalCompare(a.name, b.name)))
     );
     const fetching$ = toObservable(this.endpointsData.loading, { injector: this.injector });
 

@@ -9,7 +9,8 @@ import {
   AppActionMonitorComponent,
   AppMonitorComponentTypes,
   ITableColumn,
-  ITableCellRequestMonitorIconConfig } from '@stratosui/core';
+  ITableCellRequestMonitorIconConfig,
+  naturalCompare } from '@stratosui/core';
 import { entityCatalog, APIResource } from '@stratosui/store';
 import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
 import { ChangeCfUserRole } from '../../../../../actions/users.actions';
@@ -169,7 +170,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
           username: ManageUsersSetUsernamesHelper.usernameFromGuid(change.userGuid),
           roleName: this.fetchRoleName(change.role, !change.spaceGuid)
         }))
-        .sort((a, b) => a.username.localeCompare(b.username)),
+        .sort((a, b) => naturalCompare(a.username, b.username)),
       )
     );
     const changesViaUserGuid = this.updateChanges.pipe(
@@ -183,7 +184,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
             username: this.fetchUsername(change.userGuid, users),
             roleName: this.fetchRoleName(change.role, !change.spaceGuid)
           }))
-          .sort((a, b) => a.username.localeCompare(b.username))
+          .sort((a, b) => naturalCompare(a.username, b.username))
       )
     );
     this.changes$ = this.setUsernames ? changesViaUsername : changesViaUserGuid;

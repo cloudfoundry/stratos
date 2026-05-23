@@ -1,5 +1,7 @@
 import { Signal, computed } from '@angular/core';
 
+import { naturalCompare } from '@stratosui/core';
+
 export interface SortSpec<T = unknown> {
   // Property name on T to sort by. Declared as string (not keyof T) so
   // the shape is compatible with SignalListComponent's SignalListSort
@@ -57,14 +59,10 @@ export class ViewPipeline<T> {
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * sign;
         }
-        // Natural string sort for string/string comparisons:
-        // - case-insensitive (orgs starting with capital letters don't
-        //   jump to the top of the list)
-        // - numeric-aware (org_2 sorts before org_10, not after)
-        // Falls back to `<` / `>` for non-string / mixed types (dates as
-        // ISO strings still compare correctly under localeCompare).
+        // Natural string sort: case-insensitive + numeric-aware.
+        // Single source of truth lives in @stratosui/core/naturalCompare.
         if (typeof av === 'string' && typeof bv === 'string') {
-          return av.localeCompare(bv, undefined, { numeric: true, sensitivity: 'base' }) * sign;
+          return naturalCompare(av, bv) * sign;
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });

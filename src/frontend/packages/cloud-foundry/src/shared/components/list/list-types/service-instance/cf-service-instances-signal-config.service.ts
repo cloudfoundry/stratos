@@ -10,7 +10,7 @@ import type { EndpointDataService } from '../../../../../services/endpoint-data/
 import type { StServiceInstance } from '../../../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import type { SignalListDropdownOption } from '@stratosui/core';
-import { ListStateStore } from '@stratosui/core';
+import { ListStateStore, naturalCompare } from '@stratosui/core';
 
 // Service instances list config — multi-CNSI by default (services-wall),
 // with optional space + type narrowing for the per-space tabs.
@@ -166,7 +166,7 @@ export class CfServiceInstancesSignalConfigService {
           if (!seen.has(o.guid)) seen.set(o.guid, o.name);
         }
       }
-      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b, undefined, { numeric: true }));
+      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a, b));
       for (const [guid, label] of sorted) opts.push({ label, value: guid });
       return opts;
     });
@@ -193,7 +193,7 @@ export class CfServiceInstancesSignalConfigService {
             if (!seen.has(s.guid)) seen.set(s.guid, s.name);
           }
         }
-        const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b, undefined, { numeric: true }));
+        const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a, b));
         for (const [guid, label] of sorted) opts.push({ label, value: guid });
         return opts;
       }
@@ -210,9 +210,9 @@ export class CfServiceInstancesSignalConfigService {
       }
       const entries = Array.from(augmented.entries());
       entries.sort(([, a], [, b]) => {
-        const bySpace = a.spaceName.localeCompare(b.spaceName, undefined, { numeric: true });
+        const bySpace = naturalCompare(a.spaceName, b.spaceName);
         if (bySpace !== 0) return bySpace;
-        return a.orgName.localeCompare(b.orgName, undefined, { numeric: true });
+        return naturalCompare(a.orgName, b.orgName);
       });
       for (const [guid, { spaceName, orgName }] of entries) {
         opts.push({ label: `${spaceName} - ${orgName}`, value: guid });

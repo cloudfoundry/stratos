@@ -18,6 +18,7 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
+import { naturalCompare } from '../../../shared/utils/natural-sort';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
 import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
@@ -229,7 +230,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     let navItems = this.collectNavigationRoutes('', this.router.config);
 
     // Sort by name
-    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => a.label.localeCompare(b.label));
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => naturalCompare(a.label, b.label));
 
     // Sort by position
     navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => {

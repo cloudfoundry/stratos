@@ -15,7 +15,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult } from '@stratosui/core';
+import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
@@ -64,7 +64,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     const source = this.offeringsSource();
     if (!source) return [];
     const offerings: StServiceOffering[] = source.value() ?? [];
-    return [...offerings].sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? ''));
+    return [...offerings].sort((a, b) => naturalCompare(a?.name ?? '', b?.name ?? ''));
   });
   // Bridge the signal to Observable for the template's `services$ |
   // async` binding (and downstream RxJS composition below).
