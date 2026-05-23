@@ -34,6 +34,13 @@ export class CnsiRoutesSource extends CnsiEntitySource<StRoute> {
     this.eds?.applyCascade('route.delete');
   }
 
+  async create(payload: unknown): Promise<StRoute> {
+    const created = await firstValueFrom(this.http.post<StRoute>(`/pp/v1/cf/routes/${this.cnsiGuid}`, payload));
+    this.patchItems(items => [...items, created]);
+    this.eds?.applyCascade('route.create');
+    return created;
+  }
+
   async unmapApp(routeGuid: string, appGuid: string): Promise<void> {
     await firstValueFrom(this.http.delete(`/pp/v1/cf/routes/${this.cnsiGuid}/${routeGuid}/apps/${appGuid}`));
     // Unmapping doesn't delete the route — only the binding. Apps need

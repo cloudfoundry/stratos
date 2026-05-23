@@ -40,6 +40,14 @@ export class CnsiAppsSource extends CnsiEntitySource<StApp> {
     this.eds?.applyCascade('app.update');
   }
 
+  async create(payload: unknown): Promise<StApp> {
+    const created = await firstValueFrom(this.http.post<StApp>(`/pp/v1/cf/apps/${this.cnsiGuid}`, payload));
+    this.patchItems(items => [...items, created]);
+    this.eds?.addApp(created);
+    this.eds?.applyCascade('app.create');
+    return created;
+  }
+
   async action(appGuid: string, verb: 'start' | 'stop' | 'restart' | 'restage'): Promise<void> {
     const updated = await firstValueFrom(this.http.post<StApp>(`/pp/v1/cf/apps/${this.cnsiGuid}/${appGuid}/actions/${verb}`, null));
     this.patchItems(items => items.map(a => (a as { guid?: string }).guid === appGuid ? { ...a, ...updated } : a));
