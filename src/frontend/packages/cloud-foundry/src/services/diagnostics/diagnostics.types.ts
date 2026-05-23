@@ -10,6 +10,7 @@ export const DIAGNOSTIC_CODE_FAMILIES = [
   'cache-miss',
   'in-flight-hit',
   'buffer-overflow',
+  'cascade-apply',
 ] as const;
 
 export type DiagnosticCode = typeof DIAGNOSTIC_CODE_FAMILIES[number];
