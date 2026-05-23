@@ -23,6 +23,7 @@ function makeStubSignalConfigService(opts?: {
   const sortSig = signal({ field: 'username' as const, direction: 'asc' as const });
   const view = {
     pagedItems: signal<StUser[]>([]).asReadonly(),
+    totalItems: signal(0).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
   };

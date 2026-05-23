@@ -85,6 +85,7 @@ describe('RoutesTabComponent', () => {
     const filtered = computed(() => routes());
     const view = {
       pagedItems: filtered,
+      totalItems: computed(() => routes().length),
       totalFilteredResults: computed(() => filtered().length),
       totalPages: computed(() => 1),
     };
