@@ -86,6 +86,7 @@ describe('VariablesTabComponent', () => {
     const filtered = computed(() => variables());
     const view = {
       pagedItems: filtered,
+      totalItems: computed(() => variables().length),
       totalFilteredResults: computed(() => filtered().length),
       totalPages: computed(() => 1),
     };
