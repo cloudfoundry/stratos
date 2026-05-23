@@ -1,0 +1,12 @@
+{
+  "id": "login",
+  "name": "Login",
+  "selectorTokens": [
+    { "selector": ".login-container", "tokens": ["--color-brand-50"] },
+    { "selector": ".login-card", "tokens": ["--color-brand-50", "--color-brand-200"] },
+    { "selector": ".login-card h1", "tokens": ["--color-brand-900"] },
+    { "selector": ".login-card label", "tokens": ["--color-brand-800"] },
+    { "selector": ".login-card input", "tokens": ["--color-brand-300"] },
+    { "selector": ".btn-primary", "tokens": ["--color-brand-500"] }
+  ]
+}
