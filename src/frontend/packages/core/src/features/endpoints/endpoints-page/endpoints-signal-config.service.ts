@@ -79,6 +79,11 @@ export class ViewPipeline<T> {
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * sign;
         }
+        // Case-insensitive + numeric-aware string sort, mirroring the
+        // shared ViewPipeline in cloud-foundry/services/data-sources.
+        if (typeof av === 'string' && typeof bv === 'string') {
+          return av.localeCompare(bv, undefined, { numeric: true, sensitivity: 'base' }) * sign;
+        }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });
     });

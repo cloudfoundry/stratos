@@ -53,10 +53,18 @@ export class ViewPipeline<T> {
         if (bv == null) return -1;
         // Prefer numeric comparison when both sides are numbers — prevents
         // accidental string coercion when, e.g., a number column gets a
-        // stringified value from a legacy backend path. Fall back to the
-        // generic `<` / `>` operators for string / date / other types.
+        // stringified value from a legacy backend path.
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * sign;
+        }
+        // Natural string sort for string/string comparisons:
+        // - case-insensitive (orgs starting with capital letters don't
+        //   jump to the top of the list)
+        // - numeric-aware (org_2 sorts before org_10, not after)
+        // Falls back to `<` / `>` for non-string / mixed types (dates as
+        // ISO strings still compare correctly under localeCompare).
+        if (typeof av === 'string' && typeof bv === 'string') {
+          return av.localeCompare(bv, undefined, { numeric: true, sensitivity: 'base' }) * sign;
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });
