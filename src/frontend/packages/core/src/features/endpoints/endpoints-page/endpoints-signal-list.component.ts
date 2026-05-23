@@ -160,7 +160,7 @@ export class EndpointsSignalListComponent {
       totalPages: this.endpointsConfig.view.totalPages,
       pageIndex: this.endpointsConfig.pageIndex,
       pageSize: this.endpointsConfig.pageSize,
-      isAnyLoading: signal(false),
+      isAnyLoading: this.endpointsConfig.loading,
       errorsByCnsi: signal(new Map()),
       columns: [
         {

@@ -122,6 +122,7 @@ export class EndpointsSignalConfigService {
   readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode = this.state.viewMode;
+  readonly loading: Signal<boolean> = this.endpointsData.loading;
 
   // Endpoint entries sourced from EndpointsSignalService so the
   // toSignal(store.select(endpointEntitiesSelector)) bridge lives in
