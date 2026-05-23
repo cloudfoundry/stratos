@@ -1,6 +1,6 @@
 import { Signal, computed } from '@angular/core';
 
-import { naturalCompare } from '@stratosui/core';
+import { detectSortContext, naturalCompare } from '@stratosui/core';
 
 export interface SortSpec<T = unknown> {
   // Property name on T to sort by. Declared as string (not keyof T) so
@@ -50,7 +50,18 @@ export class ViewPipeline<T> {
       const getValue: (row: T) => unknown = extractor
         ? extractor
         : (row: T) => (row as Record<string, unknown>)[spec.field];
-      return [...this.filteredItems()].sort((a, b) => {
+      const items = [...this.filteredItems()];
+      // Collection-aware pre-pass: scan all extracted string values for
+      // the xxx-sep?-nnn pattern. When most entries match, naturalCompare
+      // strips separator chars before tokenizing so `Org 4`, `Org_5`, and
+      // `Org6` sequence by their numeric token.
+      const strings: string[] = [];
+      for (const it of items) {
+        const v = getValue(it);
+        if (typeof v === 'string') strings.push(v);
+      }
+      const ctx = strings.length > 0 ? detectSortContext(strings) : {};
+      return items.sort((a, b) => {
         const av = getValue(a);
         const bv = getValue(b);
         if (av == null && bv == null) return 0;
@@ -62,10 +73,8 @@ export class ViewPipeline<T> {
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * sign;
         }
-        // Natural string sort: numeric-aware. Per-list case-sensitivity
-        // override comes from spec.caseSensitive (default false).
         if (typeof av === 'string' && typeof bv === 'string') {
-          return naturalCompare(av, bv, spec.caseSensitive) * sign;
+          return naturalCompare(av, bv, spec.caseSensitive, spec.direction, ctx);
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });

@@ -10,7 +10,7 @@ import {
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
 import { ListStateStore } from '../../../shared/components/signal-list/list-state-store.service';
-import { naturalCompare } from '../../../shared/utils/natural-sort';
+import { detectSortContext, naturalCompare } from '../../../shared/utils/natural-sort';
 
 // ViewPipeline lives in the cloud-foundry package today (used by the
 // app/orgs/spaces/routes signal-list configs). Endpoints sits under @stratosui/core
@@ -72,7 +72,15 @@ export class ViewPipeline<T> {
       const getValue: (row: T) => unknown = extractor
         ? extractor
         : (row: T) => (row as Record<string, unknown>)[spec.field];
-      return [...this.filteredItems()].sort((a, b) => {
+      const items = [...this.filteredItems()];
+      // Collection-aware pre-pass — see naturalCompare/detectSortContext.
+      const strings: string[] = [];
+      for (const it of items) {
+        const v = getValue(it);
+        if (typeof v === 'string') strings.push(v);
+      }
+      const ctx = strings.length > 0 ? detectSortContext(strings) : {};
+      return items.sort((a, b) => {
         const av = getValue(a);
         const bv = getValue(b);
         if (av == null && bv == null) return 0;
@@ -82,7 +90,7 @@ export class ViewPipeline<T> {
           return (av - bv) * sign;
         }
         if (typeof av === 'string' && typeof bv === 'string') {
-          return naturalCompare(av, bv, spec.caseSensitive) * sign;
+          return naturalCompare(av, bv, spec.caseSensitive, spec.direction, ctx);
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });
