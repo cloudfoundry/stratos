@@ -7,6 +7,7 @@ import {
   SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
+  SignalListDropdown,
   SignalListHeaderAction,
 } from '@stratosui/core';
 
@@ -217,6 +218,18 @@ export class CloudFoundryUsersComponent {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.usersConfig.nameFilter,
+      filterDropdowns: [
+        {
+          label: 'Organization',
+          options: this.usersConfig.orgOptions,
+          selected: this.usersConfig.selectedOrg,
+        },
+        {
+          label: 'Space',
+          options: this.usersConfig.spaceOptions,
+          selected: this.usersConfig.selectedSpace,
+        },
+      ] as SignalListDropdown[],
       onRefresh: () => this.usersConfig.refresh(),
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,

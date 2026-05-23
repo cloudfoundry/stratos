@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, inject, signal } from '@angular/core';
 
-import { SignalListComponent, SignalListConfig } from '@stratosui/core';
+import { SignalListComponent, SignalListConfig, SignalListDropdown } from '@stratosui/core';
 
 import { CfAuditEventsSignalConfigService } from '../list/list-types/cf-events/cf-audit-events-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../features/cf/services/cloud-foundry-endpoint.service';
@@ -47,8 +47,38 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.eventsConfig.initialize(cfGuid);
+  }
 
-    this.listConfig.set({
+  // @Input() values are not bound at constructor time. Building the
+  // listConfig here (with inputs guaranteed bound) lets us conditionally
+  // include the Org / Space dropdowns only on the foundation-wide page
+  // (no scope inputs). The sub-pages pin scope via basePredicate; adding
+  // dropdowns there would let users pick mismatched org/space values
+  // that the predicate then clamps — confusing UX.
+  ngOnInit(): void {
+    this.applyBasePredicate();
+    this.listConfig.set(this.buildListConfig());
+    void this.eventsConfig.loadAll();
+  }
+
+  private buildListConfig(): SignalListConfig<StAuditEvent> {
+    const isFoundationWide = !this.orgGuid && !this.spaceGuid && !this.targetGuid;
+    const filterDropdowns: SignalListDropdown[] = isFoundationWide
+      ? [
+        {
+          label: 'Organization',
+          options: this.eventsConfig.orgOptions,
+          selected: this.eventsConfig.selectedOrg,
+        },
+        {
+          label: 'Space',
+          options: this.eventsConfig.spaceOptions,
+          selected: this.eventsConfig.selectedSpace,
+        },
+      ]
+      : [];
+
+    return {
       pagedItems: this.eventsConfig.view.pagedItems,
       totalFilteredResults: this.eventsConfig.view.totalFilteredResults,
       totalPages: this.eventsConfig.view.totalPages,
@@ -102,21 +132,12 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.eventsConfig.nameFilter,
+      filterDropdowns,
       onRefresh: () => this.eventsConfig.refresh(),
       onClear: () => this.eventsConfig.clearFilters(),
       viewMode: this.eventsConfig.viewMode,
       sort: this.eventsConfig.sort,
-    });
-  }
-
-  // @Input() values are not bound at constructor time. Setting the
-  // predicate here (with the inputs guaranteed bound) before triggering
-  // the data fetch keeps cross-org/space events from rendering during
-  // the initial load. Same fix shape as the per-CF tabs: scope first,
-  // then load.
-  ngOnInit(): void {
-    this.applyBasePredicate();
-    void this.eventsConfig.loadAll();
+    };
   }
 
   // Re-apply the base predicate when scope inputs change (Angular

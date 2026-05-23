@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore } from '@stratosui/core';
 import { CfUserListDiagnosticsService } from '../../../../../services/diagnostics/cf-user-list-diagnostics.service';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
@@ -64,6 +65,13 @@ export class CfUsersSignalConfigService {
   readonly pageSize = this.state.pageSize;
   readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
+  // Toolbar-driven Org / Space narrowing. Distinct from `_lockedOrgGuid` /
+  // `_lockedSpaceGuid` (URL-driven for the per-org / per-space tabs):
+  // these are the dropdown selections on the CF-level Users page and stack
+  // ON TOP of the URL locks. null = no constraint. Selecting an org
+  // constrains the Space dropdown to that org's spaces (cascade rule).
+  readonly selectedOrg: WritableSignal<string | null> = signal(null);
+  readonly selectedSpace: WritableSignal<string | null> = signal(null);
   readonly viewMode = this.state.viewMode;
 
   // Raw user list as returned by the backend for this CNSI. We keep the
@@ -118,6 +126,57 @@ export class CfUsersSignalConfigService {
     return map;
   });
 
+  // Org options for the CF-level Users toolbar. Natural-sort (numeric-
+  // aware); "All" prepended. The per-org tab pins `_lockedOrgGuid` and
+  // elects not to render this dropdown.
+  readonly orgOptions: Signal<SignalListDropdownOption[]> = computed(() => {
+    const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+    const orgs = this.endpointDataService?.orgs() ?? [];
+    const sorted = [...orgs].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    for (const o of sorted) opts.push({ label: o.name, value: o.guid });
+    return opts;
+  });
+
+  // Space options — cascade-aware.
+  // - Org selected: list spaces in that org, label = space name.
+  // - Org = All: list every space, label = "<space> - <org>", sorted by
+  //   space name then org name (both natural-sort).
+  readonly spaceOptions: Signal<SignalListDropdownOption[]> = computed(() => {
+    const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+    const spaces = this.endpointDataService?.spaces() ?? [];
+    const org = this.selectedOrg();
+    if (org) {
+      const sorted = spaces
+        .filter(s => s.orgGuid === org)
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      for (const s of sorted) opts.push({ label: s.name, value: s.guid });
+      return opts;
+    }
+    const orgNameByGuid = new Map((this.endpointDataService?.orgs() ?? []).map(o => [o.guid, o.name]));
+    const augmented = spaces.map(s => ({
+      guid: s.guid,
+      spaceName: s.name,
+      orgName: orgNameByGuid.get(s.orgGuid) ?? '',
+    }));
+    augmented.sort((a, b) => {
+      const bySpace = a.spaceName.localeCompare(b.spaceName, undefined, { numeric: true });
+      if (bySpace !== 0) return bySpace;
+      return a.orgName.localeCompare(b.orgName, undefined, { numeric: true });
+    });
+    for (const s of augmented) opts.push({ label: `${s.spaceName} - ${s.orgName}`, value: s.guid });
+    return opts;
+  });
+
+  // spaceGuid → orgGuid lookup — drives the selectedOrg predicate (a
+  // user's role array doesn't carry orgGuid on every space role variant
+  // in all backends; flatten via the spaces() signal).
+  private readonly _orgGuidBySpaceGuid: Signal<Map<string, string>> = computed(() => {
+    const map = new Map<string, string>();
+    const spaces = this.endpointDataService?.spaces() ?? [];
+    for (const s of spaces) map.set(s.guid, s.orgGuid);
+    return map;
+  });
+
   // Access to the endpoint-data service for components that want to wait on
   // its loadDetails (e.g. to render org/space names before the buckets
   // resolve). Kept narrow — the service hides the registry from callers.
@@ -158,10 +217,41 @@ export class CfUsersSignalConfigService {
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
+        const org = this.selectedOrg();
+        const space = this.selectedSpace();
+        // orgGuidBySpaceGuid is needed when the user's space-role bucket
+        // is the only way to attribute them to an org (e.g., they hold
+        // only a space role, no org-level role).
+        const orgGuidBySpaceGuid = this._orgGuidBySpaceGuid();
         this.filter.set((u: StUser) => {
+          if (org) {
+            const hasOrgRole = u.orgRoles.some(or => or.orgGuid === org);
+            const hasSpaceInOrg = u.spaceRoles.some(sr =>
+              sr.orgGuid === org || orgGuidBySpaceGuid.get(sr.spaceGuid) === org,
+            );
+            if (!hasOrgRole && !hasSpaceInOrg) return false;
+          }
+          if (space) {
+            if (!u.spaceRoles.some(sr => sr.spaceGuid === space)) return false;
+          }
           if (!q) return true;
           return (u.username ?? '').toLowerCase().includes(q);
         });
+      });
+      // Cascade rule: clear stale Space selection only when Org switches
+      // to a different specific org that doesn't own this space. When Org
+      // returns to All, the Space dropdown shows every space across orgs
+      // (labelled "<space> - <org>"), so the current selection is still
+      // valid and must be preserved.
+      effect(() => {
+        const org = this.selectedOrg();
+        const space = this.selectedSpace();
+        if (!space) return;
+        if (org === null) return;
+        const orgGuidBySpaceGuid = this._orgGuidBySpaceGuid();
+        if (orgGuidBySpaceGuid.get(space) !== org) {
+          this.selectedSpace.set(null);
+        }
       });
     });
     this.destroyRef.onDestroy(() => {
@@ -224,6 +314,8 @@ export class CfUsersSignalConfigService {
 
   clearFilters(): void {
     this.nameFilter.set('');
+    this.selectedOrg.set(null);
+    this.selectedSpace.set(null);
     this.sort.set({ field: 'username', direction: 'asc' });
     this.pageIndex.set(0);
   }

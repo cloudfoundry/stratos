@@ -95,6 +95,16 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
         selected: this.instancesConfig.selectedCnsi,
         disabled: cnsiLocked,
       },
+      {
+        label: 'Organization',
+        options: this.instancesConfig.orgOptions,
+        selected: this.instancesConfig.selectedOrg,
+      },
+      {
+        label: 'Space',
+        options: this.instancesConfig.spaceOptions,
+        selected: this.instancesConfig.selectedSpace,
+      },
     ];
 
     const renderService = (si: StServiceInstance): string =>

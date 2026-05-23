@@ -159,6 +159,11 @@ export class CloudFoundryRoutesSignalComponent {
         options: this.routesConfig.orgOptions,
         selected: this.routesConfig.selectedOrg,
       },
+      {
+        label: 'Space',
+        options: this.routesConfig.spaceOptions,
+        selected: this.routesConfig.selectedSpace,
+      },
     ];
 
     this.listConfig.set({
