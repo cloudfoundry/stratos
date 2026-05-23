@@ -1,6 +1,6 @@
 import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
-import { ListStateStore, SignalListSort } from '@stratosui/core';
+import { ListStateStore, SignalListSort, naturalCompare } from '@stratosui/core';
 
 import { KubeHelmDataService } from '../../services/endpoint-data/kube-helm-data.service';
 import { MonocularChart, StratosError } from '../../services/endpoint-data/kube-types';
@@ -156,7 +156,7 @@ export class MonocularChartsSignalConfigService {
         if (n) seen.add(n);
       }
     });
-    return Array.from(seen).sort((a, b) => a.localeCompare(b));
+    return Array.from(seen).sort((a, b) => naturalCompare(a, b));
   });
 
   readonly artifactHubRepos: Signal<string[]> = computed(() => {
@@ -167,7 +167,7 @@ export class MonocularChartsSignalConfigService {
         if (n) seen.add(n);
       }
     });
-    return Array.from(seen).sort((a, b) => a.localeCompare(b));
+    return Array.from(seen).sort((a, b) => naturalCompare(a, b));
   });
 
   async loadAll(): Promise<void> {

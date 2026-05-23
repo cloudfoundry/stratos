@@ -3,6 +3,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { naturalCompare } from '@stratosui/core';
+
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
@@ -106,7 +108,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       }
     });
 
-    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    tabsFromRouterConfig.sort((a, b) => naturalCompare(a.label, b.label));
     return tabsFromRouterConfig;
   }
 }

@@ -2,7 +2,7 @@ import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, eff
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
-import { ListStateStore } from '@stratosui/core';
+import { ListStateStore, naturalCompare } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
@@ -179,7 +179,7 @@ export class CfRoutesSignalConfigService {
   readonly orgOptions: Signal<SignalListDropdownOption[]> = computed(() => {
     const orgs = this.endpointDataService?.orgs() ?? [];
     const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-    const sorted = [...orgs].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    const sorted = [...orgs].sort((a, b) => naturalCompare(a.name, b.name));
     for (const o of sorted) {
       opts.push({ label: o.name, value: o.guid });
     }
@@ -198,7 +198,7 @@ export class CfRoutesSignalConfigService {
     if (org) {
       const sorted = spaces
         .filter(s => s.orgGuid === org)
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+        .sort((a, b) => naturalCompare(a.name, b.name));
       for (const s of sorted) opts.push({ label: s.name, value: s.guid });
       return opts;
     }
@@ -209,9 +209,9 @@ export class CfRoutesSignalConfigService {
       orgName: orgNameByGuid.get(s.orgGuid) ?? '',
     }));
     augmented.sort((a, b) => {
-      const bySpace = a.spaceName.localeCompare(b.spaceName, undefined, { numeric: true });
+      const bySpace = naturalCompare(a.spaceName, b.spaceName);
       if (bySpace !== 0) return bySpace;
-      return a.orgName.localeCompare(b.orgName, undefined, { numeric: true });
+      return naturalCompare(a.orgName, b.orgName);
     });
     for (const s of augmented) opts.push({ label: `${s.spaceName} - ${s.orgName}`, value: s.guid });
     return opts;

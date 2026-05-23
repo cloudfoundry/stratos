@@ -1,6 +1,6 @@
 import { AsyncPipe, TitleCasePipe } from '@angular/common';
 import {Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CustomTooltipDirective } from '@stratosui/core';
+import { CustomTooltipDirective, naturalCompare } from '@stratosui/core';
 import { isBefore, isAfter } from 'date-fns';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -84,7 +84,7 @@ export class KubernetesPodContainersComponent extends CardCell<KubernetesPod> {
       ...containerStatus.map(c => this.createContainerForTable(c, row.spec.containers)),
       ...initContainerStatuses.map(c => this.createContainerForTable(c, row.spec.initContainers, true))
     ];
-    return containerStatusWithContainers.sort((a, b) => a.container.name.localeCompare(b.container.name));
+    return containerStatusWithContainers.sort((a, b) => naturalCompare(a.container.name, b.container.name));
   }
 
   private containerStatusToString(state: string, status: ContainerState): string {

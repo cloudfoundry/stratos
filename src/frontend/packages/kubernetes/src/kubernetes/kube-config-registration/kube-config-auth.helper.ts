@@ -1,6 +1,7 @@
 import { createComponent, EnvironmentInjector, Injector } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 
+import { naturalCompare } from '@stratosui/core';
 import { ConnectEndpointData } from '../../../../core/src/features/endpoints/connect.service';
 import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
 import { EndpointAuthTypeConfig, IAuthForm } from '../../../../store/src/extension-types';
@@ -48,7 +49,7 @@ export class KubeConfigAuthHelper {
       }
 
       // Sort the subtypes
-      this.subTypes = this.subTypes.sort((a, b) => a.name.localeCompare(b.name));
+      this.subTypes = this.subTypes.sort((a, b) => naturalCompare(a.name, b.name));
     }
   }
 

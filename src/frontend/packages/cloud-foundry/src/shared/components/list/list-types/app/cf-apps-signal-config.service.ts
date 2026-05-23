@@ -14,7 +14,7 @@ import { CloudFoundryService } from '../../../../data-services/cloud-foundry.ser
 import { writeWithJob } from '../../../../../services/async-jobs/write-with-job';
 import type { StratosJob } from '../../../../../services/async-jobs/async-job.types';
 import type { SignalListDropdownOption } from '@stratosui/core';
-import { ListStateStore } from '@stratosui/core';
+import { ListStateStore, naturalCompare } from '@stratosui/core';
 
 @Injectable({ providedIn: 'root' })
 export class CfAppsSignalConfigService {
@@ -226,7 +226,7 @@ export class CfAppsSignalConfigService {
         }
       }
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b));
+      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a, b));
       for (const [guid, label] of sorted) opts.push({ label, value: guid });
       return opts;
     });
@@ -247,7 +247,7 @@ export class CfAppsSignalConfigService {
         }
       }
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => a.localeCompare(b));
+      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a, b));
       for (const [guid, label] of sorted) opts.push({ label, value: guid });
       return opts;
     });

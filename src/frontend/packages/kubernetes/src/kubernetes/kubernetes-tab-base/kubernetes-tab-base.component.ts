@@ -6,6 +6,7 @@ import { take, map, startWith } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
+import { naturalCompare } from '@stratosui/core';
 import { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
@@ -93,7 +94,7 @@ export class KubernetesTabBaseComponent implements OnInit {
       }
     });
 
-    tabsFromRouterConfig.sort((a: { label: string }, b: { label: string }) => a.label.localeCompare(b.label));
+    tabsFromRouterConfig.sort((a: { label: string }, b: { label: string }) => naturalCompare(a.label, b.label));
     return tabsFromRouterConfig;
   }
 

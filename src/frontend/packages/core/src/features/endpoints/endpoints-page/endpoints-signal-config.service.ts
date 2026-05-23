@@ -10,6 +10,7 @@ import {
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
 import { ListStateStore } from '../../../shared/components/signal-list/list-state-store.service';
+import { naturalCompare } from '../../../shared/utils/natural-sort';
 
 // ViewPipeline lives in the cloud-foundry package today (used by the
 // app/orgs/spaces/routes signal-list configs). Endpoints sits under @stratosui/core
@@ -79,10 +80,8 @@ export class ViewPipeline<T> {
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * sign;
         }
-        // Case-insensitive + numeric-aware string sort, mirroring the
-        // shared ViewPipeline in cloud-foundry/services/data-sources.
         if (typeof av === 'string' && typeof bv === 'string') {
-          return av.localeCompare(bv, undefined, { numeric: true, sensitivity: 'base' }) * sign;
+          return naturalCompare(av, bv) * sign;
         }
         return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
       });
