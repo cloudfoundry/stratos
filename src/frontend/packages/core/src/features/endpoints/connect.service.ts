@@ -18,6 +18,7 @@ import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMa
 
 import { EndpointsService } from '../../core/endpoints.service';
 import { safeUnsubscribe } from '../../core/utils.service';
+import { rememberUsername } from './remembered-username';
 
 export interface ConnectEndpointConfig {
   name: string;
@@ -216,10 +217,21 @@ export class ConnectEndpointService {
         }),
       ),
     ).pipe(
-      map(actionState => ({
-        success: !actionState.error,
-        errorMessage: actionState.message,
-      })),
+      map(actionState => {
+        if (!actionState.error) {
+          // Cache the username so the next reconnect dialog (which sees an
+          // endpoint.user cleared by disconnect) can prefill it. Only for
+          // credentials-style auth — SSO / token forms don't carry one.
+          const username = (authVal as { username?: string })?.username;
+          if (username) {
+            rememberUsername(this.config.guid, username);
+          }
+        }
+        return {
+          success: !actionState.error,
+          errorMessage: actionState.message,
+        };
+      }),
     );
   }
 
