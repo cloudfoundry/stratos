@@ -52,7 +52,7 @@ export class CloudFoundryUsersComponent {
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.usersConfig.initialize(cfGuid);
-    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalFilteredResults;
+    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
 
     // Cell renderers. Each role-bucket cell resolves org/space names via
     // the config service's lookup signals (which read EndpointDataService

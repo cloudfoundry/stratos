@@ -64,7 +64,7 @@ export class CloudFoundryQuotasComponent {
     this.quotasConfig.initialize(cfGuid);
     void this.quotasConfig.loadAll();
     (this as { totalQuotas: Signal<number> }).totalQuotas =
-      this.quotasConfig.view.totalFilteredResults;
+      this.quotasConfig.view.totalItems;
     this.createQuotaAction = {
       label: 'Create Organization Quota',
       icon: 'add',

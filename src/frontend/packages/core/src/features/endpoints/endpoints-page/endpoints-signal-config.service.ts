@@ -47,6 +47,10 @@ export class ViewPipeline<T> {
   readonly filteredItems: Signal<T[]>;
   readonly sortedItems: Signal<T[]>;
   readonly pagedItems: Signal<T[]>;
+  // Unfiltered count of raw items. L5 sub-nav "Total X" labels read
+  // this so the headline stays anchored to the dataset size while
+  // filter input narrows the rendered list.
+  readonly totalItems: Signal<number>;
   readonly totalFilteredResults: Signal<number>;
   readonly totalPages: Signal<number>;
 
@@ -83,6 +87,7 @@ export class ViewPipeline<T> {
       const start = this.pageIndex() * size;
       return this.sortedItems().slice(start, start + size);
     });
+    this.totalItems = computed(() => this.items().length);
     this.totalFilteredResults = computed(() => this.filteredItems().length);
     this.totalPages = computed(() => Math.ceil(this.totalFilteredResults() / this.pageSize()));
   }

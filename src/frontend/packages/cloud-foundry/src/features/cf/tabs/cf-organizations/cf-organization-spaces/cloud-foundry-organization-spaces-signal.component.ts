@@ -90,7 +90,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
     const router = inject(Router);
     this.spacesConfig.initialize(cfGuid, orgGuid);
     (this as { totalSpaces: Signal<number> }).totalSpaces =
-      this.spacesConfig.view.totalFilteredResults;
+      this.spacesConfig.view.totalItems;
     this.createSpaceAction = {
       label: 'Create Space',
       icon: 'add',

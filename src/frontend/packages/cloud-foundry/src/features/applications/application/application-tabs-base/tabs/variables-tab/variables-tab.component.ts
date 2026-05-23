@@ -225,7 +225,7 @@ export class VariablesTabComponent implements OnInit {
       sort: this.variablesConfig.sort,
     };
 
-    this.totalVariables = this.variablesConfig.view.totalFilteredResults;
+    this.totalVariables = this.variablesConfig.view.totalItems;
   }
 
   ngOnInit(): void {

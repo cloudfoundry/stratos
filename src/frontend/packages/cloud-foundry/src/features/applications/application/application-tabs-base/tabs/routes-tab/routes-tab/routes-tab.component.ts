@@ -126,7 +126,7 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
       sort: this.routesConfig.sort,
     };
 
-    this.totalRoutes = this.routesConfig.view.totalFilteredResults;
+    this.totalRoutes = this.routesConfig.view.totalItems;
   }
 
   ngOnInit(): void {

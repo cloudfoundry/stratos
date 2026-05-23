@@ -62,7 +62,7 @@ export class CloudFoundrySpaceUsersComponent {
     const cfGuid = this.cfEndpointService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.usersConfig.initializeForSpace(cfGuid, spaceGuid);
-    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalFilteredResults;
+    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
 
     const renderUsername = (u: StUser): string =>
       u.username && u.username.length > 0 ? u.username : (u.presentationName ?? u.guid);
