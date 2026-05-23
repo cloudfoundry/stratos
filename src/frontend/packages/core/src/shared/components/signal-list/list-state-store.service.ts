@@ -149,5 +149,11 @@ function isSortTuple(v: unknown): v is ModeTuple<SignalListSort> {
 function isSort(v: unknown): v is SignalListSort {
   if (!v || typeof v !== 'object') return false;
   const s = v as Partial<SignalListSort>;
-  return typeof s.field === 'string' && (s.direction === 'asc' || s.direction === 'desc');
+  // Empty field is rejected: a stored `{field:""}` was observed in older
+  // sessions and trips ViewPipeline into reading `row[""] = undefined`,
+  // collapsing every row to "equal" and emitting insertion order. Reject
+  // here so bind() falls back to the caller's named defaults.
+  return typeof s.field === 'string'
+    && s.field.length > 0
+    && (s.direction === 'asc' || s.direction === 'desc');
 }
