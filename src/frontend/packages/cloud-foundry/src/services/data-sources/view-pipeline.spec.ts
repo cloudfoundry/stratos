@@ -43,6 +43,24 @@ describe('ViewPipeline', () => {
     expect(pipe.totalFilteredResults()).toBe(0);
   });
 
+  it('strings sort case-insensitively and naturally (numeric-aware)', () => {
+    // Without natural sort: 'OrgNoSelectedQuota' < 'e2e' (capital O = 0x4F
+    // < lowercase e = 0x65) and 'org_10' lands between 'org_1' and 'org_2'.
+    // With localeCompare(numeric, sensitivity:'base') case folds away and
+    // numbers sort by value.
+    const items = signal<{ name: string }[]>([
+      { name: 'org_10' },
+      { name: 'org_2' },
+      { name: 'OrgAlpha' },
+      { name: 'org_1' },
+      { name: 'eee' },
+    ]).asReadonly();
+    const filter = signal<(r: { name: string }) => boolean>(() => true);
+    const sort = signal<{ field: 'name'; direction: 'asc' | 'desc' }>({ field: 'name', direction: 'asc' });
+    const pipe = new ViewPipeline(items, filter, sort, signal(10), signal(0));
+    expect(pipe.sortedItems().map(r => r.name)).toEqual(['eee', 'org_1', 'org_2', 'org_10', 'OrgAlpha']);
+  });
+
   it('descending sort', () => {
     const items = signal<Row[]>([{ name: 'a', created: 1 }, { name: 'b', created: 2 }]).asReadonly();
     const filter = signal<(r: Row) => boolean>(() => true);
