@@ -2,8 +2,12 @@
   {{ title$ | async }}
 </app-page-header>
 @if (initialisedService(); as inited) {
+  <ng-template #contextSummaryTpl>
+    <span><span class="font-medium text-content-text">Creating in:</span> {{ contextSummaryParts().join(' / ') }}</span>
+  </ng-template>
   <div class="h-full">
-    <app-steppers [cancel]="modeService.cancelUrl">
+    <app-steppers [cancel]="modeService.cancelUrl"
+      [contextSummary]="contextSummaryParts().length > 0 ? contextSummaryTpl : null">
       @if (serviceType === serviceTypes.SERVICE) {
         @if (modeService.viewDetail.showSelectCf && !isSpaceScoped()) {
           <app-step title="Cloud Foundry" [signalHandle]="selectCFHandle">
