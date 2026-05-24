@@ -102,6 +102,7 @@ applications:
     command: ./jetstream
     env:
       ENCRYPTION_KEY: B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF
+      SESSION_STORE_EXPIRY: "240"
 # Override CF API endpoint URL inferred from VCAP_APPLICATION env
 #       CF_API_URL: https://CLOUD_FOUNDRY_API_ENDPOINT
 # Force the console to use secured communication with the Cloud Foundry API endpoint
