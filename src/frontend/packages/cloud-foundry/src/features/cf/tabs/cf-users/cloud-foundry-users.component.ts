@@ -223,11 +223,13 @@ export class CloudFoundryUsersComponent {
           label: 'Organization',
           options: this.usersConfig.orgOptions,
           selected: this.usersConfig.selectedOrg,
+          loading: this.usersConfig.isLoadingOrgs,
         },
         {
           label: 'Space',
           options: this.usersConfig.spaceOptions,
           selected: this.usersConfig.selectedSpace,
+          loading: this.usersConfig.isLoadingSpaces,
         },
       ] as SignalListDropdown[],
       onRefresh: () => this.usersConfig.refresh(),

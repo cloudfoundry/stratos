@@ -277,12 +277,14 @@ export class ApplicationWallComponent implements OnInit {
         options: this.appsConfig.orgOptions,
         selected: this.appsConfig.selectedOrg,
         onOpen: onDropdownOpen,
+        loading: this.appsConfig.isLoadingOrgs,
       },
       {
         label: 'Space',
         options: this.appsConfig.spaceOptions,
         selected: this.appsConfig.selectedSpace,
         onOpen: onDropdownOpen,
+        loading: this.appsConfig.isLoadingSpaces,
       },
     ];
     const stateColor = (app: StApp): SignalListPillColor => {

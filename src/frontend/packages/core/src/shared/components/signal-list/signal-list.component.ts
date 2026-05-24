@@ -195,6 +195,10 @@ export interface SignalListDropdown {
   // Lets the host service defer expensive option-population work until the user
   // actually opens the menu — paint-fast pages, populate-on-demand dropdowns.
   onOpen?: () => void;
+  // When true, render a small spinner next to the dropdown label so the user
+  // sees that option population is in-flight rather than mistaking an empty
+  // list for "no items available."
+  loading?: Signal<boolean>;
 }
 
 export type SignalListViewMode = 'table' | 'card';

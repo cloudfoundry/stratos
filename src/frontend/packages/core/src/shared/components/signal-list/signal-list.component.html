@@ -18,6 +18,12 @@
               <option [value]="opt.value ?? ''" [selected]="(opt.value ?? '') === (dd.selected() ?? '')">{{ opt.label }}</option>
             }
           </select>
+          @if (dd.loading?.()) {
+            <svg class="animate-spin text-content-muted" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Loading">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/>
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          }
         </label>
       }
     }

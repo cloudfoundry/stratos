@@ -174,11 +174,13 @@ export class CloudFoundryRoutesSignalComponent {
         label: 'Organization',
         options: this.routesConfig.orgOptions,
         selected: this.routesConfig.selectedOrg,
+        loading: this.routesConfig.isLoadingOrgs,
       },
       {
         label: 'Space',
         options: this.routesConfig.spaceOptions,
         selected: this.routesConfig.selectedSpace,
+        loading: this.routesConfig.isLoadingSpaces,
       },
     ];
 
