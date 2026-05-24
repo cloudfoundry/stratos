@@ -203,10 +203,14 @@ export class ServicesWallComponent implements OnInit {
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
-          // Use the legacy detail-page route shape: /services/:type/:cnsi/:siGuid
-          // (the legacy detail page itself stays untouched in this migration).
-          link: (si: StServiceInstance) =>
-            ['/services', si.type === 'user-provided' ? 'user-provided' : 'managed', si.cnsiGuid, si.guid],
+          // Land on the marketplace offering summary for managed instances;
+          // user-provided instances have no offering so the name stays
+          // plain text (signal-list renders `null` as non-link).
+          link: (si: StServiceInstance) => {
+            const offeringGuid = si.servicePlan?.serviceOffering?.guid;
+            if (!offeringGuid) return null;
+            return ['/marketplace', si.cnsiGuid, offeringGuid, 'summary'];
+          },
           render: (si: StServiceInstance) => si.name,
           widthHint: '14rem',
         },

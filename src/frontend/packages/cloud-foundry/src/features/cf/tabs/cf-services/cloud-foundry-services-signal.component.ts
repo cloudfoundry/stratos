@@ -149,8 +149,11 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
-          link: (si: StServiceInstance) =>
-            ['/services', si.type === 'user-provided' ? 'user-provided' : 'managed', si.cnsiGuid, si.guid],
+          link: (si: StServiceInstance) => {
+            const offeringGuid = si.servicePlan?.serviceOffering?.guid;
+            if (!offeringGuid) return null;
+            return ['/marketplace', si.cnsiGuid, offeringGuid, 'summary'];
+          },
           render: (si: StServiceInstance) => si.name,
           widthHint: '14rem',
         },
