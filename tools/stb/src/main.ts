@@ -7,6 +7,7 @@ import { createHighlightWiring } from '@/ui/highlight';
 import { mountLightDarkActions } from '@/ui/light-dark-actions';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
+import { loadBuiltInPreset } from '@/state/presets';
 
 interface ColorFormatState { value: 'hex' | 'rgb' | 'oklch'; }
 const colorFormat: ColorFormatState = { value: 'hex' };
@@ -39,6 +40,8 @@ async function main() {
     app.querySelector('.stb-left') as HTMLElement,
     app.querySelector('.stb-preview-host') as HTMLElement,
   );
+
+  await loadBuiltInPreset('stratos-default');
 
   await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
   mountLightDarkActions(app.querySelector('.stb-actions-host') as HTMLElement);
