@@ -10,6 +10,7 @@ import { openExportDialog } from '@/ui/export-dialog';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 import { loadBuiltInPreset } from '@/state/presets';
+import { restoreSession, startAutoSave } from '@/state/persistence';
 
 interface ColorFormatState { value: 'hex' | 'rgb' | 'oklch'; }
 const colorFormat: ColorFormatState = { value: 'hex' };
@@ -43,7 +44,9 @@ async function main() {
     app.querySelector('.stb-preview-host') as HTMLElement,
   );
 
-  await loadBuiltInPreset('stratos-default');
+  const restored = restoreSession();
+  if (!restored) await loadBuiltInPreset('stratos-default');
+  startAutoSave();
 
   await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
   const actionsHost = app.querySelector('.stb-actions-host') as HTMLElement;
