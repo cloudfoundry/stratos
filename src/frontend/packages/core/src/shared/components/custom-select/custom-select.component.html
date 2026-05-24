@@ -1,6 +1,6 @@
 <div class="custom-select relative inline-block w-full min-w-[100px] font-inherit bg-[var(--input-bg)] text-[var(--input-text)] border-none rounded-md"
   [ngClass]="{
-    'opacity-60 pointer-events-none cursor-not-allowed': disabled,
+    'disabled opacity-60 pointer-events-none cursor-not-allowed': disabled,
     'open': isOpen,
     'invalid': invalid
   }"
@@ -33,12 +33,21 @@
       </span>
     </span>
     <div class="flex items-center gap-1 ml-2">
-      <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"
-        [class.rotate-180]="isOpen">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
+      @if (loading) {
+        <div class="text-[var(--text-muted,#666)] flex items-center" aria-label="Loading">
+          <svg class="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/>
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      } @else {
+        <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"
+          [class.rotate-180]="isOpen">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      }
     </div>
   </div>
 
