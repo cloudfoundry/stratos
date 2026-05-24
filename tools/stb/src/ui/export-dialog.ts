@@ -2,6 +2,7 @@ import { rootValues, darkValues, requiredTokens } from '@/state/tokens';
 import { findMissing } from '@/parse/completeness';
 import { buildBundle } from '@/export/bundle-builder';
 import { bundleToZip, triggerDownload } from '@/export/zip';
+import { assets } from '@/state/assets';
 
 export function openExportDialog(): void {
   const existing = document.getElementById('stb-export-dialog');
@@ -38,11 +39,17 @@ export function openExportDialog(): void {
   dialog.querySelector('#stb-confirm-export')!.addEventListener('click', async () => {
     const name = (dialog.querySelector('#stb-export-name') as HTMLInputElement).value || 'theme';
     const id = (dialog.querySelector('#stb-export-id') as HTMLInputElement).value || 'theme';
+    const assetInputs = assets.value
+      .filter((a) => a.blob)
+      .map((a) => ({
+        path: a.name === 'favicon' ? 'assets/favicon.svg' : `assets/${a.filename}`,
+        blob: a.blob!,
+      }));
     const bundle = buildBundle({
       name, id, description: '',
       root: rootValues.value,
       dark: darkValues.value,
-      assets: [], // assets UI is Task 22
+      assets: assetInputs,
     });
     const zip = await bundleToZip(bundle);
     triggerDownload(zip, `${id}.zip`);

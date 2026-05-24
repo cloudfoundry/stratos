@@ -8,6 +8,7 @@ import { mountLightDarkActions } from '@/ui/light-dark-actions';
 import { mountPresetMenu } from '@/ui/preset-menu';
 import { openExportDialog } from '@/ui/export-dialog';
 import { mountStatusBar } from '@/ui/status-bar';
+import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 import { loadBuiltInPreset } from '@/state/presets';
@@ -62,6 +63,11 @@ async function main() {
   exportBtn.textContent = 'Export…';
   exportBtn.addEventListener('click', () => openExportDialog());
   actionsHost.appendChild(exportBtn);
+
+  const assetHost = document.createElement('div');
+  assetHost.className = 'stb-asset-host';
+  actionsHost.appendChild(assetHost);
+  mountAssetManager(assetHost);
 
   const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
