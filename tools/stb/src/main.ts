@@ -4,6 +4,7 @@ import { mountSceneTabs } from '@/ui/scene-tabs';
 import { createPreviewPane } from '@/ui/preview-pane';
 import { openColorPicker } from '@/ui/color-picker';
 import { createHighlightWiring } from '@/ui/highlight';
+import { mountLightDarkActions } from '@/ui/light-dark-actions';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 
@@ -23,6 +24,7 @@ async function main() {
   const app = document.getElementById('app')!;
   app.innerHTML = `
     <div class="stb-scene-tabs-host"></div>
+    <div class="stb-actions-host" style="padding:0.5rem;border-bottom:1px solid #ddd"></div>
     <div class="stb-main" style="display:flex;flex:1;overflow:hidden">
       <div class="stb-left" style="display:flex">
         <div class="stb-sidebar-host" style="width:280px;overflow:auto"></div>
@@ -39,6 +41,7 @@ async function main() {
   );
 
   await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
+  mountLightDarkActions(app.querySelector('.stb-actions-host') as HTMLElement);
 
   const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
