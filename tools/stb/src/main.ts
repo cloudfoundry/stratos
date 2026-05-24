@@ -6,6 +6,7 @@ import { openColorPicker } from '@/ui/color-picker';
 import { createHighlightWiring } from '@/ui/highlight';
 import { mountLightDarkActions } from '@/ui/light-dark-actions';
 import { mountPresetMenu } from '@/ui/preset-menu';
+import { openExportDialog } from '@/ui/export-dialog';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 import { loadBuiltInPreset } from '@/state/presets';
@@ -51,6 +52,12 @@ async function main() {
   presetsHost.className = 'stb-presets-host';
   actionsHost.appendChild(presetsHost);
   mountPresetMenu(presetsHost);
+
+  const exportBtn = document.createElement('button');
+  exportBtn.id = 'stb-export-btn';
+  exportBtn.textContent = 'Export…';
+  exportBtn.addEventListener('click', () => openExportDialog());
+  actionsHost.appendChild(exportBtn);
 
   const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
