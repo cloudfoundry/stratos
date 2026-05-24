@@ -97,6 +97,10 @@ export class CfServiceInstancesSignalConfigService {
   // (scope is already pinned).
   readonly orgOptions: Signal<SignalListDropdownOption[]>;
   readonly spaceOptions: Signal<SignalListDropdownOption[]>;
+  // Loading flags for the Org / Space filter dropdowns. True while any
+  // in-scope EndpointDataService is draining orgs / spaces.
+  readonly isLoadingOrgs!: Signal<boolean>;
+  readonly isLoadingSpaces!: Signal<boolean>;
   // endpoint guid → endpoint name, for rendering the CF column without
   // forcing each row to look it up.
   readonly endpointNames: Signal<Map<string, string>>;
@@ -218,6 +222,27 @@ export class CfServiceInstancesSignalConfigService {
         opts.push({ label: `${spaceName} - ${orgName}`, value: guid });
       }
       return opts;
+    });
+
+    // Org / Space dropdown loading flags — unioned across the in-scope
+    // EndpointDataServices. Lets the SignalListDropdown surface a spinner
+    // while the per-CNSI orgs/spaces drain is in flight, so a momentarily
+    // empty list reads as "loading" rather than "no items available."
+    this.isLoadingOrgs = computed(() => {
+      const byCnsi = this._edsByCnsi();
+      const selected = this.selectedCnsi();
+      const edsList: EndpointDataService[] = selected
+        ? (byCnsi.get(selected) ? [byCnsi.get(selected) as EndpointDataService] : [])
+        : Array.from(byCnsi.values());
+      return edsList.some(eds => eds.isLoadingOrgs());
+    });
+    this.isLoadingSpaces = computed(() => {
+      const byCnsi = this._edsByCnsi();
+      const selected = this.selectedCnsi();
+      const edsList: EndpointDataService[] = selected
+        ? (byCnsi.get(selected) ? [byCnsi.get(selected) as EndpointDataService] : [])
+        : Array.from(byCnsi.values());
+      return edsList.some(eds => eds.isLoadingSpaces());
     });
 
     // Flattened space → org map for the filter predicate. StServiceInstance

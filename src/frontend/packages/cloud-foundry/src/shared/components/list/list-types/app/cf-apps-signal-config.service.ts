@@ -104,6 +104,14 @@ export class CfAppsSignalConfigService {
   // is the expected visual cue.
   private readonly _orgsByCnsi = signal<Map<string, StOrg[]>>(new Map());
   private readonly _spacesByCnsi = signal<Map<string, StSpace[]>>(new Map());
+  // Loading flags for the Org / Space toolbar dropdowns — set true while
+  // loadNames() is fetching and cleared once the relevant map is populated.
+  // Drives the SignalListDropdown spinner so users see "loading" rather
+  // than an empty list.
+  private readonly _isLoadingOrgs = signal(false);
+  private readonly _isLoadingSpaces = signal(false);
+  readonly isLoadingOrgs: Signal<boolean> = this._isLoadingOrgs.asReadonly();
+  readonly isLoadingSpaces: Signal<boolean> = this._isLoadingSpaces.asReadonly();
   // Visible-row resolver overlay: space names looked up by guid for rows
   // currently visible in the view but whose guid wasn't in the bounded
   // /pp/v1/cf/spaces catalog page (which caps at ~500 resources to avoid
@@ -436,12 +444,15 @@ export class CfAppsSignalConfigService {
         .then(r => ({ guid, orgs: r.resources as StOrg[] }))
         .catch(() => ({ guid, orgs: [] as StOrg[] }));
 
+    this._isLoadingOrgs.set(true);
+    this._isLoadingSpaces.set(true);
     const orgResults = await Promise.all(cnsiGuids.map(fetchOrgs));
-    if (gen !== this._initGen) return;
+    if (gen !== this._initGen) { this._isLoadingOrgs.set(false); this._isLoadingSpaces.set(false); return; }
 
     const orgMap = new Map<string, StOrg[]>();
     for (const { guid, orgs } of orgResults) orgMap.set(guid, orgs);
     this._orgsByCnsi.set(orgMap);
+    this._isLoadingOrgs.set(false);
 
     // Reset the spaces map up-front so a re-initialize() doesn't render
     // last mount's stale list while the new drain is still in flight.
@@ -463,6 +474,7 @@ export class CfAppsSignalConfigService {
     // returning. A failure of one CF's drain shouldn't block the others,
     // hence allSettled.
     await Promise.allSettled(drainPromises);
+    this._isLoadingSpaces.set(false);
   }
 
   // Returns the cnsi's orgs ordered with "priority" orgs first (those

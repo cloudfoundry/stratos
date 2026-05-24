@@ -99,11 +99,13 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
         label: 'Organization',
         options: this.instancesConfig.orgOptions,
         selected: this.instancesConfig.selectedOrg,
+        loading: this.instancesConfig.isLoadingOrgs,
       },
       {
         label: 'Space',
         options: this.instancesConfig.spaceOptions,
         selected: this.instancesConfig.selectedSpace,
+        loading: this.instancesConfig.isLoadingSpaces,
       },
     ];
 

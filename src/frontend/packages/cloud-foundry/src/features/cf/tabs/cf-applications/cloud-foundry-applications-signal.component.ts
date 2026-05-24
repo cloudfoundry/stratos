@@ -92,11 +92,13 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         label: 'Organization',
         options: this.appsConfig.orgOptions,
         selected: this.appsConfig.selectedOrg,
+        loading: this.appsConfig.isLoadingOrgs,
       },
       {
         label: 'Space',
         options: this.appsConfig.spaceOptions,
         selected: this.appsConfig.selectedSpace,
+        loading: this.appsConfig.isLoadingSpaces,
       },
     ];
 

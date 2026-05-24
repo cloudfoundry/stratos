@@ -173,6 +173,15 @@ export class CfRoutesSignalConfigService {
     return map;
   });
 
+  // Loading flags for the Org / Space toolbar dropdowns — surface a
+  // spinner while the per-CF EndpointDataService drains orgs / spaces.
+  readonly isLoadingOrgs: Signal<boolean> = computed(() =>
+    this.endpointDataService?.isLoadingOrgs() ?? false
+  );
+  readonly isLoadingSpaces: Signal<boolean> = computed(() =>
+    this.endpointDataService?.isLoadingSpaces() ?? false
+  );
+
   // Org options for the CF-level page's Organization filter dropdown.
   // "All" is prepended as the null-value option. Sorted natural-order
   // (numeric-aware) so "org-2" comes before "org-10".

@@ -53,6 +53,15 @@ export class CfAuditEventsSignalConfigService {
   // restrict the foundation-wide event stream to their entity.
   readonly basePredicate: WritableSignal<(e: StAuditEvent) => boolean> = signal(() => true);
 
+  // Loading flags for the Org / Space toolbar dropdowns — surface a
+  // spinner while the per-CF EndpointDataService drains orgs / spaces.
+  readonly isLoadingOrgs: Signal<boolean> = computed(() =>
+    this.endpointDataService?.isLoadingOrgs() ?? false
+  );
+  readonly isLoadingSpaces: Signal<boolean> = computed(() =>
+    this.endpointDataService?.isLoadingSpaces() ?? false
+  );
+
   // Org options for the toolbar. Sourced from EDS.orgs(); "All"
   // prepended. Natural-sort (numeric-aware). Sub-pages (per-org, per-
   // space, per-app) ignore this dropdown.

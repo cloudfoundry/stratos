@@ -69,11 +69,13 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
           label: 'Organization',
           options: this.eventsConfig.orgOptions,
           selected: this.eventsConfig.selectedOrg,
+          loading: this.eventsConfig.isLoadingOrgs,
         },
         {
           label: 'Space',
           options: this.eventsConfig.spaceOptions,
           selected: this.eventsConfig.selectedSpace,
+          loading: this.eventsConfig.isLoadingSpaces,
         },
       ]
       : [];
