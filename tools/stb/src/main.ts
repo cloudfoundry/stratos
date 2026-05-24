@@ -7,6 +7,7 @@ import { createHighlightWiring } from '@/ui/highlight';
 import { mountLightDarkActions } from '@/ui/light-dark-actions';
 import { mountPresetMenu } from '@/ui/preset-menu';
 import { openExportDialog } from '@/ui/export-dialog';
+import { mountStatusBar } from '@/ui/status-bar';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 import { loadBuiltInPreset } from '@/state/presets';
@@ -96,6 +97,10 @@ async function main() {
   });
 
   mountEditorPane(app.querySelector('.stb-editor-host') as HTMLElement);
+
+  mountStatusBar(app.querySelector('.stb-statusbar-host') as HTMLElement, {
+    onFormatChange: (fmt) => { colorFormat.value = fmt; },
+  });
 }
 
 main();
