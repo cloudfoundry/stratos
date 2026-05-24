@@ -4,7 +4,6 @@
     <app-form-field>
       <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
         [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy"
-        [loading]="cfOrgSpaceService.cf.loading()"
         [ngModel]="cfOrgSpaceService.cf.select()"
         (selectionChange)="onCfChange($event.value)" required name="cf"
         [appFocus]="!cfOrgSpaceService.cf.loading()">
