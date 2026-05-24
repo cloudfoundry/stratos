@@ -30,7 +30,7 @@
         </app-option>
       }
     </app-select>
-    @if (!hasOrgs()) {
+    @if (cfOrgSpaceService.cf.select() && !cfOrgSpaceService.org.loading() && !hasOrgs()) {
       <app-error>There are no organizations in this Cloud Foundry</app-error>
     }
   </app-form-field>
@@ -47,7 +47,7 @@
         </app-option>
       }
     </app-select>
-    @if ((hasSpaces$ | async) === false) {
+    @if (cfOrgSpaceService.org.select() && !cfOrgSpaceService.space.loading() && (hasSpaces$ | async) === false) {
       <app-error>There are no spaces in this organization</app-error>
     }
   </app-form-field>
