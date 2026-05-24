@@ -9,6 +9,8 @@ import { filter, map, take } from 'rxjs/operators';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
@@ -49,6 +51,7 @@ import type { StServiceInstance } from '../../../services/endpoint-data/stratos-
     RouterModule,
     PageHeaderComponent,
     SignalListComponent,
+    ListSubNavComponent,
     CfEndpointsMissingComponent,
     DuplicateUrlBannerComponent,
   ],
@@ -118,6 +121,14 @@ export class ServicesWallComponent implements OnInit {
   // Config for <app-signal-list>. Populated in ngOnInit once the signal
   // config has been initialized with the connected CF guids.
   public listConfig: WritableSignal<SignalListConfig<StServiceInstance> | undefined> = signal(undefined);
+  // L5 sub-nav: unfiltered total + primary add action. Total is bound
+  // post-initialize() once instancesConfig.view exists.
+  public totalServiceInstances!: Signal<number>;
+  public readonly createServiceInstanceAction: ListSubNavAddAction = {
+    label: 'Add Service Instance',
+    icon: 'add',
+    invoke: () => this.router.navigateByUrl('/services/new'),
+  };
 
   constructor() {
     this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
@@ -140,6 +151,8 @@ export class ServicesWallComponent implements OnInit {
     );
     const cnsiGuids = (connected ?? []).map(ep => ep.guid);
     this.instancesConfig.initialize(cnsiGuids);
+    // Bind the L5 sub-nav count — view exists only after initialize().
+    this.totalServiceInstances = this.instancesConfig.view.totalItems;
 
     const dropdowns: SignalListDropdown[] = [
       {
@@ -287,15 +300,6 @@ export class ServicesWallComponent implements OnInit {
       filterColumns: ['name', 'service', 'tags'],
       filterField: this.instancesConfig.filterField,
       filterDropdowns: dropdowns,
-      headerActions: [
-        {
-          label: 'Add Service Instance',
-          icon: 'add',
-          primary: true,
-          dataTest: 'add-service-instance',
-          run: () => this.router.navigateByUrl('/services/new'),
-        },
-      ],
       onRefresh: () => this.instancesConfig.refresh(),
       onClear: () => this.instancesConfig.clearFilters(),
       viewMode: this.instancesConfig.viewMode,
