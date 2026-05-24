@@ -102,8 +102,8 @@ github.com/cloudfoundry/noaa/v2 v2.5.0/go.mod h1:R33q73MnTXa549YPMHupTdQuKL3QqKQ
 github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d h1:zFEOGvCZYR7QrZ94C7r2dqsLNw/BYMr0QYyuwlMAhrY=
 github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d/go.mod h1:n3NQkJyrQPZ/pq+mjECQL7sLjL/U3rmTwyWMwpGxcXQ=
 github.com/codegangsta/negroni v1.0.0/go.mod h1:v0y3T5G7Y1UlFfyxFn/QLRU4a2EuNau2iZY63YTKWo0=
-github.com/containerd/containerd v1.7.30 h1:/2vezDpLDVGGmkUXmlNPLCCNKHJ5BbC5tJB5JNzQhqE=
-github.com/containerd/containerd v1.7.30/go.mod h1:fek494vwJClULlTpExsmOyKCMUAbuVjlFsJQc4/j44M=
+github.com/containerd/containerd v1.7.32 h1:S54xuVcPxeLaYgaRABtpJ2VyVUVsy0IGf7qHBs+sbY8=
+github.com/containerd/containerd v1.7.32/go.mod h1:jdwD6s/BhV4XVJGrvtziNPVA+83n66TwptVaPKprq4E=
 github.com/containerd/errdefs v1.0.0 h1:tg5yIfIlQIrxYtu9ajqY42W3lpS19XqdxRQeEwYG8PI=
 github.com/containerd/errdefs v1.0.0/go.mod h1:+YBYIdtsnF4Iw6nWZhJcqGSg/dwvV7tyJ/kCkyJ2k+M=
 github.com/containerd/log v0.1.0 h1:TCJt7ioM2cr/tfR8GPbGf9/VRAX8D2B4PjzCpfX540I=
