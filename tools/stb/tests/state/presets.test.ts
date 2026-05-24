@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { loadPresetFromCss, savePreset, listSavedPresets, deleteSavedPreset } from '@/state/presets';
 import { rootValues, darkValues, resetTokens } from '@/state/tokens';
 
