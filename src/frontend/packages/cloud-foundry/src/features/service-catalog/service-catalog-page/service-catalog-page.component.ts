@@ -2,7 +2,7 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
@@ -59,6 +59,7 @@ export class ServiceCatalogPageComponent implements OnInit {
   cloudFoundryService = inject(CloudFoundryService);
   private offeringsConfig = inject(CfServiceOfferingsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private router = inject(Router);
 
   public cfIds$: Observable<string[]>;
   public haveConnectedCf$: Observable<boolean>;
@@ -205,6 +206,18 @@ export class ServiceCatalogPageComponent implements OnInit {
       filterColumns: ['name', 'description', 'tags', 'broker'],
       filterField: this.offeringsConfig.filterField,
       filterDropdowns: dropdowns,
+      headerActions: [
+        {
+          label: 'Add Service Instance',
+          icon: 'add',
+          primary: true,
+          dataTest: 'add-service-instance',
+          // Marketplace lists managed offerings, so default to the managed
+          // path. The tile chooser at /services/new offers UPS too if the
+          // user navigates back, but skipping it on this page shaves a step.
+          run: () => this.router.navigateByUrl('/services/new/service'),
+        },
+      ],
       onRefresh: () => this.offeringsConfig.refresh(),
       onClear: () => this.offeringsConfig.clearFilters(),
       viewMode: this.offeringsConfig.viewMode,

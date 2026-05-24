@@ -2,7 +2,7 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
@@ -72,6 +72,7 @@ export class ServicesWallComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
 
   public cfIds$: Observable<string[]>;
   public haveConnectedCf$: Observable<boolean>;
@@ -286,6 +287,15 @@ export class ServicesWallComponent implements OnInit {
       filterColumns: ['name', 'service', 'tags'],
       filterField: this.instancesConfig.filterField,
       filterDropdowns: dropdowns,
+      headerActions: [
+        {
+          label: 'Add Service Instance',
+          icon: 'add',
+          primary: true,
+          dataTest: 'add-service-instance',
+          run: () => this.router.navigateByUrl('/services/new'),
+        },
+      ],
       onRefresh: () => this.instancesConfig.refresh(),
       onClear: () => this.instancesConfig.clearFilters(),
       viewMode: this.instancesConfig.viewMode,
