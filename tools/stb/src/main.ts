@@ -5,6 +5,7 @@ import { createPreviewPane } from '@/ui/preview-pane';
 import { openColorPicker } from '@/ui/color-picker';
 import { createHighlightWiring } from '@/ui/highlight';
 import { mountLightDarkActions } from '@/ui/light-dark-actions';
+import { mountPresetMenu } from '@/ui/preset-menu';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
 import { loadBuiltInPreset } from '@/state/presets';
@@ -44,7 +45,12 @@ async function main() {
   await loadBuiltInPreset('stratos-default');
 
   await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
-  mountLightDarkActions(app.querySelector('.stb-actions-host') as HTMLElement);
+  const actionsHost = app.querySelector('.stb-actions-host') as HTMLElement;
+  mountLightDarkActions(actionsHost);
+  const presetsHost = document.createElement('div');
+  presetsHost.className = 'stb-presets-host';
+  actionsHost.appendChild(presetsHost);
+  mountPresetMenu(presetsHost);
 
   const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
