@@ -103,6 +103,36 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // Use signal for imperative title updates without change detection errors
   private _title = signal<string>('');
   title$ = toObservable(this._title);
+  // Service offering name resolved by the helper, used both for the
+  // page title and the stepper context summary. Updated alongside _title.
+  private _serviceName = signal<string>('');
+  // Stepper context summary parts — "what am I creating, where" — surfaced
+  // above the step headers via the new <app-steppers [contextSummary]>.
+  // CF / Org / Space come from the picker selections; service / instance
+  // name come from csiState as the user advances.
+  readonly contextSummaryParts: Signal<string[]> = computed(() => {
+    const parts: string[] = [];
+    const cfGuid = this.cfOrgSpaceService.cf.select();
+    const orgGuid = this.cfOrgSpaceService.org.select();
+    const spaceGuid = this.cfOrgSpaceService.space.select();
+    if (cfGuid) {
+      const cf = this.cfOrgSpaceService.cf.list().find(c => c.guid === cfGuid);
+      if (cf?.name) parts.push(cf.name);
+    }
+    if (orgGuid) {
+      const org = this.cfOrgSpaceService.org.list().find(o => o.guid === orgGuid);
+      if (org?.name) parts.push(org.name);
+    }
+    if (spaceGuid) {
+      const space = this.cfOrgSpaceService.space.list().find(s => s.guid === spaceGuid);
+      if (space?.name) parts.push(space.name);
+    }
+    const svc = this._serviceName();
+    if (svc) parts.push(svc);
+    const instanceName = this.csiState.state().name;
+    if (instanceName) parts.push(`"${instanceName}"`);
+    return parts;
+  });
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
@@ -831,18 +861,21 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     // setTimeout pushes each update past the current change-detection
     // cycle to avoid ExpressionChangedAfterItHasBeenChecked.
     this.cSIHelperService.serviceName$.pipe(
-      map(label => `Create Instance: ${label || 'Service'}`),
       catchError(error => {
         console.error('initialiseForMarketplaceMode: Failed to fetch service name', {
           serviceId,
           endpointId,
           error
         });
-        return observableOf('Create Service Instance');
+        return observableOf('');
       }),
       takeUntil(this.destroyed$)
-    ).subscribe(title => {
-      setTimeout(() => this._title.set(title), 0);
+    ).subscribe(label => {
+      const title = `Create Instance: ${label || 'Service'}`;
+      setTimeout(() => {
+        this._title.set(title);
+        this._serviceName.set(label || '');
+      }, 0);
     });
     this.marketPlaceMode = true;
 

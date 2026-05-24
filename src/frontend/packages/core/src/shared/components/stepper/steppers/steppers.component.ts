@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, ViewEncapsulation, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
@@ -50,6 +50,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   @Input() basePreviousRedirect: IRouterNavPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
   } : null;
+  // Optional context summary rendered above the step headers. Hosts pass
+  // a TemplateRef that surfaces the user's in-progress selections (CF /
+  // Org / Space / offering / plan / name) so the wizard always shows
+  // "what am I creating?" as later steps navigate away from the picker.
+  @Input() contextSummary?: TemplateRef<unknown>;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];

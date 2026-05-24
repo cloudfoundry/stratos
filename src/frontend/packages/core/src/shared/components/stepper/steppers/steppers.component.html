@@ -2,6 +2,14 @@
   @if (steps && steps.length) {
     <div class="steppers">
       <div class="steppers-inner">
+        <!-- Context summary — surfaces in-progress selections (e.g.
+             "Creating service instance in {CF} / {Org} / {Space}") so
+             later steps don't lose track of what's being built. -->
+        @if (contextSummary) {
+          <div class="steppers-context-summary mb-4 px-3 py-2 rounded border border-content-border bg-content-bg-alt text-sm text-content-muted">
+            <ng-container *ngTemplateOutlet="contextSummary"></ng-container>
+          </div>
+        }
         <!-- Step headers -->
         @if (steps.length > 1) {
           <div class="steppers-headers flex flex-wrap sm:flex-nowrap items-center justify-center mb-8 gap-2 overflow-x-auto">
