@@ -7,6 +7,8 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import {
+  ListSubNavAddAction,
+  ListSubNavComponent,
   PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
@@ -38,6 +40,7 @@ import type { StServiceOffering } from '../../../services/endpoint-data/stratos-
     RouterModule,
     PageHeaderComponent,
     SignalListComponent,
+    ListSubNavComponent,
     CfEndpointsMissingComponent,
     DuplicateUrlBannerComponent,
   ],
@@ -100,6 +103,17 @@ export class ServiceCatalogPageComponent implements OnInit {
   // config has been initialized with the connected CF guids. Using a
   // WritableSignal so assignment triggers change detection under OnPush.
   public listConfig: WritableSignal<SignalListConfig<StServiceOffering> | undefined> = signal(undefined);
+  // L5 sub-nav: unfiltered offering count + primary add action. Total is
+  // bound post-initialize() once offeringsConfig.view exists.
+  public totalServiceOfferings!: Signal<number>;
+  public readonly createServiceInstanceAction: ListSubNavAddAction = {
+    label: 'Add Service Instance',
+    // Marketplace lists managed offerings, so default to the managed path —
+    // skips the tile chooser at /services/new since UPS isn't a marketplace
+    // construct.
+    icon: 'add',
+    invoke: () => this.router.navigateByUrl('/services/new/service'),
+  };
 
   constructor() {
     this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
@@ -122,6 +136,8 @@ export class ServiceCatalogPageComponent implements OnInit {
     );
     const cnsiGuids = (connected ?? []).map(ep => ep.guid);
     this.offeringsConfig.initialize(cnsiGuids);
+    // Bind the L5 sub-nav count — view exists only after initialize().
+    this.totalServiceOfferings = this.offeringsConfig.view.totalItems;
 
     const dropdowns: SignalListDropdown[] = [
       {
@@ -206,18 +222,6 @@ export class ServiceCatalogPageComponent implements OnInit {
       filterColumns: ['name', 'description', 'tags', 'broker'],
       filterField: this.offeringsConfig.filterField,
       filterDropdowns: dropdowns,
-      headerActions: [
-        {
-          label: 'Add Service Instance',
-          icon: 'add',
-          primary: true,
-          dataTest: 'add-service-instance',
-          // Marketplace lists managed offerings, so default to the managed
-          // path. The tile chooser at /services/new offers UPS too if the
-          // user navigates back, but skipping it on this page shaves a step.
-          run: () => this.router.navigateByUrl('/services/new/service'),
-        },
-      ],
       onRefresh: () => this.offeringsConfig.refresh(),
       onClear: () => this.offeringsConfig.clearFilters(),
       viewMode: this.offeringsConfig.viewMode,
