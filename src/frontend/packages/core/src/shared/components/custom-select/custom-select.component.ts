@@ -78,6 +78,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Input() invalid = false;
   @Input() errorMessage = '';
   @Input() autoSelectSingleOption = true; // Auto-select when only one option exists
+  @Input({ transform: booleanAttribute }) loading = false;
 
   @Input()
   get value(): any {

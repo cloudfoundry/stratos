@@ -4,6 +4,7 @@
     <app-form-field>
       <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
         [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy"
+        [loading]="cfOrgSpaceService.cf.loading()"
         [ngModel]="cfOrgSpaceService.cf.select()"
         (selectionChange)="onCfChange($event.value)" required name="cf"
         [appFocus]="!cfOrgSpaceService.cf.loading()">
@@ -19,6 +20,7 @@
   <app-form-field>
     <app-select id="org" #orgSelect="ngModel" placeholder="Organization" [autoSelectSingleOption]="false"
       [disabled]="!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy"
+      [loading]="cfOrgSpaceService.org.loading()"
       [ngModel]="cfOrgSpaceService.org.select()"
       (selectionChange)="onOrgChange($event.value)" required name="org"
       [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy)">
@@ -36,6 +38,7 @@
   <app-form-field>
     <app-select id="space" #spaceSelect="ngModel" placeholder="Space" [autoSelectSingleOption]="false"
       [disabled]="!cfOrgSpaceService.org.select() || cfOrgSpaceService.space.loading() || isRedeploy"
+      [loading]="cfOrgSpaceService.space.loading()"
       [ngModel]="cfOrgSpaceService.space.select()"
       (selectionChange)="onSpaceChange($event.value)" required name="space">
       <app-option [value]="null">None</app-option>
