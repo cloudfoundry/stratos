@@ -1,5 +1,4 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -20,6 +19,8 @@ import { CFAppState } from '../../cf-app-state';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
+import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
+import type { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
 import { QParam, QParamJoiners } from '../q-param';
 import { CfOrgSpaceDebug, createCfOrgSpaceDebug } from './cf-org-space-debug';
 
@@ -137,13 +138,15 @@ interface InitialValues { cf: string; org: string; space: string; }
  * Signal-native cf/org/space picker store.
  *
  * State of the world:
- * - Selection (`_cfSelected`, `_orgSelected`, `_spaceSelected`) and data
- *   (`_orgsByCnsi`, `_spacesByOrg`) are WritableSignals — single source of
- *   truth.
- * - Cascade (cf change clears org+space, org change clears space), HTTP
- *   fetches against V3 native handlers, and singleton auto-pick are all
- *   `effect()` reactions to those signals. No rxjs operators in the
- *   control flow.
+ * - Selection (`_cfSelected`, `_orgSelected`, `_spaceSelected`) are
+ *   WritableSignals — single source of truth.
+ * - Org and space lists are sourced from the per-CNSI
+ *   `EndpointDataService` (acquired through `EndpointDataRegistry`),
+ *   not fetched directly. The registry already drains orgs+spaces on
+ *   home / wall navigation, so the picker reuses the warmed cache.
+ * - Cascade (cf change clears org+space, org change clears space) and
+ *   singleton auto-pick are `effect()` reactions to the selection
+ *   signals. No rxjs operators in the control flow.
  * - The legacy `cf/org/space.{list$, loading$, select}` shape is kept as
  *   a thin shim — `list$`/`loading$` are `toObservable(signal)` and
  *   `select` is a BehaviorSubject backed by the underlying signal so
@@ -165,9 +168,14 @@ interface InitialValues { cf: string; org: string; space: string; }
 })
 export class CfOrgSpaceDataService implements OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
-  private http = inject(HttpClient);
   private endpointsService = inject(EndpointsDataService);
+  private endpointRegistry = inject(EndpointDataRegistry);
   paginationMonitorFactory = inject(PaginationMonitorFactory);
+
+  // Per-CNSI acquired EndpointDataService handles. Each handle is
+  // released on destroy. The registry refcounts so multiple acquirers
+  // (this picker + a wall page + the home cards) share one drain.
+  private _edsByCnsi = signal<Map<string, EndpointDataService>>(new Map());
 
   private debug: CfOrgSpaceDebug = createCfOrgSpaceDebug();
 
@@ -177,12 +185,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private _spaceSelected = signal<string | null>(null);
 
   // === Data state ===
-  private _orgsByCnsi = signal<Record<string, { guid: string; name: string }[]>>({});
-  private _spacesByOrg = signal<Record<string, { guid: string; name: string }[]>>({});
+  // org and space lists are now sourced from EndpointDataService via the
+  // `_edsByCnsi` handle map (declared earlier). _orgFetching /
+  // _spaceFetching mirror EDS.isLoadingOrgs / isLoadingSpaces for the
+  // currently selected CF / org pair so consumers keep their existing
+  // org.loading / space.loading API surface.
   private _orgFetching = signal(false);
   private _spaceFetching = signal(false);
-  private fetchedCnsis = new Set<string>();
-  private fetchedOrgKeys = new Set<string>();
 
   private _autoSelectEnabled = signal(false);
 
@@ -198,24 +207,29 @@ export class CfOrgSpaceDataService implements OnDestroy {
   );
 
   // === Public derived signals ===
-  /** Orgs for the currently-selected cnsi. Empty until fetch resolves.
-   *  Sorted by name (natural compare) so org_2 lands between org_1 and
-   *  org_3, not after org_19. CAPI returns creation order by default
-   *  which is not useful for users scanning a long list. */
+  /** Orgs for the currently-selected cnsi. Reads from EndpointDataService
+   *  via the per-CNSI handle (already drained by the registry). Empty
+   *  until the drain lands. Sorted by name (natural compare) so org_2
+   *  lands between org_1 and org_3, not after org_19 — CAPI returns
+   *  creation order by default which isn't useful for scanning. */
   public orgList: Signal<{ guid: string; name: string }[]> = computed(() => {
     const cnsi = this._cfSelected();
-    if (!cnsi) { return []; }
-    const list = this._orgsByCnsi()[cnsi] ?? [];
+    if (!cnsi) return [];
+    const eds = this._edsByCnsi().get(cnsi);
+    const list = eds ? eds.orgs() : [];
     return [...list].sort((a, b) => naturalCompare(a.name, b.name));
   });
 
-  /** Spaces for the currently-selected (cnsi, org). Empty until fetch
-   *  resolves. Sorted by name for the same reason as orgList. */
+  /** Spaces for the currently-selected (cnsi, org). Reads from EDS too —
+   *  filters EDS.spaces() by orgGuid. Sorted by name for the same reason
+   *  as orgList. */
   public spaceList: Signal<{ guid: string; name: string }[]> = computed(() => {
     const cnsi = this._cfSelected();
     const org = this._orgSelected();
-    if (!cnsi || !org) { return []; }
-    const list = this._spacesByOrg()[`${cnsi}:${org}`] ?? [];
+    if (!cnsi || !org) return [];
+    const eds = this._edsByCnsi().get(cnsi);
+    if (!eds) return [];
+    const list = eds.spaces().filter(s => s.orgGuid === org);
     return [...list].sort((a, b) => naturalCompare(a.name, b.name));
   });
 
@@ -266,41 +280,42 @@ export class CfOrgSpaceDataService implements OnDestroy {
 
     // === Effects ===
 
-    // V3 orgs fetch on cf change. Each cnsi is fetched once.
+    // Acquire an EndpointDataService for the selected CNSI. The registry
+    // refcounts and drives the orgs+spaces drain via its own card/details
+    // queue. Reading EDS.orgs() / EDS.spaces() is reactive — the picker's
+    // orgList / spaceList computeds (below) re-evaluate as soon as the
+    // drain lands. Eliminates the previous duplicate `/pp/v1/cf/orgs/...`
+    // and `/pp/v1/cf/org/.../spaces` fetches that were redundant with the
+    // home-card / wall hydration the registry already drives.
     effect(() => {
       const cnsi = this._cfSelected();
-      if (!cnsi || this.fetchedCnsis.has(cnsi)) { return; }
-      this.fetchedCnsis.add(cnsi);
-      untracked(() => this._orgFetching.set(true));
-      this.http.get<{ resources: { guid: string; name: string }[] }>(
-        `/pp/v1/cf/orgs/${cnsi}?per_page=500&page=1`,
-      ).subscribe({
-        next: resp => {
-          this._orgsByCnsi.update(m => ({ ...m, [cnsi]: resp.resources ?? [] }));
-          this._orgFetching.set(false);
-        },
-        error: () => this._orgFetching.set(false),
-      });
+      if (!cnsi) return;
+      const cur = untracked(() => this._edsByCnsi());
+      if (cur.has(cnsi)) return;
+      const eds = this.endpointRegistry.acquire(cnsi);
+      untracked(() => this._edsByCnsi.update(m => {
+        const n = new Map(m);
+        n.set(cnsi, eds);
+        return n;
+      }));
     });
 
-    // V3 spaces fetch on org change. Each (cnsi, org) is fetched once.
+    // Mirror EDS loading flags into the picker's loading signals so
+    // consumers don't have to know about the EDS handle layer.
+    effect(() => {
+      const cnsi = this._cfSelected();
+      if (!cnsi) { untracked(() => this._orgFetching.set(false)); return; }
+      const eds = this._edsByCnsi().get(cnsi);
+      const loading = eds ? eds.isLoadingOrgs() : false;
+      untracked(() => this._orgFetching.set(loading));
+    });
     effect(() => {
       const cnsi = this._cfSelected();
       const orgGuid = this._orgSelected();
-      if (!cnsi || !orgGuid) { return; }
-      const key = `${cnsi}:${orgGuid}`;
-      if (this.fetchedOrgKeys.has(key)) { return; }
-      this.fetchedOrgKeys.add(key);
-      untracked(() => this._spaceFetching.set(true));
-      this.http.get<{ resources: { guid: string; name: string }[] }>(
-        `/pp/v1/cf/org/${cnsi}/${orgGuid}/spaces?per_page=500&page=1`,
-      ).subscribe({
-        next: resp => {
-          this._spacesByOrg.update(m => ({ ...m, [key]: resp.resources ?? [] }));
-          this._spaceFetching.set(false);
-        },
-        error: () => this._spaceFetching.set(false),
-      });
+      if (!cnsi || !orgGuid) { untracked(() => this._spaceFetching.set(false)); return; }
+      const eds = this._edsByCnsi().get(cnsi);
+      const loading = eds ? eds.isLoadingSpaces() : false;
+      untracked(() => this._spaceFetching.set(loading));
     });
 
     // Cascade: cf change clears org and space — but skip on null→non-null
@@ -439,6 +454,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Release acquired EndpointDataService handles. The registry refcounts —
+    // other acquirers keep the drain alive; if we were the last, the
+    // registry tears the EDS down.
+    for (const cnsi of this._edsByCnsi().keys()) {
+      this.endpointRegistry.release(cnsi);
+    }
+    this._edsByCnsi.set(new Map());
     this.destroy();
   }
 
