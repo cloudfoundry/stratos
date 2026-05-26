@@ -4,7 +4,6 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, Chang
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@stratosui/store';
 import {
   BaseSCM,
   GitBranch,
@@ -41,14 +40,6 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import {
-  ProjectDoesntExist,
-  SaveAppDetails,
-  SetAppSourceDetails,
-  SetBranch,
-  SetDeployBranch,
-} from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
@@ -77,7 +68,6 @@ selector: 'app-deploy-application-step2',
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
-  private store = inject<Store<CFAppState>>(Store);
   private route = inject(ActivatedRoute);
   private scmService = inject(GitSCMService);
   private httpClient = inject(HttpClient);
@@ -165,17 +155,17 @@ export class DeployApplicationStep2Component
         scm: this.scm,
       }).waitForEntity$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
         if (!repo) { return; }
-        this.store.dispatch(new SaveAppDetails({
+        this.deployData.saveAppDetails({
           projectName: this.repository,
           branch: this.repositoryBranch,
           url: repo.entity.clone_url,
           accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
-        }, null));
+        }, null);
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
-      this.store.dispatch(new SaveAppDetails({
+      this.deployData.saveAppDetails({
         projectName: this.gitUrl,
         branch: {
           name: this.gitUrlBranchName,
@@ -185,13 +175,13 @@ export class DeployApplicationStep2Component
           endpointGuid: null,
         },
         endpointGuid: null
-      }, null));
+      }, null);
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-      this.store.dispatch(new SaveAppDetails(null, {
+      this.deployData.saveAppDetails(null, {
         applicationName: this.dockerAppName,
         dockerImage: this.dockerImg,
         dockerUsername: this.dockerUsername,
-      }));
+      });
     }
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   };
@@ -255,7 +245,7 @@ export class DeployApplicationStep2Component
       this.setupForGit();
     }
 
-    this.store.dispatch(new SetAppSourceDetails(sourceType));
+    this.deployData.setSourceType(sourceType);
   };
 
   ngAfterContentInit() {
@@ -271,7 +261,7 @@ export class DeployApplicationStep2Component
       map(p => (!!p.exists && !!p.data) ? p.data : null),
       tap(p => {
         if (!!p && !this.isRedeploy) {
-          this.store.dispatch(new SetDeployBranch(p.default_branch));
+          this.deployData.setDeployBranch(p.default_branch);
         }
       })
     );
@@ -313,7 +303,7 @@ export class DeployApplicationStep2Component
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
         if (branch && !!projectInfo && branch.projectName === projectInfo.full_name) {
-          this.store.dispatch(new SetBranch(branch));
+          this.deployData.setBranch(branch);
 
           if (this.isRedeploy) {
             const commitSha = commit || branch.commit.sha;
@@ -352,9 +342,9 @@ export class DeployApplicationStep2Component
             this.repository = null;
             this.commitInfo = null;
             this.repositoryBranch = null;
-            this.store.dispatch(new SetBranch(null));
-            this.store.dispatch(new ProjectDoesntExist(''));
-            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null, endpointGuid: this.sourceType.endpointGuid }, null));
+            this.deployData.setBranch(null);
+            this.deployData.projectDoesntExist('');
+            this.deployData.saveAppDetails({ projectName: '', branch: null, endpointGuid: this.sourceType.endpointGuid }, null);
           }
           this.scm = newScm;
         }
@@ -434,7 +424,7 @@ export class DeployApplicationStep2Component
   }
 
   updateBranchName(branch: GitBranch) {
-    this.store.dispatch(new SetDeployBranch(branch.name));
+    this.deployData.setDeployBranch(branch.name);
   }
 
 

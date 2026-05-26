@@ -99,10 +99,8 @@ export { RemoveCfUserRole } from './actions/users.actions';
 
 // CF Selectors
 export { selectCfEntity } from './store/selectors/api.selectors';
-export { selectDeployAppState } from './store/selectors/deploy-application.selector';
 
 // CF Actions
-export { CheckProjectExists } from './actions/deploy-applications.actions';
 export { UpdateExistingApplication } from './actions/application.actions';
 
 // CF Route Types

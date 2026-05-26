@@ -12,8 +12,8 @@ import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
 import { RouterNav } from '@stratosui/store';
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
+import { CFAppState } from '../../../../cf-app-state';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import type { StApp, StAppsResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
@@ -34,6 +34,7 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
 })
 export class DeployApplicationStep3Component implements OnDestroy {
   private store = inject<Store<CFAppState>>(Store);
+  private deployData = inject(CfDeployAppDataService);
   private snackBarService = inject(SnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private injector = inject(Injector);
@@ -178,7 +179,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.store.dispatch(new DeleteDeployAppSection());
+    this.deployData.resetState();
     this.destroyDeployer();
     if (this.deployer) {
       if (!this.deployer.deploying) {
@@ -246,7 +247,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
-    this.store.dispatch(new DeleteDeployAppSection());
+    this.deployData.resetState();
     this.goToAppSummary();
     return observableOf({ success: true });
   };

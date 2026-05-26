@@ -3,12 +3,10 @@ import { StoreModule } from '@ngrx/store';
 
 import { cfUsersRolesReducer } from './reducers/cf-users-roles.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
-import { deployAppReducer } from './reducers/deploy-app.reducer';
 
 @NgModule({
   imports: [
     StoreModule.forFeature('createApplication', createAppReducer),
-    StoreModule.forFeature('deployApplication', deployAppReducer),
     StoreModule.forFeature('manageUsersRoles', cfUsersRolesReducer),
   ]
 })

@@ -1,12 +1,10 @@
 import { Directive, forwardRef, Input, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { Observable, of as observableOf } from 'rxjs';
 import { take, debounceTime, filter, map, tap } from 'rxjs/operators';
 
-import { CFAppState, CheckProjectExists } from '@stratosui/cloud-foundry';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 
 interface GithubProjectExistsResponse {
@@ -29,7 +27,6 @@ export class GithubProjectExistsDirective implements Validator {
 
   private lastValue = '';
 
-  private store = inject(Store<CFAppState>);
   private scmService = inject(GitSCMService);
   private deployData = inject(CfDeployAppDataService);
   private deployState$ = toObservable(this.deployData.state);
@@ -68,7 +65,10 @@ export class GithubProjectExistsDirective implements Validator {
         debounceTime(250),
         tap(createAppState => {
           if (createAppState?.projectExists && createAppState.projectExists.name !== c.value) {
-            this.store.dispatch(new CheckProjectExists(this.scmService.getSCM(...this.getTypeAndEndpointWithAuth()), c.value));
+            this.deployData.checkProjectExists(
+              this.scmService.getSCM(...this.getTypeAndEndpointWithAuth()),
+              c.value,
+            );
           }
         }),
         filter(createAppState =>

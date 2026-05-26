@@ -16,14 +16,9 @@ import { take, combineLatest, filter, map } from 'rxjs/operators';
 import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { getCommitGuid } from '../../../../../../../git/src/store/git-entity-factory';
 import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import {
-  CheckProjectExists,
-  SetAppSourceDetails,
-  SetDeployBranch,
-  SetDeployCommit,
-  StoreCFSettings } from '../../../../../actions/deploy-applications.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { CfDeployAppDataService } from '../../../../../services/domain-data/cf-deploy-app-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +26,7 @@ import { ApplicationService } from '../../../../../features/applications/applica
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
   private scmService = inject(GitSCMService);
   private applicationService = inject(ApplicationService);
+  private deployData = inject(CfDeployAppDataService);
 
 
   constructor() {
@@ -43,24 +39,22 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
   private listActionRedeploy: IListAction<GitCommit> = {
     action: (commitEntity) => {
-      // set CF data
-      this.store.dispatch(new StoreCFSettings({
+      // Seed the deploy wizard's signal-native state so the redeploy
+      // page lands on step 3 with everything pre-populated.
+      this.deployData.setCfDetails({
         cloudFoundry: this.cfGuid,
         org: this.orgGuid,
-        space: this.spaceGuid
-      }));
-      // Set Project data
-      this.store.dispatch(new CheckProjectExists(this.scm, this.projectName));
-      // Set Source type
-      this.store.dispatch(new SetAppSourceDetails({
+        space: this.spaceGuid,
+      });
+      this.deployData.checkProjectExists(this.scm, this.projectName);
+      this.deployData.setSourceType({
         name: this.scm.getLabel(),
         id: this.scm.getType(),
         group: 'gitscm',
-        endpointGuid: this.scm.endpointGuid }));
-      // Set branch
-      this.store.dispatch(new SetDeployBranch(this.branchName));
-      // Set Commit
-      this.store.dispatch(new SetDeployCommit(commitEntity.sha));
+        endpointGuid: this.scm.endpointGuid,
+      });
+      this.deployData.setDeployBranch(this.branchName);
+      this.deployData.setDeployCommit(commitEntity.sha);
 
       this.store.dispatch(new RouterNav({
         path: ['/applications/deploy'],
