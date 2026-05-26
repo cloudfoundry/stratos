@@ -1,10 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Injector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { BytesToHumanSize, StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
@@ -33,11 +31,10 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   public valid$: Observable<boolean>;
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
     const cfOrgSpaceService = this.cfOrgSpaceService;
     const injector = this.injector;
 
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService, injector);
+    this.deployer = new DeployApplicationDeployer(cfOrgSpaceService, injector);
     this.valid$ = this.deployer.fileTransferStatus$.asObservable().pipe(
       filter(status => !!status),
       map((status: FileTransferStatus) => status.filesSent === status.totalFiles),

@@ -1,13 +1,9 @@
 import { Injector, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { take, catchError, combineLatest, filter, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
 import {
   AppData,
   DeployApplicationSource,
@@ -143,7 +139,6 @@ export class DeployApplicationDeployer {
   private currentFileTransfer: any;
 
   constructor(
-    private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     private injector: Injector,
   ) {
@@ -202,24 +197,27 @@ export class DeployApplicationDeployer {
     const deployState$ = toObservable(deployData.state, { injector: this.injector });
     this.connectSub = deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
-      mergeMap(appDetails => {
-        const orgSubscription = this.store.select(selectCfEntity(organizationEntityType, appDetails.cloudFoundryDetails.org));
-        const spaceSubscription = this.store.select(selectCfEntity(spaceEntityType, appDetails.cloudFoundryDetails.space));
-        return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
-      }),
       take(1),
-      tap(([appDetail, org, space]) => {
+      tap((appDetail) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
         this.applicationSource = appDetail.applicationSource;
         this.applicationOverrides = appDetail.applicationOverrides;
+        // Resolve org / space names from the signal-native picker — it
+        // already loaded both lists when the user made their selection,
+        // so the lookup is synchronous. Replaces the legacy ngrx
+        // `selectCfEntity` selectors that the V3 signal-native cutover
+        // stopped populating for org / space, which was causing the
+        // deployer to crash here on `undefined.entity.name`.
+        const orgName = this.cfOrgSpaceService.orgList().find(o => o.guid === this.orgGuid)?.name ?? '';
+        const spaceName = this.cfOrgSpaceService.spaceList().find(s => s.guid === this.spaceGuid)?.name ?? '';
         const host = window.location.host;
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
           `${protocol}://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
-          `?org=${org.entity.name}&space=${space.entity.name}${appId}`
+          `?org=${encodeURIComponent(orgName)}&space=${encodeURIComponent(spaceName)}${appId}`
         );
 
         this.inputStream = new Subject<string>();
