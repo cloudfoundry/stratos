@@ -1,71 +1,168 @@
-import { Injectable, Signal, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
+import { ApplicationRef, Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { GitBranch, GitSCM } from '@stratosui/git';
+import { take } from 'rxjs/operators';
 
-import { Store } from '@stratosui/store';
-
-import { CFAppState } from '../../cf-app-state';
+import { NewAppCFDetails } from '../../store/types/create-application.types';
 import {
-  selectCfDetails,
-  selectDeployAppState,
-  selectDeployBranchName,
-  selectNewProjectCommit,
-  selectPEProjectName,
-  selectProjectExists,
-  selectSourceType,
-} from '../../store/selectors/deploy-application.selector';
-import {
+  DeployApplicationSource,
   DeployApplicationState,
+  DockerAppDetails,
+  GitAppDetails,
+  OverrideAppDetails,
   ProjectExists,
   SourceType,
 } from '../../store/types/deploy-application.types';
-import { NewAppCFDetails } from '../../store/types/create-application.types';
 
-// Signal-native bridge for the deployApplication wizard slice. Wraps
-// each compose-style selector in toSignal so deploy-application{,
-// -deployer,-step2,-options-step}, github-project-exists, and the
-// create-application step can drop their `store.select(selectDeploy
-// App... | select{Cf,Source,Project,New}*)` calls without waiting
-// for the underlying NgRx reducer to migrate.
-//
-// Read-only on top of the existing reducer; the deploy wizard still
-// dispatches actions for state mutations.
+const DEFAULT_STATE: DeployApplicationState = {
+  cloudFoundryDetails: null,
+  applicationSource: { type: null },
+  applicationOverrides: null,
+  projectExists: { checking: false, exists: false, error: false, name: '' },
+};
+
+// Signal-native owner of the deploy-application wizard's cross-step
+// state. Replaces the @ngrx/store reducer + effect that this slice
+// originally lived in — see the C2 deploy-application ngrx-removal
+// PR for the migration notes.
 @Injectable({ providedIn: 'root' })
 export class CfDeployAppDataService {
-  private readonly store = inject<Store<CFAppState>>(Store);
+  private readonly httpClient = inject(HttpClient);
+  private readonly appRef = inject(ApplicationRef);
 
-  readonly state: Signal<DeployApplicationState | undefined> = toSignal(
-    this.store.select(selectDeployAppState),
-    { initialValue: undefined },
+  private readonly _state = signal<DeployApplicationState>(DEFAULT_STATE);
+
+  readonly state: Signal<DeployApplicationState> = this._state.asReadonly();
+  readonly applicationSource: Signal<DeployApplicationSource | undefined> = computed(
+    () => this._state().applicationSource,
+  );
+  readonly sourceType: Signal<SourceType | undefined> = computed(
+    () => this._state().applicationSource?.type,
+  );
+  readonly projectExists: Signal<ProjectExists | undefined> = computed(
+    () => this._state().projectExists,
+  );
+  readonly projectName: Signal<string | undefined> = computed(
+    () => this._state().projectExists?.name,
+  );
+  readonly newProjectCommit: Signal<string | undefined> = computed(
+    () => this._state().applicationSource?.gitDetails?.commit,
+  );
+  readonly deployBranchName: Signal<string | undefined> = computed(
+    () => this._state().applicationSource?.gitDetails?.branchName,
+  );
+  readonly cfDetails: Signal<NewAppCFDetails | undefined> = computed(
+    () => this._state().cloudFoundryDetails,
   );
 
-  readonly sourceType: Signal<SourceType | undefined> = toSignal(
-    this.store.select(selectSourceType),
-    { initialValue: undefined },
-  );
+  setCfDetails(details: NewAppCFDetails) {
+    this._state.update(s => ({ ...s, cloudFoundryDetails: details }));
+  }
 
-  readonly projectExists: Signal<ProjectExists | undefined> = toSignal(
-    this.store.select(selectProjectExists),
-    { initialValue: undefined },
-  );
+  setSourceType(sourceType: SourceType) {
+    this._state.update(s => ({
+      ...s,
+      applicationSource: { ...s.applicationSource, type: sourceType },
+    }));
+  }
 
-  readonly projectName: Signal<string | undefined> = toSignal(
-    this.store.select(selectPEProjectName),
-    { initialValue: undefined },
-  );
+  saveAppDetails(git: GitAppDetails | null, docker: DockerAppDetails | null) {
+    this._state.update(s => ({
+      ...s,
+      applicationSource: {
+        ...s.applicationSource,
+        gitDetails: git || s.applicationSource?.gitDetails,
+        dockerDetails: docker || s.applicationSource?.dockerDetails,
+      },
+    }));
+  }
 
-  readonly newProjectCommit: Signal<string | undefined> = toSignal(
-    this.store.select(selectNewProjectCommit),
-    { initialValue: undefined },
-  );
+  saveAppOverrides(overrides: OverrideAppDetails) {
+    this._state.update(s => ({ ...s, applicationOverrides: { ...overrides } }));
+  }
 
-  readonly deployBranchName: Signal<string | undefined> = toSignal(
-    this.store.select(selectDeployBranchName),
-    { initialValue: undefined },
-  );
+  setBranch(branch: GitBranch | null) {
+    this._state.update(s => ({
+      ...s,
+      applicationSource: {
+        ...s.applicationSource,
+        gitDetails: { ...s.applicationSource?.gitDetails, branch } as GitAppDetails,
+      },
+    }));
+  }
 
-  readonly cfDetails: Signal<NewAppCFDetails | undefined> = toSignal(
-    this.store.select(selectCfDetails),
-    { initialValue: undefined },
-  );
+  setDeployBranch(branchName: string) {
+    this._state.update(s => ({
+      ...s,
+      applicationSource: {
+        ...s.applicationSource,
+        gitDetails: { ...s.applicationSource?.gitDetails, branchName } as GitAppDetails,
+      },
+    }));
+  }
 
+  setDeployCommit(commit: string) {
+    this._state.update(s => ({
+      ...s,
+      applicationSource: {
+        ...s.applicationSource,
+        gitDetails: { ...s.applicationSource?.gitDetails, commit } as GitAppDetails,
+      },
+    }));
+  }
+
+  projectDoesntExist(projectName: string) {
+    this._state.update(s => ({
+      ...s,
+      projectExists: {
+        checking: false,
+        exists: false,
+        name: projectName,
+        error: false,
+        data: null,
+      },
+    }));
+  }
+
+  resetState() {
+    this._state.set(DEFAULT_STATE);
+  }
+
+  // Replaces the legacy CheckProjectExists action + DeployAppEffects
+  // pipeline. Flips projectExists to {checking:true} so reactive
+  // consumers (github-project-exists.directive form validator) see the
+  // intermediate state, then issues the SCM repo lookup and resolves to
+  // exists / doesnt-exist / fetch-failed.
+  checkProjectExists(scm: GitSCM, projectName: string) {
+    this._state.update(s => ({
+      ...s,
+      projectExists: { checking: true, exists: false, name: projectName, error: false },
+    }));
+
+    scm.getRepository(this.httpClient, projectName).pipe(take(1)).subscribe({
+      next: data => {
+        this._state.update(s => ({
+          ...s,
+          projectExists: { checking: false, exists: true, name: projectName, error: false, data },
+        }));
+        this.appRef.tick();
+      },
+      error: err => {
+        const is404 = err?.status === 404;
+        this._state.update(s => ({
+          ...s,
+          projectExists: is404
+            ? { checking: false, exists: false, name: projectName, error: false, data: null }
+            : {
+                checking: false,
+                exists: false,
+                name: projectName,
+                error: true,
+                data: scm.parseErrorAsString(err),
+              },
+        }));
+        this.appRef.tick();
+      },
+    });
+  }
 }
