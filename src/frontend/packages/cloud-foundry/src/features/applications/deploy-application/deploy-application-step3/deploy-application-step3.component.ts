@@ -226,7 +226,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     if (fsDeployer) {
       this.deployer = fsDeployer;
     } else {
-      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService, this.injector);
+      this.deployer = new DeployApplicationDeployer(this.cfOrgSpaceService, this.injector);
     }
 
     this.initDeployer();
