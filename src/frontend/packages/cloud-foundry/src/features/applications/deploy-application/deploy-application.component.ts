@@ -134,13 +134,14 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   // `enterData` between step.onNext.data → next step.onEnter(enterData);
   // signal-handle submit() drops the `data` channel, so the parent
   // captures it explicitly here. step2_2's submit stores the deployer,
-  // step3's ViewChild setter forwards it to step3.onEnter on activation.
+  // step3Handle.onEnter forwards it to step3.onEnter on activation.
   private pendingDeployer?: unknown;
   // FileScannerInfo from step2's source-select onNext, consumed by
-  // step2_2's onEnter to prime deployer.fsFileInfo. Without this, the
-  // file-upload deploy path throws at deployer.fsFileInfo.root because
-  // the field never gets set (the legacy stepper relayed step2's
-  // onNext.data into step2_2.onEnter via enterData).
+  // step2_2Handle.onEnter to prime deployer.fsFileInfo. Without this,
+  // the file-upload deploy path never opens the deploy WebSocket because
+  // deployer.open()'s readyFilter falls into the git/docker branch (which
+  // requires gitDetails or dockerDetails). The legacy stepper relayed
+  // step2's onNext.data into step2_2.onEnter via enterData.
   private pendingFsFileInfo?: unknown;
 
   private isLoadingSignal = this.cfOrgSpaceService.isLoading;
@@ -199,12 +200,13 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.step2_2Sub?.unsubscribe();
     this.step2_2Sub = undefined;
     if (v) {
-      // The legacy [onEnter]="step2_2.onEnter" received the FileScannerInfo
-      // emitted by step 2's onNext data result. Forward the captured
-      // pendingFsFileInfo so deployer.fsFileInfo gets primed — the
-      // file-upload deploy path reads .root and .total off it later.
-      v.onEnter(this.pendingFsFileInfo as any);
-      this.pendingFsFileInfo = undefined;
+      // Subscription wiring only. The activation-time `onEnter` call that
+      // primes `deployer.fsFileInfo` lives on `step2_2Handle.onEnter` — it
+      // fires when the stepper navigates *into* this step, after step 2's
+      // submit has populated `pendingFsFileInfo`. Calling `v.onEnter` here
+      // (on view-init) would run with `pendingFsFileInfo === undefined`
+      // because `<app-step [hidden]>` keeps step 2_2 instantiated up-front,
+      // so the setter fires before step 2 ever submits.
       this.step2_2Sub = v.valid$.subscribe(valid => {
         this.step2_2Valid.set(!!valid);
         this.cdr.markForCheck();
@@ -244,13 +246,10 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.step3CloseableSub = undefined;
     this.step3DisablePrevSub = undefined;
     if (v) {
-      // Forward the captured deployer (if any) to step3.onEnter so the
-      // file-upload path's deployer is reused. Source types that don't
-      // populate a deployer (giturl, docker-image) leave pendingDeployer
-      // undefined, in which case step3 instantiates a fresh deployer.
-      const deployer = this.pendingDeployer;
-      this.pendingDeployer = undefined;
-      v.onEnter(deployer as any);
+      // Subscription wiring only. The activation-time `onEnter` call that
+      // forwards `pendingDeployer` lives on `step3Handle.onEnter` — see the
+      // `step2_2Ref` comment above for why the ViewChild-time call was the
+      // wrong hook.
       this.step3ValidSub = v.valid$.subscribe(valid => {
         this.step3Valid.set(!!valid);
         this.cdr.markForCheck();
@@ -312,6 +311,15 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   step2_2Handle: SignalStepHandle = {
     valid: this.step2_2Valid.asReadonly(),
+    // Activation-time hand-off of step 2's captured FileScannerInfo into
+    // the source-upload component. Has to run on each entry (not just on
+    // ViewChild init) so re-entries after a Previous click also re-prime
+    // the freshly-constructed deployer. See `step2_2Ref` comment for the
+    // ViewChild-fires-once trap this avoids.
+    onEnter: () => {
+      this._step2_2?.onEnter(this.pendingFsFileInfo as any);
+      this.pendingFsFileInfo = undefined;
+    },
     onLeave: (isNext?: boolean) => this._step2_2?.onLeave(!!isNext),
     submit: async () => {
       const result = await firstValueFrom(this._step2_2!.onNext(0, null as any));
@@ -338,6 +346,16 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   step3Handle: SignalStepHandle = {
     valid: this.step3Valid.asReadonly(),
+    // Activation-time hand-off of step 2_2's deployer. Same rationale as
+    // `step2_2Handle.onEnter` — ViewChild-time would run with
+    // `pendingDeployer === undefined`. Source types that bypass step 2_2
+    // (git-url, docker-image) leave pendingDeployer undefined and step 3
+    // instantiates a fresh deployer.
+    onEnter: () => {
+      const deployer = this.pendingDeployer;
+      this.pendingDeployer = undefined;
+      this._step3?.onEnter(deployer as any);
+    },
     canClose: this.step3Closeable.asReadonly(),
     disablePrevious: this.step3DisablePrevious.asReadonly(),
     // step3.busy and step3.disablePrevious$ are both fed by the same
