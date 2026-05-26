@@ -280,9 +280,14 @@ define dev.backend
 		echo "Building backend for host platform..."; \
 		$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
 	fi
-	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) ../../$($(_HIDE)BIN_DIR)/jetstream
+	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ../../$($(_HIDE)BIN_DIR)/jetstream
 endef
 $(call register, dev, backend)
+
+# Local dev session expiry. Mirrors the cf-package deploy default
+# (`build/release-cf.sh`) so long Playwright drives don't get bounced
+# back to /login mid-session. Override on the make line if needed.
+SESSION_STORE_EXPIRY ?= 240
 
 # ── E2E variables (consumed by test.e2e and check.e2e) ──
 # These are recipe-local, not cross-cutting. DRYRUN=yes is the
