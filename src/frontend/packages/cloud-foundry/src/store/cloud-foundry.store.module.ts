@@ -4,7 +4,6 @@ import { GitPackageModule } from '@stratosui/git';
 
 import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
-import { DeployAppEffects } from './effects/deploy-app.effects';
 import { CfValidateEffects } from './effects/request.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
@@ -14,7 +13,6 @@ import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.serv
   imports: [
     CloudFoundryReducersModule,
     EffectsModule.forFeature([
-      DeployAppEffects,
       ServiceInstanceEffects,
       CfValidateEffects,
       UsersRolesEffects

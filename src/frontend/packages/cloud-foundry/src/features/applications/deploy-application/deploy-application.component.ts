@@ -17,13 +17,7 @@ import { Observable, Subscription, of, of as observableOf, firstValueFrom } from
 import { take, filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 
-import {
-  DeleteDeployAppSection,
-  StoreCFSettings } from '../../../actions/deploy-applications.actions';
-import { CFAppState } from '@stratosui/cloud-foundry';
-import {
-  selectApplicationSource } from '../../../store/selectors/deploy-application.selector';
-import { DeployApplicationSource, SourceType } from '../../../store/types/deploy-application.types';
+import { SourceType } from '../../../store/types/deploy-application.types';
 import { RouterNav } from '@stratosui/store';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
@@ -62,7 +56,9 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
 ]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
+  // RouterNav dispatches still go through Store; the deployApplication
+  // slice itself is signal-native via CfDeployAppDataService.
+  private store = inject(Store);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private appsConfig = inject(CfAppsSignalConfigService);
   private activatedRoute = inject(ActivatedRoute);
@@ -274,13 +270,13 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     blocked: computed(() => !!this.isLoadingSignal()),
     submit: async () => {
       // The legacy template wired step 1's submit to the *parent*'s
-      // onNext — dispatch StoreCFSettings using the values currently
-      // in CfOrgSpaceDataService.
-      this.store.dispatch(new StoreCFSettings({
+      // onNext — push the picker selections into the deploy-data
+      // service so downstream steps (step 2, options) can read them.
+      this.deployData.setCfDetails({
         cloudFoundry: this.cfOrgSpaceService.cf.select(),
         org: this.cfOrgSpaceService.org.select(),
-        space: this.cfOrgSpaceService.space.select()
-      }));
+        space: this.cfOrgSpaceService.space.select(),
+      });
     },
   };
 
@@ -382,13 +378,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
     this.selectedSourceType$ = appDeploySourceTypes.getAutoSelectedType(activatedRoute);
 
-    this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
-      map((appSource: DeployApplicationSource) => {
-        if (appSource && appSource.type) {
-          return appSource.type.id === 'giturl';
-        }
-        return false;
-      })
+    this.skipConfig$ = toObservable(this.deployData.applicationSource).pipe(
+      map(appSource => appSource?.type?.id === 'giturl'),
     );
 
     if (this.isRedeploy) {
@@ -449,7 +440,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         this.cfOrgSpaceService.space.select.set(space);
       }
       // Delete any state in deployApplication
-      this.store.dispatch(new DeleteDeployAppSection());
+      this.deployData.resetState();
     }
   }
 

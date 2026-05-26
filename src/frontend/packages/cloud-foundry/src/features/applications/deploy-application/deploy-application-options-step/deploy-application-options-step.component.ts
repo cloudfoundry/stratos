@@ -5,13 +5,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
-import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
 import {
@@ -55,7 +52,6 @@ interface DeployOptionsForm {
 })
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
-  private store = inject<Store<CFAppState>>(Store);
   private http = inject(HttpClient);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private activatedRoute = inject(ActivatedRoute);
@@ -265,7 +261,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SaveAppOverrides(this.formToObj(this.deployOptionsForm.controls)));
+    this.deployData.saveAppOverrides(this.formToObj(this.deployOptionsForm.controls));
     return observableOf({
       success: true, data: this.stepOpts
     });

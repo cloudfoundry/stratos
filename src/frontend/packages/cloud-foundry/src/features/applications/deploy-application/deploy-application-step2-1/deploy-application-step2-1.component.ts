@@ -1,12 +1,10 @@
 
 import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { StepOnNextFunction } from '@stratosui/core';
 import { GitCommit } from '@stratosui/git';
-import { SetDeployCommit } from '../../../../actions/deploy-applications.actions';
-import { CFAppState } from '../../../../cf-app-state';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
 
 @Component({
@@ -18,7 +16,7 @@ import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wr
   imports: []
 })
 export class DeployApplicationStep21Component {
-  private store = inject<Store<CFAppState>>(Store);
+  private deployData = inject(CfDeployAppDataService);
 
   // Stable BehaviorSubjects back the public Observable fields. The wrapper
   // component is recreated on every onEnter, so the underlying stream
@@ -62,7 +60,7 @@ export class DeployApplicationStep21Component {
   onNext: StepOnNextFunction = () => {
     const commit = this.selectedCommitSubject.getValue();
     if (commit) {
-      this.store.dispatch(new SetDeployCommit(commit.sha));
+      this.deployData.setDeployCommit(commit.sha);
     }
     return observableOf({ success: true });
   };
