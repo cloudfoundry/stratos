@@ -300,6 +300,7 @@ describe('CfAppsSignalConfigService', () => {
 
   it('deleteServiceBinding routes through writeWithJob against /pp/v1/cf/service_bindings/{cnsi}/{binding}', async () => {
     const httpMock = {
+      get: makeHttp().get,
       delete: vi.fn(() => of(new HttpResponse<unknown>({
         status: 200,
         body: { result: { operation: 'service_credential_binding.delete' }, state: 'COMPLETE' },
@@ -312,6 +313,7 @@ describe('CfAppsSignalConfigService', () => {
 
   it('deleteRoute routes through writeWithJob against /pp/v1/cf/routes/{cnsi}/{route}', async () => {
     const httpMock = {
+      get: makeHttp().get,
       delete: vi.fn(() => of(new HttpResponse<unknown>({
         status: 200,
         body: { result: { jobGuid: 'j-1', operation: 'route.delete' }, state: 'COMPLETE' },
