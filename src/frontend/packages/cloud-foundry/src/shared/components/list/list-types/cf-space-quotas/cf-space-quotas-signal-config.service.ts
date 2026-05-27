@@ -3,8 +3,11 @@ import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
 
+import { firstValueFrom } from 'rxjs';
+
 import { CnsiSpaceQuotasSource } from '../../../../../services/data-sources/cnsi-space-quotas-source';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { QuotaDataService } from '../../../../../services/endpoint-data/quota-data.service';
 import type { StSpaceQuota } from '../../../../../services/endpoint-data/stratos-types';
 
 // CF Space Quotas list config — single-CNSI, read-only. Drives the
@@ -16,6 +19,7 @@ import type { StSpaceQuota } from '../../../../../services/endpoint-data/stratos
 export class CfSpaceQuotasSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly injector = inject(Injector);
+  private readonly quotaData = inject(QuotaDataService);
 
   private cnsiGuid = '';
   private source?: CnsiSpaceQuotasSource;
@@ -101,6 +105,14 @@ export class CfSpaceQuotasSignalConfigService {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  // Per-row delete from the Org Space Quotas tab kebab. CF returns 422
+  // if any spaces still reference the quota — the consumer side surfaces
+  // the error to the snackbar without doing a pre-check here.
+  async deleteQuota(cnsiGuid: string, quotaGuid: string): Promise<void> {
+    await firstValueFrom(this.quotaData.deleteSpaceQuota(cnsiGuid, quotaGuid));
+    await this.refresh();
   }
 
   clearFilters(): void {
