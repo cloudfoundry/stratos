@@ -110,7 +110,7 @@ describe('ServiceCatalogPageComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Description', 'Broker', 'Tags', 'CF', '',
+      'Name', 'Description', 'Broker', 'Tags', 'CF', '', '',
     ]);
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'svc-1', name: 'redis', description: '', brokerName: '',

@@ -5,6 +5,9 @@ import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
+
+import { CurrentUserPermissionsService } from '@stratosui/core';
 
 import { ServicePlansComponent } from './service-plans.component';
 
@@ -24,6 +27,13 @@ describe('ServicePlansComponent', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         provideNoopAnimations(),
+        // Stub the permissions service to short-circuit the
+        // CurrentUserRolesDataService → ngrx Store chain. The per-row
+        // Create Instance action reads .can() to gate its disabled state;
+        // the spec just needs the signal to resolve without injection
+        // errors. Default to false (lacking permission) so the kebab
+        // item renders as disabled — matches the safer fallback.
+        { provide: CurrentUserPermissionsService, useValue: { can: () => of(false) } },
       ],
     }).compileComponents();
 

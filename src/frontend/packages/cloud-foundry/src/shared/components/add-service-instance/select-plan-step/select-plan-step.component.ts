@@ -189,8 +189,15 @@ export class SelectPlanStepComponent implements OnDestroy {
       filter(p => !!p && p.length > 0),
       withLatestFrom(this.csiState$),
       tap(([servicePlans, createServiceInstanceState]) => {
+        const preselect = createServiceInstanceState.servicePlanGuid;
         if (this.modeService.isEditServiceInstanceMode()) {
-          this.stepperForm.controls.servicePlans.setValue(createServiceInstanceState.servicePlanGuid ?? '');
+          this.stepperForm.controls.servicePlans.setValue(preselect ?? '');
+        } else if (preselect && servicePlans.some(p => p.guid === preselect)) {
+          // Marketplace mode landed with a plan preselected via the
+          // SERVICE_PLAN_URL_PARAM query param (per-row Create Instance
+          // from the Plans tab). Honor it; user can still pick a different
+          // plan before continuing.
+          this.stepperForm.controls.servicePlans.setValue(preselect);
         } else {
           this.stepperForm.controls.servicePlans.setValue(servicePlans[0]?.guid ?? '');
         }
