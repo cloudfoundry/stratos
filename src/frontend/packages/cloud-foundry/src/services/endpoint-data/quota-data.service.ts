@@ -132,6 +132,10 @@ export class QuotaDataService {
     return this.http.patch<StSpaceQuota>(`/pp/v1/cf/space_quotas/${cnsiGuid}/${quotaGuid}`, body);
   }
 
+  deleteSpaceQuota(cnsiGuid: string, quotaGuid: string): Observable<void> {
+    return this.http.delete<void>(`/pp/v1/cf/space_quotas/${cnsiGuid}/${quotaGuid}`);
+  }
+
   // Apply an org quota to one or more orgs. Used by the create/edit-org
   // step components to set the quota after creating/updating the org;
   // V3 splits the quota assignment off into a relationships endpoint

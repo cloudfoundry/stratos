@@ -85,8 +85,44 @@ func (c *CloudFoundrySpecification) updateNativeSpaceQuota(ctx echo.Context) err
 	return ctx.JSON(http.StatusOK, toStSpaceQuota(*q, cnsiGUID))
 }
 
+// deleteNativeSpaceQuota handles
+//
+//	DELETE /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}
+//
+// Stratos-shape wrapper around CF V3 DELETE /v3/space_quotas/{guid}.
+// Per-row Delete on the Org Space Quotas tab restores the V2-era
+// listActionDelete that the signal-native migration dropped. CF
+// refuses with 422 if any spaces are still assigned the quota; the
+// consumer surfaces that error via snackbar without a pre-check.
+func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	quotaGUID := ctx.Param("quotaGuid")
+	if cnsiGUID == "" || quotaGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and quotaGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	if delErr := cfClient.SpaceQuotas().Delete(ctx.Request().Context(), quotaGUID); delErr != nil {
+		return handleCapiError(ctx, delErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.NoContent(http.StatusNoContent)
+}
+
 // applySpaceQuotaToSpaces handles
-//   POST /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}/relationships/spaces
+//
+//	POST /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}/relationships/spaces
+//
 // Body: { "space_guids": ["guid1", "guid2", ...] }.
 // Wraps CF V3 POST /v3/space_quotas/{guid}/relationships/spaces, which
 // attaches the quota to one or more spaces in a single call.
@@ -130,7 +166,9 @@ func (c *CloudFoundrySpecification) applySpaceQuotaToSpaces(ctx echo.Context) er
 }
 
 // removeSpaceQuotaFromSpace handles
-//   DELETE /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}/relationships/spaces/{spaceGuid}
+//
+//	DELETE /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid}/relationships/spaces/{spaceGuid}
+//
 // Wraps CF V3 DELETE /v3/space_quotas/{guid}/relationships/spaces/{space_guid}.
 // Edit-space-step calls this when the user clears the quota on an existing
 // space; v3 has no single endpoint to "switch" quota on a space, so the

@@ -4,10 +4,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
   ListSubNavAddAction,
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListRowAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 
@@ -45,6 +49,8 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private quotasConfig = inject(CfSpaceQuotasSignalConfigService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StSpaceQuota> | undefined> = signal(undefined);
 
@@ -55,6 +61,11 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
   /** Reactive permission flag for the L5 button. Mirrors the legacy
    *  `(canAddQuota$ | async)` template gate. */
   public canAddSpaceQuota!: Signal<boolean>;
+
+  /** Reactive permission flags for per-row Edit / Delete kebab entries.
+   *  Both check ORG_MANAGER scope on the org the quota belongs to. */
+  private canEditSpaceQuota!: Signal<boolean>;
+  private canDeleteSpaceQuota!: Signal<boolean>;
 
   /** L5 primary action — navigates to the legacy add-space-quota wizard. */
   public createSpaceQuotaAction!: ListSubNavAddAction;
@@ -67,6 +78,22 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     this.canAddSpaceQuota = toSignal(
       currentUserPermissionsService.can(
         CfCurrentUserPermissions.SPACE_QUOTA_CREATE,
+        cfGuid,
+        orgGuid,
+      ),
+      { initialValue: false },
+    );
+    this.canEditSpaceQuota = toSignal(
+      currentUserPermissionsService.can(
+        CfCurrentUserPermissions.SPACE_QUOTA_EDIT,
+        cfGuid,
+        orgGuid,
+      ),
+      { initialValue: false },
+    );
+    this.canDeleteSpaceQuota = toSignal(
+      currentUserPermissionsService.can(
+        CfCurrentUserPermissions.SPACE_QUOTA_DELETE,
         cfGuid,
         orgGuid,
       ),
@@ -145,6 +172,13 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
           render: (q: StSpaceQuota) => CloudFoundryOrganizationSpaceQuotasComponent.formatDate(q.createdAt),
           widthHint: '12rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (q: StSpaceQuota) => this.buildRowActions(q, cfGuid, orgGuid, router),
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (q: StSpaceQuota) => `${q.cnsiGuid}:${q.guid}`,
       emptyMessage: 'There are no space quotas in this organization',
@@ -160,6 +194,73 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
       viewMode: this.quotasConfig.viewMode,
       sort: this.quotasConfig.sort,
     });
+  }
+
+  // Per-row Edit + Delete kebab entries. Restored from V2-era
+  // CfSpaceQuotasListConfigService.getSingleActions which the
+  // signal-native migration dropped (catalog 2026-05-26 Org-scope row).
+  // Edit routes to the existing edit-space-quota wizard; Delete confirms
+  // then calls the signal-config wrapper which invokes the new V3 native
+  // DELETE handler and refreshes the list on success. CF refuses with
+  // 422 if any spaces are still assigned the quota — extractCfErrorMessage
+  // pulls the V3 errors envelope detail for the snackbar.
+  private buildRowActions(
+    q: StSpaceQuota,
+    cfGuid: string,
+    orgGuid: string,
+    router: Router,
+  ): readonly SignalListRowAction<StSpaceQuota>[] {
+    return [
+      {
+        label: 'Edit', icon: 'edit',
+        disabled: !this.canEditSpaceQuota(),
+        invoke: () => {
+          void router.navigate([
+            '/cloud-foundry', cfGuid,
+            'organizations', orgGuid,
+            'space-quota-definitions', q.guid,
+            'edit-space-quota',
+          ]);
+        },
+      },
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        disabled: !this.canDeleteSpaceQuota(),
+        invoke: () => {
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Space Quota',
+            `Are you sure you want to delete the space quota "${q.name}"? This cannot be undone. Cloud Foundry will refuse if any spaces are still assigned to this quota.`,
+            'Delete',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            try {
+              await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
+            } catch (err: unknown) {
+              this.snackBar.error(`Delete failed: ${CloudFoundryOrganizationSpaceQuotasComponent.extractCfErrorMessage(err)}`);
+            }
+          });
+        },
+      },
+    ];
+  }
+
+  // Pulls a human-readable message out of CF error envelopes; mirrors
+  // the helper in CloudFoundryQuotasComponent. Falls back to JSON-stringify
+  // so the snackbar never shows "[object Object]".
+  static extractCfErrorMessage(err: unknown): string {
+    if (err && typeof err === 'object') {
+      const e = err as { error?: unknown; message?: string };
+      const body = e.error;
+      if (body && typeof body === 'object') {
+        const cf = body as { errors?: Array<{ detail?: string; title?: string }>; error?: string };
+        const detail = cf.errors?.[0]?.detail || cf.errors?.[0]?.title;
+        if (detail) return detail;
+        if (cf.error) return cf.error;
+      }
+      if (e.message) return e.message;
+    }
+    try { return JSON.stringify(err); } catch { return String(err); }
   }
 
   static formatLimit(value: number, unit?: string): string {
