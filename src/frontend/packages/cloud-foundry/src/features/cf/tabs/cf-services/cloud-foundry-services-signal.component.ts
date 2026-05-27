@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
@@ -23,6 +26,7 @@ import {
 import {
   CfServiceInstancesSignalConfigService,
 } from '../../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
@@ -38,6 +42,7 @@ import type { StServiceInstance } from '../../../../services/endpoint-data/strat
   imports: [
     CommonModule,
     RouterModule,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -47,6 +52,27 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
+  private permissionsService = inject(CurrentUserPermissionsService);
+
+  /** Total service-instance count for the L5 sub-nav. */
+  public totalServiceInstances!: Signal<number>;
+  /** Reactive permission flag for the Add Service Instance button. Built
+   *  in the constructor (injection context) so toSignal() resolves. */
+  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
+    this.permissionsService.can(CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE, this.cfEndpointService.cfGuid),
+    { initialValue: false },
+  );
+  /** L5 primary action — navigates to the add-service-instance wizard's
+   *  type selector (Managed Service vs User Provided). Forwards the cnsi
+   *  as `auto-select-endpoint` so the wizard can pre-select this CF. */
+  public readonly createServiceInstanceAction: ListSubNavAddAction = {
+    label: 'Add Service Instance',
+    icon: 'add',
+    visible: this.canCreateServiceInstance,
+    invoke: () => this.router.navigate(['/services/new'],
+      { queryParams: { 'auto-select-endpoint': this.cfEndpointService.cfGuid } }),
+  };
 
   private readonly favoriteInstanceRowKeys: Signal<ReadonlySet<string>> = toSignal(
     this.userFavoriteManager.getAllFavorites().pipe(
@@ -84,6 +110,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.instancesConfig.initialize([cfGuid]);
+    this.totalServiceInstances = this.instancesConfig.view.totalItems;
     // CNSI is pre-chosen by the URL — show the dropdown but disable it so
     // the scope is visible and can't drift.
     this.instancesConfig.selectedCnsi.set(cfGuid);

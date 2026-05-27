@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
@@ -21,6 +24,7 @@ import {
 
 import { applicationEntityType } from '../../../../cf-entity-types';
 import { CfAppsSignalConfigService } from '../../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StApp } from '../../../../services/endpoint-data/stratos-types';
 
@@ -37,6 +41,7 @@ import type { StApp } from '../../../../services/endpoint-data/stratos-types';
   imports: [
     CommonModule,
     RouterModule,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -46,6 +51,26 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
+  private permissionsService = inject(CurrentUserPermissionsService);
+
+  /** Total app count for the L5 sub-nav. */
+  public totalApplications!: Signal<number>;
+  /** Reactive permission flag for the Create Application button. Built
+   *  in the constructor (injection context) so toSignal() resolves. */
+  public readonly canCreateApplication: Signal<boolean> = toSignal(
+    this.permissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE, this.cfEndpointService.cfGuid),
+    { initialValue: false },
+  );
+  /** L5 primary action — navigates to the deploy stepper with this CNSI
+   *  pre-selected via the `:endpointId` route param (the new-application
+   *  base step forwards it as `auto-select-endpoint`). */
+  public readonly createApplicationAction: ListSubNavAddAction = {
+    label: 'Create Application',
+    icon: 'add',
+    visible: this.canCreateApplication,
+    invoke: () => this.router.navigate(['/applications/new', this.cfEndpointService.cfGuid]),
+  };
 
   private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
     this.userFavoriteManager.getAllFavorites().pipe(
@@ -76,6 +101,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
     // mount in the same session, then build a single-CNSI orchestrator.
     this.appsConfig.clearLockedSpace();
     this.appsConfig.initialize([cfGuid]);
+    this.totalApplications = this.appsConfig.view.totalItems;
     // CNSI is pre-chosen by the URL — pin the dropdown's selection to this
     // CF and disable it so the scope is visible (matching Org/Space framing
     // on per-org / per-space pages) but the user can't drift off this CF.

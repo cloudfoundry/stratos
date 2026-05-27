@@ -4,7 +4,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
+import { of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -22,6 +23,7 @@ function makeStubAppsConfig() {
     pagedItems: signal([]).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
+    totalItems: signal(0).asReadonly(),
   };
   const orchestrator = {
     isAnyLoading: signal(false).asReadonly(),
@@ -71,6 +73,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
         { provide: CfAppsSignalConfigService, useValue: stubAppsConfig },
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
         { provide: CloudFoundrySpaceService, useValue: stubSpaceService },
+        { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
       ],
     }).compileComponents();
 
