@@ -679,4 +679,110 @@ describe('SignalListComponent', () => {
       expect(fixture.nativeElement.querySelectorAll('[data-test="custom-cell"]').length).toBe(0);
     });
   });
+
+  describe('bulk-action bar (bulkActions slot)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`
+    })
+    class BulkHost {
+      items = signal([{ name: 'one' }, { name: 'two' }, { name: 'three' }]);
+      selected = signal<ReadonlySet<string>>(new Set<string>());
+      pageIndex = signal(0);
+      pageSize = signal(10);
+      runSpy = vi.fn();
+      config: SignalListConfig<{ name: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(3).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: this.pageIndex,
+        pageSize: this.pageSize,
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          { header: 'Pick', key: 'pick', kind: 'checkbox', render: () => '',
+            checkbox: { selectedKeys: this.selected } },
+          { header: 'Name', render: r => r.name },
+        ],
+        getRowKey: r => r.name,
+        bulkActions: [
+          { label: 'Delete', icon: 'delete', danger: true, run: this.runSpy },
+        ],
+      };
+    }
+
+    it('does not render the bar when selection is empty', () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+    });
+
+    it('renders the bar with count and action when 1+ rows are selected', () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      fixture.componentInstance.selected.set(new Set(['one', 'two']));
+      fixture.detectChanges();
+      const bar = fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]');
+      expect(bar).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-selected-count"]').textContent).toContain('2 selected');
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]')).not.toBeNull();
+    });
+
+    it('clicking a bulk action invokes run with the selection snapshot', async () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      fixture.componentInstance.selected.set(new Set(['one', 'three']));
+      fixture.detectChanges();
+      const btn = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
+      btn.click();
+      await fixture.whenStable();
+      expect(fixture.componentInstance.runSpy).toHaveBeenCalledTimes(1);
+      const passed = fixture.componentInstance.runSpy.mock.calls[0][0] as ReadonlySet<string>;
+      expect(passed.has('one')).toBe(true);
+      expect(passed.has('three')).toBe(true);
+      expect(passed.size).toBe(2);
+    });
+
+    it('Clear button empties the selection', () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      fixture.componentInstance.selected.set(new Set(['one', 'two']));
+      fixture.detectChanges();
+      const clear = fixture.nativeElement.querySelector('[data-test="bulk-clear"]') as HTMLButtonElement;
+      clear.click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected().size).toBe(0);
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+    });
+
+    it('bar stays hidden when bulkActions is undefined even with selection', () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, bulkActions: undefined };
+      fixture.componentInstance.selected.set(new Set(['one']));
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+    });
+
+    it('bar stays hidden when bulkActions is empty array', () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, bulkActions: [] };
+      fixture.componentInstance.selected.set(new Set(['one']));
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+    });
+
+    it('disabled action does not invoke run', async () => {
+      const fixture = TestBed.createComponent(BulkHost);
+      const spy = vi.fn();
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        bulkActions: [{ label: 'Delete', run: spy, disabled: signal(true).asReadonly() }],
+      };
+      fixture.componentInstance.selected.set(new Set(['one']));
+      fixture.detectChanges();
+      const btn = fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
+      expect(btn.disabled).toBe(true);
+      btn.click();
+      await fixture.whenStable();
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
 });

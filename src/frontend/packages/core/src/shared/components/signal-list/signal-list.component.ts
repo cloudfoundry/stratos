@@ -231,6 +231,36 @@ export interface SignalListHeaderAction {
   readonly primary?: boolean;
 }
 
+/**
+ * Bulk action button rendered in the selection bar that appears above the
+ * table when a `kind: 'checkbox'` column has 1+ rows selected. Operates on
+ * the set of selected row keys; the consumer resolves keys → rows from its
+ * own data source (the framework doesn't keep an index by key, and pageable
+ * lists may not have every selected row in memory at action time).
+ *
+ * Restores the legacy `IMultiListAction` slot that V2 list-configs used for
+ * bulk Delete / Unmap / Manage Users. The signal-list framework had a
+ * `kind: 'checkbox'` selection column from the start but never grew a slot
+ * to act on the selection — leaving bulk operations unmigratable. This is
+ * the slot, no consumers wired by this commit.
+ */
+export interface SignalListBulkAction<T> {
+  /** Display label inside the button. */
+  readonly label: string;
+  /** Optional Material icon name rendered to the left of the label. */
+  readonly icon?: string;
+  /** Invoked with a snapshot of the currently-selected row keys. */
+  readonly run: (selectedKeys: ReadonlySet<string>) => void | Promise<void>;
+  /** Optional reactive disabled state — e.g. permission-gated actions. */
+  readonly disabled?: Signal<boolean>;
+  /** Optional destructive styling (red) — for Delete-style entries. */
+  readonly danger?: boolean;
+  /** Optional tooltip / aria title. */
+  readonly title?: string;
+  /** Optional `data-test` attribute for E2E selectors. */
+  readonly dataTest?: string;
+}
+
 export interface SignalListConfig<T> {
   readonly pagedItems: Signal<T[]>;
   readonly totalFilteredResults: Signal<number>;
@@ -296,6 +326,13 @@ export interface SignalListConfig<T> {
   // operate on the list as a whole (Invite User / Manage Users / Create
   // Org) — not per-row actions, which still go via `kind: 'actions'`.
   readonly headerActions?: readonly SignalListHeaderAction[];
+  // Optional — bulk-action buttons rendered in a selection bar above the
+  // table when a `kind: 'checkbox'` column has 1+ rows selected. Restores
+  // the legacy `IMultiListAction` slot for bulk Delete / Unmap / Manage.
+  // Bar is hidden when no checkbox column exists, selection is empty, or
+  // this field is undefined/empty — no visual impact on lists that don't
+  // opt in.
+  readonly bulkActions?: readonly SignalListBulkAction<T>[];
 }
 
 @Component({
@@ -556,6 +593,54 @@ export class SignalListComponent<T> implements AfterViewInit {
   // column doesn't render as a label:value detail line.
   actionsColumn(): SignalListColumn<T> | null {
     return this.config.columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
+  }
+
+  // Bulk-action bar helpers --------------------------------------------
+
+  // Returns the first column configured as kind === 'checkbox'; the
+  // bulk-action bar reads its selectedKeys signal to drive count and
+  // pass-through to action handlers.
+  checkboxColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c => c.kind === 'checkbox' && !!c.checkbox) ?? null;
+  }
+
+  // Number of rows currently selected via the checkbox column. 0 when no
+  // checkbox column is configured.
+  selectedCount(): number {
+    return this.checkboxColumn()?.checkbox?.selectedKeys().size ?? 0;
+  }
+
+  // True when the bulk-action bar should render: bulkActions is non-empty,
+  // a checkbox column exists, and at least one row is selected.
+  showBulkBar(): boolean {
+    const acts = this.config.bulkActions;
+    if (!acts || acts.length === 0) return false;
+    return this.selectedCount() > 0;
+  }
+
+  // Clears the checkbox column's selection. Used by the "Clear" button in
+  // the bulk-action bar and is the recommended path for consumers to call
+  // after a bulk action completes (delete-style actions especially).
+  clearBulkSelection(): void {
+    const col = this.checkboxColumn();
+    col?.checkbox?.selectedKeys.set(new Set());
+  }
+
+  // Invokes a bulk action, passing the current selection snapshot. Errors
+  // from the handler are caught and logged — the bar stays open so the
+  // user can retry or clear manually. Selection is NOT auto-cleared; the
+  // consumer decides whether the action invalidates the selection (delete:
+  // yes; mark-favorite: no).
+  async invokeBulkAction(act: SignalListBulkAction<T>): Promise<void> {
+    if (act.disabled?.()) return;
+    const col = this.checkboxColumn();
+    const keys = col?.checkbox?.selectedKeys() ?? new Set<string>();
+    if (keys.size === 0) return;
+    try {
+      await act.run(keys);
+    } catch (err) {
+      console.error(`Bulk action "${act.label}" failed:`, err);
+    }
   }
 
   // Resolves the row-level link target — used to make the whole card /
