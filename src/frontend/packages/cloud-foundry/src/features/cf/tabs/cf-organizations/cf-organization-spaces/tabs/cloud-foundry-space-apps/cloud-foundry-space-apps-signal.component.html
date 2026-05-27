@@ -1,5 +1,8 @@
 <div class="space-apps h-full flex flex-col">
   @if (listConfig(); as config) {
+    <app-list-sub-nav title="Total Applications"
+                      [count]="totalApplications"
+                      [addAction]="createApplicationAction"></app-list-sub-nav>
     <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
   }
 </div>

@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListPillColor,
@@ -20,6 +23,7 @@ import {
 
 import { applicationEntityType } from '../../../../../../../cf-entity-types';
 import { CfAppsSignalConfigService } from '../../../../../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
@@ -43,6 +47,7 @@ import type { StApp } from '../../../../../../../services/endpoint-data/stratos-
   imports: [
     CommonModule,
     RouterModule,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -53,6 +58,32 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
+  private permissionsService = inject(CurrentUserPermissionsService);
+
+  /** Total app count in this space for the L5 sub-nav. */
+  public totalApplications!: Signal<number>;
+  /** Reactive permission flag for the Create Application button — scoped
+   *  to this space (APPLICATION_CREATE checks SPACE_DEVELOPER role). Built
+   *  in the constructor (injection context) so toSignal() resolves. */
+  public readonly canCreateApplication: Signal<boolean> = toSignal(
+    this.permissionsService.can(
+      CfCurrentUserPermissions.APPLICATION_CREATE,
+      this.cfEndpointService.cfGuid,
+      this.cfSpaceService.spaceGuid,
+    ),
+    { initialValue: false },
+  );
+  /** L5 primary action — navigates to the deploy stepper with the CNSI
+   *  pre-selected via the `:endpointId` route param. Org/space pre-fill
+   *  is a follow-up enhancement; today the user picks org/space inside
+   *  the wizard. */
+  public readonly createApplicationAction: ListSubNavAddAction = {
+    label: 'Create Application',
+    icon: 'add',
+    visible: this.canCreateApplication,
+    invoke: () => this.router.navigate(['/applications/new', this.cfEndpointService.cfGuid]),
+  };
 
   // Row keys (${cnsiGuid}:${appGuid}) for apps the user has favorited.
   // Mirrors the application-wall pattern so favorites carry across the
@@ -87,6 +118,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     // initializeForSpace() also flips a benign signal so the constructor
     // effect re-derives the filter predicate against the new lock.
     this.appsConfig.initializeForSpace(cfGuid, spaceGuid);
+    this.totalApplications = this.appsConfig.view.totalItems;
 
     const stateColor = (app: StApp): SignalListPillColor => {
       const s = (app.state ?? '').toUpperCase();

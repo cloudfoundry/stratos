@@ -5,6 +5,7 @@ import { Store } from '@stratosui/store';
 import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { BASE_REDIRECT_QUERY } from '../../../../../../core/src/shared/components/stepper/stepper.types';
+import { AUTO_SELECT_CF_URL_PARAM } from '../../../../features/applications/new-application-base-step/new-application-base-step.component';
 import { TileConfigManager } from '../../../../../../core/src/shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../../../core/src/shared/components/tile/tile-selector.types';
 import { RouterNav } from '../../../../../../store/src/actions/router.actions';
@@ -62,12 +63,21 @@ export class AddServiceInstanceBaseStepComponent {
     this.pSelectedTile = tile;
     if (tile) {
       const baseUrl = this.createServiceTileUrl();
+      // Forward the per-CF-tab Add affordance's `?auto-select-endpoint=`
+      // hint to the next step. Per-CF Marketplace / Services tabs include
+      // this when launching the wizard; carrying it through the tile-pick
+      // step lets the actual wizard pre-select the CF in step 1.
+      const autoSelectCf = this.route.snapshot.queryParams[AUTO_SELECT_CF_URL_PARAM];
+      const query: { [key: string]: string } = {
+        [BASE_REDIRECT_QUERY]: baseUrl,
+        [CSI_CANCEL_URL]: this.cancelUrl,
+      };
+      if (autoSelectCf) {
+        query[AUTO_SELECT_CF_URL_PARAM] = autoSelectCf;
+      }
       this.store.dispatch(new RouterNav({
         path: `${baseUrl}/${this.serviceType}`,
-        query: {
-          [BASE_REDIRECT_QUERY]: baseUrl, // 'previous' destination
-          [CSI_CANCEL_URL]: this.cancelUrl // 'cancel' + 'success' destination
-        }
+        query,
       }));
     }
   }

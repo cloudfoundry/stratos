@@ -45,6 +45,7 @@ import { SpaceDataRegistry } from '../../../../services/endpoint-data/space-data
 import { StApp, StServiceInstance, StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { CreateApplicationStep1Component } from '../../create-application/create-application-step1/create-application-step1.component';
 import { SelectServiceComponent } from '../../select-service/select-service.component';
+import { AUTO_SELECT_CF_URL_PARAM } from '../../../../features/applications/new-application-base-step/new-application-base-step.component';
 import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -434,6 +435,17 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     );
     this.inMarketplaceMode = this.modeService.isMarketplaceMode();
     this.serviceType = route.snapshot.params.type || SERVICE_INSTANCE_TYPES.SERVICE;
+
+    // Honor the per-CF-tab Add affordance: when a per-CF Marketplace /
+    // Services tab navigates here, it forwards its CNSI via the
+    // `auto-select-endpoint` query param (the same convention the app
+    // deploy wizard uses). Pre-select the CF in the org/space picker so
+    // step 1 lands on the right context — no re-pick required when the
+    // user clearly came from a CF-scoped surface.
+    const autoSelectCf = route.snapshot.queryParams[AUTO_SELECT_CF_URL_PARAM];
+    if (autoSelectCf) {
+      this.cfOrgSpaceService.cf.select.set(autoSelectCf);
+    }
   }
 
   ngOnInit(): void {
