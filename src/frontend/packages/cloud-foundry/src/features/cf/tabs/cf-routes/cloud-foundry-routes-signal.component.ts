@@ -23,6 +23,7 @@ import {
 import { CfRoutesSignalConfigService } from '../../../../shared/components/list/list-types/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 
 // Signal-native replacement for CloudFoundryRoutesComponent at
 // /cloud-foundry/:cnsi/routes. CNSI-wide — shows every route the CF
@@ -270,15 +271,41 @@ export class CloudFoundryRoutesSignalComponent {
     this.userFavoriteManager.toggleFavorite(fav);
   }
 
+  // Per-row Unmap + Delete. Restores the V2-era listActionUnmap /
+  // listActionDelete the signal-native migration dropped (catalog
+  // 2026-05-26 CF-scope row). Unmap removes all destinations (every
+  // bound app) from the route, leaving the route itself in place;
+  // Delete also detaches but additionally destroys the route entity.
+  // Unmap is disabled when the route has no bindings — nothing to do.
   private buildRouteActions = (route: StRoute): readonly SignalListRowAction<StRoute>[] => {
     const runAction = async (label: string, op: () => Promise<void>) => {
       try {
         await op();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+      } catch (err: unknown) {
+        this.snackBar.error(`${label} failed: ${extractHttpErrorMessage(err)}`);
       }
     };
+    const appGuids = route.appGuids ?? [];
+    const boundCount = appGuids.length;
     return [
+      {
+        label: 'Unmap', icon: 'link_off',
+        disabled: boundCount === 0,
+        invoke: () => {
+          const confirm = new ConfirmationDialogConfig(
+            'Unmap Route',
+            boundCount === 1
+              ? `Unmap "${route.url || route.guid}" from the app it is currently bound to? The route will remain available to map again later.`
+              : `Unmap "${route.url || route.guid}" from all ${boundCount} bound apps? The route will remain available to map again later.`,
+            'Unmap',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            await runAction('Unmap', () =>
+              this.routesConfig.unmapAllAppsFromRoute(route.cnsiGuid, route.guid, appGuids));
+          });
+        },
+      },
       {
         label: 'Delete', icon: 'delete', danger: true,
         invoke: () => {
