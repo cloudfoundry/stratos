@@ -281,4 +281,29 @@ export class CfRoutesSignalConfigService {
     // also marks apps stale for the cross-tab UX.
     await this.fetchRoutes();
   }
+
+  // Per-row Unmap on a route entry. CAPI v3 has no "remove all
+  // destinations" endpoint, so we fan out N DELETEs against the
+  // unmapRouteFromApp handler — one per appGuid. The handler itself
+  // performs the destinations-list lookup then deletes the matching
+  // destination, so each leg is a single Stratos call. Caller passes
+  // the appGuids it already has on the row (StRoute.appGuids), avoiding
+  // a re-fetch.
+  //
+  // Refreshes the routes list on completion so the affected rows lose
+  // their app pills. Errors from any leg propagate to the caller.
+  async unmapAllAppsFromRoute(
+    cnsiGuid: string,
+    routeGuid: string,
+    appGuids: readonly string[],
+  ): Promise<void> {
+    if (!appGuids.length) return;
+    const ops = appGuids.map(appGuid =>
+      firstValueFrom(this.http.delete<void>(
+        `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}/apps/${appGuid}`,
+      )),
+    );
+    await Promise.all(ops);
+    await this.fetchRoutes();
+  }
 }
