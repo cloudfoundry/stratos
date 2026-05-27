@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
-import { rememberedUsernameKey } from '../remembered-username';
+import { getRememberedUsername } from '../remembered-username';
 
 /**
  * Base interface for the endpoint form structure.
@@ -209,13 +209,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     if (!authValues || !authValues.get('username')) {
       return;
     }
-    try {
-      const stored = window.localStorage?.getItem(rememberedUsernameKey(endpointGuid));
-      if (stored) {
-        authValues.patchValue({ username: stored });
-      }
-    } catch {
-      // Private mode / quota — silent fail, no prefill.
+    const stored = getRememberedUsername(endpointGuid);
+    if (stored) {
+      authValues.patchValue({ username: stored });
     }
   }
 
