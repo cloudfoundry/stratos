@@ -3,8 +3,11 @@ import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
 
+import { firstValueFrom } from 'rxjs';
+
 import { CnsiOrgQuotasSource } from '../../../../../services/data-sources/cnsi-org-quotas-source';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { QuotaDataService } from '../../../../../services/endpoint-data/quota-data.service';
 import type { StOrgQuota } from '../../../../../services/endpoint-data/stratos-types';
 
 // CF Org Quotas list config — single-CNSI, read-only. Drives the
@@ -17,6 +20,7 @@ import type { StOrgQuota } from '../../../../../services/endpoint-data/stratos-t
 export class CfOrgQuotasSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly injector = inject(Injector);
+  private readonly quotaData = inject(QuotaDataService);
 
   private cnsiGuid = '';
   private source?: CnsiOrgQuotasSource;
@@ -96,6 +100,14 @@ export class CfOrgQuotasSignalConfigService {
     } finally {
       this._loading.set(false);
     }
+  }
+
+  // Per-row delete from the CF Quotas tab kebab. CF returns 422 if any
+  // orgs still reference the quota — the consumer side surfaces the
+  // error to the snackbar without doing a pre-check here.
+  async deleteQuota(cnsiGuid: string, quotaGuid: string): Promise<void> {
+    await firstValueFrom(this.quotaData.deleteOrgQuota(cnsiGuid, quotaGuid));
+    await this.refresh();
   }
 
   clearFilters(): void {

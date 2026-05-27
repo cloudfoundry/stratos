@@ -4,10 +4,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
   ListSubNavAddAction,
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListRowAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 
@@ -37,6 +41,8 @@ import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-type
 export class CloudFoundryQuotasComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private quotasConfig = inject(CfOrgQuotasSignalConfigService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StOrgQuota> | undefined> = signal(undefined);
 
@@ -48,6 +54,11 @@ export class CloudFoundryQuotasComponent {
    *  `(canAddQuota$ | async)` template gate. */
   public canAddQuota!: Signal<boolean>;
 
+  /** Reactive permission flags driving per-row Edit / Delete kebab
+   *  entries. Both check CF admin scope. */
+  private canEditQuota!: Signal<boolean>;
+  private canDeleteQuota!: Signal<boolean>;
+
   /** L5 primary action — navigates to the legacy add-quota wizard. */
   public createQuotaAction!: ListSubNavAddAction;
 
@@ -58,6 +69,14 @@ export class CloudFoundryQuotasComponent {
 
     this.canAddQuota = toSignal(
       currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_CREATE, cfGuid),
+      { initialValue: false },
+    );
+    this.canEditQuota = toSignal(
+      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
+      { initialValue: false },
+    );
+    this.canDeleteQuota = toSignal(
+      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_DELETE, cfGuid),
       { initialValue: false },
     );
 
@@ -134,6 +153,13 @@ export class CloudFoundryQuotasComponent {
           render: (q: StOrgQuota) => CloudFoundryQuotasComponent.formatDate(q.createdAt),
           widthHint: '12rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (q: StOrgQuota) => this.buildRowActions(q, cfGuid, router),
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (q: StOrgQuota) => `${q.cnsiGuid}:${q.guid}`,
       emptyMessage: 'There are no organization quotas in this Cloud Foundry',
@@ -149,6 +175,72 @@ export class CloudFoundryQuotasComponent {
       viewMode: this.quotasConfig.viewMode,
       sort: this.quotasConfig.sort,
     });
+  }
+
+  // Per-row Edit + Delete kebab entries. Restored from the V2-era
+  // CfQuotasListConfigService.getSingleActions which the signal-native
+  // migration dropped (catalog 2026-05-26 CF-scope row). Edit routes to
+  // the existing edit-quota wizard; Delete confirms then calls the
+  // signal-config wrapper which invokes the new V3 native DELETE
+  // handler and refreshes the list on success.
+  private buildRowActions(
+    q: StOrgQuota,
+    cfGuid: string,
+    router: Router,
+  ): readonly SignalListRowAction<StOrgQuota>[] {
+    return [
+      {
+        label: 'Edit', icon: 'edit',
+        disabled: !this.canEditQuota(),
+        invoke: () => {
+          void router.navigate(['/cloud-foundry', cfGuid, 'quota-definitions', q.guid, 'edit-quota']);
+        },
+      },
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        disabled: !this.canDeleteQuota(),
+        invoke: () => {
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Organization Quota',
+            `Are you sure you want to delete the organization quota "${q.name}"? This cannot be undone. Cloud Foundry will refuse if any organizations are still assigned to this quota.`,
+            'Delete',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            try {
+              await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
+            } catch (err: unknown) {
+              this.snackBar.error(`Delete failed: ${CloudFoundryQuotasComponent.extractCfErrorMessage(err)}`);
+            }
+          });
+        },
+      },
+    ];
+  }
+
+  // Pulls a human-readable message out of the error shapes Stratos
+  // emits for failed CF mutations:
+  //  - HttpErrorResponse.error.errors[0].detail — capi.ResponseError
+  //    serialized verbatim (CF V3 errors envelope).
+  //  - HttpErrorResponse.error.error — fallback shape used when the
+  //    backend hits a non-capi error and emits {"error": "<msg>"}.
+  //  - HttpErrorResponse.message — Angular's auto-generated summary.
+  //  - .message — generic Error.
+  // Anything else falls back to JSON-stringifying so the snackbar
+  // never shows literal "[object Object]" again.
+  static extractCfErrorMessage(err: unknown): string {
+    if (err && typeof err === 'object') {
+      const e = err as { error?: unknown; message?: string };
+      const body = e.error;
+      if (body && typeof body === 'object') {
+        const cf = body as { errors?: Array<{ detail?: string; title?: string }>; error?: string };
+        const detail = cf.errors?.[0]?.detail || cf.errors?.[0]?.title;
+        if (detail) return detail;
+        if (cf.error) return cf.error;
+      }
+      if (e.message) return e.message;
+    }
+    try { return JSON.stringify(err); } catch { return String(err); }
   }
 
   // -1 on the wire signals "Unlimited" (the backend coerces null v3
