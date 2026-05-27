@@ -46,7 +46,7 @@ import { StApp, StServiceInstance, StSpace } from '../../../../services/endpoint
 import { CreateApplicationStep1Component } from '../../create-application/create-application-step1/create-application-step1.component';
 import { SelectServiceComponent } from '../../select-service/select-service.component';
 import { AUTO_SELECT_CF_URL_PARAM } from '../../../../features/applications/new-application-base-step/new-application-base-step.component';
-import { SERVICE_INSTANCE_TYPES } from '../add-service-instance-base-step/add-service-instance.types';
+import { SERVICE_INSTANCE_TYPES, SERVICE_PLAN_URL_PARAM } from '../add-service-instance-base-step/add-service-instance.types';
 import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -862,6 +862,10 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
         this.csiState.setCFDetails(endpointId);
       }
       this.csiState.setServiceGuid(serviceId);
+      const planGuid = this.activatedRoute.snapshot.queryParams[SERVICE_PLAN_URL_PARAM];
+      if (planGuid) {
+        this.csiState.setServicePlan(planGuid);
+      }
     } catch (error) {
       return this.failSetup(
         `initialiseForMarketplaceMode: Error during service configuration (endpointId=${endpointId}, serviceId=${serviceId}): ${error instanceof Error ? error.message : String(error)}`,

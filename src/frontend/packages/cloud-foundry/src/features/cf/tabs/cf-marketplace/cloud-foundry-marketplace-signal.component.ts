@@ -159,6 +159,25 @@ export class CloudFoundryMarketplaceSignalComponent implements OnInit {
           render: () => '',
           widthHint: '3rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (o: StServiceOffering) => [
+            {
+              label: 'Create Instance',
+              icon: 'add',
+              disabled: !this.canCreateServiceInstance(),
+              invoke: () => {
+                void this.router.navigate(
+                  ['/marketplace', o.cnsiGuid, o.guid, 'create'],
+                  { queryParams: { 'auto-select-endpoint': o.cnsiGuid } },
+                );
+              },
+            },
+          ],
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (o: StServiceOffering) => `${o.cnsiGuid}:${o.guid}`,
       emptyMessage: 'There are no services',

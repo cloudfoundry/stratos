@@ -207,6 +207,31 @@ export class ServiceCatalogPageComponent implements OnInit {
           render: () => '',
           widthHint: '3rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          // Per-row Create Instance jumps straight into the marketplace
+          // wizard with this offering preselected via the URL :serviceId
+          // segment, and forwards the row's CNSI via the auto-select
+          // endpoint param so the CF step lands on the right endpoint.
+          // Permission is enforced server-side by the wizard's create
+          // step — the row action stays visible across CNSIs to match
+          // the rest of the multi-CNSI wall affordances.
+          actions: (o: StServiceOffering) => [
+            {
+              label: 'Create Instance',
+              icon: 'add',
+              invoke: () => {
+                void this.router.navigate(
+                  ['/marketplace', o.cnsiGuid, o.guid, 'create'],
+                  { queryParams: { 'auto-select-endpoint': o.cnsiGuid } },
+                );
+              },
+            },
+          ],
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (o: StServiceOffering) => `${o.cnsiGuid}:${o.guid}`,
       emptyMessage: 'There are no services',
