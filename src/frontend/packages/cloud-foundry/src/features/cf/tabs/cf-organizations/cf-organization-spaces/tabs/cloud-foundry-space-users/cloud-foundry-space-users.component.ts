@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import {
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListRowAction,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -50,6 +51,7 @@ export class CloudFoundrySpaceUsersComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   cfSpaceService = inject(CloudFoundrySpaceService);
   private usersConfig = inject(CfUsersSignalConfigService);
+  private router = inject(Router);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -60,6 +62,7 @@ export class CloudFoundrySpaceUsersComponent {
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
+    const orgGuid = this.cfOrgService.orgGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.usersConfig.initializeForSpace(cfGuid, spaceGuid);
     (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
@@ -122,6 +125,13 @@ export class CloudFoundrySpaceUsersComponent {
           render: renderCreated,
           widthHint: '12rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (u: StUser) => this.buildRowActions(u, cfGuid, orgGuid, spaceGuid),
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
       emptyMessage: 'There are no users in this space',
@@ -140,6 +150,39 @@ export class CloudFoundrySpaceUsersComponent {
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);
     this.usersConfig.registerSortExtractor('spaceRoles', renderSpaceRoles);
+  }
+
+  // Per-row Manage Roles + Remove (2 variants). Mirrors the CF / Org
+  // Users tab pattern but with a space-scoped wizard URL. ?user= still
+  // forwards the user GUID and ?spaces=true scopes the remove-flow to
+  // space-only role grants.
+  private buildRowActions(
+    u: StUser,
+    cfGuid: string,
+    orgGuid: string,
+    spaceGuid: string,
+  ): readonly SignalListRowAction<StUser>[] {
+    const base = ['/cloud-foundry', cfGuid, 'organizations', orgGuid, 'spaces', spaceGuid, 'users'];
+    return [
+      {
+        label: 'Manage Roles', icon: 'group',
+        invoke: () => {
+          void this.router.navigate([...base, 'manage'], { queryParams: { user: u.guid } });
+        },
+      },
+      {
+        label: 'Remove from Spaces', icon: 'remove_circle_outline',
+        invoke: () => {
+          void this.router.navigate([...base, 'remove'], { queryParams: { user: u.guid, spaces: 'true' } });
+        },
+      },
+      {
+        label: 'Remove from Org and Spaces', icon: 'remove_circle', danger: true,
+        invoke: () => {
+          void this.router.navigate([...base, 'remove'], { queryParams: { user: u.guid } });
+        },
+      },
+    ];
   }
 
   static formatDate(iso: string | null | undefined): string {
