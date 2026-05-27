@@ -160,6 +160,45 @@
       </button>
     }
   </div>
+
+  <!-- Bulk-action bar: appears between the toolbar and the table when a
+       `kind: 'checkbox'` column has 1+ rows selected and bulkActions is
+       configured. Restores the legacy IMultiListAction surface. -->
+  @if (showBulkBar()) {
+    <div data-test="bulk-action-bar"
+         class="flex items-center gap-3 px-4 py-2 border-b border-content-border bg-primary-shade-50 dark:bg-primary-shade-900/30 flex-wrap">
+      <span data-test="bulk-selected-count" class="text-sm text-content-text font-medium">
+        {{ selectedCount() }} selected
+      </span>
+      <button
+        data-test="bulk-clear"
+        type="button"
+        (click)="clearBulkSelection()"
+        title="Clear selection"
+        class="px-2 py-1 text-sm text-content-muted hover:text-content-text underline">
+        Clear
+      </button>
+      <div class="flex-1"></div>
+      @for (act of config.bulkActions; track act.label) {
+        <button
+          type="button"
+          (click)="invokeBulkAction(act)"
+          [disabled]="act.disabled ? act.disabled() : false"
+          [title]="act.title ?? act.label"
+          [attr.data-test]="act.dataTest ?? ('bulk-action-' + act.label)"
+          [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
+            (act.danger
+              ? 'border-red-600 bg-red-600 text-white hover:bg-red-700'
+              : 'border-content-border bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700')">
+          @if (act.icon) {
+            <span class="material-icons text-base leading-5">{{ act.icon }}</span>
+          }
+          <span>{{ act.label }}</span>
+        </button>
+      }
+    </div>
+  }
+
   @if (config.errorsByCnsi().size > 0) {
     <div data-test="errors" class="px-4 py-1 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
       @for (entry of config.errorsByCnsi() | keyvalue; track entry.key) {
