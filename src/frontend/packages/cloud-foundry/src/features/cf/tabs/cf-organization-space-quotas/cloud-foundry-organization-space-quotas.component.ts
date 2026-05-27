@@ -20,6 +20,7 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StSpaceQuota } from '../../../../services/endpoint-data/stratos-types';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 
 // Signal-native CF Space Quotas tab (rendered inside the org page —
 // /cloud-foundry/:cnsi/organizations/:org/space-quota-definitions).
@@ -202,7 +203,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
   // Edit routes to the existing edit-space-quota wizard; Delete confirms
   // then calls the signal-config wrapper which invokes the new V3 native
   // DELETE handler and refreshes the list on success. CF refuses with
-  // 422 if any spaces are still assigned the quota — extractCfErrorMessage
+  // 422 if any spaces are still assigned the quota — extractHttpErrorMessage
   // pulls the V3 errors envelope detail for the snackbar.
   private buildRowActions(
     q: StSpaceQuota,
@@ -237,30 +238,12 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
             try {
               await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
             } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${CloudFoundryOrganizationSpaceQuotasComponent.extractCfErrorMessage(err)}`);
+              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
             }
           });
         },
       },
     ];
-  }
-
-  // Pulls a human-readable message out of CF error envelopes; mirrors
-  // the helper in CloudFoundryQuotasComponent. Falls back to JSON-stringify
-  // so the snackbar never shows "[object Object]".
-  static extractCfErrorMessage(err: unknown): string {
-    if (err && typeof err === 'object') {
-      const e = err as { error?: unknown; message?: string };
-      const body = e.error;
-      if (body && typeof body === 'object') {
-        const cf = body as { errors?: Array<{ detail?: string; title?: string }>; error?: string };
-        const detail = cf.errors?.[0]?.detail || cf.errors?.[0]?.title;
-        if (detail) return detail;
-        if (cf.error) return cf.error;
-      }
-      if (e.message) return e.message;
-    }
-    try { return JSON.stringify(err); } catch { return String(err); }
   }
 
   static formatLimit(value: number, unit?: string): string {

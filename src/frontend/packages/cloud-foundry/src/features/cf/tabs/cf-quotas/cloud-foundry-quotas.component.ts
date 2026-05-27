@@ -19,6 +19,7 @@ import { CfOrgQuotasSignalConfigService } from '../../../../shared/components/li
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 
 // Signal-native CF Org Quotas tab. Read-only list of org-level quota
 // definitions on the foundation. Replaces the legacy ListConfig +
@@ -210,37 +211,12 @@ export class CloudFoundryQuotasComponent {
             try {
               await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
             } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${CloudFoundryQuotasComponent.extractCfErrorMessage(err)}`);
+              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
             }
           });
         },
       },
     ];
-  }
-
-  // Pulls a human-readable message out of the error shapes Stratos
-  // emits for failed CF mutations:
-  //  - HttpErrorResponse.error.errors[0].detail — capi.ResponseError
-  //    serialized verbatim (CF V3 errors envelope).
-  //  - HttpErrorResponse.error.error — fallback shape used when the
-  //    backend hits a non-capi error and emits {"error": "<msg>"}.
-  //  - HttpErrorResponse.message — Angular's auto-generated summary.
-  //  - .message — generic Error.
-  // Anything else falls back to JSON-stringifying so the snackbar
-  // never shows literal "[object Object]" again.
-  static extractCfErrorMessage(err: unknown): string {
-    if (err && typeof err === 'object') {
-      const e = err as { error?: unknown; message?: string };
-      const body = e.error;
-      if (body && typeof body === 'object') {
-        const cf = body as { errors?: Array<{ detail?: string; title?: string }>; error?: string };
-        const detail = cf.errors?.[0]?.detail || cf.errors?.[0]?.title;
-        if (detail) return detail;
-        if (cf.error) return cf.error;
-      }
-      if (e.message) return e.message;
-    }
-    try { return JSON.stringify(err); } catch { return String(err); }
   }
 
   // -1 on the wire signals "Unlimited" (the backend coerces null v3
