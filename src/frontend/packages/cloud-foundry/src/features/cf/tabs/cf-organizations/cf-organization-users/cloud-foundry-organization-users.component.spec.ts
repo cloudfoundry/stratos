@@ -84,7 +84,7 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Username', 'Origin', 'Org Roles', 'Space Roles', 'Created',
+      'Username', 'Origin', 'Org Roles', 'Space Roles', 'Created', '',
     ]);
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'user-1', username: 'alice',

@@ -9,6 +9,7 @@ import {
   SignalListConfig,
   SignalListDropdown,
   SignalListHeaderAction,
+  SignalListRowAction,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -19,9 +20,10 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../service
 // /cloud-foundry/:cnsi/users. CNSI-wide — shows every user the CF returns,
 // joined with their org and space role grants by the backend handler.
 //
-// Manage Roles + Remove User flows stay legacy this round (separate route
-// entries under /cloud-foundry/:cnsi/users/manage|remove); the page is
-// read-only signal-native. The Org Roles + Space Roles columns resolve
+// Manage Roles + Remove User wizards are still legacy ngrx (separate
+// route entries under /cloud-foundry/:cnsi/users/manage|remove); per-row
+// kebab entries here just navigate to those routes with ?user={guid}
+// pre-filling the wizard. The Org Roles + Space Roles columns resolve
 // org/space names via EndpointDataService signals so cells never render
 // raw GUIDs (no_raw_guids feedback rule).
 @Component({
@@ -208,6 +210,13 @@ export class CloudFoundryUsersComponent {
           render: renderCreated,
           widthHint: '12rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (u: StUser) => this.buildRowActions(u, cfGuid),
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
       emptyMessage: 'There are no users in this Cloud Foundry',
@@ -242,6 +251,47 @@ export class CloudFoundryUsersComponent {
     this.usersConfig.registerSortExtractor('origin', renderOrigin);
     this.usersConfig.registerSortExtractor('orgRoles', renderOrgRoles);
     this.usersConfig.registerSortExtractor('spaceRoles', renderSpaceRoles);
+  }
+
+  // Per-row Manage Roles + Remove (2 variants) kebab entries. Restores
+  // the V2-era manageUserAction + removeUserActions() singles that the
+  // signal-native migration dropped (catalog 2026-05-26 CF-scope row).
+  // Each entry navigates to the existing legacy wizard route with the
+  // user GUID forwarded via ?user= so the wizard pre-selects this row.
+  // "Remove from Spaces" sets ?spaces=true to scope the wizard to
+  // space-role grants only; without the param the wizard strips org +
+  // space roles together. Both variants ship today as separate kebab
+  // items rather than a sub-menu since SignalListRowAction is flat.
+  private buildRowActions(u: StUser, cfGuid: string): readonly SignalListRowAction<StUser>[] {
+    return [
+      {
+        label: 'Manage Roles', icon: 'group',
+        invoke: () => {
+          void this.router.navigate(
+            ['/cloud-foundry', cfGuid, 'users', 'manage'],
+            { queryParams: { user: u.guid } },
+          );
+        },
+      },
+      {
+        label: 'Remove from Spaces', icon: 'remove_circle_outline',
+        invoke: () => {
+          void this.router.navigate(
+            ['/cloud-foundry', cfGuid, 'users', 'remove'],
+            { queryParams: { user: u.guid, spaces: 'true' } },
+          );
+        },
+      },
+      {
+        label: 'Remove from Org and Spaces', icon: 'remove_circle', danger: true,
+        invoke: () => {
+          void this.router.navigate(
+            ['/cloud-foundry', cfGuid, 'users', 'remove'],
+            { queryParams: { user: u.guid } },
+          );
+        },
+      },
+    ];
   }
 
   // Resolves an org-role bucket's display label. Used by the plain-text

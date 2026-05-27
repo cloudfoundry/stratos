@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import {
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListRowAction,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
@@ -49,6 +50,7 @@ export class CloudFoundryOrganizationUsersComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   cfOrgService = inject(CloudFoundryOrganizationService);
   private usersConfig = inject(CfUsersSignalConfigService);
+  private router = inject(Router);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -141,6 +143,13 @@ export class CloudFoundryOrganizationUsersComponent {
           render: renderCreated,
           widthHint: '12rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (u: StUser) => this.buildRowActions(u, cfGuid, orgGuid),
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
       emptyMessage: 'There are no users in this organization',
@@ -160,6 +169,35 @@ export class CloudFoundryOrganizationUsersComponent {
     this.usersConfig.registerSortExtractor('origin', renderOrigin);
     this.usersConfig.registerSortExtractor('orgRoles', renderOrgRoles);
     this.usersConfig.registerSortExtractor('spaceRoles', renderSpaceRoles);
+  }
+
+  // Per-row Manage Roles + Remove (2 variants). Mirrors the CF Users
+  // tab pattern, but the wizard target lives under the org sub-tree
+  // so its scope guard pre-selects this org. ?user= still forwards the
+  // user GUID and ?spaces=true scopes the remove-flow to space-only
+  // role grants.
+  private buildRowActions(u: StUser, cfGuid: string, orgGuid: string): readonly SignalListRowAction<StUser>[] {
+    const base = ['/cloud-foundry', cfGuid, 'organizations', orgGuid, 'users'];
+    return [
+      {
+        label: 'Manage Roles', icon: 'group',
+        invoke: () => {
+          void this.router.navigate([...base, 'manage'], { queryParams: { user: u.guid } });
+        },
+      },
+      {
+        label: 'Remove from Spaces', icon: 'remove_circle_outline',
+        invoke: () => {
+          void this.router.navigate([...base, 'remove'], { queryParams: { user: u.guid, spaces: 'true' } });
+        },
+      },
+      {
+        label: 'Remove from Org and Spaces', icon: 'remove_circle', danger: true,
+        invoke: () => {
+          void this.router.navigate([...base, 'remove'], { queryParams: { user: u.guid } });
+        },
+      },
+    ];
   }
 
   // Resolves a space-role bucket's display label. Used by the plain-text

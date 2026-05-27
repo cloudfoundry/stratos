@@ -85,7 +85,7 @@ describe('CloudFoundrySpaceUsersComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Username', 'Origin', 'Space Roles', 'Created',
+      'Username', 'Origin', 'Space Roles', 'Created', '',
     ]);
     expect(cfg!.columns.find(c => c.key === 'orgRoles')).toBeUndefined();
     expect(cfg!.getRowKey({
