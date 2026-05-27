@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
@@ -22,6 +22,7 @@ import {
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import { extractHttpErrorMessage } from '../../../../../../../services/extract-error-message';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Scoped to one space under one org under one CF endpoint, narrowed to
@@ -54,6 +55,7 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
 
   // Favorite keys in rowKey format (${cnsi}:${siGuid}) for user-provided
   // service-instance favorites only. The wall ORs both managed and
@@ -186,15 +188,28 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
     this.userFavoriteManager.toggleFavorite(fav);
   }
 
+  // Per-row Edit / Detach / Delete. Restores the V2-era Edit + Detach
+  // actions from cf-user-service-instances-list-config that the signal-
+  // native migration dropped (catalog 2026-05-26 Space-scope row).
+  // Every row on this tab is user-provided, so siType is 'user-service'.
   private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
-      try {
-        await op();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
-      }
-    };
     return [
+      {
+        label: 'Edit', icon: 'edit',
+        invoke: () => {
+          void this.router.navigate([
+            '/services', 'user-service', si.cnsiGuid, si.guid, 'edit',
+          ]);
+        },
+      },
+      {
+        label: 'Detach', icon: 'link_off',
+        invoke: () => {
+          void this.router.navigate([
+            '/services', 'user-service', si.cnsiGuid, si.guid, 'detach',
+          ]);
+        },
+      },
       {
         label: 'Delete', icon: 'delete', danger: true,
         invoke: () => {
@@ -205,8 +220,11 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () =>
-              this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid));
+            try {
+              await this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid);
+            } catch (err: unknown) {
+              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
+            }
           });
         },
       },

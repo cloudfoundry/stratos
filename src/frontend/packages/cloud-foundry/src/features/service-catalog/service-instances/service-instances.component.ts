@@ -40,11 +40,11 @@ import { extractHttpErrorMessage } from '../../../services/extract-error-message
  * and the per-space tabs — extending it with a per-offering filter
  * matched the existing per-space pattern and avoided a parallel service.
  *
- * Per-row actions (only Delete today; Edit/Detach are out of scope until
- * the bind stepper migrates fully). Edit was navigation to the SI edit
- * stepper in legacy; offering-scoped detail page navigation will be
- * revisited if/when the SI detail page is built (parked per the slice
- * plan).
+ * Per-row actions: Edit / Detach / Delete. Edit + Detach navigate
+ * out to /services/{type}/{cnsi}/{guid}/{edit|detach}, reusing the
+ * existing AddServiceInstanceComponent (edit mode) and
+ * DetachServiceInstanceComponent. Delete confirms inline and calls
+ * instancesConfig.deleteServiceInstance.
  */
 @Component({
   selector: 'app-service-instances',
@@ -188,13 +188,34 @@ export class ServiceInstancesComponent implements OnInit {
     void this.instancesConfig.loadAll();
   }
 
-  // Per-row Delete with confirmation. Mirrors the wall's row-action
-  // pattern. After the writeWithJob settles the config service refreshes
-  // its source signal so the row vanishes.
+  // Per-row Edit / Detach / Delete. Restores the V2-era listActionEdit
+  // / listActionDetach surfaced by CfServiceInstancesListConfigBase
+  // that the signal-native migration dropped (catalog 2026-05-26 row
+  // for service-catalog Instances tab). Delete already shipped; this
+  // pass adds Edit and Detach navigation. After Delete the
+  // writeWithJob settles, instancesConfig refreshes, and the row
+  // vanishes.
   private readonly buildRowActions = (
     si: StServiceInstance,
   ): readonly SignalListRowAction<StServiceInstance>[] => {
+    const siType = si.type === 'user-provided' ? 'user-service' : 'service';
     return [
+      {
+        label: 'Edit', icon: 'edit',
+        invoke: () => {
+          void this.router.navigate([
+            '/services', siType, si.cnsiGuid, si.guid, 'edit',
+          ]);
+        },
+      },
+      {
+        label: 'Detach', icon: 'link_off',
+        invoke: () => {
+          void this.router.navigate([
+            '/services', siType, si.cnsiGuid, si.guid, 'detach',
+          ]);
+        },
+      },
       {
         label: 'Delete', icon: 'delete', danger: true,
         invoke: () => {
