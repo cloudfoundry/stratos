@@ -120,6 +120,10 @@ export class QuotaDataService {
     return this.http.patch<StOrgQuota>(`/pp/v1/cf/organization_quotas/${cnsiGuid}/${quotaGuid}`, body);
   }
 
+  deleteOrgQuota(cnsiGuid: string, quotaGuid: string): Observable<void> {
+    return this.http.delete<void>(`/pp/v1/cf/organization_quotas/${cnsiGuid}/${quotaGuid}`);
+  }
+
   createSpaceQuota(cnsiGuid: string, body: SpaceQuotaWriteBody): Observable<StSpaceQuota> {
     return this.http.post<StSpaceQuota>(`/pp/v1/cf/space_quotas/${cnsiGuid}`, body);
   }
