@@ -234,7 +234,16 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // Without this, ViewChild setters firing on first construction would
   // call downstream onEnter() with stale/missing context (e.g. before
   // the user has actually selected a plan).
-  private pendingSelectPlanEnter = false;
+  // Pending-onEnter flags. SelectPlan is a signal so an effect can fire
+  // onEnter once both the ViewChild has captured the child component AND
+  // submit() has flipped the pending flag — the original plain-field
+  // version was structurally broken because all step children are
+  // pre-instantiated at wizard mount (their `#refs` live inside content
+  // TemplateRefs that the ViewChild query reaches eagerly). The setter
+  // therefore fires once with v=truthy and pending=false on init, then
+  // never re-fires when submit later sets pending=true. Routing through
+  // a signal + effect handles the timing automatically.
+  private pendingSelectPlanEnter = signal(false);
   private pendingBindAppEnter = false;
   private pendingSpecifyDetailsEnter = false;
 
@@ -276,12 +285,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   @ViewChild('selectPlan', { static: false })
   set selectPlanRef(v: SelectPlanStepComponent | undefined) {
     this._selectPlan.set(v);
-    if (v && this.pendingSelectPlanEnter) {
-      this.pendingSelectPlanEnter = false;
-      // Replicate the legacy [onEnter]="selectPlan.onEnter" — the child
-      // re-fetches the plan list keyed off the selected service.
-      v.onEnter();
-    }
+    // onEnter is driven by an effect — see constructor — so swapping flag
+    // state (or having the child appear later) reliably reaches the
+    // child's onEnter regardless of which signal lands first.
   }
 
   @ViewChild('bindApp', { static: false })
@@ -342,7 +348,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       // the next transition; for the managed service flow it is Cloud
       // Foundry → Select Service. Queue both possible downstream
       // onEnters — only the one whose ViewChild fires next will trigger.
-      this.pendingSelectPlanEnter = true;
+      this.pendingSelectPlanEnter.set(true);
       this.pendingBindAppEnter = true;
     },
   };
@@ -358,7 +364,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (!result.success) {
         throw new Error(result.message || 'Failed to select service');
       }
-      this.pendingSelectPlanEnter = true;
+      this.pendingSelectPlanEnter.set(true);
     },
   };
 
@@ -446,6 +452,24 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     if (autoSelectCf) {
       this.cfOrgSpaceService.cf.select.set(autoSelectCf);
     }
+
+    // Bridge pendingSelectPlanEnter → child.onEnter via a signal effect.
+    // The child component is pre-instantiated at wizard mount (its #ref
+    // lives inside the app-step's content TemplateRef which the ViewChild
+    // query reaches eagerly), so the legacy setter-time check was racing
+    // submit() and almost always lost. Effects re-run when either signal
+    // changes, so flipping the flag after the child is mounted reliably
+    // routes through here.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const selectPlan = this._selectPlan();
+        const pending = this.pendingSelectPlanEnter();
+        if (selectPlan && pending) {
+          this.pendingSelectPlanEnter.set(false);
+          selectPlan.onEnter();
+        }
+      });
+    });
   }
 
   ngOnInit(): void {
