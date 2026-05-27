@@ -5,6 +5,8 @@ import { TestBed } from '@angular/core/testing';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
 import type { StApp } from '../../../../../services/endpoint-data/stratos-types';
+import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 
 function makeHttp(): HttpClient {
   return {
@@ -43,6 +45,60 @@ describe('CfAppsSignalConfigService', () => {
     const svc = makeSvc(http);
     svc.initialize(['cnsi-1', 'cnsi-2']);
     expect(svc.orchestrator.sources.map(s => s.cnsiGuid)).toEqual(['cnsi-1', 'cnsi-2']);
+  });
+
+  it('seeds sources from the EndpointDataService cache when apps were drained earlier', async () => {
+    // The home card / endpoint detail page drains EndpointDataService.apps()
+    // before the user reaches the per-CF Apps tab. Without seeding, mounting
+    // the tab discards that cache and shows a spinner while it re-fetches.
+    // Seed-on-construct lets the tab open populated; an explicit refresh()
+    // (via orchestrator.refresh) still falls through to the HTTP drain.
+    const http = makeHttp();
+    const a: StApp = { guid: 'a', name: 'cached-app', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '' };
+    const eds = new EndpointDataService(http, { write: () => {}, read: () => undefined } as never, 'cf-1');
+    // Drive the EDS state the way loadApps() does on success: full apps
+    // array + non-null appsLastFetched. Use the public mutators to avoid
+    // touching internal signals from the test.
+    eds.addApp(a);
+    (eds as unknown as { _appsLastFetched: { set: (d: Date) => void } })._appsLastFetched.set(new Date());
+
+    const registry = { acquire: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: HttpClient, useValue: http },
+        { provide: CloudFoundryService, useValue: makeStubCfService() },
+        { provide: EndpointDataRegistry, useValue: registry },
+        CfAppsSignalConfigService,
+      ],
+    });
+    const svc = TestBed.inject(CfAppsSignalConfigService);
+    svc.initialize(['cf-1']);
+    // loadAll() short-circuits because preSeed flipped the source's
+    // _preseeded flag; the HTTP stub never sees a request.
+    await svc.loadAll();
+    expect(svc.orchestrator.allItems()).toEqual([a]);
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
+  it('does not seed sources when EndpointDataService has not drained apps yet', async () => {
+    const http = makeHttp();
+    const eds = new EndpointDataService(http, { write: () => {}, read: () => undefined } as never, 'cf-1');
+    // No addApp / no appsLastFetched mutation — appsLastFetched stays null.
+
+    const registry = { acquire: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: HttpClient, useValue: http },
+        { provide: CloudFoundryService, useValue: makeStubCfService() },
+        { provide: EndpointDataRegistry, useValue: registry },
+        CfAppsSignalConfigService,
+      ],
+    });
+    const svc = TestBed.inject(CfAppsSignalConfigService);
+    svc.initialize(['cf-1']);
+    await svc.loadAll();
+    // Page 1 fetched via the normal load() path.
+    expect(http.get).toHaveBeenCalled();
   });
 
   it('exposes a ViewPipeline with filter / sort / pagination signals', () => {

@@ -336,7 +336,21 @@ export class CfAppsSignalConfigService {
     // alongside the dedup sets so previously-resolved names don't bleed
     // across initialize() calls.
     this.clearResolverState();
-    const sources = cnsiGuids.map(guid => new CnsiAppsSource(guid, this.http, this.endpointRegistry.acquire(guid)));
+    const sources = cnsiGuids.map(guid => {
+      const eds = this.endpointRegistry.acquire(guid);
+      const source = new CnsiAppsSource(guid, this.http, eds);
+      // If a prior page (home card / detail view / earlier tab mount) has
+      // already drained this CF's apps into the shared EndpointDataService,
+      // seed the new source from that cache so the user lands on populated
+      // rows instead of staring at a spinner while we re-fetch the same
+      // data. The base class's preSeed flag short-circuits the next load()
+      // exactly once; an explicit refresh() falls through to the normal
+      // HTTP drain.
+      if (eds.appsLastFetched() !== null) {
+        source.preSeed(eds.apps());
+      }
+      return source;
+    });
     this.orchestrator = new MergeOrchestrator<StApp>(sources);
     this.view = new ViewPipeline<StApp>(
       this.orchestrator.allItems,
