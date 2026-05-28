@@ -150,7 +150,9 @@ func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 }
 
 // setSpaceSshFeature handles
-//   PUT /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}/features/ssh
+//
+//	PUT /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}/features/ssh
+//
 // Body: { "enabled": true|false }.
 // Wraps CF V3 PATCH /v3/spaces/{guid}/features/ssh. V3 lifted SSH out
 // of the space attributes endpoint into a separate feature toggle, so
