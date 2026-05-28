@@ -19,7 +19,6 @@ import { UserInviteConfigureService, UserInviteService } from '../src/features/c
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
-import { createUserRoleInOrg } from '../src/store/types/cf-user.types';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
@@ -149,22 +148,6 @@ export function generateCfTopLevelStoreEntities() {
         name: '',
         error: false
       }
-    },
-    manageUsersRoles: {
-      users: [],
-      cfGuid: '',
-      newRoles: {
-        name: '',
-        orgGuid: '',
-        spaces: {},
-        permissions: createUserRoleInOrg(
-          undefined,
-          undefined,
-          undefined,
-          undefined
-        )
-      },
-      changedRoles: []
     },
   };
 }

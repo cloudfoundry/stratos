@@ -15,7 +15,6 @@ import { CloudFoundryReducersModule } from './store/cloud-foundry.reducers.modul
 import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
 import { CfValidateEffects } from './store/effects/request.effects';
 import { ServiceInstanceEffects } from './store/effects/service-instance.effects';
-import { UsersRolesEffects } from './store/effects/users-roles.effects';
 
 @NgModule({
   imports: [
@@ -25,7 +24,6 @@ import { UsersRolesEffects } from './store/effects/users-roles.effects';
     EffectsModule.forFeature([
       ServiceInstanceEffects,
       CfValidateEffects,
-      UsersRolesEffects
     ]),
     HttpClientTestingModule,
   ],

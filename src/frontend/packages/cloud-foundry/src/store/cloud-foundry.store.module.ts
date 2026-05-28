@@ -6,7 +6,6 @@ import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
 import { CfValidateEffects } from './effects/request.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
-import { UsersRolesEffects } from './effects/users-roles.effects';
 import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.service';
 
 @NgModule({
@@ -15,7 +14,6 @@ import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.serv
     EffectsModule.forFeature([
       ServiceInstanceEffects,
       CfValidateEffects,
-      UsersRolesEffects
     ]),
     // Brings in GitSCMService
     GitPackageModule,
