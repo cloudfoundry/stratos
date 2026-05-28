@@ -20,7 +20,7 @@ import { PermissionValues } from '@stratosui/store';
 import { CFFeatureFlagTypes } from '../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
-import { getFeatureFlagsSource } from './feature-flags-cache';
+import { featureFlagsAfterLoad$, getFeatureFlagsSource } from './feature-flags-cache';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
 import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import {
@@ -242,9 +242,16 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
           // for us, so trigger an idempotent load() here. The shared cache
           // (feature-flags-cache.ts) collapses concurrent + repeat loads
           // for the same cnsi, so this is safe to call on every check.
+          //
+          // Gate on load() completion: the items signal starts empty, so a
+          // take(1) consumer would otherwise capture the pre-load empty list
+          // and resolve to a false negative (set/unset-roles-by-username
+          // wrongly appearing disabled despite the flag being enabled).
           const src = getFeatureFlagsSource(guid, this.http);
-          src.load();
-          return toObservable(src.items, { injector: this.injector });
+          return featureFlagsAfterLoad$(
+            () => src.load(),
+            () => toObservable(src.items, { injector: this.injector }),
+          );
         };
         return combineLatest(guids.map(createFFObs));
       }),
