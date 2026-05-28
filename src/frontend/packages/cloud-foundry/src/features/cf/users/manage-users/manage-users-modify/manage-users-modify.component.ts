@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take,
   catchError,
@@ -26,9 +25,7 @@ import {
   TableComponent,
 } from '@stratosui/core';
 import { getRowMetadata, APIResource } from '@stratosui/store';
-import { UsersRolesFlipSetRoles, UsersRolesSetOrg } from '../../../../../actions/users-roles.actions';
 import { IOrganization } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
 import {
   TableCellRoleOrgSpaceComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
@@ -59,7 +56,6 @@ interface CfUserWithWarning extends CfUser {
   ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfRolesService = inject(CfRolesService);
   private cd = inject(ChangeDetectorRef);
@@ -180,7 +176,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         take(1),
         defaultIfEmpty(null)
       ).subscribe(org => {
-        if (org) { this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name)); }
+        if (org) { this.rolesData.setOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name); }
       });
     } else {
       this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid).pipe(
@@ -188,7 +184,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
         take(1)
       ).subscribe(orgs => {
         if (orgs[0]?.metadata?.guid && orgs[0]?.entity?.name) {
-          this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid, orgs[0].entity.name));
+          this.rolesData.setOrg(orgs[0].metadata.guid, orgs[0].entity.name);
         }
       });
     }
@@ -287,7 +283,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     // In order to show the removed roles correctly (as ticks) flip them from remove to add
     this.isRemove$$.pipe(take(1)).subscribe(isRemove => {
       if (isRemove) {
-        this.store.dispatch(new UsersRolesFlipSetRoles());
+        this.rolesData.flipSetRoles();
       }
     });
   };
@@ -307,7 +303,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       map(([isRemove]) => {
         if (isRemove) {
           // If we're going to eventually remove the roles flip the add to remove
-          this.store.dispatch(new UsersRolesFlipSetRoles());
+          this.rolesData.flipSetRoles();
         }
         return { success: true };
       })

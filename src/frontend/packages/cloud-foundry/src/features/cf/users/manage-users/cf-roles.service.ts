@@ -22,7 +22,7 @@ import { IOrganization, ISpace } from '../../../../cf-api.types';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { StOrg, StOrgDetail } from '../../../../services/endpoint-data/stratos-types';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/cf-users-roles.reducer';
+import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';

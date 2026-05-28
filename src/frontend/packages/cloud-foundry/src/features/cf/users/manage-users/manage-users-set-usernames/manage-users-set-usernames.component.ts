@@ -2,7 +2,6 @@ import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { take, defaultIfEmpty, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
@@ -16,13 +15,8 @@ import {
   StackedInputActionsUpdate,
   StepOnNextFunction,
 } from '@stratosui/core';
-import {
-  UsersRolesSetIsRemove,
-  UsersRolesSetIsSetByUsername,
-  UsersRolesSetUsers,
-} from '../../../../../actions/users-roles.actions';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUser } from '../../../../../store/types/cf-user.types';
 import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
@@ -54,7 +48,7 @@ export class ManageUsersSetUsernamesHelper {
   ]
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private rolesData = inject(CfUsersRolesDataService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
 
@@ -117,7 +111,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.store.dispatch(new UsersRolesSetIsSetByUsername(true));
+    this.rolesData.setIsSetByUsername(true);
     // When we add username validation the processing state should be used to show validation progress and result
     const processingState: StackedInputActionsState[] = [];
     // Object.keys(this.users.values).forEach(key => {
@@ -135,7 +129,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   }
 
   setIsRemove(event: {source: any, value: boolean}) {
-    this.store.dispatch(new UsersRolesSetIsRemove(event.value));
+    this.rolesData.setIsRemove(event.value);
     this.currentValue = event.value;
   }
 
@@ -146,7 +140,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
         guid: ManageUsersSetUsernamesHelper.createGuid(username, this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid)
       } as CfUser;
     });
-    this.store.dispatch(new UsersRolesSetUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin));
+    this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin);
     return of({
       success: true
     });

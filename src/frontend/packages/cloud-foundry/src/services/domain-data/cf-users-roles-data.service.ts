@@ -1,87 +1,345 @@
-import { Injectable, Signal, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { firstValueFrom } from 'rxjs';
 
-import { Store } from '@stratosui/store';
-
-import { UsersRolesSetChanges } from '../../actions/users-roles.actions';
-import { CFAppState } from '../../cf-app-state';
 import {
-  selectCfUsersIsRemove,
-  selectCfUsersIsSetByUsername,
-  selectCfUsersRoles,
-  selectCfUsersRolesChangedRoles,
-  selectCfUsersRolesCf,
-  selectCfUsersRolesOrgGuid,
-  selectCfUsersRolesPicked,
-  selectCfUsersRolesRoles,
-} from '../../store/selectors/cf-users-roles.selector';
+  CfUser,
+  IUserPermissionInOrg,
+  IUserPermissionInSpace,
+  OrgUserRoleNames,
+  SpaceUserRoleNames,
+  createUserRoleInOrg,
+  createUserRoleInSpace,
+} from '../../store/types/cf-user.types';
 import { CfRoleChange, UsersRolesState } from '../../store/types/users-roles.types';
-import { CfUser, IUserPermissionInOrg } from '../../store/types/cf-user.types';
 
-// Signal-native bridge for the manageUsersRoles wizard slice. Wraps
-// each compose-style selector in toSignal so the manage-users wizard
-// (cf-roles.service, manage-users{,-modify,-confirm}, remove-user,
-// cf-users-space-roles-list-config, table-cell-select-org,
-// cf-role-checkbox) can drop their `store.select(selectCfUsers...)`
-// calls without waiting for the underlying NgRx reducer to migrate.
+// Signal-native owner of the Manage Roles / Remove User wizard state. This
+// replaces the legacy `manageUsersRoles` NgRx slice (actions + reducer +
+// selectors + execute effect): state lives in writable signals here, and
+// `executeChanges` calls the native batch role-change endpoint directly
+// instead of dispatching entity actions and monitoring entity updates.
 //
-// Reads are signal-out (toSignal-wrapped selectors); writes are a
-// thin set of mutation methods that wrap the existing reducer actions
-// so consumers don't have to `inject(Store)` for the dispatch leg.
-// When the reducer eventually folds into this service, the public
-// surface stays put — only the internal `store` bridge goes away.
+// Read surface (cfGuid / users / newRoles / orgGuid / changedRoles /
+// isRemove / isSetByUsername / state) is preserved so existing consumers
+// keep working; the mutation methods replace the previous `inject(Store)`
+// + dispatch legs.
+export type RoleChangeApplyState = 'busy' | 'done' | 'error';
+
 @Injectable({ providedIn: 'root' })
 export class CfUsersRolesDataService {
-  private readonly store = inject<Store<CFAppState>>(Store);
+  private readonly http = inject(HttpClient);
+  private readonly snackBar = inject(TailwindSnackBarService);
 
-  readonly state: Signal<UsersRolesState | undefined> = toSignal(
-    this.store.select(selectCfUsersRoles),
-    { initialValue: undefined },
-  );
+  private readonly _cfGuid = signal<string>('');
+  private readonly _users = signal<CfUser[]>([]);
+  private readonly _newRoles = signal<IUserPermissionInOrg>(createDefaultOrgRoles('', ''));
+  private readonly _changedRoles = signal<CfRoleChange[]>([]);
+  private readonly _usernameOrigin = signal<string | undefined>(undefined);
+  private readonly _isRemove = signal<boolean | undefined>(undefined);
+  private readonly _isSetByUsername = signal<boolean | undefined>(undefined);
+  private readonly _applyStatus = signal<Record<string, RoleChangeApplyState>>({});
 
-  readonly cfGuid: Signal<string | undefined> = toSignal(
-    this.store.select(selectCfUsersRolesCf),
-    { initialValue: undefined },
-  );
+  /** Per-change apply state, keyed by {@link changeKey}, populated by executeChanges. */
+  readonly applyStatus: Signal<Record<string, RoleChangeApplyState>> = this._applyStatus.asReadonly();
 
-  readonly users: Signal<CfUser[]> = toSignal(
-    this.store.select(selectCfUsersRolesPicked),
-    { initialValue: [] as CfUser[] },
-  );
+  /** Stable identity for a role change — used to key applyStatus per row. */
+  static changeKey(c: CfRoleChange): string {
+    return `${c.userGuid}/${c.orgGuid}/${c.spaceGuid ?? ''}/${c.role}`;
+  }
 
-  readonly newRoles: Signal<IUserPermissionInOrg | undefined> = toSignal(
-    this.store.select(selectCfUsersRolesRoles),
-    { initialValue: undefined },
-  );
+  readonly cfGuid: Signal<string> = this._cfGuid.asReadonly();
+  readonly users: Signal<CfUser[]> = this._users.asReadonly();
+  readonly newRoles: Signal<IUserPermissionInOrg> = this._newRoles.asReadonly();
+  readonly changedRoles: Signal<CfRoleChange[]> = this._changedRoles.asReadonly();
+  readonly isRemove: Signal<boolean | undefined> = this._isRemove.asReadonly();
+  readonly isSetByUsername: Signal<boolean | undefined> = this._isSetByUsername.asReadonly();
+  readonly orgGuid: Signal<string> = computed(() => this._newRoles().orgGuid);
+  readonly state: Signal<UsersRolesState> = computed(() => ({
+    cfGuid: this._cfGuid(),
+    users: this._users(),
+    newRoles: this._newRoles(),
+    changedRoles: this._changedRoles(),
+    usernameOrigin: this._usernameOrigin(),
+    isRemove: this._isRemove(),
+    isSetByUsername: this._isSetByUsername(),
+  }));
 
-  readonly orgGuid: Signal<string | undefined> = toSignal(
-    this.store.select(selectCfUsersRolesOrgGuid),
-    { initialValue: undefined },
-  );
+  /** Seed the wizard with the picked users; clears roles but keeps the org. */
+  setUsers(cfGuid: string, users: CfUser[], origin?: string): void {
+    const current = this._newRoles();
+    this._cfGuid.set(cfGuid);
+    this._users.set(users);
+    this._newRoles.set(createDefaultOrgRoles(current.orgGuid, current.name));
+    this._usernameOrigin.set(origin);
+  }
 
-  readonly changedRoles: Signal<CfRoleChange[]> = toSignal(
-    this.store.select(selectCfUsersRolesChangedRoles),
-    { initialValue: [] as CfRoleChange[] },
-  );
+  /** Reset to the default empty state (wizard close). */
+  clear(): void {
+    this._cfGuid.set('');
+    this._users.set([]);
+    this._newRoles.set(createDefaultOrgRoles('', ''));
+    this._changedRoles.set([]);
+    this._usernameOrigin.set(undefined);
+    this._isRemove.set(undefined);
+    this._isSetByUsername.set(undefined);
+  }
 
-  readonly isRemove: Signal<boolean | undefined> = toSignal(
-    this.store.select(selectCfUsersIsRemove),
-    { initialValue: undefined },
-  );
+  /** Switch the org context, resetting the role matrix. */
+  setOrg(orgGuid: string, orgName: string): void {
+    this._newRoles.set(createDefaultOrgRoles(orgGuid, orgName));
+  }
 
-  readonly isSetByUsername: Signal<boolean | undefined> = toSignal(
-    this.store.select(selectCfUsersIsSetByUsername),
-    { initialValue: undefined },
-  );
+  setOrgRole(orgGuid: string, orgName: string, role: string, setRole: boolean): void {
+    const next = applyRoleChange(this._newRoles(), orgGuid, orgName, null, null, role, setRole, !!this._isSetByUsername());
+    if (next) {
+      this._newRoles.set(next);
+    }
+  }
+
+  setSpaceRole(orgGuid: string, orgName: string, spaceGuid: string, spaceName: string, role: string, setRole: boolean): void {
+    const next = applyRoleChange(this._newRoles(), orgGuid, orgName, spaceGuid, spaceName, role, setRole, !!this._isSetByUsername());
+    if (next) {
+      this._newRoles.set(next);
+    }
+  }
+
+  /** Replace the wizard's pending role-change set. */
+  setChanges(changes: CfRoleChange[]): void {
+    this._changedRoles.set(changes);
+  }
+
+  /** Invert the `add` flag on every pending change (remove-confirm flow). */
+  flipSetRoles(): void {
+    this._changedRoles.update(changes => changes.map(c => ({ ...c, add: !c.add })));
+  }
+
+  setIsRemove(isRemove: boolean): void {
+    this._isRemove.set(isRemove);
+  }
+
+  setIsSetByUsername(isSetByUsername: boolean): void {
+    this._isSetByUsername.set(isSetByUsername);
+  }
 
   /**
-   * Replace the wizard's pending role-change set. Wraps the
-   * {@link UsersRolesSetChanges} reducer action so consumers (the
-   * manage-users review step in `CfRolesService`, the remove-user
-   * confirm step) don't have to `inject(Store)` for this single
-   * dispatch.
+   * Apply the pending role changes via the native batch endpoint. The
+   * backend orders org-user membership relative to other roles and resolves
+   * GUIDs for removals, so the wizard just hands over the diff.
+   *
+   * Drives the per-row `applyStatus` signal (busy → done/error) so the
+   * confirm step can show live status, and pops a summary snackbar of the
+   * outcome. Never rejects on a per-change failure — the status + snackbar
+   * convey it — so the two-click apply flow stays in control of navigation.
    */
-  setChanges(changes: CfRoleChange[]): void {
-    this.store.dispatch(new UsersRolesSetChanges(changes));
+  async executeChanges(): Promise<void> {
+    const cfGuid = this._cfGuid();
+    const changes = this._changedRoles();
+    if (!changes.length) {
+      return;
+    }
+    this._applyStatus.set(
+      Object.fromEntries(changes.map(c => [CfUsersRolesDataService.changeKey(c), 'busy' as RoleChangeApplyState])),
+    );
+
+    const body = { changes: changes.map(toNativeRoleChange) };
+    let results: NativeRoleChangeResult[];
+    try {
+      const resp = await firstValueFrom(
+        this.http.post<{ results?: NativeRoleChangeResult[] }>(`/pp/v1/cf/roles/${cfGuid}/changes`, body),
+      );
+      results = resp?.results ?? [];
+    } catch (e) {
+      // Whole-request failure — mark everything errored and surface it.
+      this._applyStatus.update(s => {
+        const next = { ...s };
+        for (const key of Object.keys(next)) {
+          next[key] = 'error';
+        }
+        return next;
+      });
+      this.snackBar.error(`Failed to apply role changes: ${errorMessage(e)}`);
+      return;
+    }
+
+    const status = { ...this._applyStatus() };
+    const errors: string[] = [];
+    for (const r of results) {
+      const c = changes[r.index];
+      if (!c) {
+        continue;
+      }
+      const key = CfUsersRolesDataService.changeKey(c);
+      status[key] = r.success ? 'done' : 'error';
+      if (!r.success && r.error) {
+        errors.push(r.error);
+      }
+    }
+    this._applyStatus.set(status);
+
+    if (errors.length) {
+      this.snackBar.error(`${errors.length} of ${changes.length} role changes failed: ${errors.join('; ')}`);
+    } else {
+      this.snackBar.open(`Applied ${changes.length} role change${changes.length === 1 ? '' : 's'}`);
+    }
   }
+}
+
+function errorMessage(e: unknown): string {
+  if (e instanceof Error) {
+    return e.message;
+  }
+  return String(e);
+}
+
+interface NativeRoleChange {
+  userGuid: string;
+  orgGuid?: string;
+  spaceGuid?: string;
+  type: string;
+  add: boolean;
+}
+
+interface NativeRoleChangeResult {
+  index: number;
+  success: boolean;
+  error?: string;
+  jobId?: string;
+  state?: string;
+}
+
+// Maps a wizard role change to the V3 batch wire shape. Space scope sends
+// spaceGuid; org scope sends orgGuid. The short role names collide between
+// org and space (e.g. 'managers'), so the scope flag disambiguates.
+function toNativeRoleChange(c: CfRoleChange): NativeRoleChange {
+  const type = nativeRoleType(c.role, !!c.spaceGuid);
+  return c.spaceGuid
+    ? { userGuid: c.userGuid, spaceGuid: c.spaceGuid, type, add: c.add }
+    : { userGuid: c.userGuid, orgGuid: c.orgGuid, type, add: c.add };
+}
+
+function nativeRoleType(role: string, isSpace: boolean): string {
+  if (isSpace) {
+    switch (role) {
+      case SpaceUserRoleNames.MANAGER: return 'space_manager';
+      case SpaceUserRoleNames.AUDITOR: return 'space_auditor';
+      case SpaceUserRoleNames.DEVELOPER: return 'space_developer';
+      default: throw new Error(`Unknown space role: ${role}`);
+    }
+  }
+  switch (role) {
+    case OrgUserRoleNames.MANAGER: return 'organization_manager';
+    case OrgUserRoleNames.BILLING_MANAGERS: return 'organization_billing_manager';
+    case OrgUserRoleNames.AUDITOR: return 'organization_auditor';
+    case OrgUserRoleNames.USER: return 'organization_user';
+    default: throw new Error(`Unknown org role: ${role}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Role-matrix helpers — ported verbatim from the former cf-users-roles
+// reducer so the in-progress matrix behaves identically (immutable clones,
+// auto-add of the org user role when any other role is applied).
+
+export function createDefaultOrgRoles(orgGuid: string, orgName: string): IUserPermissionInOrg {
+  return {
+    name: orgName,
+    orgGuid,
+    permissions: createUserRoleInOrg(undefined, undefined, undefined, undefined),
+    spaces: {},
+  };
+}
+
+export function createDefaultSpaceRoles(orgGuid: string, orgName: string, spaceGuid: string, spaceName: string): IUserPermissionInSpace {
+  return {
+    name: spaceName,
+    spaceGuid,
+    orgGuid,
+    orgName,
+    permissions: createUserRoleInSpace(undefined, undefined, undefined),
+  };
+}
+
+function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, role: string, applyRole: boolean): boolean {
+  if ((roles.permissions as any)[role] === applyRole) {
+    return false;
+  }
+  roles.permissions = {
+    ...roles.permissions,
+    [role]: applyRole,
+  };
+  return true;
+}
+
+function cloneOrgRoles(orgRoles: IUserPermissionInOrg, orgGuid: string, orgName: string): IUserPermissionInOrg {
+  return orgRoles
+    ? { ...orgRoles, spaces: { ...orgRoles.spaces } }
+    : createDefaultOrgRoles(orgGuid, orgName);
+}
+
+function applyRoleChange(
+  existing: IUserPermissionInOrg,
+  orgGuid: string,
+  orgName: string,
+  spaceGuid: string | null,
+  spaceName: string | null,
+  role: string,
+  applyRole: boolean,
+  isSetByUsername: boolean,
+): IUserPermissionInOrg | null {
+  let next: IUserPermissionInOrg | null = cloneOrgRoles(existing, orgGuid, orgName);
+  if (spaceGuid) {
+    next = applySpaceRole(next, orgGuid, orgName, spaceGuid, spaceName as string, role, applyRole, isSetByUsername);
+  } else {
+    next = applyOrgRole(next, role, applyRole, isSetByUsername);
+  }
+  if (!next) {
+    return null;
+  }
+  return { ...existing, ...next };
+}
+
+function applySpaceRole(
+  orgRoles: IUserPermissionInOrg,
+  orgGuid: string,
+  orgName: string,
+  spaceGuid: string,
+  spaceName: string,
+  role: string,
+  applyRole: boolean,
+  isSetByUsername: boolean,
+): IUserPermissionInOrg {
+  if (!orgRoles.spaces![spaceGuid]) {
+    orgRoles.spaces![spaceGuid] = createDefaultSpaceRoles(orgGuid, orgName, spaceGuid, spaceName);
+  }
+  const spaceRoles = orgRoles.spaces![spaceGuid] = { ...orgRoles.spaces![spaceGuid] };
+  const changed = setPermission(spaceRoles, role, applyRole);
+  // Applying any space role implies org membership.
+  if (changed && applyRole && !isSetByUsername) {
+    orgRoles.permissions = {
+      ...orgRoles.permissions,
+      [OrgUserRoleNames.USER]: true,
+    };
+  }
+  return orgRoles;
+}
+
+function applyOrgRole(
+  orgRoles: IUserPermissionInOrg,
+  role: string,
+  applyRole: boolean,
+  isSetByUsername: boolean,
+): IUserPermissionInOrg | null {
+  const changed = setPermission(orgRoles, role, applyRole);
+  if (!changed) {
+    return null;
+  }
+  // Applying org manager/auditor/billing implies org membership.
+  if (role !== 'user' && applyRole && !isSetByUsername) {
+    orgRoles.permissions = {
+      ...orgRoles.permissions,
+      [OrgUserRoleNames.USER]: true,
+    };
+  }
+  return orgRoles;
 }

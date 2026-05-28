@@ -12,13 +12,10 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
-import { UsersRolesClear, UsersRolesExecuteChanges, UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
-import { CFAppState } from '../../../../cf-app-state';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CfUser } from '../../../../store/types/cf-user.types';
@@ -51,7 +48,6 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
   ]
 })
 export class UsersRolesComponent implements AfterViewInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfUserService = inject(CfUserService);
   private route = inject(ActivatedRoute);
@@ -82,9 +78,9 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   // onEnter, onLeave, onNext) so each handle is mostly a thin delegating
   // shell.
   //
-  // Cross-step state survives via the existing ngrx pipeline
-  // (UsersRolesSetUsers / UsersRolesExecuteChanges / etc.) — no parent-
-  // owned signal coordination needed beyond `applyStartedSignal`.
+  // Cross-step state lives in the signal-native CfUsersRolesDataService
+  // (setUsers / executeChanges / etc.) — no parent-owned signal
+  // coordination needed beyond `applyStartedSignal`.
   @ViewChild('setUsers', { static: false }) setUsers?: ManageUsersSetUsernamesComponent;
   @ViewChild('modify', { static: false }) modify!: UsersRolesModifyComponent;
   @ViewChild('confirm', { static: false }) confirm!: UsersRolesConfirmComponent;
@@ -99,9 +95,9 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     valid: this.setUsersValid.asReadonly(),
     blocked: this.setUsersBlocked.asReadonly(),
     submit: async () => {
-      // setUsers.onNext returns of({ success: true }) after dispatching
-      // UsersRolesSetUsers — we just need to wait for it to fire so the
-      // store is primed before the modify step's onEnter runs.
+      // setUsers.onNext returns of({ success: true }) after seeding the
+      // wizard service with the picked users — we wait for it so the
+      // service is primed before the modify step's onEnter runs.
       const result = await firstValueFrom(this.setUsers!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to set usernames');
@@ -138,13 +134,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
         return;
       }
       this.applyStartedSignal.set(true);
-      this.store.dispatch(
-        new UsersRolesExecuteChanges(
-          this.setUsernames,
-          this.activeRouteCfOrgSpace.orgGuid,
-          this.activeRouteCfOrgSpace.spaceGuid,
-        ),
-      );
+      await this.rolesData.executeChanges();
       return { ignoreSuccess: true };
     },
   };
@@ -162,8 +152,17 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
       // User has yet to supply users to manage. This will be handled by the first step
       this.singleUser$ = of(null);
     } else {
+      // `?users=g1,g2,g3` selects multiple users (the bulk Manage Roles
+      // path); `?user=g1` is the single-user shorthand. Falls back to the
+      // already-picked users in the wizard state.
+      const usersQParam = this.route.snapshot.queryParams.users;
       const userQParam = this.route.snapshot.queryParams.user;
-      if (userQParam) {
+      if (usersQParam) {
+        const guids = (usersQParam as string).split(',').map(g => g.trim()).filter(Boolean);
+        this.initialUsers$ = observableCombineLatest(
+          guids.map(guid => this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, guid).pipe(map(user => user.entity)))
+        ).pipe(take(1));
+      } else if (userQParam) {
         this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
           map(user => [user.entity]),
           take(1)
@@ -184,7 +183,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
         take(1)
       ).subscribe(([usersRoles, users]) => {
         if (!usersRoles?.cfGuid || !users) {
-          this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, users));
+          this.rolesData.setUsers(activeRouteCfOrgSpace.cfGuid, users);
         }
       });
     }
@@ -229,7 +228,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.bridgeSubs.forEach(s => s.unsubscribe());
-    this.store.dispatch(new UsersRolesClear());
+    this.rolesData.clear();
   }
 
   /**

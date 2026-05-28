@@ -10,15 +10,9 @@ import {
 import { toObservable } from "@angular/core/rxjs-interop";
 import { CustomCheckboxComponent } from "@stratosui/core";
 import { CustomTooltipDirective } from "@stratosui/core";
-import { Store } from "@stratosui/store";
 import { Subscription } from "rxjs";
 import { take, combineLatest as combineLatestOp, filter } from "rxjs/operators";
 
-import {
-  UsersRolesSetOrgRole,
-  UsersRolesSetSpaceRole,
-} from "../../../../../cloud-foundry/src/actions/users-roles.actions";
-import { CFAppState } from "../../../../../cloud-foundry/src/cf-app-state";
 import { CfUserRolesSelected } from "../../../../../cloud-foundry/src/store/types/users-roles.types";
 import { CurrentUserPermissionsService } from "../../../../../core/src/core/permissions/current-user-permissions.service";
 import { canUpdateOrgSpaceRoles } from "../../../features/cf/cf.helpers";
@@ -54,7 +48,6 @@ enum CfRoleCheckboxMode {
   imports: [CustomCheckboxComponent, CustomTooltipDirective],
 })
 export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
-  private store = inject(Store<CFAppState>);
   private cfRolesService = inject(CfRolesService);
   private userPerms = inject(CurrentUserPermissionsService);
   private rolesData = inject(CfUsersRolesDataService);
@@ -439,24 +432,15 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
         this.tooltip = "";
       }
       if (this.isOrgRole) {
-        this.store.dispatch(
-          new UsersRolesSetOrgRole(
-            this.orgGuid,
-            this.orgName,
-            this.role,
-            checked,
-          ),
-        );
+        this.rolesData.setOrgRole(this.orgGuid, this.orgName, this.role, checked);
       } else {
-        this.store.dispatch(
-          new UsersRolesSetSpaceRole(
-            this.orgGuid,
-            this.orgName,
-            this.spaceGuid,
-            this.spaceName,
-            this.role,
-            checked,
-          ),
+        this.rolesData.setSpaceRole(
+          this.orgGuid,
+          this.orgName,
+          this.spaceGuid,
+          this.spaceName,
+          this.role,
+          checked,
         );
       }
     });

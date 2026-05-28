@@ -4,12 +4,9 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { Store } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
-import { UsersRolesSetOrg } from '../../../../../../../../cloud-foundry/src/actions/users-roles.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
@@ -31,7 +28,6 @@ import { CfUsersRolesDataService } from '../../../../../../services/domain-data/
   ]
 })
 export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOrganization>> implements OnInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfRolesService = inject(CfRolesService);
   private rolesData = inject(CfUsersRolesDataService);
@@ -73,7 +69,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     }
     this.organizations$.pipe(take(1)).subscribe(orgs => {
       const org = orgs.find(o => o.metadata.guid === orgGuid);
-      this.store.dispatch(new UsersRolesSetOrg(org.metadata.guid, org.entity.name));
+      this.rolesData.setOrg(org.metadata.guid, org.entity.name);
     });
 
   }

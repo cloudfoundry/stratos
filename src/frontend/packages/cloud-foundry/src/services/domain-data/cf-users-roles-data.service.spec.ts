@@ -1,91 +1,139 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { describe, expect, it, beforeEach } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 
-import { UsersRolesSetChanges } from '../../actions/users-roles.actions';
-import { CfUser, IUserPermissionInOrg } from '../../store/types/cf-user.types';
-import { CfRoleChange, UsersRolesState } from '../../store/types/users-roles.types';
+import { CfUser } from '../../store/types/cf-user.types';
+import { CfRoleChange } from '../../store/types/users-roles.types';
 import { CfUsersRolesDataService } from './cf-users-roles-data.service';
-
-const newRoles: IUserPermissionInOrg = {
-  orgGuid: 'org-1',
-  orgName: 'Org 1',
-  permissions: {} as any,
-  spaces: {} as any,
-};
 
 const userA = { guid: 'u-a', username: 'alice' } as unknown as CfUser;
 
-const change: CfRoleChange = {
-  userGuid: 'u-a',
-  orgGuid: 'org-1',
-  add: true,
-  role: 'managers' as any,
-  orgName: 'Org 1',
-};
-
-const fullState: UsersRolesState = {
-  cfGuid: 'cf-1',
-  users: [userA],
-  newRoles,
-  changedRoles: [change],
-  isRemove: false,
-  isSetByUsername: true,
-};
-
-function stateWith(roles: Partial<UsersRolesState>): unknown {
-  return {
-    manageUsersRoles: { ...fullState, ...roles },
-  };
-}
-
 describe('CfUsersRolesDataService', () => {
   let svc: CfUsersRolesDataService;
-  let store: MockStore;
+  let httpMock: HttpTestingController;
+  let snackBar: { open: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
+    snackBar = { open: vi.fn(), error: vi.fn() };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideMockStore({ initialState: stateWith({}) }),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: TailwindSnackBarService, useValue: snackBar },
         CfUsersRolesDataService,
       ],
     });
-    store = TestBed.inject(MockStore);
+    httpMock = TestBed.inject(HttpTestingController);
     svc = TestBed.inject(CfUsersRolesDataService);
   });
 
-  it('exposes the wizard slice fields as signals', () => {
+  it('starts from an empty default state', () => {
+    expect(svc.cfGuid()).toBe('');
+    expect(svc.users()).toEqual([]);
+    expect(svc.changedRoles()).toEqual([]);
+    expect(svc.orgGuid()).toBe('');
+  });
+
+  it('setUsers seeds users + cfGuid, retains the selected org, and records origin', () => {
+    svc.setOrg('org-1', 'Org 1');
+    svc.setUsers('cf-1', [userA], 'ldap');
+
     expect(svc.cfGuid()).toBe('cf-1');
     expect(svc.users().map(u => u.guid)).toEqual(['u-a']);
-    expect(svc.newRoles()).toEqual(newRoles);
     expect(svc.orgGuid()).toBe('org-1');
-    expect(svc.changedRoles()).toEqual([change]);
-    expect(svc.isRemove()).toBe(false);
-    expect(svc.isSetByUsername()).toBe(true);
+    expect(svc.state().usernameOrigin).toBe('ldap');
   });
 
-  it('reflects state changes through the signal pipeline', () => {
-    store.setState(stateWith({ cfGuid: 'cf-2', isRemove: true, isSetByUsername: false }));
+  it('clear resets to defaults', () => {
+    svc.setUsers('cf-1', [userA]);
+    svc.setIsRemove(true);
+    svc.clear();
 
-    expect(svc.cfGuid()).toBe('cf-2');
-    expect(svc.isRemove()).toBe(true);
-    expect(svc.isSetByUsername()).toBe(false);
+    expect(svc.cfGuid()).toBe('');
+    expect(svc.users()).toEqual([]);
+    expect(svc.isRemove()).toBeUndefined();
   });
 
-  it('setChanges dispatches UsersRolesSetChanges with the provided diff', () => {
-    const dispatched: unknown[] = [];
-    store.scannedActions$.subscribe(a => dispatched.push(a));
+  it('setOrgRole sets the requested role', () => {
+    svc.setOrg('org-1', 'Org 1');
+    svc.setOrgRole('org-1', 'Org 1', 'auditors', true);
 
-    const newChange: CfRoleChange = { ...change, role: 'auditors' as any };
-    svc.setChanges([newChange]);
+    expect(svc.newRoles().permissions.auditors).toBe(true);
+  });
 
-    const setAction = dispatched.find(
-      (a): a is UsersRolesSetChanges => a instanceof UsersRolesSetChanges,
-    );
-    expect(setAction).toBeDefined();
-    expect(setAction!.changes).toEqual([newChange]);
+  it('setOrgRole for a non-user role auto-adds the org user role', () => {
+    svc.setOrg('org-1', 'Org 1');
+    svc.setOrgRole('org-1', 'Org 1', 'managers', true);
+
+    expect(svc.newRoles().permissions.managers).toBe(true);
+    expect(svc.newRoles().permissions.users).toBe(true);
+  });
+
+  it('setSpaceRole sets the space role and auto-adds the org user role', () => {
+    svc.setOrg('org-1', 'Org 1');
+    svc.setSpaceRole('org-1', 'Org 1', 'sp-1', 'Space 1', 'developers', true);
+
+    expect(svc.newRoles().spaces!['sp-1'].permissions.developers).toBe(true);
+    expect(svc.newRoles().permissions.users).toBe(true);
+  });
+
+  it('does not auto-add the org user role when setting by username', () => {
+    svc.setOrg('org-1', 'Org 1');
+    svc.setIsSetByUsername(true);
+    svc.setOrgRole('org-1', 'Org 1', 'managers', true);
+
+    expect(svc.newRoles().permissions.managers).toBe(true);
+    expect(svc.newRoles().permissions.users).toBeUndefined();
+  });
+
+  it('flipSetRoles inverts add on every change', () => {
+    const c1: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' };
+    const c2: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: false, role: 'auditors' as any, orgName: 'Org 1' };
+    svc.setChanges([c1, c2]);
+    svc.flipSetRoles();
+
+    expect(svc.changedRoles().map(c => c.add)).toEqual([false, true]);
+  });
+
+  it('executeChanges posts changes mapped to V3 role types and scope', async () => {
+    svc.setUsers('cf-1', [userA]);
+    svc.setChanges([
+      { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' },
+      { userGuid: 'u-a', orgGuid: 'org-1', spaceGuid: 'sp-1', add: false, role: 'developers' as any, orgName: 'Org 1', spaceName: 'Space 1' },
+    ]);
+
+    const done = svc.executeChanges();
+
+    const req = httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body.changes).toEqual([
+      { userGuid: 'u-a', orgGuid: 'org-1', type: 'organization_manager', add: true },
+      { userGuid: 'u-a', spaceGuid: 'sp-1', type: 'space_developer', add: false },
+    ]);
+    req.flush({ results: [{ index: 0, success: true }, { index: 1, success: true }] });
+
+    await expect(done).resolves.toBeUndefined();
+    expect(snackBar.open).toHaveBeenCalled();
+  });
+
+  it('executeChanges records per-change applyStatus and surfaces failures via snackbar', async () => {
+    svc.setUsers('cf-1', [userA]);
+    const ok: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' };
+    const bad: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', spaceGuid: 'sp-1', add: false, role: 'developers' as any, orgName: 'Org 1', spaceName: 'Space 1' };
+    svc.setChanges([ok, bad]);
+
+    const done = svc.executeChanges();
+    const req = httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes');
+    req.flush({ results: [{ index: 0, success: true }, { index: 1, success: false, error: 'boom' }] });
+    await done;
+
+    expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(ok)]).toBe('done');
+    expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(bad)]).toBe('error');
+    expect(snackBar.error).toHaveBeenCalled();
   });
 });

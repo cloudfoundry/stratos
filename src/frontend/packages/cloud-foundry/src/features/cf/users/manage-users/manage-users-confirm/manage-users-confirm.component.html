@@ -1,4 +1,36 @@
 <p>Please confirm that you would like to make the following user role changes to organization {{orgName$ | async}}</p>
-<app-action-monitor [columns]="columns" [data$]="changes$" [entityKey]="userCatalogEntity.entityKey"
-  [schema]="userCatalogEntity.getSchema()" [monitorState]="monitorState" [getCellConfig]="getCellConfig">
-</app-action-monitor>
+@if (changes$ | async; as changes) {
+  <table class="w-full text-left border-collapse">
+    <thead>
+      <tr class="border-b border-content-subtle">
+        <th class="py-2 pr-4 font-medium">User</th>
+        <th class="py-2 pr-4 font-medium">Action</th>
+        <th class="py-2 pr-4 font-medium">Role</th>
+        <th class="py-2 pr-4 font-medium">Target</th>
+        <th class="py-2 font-medium">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of changes; track rowKey(row)) {
+        <tr class="border-b border-content-subtle">
+          <td class="py-2 pr-4">{{ row.username }}</td>
+          <td class="py-2 pr-4">
+            <app-table-cell-confirm-role-add-rem [row]="row"></app-table-cell-confirm-role-add-rem>
+          </td>
+          <td class="py-2 pr-4">{{ row.roleName }}</td>
+          <td class="py-2 pr-4">
+            <app-table-cell-confirm-org-space [row]="row"></app-table-cell-confirm-org-space>
+          </td>
+          <td class="py-2">
+            @switch (statusOf(row)) {
+              @case ('busy') { <span class="text-content-subtle">Applying…</span> }
+              @case ('done') { <span class="text-status-success">Done</span> }
+              @case ('error') { <span class="text-status-danger">Failed</span> }
+              @default { <span class="text-content-subtle">Pending</span> }
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

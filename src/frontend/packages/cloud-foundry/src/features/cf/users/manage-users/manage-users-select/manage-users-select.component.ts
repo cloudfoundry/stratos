@@ -9,13 +9,11 @@ import {
   signal,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
-import { UsersRolesSetUsers } from '../../../../../actions/users-roles.actions';
-import { CFAppState } from '../../../../../cf-app-state';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
   CfSelectUsersSignalConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-signal-config.service';
@@ -37,7 +35,7 @@ import { EnumerateComponent } from '../../../../../../../core/src/shared/compone
   providers: [CfSelectUsersSignalConfigService],
 })
 export class UsersRolesSelectComponent {
-  private store = inject<Store<CFAppState>>(Store);
+  private rolesData = inject(CfUsersRolesDataService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private selectConfig = inject(CfSelectUsersSignalConfigService);
   cfRolesService = inject(CfRolesService);
@@ -68,7 +66,7 @@ export class UsersRolesSelectComponent {
 
   onNext = () => {
     const users = this.selectedUsers();
-    this.store.dispatch(new UsersRolesSetUsers(this.activeRouteCfOrgSpace.cfGuid, users));
+    this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users);
     return of({ success: true });
   };
 }

@@ -1,6 +1,6 @@
 <app-page-header>
-  @if (singleUser$ | async) {
-    <span>Remove User: {{(singleUser$ | async).username }}</span>
+  @if (title$ | async; as title) {
+    <span>{{ title }}</span>
   }
 </app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">

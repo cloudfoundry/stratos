@@ -101,8 +101,8 @@ export class CfSelectUsersSignalConfigService {
 
   /**
    * Resolve the current set of selected CfUser objects. Used by the
-   * wizard's onNext to dispatch UsersRolesSetUsers — preserves the legacy
-   * dispatch contract (full CfUser objects, not just guids).
+   * wizard's onNext to seed CfUsersRolesDataService.setUsers — full CfUser
+   * objects, not just guids.
    */
   resolveSelected(): CfUser[] {
     const keys = this.selectedKeys();
