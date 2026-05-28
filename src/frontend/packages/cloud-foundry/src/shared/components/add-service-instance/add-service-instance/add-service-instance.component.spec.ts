@@ -3,6 +3,7 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
 import { InternalEventMonitorFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TabNavService } from '@stratosui/core';
@@ -98,5 +99,82 @@ describe('AddServiceInstanceComponent', () => {
       expect(component.supdHandle.valid()).toBe(true);
     });
 
+  });
+
+  /**
+   * The framework's SteppersComponent.setActive(idx+1) propagates a step's
+   * submit-result `data` field into the next step's `pOnEnter(this.enterData)`
+   * call, which prefers `signalHandle.onEnter(data)`. For the Add SI flow this
+   * is how the user's selected plan must reach bind-app and specify-details:
+   *
+   *   selectPlanHandle.submit  →  { data: plan }
+   *                                    │
+   *                                    └→  SteppersComponent.enterData = plan
+   *                                            │
+   *                                            └→  bindAppHandle.onEnter(plan)
+   *                                                  → _bindApp().onEnter(plan)
+   *                                            └→  specifyDetailsHandle.onEnter(plan)
+   *                                                  → _specifyDetails.onEnter(plan)
+   *
+   * The legacy pendingX-flag pattern attempted this via @ViewChild setters
+   * that fire-once-at-mount, missing later flag flips. These specs lock the
+   * contract on the handles directly so the bug can't reappear.
+   */
+  describe('step handle onEnter forwards plan to child after selectPlan submit', () => {
+    it('selectPlanHandle.submit resolves with { data: <plan> } so framework propagates it', async () => {
+      const plan = { guid: 'plan-1', name: 'Standard' };
+      const child = {
+        validate: signal(true),
+        onEnter: () => undefined,
+        onNext: () => of({ success: true, data: plan }),
+      } as any;
+      (component as any).selectPlanRef = child;
+
+      const result = await component.selectPlanHandle.submit!();
+
+      expect(result).toEqual({ data: plan });
+    });
+
+    it('bindAppHandle.onEnter forwards the plan to the bind-app child', () => {
+      let received: any = null;
+      const child = {
+        validate: signal(true),
+        onEnter: (plan: any) => { received = plan; },
+      } as any;
+      (component as any).bindAppRef = child;
+
+      const plan = { guid: 'plan-1', name: 'Standard' };
+      component.bindAppHandle.onEnter?.(plan);
+
+      expect(received).toEqual(plan);
+    });
+
+    it('specifyDetailsHandle.onEnter forwards the plan to the specify-details child', () => {
+      let received: any = null;
+      const child = {
+        validate: { subscribe: () => ({ unsubscribe: () => {} }) },
+        serviceInstancesInit$: { subscribe: () => ({ unsubscribe: () => {} }) },
+        onEnter: (plan: any) => { received = plan; },
+      } as any;
+      (component as any).specifyDetailsRef = child;
+
+      const plan = { guid: 'plan-1', name: 'Standard' };
+      component.specifyDetailsHandle.onEnter?.(plan);
+
+      expect(received).toEqual(plan);
+    });
+
+    it('selectPlanHandle.onEnter triggers the select-plan child onEnter', () => {
+      let called = false;
+      const child = {
+        validate: signal(true),
+        onEnter: () => { called = true; },
+      } as any;
+      (component as any).selectPlanRef = child;
+
+      component.selectPlanHandle.onEnter?.();
+
+      expect(called).toBe(true);
+    });
   });
 });
