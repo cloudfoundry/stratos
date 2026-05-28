@@ -43,7 +43,7 @@ export interface SignalStepHandle {
    * snackbar (used by `manage-users` / `remove-user` two-click apply).
    * When omitted the step auto-succeeds — useful for confirmation screens.
    */
-  readonly submit?: () => Promise<void | { ignoreSuccess?: boolean }>;
+  readonly submit?: () => Promise<void | Partial<StepOnNextResult>>;
   /**
    * Optional conditional-skip predicate. When true the stepper treats the
    * step as if its legacy `skip` input were true — included in the visible
