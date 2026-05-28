@@ -125,7 +125,10 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
 	if err != nil {
 		log.Warnf("[diag refresh] UAA call FAILED cnsi=%s user=%s err=%v", cnsiGUID, userGUID, err)
-		return t, fmt.Errorf("token refresh request failed: %v", err)
+		// %w (not %v) so the underlying api.ErrHTTPRequest stays unwrappable —
+		// the native CF error classifier inspects its upstream Status to tell
+		// an unreachable UAA (5xx/timeout) from a rejected token (401).
+		return t, fmt.Errorf("token refresh request failed: %w", err)
 	}
 
 	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
