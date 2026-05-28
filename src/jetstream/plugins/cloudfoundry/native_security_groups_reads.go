@@ -44,7 +44,7 @@ func (c *CloudFoundrySpecification) getNativeSecurityGroups(ctx echo.Context) er
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.SecurityGroups().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StSecurityGroupsResponse{
 			Resources:    []StSecurityGroup{},

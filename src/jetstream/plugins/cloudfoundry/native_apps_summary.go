@@ -390,7 +390,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 
 	raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		return err
 	}
 
 	appGUIDs := make([]string, 0, len(raw.Resources))
@@ -494,7 +494,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	// Fetch all matching apps (filters retained; page/per_page/order_by ignored)
 	allApps, err := fetchAllAppsWithFilters(ctx.Request().Context(), cfClient, params.Filters)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		return err
 	}
 
 	appGUIDs := make([]string, 0, len(allApps))
