@@ -233,19 +233,11 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // signal-handle submit() drops that wiring so we replicate it here.
   // Without this, ViewChild setters firing on first construction would
   // call downstream onEnter() with stale/missing context (e.g. before
-  // the user has actually selected a plan).
-  // Pending-onEnter flags. SelectPlan is a signal so an effect can fire
-  // onEnter once both the ViewChild has captured the child component AND
-  // submit() has flipped the pending flag — the original plain-field
-  // version was structurally broken because all step children are
-  // pre-instantiated at wizard mount (their `#refs` live inside content
-  // TemplateRefs that the ViewChild query reaches eagerly). The setter
-  // therefore fires once with v=truthy and pending=false on init, then
-  // never re-fires when submit later sets pending=true. Routing through
-  // a signal + effect handles the timing automatically.
-  private pendingSelectPlanEnter = signal(false);
-  private pendingBindAppEnter = false;
-  private pendingSpecifyDetailsEnter = false;
+  // the user has actually selected a plan). Cross-step onEnter delivery
+  // is owned by `signalHandle.onEnter` — the framework routes the prior
+  // step's `submit()` return-value `data` field through `pOnEnter` into
+  // the next handle's onEnter, so the legacy pendingX-flag pattern is
+  // unnecessary.
 
   @ViewChild('selectCF', { static: false })
   set selectCFRef(v: CreateApplicationStep1Component | undefined) {
@@ -293,12 +285,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   @ViewChild('bindApp', { static: false })
   set bindAppRef(v: BindAppsStepComponent | undefined) {
     this._bindApp.set(v);
-    if (v && this.pendingBindAppEnter) {
-      this.pendingBindAppEnter = false;
-      // Replicate the legacy [onEnter]="bindApp.onEnter" — the child
-      // initialises bindings using the plan selected upstream.
-      v.onEnter(this.selectedPlan as any);
-    }
   }
 
   @ViewChild('specifyDetails', { static: false })
@@ -309,12 +295,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     this.specifyDetailsValidSub = undefined;
     this.specifyDetailsInitSub = undefined;
     if (v) {
-      if (this.pendingSpecifyDetailsEnter) {
-        this.pendingSpecifyDetailsEnter = false;
-        // Replicate the legacy [onEnter]="specifyDetails.onEnter" — the
-        // child seeds form values from the selected plan.
-        v.onEnter(this.selectedPlan as any);
-      }
       this.specifyDetailsValidSub = v.validate.subscribe(valid => {
         this.specifyDetailsValid.set(!!valid);
         this.cdr.markForCheck();
@@ -344,12 +324,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (!result.success) {
         throw new Error(this.errorMessage || 'Failed to save Cloud Foundry details');
       }
-      // For the user-provided service flow Cloud Foundry → Bind App is
-      // the next transition; for the managed service flow it is Cloud
-      // Foundry → Select Service. Queue both possible downstream
-      // onEnters — only the one whose ViewChild fires next will trigger.
-      this.pendingSelectPlanEnter.set(true);
-      this.pendingBindAppEnter = true;
     },
   };
 
@@ -364,7 +338,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (!result.success) {
         throw new Error(result.message || 'Failed to select service');
       }
-      this.pendingSelectPlanEnter.set(true);
     },
   };
 
@@ -372,17 +345,19 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     valid: computed(() => !!this._selectPlan()?.validate()),
     blocked: computed(() => !this._initialisedService()),
     cancelButtonText: signal('Cancel').asReadonly(),
+    onEnter: () => this._selectPlan()?.onEnter(),
     submit: async () => {
       const result = await firstValueFrom(this._selectPlan()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to select plan');
       }
-      // Capture the selected plan for downstream step onEnters and
-      // queue the bind-app + specify-details onEnter calls — the
-      // ViewChild setters fire those when their refs become available.
+      // Stash the plan locally so downstream submit handlers / template
+      // bindings can read it synchronously. The stepper framework also
+      // carries this `data` through `enterData` into the next step's
+      // signalHandle.onEnter — see bindAppHandle.onEnter +
+      // specifyDetailsHandle.onEnter below.
       this.selectedPlan = result.data;
-      this.pendingBindAppEnter = true;
-      this.pendingSpecifyDetailsEnter = true;
+      return { data: result.data };
     },
   };
 
@@ -390,6 +365,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     valid: computed(() => !!this._bindApp()?.validate()),
     skipIf: this.skipAppsSignal.asReadonly(),
     cancelButtonText: signal('Cancel').asReadonly(),
+    onEnter: (plan) => this._bindApp()?.onEnter(plan as any),
     submit: async () => {
       const result = await firstValueFrom(this._bindApp()!.submit());
       if (!result.success) {
@@ -403,6 +379,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     blocked: this.specifyDetailsInit.asReadonly(),
     cancelButtonText: signal('Cancel ').asReadonly(),
     nextButtonText: signal('Create ').asReadonly(),
+    onEnter: (plan) => this._specifyDetails?.onEnter(plan as any),
     submit: async () => {
       const result = await firstValueFrom(this._specifyDetails!.onNext());
       if (!result.success) {
@@ -452,24 +429,6 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     if (autoSelectCf) {
       this.cfOrgSpaceService.cf.select.set(autoSelectCf);
     }
-
-    // Bridge pendingSelectPlanEnter → child.onEnter via a signal effect.
-    // The child component is pre-instantiated at wizard mount (its #ref
-    // lives inside the app-step's content TemplateRef which the ViewChild
-    // query reaches eagerly), so the legacy setter-time check was racing
-    // submit() and almost always lost. Effects re-run when either signal
-    // changes, so flipping the flag after the child is mounted reliably
-    // routes through here.
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const selectPlan = this._selectPlan();
-        const pending = this.pendingSelectPlanEnter();
-        if (selectPlan && pending) {
-          this.pendingSelectPlanEnter.set(false);
-          selectPlan.onEnter();
-        }
-      });
-    });
   }
 
   ngOnInit(): void {
