@@ -227,12 +227,12 @@ type StSpacesResponse struct {
 // v3 relationship if needed (broker.guid alone is omitted at base since
 // the wire-shape already strips relationships).
 type StServiceOffering struct {
-	GUID                  string                 `json:"guid"`
-	CnsiGUID              string                 `json:"cnsiGuid"`
-	Name                  string                 `json:"name"`
-	Description           string                 `json:"description,omitempty"`
-	Tags                  []string               `json:"tags,omitempty"`
-	Available             *bool                  `json:"available,omitempty"`
+	GUID        string   `json:"guid"`
+	CnsiGUID    string   `json:"cnsiGuid"`
+	Name        string   `json:"name"`
+	Description string   `json:"description,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+	Available   *bool    `json:"available,omitempty"`
 	// Bindable mirrors capi.ServiceOffering.Bindable. Drives the marketplace
 	// card's Bindable column (replaces the V2 IService.bindable read).
 	// Pointer so summary+ tiers emit it while base omits.
