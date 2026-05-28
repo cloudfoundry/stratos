@@ -35,6 +35,46 @@ function extractCnsiGuid(url: string): string | null {
   return m ? m[1] : null;
 }
 
+// Headers the Jetstream native-CF error paths set to classify a failure.
+// REASON is only emitted for called-out reasons (unreachable / auth_expired);
+// UPSTREAM_STATUS carries the real CF/UAA code (e.g. 503) since the Stratos
+// response status is often a mapped 502.
+const STRATOS_ERROR_REASON_HEADER = 'X-Stratos-Error-Reason';
+const STRATOS_UPSTREAM_STATUS_HEADER = 'X-Stratos-Upstream-Status';
+
+interface NativeCfErrorBody {
+  reason?: string;
+  upstreamStatus?: number;
+  detail?: string;
+  cnsiGuid?: string;
+}
+
+// Parse a native CF error body using the first-character discriminator the
+// backend emits: '{' → JSON, '#' → plain string (marker stripped), anything
+// else → legacy plain string. Angular may already have parsed a JSON body
+// into an object, in which case it's returned as-is.
+function parseNativeCfErrorBody(err: HttpErrorResponse): NativeCfErrorBody {
+  const raw = err.error;
+  if (raw && typeof raw === 'object') {
+    return raw as NativeCfErrorBody;
+  }
+  if (typeof raw !== 'string') {
+    return {};
+  }
+  const s = raw.trimStart();
+  if (s.startsWith('{')) {
+    try {
+      return JSON.parse(s) as NativeCfErrorBody;
+    } catch {
+      return {};
+    }
+  }
+  if (s.startsWith('#')) {
+    return { detail: s.slice(1) };
+  }
+  return { detail: s };
+}
+
 export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
   const diagnostics = inject(StratosDiagnostics);
   const authState = inject(EndpointAuthStateService);
@@ -67,23 +107,58 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
         const ms = performance.now() - start;
         diagnostics.emitCounter('api-call-count', { urlPattern, method, outcome: 'error' });
         diagnostics.emitSample('api-call-timing', { urlPattern, method, outcome: 'error' }, ms);
-        // 502 from a native CF handler typically signals stale token / failed
-        // refresh on the proxy side. Mark the endpoint stale + show a one-shot
-        // toast linking to the endpoints page so the user can reconnect. Look
-        // up the endpoint name so the toast tells the user *which* endpoint to
-        // reconnect (the GUID is included as a tail-end disambiguator for the
-        // case where two endpoints share a display name).
-        if (cnsiGuid && err instanceof HttpErrorResponse && err.status === 502) {
-          if (authState.markStale(cnsiGuid)) {
+        // 502 from a native CF handler. The Jetstream middleware classifies
+        // the failure via the X-Stratos-Error-Reason header so the banner can
+        // tell the user the right thing: a rejected token (reconnect fixes
+        // it), an unreachable/down endpoint (reconnect won't help), or an
+        // unclassified request failure. The endpoint is always named (the
+        // GUID is a tail-end disambiguator for shared display names).
+        if (cnsiGuid && err instanceof HttpErrorResponse) {
+          const reason = err.headers?.get(STRATOS_ERROR_REASON_HEADER) ?? '';
+          // Act on classified failures (any status) or gateway 502s. Normal CF
+          // errors (404/422/...) carry no reason and aren't 502 — leave those
+          // to the component that made the call.
+          if (reason || err.status === 502) {
             const endpoint = endpointsSignal.endpoints()[cnsiGuid];
-            const label = endpoint?.name
-              ? `'${endpoint.name}' (${cnsiGuid})`
-              : cnsiGuid;
-            const ref = snackbar.error(
-              `Cloud Foundry endpoint ${label} authentication expired. Reconnect to refresh.`,
-              'Reconnect',
-            );
-            ref.onAction().subscribe(() => router.navigate(['/endpoints']));
+            // Prefer the endpoint name; fall back to the GUID only when the
+            // name is unknown. The GUID is otherwise omitted — the error code
+            // is the useful diagnostic, not the opaque cnsi GUID.
+            const label = endpoint?.name ? `'${endpoint.name}'` : cnsiGuid;
+            const headerStatus = err.headers?.get(STRATOS_UPSTREAM_STATUS_HEADER);
+            const body = parseNativeCfErrorBody(err);
+            const upstreamStatus = headerStatus ? Number(headerStatus) : (body.upstreamStatus ?? 0);
+            // Two-line banner: endpoint name on line 1, "HTTP <code>: <what>"
+            // on line 2 (the "\n" renders via the snackbar's whitespace-pre-line
+            // — see TailwindSnackBarService; we avoid <br>/innerHTML so the
+            // user-controlled endpoint name can't inject markup).
+            const codePrefix = upstreamStatus ? `HTTP ${upstreamStatus}: ` : '';
+            const line1 = `Cloud Foundry endpoint ${label}`;
+
+            if (reason === 'auth_expired') {
+              // Stored token rejected — reconnecting re-authenticates.
+              if (authState.markStale(cnsiGuid)) {
+                const ref = snackbar.error(
+                  `${line1}\n${codePrefix}Authentication expired. Reconnect to refresh.`,
+                  'Reconnect',
+                );
+                ref.onAction().subscribe(() => router.navigate(['/endpoints']));
+              }
+            } else if (reason === 'unreachable') {
+              // Endpoint is down — no stale mark (reconnect won't help).
+              if (authState.notifyOnce(cnsiGuid, reason)) {
+                snackbar.error(
+                  `${line1}\n${codePrefix}The endpoint is unreachable or down.`,
+                );
+              }
+            } else {
+              // Unclassified failure — neutral, complete title naming the
+              // endpoint; the calling component may surface its own detail.
+              if (authState.notifyOnce(cnsiGuid, reason || 'generic')) {
+                snackbar.error(
+                  `${line1}\n${codePrefix}Request failed.`,
+                );
+              }
+            }
           }
         }
       },
