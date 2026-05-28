@@ -51,6 +51,7 @@ describe('VariablesTabComponent', () => {
   // Spy holders, refreshed per test.
   let refreshScope: ReturnType<typeof vi.fn>;
   let addVariable: ReturnType<typeof vi.fn>;
+  let updateVariable: ReturnType<typeof vi.fn>;
   let deleteVariable: ReturnType<typeof vi.fn>;
   let confirmOpen: ReturnType<typeof vi.fn>;
   let configRefresh: ReturnType<typeof vi.fn>;
@@ -67,13 +68,14 @@ describe('VariablesTabComponent', () => {
 
   const makeVariableActionsStub = () => {
     addVariable = vi.fn(async () => undefined);
+    updateVariable = vi.fn(async () => undefined);
     deleteVariable = vi.fn(async () => undefined);
     return {
       transitioningName: signal<string | null>(null).asReadonly(),
       inFlight: signal(false).asReadonly(),
       addVariable,
       deleteVariable,
-      updateVariable: vi.fn(async () => undefined),
+      updateVariable,
     };
   };
 
@@ -224,6 +226,63 @@ describe('VariablesTabComponent', () => {
     await onConfirm();
     expect(deleteVariable).toHaveBeenCalledWith('FOO');
     expect(configRefresh).toHaveBeenCalled();
+  });
+
+  describe('edit affordance (restored lost functionality)', () => {
+    it('exposes an Edit row action alongside Delete', () => {
+      fixture.detectChanges();
+      const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+      const rowActions = actionsCol!.actions!({ name: 'FOO', value: 'bar' } as any);
+      expect(rowActions.find(a => a.label === 'Edit')).toBeTruthy();
+      expect(rowActions.find(a => a.label === 'Delete')).toBeTruthy();
+    });
+
+    it('Edit opens the inline form pre-filled and enters edit mode', () => {
+      fixture.detectChanges();
+      const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+      const edit = actionsCol!.actions!({ name: 'FOO', value: 'bar' } as any).find(a => a.label === 'Edit');
+
+      edit!.invoke({ name: 'FOO', value: 'bar' } as any);
+
+      expect(component.isAdding()).toBe(true);
+      expect(component.editingName()).toBe('FOO');
+      expect(component.addItem()).toEqual({ name: 'FOO', value: 'bar' });
+    });
+
+    it('validateAndSave in edit mode calls updateVariable (not addVariable), then closes + refreshes', async () => {
+      fixture.detectChanges();
+      component.editingName.set('FOO');
+      component.addItem.set({ name: 'FOO', value: 'new-value' });
+
+      component.validateAndSave();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(updateVariable).toHaveBeenCalledWith('FOO', 'new-value');
+      expect(addVariable).not.toHaveBeenCalled();
+      expect(configRefresh).toHaveBeenCalled();
+      expect(component.isAdding()).toBe(false);
+      expect(component.editingName()).toBeNull();
+    });
+
+    it('edit mode skips the duplicate-name validation (the key already exists)', () => {
+      fixture.detectChanges();
+      component.editingName.set('FOO');
+      component.addItem.set({ name: 'FOO', value: 'v' });
+
+      component.validateAndSave();
+
+      expect(component.nameError()).toBe('');
+      expect(updateVariable).toHaveBeenCalled();
+    });
+
+    it('cancel clears edit mode', () => {
+      component.editingName.set('FOO');
+      component.isAdding.set(true);
+      component.cancelAdd();
+      expect(component.editingName()).toBeNull();
+      expect(component.isAdding()).toBe(false);
+    });
   });
 
   describe('validateAndSave()', () => {

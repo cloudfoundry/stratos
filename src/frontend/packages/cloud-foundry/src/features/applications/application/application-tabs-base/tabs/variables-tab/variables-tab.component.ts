@@ -106,6 +106,15 @@ export class VariablesTabComponent implements OnInit {
   readonly addItem: WritableSignal<{ name: string; value: string }> = signal({ name: '', value: '' });
 
   /**
+   * Name of the variable currently being edited, or null in add mode. The
+   * inline form is reused for edit: when set, the Name input is locked (the
+   * key is the variable's identity — only the value changes) and a save
+   * routes to updateVariable instead of addVariable. Restores the per-row
+   * Edit affordance dropped in the signal-native migration.
+   */
+  readonly editingName: WritableSignal<string | null> = signal(null);
+
+  /**
    * Validation error for the Name input — populated by validateAndSave()
    * when the user clicks the ✓ button with an invalid Name. Empty string
    * = no error to display. Cleared on every keystroke so the user sees
@@ -143,6 +152,7 @@ export class VariablesTabComponent implements OnInit {
     invoke: () => {
       this.addItem.set({ name: '', value: '' });
       this.nameError.set('');
+      this.editingName.set(null);
       this.isAdding.set(true);
     },
   };
@@ -243,6 +253,15 @@ export class VariablesTabComponent implements OnInit {
    *  in the absolute-positioned slot above the Name input. */
   validateAndSave(): void {
     const item = this.addItem();
+    const editing = this.editingName();
+    if (editing) {
+      // Edit mode: the key is fixed (Name input is locked), only the value
+      // changes, so the add-path name validation (required / pattern /
+      // duplicate) does not apply. Route straight to the update verb.
+      this.nameError.set('');
+      void this.saveEdit(editing, item.value ?? '');
+      return;
+    }
     const name = (item.name ?? '').trim();
     if (!name) {
       this.nameError.set('Name is required');
@@ -260,9 +279,10 @@ export class VariablesTabComponent implements OnInit {
     void this.saveAdd(name, item.value ?? '');
   }
 
-  /** Cancel the inline add form. */
+  /** Cancel the inline add/edit form. */
   cancelAdd(): void {
     this.nameError.set('');
+    this.editingName.set(null);
     this.isAdding.set(false);
   }
 
@@ -292,6 +312,20 @@ export class VariablesTabComponent implements OnInit {
     }
   }
 
+  /** Submit an edited variable's value via the update verb, then close the
+   *  form and refresh the env envelope so the next read reflects CF. */
+  private async saveEdit(name: string, value: string): Promise<void> {
+    try {
+      await this.actionsService.updateVariable(name, value);
+      this.isAdding.set(false);
+      this.editingName.set(null);
+      this.addItem.set({ name: '', value: '' });
+      await this.variablesConfig.refresh();
+    } catch (err: any) {
+      this.snackBar.error(`Update variable failed: ${err?.message ?? err}`);
+    }
+  }
+
   /**
    * Per-row action factory. Wraps the wave-2 service's Delete verb with
    * a confirmation dialog (legacy text style). On confirm we await the
@@ -303,6 +337,18 @@ export class VariablesTabComponent implements OnInit {
   private readonly buildRowActions = (row: ListAppEnvVar): readonly SignalListRowAction<ListAppEnvVar>[] => {
     const disabled = this.actionsService.inFlight();
     return [
+      {
+        label: 'Edit', icon: 'edit',
+        disabled,
+        invoke: () => {
+          // Reuse the inline form in edit mode: pre-fill name+value, lock
+          // the Name (the key is the variable's identity), save via update.
+          this.addItem.set({ name: row.name, value: row.value == null ? '' : String(row.value) });
+          this.nameError.set('');
+          this.editingName.set(row.name);
+          this.isAdding.set(true);
+        },
+      },
       {
         label: 'Delete', icon: 'delete', danger: true,
         disabled,
