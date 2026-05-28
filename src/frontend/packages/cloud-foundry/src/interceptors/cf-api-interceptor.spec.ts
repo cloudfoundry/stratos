@@ -74,23 +74,122 @@ describe('cfApiInterceptor', () => {
     expect(errMatch?.count).toBe(1);
   });
 
-  // Regression for the snackbar identifying the failing endpoint by name.
-  // The first cut of the 502 handler said only "Cloud Foundry endpoint
-  // authentication expired" — operators with multiple CF endpoints could
-  // not tell which one needed reconnecting. Snackbar text must include the
-  // endpoint name and the GUID (the latter as a tail-end disambiguator for
-  // the case where two endpoints share a display name).
-  it('includes endpoint name and GUID in the 502 snackbar message', async () => {
-    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
-    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
-    const messages: string[] = [];
+  // The 502 banner must always identify the failing endpoint by name + GUID
+  // (the GUID disambiguates shared display names). The message + behaviour
+  // vary by the X-Stratos-Error-Reason header the Jetstream middleware sets.
+  //
+  // Helper: capture banner messages and the action label passed alongside.
+  const captureSnackbar = async () => {
+    const calls: { msg: string; action?: string }[] = [];
     const { TailwindSnackBarService } = await import('@stratosui/core');
     const snackbar = TestBed.inject(TailwindSnackBarService);
     const origError = snackbar.error.bind(snackbar);
     snackbar.error = (msg: string, action?: string) => {
-      messages.push(msg);
+      calls.push({ msg, action });
       return origError(msg, action);
     };
+    return calls;
+  };
+
+  it('auth_expired reason → "authentication expired" banner with Reconnect action', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
+      JSON.stringify({ reason: 'auth_expired', detail: 'token rejected' }),
+      { status: 502, statusText: 'Bad Gateway', headers: { 'X-Stratos-Error-Reason': 'auth_expired' } },
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].msg).toContain("'Kevin'");
+    expect(calls[0].msg).not.toContain(cnsi); // GUID dropped from the banner
+    expect(calls[0].msg).toContain('Authentication expired');
+    expect(calls[0].action).toBe('Reconnect');
+  });
+
+  it('unreachable reason → "unreachable" banner, no Reconnect, includes upstream status', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
+      JSON.stringify({ reason: 'unreachable', upstreamStatus: 503, detail: 'down' }),
+      { status: 502, statusText: 'Bad Gateway', headers: { 'X-Stratos-Error-Reason': 'unreachable' } },
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].msg).toContain("'Kevin'");
+    expect(calls[0].msg).not.toContain(cnsi); // GUID dropped
+    expect(calls[0].msg).toContain('unreachable');
+    expect(calls[0].msg).toContain('HTTP 503'); // error code shown
+    expect(calls[0].action).toBeUndefined();
+  });
+
+  it('reason via header on a non-502 status still fires, with upstream status from header', async () => {
+    // The handleCapiError path maps to a real status (e.g. 401) and sets the
+    // reason + upstream-status headers directly — the banner must fire off the
+    // header, not the 502 status, and show the upstream code.
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
+      JSON.stringify({ errors: [{ code: 10002, title: 'CF-NotAuthenticated' }] }),
+      {
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: { 'X-Stratos-Error-Reason': 'auth_expired', 'X-Stratos-Upstream-Status': '401' },
+      },
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].msg).toContain('Authentication expired');
+    expect(calls[0].action).toBe('Reconnect');
+  });
+
+  it('unreachable via header with upstream-status header → "unreachable (HTTP 503)"', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/orgs/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/orgs/${cnsi}`).flush(
+      '{"error":"capi: server error (status 503): <html>...</html>"}',
+      {
+        status: 502,
+        statusText: 'Bad Gateway',
+        headers: { 'X-Stratos-Error-Reason': 'unreachable', 'X-Stratos-Upstream-Status': '503' },
+      },
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].msg).toContain('unreachable');
+    expect(calls[0].msg).toContain('HTTP 503');
+    expect(calls[0].action).toBeUndefined();
+  });
+
+  it('normal CF error (404, no reason header) → no banner', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/orgs/${cnsi}/missing`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/orgs/${cnsi}/missing`).flush(
+      JSON.stringify({ errors: [{ code: 10010, title: 'CF-ResourceNotFound' }] }),
+      { status: 404, statusText: 'Not Found' },
+    );
+
+    expect(calls).toHaveLength(0); // component handles its own 404
+  });
+
+  it('no reason header → neutral "request failed" banner naming the endpoint', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
 
     http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
     ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
@@ -98,9 +197,12 @@ describe('cfApiInterceptor', () => {
       { status: 502, statusText: 'Bad Gateway' },
     );
 
-    expect(messages).toHaveLength(1);
-    expect(messages[0]).toContain("'Kevin'");
-    expect(messages[0]).toContain(cnsi);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].msg).toContain("'Kevin'");
+    expect(calls[0].msg).not.toContain(cnsi); // GUID dropped
+    expect(calls[0].msg).toContain('failed');
+    expect(calls[0].msg).not.toContain('authentication expired');
+    expect(calls[0].action).toBeUndefined();
   });
 
   // Regression for the desktop-plugin cnsi GUID format. Endpoints registered

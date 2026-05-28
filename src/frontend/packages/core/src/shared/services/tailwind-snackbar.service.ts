@@ -156,10 +156,12 @@ export class TailwindSnackBarService {
 
     snackbar.className = classes.join(' ');
 
-    // Create message element
+    // Create message element. whitespace-pre-line honours explicit "\n" in the
+    // message (so callers can put a technical detail / error code on its own
+    // line) while still wrapping normally — textContent keeps it XSS-safe.
     const messageElement = document.createElement('span');
     messageElement.textContent = message;
-    messageElement.className = 'flex-1';
+    messageElement.className = 'flex-1 whitespace-pre-line';
     snackbar.appendChild(messageElement);
 
     // Create action button if provided
