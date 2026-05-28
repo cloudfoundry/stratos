@@ -66,7 +66,7 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 			WithFilter("type", "app")
 		raw, lerr := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		// Legacy flat envelope — preserved for ?return=counts callers.
 		return ctx.JSON(http.StatusOK, struct {
@@ -161,7 +161,7 @@ func (c *CloudFoundrySpecification) getServiceInstanceServiceBindings(ctx echo.C
 			WithFilter("type", "app")
 		raw, lerr := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, struct {
 			Resources    []StServiceCredentialBinding `json:"resources"`

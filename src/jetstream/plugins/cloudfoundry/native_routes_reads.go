@@ -50,7 +50,7 @@ func (c *CloudFoundrySpecification) getAppRoutes(ctx echo.Context) error {
 			WithFilter("app_guids", appGUID)
 		raw, lerr := cfClient.Routes().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StAppRoutesResponse{
 			Resources:    []StRoute{},

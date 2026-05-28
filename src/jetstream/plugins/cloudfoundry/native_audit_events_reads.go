@@ -46,7 +46,7 @@ func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StAuditEventsResponse{
 			Resources:    []StAuditEvent{},
@@ -108,7 +108,7 @@ func (c *CloudFoundrySpecification) getNativeOrgAuditEvents(ctx echo.Context) er
 			WithFilter("organization_guids", orgGUID)
 		raw, lerr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StAuditEventsResponse{
 			Resources:    []StAuditEvent{},
@@ -173,7 +173,7 @@ func (c *CloudFoundrySpecification) getNativeSpaceAuditEvents(ctx echo.Context) 
 			WithFilter("space_guids", spaceGUID)
 		raw, lerr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StAuditEventsResponse{
 			Resources:    []StAuditEvent{},

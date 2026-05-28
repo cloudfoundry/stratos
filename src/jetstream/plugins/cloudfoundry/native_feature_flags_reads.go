@@ -43,7 +43,7 @@ func (c *CloudFoundrySpecification) getNativeFeatureFlags(ctx echo.Context) erro
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.FeatureFlags().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StFeatureFlagsResponse{
 			Resources:    []StFeatureFlag{},

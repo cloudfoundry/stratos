@@ -66,7 +66,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		// Legacy flat-envelope shape kept identical to pre-rework — the
 		// frontend counts probe still consumes `{resources, totalResults}`.
@@ -213,7 +213,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx echo.
 			WithFilter("service_broker_guids", brokerGUID)
 		raw, lerr := cfClient.ServiceOfferings().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, struct {
 			Resources    []StServiceOffering `json:"resources"`

@@ -42,7 +42,7 @@ func (c *CloudFoundrySpecification) getNativeBuildpacks(ctx echo.Context) error 
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, lerr := cfClient.Buildpacks().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StBuildpacksResponse{
 			Resources:    []StBuildpack{},

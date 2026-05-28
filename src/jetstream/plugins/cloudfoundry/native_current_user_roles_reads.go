@@ -109,7 +109,7 @@ func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) 
 	}
 	logCapiTiming("getNativeCurrentUserRoles.roles", -1, -1, -1, rStart, rerr, rRows, -1)
 	if rerr != nil {
-		err = echo.NewHTTPError(http.StatusBadGateway, rerr.Error())
+		err = rerr
 		return err
 	}
 
