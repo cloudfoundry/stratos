@@ -76,7 +76,7 @@
         }
         <!-- Step content -->
         <div class="steppers-contents mb-8">
-          <span *ngTemplateOutlet="steps[currentIndex].content"></span>
+          <span *ngTemplateOutlet="steps[currentIndex()].content"></span>
         </div>
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex items-center justify-between border-t pt-6">
@@ -84,42 +84,42 @@
             @if (steps.length !== 1 || basePreviousRedirect) {
               <button id="stepper_previous"
                 class="btn btn-secondary"
-                (click)="setActive(currentIndex - 1)"
-                [disabled]="!canGoto(currentIndex - 1) || steps[currentIndex].disablePrevious">
+                (click)="setActive(currentIndex() - 1)"
+                [disabled]="!canGoto(currentIndex() - 1) || steps[currentIndex()].disablePrevious">
                 Previous
               </button>
             }
           </div>
           <div class="steppers-navigation-right flex items-center space-x-3">
             <!-- Cancel button -->
-            @if (!steps[currentIndex].hideCloseButton && cancel) {
+            @if (!steps[currentIndex()].hideCloseButton && cancel) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
                 [routerLink]="cancel$ | async"
                 [queryParams]="cancelQueryParams$ | async"
-                [disabled]="!canCancel(currentIndex)"
-                (click)="steps[currentIndex].onLeave(false)">
-                {{ this.getCancelButtonText(currentIndex) }}
+                [disabled]="!canCancel(currentIndex())"
+                (click)="steps[currentIndex()].onLeave(false)">
+                {{ this.getCancelButtonText(currentIndex()) }}
               </button>
             }
             <!-- Next/Submit button -->
-            @if (!steps[currentIndex].hideNextButton) {
+            @if (!steps[currentIndex()].hideNextButton) {
               <button id="stepper_next"
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
                   [ngClass]="{
-                    'btn-danger': steps[currentIndex].destructiveStep,
-                    'btn-primary': !steps[currentIndex].destructiveStep
+                    'btn-danger': steps[currentIndex()].destructiveStep,
+                    'btn-primary': !steps[currentIndex()].destructiveStep
                   }"
                 type="submit"
-                (click)="goNext(currentIndex)"
-                [disabled]="steps[currentIndex].busy || steps[currentIndex].blocked || !canGoNext(currentIndex)">
+                (click)="goNext(currentIndex())"
+                [disabled]="steps[currentIndex()].busy || steps[currentIndex()].blocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
                 @if (showNextButtonProgress) {
                   <div
                     class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
                   </div>
                 } @else {
-                  <span>{{ this.getNextButtonText(currentIndex) }}</span>
+                  <span>{{ this.getNextButtonText(currentIndex()) }}</span>
                 }
                 <!-- Button text -->
               </button>

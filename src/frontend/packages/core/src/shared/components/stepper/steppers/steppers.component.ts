@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
@@ -67,7 +67,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private enterData: any;
   private snackBarRef!: TailwindSnackBarRef<any>;
 
-  currentIndex = 0;
+  // Signal (read directly in the template as currentIndex()) so the action
+  // buttons' [disabled]/text bindings re-render under zoneless CD when the
+  // step changes. The step transition completes inside an async submit
+  // continuation (a Promise resolved by signal-handle.submit); a plain
+  // property + markForCheck there did not flush, leaving the finish/Apply
+  // button stale on the final step. A signal write reliably triggers
+  // zoneless CD, and a direct template read establishes the dependency
+  // (a getter-wrapped read does not track for signal-driven CD).
+  readonly currentIndex = signal(0);
   cancelQueryParams$: Observable<{
     [key: string]: string;
   }>;
@@ -144,8 +152,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.snackBar.dismiss();
     }
     this.unsubscribeNext();
-    if (this.currentIndex < this.steps.length) {
-      const step = this.steps[this.currentIndex];
+    if (this.currentIndex() < this.steps.length) {
+      const step = this.steps[this.currentIndex()];
       step.busy = true;
 
       // Defensive: step.invokeNext may throw synchronously (runtime error
@@ -155,7 +163,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // forever. Catch, surface via snackbar, reset busy.
       let obs$: Observable<StepOnNextResult> | unknown;
       try {
-        obs$ = step.invokeNext(this.currentIndex);
+        obs$ = step.invokeNext(this.currentIndex());
       } catch (err) {
         console.error('Stepper onNext threw synchronously:', err);
         step.busy = false;
@@ -209,7 +217,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               // Must sub to this
               return this.redirect(redirectPayload);
             } else {
-              this.setActive(this.currentIndex + 1);
+              this.setActive(this.currentIndex() + 1);
             }
           } else if (!success && message) {
             this.snackBarRef = this.snackBar.error(
@@ -277,8 +285,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
 
     // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
-    const isNextDirection = index > this.currentIndex;
-    this.steps[this.currentIndex].invokeLeave(isNextDirection);
+    const isNextDirection = index > this.currentIndex();
+    this.steps[this.currentIndex()].invokeLeave(isNextDirection);
 
     // 2) Determine if the required step is ok (and if not find the next/previous valid step)
     index = this.findValidStep(index, isNextDirection);
@@ -291,10 +299,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       s.complete = i < index;
       s.active = i === index;
     });
-    this.currentIndex = index;
+    this.currentIndex.set(index);
     // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
     // wizards) receive the enter callback — see comment above for rationale.
-    this.steps[this.currentIndex].pOnEnter(this.enterData);
+    this.steps[this.currentIndex()].pOnEnter(this.enterData);
     this.enterData = undefined;
 
     // Trigger change detection for OnPush strategy
@@ -329,17 +337,17 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (index < 0 && this.basePreviousRedirect) {
       return true;
     }
-    const step = this.steps[this.currentIndex];
+    const step = this.steps[this.currentIndex()];
     if (!step || step.busy || step.disablePrevious || step.skip) {
       return false;
     }
-    if (index === this.currentIndex) {
+    if (index === this.currentIndex()) {
       return true;
     }
     if (index < 0 || index >= this.steps.length) {
       return false;
     }
-    if (index < this.currentIndex) {
+    if (index < this.currentIndex()) {
       return true;
     } else if (step.error) {
       return false;
