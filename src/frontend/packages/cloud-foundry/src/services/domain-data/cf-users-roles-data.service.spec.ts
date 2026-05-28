@@ -121,6 +121,28 @@ describe('CfUsersRolesDataService', () => {
     expect(snackBar.open).toHaveBeenCalled();
   });
 
+  it('executeChanges identifies users by username+origin when setting by username', async () => {
+    // Set-by-username users carry synthetic guids (username/cfGuid/orgGuid);
+    // the wire payload must use username+origin instead so the backend can
+    // create/resolve the real user.
+    const synthetic = { guid: 'newbie/cf-1/org-1', username: 'newbie' } as unknown as CfUser;
+    svc.setIsSetByUsername(true);
+    svc.setUsers('cf-1', [synthetic], 'uaa');
+    svc.setChanges([
+      { userGuid: 'newbie/cf-1/org-1', orgGuid: 'org-1', spaceGuid: 'sp-1', add: true, role: 'developers' as any, orgName: 'Org 1', spaceName: 'Space 1' },
+    ]);
+
+    const done = svc.executeChanges();
+
+    const req = httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes');
+    expect(req.request.body.changes).toEqual([
+      { username: 'newbie', origin: 'uaa', spaceGuid: 'sp-1', type: 'space_developer', add: true },
+    ]);
+    req.flush({ results: [{ index: 0, success: true }] });
+
+    await expect(done).resolves.toBeUndefined();
+  });
+
   it('executeChanges records per-change applyStatus and surfaces failures via snackbar', async () => {
     svc.setUsers('cf-1', [userA]);
     const ok: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' };

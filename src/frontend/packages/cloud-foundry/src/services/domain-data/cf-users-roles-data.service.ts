@@ -142,7 +142,18 @@ export class CfUsersRolesDataService {
       Object.fromEntries(changes.map(c => [CfUsersRolesDataService.changeKey(c), 'busy' as RoleChangeApplyState])),
     );
 
-    const body = { changes: changes.map(toNativeRoleChange) };
+    // Set-roles-by-username: the picked "users" carry synthetic guids
+    // (username/cfGuid/orgGuid) rather than real CF guids, so the wire payload
+    // must identify them by username+origin and let the backend resolve/create
+    // the user. For the normal path the real guid is sent.
+    const byUsername = !!this._isSetByUsername();
+    const origin = this._usernameOrigin();
+    const usernameByGuid = byUsername
+      ? new Map(this._users().map(u => [u.guid, u.username]))
+      : undefined;
+    const body = {
+      changes: changes.map(c => toNativeRoleChange(c, usernameByGuid?.get(c.userGuid), origin)),
+    };
     let results: NativeRoleChangeResult[];
     try {
       const resp = await firstValueFrom(
@@ -193,7 +204,9 @@ function errorMessage(e: unknown): string {
 }
 
 interface NativeRoleChange {
-  userGuid: string;
+  userGuid?: string;
+  username?: string;
+  origin?: string;
   orgGuid?: string;
   spaceGuid?: string;
   type: string;
@@ -210,12 +223,17 @@ interface NativeRoleChangeResult {
 
 // Maps a wizard role change to the V3 batch wire shape. Space scope sends
 // spaceGuid; org scope sends orgGuid. The short role names collide between
-// org and space (e.g. 'managers'), so the scope flag disambiguates.
-function toNativeRoleChange(c: CfRoleChange): NativeRoleChange {
+// org and space (e.g. 'managers'), so the scope flag disambiguates. When a
+// username is supplied (set-roles-by-username) the user is identified by
+// username+origin and the synthetic guid is dropped.
+function toNativeRoleChange(c: CfRoleChange, username?: string, origin?: string): NativeRoleChange {
   const type = nativeRoleType(c.role, !!c.spaceGuid);
+  const user: Pick<NativeRoleChange, 'userGuid' | 'username' | 'origin'> = username
+    ? { username, origin }
+    : { userGuid: c.userGuid };
   return c.spaceGuid
-    ? { userGuid: c.userGuid, spaceGuid: c.spaceGuid, type, add: c.add }
-    : { userGuid: c.userGuid, orgGuid: c.orgGuid, type, add: c.add };
+    ? { ...user, spaceGuid: c.spaceGuid, type, add: c.add }
+    : { ...user, orgGuid: c.orgGuid, type, add: c.add };
 }
 
 function nativeRoleType(role: string, isSpace: boolean): string {

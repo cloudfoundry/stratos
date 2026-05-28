@@ -16,7 +16,12 @@ import (
 // Scope is exactly one of orgGuid / spaceGuid. add=true creates the role;
 // add=false removes it (the handler resolves the role GUID first).
 type nativeRoleChange struct {
-	UserGUID  string `json:"userGuid"`
+	UserGUID string `json:"userGuid,omitempty"`
+	// Username/Origin identify the user by name instead of GUID — the
+	// set-roles-by-username path. On add the user is created (CF auto-creates
+	// the record); on remove the GUID is resolved via a username lookup.
+	Username  string `json:"username,omitempty"`
+	Origin    string `json:"origin,omitempty"`
 	OrgGUID   string `json:"orgGuid,omitempty"`
 	SpaceGUID string `json:"spaceGuid,omitempty"`
 	Type      string `json:"type"`
@@ -71,6 +76,25 @@ func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c echo.Context) erro
 	results := make([]nativeRoleChangeResult, 0, len(reqBody.Changes))
 	for _, i := range orderRoleChanges(reqBody.Changes) {
 		ch := reqBody.Changes[i]
+
+		// Set-roles-by-username: resolve the change to a real user GUID before
+		// the create/remove legs, which operate on GUIDs. The user must already
+		// exist (created via `cf create-user` or invited) — this path assigns
+		// roles, it does not create users. Resolution is a read; if the user
+		// does not resolve the change fails with a clear error.
+		if ch.Username != "" {
+			action := "remove"
+			if ch.Add {
+				action = "add"
+			}
+			var resolveErr error
+			ch.UserGUID, resolveErr = findUserGUID(reqCtx, cfClient, ch.Username, ch.Origin)
+			if resolveErr != nil {
+				results = append(results, nativeRoleChangeResult{Index: i, Action: action, Error: resolveErr.Error()})
+				continue
+			}
+		}
+
 		if ch.Add {
 			role, addErr := cfClient.Roles().Create(reqCtx, roleCreateRequestFor(ch))
 			res := nativeRoleChangeResult{Index: i, Action: "add", Success: addErr == nil, Role: role}
@@ -166,6 +190,24 @@ func roleCreateRequestFor(ch nativeRoleChange) *capi.RoleCreateRequest {
 		req.Relationships.Organization = &capi.Relationship{Data: &capi.RelationshipData{GUID: ch.OrgGUID}}
 	}
 	return req
+}
+
+// findUserGUID resolves an existing user's GUID via a filtered V3 users list.
+func findUserGUID(ctx context.Context, cfClient capi.Client, username, origin string) (string, error) {
+	params := capi.NewQueryParams().
+		WithFilter("usernames", username).
+		WithPerPage(1)
+	if origin != "" {
+		params = params.WithFilter("origins", origin)
+	}
+	list, err := cfClient.Users().List(ctx, params)
+	if err != nil {
+		return "", err
+	}
+	if list == nil || len(list.Resources) == 0 {
+		return "", fmt.Errorf("user not found: %s", username)
+	}
+	return list.Resources[0].GUID, nil
 }
 
 // resolveRoleGUID finds the GUID of an existing role for a (user, scope, type)
