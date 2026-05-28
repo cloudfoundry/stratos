@@ -97,6 +97,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	nativeGroup.POST("/cf/service_instances/:cnsiGuid", c.createManagedServiceInstance)
 	nativeGroup.PATCH("/cf/service_instances/:cnsiGuid/:siGuid", c.updateManagedServiceInstance)
 	nativeGroup.POST("/cf/roles/:cnsiGuid", c.createNativeRole)
+	nativeGroup.POST("/cf/roles/:cnsiGuid/changes", c.applyNativeRoleChanges)
 	nativeGroup.DELETE("/cf/roles/:cnsiGuid/:roleGuid", c.deleteNativeRole)
 
 	// Services-domain scoped reads (slice 5: services-domain signal+V3).
