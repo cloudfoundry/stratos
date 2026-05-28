@@ -3,6 +3,7 @@ package cloudfoundry
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -92,14 +93,19 @@ func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID 
 		)
 		if refreshErr != nil {
 			log.Warnf("[diag refresh] CF token refresh FAILED for cnsi=%s user=%s: %v", cnsiGUID, userGUID, refreshErr)
-			return nil, echo.NewHTTPError(http.StatusBadGateway, "token refresh failed: "+refreshErr.Error())
+			// Return the raw refresh error (preserving its api.ErrHTTPRequest
+			// type) so the classifyNativeErrors middleware can distinguish an
+			// unreachable endpoint (5xx/timeout) from a rejected token (401).
+			return nil, fmt.Errorf("token refresh failed: %w", refreshErr)
 		}
 		log.Infof("[diag refresh] OK cnsi=%s user=%s new_expiry=%d", cnsiGUID, userGUID, refreshed.TokenExpiry)
 		tokenRecord = refreshed
 	}
 	client, err := cfclient.NewWithToken(ctx, cnsiRecord.APIEndpoint.String(), tokenRecord.AuthToken)
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		// Raw error so the middleware can classify (e.g. an unreachable API
+		// endpoint surfaces as a transport/net error → unreachable).
+		return nil, fmt.Errorf("cf client init failed: %w", err)
 	}
 	return client, nil
 }
@@ -312,7 +318,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		params := capi.NewQueryParams().WithPerPage(1)
 		raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+			return err
 		}
 		orgs := make([]StOrg, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
@@ -338,7 +344,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 
 	raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
 	if lerr != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		return lerr
 	}
 
 	// Enrich with per-org space + app counts via concurrent CAPI drains
@@ -446,7 +452,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+			return err
 		}
 		apps := make([]StApp, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
@@ -458,7 +464,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		params := capi.NewQueryParams().WithPerPage(10).WithOrderBy("-updated_at")
 		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+			return err
 		}
 		apps := make([]StApp, 0, len(raw.Resources))
 		for _, r := range raw.Resources {
@@ -505,7 +511,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 
 	raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
 	if lerr != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		return lerr
 	}
 
 	if guidsFilter {
@@ -633,7 +639,7 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		}
 		logCapiTiming("getNativeSpaces.counts", 1, 1, -1, cStart, lerr, cRows, cTotal)
 		if lerr != nil {
-			err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			err = lerr
 			return err
 		}
 		spaces := make([]StSpace, 0, len(raw.Resources))
@@ -688,7 +694,7 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 	}
 	logCapiTiming("getNativeSpaces.page", page, perPage, 0, pStart, lerr, pRows, pTotal)
 	if lerr != nil {
-		err = echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		err = lerr
 		return err
 	}
 
@@ -842,7 +848,7 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 		}
 		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+			return err
 		}
 		return ctx.JSON(http.StatusOK, StRoutesResponse{
 			TotalResults: raw.Pagination.TotalResults,
@@ -851,7 +857,7 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 
 	resources, totalResults, err := listAllRoutes(ctx.Request().Context(), cfClient, spaceGUIDs)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, err.Error())
+		return err
 	}
 	routes := make([]StRoute, 0, len(resources))
 	for _, r := range resources {
@@ -959,7 +965,7 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 			WithFilter("organization_guids", orgGUID)
 		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
 		if lerr != nil {
-			return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+			return lerr
 		}
 		return ctx.JSON(http.StatusOK, StSpacesResponse{
 			Resources:    []StSpace{},
@@ -974,7 +980,7 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 	)
 	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
 	if lerr != nil {
-		return echo.NewHTTPError(http.StatusBadGateway, lerr.Error())
+		return lerr
 	}
 
 	// Enrich with per-space app + route counts (mirror getNativeSpaces).

@@ -511,6 +511,11 @@ func handleCapiError(ctx echo.Context, err error) error {
 	status := statusFromCapiError(err)
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	// Classify for the frontend banner: reason + upstream status headers. This
+	// path maps the capi error to a real HTTP status and writes the body
+	// directly, so the classifyNativeErrors middleware never sees it — set the
+	// headers here instead.
+	setNativeCFErrorHeaders(ctx, err)
 
 	var respErr *capi.ResponseError
 	if errors.As(err, &respErr) {
