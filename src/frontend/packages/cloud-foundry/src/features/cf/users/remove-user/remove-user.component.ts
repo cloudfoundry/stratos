@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@stratosui/store';
 import { combineLatest as obsCombineLatest, Observable, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map, startWith } from 'rxjs/operators';
 
@@ -23,12 +22,6 @@ import {
   StepComponent,
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { AppState } from '../../../../../../store/src/app-state';
-import {
-  UsersRolesClear,
-  UsersRolesExecuteChanges,
-  UsersRolesSetChanges,
-  UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
@@ -58,7 +51,6 @@ selector: 'app-remove-user',
   ]
 })
 export class RemoveUserComponent implements AfterViewInit, OnDestroy {
-  private store = inject<Store<AppState>>(Store);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfUserService = inject(CfUserService);
   private cfRolesService = inject(CfRolesService);
@@ -69,8 +61,9 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
   private rolesData = inject(CfUsersRolesDataService);
   private state$ = toObservable(this.rolesData.state);
 
-  initialUsers$!: Observable<CfUser[]>;
-  singleUser$!: Observable<CfUser>;
+  users$!: Observable<CfUser[]>;
+  singleUser$!: Observable<CfUser | null>;
+  title$!: Observable<string>;
   defaultCancelUrl!: string;
   cfGuid!: string;
   orgGuid!: string;
@@ -89,7 +82,7 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
   // FWT-959 Part 2: SignalStepHandle for the single Confirm step.
   //
   // Two-click apply semantic preserved via submit():
-  //   1st click (applyStarted == false) — dispatch UsersRolesExecuteChanges,
+  //   1st click (applyStarted == false) — run rolesData.executeChanges(),
   //     flip applyStarted, return { ignoreSuccess: true } so the stepper
   //     does NOT auto-advance / does NOT pop a success snackbar.
   //   2nd click (applyStarted == true) — return void after explicit
@@ -120,10 +113,10 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
         return;
       }
       this.applyStartedSignal.set(true);
-      this.store.dispatch(new UsersRolesExecuteChanges());
+      await this.rolesData.executeChanges();
       // First click — apply has started; suppress auto-advance and the
       // success snackbar so the user can see the per-row monitor while
-      // the dispatched changes settle.
+      // the changes settle.
       return { ignoreSuccess: true };
     },
   };
@@ -137,11 +130,19 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     this.spaceGuid = this.activeRouteCfOrgSpace.spaceGuid;
     this.onlySpaces = this.route.snapshot.queryParams.spaces === 'true';
 
+    // `?users=g1,g2,g3` removes multiple users at once (the bulk path);
+    // `?user=g1` is the single-user shorthand.
+    const usersQParam = this.route.snapshot.queryParams.users;
     const userQParam = this.route.snapshot.queryParams.user;
-    if (userQParam) {
-      this.singleUser$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam)
+    if (usersQParam) {
+      const guids = (usersQParam as string).split(',').map(g => g.trim()).filter(Boolean);
+      this.users$ = obsCombineLatest(
+        guids.map(guid => this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, guid).pipe(map(user => user.entity)))
+      ).pipe(take(1));
+    } else if (userQParam) {
+      this.users$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam)
         .pipe(
-          map(user => user.entity),
+          map(user => [user.entity]),
           take(1)
         );
     } else {
@@ -149,14 +150,19 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    this.singleUser$ = this.users$.pipe(map(users => users.length === 1 ? users[0] : null));
+    this.title$ = this.users$.pipe(
+      map(users => users.length === 1 ? `Remove User: ${users[0].username}` : `Remove ${users.length} Users`)
+    );
+
     const cfGuid$ = this.state$.pipe(
-      combineLatest(this.singleUser$),
+      combineLatest(this.users$),
       take(1)
     );
     // Ensure that when we arrive here directly the store is set up with all it needs
-    cfGuid$.subscribe(([usersRoles, user]) => {
-      if (!usersRoles?.cfGuid || !user) {
-        this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, [user]));
+    cfGuid$.subscribe(([usersRoles, users]) => {
+      if (!usersRoles?.cfGuid || !users) {
+        this.rolesData.setUsers(activeRouteCfOrgSpace.cfGuid, users);
       }
     });
 
@@ -167,18 +173,28 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     );
 
     this.cfRolesService.existingRoles$.pipe(
-      combineLatest(this.singleUser$),
+      combineLatest(this.users$),
       take(1),
-    ).subscribe(([existingRoles, user]) => {
-      const orgs = existingRoles[user.guid];
-      const changes = this.getRolesChanges(user, orgs);
+    ).subscribe(([existingRoles, users]) => {
+      const changes: CfRoleChange[] = [];
+      for (const user of users) {
+        const orgs = existingRoles[user.guid];
+        if (orgs) {
+          changes.push(...this.getRolesChanges(user, orgs));
+        }
+      }
+
+      if (!changes.length) {
+        this.rolesData.setChanges([]);
+        return;
+      }
 
       obsCombineLatest(...this.getChangesObservables(changes)).pipe(
         map(([...canChanges]) => canChanges),
         take(1)
       ).subscribe((canChanges) => {
         const allowedChanges = canChanges.filter((c) => c.can).map(c => c.change);
-        this.store.dispatch(new UsersRolesSetChanges(allowedChanges));
+        this.rolesData.setChanges(allowedChanges);
       });
     });
   }
@@ -196,7 +212,7 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.isBlockedSub?.unsubscribe();
-    this.store.dispatch(new UsersRolesClear());
+    this.rolesData.clear();
   }
 
   getChangesObservables(changes: CfRoleChange[]) {
