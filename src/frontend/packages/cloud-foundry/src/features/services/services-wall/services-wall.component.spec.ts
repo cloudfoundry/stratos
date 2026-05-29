@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -139,6 +139,38 @@ describe('ServicesWallComponent', () => {
     };
     expect(serviceCol!.render!(managed)).toBe('redis');
     expect(serviceCol!.render!(ups)).toBe('User Provided');
+  });
+
+  it('row actions are Edit / Detach / Delete', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    const actionsCol = cfg!.columns.find(c => c.key === 'actions');
+    expect(actionsCol).toBeDefined();
+    const managed: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
+    expect((actionsCol as any).actions!(managed).map((a: any) => a.label))
+      .toEqual(['Edit', 'Detach', 'Delete']);
+  });
+
+  it('Edit / Detach navigate with :type = service for managed, user-service for user-provided', async () => {
+    await component.ngOnInit();
+    const router = TestBed.inject(Router);
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const cfg = component.listConfig();
+    const actionsCol: any = cfg!.columns.find(c => c.key === 'actions');
+
+    const managed: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
+    const managedActions = actionsCol.actions(managed);
+    managedActions.find((a: any) => a.label === 'Edit').invoke();
+    managedActions.find((a: any) => a.label === 'Detach').invoke();
+    expect(navSpy).toHaveBeenCalledWith(['/services', 'service', 'cnsi-1', 'si-1', 'edit']);
+    expect(navSpy).toHaveBeenCalledWith(['/services', 'service', 'cnsi-1', 'si-1', 'detach']);
+
+    const ups: any = { cnsiGuid: 'cnsi-1', guid: 'si-2', name: 'legacy-db', type: 'user-provided' };
+    const upsActions = actionsCol.actions(ups);
+    upsActions.find((a: any) => a.label === 'Edit').invoke();
+    upsActions.find((a: any) => a.label === 'Detach').invoke();
+    expect(navSpy).toHaveBeenCalledWith(['/services', 'user-service', 'cnsi-1', 'si-2', 'edit']);
+    expect(navSpy).toHaveBeenCalledWith(['/services', 'user-service', 'cnsi-1', 'si-2', 'detach']);
   });
 
   it('wires the CF / Organization / Space filter dropdowns into listConfig', async () => {

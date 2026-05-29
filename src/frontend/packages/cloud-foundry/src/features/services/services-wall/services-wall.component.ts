@@ -37,10 +37,11 @@ import type { StServiceInstance } from '../../../services/endpoint-data/stratos-
 //
 // Mirrors ServiceCatalogPageComponent (the marketplace migration) and
 // ApplicationWallComponent: MergeOrchestrator + ViewPipeline + signal
-// config wiring + CF dropdown filter. The only write surface is a
-// per-row Delete kebab. Detach / edit / add stay on the legacy ngrx
-// flow and are out of scope for this migration; the row Name link
-// keeps the existing /services/:type/:cnsi/:siGuid detail-page route.
+// config wiring + CF dropdown filter. Per-row write surface is
+// Edit / Detach / Delete (Edit + Detach navigate to the existing
+// /services/:type/:cnsi/:siGuid edit|detach routes); the L5 sub-nav
+// hosts Add Service Instance. The row Name link keeps the existing
+// /services/:type/:cnsi/:siGuid detail-page route.
 @Component({
   selector: 'app-services-wall',
   templateUrl: './services-wall.component.html',
@@ -328,7 +329,24 @@ export class ServicesWallComponent implements OnInit {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
     };
+    // The wall mixes managed and user-provided instances, so the
+    // edit/detach route's :type segment branches on the row kind:
+    // 'service' for managed, 'user-service' for user-provided. Mirrors
+    // the per-space tabs that already restored Edit + Detach.
+    const siType = si.type === 'user-provided' ? 'user-service' : 'service';
     return [
+      {
+        label: 'Edit', icon: 'edit',
+        invoke: () => {
+          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'edit']);
+        },
+      },
+      {
+        label: 'Detach', icon: 'link_off',
+        invoke: () => {
+          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'detach']);
+        },
+      },
       {
         label: 'Delete', icon: 'delete', danger: true,
         invoke: () => {

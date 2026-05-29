@@ -270,7 +270,24 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
     };
+    // This surface mixes managed and user-provided instances, so the
+    // edit/detach route's :type segment branches on the row kind:
+    // 'service' for managed, 'user-service' for user-provided. Mirrors
+    // the per-space tabs that already restored Edit + Detach.
+    const siType = si.type === 'user-provided' ? 'user-service' : 'service';
     return [
+      {
+        label: 'Edit', icon: 'edit',
+        invoke: () => {
+          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'edit']);
+        },
+      },
+      {
+        label: 'Detach', icon: 'link_off',
+        invoke: () => {
+          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'detach']);
+        },
+      },
       {
         label: 'Delete', icon: 'delete', danger: true,
         invoke: () => {
