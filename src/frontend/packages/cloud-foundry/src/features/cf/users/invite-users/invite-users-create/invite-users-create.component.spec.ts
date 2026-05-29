@@ -6,7 +6,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { of, firstValueFrom } from 'rxjs';
 
 import {
   EntityMonitorFactory,
@@ -25,6 +26,7 @@ import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/c
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CloudFoundryReducersModule } from '../../../../../store/cloud-foundry.reducers.module';
 import { UserInviteService } from '../../../user-invites/user-invite.service';
+import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
 import { InviteUsersCreateComponent } from './invite-users-create.component';
 
 describe('InviteUsersCreateComponent', () => {
@@ -106,5 +108,28 @@ describe('InviteUsersCreateComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('marks the signal-native user cache stale for the active cfGuid on a fully successful invite', async () => {
+    const usersData = TestBed.inject(CfUsersPagedDataService);
+    const markStale = vi.spyOn(usersData, 'markStale');
+
+    const inviteService = TestBed.inject(UserInviteService);
+    vi.spyOn(inviteService, 'invite').mockReturnValue(of({
+      error: false,
+      failed_invites: [],
+      new_invites: [],
+    }));
+
+    // Populate the component's pending users so runInvite() iterates a value.
+    component.stateOut({
+      valid: true,
+      values: { row0: 'someone@example.com' },
+    } as any);
+
+    // Drive the same code path the wizard uses on submit.
+    await firstValueFrom(component.onNext());
+
+    expect(markStale).toHaveBeenCalledWith(testSCFEndpointGuid);
   });
 });
