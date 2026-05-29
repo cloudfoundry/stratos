@@ -4,7 +4,6 @@ import { TailwindSnackBarService } from '@stratosui/core';
 import { firstValueFrom } from 'rxjs';
 
 import {
-  CfUser,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
@@ -12,6 +11,7 @@ import {
   createUserRoleInOrg,
   createUserRoleInSpace,
 } from '../../store/types/cf-user.types';
+import { StUser } from '../endpoint-data/stratos-types';
 import { CfRoleChange, UsersRolesState } from '../../store/types/users-roles.types';
 
 // Signal-native owner of the Manage Roles / Remove User wizard state. This
@@ -32,7 +32,7 @@ export class CfUsersRolesDataService {
   private readonly snackBar = inject(TailwindSnackBarService);
 
   private readonly _cfGuid = signal<string>('');
-  private readonly _users = signal<CfUser[]>([]);
+  private readonly _users = signal<StUser[]>([]);
   private readonly _newRoles = signal<IUserPermissionInOrg>(createDefaultOrgRoles('', ''));
   private readonly _changedRoles = signal<CfRoleChange[]>([]);
   private readonly _usernameOrigin = signal<string | undefined>(undefined);
@@ -49,7 +49,7 @@ export class CfUsersRolesDataService {
   }
 
   readonly cfGuid: Signal<string> = this._cfGuid.asReadonly();
-  readonly users: Signal<CfUser[]> = this._users.asReadonly();
+  readonly users: Signal<StUser[]> = this._users.asReadonly();
   readonly newRoles: Signal<IUserPermissionInOrg> = this._newRoles.asReadonly();
   readonly changedRoles: Signal<CfRoleChange[]> = this._changedRoles.asReadonly();
   readonly isRemove: Signal<boolean | undefined> = this._isRemove.asReadonly();
@@ -66,7 +66,7 @@ export class CfUsersRolesDataService {
   }));
 
   /** Seed the wizard with the picked users; clears roles but keeps the org. */
-  setUsers(cfGuid: string, users: CfUser[], origin?: string): void {
+  setUsers(cfGuid: string, users: StUser[], origin?: string): void {
     const current = this._newRoles();
     this._cfGuid.set(cfGuid);
     this._users.set(users);
