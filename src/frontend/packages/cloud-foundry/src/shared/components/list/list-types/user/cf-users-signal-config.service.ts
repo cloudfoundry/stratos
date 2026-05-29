@@ -1,5 +1,4 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
@@ -7,7 +6,8 @@ import { CfUserListDiagnosticsService } from '../../../../../services/diagnostic
 import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StUser, StUsersResponse } from '../../../../../services/endpoint-data/stratos-types';
+import type { StUser } from '../../../../../services/endpoint-data/stratos-types';
+import { CfUsersPagedDataService } from '../../../../data-services/cf-users-paged-data.service';
 
 // Users list config service — single-CNSI, optionally org- or space-scoped.
 // Modelled on CfRoutesSignalConfigService (which also fetches its own list
@@ -23,22 +23,24 @@ import type { StUser, StUsersResponse } from '../../../../../services/endpoint-d
 //   - Per-space tab: initializeForSpace(cnsiGuid, spaceGuid) — narrows
 //     the view to users with at least one space role in the locked space.
 //
-// Users are not carried on EndpointDataService (the home-page cache covers
-// orgs + apps + spaces; users live separately because the join is heavier).
-// This service owns its own fetch against GET /pp/v1/cf/users/:cnsi.
+// Users are stored and drained by CfUsersPagedDataService (singleton,
+// per-CNSI cache). This service reads the stable per-CNSI signal from
+// that service and layers on filtering, sorting, and paging.
 //
 // Manage Roles + Remove User flows stay legacy in this round — the service
 // has no write methods. The page is read-only signal-native.
 @Injectable({ providedIn: 'root' })
 export class CfUsersSignalConfigService {
-  private readonly http = inject(HttpClient);
   private readonly registry = inject(EndpointDataRegistry);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly diag = inject(CfUserListDiagnosticsService);
+  private readonly usersData = inject(CfUsersPagedDataService);
 
   private endpointDataService?: EndpointDataService;
-  private cnsiGuid = '';
+  private readonly _cnsiGuid: WritableSignal<string> = signal('');
+  private get cnsiGuid(): string { return this._cnsiGuid(); }
+  private set cnsiGuid(v: string) { this._cnsiGuid.set(v); }
   // Empty string = show all users for the CNSI (the CF-level Users tab).
   // Non-empty = narrow to users with at least one role in that space (the
   // per-space Users tab). Stored in a WritableSignal so the filter effect
@@ -74,14 +76,9 @@ export class CfUsersSignalConfigService {
   readonly selectedSpace: WritableSignal<string | null> = signal(null);
   readonly viewMode = this.state.viewMode;
 
-  // Raw user list as returned by the backend for this CNSI. We keep the
-  // unfiltered list in the writable signal and project the space-filtered
-  // view via a computed — symmetric with how CfRoutesSignalConfigService
-  // narrows per-CNSI routes down to one space.
-  private readonly _allUsers: WritableSignal<StUser[]> = signal([]);
-
   readonly users: Signal<StUser[]> = computed(() => {
-    const all = this._allUsers();
+    const cnsi = this._cnsiGuid();
+    const all = cnsi ? this.usersData.usersSignal(cnsi)() : [];
     const spaceLock = this._lockedSpaceGuid();
     const orgLock = this._lockedOrgGuid();
     if (spaceLock) {
@@ -103,8 +100,10 @@ export class CfUsersSignalConfigService {
 
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StUser) => unknown>> = signal(new Map());
 
-  private readonly _hasLoadedOnce = signal(false);
-  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+  readonly hasLoadedOnce: Signal<boolean> = computed(() => {
+    const cnsi = this._cnsiGuid();
+    return !!cnsi && this.usersData.lastFetched(cnsi)() !== null;
+  });
 
   // Org/space name lookups, surfaced from EndpointDataService so the
   // CF-level page's Org Roles + Space Roles compound cells can resolve
@@ -196,8 +195,7 @@ export class CfUsersSignalConfigService {
   initialize(cnsiGuid: string): void {
     this.diag.record(cnsiGuid, 'initialize-called', {
       previousCnsiGuid: this.cnsiGuid,
-      allUsersLenBefore: this._allUsers().length,
-      hasLoadedOnceBefore: this._hasLoadedOnce(),
+      hasLoadedOnceBefore: this.hasLoadedOnce(),
     });
     this.cnsiGuid = cnsiGuid;
     this._lockedSpaceGuid.set('');
@@ -214,15 +212,15 @@ export class CfUsersSignalConfigService {
     this.diag.setIdentity(cnsiGuid, '/pp/v1/cf/users', `signal:${cnsiGuid}`, 'CfUsersSignalConfigService');
     this.diag.setDataSource(cnsiGuid, {
       rowCount: () => this.view?.totalFilteredResults() ?? -1,
-      allRowsCount: () => this._allUsers().length,
-      isLoadingPage: () => !this._hasLoadedOnce(),
+      allRowsCount: () => this.usersData.usersSignal(this.cnsiGuid)().length,
+      isLoadingPage: () => !this.hasLoadedOnce(),
     });
     this.diag.record(cnsiGuid, 'view-pipeline-built');
     // Kick off the endpoint-data load so orgs() / spaces() populate; swallow
     // errors since the user list still renders without name lookups (cells
     // fall back to the GUID short-form / em-dash).
     void firstValueFrom(this.endpointDataService.loadDetails()).catch((): void => undefined);
-    void this.fetchUsers();
+    this.triggerUsersLoad(cnsiGuid);
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
@@ -295,30 +293,8 @@ export class CfUsersSignalConfigService {
     this.filter.set(this.filter());
   }
 
-  private async fetchUsers(): Promise<void> {
-    const requestedFor = this.cnsiGuid;
-    this.diag.record(requestedFor, 'fetch-start');
-    try {
-      const resp = await firstValueFrom(
-        this.http.get<StUsersResponse>(`/pp/v1/cf/users/${requestedFor}`),
-      );
-      const cnsiAtResolve = this.cnsiGuid;
-      this.diag.record(requestedFor, 'fetch-resolved', {
-        cnsiAtResolve,
-        cnsiAtRequest: requestedFor,
-        sameCnsi: cnsiAtResolve === requestedFor,
-        respCount: resp?.resources?.length ?? 0,
-      });
-      this._allUsers.set(resp?.resources ?? []);
-      this._hasLoadedOnce.set(true);
-      this.diag.record(requestedFor, 'allUsers-set', { len: this._allUsers().length });
-    } catch (e) {
-      // Swallow — empty state renders instead of a forever-loading
-      // spinner. Errors surface via the list's generic error UI if wired
-      // through the orchestrator-style errorsByCnsi signal in future.
-      this.diag.record(requestedFor, 'fetch-error', { error: (e as Error)?.message });
-      this._hasLoadedOnce.set(true);
-    }
+  private triggerUsersLoad(cnsiGuid: string): void {
+    void firstValueFrom(this.usersData.loadUsers(cnsiGuid)).catch((): void => undefined);
   }
 
   clearFilters(): void {
@@ -330,7 +306,7 @@ export class CfUsersSignalConfigService {
   }
 
   async refresh(): Promise<void> {
-    await this.fetchUsers();
+    await firstValueFrom(this.usersData.refresh(this.cnsiGuid));
     if (this.endpointDataService) {
       try {
         await firstValueFrom(this.endpointDataService.loadDetails());
