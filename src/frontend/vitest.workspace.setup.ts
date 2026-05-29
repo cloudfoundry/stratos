@@ -61,9 +61,10 @@ class LocalStorageMock implements Storage {
   }
 
   getItem(key: string): string | null {
-    // Return empty string instead of null to avoid issues with code that doesn't handle null
-    // This is a test-friendly behavior while still being technically compliant with Storage interface
-    return this.store.get(key) ?? '';
+    // Spec-compliant: the Storage interface returns null for a missing key (real
+    // browsers and node's webstorage do). Returning '' here diverged from that and
+    // broke `.toBeNull()` assertions once the --localstorage-file flag was dropped.
+    return this.store.get(key) ?? null;
   }
 
   key(index: number): string | null {
