@@ -1,8 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
-import { CfUserService } from '../../../../../../cloud-foundry/src/shared/data-services/cf-user.service';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../features/cf/services/cloud-foundry-organization.service';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
@@ -24,6 +22,5 @@ import { CapitalizeFirstPipe } from '@stratosui/core';
 })
 export class CardCfOrgUserDetailsComponent {
   public cfOrgService = inject(CloudFoundryOrganizationService);
-  public cfUserService = inject(CfUserService);
   public cfEndpointService = inject(CloudFoundryEndpointService);
 }

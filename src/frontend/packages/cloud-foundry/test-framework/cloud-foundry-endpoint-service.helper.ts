@@ -17,14 +17,12 @@ import { ActiveRouteCfOrgSpace } from '../src/features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../src/features/cf/services/cloud-foundry-endpoint.service';
 import { UserInviteConfigureService, UserInviteService } from '../src/features/cf/user-invites/user-invite.service';
 import { CfOrgSpaceDataService } from '../src/shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.service';
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
   CfOrgSpaceDataService,
-  CfUserService,
   PaginationMonitorFactory,
   EntityMonitorFactory,
   UserInviteService,
@@ -84,23 +82,6 @@ export function generateTestCfEndpointService() {
     ...cfEndpointServiceProviderDeps,
     ...generateTestCfEndpointServiceProvider()
   ];
-}
-
-export function generateTestCfUserServiceProvider(guid = testSCFEndpointGuid) {
-  return {
-    provide: CfUserService,
-    useFactory: (
-      store: Store<CFAppState>,
-      paginationMonitorFactory: PaginationMonitorFactory,
-    ) => {
-      return new CfUserService(
-        store,
-        paginationMonitorFactory,
-        { cfGuid: guid, orgGuid: guid, spaceGuid: guid },
-      );
-    },
-    deps: [Store, PaginationMonitorFactory, HttpClient]
-  };
 }
 
 export function generateTestCfServiceProvider() {

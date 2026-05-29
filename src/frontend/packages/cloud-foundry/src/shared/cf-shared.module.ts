@@ -7,7 +7,6 @@ import { SharedModule } from '@stratosui/core';
 import { ApplicationStateService } from './services/application-state.service';
 import { ApplicationEnvVarsHelper } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { CloudFoundryUserProvidedServicesService } from './services/cloud-foundry-user-provided-services.service';
-import { CfUserService } from './data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 
 /**
@@ -34,7 +33,6 @@ import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         CloudFoundryUserProvidedServicesService,
-        CfUserService,
         ActiveRouteCfOrgSpace,
     ]
 })
