@@ -5,14 +5,14 @@ import { Observable, Subject } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { naturalCompare } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
 import { CfUsersRolesDataService, RoleChangeApplyState } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
   TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
   TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
+import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
@@ -29,7 +29,7 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
   ]
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
-  private cfUserService = inject(CfUserService);
+  private usersData = inject(CfUsersPagedDataService);
   private rolesData = inject(CfUsersRolesDataService);
   // Cached toObservable bridges so handlers can use them outside the
   // injection context.
@@ -82,12 +82,15 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     this.updateChanges.next(new Date().getTime());
   };
 
-  fetchUsername = (userGuid: string, users: APIResource<CfUser>[]): string => {
+  fetchUsername = (userGuid: string, users: StUser[]): string => {
     let res = this.nameCache.user[userGuid];
     if (res) {
       return res;
     }
-    res = users.find(user => user.metadata.guid === userGuid).entity.username;
+    // getUsers now yields the drained StUser[] (guid is the identity); fall
+    // back to the guid when a user isn't in the set so the confirm row still
+    // renders rather than throwing (the legacy .find(...).entity would crash).
+    res = users.find(user => user.guid === userGuid)?.username || userGuid;
     this.nameCache.user[userGuid] = res;
     return res;
   };
@@ -120,7 +123,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     );
     const changesViaUserGuid = this.updateChanges.pipe(
       withLatestFrom(this.cfGuid$),
-      mergeMap(([, cfGuid]) => this.cfUserService.getUsers(cfGuid)),
+      mergeMap(([, cfGuid]) => this.usersData.getUsers(cfGuid)),
       withLatestFrom(this.changedRoles$),
       map(([users, changes]) =>
         changes
