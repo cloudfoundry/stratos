@@ -1,8 +1,9 @@
-import { CfUser, CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
+import { CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
+import { StUser } from '../../services/endpoint-data/stratos-types';
 
 export interface UsersRolesState {
   cfGuid: string;
-  users: CfUser[];
+  users: StUser[];
   newRoles: IUserPermissionInOrg;
   changedRoles: CfRoleChange[];
   usernameOrigin?: string;
