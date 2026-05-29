@@ -7,6 +7,9 @@ import { map } from 'rxjs/operators';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
   SignalListPillColor,
@@ -16,6 +19,7 @@ import {
 import { UserFavorite, UserFavoriteManager } from '@stratosui/store';
 
 import { serviceInstancesEntityType } from '../../../../../../../cf-entity-types';
+import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import {
   CfServiceInstancesSignalConfigService,
 } from '../../../../../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
@@ -43,6 +47,7 @@ import type { StServiceInstance } from '../../../../../../../services/endpoint-d
   imports: [
     CommonModule,
     RouterModule,
+    ListSubNavComponent,
     SignalListComponent,
   ],
 })
@@ -55,6 +60,35 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private router = inject(Router);
+  private permissionsService = inject(CurrentUserPermissionsService);
+
+  /** Unfiltered total for the L5 sub-nav count. Bound in the constructor
+   *  after initializeForSpace() creates the view. */
+  public totalServiceInstances!: Signal<number>;
+
+  /** Gate the Add button on space-scoped SERVICE_INSTANCE_CREATE
+   *  (SPACE_DEVELOPER). Built here in the injection context so toSignal()
+   *  resolves. */
+  public readonly canCreateServiceInstance: Signal<boolean> = toSignal(
+    this.permissionsService.can(
+      CfCurrentUserPermissions.SERVICE_INSTANCE_CREATE,
+      this.cfEndpointService.cfGuid,
+      this.cfSpaceService.spaceGuid,
+    ),
+    { initialValue: false },
+  );
+
+  /** L5 primary action — opens the add-service-instance wizard straight to
+   *  the Managed Service path (this tab is managed-only), pre-selecting this
+   *  CF via the `auto-select-endpoint` hint. Org/space are chosen in the
+   *  wizard (no query-param pre-selection for those). */
+  public readonly createServiceInstanceAction: ListSubNavAddAction = {
+    label: 'Add Service Instance',
+    icon: 'add',
+    visible: this.canCreateServiceInstance,
+    invoke: () => this.router.navigate(['/services/new/service'],
+      { queryParams: { 'auto-select-endpoint': this.cfEndpointService.cfGuid } }),
+  };
 
   // Favorite keys in rowKey format (${cnsi}:${siGuid}) for managed
   // service-instance favorites only. The wall ORs both managed and
@@ -88,6 +122,8 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     const cfGuid = this.cfEndpointService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.instancesConfig.initializeForSpace(cfGuid, spaceGuid, 'managed');
+    // view exists only after initializeForSpace()
+    this.totalServiceInstances = this.instancesConfig.view.totalItems;
 
     const renderService = (si: StServiceInstance): string => si.servicePlan?.serviceOffering?.name ?? '';
 
