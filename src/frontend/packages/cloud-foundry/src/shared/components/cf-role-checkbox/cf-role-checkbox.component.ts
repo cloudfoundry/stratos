@@ -18,8 +18,8 @@ import { CurrentUserPermissionsService } from "../../../../../core/src/core/perm
 import { canUpdateOrgSpaceRoles } from "../../../features/cf/cf.helpers";
 import { CfRolesService } from "../../../features/cf/users/manage-users/cf-roles.service";
 import { CfUsersRolesDataService } from "../../../services/domain-data/cf-users-roles-data.service";
+import { StUser } from "../../../services/endpoint-data/stratos-types";
 import {
-  CfUser,
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
@@ -121,7 +121,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
    */
   private static getCheckedState(
     role: string,
-    users: CfUser[],
+    users: StUser[],
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
@@ -191,7 +191,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   }
 
   private static hasSpaceRole(
-    users: CfUser[],
+    users: StUser[],
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
@@ -239,7 +239,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   }
 
   private static hasOrgSpaceRole(
-    users: CfUser[],
+    users: StUser[],
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
@@ -327,7 +327,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   private static isDisabled(
     isOrgRole: boolean,
     role: string,
-    users: CfUser[],
+    users: StUser[],
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     orgGuid: string,
