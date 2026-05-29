@@ -3,7 +3,6 @@ import { Component, computed, Input, OnDestroy, OnInit, Signal, signal, ChangeDe
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { firstValueFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -15,10 +14,7 @@ import {
   StackedInputActionsUpdate,
   StepOnNextFunction,
 } from '@stratosui/core';
-import { ClearPaginationOfType } from '@stratosui/store';
-import { CFAppState } from '../../../../../cf-app-state';
-import { cfUserEntityType } from '../../../../../cf-entity-types';
-import { CFEntityConfig } from '../../../../../cf-types';
+import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
 import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 import { SpaceDataRegistry } from '../../../../../services/endpoint-data/space-data.registry';
@@ -41,7 +37,7 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
   ]
 })
 export class InviteUsersCreateComponent implements OnInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
+  private usersData = inject(CfUsersPagedDataService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private userInviteService = inject(UserInviteService);
   private router = inject(Router);
@@ -170,8 +166,9 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
       Object.values(this.users.values)).pipe(
         map(res => {
           if (!res.error && res.failed_invites.length === 0) {
-            // Success! Clear all paginations of type users such that lists can be refetched with new user.s
-            this.store.dispatch(new ClearPaginationOfType(new CFEntityConfig(cfUserEntityType)));
+            // Success! Mark the signal-native user cache stale so the user
+            // list re-drains with the newly invited users on next read.
+            this.usersData.markStale(this.activeRouteCfOrgSpace.cfGuid);
           } else if (res.failed_invites.length > 0) {
             // One or more failed. Push failures back into components
             const newState: StackedInputActionsState[] = [];
