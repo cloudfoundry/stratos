@@ -15,7 +15,7 @@ import { appReducers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { CloudFoundryTestingModule } from '../../../../cloud-foundry-test.module';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from '../manage-users/cf-roles.service';
 import { RemoveUserComponent } from './remove-user.component';
@@ -45,10 +45,9 @@ describe('RemoveUserComponent', () => {
   const mockUser = {
     guid: 'test-user-guid',
     username: 'test-user',
-    entity: {
-      guid: 'test-user-guid',
-      username: 'test-user'
-    }
+    cnsiGuid: 'cf-guid',
+    orgRoles: [],
+    spaceRoles: []
   };
 
   const mockExistingRoles = {
@@ -79,7 +78,7 @@ describe('RemoveUserComponent', () => {
   const mockUserSubject = new BehaviorSubject(mockUser);
   const mockExistingRolesSubject = new BehaviorSubject(mockExistingRoles);
 
-  const mockCfUserService = {
+  const mockUsersData = {
     getUser: vi.fn(() => mockUserSubject.asObservable())
   };
 
@@ -105,7 +104,7 @@ describe('RemoveUserComponent', () => {
         { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: CfRolesService, useValue: mockCfRolesService },
-        { provide: CfUserService, useValue: mockCfUserService },
+        { provide: CfUsersPagedDataService, useValue: mockUsersData },
         TabNavService,
         ...cfCurrentUserPermissionsService,
       ],
