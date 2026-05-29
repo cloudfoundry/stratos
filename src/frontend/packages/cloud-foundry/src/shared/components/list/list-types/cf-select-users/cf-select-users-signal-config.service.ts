@@ -15,28 +15,26 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ListStateStore, SignalListConfig, SignalListColumn } from '@stratosui/core';
 
 import { SortSpec, ViewPipeline } from '../../../../../services/data-sources/view-pipeline';
-import { CfUserService } from '../../../../data-services/cf-user.service';
-import { CfUser, CfUserMissingRoles } from '../../../../../store/types/cf-user.types';
-import { APIResource } from '../../../../../../../store/src/types/api.types';
+import { CfUsersPagedDataService } from '../../../../data-services/cf-users-paged-data.service';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
 
 // Signal-native list config for the manage-users wizard "Select Users"
 // step. Replaces CfSelectUsersListConfigService + CfSelectUsersDataSource
 // (ngrx ListDataSource over the V2 paginated users action).
 //
-// Rows are unwrapped APIResource<CfUser>.entity — only `.guid` and
-// `.username` are read from each row (column + selection key). The
-// underlying pagination machinery still lives in CfUserService.getUsers()
-// for now; this service drops the V2 list-config + data-source consumer
-// from the chain, and the wizard reducer remains the unchanged downstream
-// (it stores CfUser objects and downstream cf-roles.service re-resolves
-// each user by guid via the same getUsers()).
+// Rows are signal-native StUser objects drained by CfUsersPagedDataService
+// — only `.guid` and `.username` are read from each row (column + selection
+// key). This service drops the V2 list-config + data-source consumer from
+// the chain; the wizard reducer remains the unchanged downstream (it stores
+// the selected user objects and downstream cf-roles.service re-resolves each
+// user by guid via the same drain).
 //
 // Tab-scoped @Injectable() (no providedIn) — provided by the wizard
 // component so each session of the wizard gets a fresh selection set.
 @Injectable()
 export class CfSelectUsersSignalConfigService {
-  private readonly cfUserService = inject(CfUserService);
+  private readonly usersData = inject(CfUsersPagedDataService);
   private readonly activeRoute = inject(ActiveRouteCfOrgSpace);
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
@@ -52,34 +50,34 @@ export class CfSelectUsersSignalConfigService {
   });
 
   readonly nameFilter: WritableSignal<string> = signal('');
-  readonly filter: WritableSignal<(u: CfUser) => boolean> = signal(() => true);
-  readonly sort = this.state.sort as WritableSignal<SortSpec<CfUser>>;
+  readonly filter: WritableSignal<(u: StUser) => boolean> = signal(() => true);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StUser>>;
   readonly pageSize = this.state.pageSize;
   readonly pageIndex = this.state.pageIndex;
   readonly viewMode = this.state.viewMode;
 
-  // Selection state — set of CfUser.guid for currently-checked rows. Owned
+  // Selection state — set of StUser.guid for currently-checked rows. Owned
   // by this service so the wizard step can read it directly without
   // squirrelling state into the wizard component.
   readonly selectedKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
 
-  private readonly _allUsers: Signal<APIResource<CfUser>[] | null>;
+  private readonly _allUsers: Signal<StUser[] | null>;
 
-  readonly users: Signal<CfUser[]>;
+  readonly users: Signal<StUser[]>;
   readonly hasLoadedOnce: Signal<boolean>;
 
-  view!: ViewPipeline<CfUser>;
+  view!: ViewPipeline<StUser>;
 
-  private readonly _sortExtractors: WritableSignal<Map<string, (row: CfUser) => unknown>> = signal(new Map());
+  private readonly _sortExtractors: WritableSignal<Map<string, (row: StUser) => unknown>> = signal(new Map());
 
   constructor() {
-    this._allUsers = toSignal(this.cfUserService.getUsers(this.activeRoute.cfGuid, false), {
+    this._allUsers = toSignal(this.usersData.getUsers(this.activeRoute.cfGuid), {
       initialValue: null,
     });
-    this.users = computed(() => (this._allUsers() ?? []).map(r => r.entity));
+    this.users = computed(() => this._allUsers() ?? []);
     this.hasLoadedOnce = computed(() => this._allUsers() !== null);
 
-    this.view = new ViewPipeline<CfUser>(
+    this.view = new ViewPipeline<StUser>(
       this.users,
       this.filter,
       this.sort,
@@ -91,7 +89,7 @@ export class CfSelectUsersSignalConfigService {
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
-        this.filter.set((u: CfUser) => {
+        this.filter.set((u: StUser) => {
           if (!q) return true;
           return (this.getUsername(u) ?? '').toLowerCase().includes(q);
         });
@@ -100,18 +98,18 @@ export class CfSelectUsersSignalConfigService {
   }
 
   /**
-   * Resolve the current set of selected CfUser objects. Used by the
-   * wizard's onNext to seed CfUsersRolesDataService.setUsers — full CfUser
+   * Resolve the current set of selected StUser objects. Used by the
+   * wizard's onNext to seed CfUsersRolesDataService.setUsers — full StUser
    * objects, not just guids.
    */
-  resolveSelected(): CfUser[] {
+  resolveSelected(): StUser[] {
     const keys = this.selectedKeys();
     if (keys.size === 0) return [];
     return this.users().filter(u => keys.has(u.guid));
   }
 
-  buildConfig(): SignalListConfig<CfUser> {
-    const columns: SignalListColumn<CfUser>[] = [
+  buildConfig(): SignalListConfig<StUser> {
+    const columns: SignalListColumn<StUser>[] = [
       {
         header: '',
         key: 'select',
@@ -158,19 +156,9 @@ export class CfSelectUsersSignalConfigService {
     };
   }
 
-  private getUsername(user: CfUser): string {
-    const username = user.username || user.guid;
-    return this.hasMissingRoles(user.missingRoles)
-      ? `${username} - Not all roles for this user are known`
-      : username;
-  }
-
-  // Mirrors legacy hasMissingRoles — at space scope, all roles are known.
-  // At org scope, only the space-roles can be missing; at cf scope, either.
-  private hasMissingRoles(missingRoles?: CfUserMissingRoles): boolean {
-    if (!missingRoles) return false;
-    if (this.activeRoute.spaceGuid) return false;
-    if (this.activeRoute.orgGuid) return !!missingRoles.space.length;
-    return !!missingRoles.org.length || !!missingRoles.space.length;
+  private getUsername(user: StUser): string {
+    // StUser carries the full drained role set — the legacy "missing roles"
+    // suffix (a V2 maxed-pagination artifact) no longer applies.
+    return user.username || user.guid;
   }
 }
