@@ -33,8 +33,9 @@ import { ListStateStore, naturalCompare } from '@stratosui/core';
 // nameFilter searches across Name and ServiceOfferingName so users can
 // find "the redis I named primary-cache" by typing either.
 //
-// Delete is the only write surface exposed; detach/edit/add stay on the
-// legacy ngrx flow until a follow-up migration.
+// Delete is the only write surface this config OWNS (deleteServiceInstance).
+// Edit / Detach are per-row navigations to the /services edit|detach routes
+// and Add is an L5 sub-nav action — both wired at the consuming components.
 @Injectable({ providedIn: 'root' })
 export class CfServiceInstancesSignalConfigService {
   orchestrator!: MergeOrchestrator<StServiceInstance>;
