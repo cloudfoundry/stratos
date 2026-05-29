@@ -122,8 +122,10 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     const cfGuid = this.cfEndpointService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.instancesConfig.initializeForSpace(cfGuid, spaceGuid, 'managed');
-    // view exists only after initializeForSpace()
-    this.totalServiceInstances = this.instancesConfig.view.totalItems;
+    // view exists only after initializeForSpace(). Use the filtered count:
+    // the space + managed scope is applied via the filter predicate, so
+    // totalItems would report the CNSI-wide total, not this page's scope.
+    this.totalServiceInstances = this.instancesConfig.view.totalFilteredResults;
 
     const renderService = (si: StServiceInstance): string => si.servicePlan?.serviceOffering?.name ?? '';
 
