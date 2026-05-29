@@ -33,13 +33,14 @@ import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
-import { CfUser, OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
+import { OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
 interface Org { metadata: { guid: string, }; }
-interface CfUserWithWarning extends CfUser {
+interface CfUserWithWarning extends StUser {
   showWarning: boolean;
 }
 
@@ -213,12 +214,21 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     this.isRemove$ = this.isRemove$$;
   }
 
-  private mapUser(user: CfUser): CfUserWithWarning {
-    // If we're at the org level or lower we guarantee org roles. If we're at the space we guarantee space roles.
-
-    const showWarning = !!user.missingRoles &&
-      ((user.missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
-        (user.missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid));
+  private mapUser(user: StUser): CfUserWithWarning {
+    // If we're at the org level or lower we guarantee org roles. If we're at
+    // the space we guarantee space roles.
+    //
+    // `missingRoles` was a v2-era artifact stamped by the ngrx cf-users
+    // reducer when a user was fetched without its full org/space relation
+    // tree. StUser is always the fully-drained native row (every scope's
+    // role buckets present), so there's never a partial-fetch warning —
+    // showWarning is therefore always false. The warning machinery (snackbar
+    // + '*' prefix) is preserved so the affordance reappears for free if a
+    // partial-fetch shape is ever reintroduced.
+    const missingRoles = (user as { missingRoles?: { org: unknown[]; space: unknown[] } }).missingRoles;
+    const showWarning = !!missingRoles &&
+      ((!!missingRoles.org.length && !this.activeRouteCfOrgSpace.orgGuid) ||
+        (!!missingRoles.space.length && !this.activeRouteCfOrgSpace.spaceGuid));
     // Ensure we're in an object where the username is always populated (in some cases it's missing)
     const newUser = {
       ...user,

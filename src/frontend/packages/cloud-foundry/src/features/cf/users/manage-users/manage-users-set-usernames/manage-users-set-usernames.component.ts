@@ -17,7 +17,7 @@ import {
 } from '@stratosui/core';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -134,11 +134,18 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   }
 
   onNext: StepOnNextFunction = () => {
-    const users: CfUser[] = Object.values(this.usernames.values).map(username => {
+    // Set-by-username seeds synthetic StUser rows: the username is the real
+    // identity and `guid` is the composite (username/cfGuid/orgGuid) the
+    // executeChanges payload keys off. There's no fetched CF user yet, so the
+    // role buckets / metadata are empty placeholders.
+    const users: StUser[] = Object.values(this.usernames.values).map(username => {
       return {
         username,
-        guid: ManageUsersSetUsernamesHelper.createGuid(username, this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid)
-      } as CfUser;
+        guid: ManageUsersSetUsernamesHelper.createGuid(username, this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid),
+        cnsiGuid: this.activeRouteCfOrgSpace.cfGuid,
+        orgRoles: [],
+        spaceRoles: [],
+      } as StUser;
     });
     this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin);
     return of({

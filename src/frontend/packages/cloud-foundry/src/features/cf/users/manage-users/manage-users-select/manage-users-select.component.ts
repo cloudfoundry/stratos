@@ -17,7 +17,7 @@ import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-
 import {
   CfSelectUsersSignalConfigService,
 } from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-signal-config.service';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { EnumerateComponent } from '../../../../../../../core/src/shared/components/enumerate/enumerate.component';
@@ -42,15 +42,15 @@ export class UsersRolesSelectComponent {
 
   // SignalListConfig backing the wizard's user-pick step. Built once at
   // construction and rendered via <app-signal-list>.
-  readonly listConfig: WritableSignal<SignalListConfig<CfUser>>;
+  readonly listConfig: WritableSignal<SignalListConfig<StUser>>;
 
   // The wizard's selection set, derived from the signal-config's
   // selectedKeys + users() each tick.
-  readonly selectedUsers: Signal<CfUser[]> = computed(() => this.selectConfig.resolveSelected());
+  readonly selectedUsers: Signal<StUser[]> = computed(() => this.selectConfig.resolveSelected());
 
   // EnumerateComponent takes an Observable<any[]>; bridge the selection
   // signal back to one for the existing label rendering.
-  readonly selectedUsers$: Observable<CfUser[]> = toObservable(this.selectedUsers);
+  readonly selectedUsers$: Observable<StUser[]> = toObservable(this.selectedUsers);
 
   readonly valid$ = signal<boolean>(false);
 

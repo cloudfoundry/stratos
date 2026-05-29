@@ -17,8 +17,8 @@ import { take, combineLatest, filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CfUser } from '../../../../store/types/cf-user.types';
+import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
+import { StUser } from '../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CfRolesService } from './cf-roles.service';
@@ -43,20 +43,19 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CfUserService,
     CfRolesService
   ]
 })
 export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private cfUserService = inject(CfUserService);
+  private usersData = inject(CfUsersPagedDataService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private rolesData = inject(CfUsersRolesDataService);
 
-  initialUsers$!: Observable<CfUser[]>;
-  singleUser$!: Observable<CfUser | null>;
+  initialUsers$!: Observable<StUser[]>;
+  singleUser$!: Observable<StUser | null>;
   defaultCancelUrl!: string;
   // FWT-959 Part 2: applyStarted promoted to a signal so the confirm step's
   // canClose / disablePrevious / destructiveStep / finishButtonText handle
@@ -160,11 +159,16 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
       if (usersQParam) {
         const guids = (usersQParam as string).split(',').map(g => g.trim()).filter(Boolean);
         this.initialUsers$ = observableCombineLatest(
-          guids.map(guid => this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, guid).pipe(map(user => user.entity)))
-        ).pipe(take(1));
+          guids.map(guid => this.usersData.getUser(activeRouteCfOrgSpace.cfGuid, guid))
+        ).pipe(
+          // getUser emits StUser | undefined; drop any guid that didn't resolve
+          // so the wizard is never seeded with a hole in the picked-users array.
+          map(users => users.filter((user): user is StUser => !!user)),
+          take(1)
+        );
       } else if (userQParam) {
-        this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
-          map(user => [user.entity]),
+        this.initialUsers$ = this.usersData.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
+          map(user => user ? [user] : []),
           take(1)
         );
       } else {
