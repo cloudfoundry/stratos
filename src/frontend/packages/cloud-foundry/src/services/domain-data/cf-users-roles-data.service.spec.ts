@@ -5,11 +5,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TailwindSnackBarService } from '@stratosui/core';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
-import { CfUser } from '../../store/types/cf-user.types';
+import { StUser } from '../endpoint-data/stratos-types';
 import { CfRoleChange } from '../../store/types/users-roles.types';
 import { CfUsersRolesDataService } from './cf-users-roles-data.service';
 
-const userA = { guid: 'u-a', username: 'alice' } as unknown as CfUser;
+const userA = { guid: 'u-a', username: 'alice' } as unknown as StUser;
 
 describe('CfUsersRolesDataService', () => {
   let svc: CfUsersRolesDataService;
@@ -125,7 +125,7 @@ describe('CfUsersRolesDataService', () => {
     // Set-by-username users carry synthetic guids (username/cfGuid/orgGuid);
     // the wire payload must use username+origin instead so the backend can
     // create/resolve the real user.
-    const synthetic = { guid: 'newbie/cf-1/org-1', username: 'newbie' } as unknown as CfUser;
+    const synthetic = { guid: 'newbie/cf-1/org-1', username: 'newbie' } as unknown as StUser;
     svc.setIsSetByUsername(true);
     svc.setUsers('cf-1', [synthetic], 'uaa');
     svc.setChanges([
