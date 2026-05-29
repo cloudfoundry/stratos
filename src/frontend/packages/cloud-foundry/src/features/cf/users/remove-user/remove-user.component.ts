@@ -23,8 +23,9 @@ import {
 } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
+import { StUser } from '../../../../services/endpoint-data/stratos-types';
+import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
+import { IUserPermissionInOrg, IUserPermissionInSpace, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -37,7 +38,6 @@ selector: 'app-remove-user',
   templateUrl: './remove-user.component.html',
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CfUserService,
     CfRolesService
   ],
   standalone: true,
@@ -52,7 +52,7 @@ selector: 'app-remove-user',
 })
 export class RemoveUserComponent implements AfterViewInit, OnDestroy {
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private cfUserService = inject(CfUserService);
+  private usersData = inject(CfUsersPagedDataService);
   private cfRolesService = inject(CfRolesService);
   private route = inject(ActivatedRoute);
   private userPerms = inject(CurrentUserPermissionsService);
@@ -61,8 +61,8 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
   private rolesData = inject(CfUsersRolesDataService);
   private state$ = toObservable(this.rolesData.state);
 
-  users$!: Observable<CfUser[]>;
-  singleUser$!: Observable<CfUser | null>;
+  users$!: Observable<StUser[]>;
+  singleUser$!: Observable<StUser | null>;
   title$!: Observable<string>;
   defaultCancelUrl!: string;
   cfGuid!: string;
@@ -137,12 +137,15 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     if (usersQParam) {
       const guids = (usersQParam as string).split(',').map(g => g.trim()).filter(Boolean);
       this.users$ = obsCombineLatest(
-        guids.map(guid => this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, guid).pipe(map(user => user.entity)))
-      ).pipe(take(1));
+        guids.map(guid => this.usersData.getUser(activeRouteCfOrgSpace.cfGuid, guid))
+      ).pipe(
+        map(users => users.filter((u): u is StUser => !!u)),
+        take(1)
+      );
     } else if (userQParam) {
-      this.users$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam)
+      this.users$ = this.usersData.getUser(activeRouteCfOrgSpace.cfGuid, userQParam)
         .pipe(
-          map(user => [user.entity]),
+          map(user => user ? [user] : []),
           take(1)
         );
     } else {
@@ -231,7 +234,7 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  getRolesChanges(user: CfUser, orgs: any) {
+  getRolesChanges(user: StUser, orgs: any) {
     const changes = [];
     const orgGuids = this.orgGuid ? [this.orgGuid] : Object.keys(orgs);
 
@@ -245,7 +248,7 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     return changes;
   }
 
-  getOrgRolesChanges(user: CfUser, org: IUserPermissionInOrg): CfRoleChange[] {
+  getOrgRolesChanges(user: StUser, org: IUserPermissionInOrg): CfRoleChange[] {
     const changes: CfRoleChange[] = [];
 
     if (!this.spaceGuid && !this.onlySpaces) {
@@ -268,7 +271,7 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     return changes;
   }
 
-  getSpacesRolesChanges(user: CfUser, spaces: { [spaceGuid: string]: IUserPermissionInSpace }): CfRoleChange[] {
+  getSpacesRolesChanges(user: StUser, spaces: { [spaceGuid: string]: IUserPermissionInSpace }): CfRoleChange[] {
     const changes: CfRoleChange[] = [];
     const spaceGuids = this.spaceGuid ? [this.spaceGuid] : Object.keys(spaces);
 
