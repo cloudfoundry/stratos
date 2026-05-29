@@ -25,7 +25,6 @@ import { ISpaceFavMetadata } from '../../../../../../cf-metadata-types';
 import { SpaceDataRegistry } from '../../../../../../services/endpoint-data/space-data.registry';
 import { SpaceDataService } from '../../../../../../services/endpoint-data/space-data.service';
 import { CF_ENDPOINT_TYPE } from '../../../../../../cf-types';
-import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../../../shared/services/cloud-foundry-user-provided-services.service';
@@ -48,7 +47,6 @@ import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-spa
   ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CfUserService,
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
     CloudFoundryUserProvidedServicesService,

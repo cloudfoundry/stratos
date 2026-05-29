@@ -6,7 +6,6 @@ import { SharedModule } from '@stratosui/core';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { generateCFEntities } from './cf-entity-generator';
 import { setCfInfoHelperInjector } from './services/endpoint-data/cf-info-helper';
-import { CfUserService } from './shared/data-services/cf-user.service';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
@@ -23,7 +22,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
   ],
   providers: [
     ...cfCurrentUserPermissionsService,
-    CfUserService,
     CloudFoundryService,
     LongRunningCfOperationsService,
     CloudFoundryUserProvidedServicesService,

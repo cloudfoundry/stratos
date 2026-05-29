@@ -34,7 +34,6 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CfOrgSpaceDataService } from '../../../../../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../../../../../shared/data-services/cf-user.service';
 import { UserInviteService, UserInviteConfigureService } from '../../../../../user-invites/user-invite.service';
 import { CloudFoundrySpaceSummaryComponent } from './cloud-foundry-space-summary.component';
 import { generateCFEntities } from '../../../../../../../cf-entity-generator';
@@ -71,7 +70,6 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         CloudFoundryEndpointService,
         CloudFoundryOrganizationService,
         CfOrgSpaceDataService,
-        CfUserService,
         UserInviteService,
         UserInviteConfigureService,
         TabNavService,

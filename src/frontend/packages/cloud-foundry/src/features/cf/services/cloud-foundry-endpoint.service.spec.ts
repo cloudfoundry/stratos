@@ -9,7 +9,6 @@ import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { EndpointsDataService } from '@stratosui/store';
 
 // A.#1: pins the URL shape of the instance fetchAppCount / fetchRouteCount
@@ -42,7 +41,6 @@ describe('CloudFoundryEndpointService — fetchAppCount / fetchRouteCount', () =
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1' } },
-        { provide: CfUserService, useValue: {} },
         { provide: CnsiUsersSnapshotService, useValue: { users: () => () => null } },
         {
           provide: EndpointDataRegistry,

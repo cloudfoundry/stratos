@@ -5,7 +5,6 @@ import { PageHeaderComponent } from '@stratosui/core';
 import { StepComponent } from '@stratosui/core';
 import { SteppersComponent } from '@stratosui/core';
 
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
@@ -29,7 +28,6 @@ import { InviteUsersCreateComponent } from './invite-users-create/invite-users-c
     getActiveRouteCfOrgSpaceProvider,
     UserInviteService,
     UserInviteConfigureService,
-    CfUserService,
     CfRolesService,
     CloudFoundryEndpointService
   ]

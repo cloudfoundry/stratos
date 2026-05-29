@@ -22,7 +22,6 @@ import {
   EndpointModel,
   EndpointUser } from '@stratosui/store';
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../cf-api.types';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
@@ -44,7 +43,6 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 })
 export class CloudFoundryEndpointService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private cfUserService = inject(CfUserService);
   private cnsiUsers = inject(CnsiUsersSnapshotService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
   private cfInfoDataRegistry = inject(CfInfoDataRegistry);

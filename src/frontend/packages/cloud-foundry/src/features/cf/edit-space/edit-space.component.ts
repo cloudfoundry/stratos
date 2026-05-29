@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { PageHeaderComponent, StepComponent, SteppersComponent } from '@stratosui/core';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { CloudFoundryUserProvidedServicesService } from '../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -18,7 +17,6 @@ import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.compon
   templateUrl: './edit-space.component.html',
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CfUserService,
     CloudFoundryEndpointService,
     CloudFoundrySpaceService,
     CloudFoundryOrganizationService,
