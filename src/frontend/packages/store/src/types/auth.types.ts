@@ -81,6 +81,40 @@ export interface SessionDataEnvelope {
   data?: SessionData;
 }
 
+/**
+ * A redirect to replay after login. Previously lived in auth.actions.ts
+ * (alongside `RouterNav`). Now a plain type owned by the auth domain and
+ * set via {@link AuthDataService.navigateAndRememberRedirect}.
+ */
+export interface RouterRedirect {
+  path: string;
+  queryParams?: {
+    [key: string]: string
+  };
+}
+
+export interface AuthUser {
+  guid: string;
+  name: string;
+  admin: boolean;
+}
+
+/**
+ * Shape of the auth state. Previously the `auth` ngrx slice (auth.reducer.ts);
+ * now owned and mutated by {@link AuthDataService} as a signal.
+ */
+export interface AuthState {
+  loggedIn: boolean;
+  loggingIn: boolean;
+  user: AuthUser;
+  error: boolean;
+  errorResponse: any;
+  sessionData: SessionData;
+  verifying: boolean;
+  redirect?: RouterRedirect;
+  keepAlive?: boolean;
+}
+
 export interface TokenData {
   token_guid: string;
   auth_token: string;

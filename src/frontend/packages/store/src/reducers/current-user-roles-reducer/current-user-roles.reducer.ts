@@ -1,7 +1,8 @@
 import { Action } from '@ngrx/store';
 
-import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
 import {
+  CURRENT_USER_ROLES_SESSION_VERIFIED,
+  CurrentUserRolesSessionVerified,
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
@@ -45,8 +46,8 @@ function coreCurrentUserRolesReducer(state: ICurrentUserRolesState, action: Acti
         ...state,
         state: currentUserRolesRequestStateReducer(state.state, RolesRequestStateStage.FAILURE)
       };
-    case SESSION_VERIFIED: {
-      const svAction = action as VerifiedSession;
+    case CURRENT_USER_ROLES_SESSION_VERIFIED: {
+      const svAction = action as CurrentUserRolesSessionVerified;
       return applyInternalScopes(state, svAction.sessionData?.user);
     }
   }

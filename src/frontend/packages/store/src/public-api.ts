@@ -48,7 +48,6 @@ export type {
 } from './entity-request-pipeline/entity-request-pipeline.types';
 export { JetstreamError } from './entity-request-pipeline/entity-request-base-handlers/handle-multi-endpoints.pipe';
 export type {
-  AuthOnlyAppState,
   EndpointOnlyAppState,
   GeneralRequestDataState,
   IRequestEntityTypeState,
@@ -61,7 +60,6 @@ export {
   InternalAppState,
 } from './app-state';
 export { internalEventStateSelector } from './selectors/internal-events.selectors';
-export { Login, Logout, VerifySession, VerifiedSession, SESSION_VERIFIED } from './actions/auth.actions';
 export { RequestTypes, APIResponse } from './actions/request.actions';
 export { selectDeletionInfo } from './selectors/api.selectors';
 export { LocalPaginationHelpers } from './helpers/local-list.helpers';
@@ -97,8 +95,7 @@ export { getActions } from './actions/action.helper';
 export { AppStoreModule } from './store.module';
 export { getAPIRequestDataState, selectEntity, selectRequestInfo } from './selectors/api.selectors';
 export { selectPaginationState } from './selectors/pagination.selectors';
-export type { AuthState } from './reducers/auth.reducer';
-export { selectSessionData } from './reducers/auth.reducer';
+export type { AuthState } from './types/auth.types';
 export type { SessionUser } from './types/auth.types';
 export { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 export type { StratosStatusMetadata } from './types/shared.types';
@@ -202,7 +199,7 @@ export {
 } from './selectors/current-user-role.selectors';
 export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
-export type { RouterRedirect } from './actions/auth.actions';
+export type { RouterRedirect } from './types/auth.types';
 export { getListStateObservables } from './reducers/list.reducer';
 export { EntitySchema } from './helpers/entity-schema';
 export type {

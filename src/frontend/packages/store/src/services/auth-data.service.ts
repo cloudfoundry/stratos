@@ -6,12 +6,11 @@ import { firstValueFrom } from 'rxjs';
 import { StratosBrandingService } from '@stratosui/theme';
 
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
-import { RouterRedirect, VerifiedSession } from '../actions/auth.actions';
 import { AppState, DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { LocalStorageService } from '../helpers/local-storage-service';
-import { AuthState } from '../reducers/auth.reducer';
-import { SessionData, SessionDataEnvelope } from '../types/auth.types';
+import { CurrentUserRolesSessionVerified } from '../actions/permissions.actions';
+import { AuthState, RouterRedirect, SessionData, SessionDataEnvelope } from '../types/auth.types';
 import { EndpointsDataService } from './endpoints-data.service';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -236,11 +235,14 @@ export class AuthDataService {
     this.router.navigate(typeof path === 'string' ? path.split('/') : path);
   }
 
-  /** SESSION_VERIFIED (+ LOGIN_SUCCESS when `login`). */
-  private setVerifiedSession(sessionData: SessionData, updateEndpoints: boolean, login: boolean): void {
-    // Keep the legacy slice populated for the framework sessionData readers
-    // and cfRoleInfoFromSessionReducer until the reducer is removed.
-    this.store.dispatch(new VerifiedSession(sessionData, updateEndpoints));
+  /** Verified session (+ logged-in when `login`). */
+  // `_updateEndpoints` is retained for call-site symmetry with verifySession;
+  // endpoints are always (re)loaded via endpointsService.getAll(true) now.
+  private setVerifiedSession(sessionData: SessionData, _updateEndpoints: boolean, login: boolean): void {
+    // Feed the current-user-roles slice the verified session so it can apply
+    // the user's internal admin scopes (replaces its SESSION_VERIFIED case).
+    // The cf-roles slice observes the sessionData signal separately.
+    this.store.dispatch(new CurrentUserRolesSessionVerified(sessionData));
     this.patch({
       error: false,
       errorResponse: '',

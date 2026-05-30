@@ -9,7 +9,6 @@ import {
   AuthDataService,
   PaginatedAction,
   SessionData,
-  selectSessionData,
 } from '@stratosui/store';
 
 const ENTITY_TYPE_DEFAULT_MAX = 600;
@@ -22,13 +21,8 @@ const ENTITY_TYPE_DEFAULT_MAX = 600;
  * `ListDataSource` and `MaxListMessageComponent`). At runtime Angular
  * populates `store.injector`, which lets us resolve `AuthDataService`
  * and bridge its `sessionData` signal back to an observable scoped to
- * the same injector. The legacy `store.select(selectSessionData())` path
- * remains as a fallback for unit tests that construct a bare `Store`
- * mock without an Injector — it is never exercised in production.
- *
- * When the auth reducer eventually collapses into `AuthDataService`,
- * the fallback branch and the `selectSessionData` import go away
- * together.
+ * the same injector. Without an injector (e.g. a bare `Store` mock in a
+ * unit test) there is no session data, so we emit `null`.
  */
 function sessionData$(store: Store<AppState>): Observable<SessionData | null> {
   const injector = (store as unknown as { injector?: Injector }).injector;
@@ -38,7 +32,8 @@ function sessionData$(store: Store<AppState>): Observable<SessionData | null> {
       return toObservable(authData.sessionData, { injector });
     }
   }
-  return store.select(selectSessionData());
+  // No injector (e.g. a bare Store mock in a unit test) → no session data.
+  return of(null);
 }
 
 export const cfMaxedStateHandlers = {
