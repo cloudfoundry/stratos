@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@stratosui/store';
 
 import {
@@ -11,7 +12,7 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { EntityServiceFactory, RouterNav } from '@stratosui/store';
+import { EntityServiceFactory } from '@stratosui/store';
 
 import { CFAppState } from '../../../../../../cf-app-state';
 import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
@@ -54,6 +55,7 @@ import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-
 })
 export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
 
   offering!: StServiceOffering;
@@ -94,7 +96,5 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   }
 
   goToServiceInstances = () =>
-    this.store.dispatch(new RouterNav({
-      path: ['marketplace', this.offering.cnsiGuid, this.offering.guid]
-    }));
+    this.router.navigate(['marketplace', this.offering.cnsiGuid, this.offering.guid]);
 }

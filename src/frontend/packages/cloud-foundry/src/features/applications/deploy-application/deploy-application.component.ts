@@ -11,14 +11,12 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@stratosui/store';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, of, of as observableOf, firstValueFrom } from 'rxjs';
 import { take, filter, map, tap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 
 import { SourceType } from '../../../store/types/deploy-application.types';
-import { RouterNav } from '@stratosui/store';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -56,9 +54,7 @@ import { DeployApplicationStep3Component } from './deploy-application-step3/depl
 ]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
-  // RouterNav dispatches still go through Store; the deployApplication
-  // slice itself is signal-native via CfDeployAppDataService.
-  private store = inject(Store);
+  private router = inject(Router);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private appsConfig = inject(CfAppsSignalConfigService);
   private activatedRoute = inject(ActivatedRoute);
@@ -420,7 +416,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       this.initCfOrgSpaceService.push(this.cfDetails$.pipe(
         filter(p => !p),
         tap(_p => {
-          this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));
+          this.router.navigate(['applications', 'deploy']);
         })
       ).subscribe());
     } else {

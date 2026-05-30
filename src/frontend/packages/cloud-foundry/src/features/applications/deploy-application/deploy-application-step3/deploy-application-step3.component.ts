@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
+import { Router } from '@angular/router';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -11,8 +11,6 @@ import {
 import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
-import { RouterNav } from '@stratosui/store';
-import { CFAppState } from '../../../../cf-app-state';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import type { StApp, StAppsResponse } from '../../../../services/endpoint-data/stratos-types';
@@ -33,7 +31,7 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
   ]
 })
 export class DeployApplicationStep3Component implements OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
   private deployData = inject(CfDeployAppDataService);
   private snackBarService = inject(SnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
@@ -259,7 +257,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // nothing reads anymore.
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
+      this.router.navigate(['applications', cfGuid, this.appGuid]);
     }
   }
 }

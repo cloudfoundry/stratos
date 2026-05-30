@@ -1,13 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@stratosui/store';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
 import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent, SignalStepHandle } from '@stratosui/core';
-import { RouterNav } from '@stratosui/store';
 import {
   ApplicationDeploySourceTypes,
   AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
@@ -40,7 +37,7 @@ export interface IAppTileData extends ITileData {
   ]
 })
 export class NewApplicationBaseStepComponent {
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
 
@@ -49,7 +46,7 @@ export class NewApplicationBaseStepComponent {
 
   // FWT-957: signal-native step handle. Tile-selector confirmation step
   // (no submission, Next hidden); navigation happens via the tile
-  // selectionChange handler dispatching RouterNav.
+  // selectionChange handler calling router.navigate.
   signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
@@ -69,10 +66,7 @@ export class NewApplicationBaseStepComponent {
         query[BASE_REDIRECT_QUERY] += `/${endpoint}`;
       }
 
-      this.store.dispatch(new RouterNav({
-        path: `${baseUrl}/${type}`,
-        query
-      }));
+      this.router.navigate(`${baseUrl}/${type}`.split('/'), { queryParams: query });
     }
   }
 

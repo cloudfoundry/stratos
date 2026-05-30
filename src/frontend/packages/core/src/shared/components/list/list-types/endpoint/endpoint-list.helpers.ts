@@ -1,5 +1,6 @@
 import { ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
-import { ActionState, AppState, EndpointModel, EndpointsDataService, entityCatalog, RouterNav, Store, stratosEntityCatalog } from '@stratosui/store';
+import { Router } from '@angular/router';
+import { ActionState, AppState, EndpointModel, EndpointsDataService, entityCatalog, Store, stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -55,6 +56,7 @@ function combineCreateVisibles(
 @Injectable()
 export class EndpointListHelper {
   private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
   private dialog = inject(TailwindDialogService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private confirmDialog = inject(ConfirmationDialogService);
@@ -191,7 +193,7 @@ export class EndpointListHelper {
       {
         action: (item) => {
           const routerLink = `/endpoints/edit/${item.guid}`;
-          this.store.dispatch(new RouterNav({ path: routerLink }));
+          this.router.navigate(routerLink.split('/'));
         },
         label: 'Edit endpoint',
         description: 'Edit the endpoint',

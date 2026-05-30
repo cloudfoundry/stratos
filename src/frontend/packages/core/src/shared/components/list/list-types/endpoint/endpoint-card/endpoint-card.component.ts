@@ -1,16 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  AppState,
   EndpointModel,
   entityCatalog,
   getFullEndpointApiUrl,
   MenuItem,
-  RouterNav,
-  Store,
   StratosCatalogEndpointEntity,
   StratosStatus,
   UserFavoriteEndpoint,
@@ -66,10 +63,7 @@ import { DisableRouterLinkDirective } from '../../../../../../core/disable-route
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
-  private store = inject<Store<AppState>>(Store);
-  // Endpoints read goes through the signal projection so this card no
-  // longer subscribes directly to the legacy endpoints selector. Store
-  // is still needed for the routerNav dispatch below.
+  private router = inject(Router);
   private endpointsSignal = inject(EndpointsSignalService);
   private endpoints$ = toObservable(this.endpointsSignal.endpoints);
   private endpointListHelper = inject(EndpointListHelper);
@@ -192,7 +186,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
   editEndpoint() {
     const routerLink = `/endpoints/edit/${this.row.guid}`;
-    this.store.dispatch(new RouterNav({ path: routerLink }));
+    this.router.navigate(routerLink.split('/'));
   }
 
   /**

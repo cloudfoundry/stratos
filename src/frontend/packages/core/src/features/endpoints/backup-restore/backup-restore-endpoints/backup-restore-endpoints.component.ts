@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { AppState, RouterNav, Store } from '@stratosui/store';
+import { Router } from '@angular/router';
 
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -24,7 +24,7 @@ interface IAppTileData extends ITileData {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupRestoreEndpointsComponent {
-  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
 
 
   public serviceType!: string;
@@ -39,7 +39,7 @@ export class BackupRestoreEndpointsComponent {
   set selectedTile(tile: ITileConfig<IAppTileData>) {
     if (tile) {
       const url = 'endpoints/backup-restore/' + tile.data.type;
-      this.store.dispatch(new RouterNav({ path: url }));
+      this.router.navigate(url.split('/'));
     }
   }
 

@@ -324,7 +324,6 @@ export class KubeConfigImportComponent implements OnDestroy {
   // Finish - go back to the endpoints view
   onNext: StepOnNextFunction = () => {
     if (this.applyStarted) {
-      // this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
       return observableOf({ success: true, redirect: true });
 
     } else {

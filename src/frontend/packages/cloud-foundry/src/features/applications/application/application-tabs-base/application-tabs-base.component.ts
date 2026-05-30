@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EffectRef, Injector, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
@@ -22,7 +22,6 @@ import {
   IHeaderBreadcrumb
 } from '@stratosui/core';
 import {
-  RouterNav,
   entityCatalog,
   EntitySchema,
   EndpointModel,
@@ -67,6 +66,7 @@ import { AppDetailDataService } from '../../app-detail-data.service';
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
   private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
   private endpointsService = inject(EndpointsService);
   private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -300,7 +300,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     runInInjectionContext(this.injector, () => {
       this.errorRedirectEffect = effect(() => {
         if (this.detail.errors().app) {
-          this.store.dispatch(new RouterNav({ path: ['applications'] }));
+          this.router.navigate(['applications']);
         }
       });
     });

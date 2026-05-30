@@ -2,12 +2,12 @@ import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Store } from '@stratosui/store';
 import { from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
-import { RouterNav } from '@stratosui/store';
 import { CFAppState } from '@stratosui/cloud-foundry';
 import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
 import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
@@ -40,6 +40,7 @@ interface DomainHostForm {
 })
 export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   private store = inject(Store<CFAppState>);
+  private router = inject(Router);
   private http = inject(HttpClient);
   private endpointDataRegistry = inject(EndpointDataRegistry);
 
@@ -76,7 +77,7 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
         : observableOf(appGuid),
       ),
       map(appGuid => {
-        this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, appGuid, 'summary'] }));
+        this.router.navigate(['applications', cloudFoundry, appGuid, 'summary']);
         return { success: true };
       }),
       catchError((err: Error | HttpErrorResponse) => {

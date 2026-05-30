@@ -2,11 +2,10 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {
   EndpointOnlyAppState,
   EndpointsDataService,
-  RouterNav,
   Store,
   stratosEntityCatalog,
 } from '@stratosui/store';
@@ -52,6 +51,7 @@ import { EndpointsSignalListComponent } from './endpoints-signal-list.component'
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
   store = inject<Store<EndpointOnlyAppState>>(Store);
+  router = inject(Router);
   private endpointsData = inject(EndpointsDataService);
   private authSignal = inject(AuthSignalService);
   private ngZone = inject(NgZone);
@@ -114,12 +114,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       map(off => {
         if (off) {
           // User should only get here if url is manually entered
-          this.store.dispatch(new RouterNav({
-            path: ['applications'],
-            extras: {
-              replaceUrl: true
-            }
-          }));
+          this.router.navigate(['applications'], { replaceUrl: true });
         }
       }),
       take(1)

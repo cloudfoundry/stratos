@@ -1,13 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
-  AppState,
   EndpointModel,
-  RouterNav,
-  Store,
   UserFavorite,
   UserFavoriteManager,
   entityCatalog,
@@ -56,7 +54,7 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
   ],
 })
 export class EndpointsSignalListComponent {
-  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
   private endpointsConfig = inject(EndpointsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
@@ -294,7 +292,7 @@ export class EndpointsSignalListComponent {
 
     out.push({
       label: 'Edit', icon: 'edit',
-      invoke: () => this.store.dispatch(new RouterNav({ path: `/endpoints/edit/${ep.guid}` })),
+      invoke: () => this.router.navigate(`/endpoints/edit/${ep.guid}`.split('/')),
     });
 
     out.push({

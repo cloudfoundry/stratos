@@ -1,10 +1,8 @@
 import { CommonModule } from '@angular/common';
 import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
+import { Router, RouterModule } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
-import { AppState, RouterNav } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -115,9 +113,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private analysisReportId = signal<string | null>(null);
   private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
   public helmReleaseHelper = inject(HelmReleaseHelperService);
-  // Store is retained only for the RouterNav action dispatch on delete.
-  // Read-side cluster-name lookup moved to EndpointsSignalService.
-  private store = inject(Store<AppState>);
+  private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackbarService = inject(SnackBarService);
@@ -272,7 +268,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         this.helmReleaseHelper.releaseTitle,
       ).then(() => {
         this.completeDelete();
-        this.store.dispatch(new RouterNav({ path: ['./workloads'] }));
+        this.router.navigate(['./workloads']);
       }).catch((err: Error) => {
         this.endDelete();
         this.snackbarService.show('Failed to delete release', 'Close');

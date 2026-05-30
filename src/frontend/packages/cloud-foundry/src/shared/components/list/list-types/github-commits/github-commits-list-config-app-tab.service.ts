@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@stratosui/store';
 import {
   GitCommit,
@@ -15,7 +16,6 @@ import { take, combineLatest, filter, map } from 'rxjs/operators';
 
 import { IListAction } from '../../../../../../../core/src/shared/components/list/list.component.types';
 import { getCommitGuid } from '../../../../../../../git/src/store/git-entity-factory';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
 import { CFAppState } from '../../../../../cf-app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { CfDeployAppDataService } from '../../../../../services/domain-data/cf-deploy-app-data.service';
@@ -24,6 +24,7 @@ import { CfDeployAppDataService } from '../../../../../services/domain-data/cf-d
   providedIn: 'root'
 })
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
+  private router = inject(Router);
   private scmService = inject(GitSCMService);
   private applicationService = inject(ApplicationService);
   private deployData = inject(CfDeployAppDataService);
@@ -56,10 +57,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.deployData.setDeployBranch(this.branchName);
       this.deployData.setDeployCommit(commitEntity.sha);
 
-      this.store.dispatch(new RouterNav({
-        path: ['/applications/deploy'],
-        query: { appGuid: this.appGuid }
-      }));
+      this.router.navigate(['/applications/deploy'], { queryParams: { appGuid: this.appGuid } });
     },
     label: 'Deploy',
     description: `` };
