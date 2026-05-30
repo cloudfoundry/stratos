@@ -2,11 +2,10 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
-import { RouterNav } from '../actions/router.actions';
+import { RouterNav, RouterRedirect } from '../actions/router.actions';
 import { VerifySession } from '../actions/auth.actions';
 import { AppState } from '../app-state';
 import { AuthState } from '../reducers/auth.reducer';
-import { RouterRedirect } from '../reducers/routing.reducer';
 import { SessionData } from '../types/auth.types';
 
 /**

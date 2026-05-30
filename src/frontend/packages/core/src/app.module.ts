@@ -1,9 +1,8 @@
-import { ApplicationRef, EnvironmentInjector, Injectable, NgModule, effect, provideZonelessChangeDetection, inject, runInInjectionContext } from '@angular/core';
+import { ApplicationRef, EnvironmentInjector, NgModule, effect, provideZonelessChangeDetection, inject, runInInjectionContext } from '@angular/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Params, RouteReuseStrategy, RouterStateSnapshot } from '@angular/router';
-import { FullRouterStateSerializer, RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { RouteReuseStrategy } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
@@ -57,35 +56,6 @@ import { TabNavService } from './tab-nav.service';
 import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@angular/common/http';
 import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';
 import { cfApiInterceptor } from '@stratosui/cloud-foundry';
-
-// Create action for router navigation. See
-// - https://github.com/ngrx/platform/issues/68
-// - https://github.com/ngrx/platform/issues/201 (https://github.com/ngrx/platform/pull/355)
-
-// https://github.com/ngrx/platform/blob/master/docs/router-store/api.md#custom-router-state-serializer
-export interface RouterStateUrl {
-  url: string;
-  params: Params;
-  queryParams: Params;
-}
-@Injectable()
-export class CustomRouterStateSerializer
-  implements RouterStateSerializer<RouterStateUrl> {
-  serialize(routerState: RouterStateSnapshot): RouterStateUrl {
-    let route = routerState.root;
-    while (route.firstChild) {
-      route = route.firstChild;
-    }
-
-    const { url } = routerState;
-    const queryParams = routerState.root.queryParams;
-    const params = route.params;
-
-    // Only return an object including the URL, params and query params
-    // instead of the entire snapshot
-    return { url, params, queryParams };
-  }
-}
 
 const storeDebugImports = environment.production ? [] : [
   StoreDevtoolsModule.instrument({
@@ -149,7 +119,6 @@ class AppStoreDebugModule { }
     LoginModule,
     HomeModule,
     DashboardModule,
-    StoreRouterConnectingModule.forRoot({ serializer: FullRouterStateSerializer }), // Create action for router navigation
     // CRITICAL: CustomImportModule MUST be last - loads feature modules that depend on core entities
     CustomImportModule,
   ],
@@ -163,7 +132,6 @@ class AppStoreDebugModule { }
     DynamicExtensionRoutes,
     SidePanelService,
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-    { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer }, // Create action for router navigation
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
     CurrentUserPermissionsService,
     provideCharts(withDefaultRegisterables()),

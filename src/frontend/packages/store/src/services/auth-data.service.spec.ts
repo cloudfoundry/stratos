@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { VerifySession } from '../actions/auth.actions';
 import { RouterNav } from '../actions/router.actions';
 import { AuthState } from '../reducers/auth.reducer';
-import { RouterRedirect } from '../reducers/routing.reducer';
+import { RouterRedirect } from '../actions/router.actions';
 import { SessionData } from '../types/auth.types';
 import { AuthDataService } from './auth-data.service';
 

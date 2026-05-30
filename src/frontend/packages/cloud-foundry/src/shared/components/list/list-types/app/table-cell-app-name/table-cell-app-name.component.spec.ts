@@ -4,8 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ROUTER_NAVIGATION } from '@ngrx/router-store';
-import { Store, StoreModule } from '@ngrx/store';
+import { StoreModule } from '@ngrx/store';
 
 import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -46,15 +45,6 @@ describe('TableCellAppNameComponent', () => {
       ]
     })
       .compileComponents();
-
-    TestBed.inject(Store).dispatch({
-      type: ROUTER_NAVIGATION,
-      payload: {
-        event: {
-          url: 'url'
-        }
-      }
-    });
   });
 
   beforeEach(() => {

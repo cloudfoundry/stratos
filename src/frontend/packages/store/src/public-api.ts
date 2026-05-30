@@ -118,7 +118,6 @@ export {
   proxyAPIVersion,
 } from './jetstream';
 export type { RoutingEvent } from './types/routing.type';
-export { getPreviousRoutingState, getCurrentRoutingState } from './types/routing.type';
 export type { IFavoriteMetadata, IFavoritesInfo, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { UserFavorite } from './types/user-favorites.types';
 export { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from './actions/recently-visited.actions';
@@ -205,7 +204,7 @@ export {
 } from './selectors/current-user-role.selectors';
 export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
-export type { RouterRedirect } from './reducers/routing.reducer';
+export type { RouterRedirect } from './actions/router.actions';
 export { getListStateObservables } from './reducers/list.reducer';
 export { EntitySchema } from './helpers/entity-schema';
 export type {

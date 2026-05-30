@@ -14,7 +14,7 @@ import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { AuthOnlyAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import { LogoutFailed } from './../actions/auth.actions';
-import { RouterRedirect } from './routing.reducer';
+import { RouterRedirect } from '../actions/router.actions';
 
 export interface AuthUser {
   guid: string;
