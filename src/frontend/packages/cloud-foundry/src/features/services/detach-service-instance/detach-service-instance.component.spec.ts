@@ -5,6 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
@@ -43,7 +44,10 @@ function configureModule(routerStub: { navigate: ReturnType<typeof vi.fn> }) {
           },
         },
       },
-      { provide: Router, useValue: routerStub },
+      // events: the stepper host instantiates the root RoutingHistoryService,
+    // whose constructor subscribes to router.events. Spread keeps the same
+    // navigate spy reference the tests assert on.
+    { provide: Router, useValue: { events: of(), ...routerStub } },
       provideZonelessChangeDetection(),
       provideNoopAnimations(),
     ],

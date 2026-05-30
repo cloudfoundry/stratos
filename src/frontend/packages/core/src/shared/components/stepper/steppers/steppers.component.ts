@@ -1,14 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { RoutingHistoryService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
 
-import { BASE_REDIRECT_QUERY } from '../stepper.types';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
+import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
 import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
@@ -34,7 +32,8 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private steppersService = inject(SteppersService);
-  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
+  private routingHistory = inject(RoutingHistoryService);
   private snackBar = inject(TailwindSnackBarService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
@@ -47,7 +46,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @Input() cancel: string = null;
   @Input() nextButtonProgress = true;
-  @Input() basePreviousRedirect: IRouterNavPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
+  @Input() basePreviousRedirect: StepperRedirectPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
   } : null;
   // Optional context summary rendered above the step headers. Hosts pass
@@ -80,9 +79,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     [key: string]: string;
   }>;
   constructor() {
-    const store = this.store;
-
-    const previousRoute$ = store.select(getPreviousRoutingState).pipe(take(1));
+    const previousRoute$ = this.routingHistory.previousState$.pipe(take(1));
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
         // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
@@ -242,27 +239,32 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  redirect(redirectPayload?: IRouterNavPayload): Observable<void> {
+  redirect(redirectPayload?: StepperRedirectPayload): Observable<void> {
     if (redirectPayload) {
-      return observableOf(this.dispatchRedirect(redirectPayload));
+      return observableOf(this.navigate(redirectPayload));
     }
     return combineLatest([
       this.cancel$,
       this.cancelQueryParams$
     ]).pipe(
       map(([path, params]) => {
-        this.dispatchRedirect({ path, query: params });
+        this.navigate({ path, query: params });
       })
     );
   }
 
-  private dispatchRedirect(redirectPayload: IRouterNavPayload): void {
-    this.store.dispatch(new RouterNav(redirectPayload));
+  // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch +
+  // RouterEffect (which did exactly this). String paths are split into route
+  // segments and query params are merged into NavigationExtras.
+  private navigate(redirectPayload: StepperRedirectPayload): void {
+    const { path, query: queryParams, extras = {} } = redirectPayload;
+    const commands = typeof path === 'string' ? path.split('/') : path;
+    this.router.navigate(commands, { ...extras, queryParams });
   }
 
   setActive(index: number): void {
     if (this.basePreviousRedirect && index < 0) {
-      this.dispatchRedirect(this.basePreviousRedirect);
+      this.navigate(this.basePreviousRedirect);
     }
     if (!this.canGoto(index)) {
       if (index === 0) {
