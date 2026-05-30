@@ -10,7 +10,6 @@ import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
-import { routingReducer } from './reducers/routing.reducer';
 
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
@@ -30,7 +29,6 @@ export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   // This is added as part of the entity catalog module.
   // requestData,
   lists: listReducer,
-  routing: routingReducer,
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,

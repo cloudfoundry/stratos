@@ -155,28 +155,6 @@ function getDefaultInitialTestStratosStoreState() {
       message: ''
     },
     lists: {},
-    routing: {
-      previousState: {
-        id: 4,
-        url: '/marketplace',
-        urlAfterRedirects: '/marketplace',
-        state: {
-          url: '/marketplace',
-          params: {},
-          queryParams: {}
-        }
-      },
-      currentState: {
-        id: 5,
-        url: '/applications',
-        urlAfterRedirects: '/applications',
-        state: {
-          url: '/applications',
-          params: {},
-          queryParams: {}
-        }
-      }
-    },
     internalEvents: {
       types: {
         global: {},

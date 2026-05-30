@@ -7,7 +7,6 @@ import type { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import type { InternalEventsState } from './types/internal-events.types';
 import type { PaginationEntityTypeState } from './types/pagination.types';
 import type { IRecentlyVisitedState } from './types/recently-visited.types';
-import type { RoutingHistory } from './types/routing.type';
 export interface IRequestTypeState {
   [entityKey: string]: any;
 }
@@ -26,7 +25,6 @@ export abstract class AppState<
   request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData!: T;
   lists!: ListsState;
-  routing!: RoutingHistory;
   internalEvents!: InternalEventsState;
   currentUserRoles!: ICurrentUserRolesState;
   userFavoritesGroups!: IUserFavoritesGroupsState;
@@ -43,8 +41,6 @@ export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'stratosEndpo
 export type AuthOnlyAppState = Pick<AppState, 'auth'>;
 export type CurrentUserRolesAppState = Pick<AppState, 'currentUserRoles'>;
 export type UserFavoritesOnlyAppState = Pick<AppState<Pick<BaseEntityValues, 'stratosUserFavorites'>>, 'userFavoritesGroups'>;
-
-export type AppRoutingOnlyAppState = Pick<AppState, 'routing'>;
 
 export type ListsOnlyAppState = Pick<AppState, 'lists'>;
 
