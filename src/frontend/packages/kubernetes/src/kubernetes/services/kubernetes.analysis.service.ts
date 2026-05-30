@@ -45,30 +45,10 @@ export class KubernetesAnalysisService {
   // BehaviorSubject's tick.
   private readonly refreshTrigger$ = new BehaviorSubject<number>(0);
 
-  // Compatibility shim — legacy `isAnalysisEnabled(store)` callers that
-  // imported @ngrx/store can call this overload. The store parameter is
-  // ignored; the read goes through SessionService.
-  public static isAnalysisEnabled(_store: unknown): Observable<boolean>;
-  public static isAnalysisEnabled(session: SessionService): Observable<boolean>;
-  public static isAnalysisEnabled(arg: unknown): Observable<boolean> {
-    // Detect SessionService by sessionData() signal presence; ngrx Store
-    // exposes select() instead. Both branches resolve to the
-    // plugins.analysis flag from session data.
-    const maybeSession = arg as { sessionData?: () => { plugins?: { analysis?: boolean } } | null } | null;
-    if (maybeSession?.sessionData && typeof maybeSession.sessionData === 'function') {
-      return of(!!maybeSession.sessionData()?.plugins?.analysis).pipe(startWith(false));
-    }
-    // Fallback: assume Store-shaped, dispatch a select. Only used by the
-    // legacy KubernetesNamespacePreviewComponent constructor — it passes
-    // an injected Store instance.
-    const store = arg as { select?: (s: string) => Observable<{ sessionData?: { plugins?: { analysis?: boolean } } }> } | null;
-    if (store?.select) {
-      return store.select('auth').pipe(
-        map(auth => !!auth?.sessionData?.plugins?.analysis),
-        startWith(false),
-      );
-    }
-    return of(false);
+  // Reads the `plugins.analysis` flag from session data via the
+  // signal-native SessionService — no ngrx Store / `store.select('auth')`.
+  public static isAnalysisEnabled(session: SessionService): Observable<boolean> {
+    return of(!!session?.sessionData()?.plugins?.analysis).pipe(startWith(false));
   }
 
   private injector = inject(Injector);

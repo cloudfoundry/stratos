@@ -1,10 +1,10 @@
 import { AsyncPipe } from "@angular/common";
 import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
-import { AppState, Store } from "@stratosui/store";
 import { Observable } from "rxjs";
 
 import { PreviewableComponent } from "../../../../../core/src/shared/previewable-component";
+import { SessionService } from "../../../../../core/src/core/session.service";
 import { BaseKubeGuid } from "../../kubernetes-page.types";
 import { KubernetesEndpointService } from "../../services/kubernetes-endpoint.service";
 import { KubernetesNamespaceService } from "../../services/kubernetes-namespace.service";
@@ -37,11 +37,11 @@ export class KubernetesNamespacePreviewComponent implements PreviewableComponent
   showAnalysis$: Observable<boolean>;
 
   link: string;
-  private store = inject(Store<AppState>);
+  private session = inject(SessionService);
 
   constructor() {
     this.showAnalysis$ = KubernetesAnalysisService.isAnalysisEnabled(
-      this.store,
+      this.session,
     );
   }
 

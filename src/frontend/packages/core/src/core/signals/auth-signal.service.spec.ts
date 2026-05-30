@@ -2,8 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { AuthState, SessionData } from '@stratosui/store';
+import { Login, Logout } from '@stratosui/store';
 
 import { AuthSignalService } from './auth-signal.service';
 
@@ -26,12 +27,14 @@ function makeAuthState(overrides: Partial<AuthState> = {}): AuthState {
 
 describe('AuthSignalService', () => {
   let auth$: BehaviorSubject<AuthState>;
+  let dispatch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     auth$ = new BehaviorSubject<AuthState>(makeAuthState());
+    dispatch = vi.fn();
     const stubStore = {
       select: () => auth$.asObservable(),
-      dispatch: () => undefined,
+      dispatch,
     };
     TestBed.configureTestingModule({
       providers: [
@@ -79,5 +82,22 @@ describe('AuthSignalService', () => {
     auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as SessionData }));
     flushEffects();
     expect(service.loginCompletedAt()).toBe(firstStamp);
+  });
+
+  it('delegates login() to the data service Login dispatch', () => {
+    const service = TestBed.inject(AuthSignalService);
+    service.login('alice', 's3cret');
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const action = dispatch.mock.calls[0][0] as Login;
+    expect(action).toBeInstanceOf(Login);
+    expect(action.username).toBe('alice');
+    expect(action.password).toBe('s3cret');
+  });
+
+  it('delegates logout() to the data service Logout dispatch', () => {
+    const service = TestBed.inject(AuthSignalService);
+    service.logout();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0][0]).toBeInstanceOf(Logout);
   });
 });

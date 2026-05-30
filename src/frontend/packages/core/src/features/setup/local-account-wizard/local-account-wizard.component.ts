@@ -4,8 +4,6 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import {
   AuthState,
-  Store,
-  VerifySession,
 } from '@stratosui/store';
 import { combineLatest, Observable, firstValueFrom } from 'rxjs';
 import { delay, filter, map, take } from 'rxjs/operators';
@@ -48,7 +46,6 @@ selector: 'app-local-account-wizard',
 })
 export class LocalAccountWizardComponent implements OnInit {
 
-  private store = inject(Store);
   private injector = inject(Injector);
   private authSignals = inject(AuthSignalService);
   private uaaSetupSignals = inject(UaaSetupSignalService);
@@ -127,7 +124,7 @@ export class LocalAccountWizardComponent implements OnInit {
       filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
         const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
-          this.store.dispatch(new VerifySession());
+          this.authSignals.verifySession(true, true);
         }
         return validUAASessionData;
       }),
