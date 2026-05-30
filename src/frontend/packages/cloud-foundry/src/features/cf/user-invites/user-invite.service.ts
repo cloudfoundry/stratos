@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { Store } from '@stratosui/store';
+import { AuthDataService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
@@ -10,7 +11,6 @@ import { environment } from '../../../../../core/src/environments/environment.pr
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { CFAppState } from '../../../cf-app-state';
 import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -128,7 +128,7 @@ export class UserInviteConfigureService {
   providedIn: 'root'
 })
 export class UserInviteService {
-  private store = inject<Store<CFAppState>>(Store);
+  private authData = inject(AuthDataService);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
   private http = inject(HttpClient);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -150,11 +150,11 @@ export class UserInviteService {
 
     this.canConfigure$ = combineLatest(
       waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
-      this.store.select('auth')
+      toObservable(this.authData.sessionData)
     ).pipe(
-      map(([cf, auth]) =>
+      map(([cf, sessionData]) =>
         cf.global.isAdmin &&
-        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
+        !!sessionData?.['plugin-config'] && sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );
   }
 

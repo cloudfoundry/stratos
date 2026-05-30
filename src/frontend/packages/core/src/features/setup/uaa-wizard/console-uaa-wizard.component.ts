@@ -4,8 +4,6 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import {
   AuthState,
-  Store,
-  VerifySession,
 } from '@stratosui/store';
 import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
 import { delay, filter, skipWhile, take } from 'rxjs/operators';
@@ -54,7 +52,6 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
-  private store = inject(Store);
   private cdr = inject(ChangeDetectorRef);
   private authSignals = inject(AuthSignalService);
   private uaaSetupSignals = inject(UaaSetupSignalService);
@@ -155,7 +152,7 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
           filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
             const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
             if (!validUAASessionData) {
-              this.store.dispatch(new VerifySession());
+              this.authSignals.verifySession(true, true);
             }
             return validUAASessionData;
           }),

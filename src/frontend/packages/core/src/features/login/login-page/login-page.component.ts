@@ -3,8 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Actions, AuthState, InternalAppState, Login, RouterRedirect, Store, VerifySession, ofType } from '@stratosui/store';
-import { LOGIN_SUCCESS } from '../../../../../store/src/actions/auth.actions';
+import { AuthState, RouterRedirect } from '@stratosui/store';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
@@ -29,12 +28,10 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit {
-  private store = inject<Store<Pick<InternalAppState, 'auth'>>>(Store);
   private authSignal = inject(AuthSignalService);
   private endpointStatusSignals = inject(EndpointStatusSignalService);
   private branding = inject(StratosBrandingService);
   private router = inject(Router);
-  private actions$ = inject(Actions);
   private appRef = inject(ApplicationRef);
 
 
@@ -93,6 +90,11 @@ export class LoginPageComponent implements OnInit {
     distinctUntilChanged((prev, curr) => prev.loading === curr.loading),
     shareReplay({ bufferSize: 1, refCount: false })
   );
+
+  // Bridge the AuthDataService login-completion marker to an observable so
+  // login() can await a *fresh* completion (replaces the legacy
+  // `actions$.pipe(ofType(LOGIN_SUCCESS))` listener).
+  private readonly loginCompletedAt$ = toObservable(this.authSignal.loginCompletedAt);
 
   // Track navigation state
   private readonly navigationInProgress$ = new BehaviorSubject<boolean>(false);
@@ -190,8 +192,8 @@ export class LoginPageComponent implements OnInit {
     // Initialize the BehaviorSubject with current value
     this.redirectAttemptsSubject$.next(this.redirectAttempts);
 
-    // Dispatch initial session verification
-    this.store.dispatch(new VerifySession());
+    // Trigger initial session verification
+    this.authSignal.verifySession(true, true);
 
     // Handle auto-redirect ONLY for valid existing sessions (page refresh/direct navigation)
     this.auth$.pipe(
@@ -250,15 +252,18 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    // Clear redirect counter and dispatch login
+    // Clear redirect counter and start login
     this.clearRedirectAttempts();
     this.message = '';
 
-    this.store.dispatch(new Login(this.username, this.password));
+    // Capture the current completion marker so we react to the *next* login
+    // completion, not a stale one from earlier in this app session.
+    const startedAt = this.authSignal.loginCompletedAt();
+    this.authSignal.login(this.username, this.password);
 
-    // Wait for LOGIN_SUCCESS, then ensure app is ready before navigating
-    this.actions$.pipe(
-      ofType(LOGIN_SUCCESS),
+    // Wait for a fresh login completion, then ensure app is ready before navigating
+    this.loginCompletedAt$.pipe(
+      filter(t => t !== startedAt),
       take(1),
       switchMap(() => this.appReady$),  // Wait for app to be stable
       switchMap(() => this.auth$.pipe(

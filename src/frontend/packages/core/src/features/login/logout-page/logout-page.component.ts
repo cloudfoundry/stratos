@@ -2,7 +2,6 @@ import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/cor
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
-import { AppState, Logout, Store } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
@@ -25,15 +24,14 @@ selector: 'app-logout-page',
 })
 export class LogoutPageComponent implements OnInit {
 
-  private store = inject(Store<AppState>);
   private auth = inject(AuthSignalService);
 
   public error$: Observable<boolean> = toObservable(this.auth.error);
 
   ngOnInit() {
-    // Dispatch the logout action after 1 second - give the logging out screen time to show
+    // Trigger logout after 1 second - give the logging out screen time to show
     setTimeout(() => {
-      this.store.dispatch(new Logout());
+      this.auth.logout();
     }, 1000);
   }
 

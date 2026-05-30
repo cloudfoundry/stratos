@@ -40,6 +40,24 @@ export class AuthSignalService {
   readonly loginCompletedAt: Signal<number> = this.authData.loginCompletedAt;
 
   /**
+   * Begin a login. Delegates to {@link AuthDataService}, which dispatches the
+   * `Login` action; the underlying ngrx effect still owns the credential POST
+   * and the verify/redirect saga.
+   */
+  login(username: string, password: string): void {
+    this.authData.login(username, password);
+  }
+
+  /**
+   * Log out. Delegates to {@link AuthDataService}, which dispatches the
+   * `Logout` action; the underlying ngrx effect still owns the logout POST
+   * and the reset/redirect.
+   */
+  logout(): void {
+    this.authData.logout();
+  }
+
+  /**
    * Trigger a session-verification cycle. Delegates to {@link AuthDataService}
    * so callers can stay Store-free; the underlying ngrx effect remains
    * responsible for the HTTP round-trip until session refresh is fully
