@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 
 import {
   AppState,
+  AuthDataService,
   EndpointsDataService,
   EndpointDisconnectCleanupService,
 } from '@stratosui/store';
@@ -12,6 +13,7 @@ import {
   CfRoleEndpointConnectedAction,
   CfRoleEndpointRegisteredAction,
   CfRoleEndpointRemovedAction,
+  CfRoleSessionEndpointsAction,
 } from '../actions/cf-endpoint-role.actions';
 
 /**
@@ -29,6 +31,7 @@ import {
 export class CfEndpointRoleSyncService implements OnDestroy {
   private endpointsService = inject(EndpointsDataService);
   private cleanup = inject(EndpointDisconnectCleanupService);
+  private authData = inject(AuthDataService);
   private store = inject<Store<AppState>>(Store);
 
   /** Track which CF endpoint guids we've already seeded a role-state row for. */
@@ -55,6 +58,19 @@ export class CfEndpointRoleSyncService implements OnDestroy {
     }
   });
 
+  /**
+   * Propagate CF admin permissions from verified-session endpoints. Replaces
+   * the auth slice's `SESSION_VERIFIED` reducer case: fires whenever
+   * `AuthDataService.sessionData` gains endpoints (i.e. once per verify, since
+   * the signal holds the same object until the next verify replaces it).
+   */
+  private readonly sessionEndpointsEffect = effect(() => {
+    const sessionData = this.authData.sessionData();
+    if (sessionData?.endpoints) {
+      this.store.dispatch(new CfRoleSessionEndpointsAction(sessionData));
+    }
+  });
+
   constructor() {
     this.cleanup.registerConnectHandler(event => {
       if (event.type !== CF_ENDPOINT_TYPE) {
@@ -72,5 +88,6 @@ export class CfEndpointRoleSyncService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.registerEffect.destroy();
+    this.sessionEndpointsEffect.destroy();
   }
 }

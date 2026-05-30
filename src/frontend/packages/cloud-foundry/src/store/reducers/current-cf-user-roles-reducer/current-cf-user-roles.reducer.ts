@@ -1,8 +1,6 @@
 import { Action } from '@ngrx/store';
 
 import {
-  SESSION_VERIFIED,
-  VerifiedSession,
   APISuccessOrFailedAction
 } from '@stratosui/store';
 import { EntityUserRolesReducer } from '../../../../../store/src/entity-request-pipeline/entity-request-pipeline.types';
@@ -25,9 +23,11 @@ import {
   CF_ROLE_ENDPOINT_CONNECTED,
   CF_ROLE_ENDPOINT_REGISTERED,
   CF_ROLE_ENDPOINT_REMOVED,
+  CF_ROLE_SESSION_ENDPOINTS,
   CfRoleEndpointConnectedAction,
   CfRoleEndpointRegisteredAction,
   CfRoleEndpointRemovedAction,
+  CfRoleSessionEndpointsAction,
 } from '../../actions/cf-endpoint-role.actions';
 import { IAllCfRolesState } from '../../types/cf-current-user-roles.types';
 import { currentUserBaseCFRolesReducer } from './current-cf-user-base-cf-role.reducer';
@@ -49,8 +49,8 @@ export const currentCfUserRolesReducer: EntityUserRolesReducer<IAllCfRolesState>
       const gcursAction = action as GetCurrentCfUserRelationsComplete;
       return currentUserBaseCFRolesReducer(state, gcursAction);
     }
-    case SESSION_VERIFIED:
-      return cfRoleInfoFromSessionReducer(state, action as VerifiedSession);
+    case CF_ROLE_SESSION_ENDPOINTS:
+      return cfRoleInfoFromSessionReducer(state, action as CfRoleSessionEndpointsAction);
     case CF_ROLE_ENDPOINT_REGISTERED:
       return addCfEndpoint(state, action as CfRoleEndpointRegisteredAction);
     case CF_ROLE_ENDPOINT_CONNECTED:

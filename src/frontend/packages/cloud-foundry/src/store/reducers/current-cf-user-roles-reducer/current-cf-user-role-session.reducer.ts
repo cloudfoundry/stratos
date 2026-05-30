@@ -1,7 +1,7 @@
-import { EndpointUser, SessionUser, VerifiedSession } from '@stratosui/store';
+import { EndpointUser, SessionUser } from '@stratosui/store';
 
 import { CfScopeStrings } from '../../../user-permissions/cf-user-permissions.types';
-import { CfRoleEndpointConnectedAction } from '../../actions/cf-endpoint-role.actions';
+import { CfRoleEndpointConnectedAction, CfRoleSessionEndpointsAction } from '../../actions/cf-endpoint-role.actions';
 import { IAllCfRolesState, ICfRolesState, IGlobalRolesState } from '../../types/cf-current-user-roles.types';
 import { getDefaultCfEndpointRoles } from './current-cf-user-base-cf-role.reducer';
 
@@ -12,7 +12,7 @@ interface PartialEndpoint {
 
 export function cfRoleInfoFromSessionReducer(
   state: IAllCfRolesState,
-  action: VerifiedSession
+  action: CfRoleSessionEndpointsAction
 ): IAllCfRolesState {
   if (!action.sessionData || !action.sessionData.endpoints) {
     return state;

@@ -8,8 +8,8 @@ import { StratosBrandingService } from '@stratosui/theme';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
-import { SESSION_VERIFIED } from '../actions/auth.actions';
-import { RouterRedirect } from '../actions/auth.actions';
+import { CURRENT_USER_ROLES_SESSION_VERIFIED } from '../actions/permissions.actions';
+import { RouterRedirect } from '../types/auth.types';
 import { EndpointsDataService } from './endpoints-data.service';
 import { AuthDataService } from './auth-data.service';
 
@@ -72,7 +72,7 @@ describe('AuthDataService', () => {
     expect(svc.loginCompletedAt()).toBe(0);
   });
 
-  it('verifySession success marks the session verified and dispatches VerifiedSession', async () => {
+  it('verifySession success marks the session verified and feeds the roles slice', async () => {
     const svc = TestBed.inject(AuthDataService);
     const p = svc.verifySession(true, true);
 
@@ -87,7 +87,8 @@ describe('AuthDataService', () => {
     expect(svc.loginCompletedAt()).toBeGreaterThan(0);
     expect(activateUserPreferences).toHaveBeenCalledTimes(1);
     expect(getAll).toHaveBeenCalledWith(true);
-    const verified = dispatch.mock.calls.map(c => c[0]).find(a => a.type === SESSION_VERIFIED);
+    // Feeds the current-user-roles slice (decoupled from the deleted auth slice).
+    const verified = dispatch.mock.calls.map(c => c[0]).find(a => a.type === CURRENT_USER_ROLES_SESSION_VERIFIED);
     expect(verified).toBeDefined();
   });
 

@@ -8,7 +8,6 @@ import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
   ActionDispatcher,
   APIResource,
-  AppState,
   EndpointHealthCheck,
   EntityInfo,
   EntitySchema,
@@ -22,7 +21,6 @@ import {
   PaginatedAction,
   PaginationEntityState,
   RequestInfoState,
-  selectSessionData,
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
@@ -373,44 +371,9 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           return all + resp.total_results;
         }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' }),
-      canIgnoreMaxedState: (store: Store<AppState>) => {
-        // Does entity type support? Yes
-        // Does BE support ignore?
-        return store.select(selectSessionData()).pipe(
-          map(sessionData => !!sessionData.config.listAllowLoadMaxed)
-        );
-      },
-      maxedStateStartAt: (store: Store<AppState>, action: PaginatedAction) => {
-        // Disable via the action?
-        // Only allowed maxed process if enabled by action. This will be removed via #4204
-        if (!action.flattenPaginationMax) {
-          return of(null);
-        }
-
-        // Maxed Count from Backend?
-        const beValue$ = store.select(selectSessionData()).pipe(
-          map(sessionData => sessionData.config.listMaxSize)
-        );
-
-        // TODO: See #4205
-        // Maxed count as per user config
-        const userOverride$ = of(null);
-        // const userOverride$ = store.select(selectSessionData()).pipe(
-        //   // Check that the user is allowed to load all, if so they can set their own max number
-        //   map(sessionData => !!sessionData.config.listAllowLoadMaxed ? null : null)
-        // );
-
-        // Maxed count from entity type
-        const entityTypeDefault = 600;
-
-        // Choose in order of priority
-        return combineLatest([
-          beValue$,
-          userOverride$
-        ]).pipe(
-          map(([beValue, userOverride]) => userOverride || beValue || entityTypeDefault)
-        );
-      },
+      // session-data reads route through AuthDataService (the signal-native
+      // facade) via the shared handlers, not store.select(selectSessionData()).
+      ...cfMaxedStateHandlers,
     },
     userRolesFetch: cfUserRolesFetch,
     userRolesReducer: currentCfUserRolesReducer

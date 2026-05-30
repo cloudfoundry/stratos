@@ -1,3 +1,5 @@
+import { Injector } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of } from 'rxjs';
 import { take, catchError, filter, map } from 'rxjs/operators';
 
@@ -9,7 +11,7 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel, EndpointsDataService, Store } from '../../../store/src/public-api';
+import { AuthDataService, EndpointModel, EndpointsDataService, Store } from '../../../store/src/public-api';
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
@@ -87,10 +89,19 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         logoUrl: '/kubernetes/assets/custom/helm.svg',
         renderPriority: helmRepoRenderPriority + 1,
         registrationComponent: HelmHubRegistrationComponent,
-        registeredLimit: (store: Store<AppState>): Observable<number> => store.select('auth').pipe(
-          filter(auth => !!auth.sessionData['plugin-config']),
-          map(auth => auth.sessionData['plugin-config'].artifactHubDisabled === 'true' ? 0 : 1),
-        )
+        registeredLimit: (store: Store<AppState>): Observable<number> => {
+          // session-data reads route through AuthDataService (signal-native
+          // facade) resolved off the framework-passed store's injector.
+          const injector = (store as unknown as { injector?: Injector }).injector;
+          const authData = injector?.get(AuthDataService, null);
+          if (!authData) {
+            return of(1);
+          }
+          return toObservable(authData.sessionData, { injector }).pipe(
+            filter(sessionData => !!sessionData?.['plugin-config']),
+            map(sessionData => sessionData['plugin-config'].artifactHubDisabled === 'true' ? 0 : 1),
+          );
+        }
       },
     ] };
 
