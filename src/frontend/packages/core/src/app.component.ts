@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, VerifySession } from '@stratosui/store';
+import { AuthOnlyAppState, RoutingHistoryService, VerifySession } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
@@ -21,6 +21,12 @@ import { LoggedInService } from './logged-in.service';
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   private loggedInService = inject(LoggedInService);
+  // Eagerly instantiated at bootstrap so it starts recording route history
+  // from the first navigation (before any wizard/error route is reached).
+  // Without this providedIn:root would lazily create it on first consumer
+  // inject, missing the navigation that landed the user on that route and
+  // breaking the Cancel/back destination.
+  private routingHistory = inject(RoutingHistoryService);
   private store = inject<Store<AuthOnlyAppState>>(Store);
   private authSignals = inject(AuthSignalService);
   branding = inject(StratosBrandingService);
