@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
-import { RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
+import { Login, Logout, RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
 import { AppState } from '../app-state';
 import { AuthState } from '../reducers/auth.reducer';
 import { SessionData } from '../types/auth.types';
@@ -18,8 +18,9 @@ import { SessionData } from '../types/auth.types';
  * `store.select(s => s.auth)` ONCE on construction and mirrors the slice
  * into signals so downstream consumers can stay Store-free.
  *
- * Mutations that previously dispatched ngrx actions (`VerifySession`,
- * `RouterNav` with redirect) are exposed as service methods. New consumers
+ * Mutations that previously dispatched ngrx actions (`Login`, `Logout`,
+ * `VerifySession`, `RouterNav` with redirect) are exposed as service
+ * methods. New consumers
  * inject this service (or {@link AuthSignalService} for the legacy
  * per-field signal API) and never touch `Store` directly.
  *
@@ -49,6 +50,19 @@ export class AuthDataService {
     () => this._auth()?.redirect,
   );
 
+  /**
+   * Timestamp (ms since epoch) of the most recent transition into a logged-in
+   * state. Replaces consumers that listen to `Actions.pipe(ofType(LOGIN_SUCCESS))`
+   * without dragging `@ngrx/effects` / `Actions` into this service. `0` until
+   * the first false → true login transition is observed in the current session.
+   */
+  private readonly _loginCompletedAt = signal(0);
+
+  readonly loginCompletedAt: Signal<number> = this._loginCompletedAt.asReadonly();
+
+  /** Tracks the prior `loggedIn` value so we only stamp on false → true. */
+  private prevLoggedIn = false;
+
   private subscription: Subscription;
 
   constructor() {
@@ -59,7 +73,33 @@ export class AuthDataService {
     // construct it lazily) and avoids the rxjs-interop dependency here.
     this.subscription = this.store.select(s => s.auth).subscribe(next => {
       this._auth.set(next);
+
+      // Stamp the completion time only on a false → true login transition.
+      // Refusing the initial true value (e.g. a verified-session restore) is
+      // intentional: consumers wanting "fresh login" semantics rely on the
+      // transition, not the steady state.
+      const isLoggedIn = !!next?.loggedIn;
+      if (isLoggedIn && !this.prevLoggedIn) {
+        this._loginCompletedAt.set(Date.now());
+      }
+      this.prevLoggedIn = isLoggedIn;
     });
+  }
+
+  /**
+   * Begin a login. Wraps the legacy `Login` action — `auth.effects.ts` still
+   * owns the credential POST and the verify/redirect saga that follows.
+   */
+  login(username: string, password: string): void {
+    this.store.dispatch(new Login(username, password));
+  }
+
+  /**
+   * Log out. Wraps the legacy `Logout` action — `auth.effects.ts` still owns
+   * the logout POST and the reset/redirect that follows.
+   */
+  logout(): void {
+    this.store.dispatch(new Logout());
   }
 
   /**

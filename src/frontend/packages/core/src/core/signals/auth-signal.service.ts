@@ -1,4 +1,4 @@
-import { Injectable, Signal, effect, inject, signal } from '@angular/core';
+import { Injectable, Signal, inject } from '@angular/core';
 import { AuthDataService, AuthState, RouterRedirect, SessionData } from '@stratosui/store';
 
 /**
@@ -32,27 +32,12 @@ export class AuthSignalService {
   /**
    * Timestamp (ms since epoch) of the most recent transition into a logged-in
    * state. Replaces consumers that listen to `Actions.pipe(ofType(LOGIN_SUCCESS))`
-   * without dragging in `@ngrx/effects` / `Actions`.
+   * without dragging in `@ngrx/effects` / `Actions`. Sourced from
+   * {@link AuthDataService}, which owns the false → true transition logic.
    *
    * `0` until the first login transition is observed in the current session.
    */
-  readonly loginCompletedAt: Signal<number>;
-
-  constructor() {
-    const completedAt = signal(0);
-    let prevLoggedIn = false;
-    effect(() => {
-      const isLoggedIn = this.loggedIn();
-      // Only emit on a false → true transition. Refusing the initial true value
-      // (e.g. from a verified session restore) is intentional: consumers wanting
-      // "fresh login" semantics should rely on the transition, not the steady state.
-      if (isLoggedIn && !prevLoggedIn) {
-        completedAt.set(Date.now());
-      }
-      prevLoggedIn = isLoggedIn;
-    });
-    this.loginCompletedAt = completedAt.asReadonly();
-  }
+  readonly loginCompletedAt: Signal<number> = this.authData.loginCompletedAt;
 
   /**
    * Trigger a session-verification cycle. Delegates to {@link AuthDataService}
