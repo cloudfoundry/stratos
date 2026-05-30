@@ -1,39 +1,69 @@
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import { StratosBrandingService } from '@stratosui/theme';
 
-import { Login, Logout, RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
-import { AppState } from '../app-state';
+import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
+import { RouterRedirect, VerifiedSession } from '../actions/auth.actions';
+import { AppState, DispatchOnlyAppState } from '../app-state';
+import { BrowserStandardEncoder } from '../browser-encoder';
+import { LocalStorageService } from '../helpers/local-storage-service';
 import { AuthState } from '../reducers/auth.reducer';
-import { SessionData } from '../types/auth.types';
+import { SessionData, SessionDataEnvelope } from '../types/auth.types';
+import { EndpointsDataService } from './endpoints-data.service';
+
+const SETUP_HEADER = 'stratos-setup-required';
+const UPGRADE_HEADER = 'retry-after';
+const DOMAIN_HEADER = 'x-stratos-domain';
+const SSO_HEADER = 'x-stratos-sso-login';
 
 /**
- * W36-C Wave 1 signal-native facade over the legacy `auth` ngrx slice.
+ * Default auth state. `verifying` starts `true` to prevent a race during app
+ * init — the authGuard waits for `verifying === false` and must not see a
+ * transient "not verifying, not logged in" window before the first verify.
+ */
+const defaultAuthState: AuthState = {
+  loggedIn: false,
+  loggingIn: false,
+  user: null,
+  error: false,
+  errorResponse: '',
+  sessionData: null,
+  verifying: true,
+};
+
+/**
+ * W36-C signal-native owner of auth state.
  *
- * The auth reducer remains the canonical store of truth — it's still driven
- * by `auth.effects.ts` (verify-session HTTP, login/logout transitions) and
- * `system.actions.ts` (GET_SYSTEM_INFO_SUCCESS folds endpoints into
- * sessionData). This service is the single bridge point: it subscribes to
- * `store.select(s => s.auth)` ONCE on construction and mirrors the slice
- * into signals so downstream consumers can stay Store-free.
+ * This service is now the source of truth for login/logout/verify: it owns
+ * the auth state as a writable signal and performs the HTTP itself (the
+ * credential POST, the verify GET, the logout POST) — work that previously
+ * lived in `auth.effects.ts` driven by the `auth` ngrx reducer. Downstream
+ * consumers read the projected signals and never touch `Store`.
  *
- * Mutations that previously dispatched ngrx actions (`Login`, `Logout`,
- * `VerifySession`, `RouterNav` with redirect) are exposed as service
- * methods. New consumers
- * inject this service (or {@link AuthSignalService} for the legacy
- * per-field signal API) and never touch `Store` directly.
- *
- * When the reducer eventually migrates into this service, the `Store` bridge
- * is the only piece that has to go — the public signal API stays put.
+ * Two ties to the legacy slice remain until the reducer is deleted:
+ *  - a successful verify still dispatches `VerifiedSession` so the auth
+ *    reducer keeps `state.auth.sessionData` populated for the entity-catalog
+ *    framework readers (`selectSessionData`, helm `registeredLimit`) and so
+ *    `cfRoleInfoFromSessionReducer` can propagate CF admin permissions; and
+ *  - the `GET_SYSTEM_INFO_SUCCESS` endpoints fold still lands in the slice.
+ * Both are retired when the reducer/effects are removed.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthDataService {
-  private store = inject<Store<AppState>>(Store);
+  private store = inject<Store<AppState & DispatchOnlyAppState>>(Store);
   private router = inject(Router);
+  private http = inject(HttpClient);
+  // Verify-only collaborators are resolved lazily (only when a verify cycle
+  // actually runs). Injecting them eagerly would construct branding/endpoints
+  // — which fetch on init — wherever this root service is pulled in, even in
+  // code paths that never authenticate.
+  private injector = inject(Injector);
 
-  /** Mirror of the `auth` slice. `undefined` until the store emits. */
-  private readonly _auth = signal<AuthState | undefined>(undefined);
+  /** Authoritative auth state. */
+  private readonly _auth = signal<AuthState>(defaultAuthState);
 
   readonly auth: Signal<AuthState | undefined> = this._auth.asReadonly();
 
@@ -52,7 +82,7 @@ export class AuthDataService {
 
   /**
    * Timestamp (ms since epoch) of the most recent transition into a logged-in
-   * state. Replaces consumers that listen to `Actions.pipe(ofType(LOGIN_SUCCESS))`
+   * state. Replaces consumers that listened to `Actions.pipe(ofType(LOGIN_SUCCESS))`
    * without dragging `@ngrx/effects` / `Actions` into this service. `0` until
    * the first false → true login transition is observed in the current session.
    */
@@ -63,61 +93,201 @@ export class AuthDataService {
   /** Tracks the prior `loggedIn` value so we only stamp on false → true. */
   private prevLoggedIn = false;
 
-  private subscription: Subscription;
+  /**
+   * Patch the auth state and stamp `loginCompletedAt` on a false → true login
+   * transition. Refusing the initial true value (e.g. a verified-session
+   * restore) is intentional: consumers wanting "fresh login" semantics rely
+   * on the transition, not the steady state.
+   */
+  private patch(partial: Partial<AuthState>): void {
+    const next = { ...this._auth(), ...partial };
+    this._auth.set(next);
+    if (next.loggedIn && !this.prevLoggedIn) {
+      this._loginCompletedAt.set(Date.now());
+    }
+    this.prevLoggedIn = !!next.loggedIn;
+    // No manual change-detection nudge: unlike the legacy store dispatches,
+    // these are signal writes, which schedule zoneless CD on their own.
+    // Calling ApplicationRef.tick() here recurses when a verify runs inside
+    // an existing CD pass (NG0101).
+  }
 
-  constructor() {
-    // Single bridge subscription. Long-lived (service is providedIn root)
-    // so we don't need to manage teardown — the subscription dies with the
-    // app. Reading via `subscribe` rather than `toSignal` keeps the data
-    // service usable from non-injection contexts (e.g. effects that
-    // construct it lazily) and avoids the rxjs-interop dependency here.
-    this.subscription = this.store.select(s => s.auth).subscribe(next => {
-      this._auth.set(next);
+  /**
+   * Begin a login: POST the credentials, then run a verify cycle (which
+   * resolves the logged-in state and replays any remembered redirect).
+   */
+  async login(username: string, password: string): Promise<void> {
+    this.patch({ loggingIn: true, loggedIn: false, error: false });
 
-      // Stamp the completion time only on a false → true login transition.
-      // Refusing the initial true value (e.g. a verified-session restore) is
-      // intentional: consumers wanting "fresh login" semantics rely on the
-      // transition, not the steady state.
-      const isLoggedIn = !!next?.loggedIn;
-      if (isLoggedIn && !this.prevLoggedIn) {
-        this._loginCompletedAt.set(Date.now());
+    const params = new HttpParams({
+      encoder: new BrowserStandardEncoder(),
+      fromObject: { username, password },
+    });
+    const headers = { 'x-cap-request-date': Math.floor(Date.now() / 1000).toString() };
+
+    try {
+      await firstValueFrom(
+        this.http.post('/pp/v1/auth/login/uaa', params, { headers, withCredentials: true }),
+      );
+      await this.verifySession(true, true);
+    } catch (err) {
+      this.patch({ error: true, errorResponse: err, loggingIn: false, loggedIn: false });
+    }
+  }
+
+  /**
+   * Log out: POST the logout, then reset the session via a full navigation
+   * (SSO uses the dedicated sso_logout endpoint). A failure surfaces as an
+   * error while keeping the user logged in.
+   */
+  async logout(): Promise<void> {
+    try {
+      const data = await firstValueFrom(
+        this.http.post<{ isSSO?: boolean }>('/pp/v1/auth/logout', {}, { withCredentials: true }),
+      );
+      if (data?.isSSO) {
+        // Clear any path from the location (otherwise stored via auth gate as
+        // redirectPath for log in) by handing off to the SSO logout endpoint.
+        const returnUrl = encodeURI(window.location.origin);
+        window.open('/pp/v1/auth/sso_logout?state=' + returnUrl, '_self');
+      } else {
+        window.location.assign(window.location.origin);
       }
-      this.prevLoggedIn = isLoggedIn;
+    } catch (err) {
+      console.error(err);
+      this.patch({ loggingIn: false, loggedIn: true, error: true, errorResponse: err });
+    }
+  }
+
+  /**
+   * Run a session-verification cycle against `/api/v1/auth/verify`. On success
+   * it hydrates session data, local storage and branding, loads endpoints, and
+   * (when `login`) marks the session logged-in. On failure it either records an
+   * invalid/error session (when `login`) or resets to the default state.
+   */
+  async verifySession(login: boolean = false, updateEndpoints: boolean = false): Promise<void> {
+    this.patch({ error: false, errorResponse: undefined, verifying: true });
+
+    const headers = { 'x-cap-request-date': Math.floor(Date.now() / 1000).toString() };
+
+    try {
+      const response = await firstValueFrom(
+        this.http.get<SessionDataEnvelope>('/api/v1/auth/verify', {
+          headers,
+          observe: 'response',
+          withCredentials: true,
+        }),
+      );
+
+      const envelope = response.body;
+      if (envelope.status === 'error') {
+        const ssoOptions = response.headers.get(SSO_HEADER);
+        const isDomainMismatch = this.isDomainMismatch(response.headers);
+        if (login) {
+          this.setInvalidSession(false, false, isDomainMismatch, ssoOptions);
+        } else {
+          this.resetAuth();
+        }
+        return;
+      }
+
+      const sessionData = envelope.data;
+      sessionData.sessionExpiresOn =
+        parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
+      const dashboardData = this.injector.get(DashboardDataService);
+      const branding = this.injector.get(StratosBrandingService);
+      const endpointsService = this.injector.get(EndpointsDataService);
+      LocalStorageService.localStorageToStore(this.store, sessionData, dashboardData);
+      branding.activateUserPreferences();
+
+      try {
+        await endpointsService.getAll(true);
+      } catch {
+        // Endpoint load failures are surfaced on EndpointsDataService; the
+        // session is still verified, but login does not complete.
+        this.setVerifiedSession(sessionData, updateEndpoints, false);
+        return;
+      }
+      this.setVerifiedSession(sessionData, updateEndpoints, login);
+    } catch (err) {
+      const httpErr = err as HttpErrorResponse;
+      let setupMode = false;
+      let isUpgrading = false;
+      const ssoOptions = httpErr?.headers?.get(SSO_HEADER);
+      if (httpErr?.status === 503) {
+        setupMode = httpErr.headers.has(SETUP_HEADER);
+        isUpgrading = httpErr.headers.has(UPGRADE_HEADER);
+      }
+      const isDomainMismatch = this.isDomainMismatch(httpErr?.headers);
+      if (login) {
+        this.setInvalidSession(setupMode, isUpgrading, isDomainMismatch, ssoOptions);
+      } else {
+        this.resetAuth();
+      }
+    }
+  }
+
+  /**
+   * Navigate to `path` while remembering `redirect` as the post-login target.
+   * The redirect is replayed by the login page on success.
+   */
+  navigateAndRememberRedirect(path: string[] | string, redirect: RouterRedirect): void {
+    this._auth.update(s => ({ ...s, redirect: redirect || s.redirect }));
+    this.router.navigate(typeof path === 'string' ? path.split('/') : path);
+  }
+
+  /** SESSION_VERIFIED (+ LOGIN_SUCCESS when `login`). */
+  private setVerifiedSession(sessionData: SessionData, updateEndpoints: boolean, login: boolean): void {
+    // Keep the legacy slice populated for the framework sessionData readers
+    // and cfRoleInfoFromSessionReducer until the reducer is removed.
+    this.store.dispatch(new VerifiedSession(sessionData, updateEndpoints));
+    this.patch({
+      error: false,
+      errorResponse: '',
+      sessionData: { ...sessionData, valid: true, uaaError: false, upgradeInProgress: false },
+      verifying: false,
+      ...(login ? { loggingIn: false, loggedIn: true } : {}),
     });
   }
 
-  /**
-   * Begin a login. Wraps the legacy `Login` action — `auth.effects.ts` still
-   * owns the credential POST and the verify/redirect saga that follows.
-   */
-  login(username: string, password: string): void {
-    this.store.dispatch(new Login(username, password));
+  /** SESSION_INVALID followed by the LOGIN_FAILED the effect chained on it. */
+  private setInvalidSession(
+    uaaError: boolean,
+    upgradeInProgress: boolean,
+    domainMismatch: boolean,
+    ssoOptions: string,
+  ): void {
+    this.patch({
+      sessionData: {
+        valid: false,
+        uaaError,
+        upgradeInProgress,
+        domainMismatch,
+        ssoOptions,
+        sessionExpiresOn: null,
+        plugins: { demo: false },
+        config: {},
+      },
+      verifying: false,
+      // invalidSessionAuth$ chained LOGIN_FAILED('Invalid session') on SESSION_INVALID.
+      error: true,
+      errorResponse: 'Invalid session',
+      loggingIn: false,
+      loggedIn: false,
+    });
   }
 
-  /**
-   * Log out. Wraps the legacy `Logout` action — `auth.effects.ts` still owns
-   * the logout POST and the reset/redirect that follows.
-   */
-  logout(): void {
-    this.store.dispatch(new Logout());
+  /** RESET_AUTH — back to the default state. */
+  private resetAuth(): void {
+    this.prevLoggedIn = false;
+    this._auth.set(defaultAuthState);
   }
 
-  /**
-   * Trigger a session-verification cycle. Wraps the legacy `VerifySession`
-   * action — `auth.effects.ts` still owns the HTTP round-trip.
-   */
-  verifySession(login: boolean = false, updateEndpoints: boolean = false): void {
-    this.store.dispatch(new VerifySession(login, updateEndpoints));
-  }
-
-  /**
-   * Navigate to `path` while remembering `redirect` as the post-login
-   * target. The auth reducer captures the redirect into `auth.redirect`
-   * via the `SetAuthRedirect` action so the login page can replay it on
-   * success; navigation itself goes straight through the Router.
-   */
-  navigateAndRememberRedirect(path: string[] | string, redirect: RouterRedirect): void {
-    this.store.dispatch(new SetAuthRedirect(redirect));
-    this.router.navigate(typeof path === 'string' ? path.split('/') : path);
+  private isDomainMismatch(headers: { has: (h: string) => boolean; get: (h: string) => string } | undefined): boolean {
+    if (headers && headers.has(DOMAIN_HEADER)) {
+      const expectedDomain = headers.get(DOMAIN_HEADER);
+      return !window.location.hostname.endsWith(expectedDomain);
+    }
+    return false;
   }
 }

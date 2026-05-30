@@ -1,103 +1,95 @@
 import { TestBed } from '@angular/core/testing';
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { AuthState, SessionData } from '@stratosui/store';
-import { Login, Logout } from '@stratosui/store';
+import { AuthDataService } from '@stratosui/store';
+import type { RouterRedirect, SessionData } from '@stratosui/store';
 
 import { AuthSignalService } from './auth-signal.service';
 
-function flushEffects() {
-  TestBed.inject(ApplicationRef).tick();
-}
-
-function makeAuthState(overrides: Partial<AuthState> = {}): AuthState {
-  return {
-    loggedIn: false,
-    loggingIn: false,
-    verifying: false,
-    error: false,
-    errorResponse: null,
-    user: null,
-    sessionData: null,
-    ...overrides,
-  } as AuthState;
-}
-
+/**
+ * AuthSignalService is a thin facade over {@link AuthDataService}: it
+ * re-exposes the data service's signals and delegates the mutation methods.
+ * These tests stub AuthDataService and verify the wiring — the underlying
+ * auth state machine is covered by auth-data.service.spec.ts.
+ */
 describe('AuthSignalService', () => {
-  let auth$: BehaviorSubject<AuthState>;
-  let dispatch: ReturnType<typeof vi.fn>;
+  let loggedIn: ReturnType<typeof signal<boolean>>;
+  let sessionData: ReturnType<typeof signal<SessionData | null>>;
+  let loginCompletedAt: ReturnType<typeof signal<number>>;
+  let login: ReturnType<typeof vi.fn>;
+  let logout: ReturnType<typeof vi.fn>;
+  let verifySession: ReturnType<typeof vi.fn>;
+  let navigateAndRememberRedirect: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    auth$ = new BehaviorSubject<AuthState>(makeAuthState());
-    dispatch = vi.fn();
-    const stubStore = {
-      select: () => auth$.asObservable(),
-      dispatch,
+    loggedIn = signal(false);
+    sessionData = signal<SessionData | null>(null);
+    loginCompletedAt = signal(0);
+    login = vi.fn();
+    logout = vi.fn();
+    verifySession = vi.fn();
+    navigateAndRememberRedirect = vi.fn();
+
+    const stubAuthData = {
+      auth: signal(undefined),
+      loggedIn,
+      loggingIn: signal(false),
+      verifying: signal(false),
+      error: signal(false),
+      errorResponse: signal(undefined),
+      sessionData,
+      sessionValid: signal(false),
+      redirect: signal<RouterRedirect | undefined>(undefined),
+      loginCompletedAt,
+      login,
+      logout,
+      verifySession,
+      navigateAndRememberRedirect,
     };
+
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
+        { provide: AuthDataService, useValue: stubAuthData },
         AuthSignalService,
       ],
     });
   });
 
-  it('exposes default-shaped auth signals before any data arrives', () => {
+  it('re-exposes the data service signals', () => {
     const service = TestBed.inject(AuthSignalService);
     expect(service.loggedIn()).toBe(false);
-    expect(service.loggingIn()).toBe(false);
-    expect(service.verifying()).toBe(false);
-    expect(service.error()).toBe(false);
     expect(service.sessionData()).toBeNull();
-    expect(service.sessionValid()).toBe(false);
     expect(service.loginCompletedAt()).toBe(0);
-  });
 
-  it('reflects auth slice updates through the projected signals', () => {
-    const sessionData = { valid: true } as unknown as SessionData;
-    auth$.next(makeAuthState({ loggedIn: true, sessionData }));
+    const data = { valid: true } as unknown as SessionData;
+    loggedIn.set(true);
+    sessionData.set(data);
+    loginCompletedAt.set(123);
 
-    const service = TestBed.inject(AuthSignalService);
     expect(service.loggedIn()).toBe(true);
-    expect(service.sessionData()).toBe(sessionData);
-    expect(service.sessionValid()).toBe(true);
+    expect(service.sessionData()).toBe(data);
+    expect(service.loginCompletedAt()).toBe(123);
   });
 
-  it('emits loginCompletedAt only on a false→true loggedIn transition', () => {
-    const service = TestBed.inject(AuthSignalService);
-    expect(service.loggedIn()).toBe(false);
-    flushEffects();
-    expect(service.loginCompletedAt()).toBe(0);
-
-    auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as SessionData }));
-    flushEffects();
-
-    const firstStamp = service.loginCompletedAt();
-    expect(firstStamp).toBeGreaterThan(0);
-
-    // Steady-state re-emit with same loggedIn=true must not bump the timestamp.
-    auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as SessionData }));
-    flushEffects();
-    expect(service.loginCompletedAt()).toBe(firstStamp);
+  it('delegates login() to the data service', () => {
+    TestBed.inject(AuthSignalService).login('alice', 's3cret');
+    expect(login).toHaveBeenCalledWith('alice', 's3cret');
   });
 
-  it('delegates login() to the data service Login dispatch', () => {
-    const service = TestBed.inject(AuthSignalService);
-    service.login('alice', 's3cret');
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    const action = dispatch.mock.calls[0][0] as Login;
-    expect(action).toBeInstanceOf(Login);
-    expect(action.username).toBe('alice');
-    expect(action.password).toBe('s3cret');
+  it('delegates logout() to the data service', () => {
+    TestBed.inject(AuthSignalService).logout();
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 
-  it('delegates logout() to the data service Logout dispatch', () => {
-    const service = TestBed.inject(AuthSignalService);
-    service.logout();
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch.mock.calls[0][0]).toBeInstanceOf(Logout);
+  it('delegates verifySession() with its flags', () => {
+    TestBed.inject(AuthSignalService).verifySession(true, true);
+    expect(verifySession).toHaveBeenCalledWith(true, true);
+  });
+
+  it('delegates navigateAndRememberRedirect()', () => {
+    const redirect: RouterRedirect = { path: '/after' };
+    TestBed.inject(AuthSignalService).navigateAndRememberRedirect(['/login'], redirect);
+    expect(navigateAndRememberRedirect).toHaveBeenCalledWith(['/login'], redirect);
   });
 });

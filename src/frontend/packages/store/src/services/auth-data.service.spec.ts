@@ -1,95 +1,192 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { StratosBrandingService } from '@stratosui/theme';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Login, Logout, RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
-import { AuthState } from '../reducers/auth.reducer';
-import { SessionData } from '../types/auth.types';
+import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
+import { SESSION_VERIFIED } from '../actions/auth.actions';
+import { RouterRedirect } from '../actions/auth.actions';
+import { EndpointsDataService } from './endpoints-data.service';
 import { AuthDataService } from './auth-data.service';
 
-function makeAuthState(overrides: Partial<AuthState> = {}): AuthState {
+const VERIFY_URL = '/api/v1/auth/verify';
+const LOGIN_URL = '/pp/v1/auth/login/uaa';
+const LOGOUT_URL = '/pp/v1/auth/logout';
+
+function okEnvelope(overrides: Record<string, unknown> = {}) {
   return {
-    loggedIn: false,
-    loggingIn: false,
-    verifying: false,
-    error: false,
-    errorResponse: null,
-    user: null,
-    sessionData: null,
-    ...overrides,
-  } as AuthState;
+    status: 'ok',
+    data: { valid: true, config: {}, plugins: { demo: false }, ...overrides },
+  };
 }
 
 describe('AuthDataService', () => {
-  let auth$: BehaviorSubject<AuthState>;
+  let httpMock: HttpTestingController;
   let dispatch: ReturnType<typeof vi.fn>;
   let navigate: ReturnType<typeof vi.fn>;
+  let activateUserPreferences: ReturnType<typeof vi.fn>;
+  let getAll: ReturnType<typeof vi.fn>;
+  let assignSpy: ReturnType<typeof vi.spyOn>;
+  let openSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    auth$ = new BehaviorSubject<AuthState>(makeAuthState());
     dispatch = vi.fn();
     navigate = vi.fn();
-    const stubStore = {
-      select: () => auth$.asObservable(),
-      dispatch,
-    };
+    activateUserPreferences = vi.fn();
+    getAll = vi.fn().mockResolvedValue([]);
+    assignSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => undefined);
+    openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: Store, useValue: { dispatch, select: () => ({ subscribe: () => ({ unsubscribe() {} }) }) } },
         { provide: Router, useValue: { navigate } },
+        { provide: StratosBrandingService, useValue: { activateUserPreferences } },
+        { provide: DashboardDataService, useValue: { hydrateFromStorage: vi.fn() } },
+        { provide: EndpointsDataService, useValue: { getAll } },
         AuthDataService,
       ],
     });
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('mirrors the default auth slice on construction', () => {
+  afterEach(() => {
+    httpMock.verify();
+    assignSpy.mockRestore();
+    openSpy.mockRestore();
+  });
+
+  it('starts in the default verifying state', () => {
     const svc = TestBed.inject(AuthDataService);
     expect(svc.loggedIn()).toBe(false);
-    expect(svc.loggingIn()).toBe(false);
+    expect(svc.verifying()).toBe(true);
+    expect(svc.sessionData()).toBeNull();
+    expect(svc.loginCompletedAt()).toBe(0);
+  });
+
+  it('verifySession success marks the session verified and dispatches VerifiedSession', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.verifySession(true, true);
+
+    const req = httpMock.expectOne(VERIFY_URL);
+    expect(req.request.method).toBe('GET');
+    req.flush(okEnvelope(), { headers: { 'x-cap-session-expires-on': '5' } });
+    await p;
+
     expect(svc.verifying()).toBe(false);
+    expect(svc.loggedIn()).toBe(true);
+    expect(svc.sessionValid()).toBe(true);
+    expect(svc.loginCompletedAt()).toBeGreaterThan(0);
+    expect(activateUserPreferences).toHaveBeenCalledTimes(1);
+    expect(getAll).toHaveBeenCalledWith(true);
+    const verified = dispatch.mock.calls.map(c => c[0]).find(a => a.type === SESSION_VERIFIED);
+    expect(verified).toBeDefined();
+  });
+
+  it('verifySession without login does not mark logged-in', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.verifySession(false, false);
+    httpMock.expectOne(VERIFY_URL).flush(okEnvelope(), { headers: { 'x-cap-session-expires-on': '5' } });
+    await p;
+    expect(svc.sessionValid()).toBe(true);
+    expect(svc.loggedIn()).toBe(false);
+    expect(svc.loginCompletedAt()).toBe(0);
+  });
+
+  it('verifySession error envelope during login records an invalid, errored session', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.verifySession(true, true);
+    httpMock.expectOne(VERIFY_URL).flush({ status: 'error', error: 'nope' });
+    await p;
+    expect(svc.verifying()).toBe(false);
+    expect(svc.loggedIn()).toBe(false);
+    expect(svc.sessionValid()).toBe(false);
+    expect(svc.error()).toBe(true);
+    expect(svc.errorResponse()).toBe('Invalid session');
+  });
+
+  it('verifySession HTTP failure without login resets to the default state', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.verifySession(false, false);
+    httpMock.expectOne(VERIFY_URL).flush('fail', { status: 401, statusText: 'Unauthorized' });
+    await p;
+    expect(svc.loggedIn()).toBe(false);
     expect(svc.error()).toBe(false);
     expect(svc.sessionData()).toBeNull();
-    expect(svc.sessionValid()).toBe(false);
-    expect(svc.redirect()).toBeUndefined();
   });
 
-  it('reflects subsequent auth slice updates through projected signals', () => {
+  it('login posts the credentials then runs a verify cycle', async () => {
     const svc = TestBed.inject(AuthDataService);
-    const sessionData = { valid: true } as unknown as SessionData;
-    const redirect: RouterRedirect = { path: '/post-login' };
+    const p = svc.login('alice', 's3cret');
 
-    auth$.next(makeAuthState({ loggedIn: true, sessionData, redirect }));
+    const loginReq = httpMock.expectOne(LOGIN_URL);
+    expect(loginReq.request.method).toBe('POST');
+    expect(loginReq.request.body.toString()).toContain('username=alice');
+    expect(svc.loggingIn()).toBe(true);
+    loginReq.flush({});
+
+    // The verify GET follows once the login POST resolves.
+    await Promise.resolve();
+    httpMock.expectOne(VERIFY_URL).flush(okEnvelope(), { headers: { 'x-cap-session-expires-on': '5' } });
+    await p;
 
     expect(svc.loggedIn()).toBe(true);
-    expect(svc.sessionData()).toBe(sessionData);
-    expect(svc.sessionValid()).toBe(true);
-    expect(svc.redirect()).toEqual(redirect);
   });
 
-  it('dispatches VerifySession with login + updateEndpoints flags', () => {
+  it('login failure records the error and stops logging in', async () => {
     const svc = TestBed.inject(AuthDataService);
-    svc.verifySession(true, true);
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    const action = dispatch.mock.calls[0][0] as VerifySession;
-    expect(action).toBeInstanceOf(VerifySession);
-    expect(action.login).toBe(true);
-    expect(action.updateEndpoints).toBe(true);
+    const p = svc.login('alice', 'bad');
+    httpMock.expectOne(LOGIN_URL).flush('denied', { status: 401, statusText: 'Unauthorized' });
+    await p;
+    expect(svc.loggingIn()).toBe(false);
+    expect(svc.loggedIn()).toBe(false);
+    expect(svc.error()).toBe(true);
   });
 
-  it('remembers the redirect via SetAuthRedirect and navigates through the Router', () => {
+  it('logout posts and resets the location for a non-SSO session', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.logout();
+    const req = httpMock.expectOne(LOGOUT_URL);
+    expect(req.request.method).toBe('POST');
+    req.flush({ isSSO: false });
+    await p;
+    expect(assignSpy).toHaveBeenCalledWith(window.location.origin);
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  it('logout hands off to the SSO logout endpoint for an SSO session', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.logout();
+    httpMock.expectOne(LOGOUT_URL).flush({ isSSO: true });
+    await p;
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    expect(openSpy.mock.calls[0][0]).toContain('/pp/v1/auth/sso_logout');
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+
+  it('logout failure keeps the user logged in and flags an error', async () => {
+    const svc = TestBed.inject(AuthDataService);
+    const p = svc.logout();
+    httpMock.expectOne(LOGOUT_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+    await p;
+    expect(svc.loggedIn()).toBe(true);
+    expect(svc.error()).toBe(true);
+    expect(assignSpy).not.toHaveBeenCalled();
+  });
+
+  it('navigateAndRememberRedirect stores the redirect signal and navigates', () => {
     const svc = TestBed.inject(AuthDataService);
     const redirect: RouterRedirect = { path: '/after' };
     svc.navigateAndRememberRedirect(['/login'], redirect);
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    const action = dispatch.mock.calls[0][0] as SetAuthRedirect;
-    expect(action).toBeInstanceOf(SetAuthRedirect);
-    expect(action.redirect).toEqual(redirect);
-    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(svc.redirect()).toEqual(redirect);
     expect(navigate).toHaveBeenCalledWith(['/login']);
   });
 
@@ -97,40 +194,5 @@ describe('AuthDataService', () => {
     const svc = TestBed.inject(AuthDataService);
     svc.navigateAndRememberRedirect('/login', { path: '/after' });
     expect(navigate).toHaveBeenCalledWith(['', 'login']);
-  });
-
-  it('dispatches a Login action carrying the credentials', () => {
-    const svc = TestBed.inject(AuthDataService);
-    svc.login('alice', 's3cret');
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    const action = dispatch.mock.calls[0][0] as Login;
-    expect(action).toBeInstanceOf(Login);
-    expect(action.username).toBe('alice');
-    expect(action.password).toBe('s3cret');
-  });
-
-  it('dispatches a Logout action', () => {
-    const svc = TestBed.inject(AuthDataService);
-    svc.logout();
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch.mock.calls[0][0]).toBeInstanceOf(Logout);
-  });
-
-  it('leaves loginCompletedAt at 0 until a login transition occurs', () => {
-    const svc = TestBed.inject(AuthDataService);
-    expect(svc.loginCompletedAt()).toBe(0);
-  });
-
-  it('stamps loginCompletedAt only on a false→true loggedIn transition', () => {
-    const svc = TestBed.inject(AuthDataService);
-    expect(svc.loginCompletedAt()).toBe(0);
-
-    auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as unknown as SessionData }));
-    const stamp = svc.loginCompletedAt();
-    expect(stamp).toBeGreaterThan(0);
-
-    // Steady-state re-emit with loggedIn still true must not bump the stamp.
-    auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as unknown as SessionData }));
-    expect(svc.loginCompletedAt()).toBe(stamp);
   });
 });
