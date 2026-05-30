@@ -1,9 +1,9 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 
-import { RouterNav, RouterRedirect } from '../actions/router.actions';
-import { VerifySession } from '../actions/auth.actions';
+import { RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
 import { AppState } from '../app-state';
 import { AuthState } from '../reducers/auth.reducer';
 import { SessionData } from '../types/auth.types';
@@ -29,6 +29,7 @@ import { SessionData } from '../types/auth.types';
 @Injectable({ providedIn: 'root' })
 export class AuthDataService {
   private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
 
   /** Mirror of the `auth` slice. `undefined` until the store emits. */
   private readonly _auth = signal<AuthState | undefined>(undefined);
@@ -72,10 +73,11 @@ export class AuthDataService {
   /**
    * Navigate to `path` while remembering `redirect` as the post-login
    * target. The auth reducer captures the redirect into `auth.redirect`
-   * via the `RouterActions.GO` case so the login page can replay it on
-   * success.
+   * via the `SetAuthRedirect` action so the login page can replay it on
+   * success; navigation itself goes straight through the Router.
    */
   navigateAndRememberRedirect(path: string[] | string, redirect: RouterRedirect): void {
-    this.store.dispatch(new RouterNav({ path }, redirect));
+    this.store.dispatch(new SetAuthRedirect(redirect));
+    this.router.navigate(typeof path === 'string' ? path.split('/') : path);
   }
 }

@@ -17,6 +17,21 @@ export const SESSION_INVALID = '[Auth] Session invalid';
 export const RESET_AUTH = '[Auth] Reset auth data';
 export const RESET_SSO_AUTH = '[Auth] Reset auth data (SSO)';
 
+export const SET_AUTH_REDIRECT = '[Auth] Set redirect';
+
+/**
+ * A redirect to replay after login. Previously lived in router.actions.ts
+ * (alongside `RouterNav`, which carried it via the `RouterActions.GO` case).
+ * Now owned by the auth slice — its only consumer — and set explicitly via
+ * {@link SetAuthRedirect}.
+ */
+export interface RouterRedirect {
+  path: string;
+  queryParams?: {
+    [key: string]: string
+  };
+}
+
 export class Login implements Action {
   constructor(public username: string, public password: string) { }
   type = LOGIN;
@@ -57,6 +72,11 @@ export class ResetAuth implements Action {
 
 export class ResetSSOAuth implements Action {
   type = RESET_SSO_AUTH;
+}
+
+export class SetAuthRedirect implements Action {
+  constructor(public redirect: RouterRedirect) { }
+  type = SET_AUTH_REDIRECT;
 }
 
 export class Logout implements Action {

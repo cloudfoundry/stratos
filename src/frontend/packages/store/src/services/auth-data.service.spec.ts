@@ -1,13 +1,12 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { VerifySession } from '../actions/auth.actions';
-import { RouterNav } from '../actions/router.actions';
+import { RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
 import { AuthState } from '../reducers/auth.reducer';
-import { RouterRedirect } from '../actions/router.actions';
 import { SessionData } from '../types/auth.types';
 import { AuthDataService } from './auth-data.service';
 
@@ -27,10 +26,12 @@ function makeAuthState(overrides: Partial<AuthState> = {}): AuthState {
 describe('AuthDataService', () => {
   let auth$: BehaviorSubject<AuthState>;
   let dispatch: ReturnType<typeof vi.fn>;
+  let navigate: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     auth$ = new BehaviorSubject<AuthState>(makeAuthState());
     dispatch = vi.fn();
+    navigate = vi.fn();
     const stubStore = {
       select: () => auth$.asObservable(),
       dispatch,
@@ -40,6 +41,7 @@ describe('AuthDataService', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: Store, useValue: stubStore },
+        { provide: Router, useValue: { navigate } },
         AuthDataService,
       ],
     });
@@ -79,14 +81,21 @@ describe('AuthDataService', () => {
     expect(action.updateEndpoints).toBe(true);
   });
 
-  it('dispatches RouterNav with the captured redirect', () => {
+  it('remembers the redirect via SetAuthRedirect and navigates through the Router', () => {
     const svc = TestBed.inject(AuthDataService);
     const redirect: RouterRedirect = { path: '/after' };
     svc.navigateAndRememberRedirect(['/login'], redirect);
     expect(dispatch).toHaveBeenCalledTimes(1);
-    const action = dispatch.mock.calls[0][0] as RouterNav;
-    expect(action).toBeInstanceOf(RouterNav);
-    expect(action.payload).toEqual({ path: ['/login'] });
+    const action = dispatch.mock.calls[0][0] as SetAuthRedirect;
+    expect(action).toBeInstanceOf(SetAuthRedirect);
     expect(action.redirect).toEqual(redirect);
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('splits a string path into segments when navigating', () => {
+    const svc = TestBed.inject(AuthDataService);
+    svc.navigateAndRememberRedirect('/login', { path: '/after' });
+    expect(navigate).toHaveBeenCalledWith(['', 'login']);
   });
 });

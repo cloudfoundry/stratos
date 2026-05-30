@@ -5,8 +5,11 @@ import {
   LoginFailed,
   LOGOUT_FAILED,
   RESET_AUTH,
+  RouterRedirect,
   SESSION_INVALID,
   SESSION_VERIFIED,
+  SET_AUTH_REDIRECT,
+  SetAuthRedirect,
   VERIFY_SESSION,
 } from '../actions/auth.actions';
 import { RouterActions, RouterNav } from '../actions/router.actions';
@@ -14,7 +17,6 @@ import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { AuthOnlyAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import { LogoutFailed } from './../actions/auth.actions';
-import { RouterRedirect } from '../actions/router.actions';
 
 export interface AuthUser {
   guid: string;
@@ -92,6 +94,13 @@ export function authReducer(state: AuthState = defaultState, action: any): AuthS
       return {
         ...state,
         redirect: goToState.redirect || state.redirect
+      };
+    }
+    case SET_AUTH_REDIRECT: {
+      const { redirect } = action as SetAuthRedirect;
+      return {
+        ...state,
+        redirect: redirect || state.redirect
       };
     }
     case RESET_AUTH:
