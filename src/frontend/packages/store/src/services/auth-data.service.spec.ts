@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
+import { Login, Logout, RouterRedirect, SetAuthRedirect, VerifySession } from '../actions/auth.actions';
 import { AuthState } from '../reducers/auth.reducer';
 import { SessionData } from '../types/auth.types';
 import { AuthDataService } from './auth-data.service';
@@ -97,5 +97,40 @@ describe('AuthDataService', () => {
     const svc = TestBed.inject(AuthDataService);
     svc.navigateAndRememberRedirect('/login', { path: '/after' });
     expect(navigate).toHaveBeenCalledWith(['', 'login']);
+  });
+
+  it('dispatches a Login action carrying the credentials', () => {
+    const svc = TestBed.inject(AuthDataService);
+    svc.login('alice', 's3cret');
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const action = dispatch.mock.calls[0][0] as Login;
+    expect(action).toBeInstanceOf(Login);
+    expect(action.username).toBe('alice');
+    expect(action.password).toBe('s3cret');
+  });
+
+  it('dispatches a Logout action', () => {
+    const svc = TestBed.inject(AuthDataService);
+    svc.logout();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0][0]).toBeInstanceOf(Logout);
+  });
+
+  it('leaves loginCompletedAt at 0 until a login transition occurs', () => {
+    const svc = TestBed.inject(AuthDataService);
+    expect(svc.loginCompletedAt()).toBe(0);
+  });
+
+  it('stamps loginCompletedAt only on a false→true loggedIn transition', () => {
+    const svc = TestBed.inject(AuthDataService);
+    expect(svc.loginCompletedAt()).toBe(0);
+
+    auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as unknown as SessionData }));
+    const stamp = svc.loginCompletedAt();
+    expect(stamp).toBeGreaterThan(0);
+
+    // Steady-state re-emit with loggedIn still true must not bump the stamp.
+    auth$.next(makeAuthState({ loggedIn: true, sessionData: { valid: true } as unknown as SessionData }));
+    expect(svc.loginCompletedAt()).toBe(stamp);
   });
 });
