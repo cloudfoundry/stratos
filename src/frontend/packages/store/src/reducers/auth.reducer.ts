@@ -12,7 +12,6 @@ import {
   SetAuthRedirect,
   VERIFY_SESSION,
 } from '../actions/auth.actions';
-import { RouterActions, RouterNav } from '../actions/router.actions';
 import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { AuthOnlyAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
@@ -89,13 +88,6 @@ export function authReducer(state: AuthState = defaultState, action: any): AuthS
         },
         verifying: false
       };
-    case RouterActions.GO: {
-      const goToState: RouterNav = action;
-      return {
-        ...state,
-        redirect: goToState.redirect || state.redirect
-      };
-    }
     case SET_AUTH_REDIRECT: {
       const { redirect } = action as SetAuthRedirect;
       return {

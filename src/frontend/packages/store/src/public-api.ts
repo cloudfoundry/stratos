@@ -153,8 +153,6 @@ export { getEndpointIDFromFavorite } from './user-favorite-helpers';
 export type { MenuItem } from './types/menu-item.types';
 export type { IRecentlyVisitedEntity } from './types/recently-visited.types';
 export { recentlyVisitedSelector } from './selectors/recently-visitied.selectors';
-export type { IRouterNavPayload, RouterQueryParams } from './actions/router.actions';
-export { RouterNav } from './actions/router.actions';
 export { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 export type { EndpointAuthTypeConfig, EndpointType, IAuthForm, IEndpointAuthComponent } from './extension-types';
 export { EntityMonitor, setEntityMonitorPollingEnabledSource } from './monitors/entity-monitor';

@@ -8,7 +8,6 @@ import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { PermissionsEffects } from './effects/permissions.effect';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
-import { RouterEffect } from './effects/router.effects';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SystemEffects } from './effects/system.effects';
 import { UserFavoritesEffect } from './effects/user-favorites-effect';
@@ -34,7 +33,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
       EndpointApiError,
       AuthEffect,
       PaginationEffects,
-      RouterEffect,
       SystemEffects,
       SetClientFilterEffect,
       UserProfileEffect,
