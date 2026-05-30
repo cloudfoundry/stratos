@@ -292,7 +292,7 @@ export class EndpointsSignalListComponent {
 
     out.push({
       label: 'Edit', icon: 'edit',
-      invoke: () => this.router.navigate(`/endpoints/edit/${ep.guid}`.split('/')),
+      invoke: () => { this.router.navigate(`/endpoints/edit/${ep.guid}`.split('/')); },
     });
 
     out.push({
