@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
-import { RouterNav, AppState, StratosStatus } from '@stratosui/store';
+import { StratosStatus } from '@stratosui/store';
 import { UtilsService } from '../../../../core/utils.service';
 import { CardStatusComponent, determineCardStatus } from '../card-status/card-status.component';
 
@@ -56,7 +56,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   formattedLimit!: string;
   usage!: string;
   private utils = inject(UtilsService);
-  private store = inject(Store<AppState>);
+  private router = inject(Router);
 
   private _status = signal<StratosStatus>(StratosStatus.NONE);
   public status = this._status.asReadonly();
@@ -124,7 +124,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   goToLink() {
     if (typeof (this.link) === 'string') {
-      this.store.dispatch(new RouterNav({ path: [this.link] }));
+      this.router.navigate([this.link]);
     } else {
       this.link();
     }

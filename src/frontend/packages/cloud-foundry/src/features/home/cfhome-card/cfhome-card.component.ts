@@ -1,6 +1,6 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
-import { Store } from '@stratosui/store';
+import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, take, startWith } from 'rxjs/operators';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -8,9 +8,8 @@ import { EndpointDataService } from '../../../services/endpoint-data/endpoint-da
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 
 import { BASE_REDIRECT_QUERY } from '@stratosui/core';
-import { RouterNav, EndpointModel, APIResource } from '@stratosui/store';
+import { EndpointModel, APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
 import {
   ApplicationDeploySourceTypes,
   AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
@@ -51,7 +50,7 @@ import { TileSelectorComponent } from '@stratosui/core';
   ]
 })
 export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private registry = inject(EndpointDataRegistry);
 
@@ -100,7 +99,7 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
       };
       if (tile.data.subType) { query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType; }
       if (tile.data.endpointGuid) { query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid; }
-      this.store.dispatch(new RouterNav({ path: `applications/${tile.data.type}`, query }));
+      this.router.navigate(`applications/${tile.data.type}`.split('/'), { queryParams: query });
     }
   }
 

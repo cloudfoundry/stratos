@@ -1,6 +1,5 @@
 import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-
-import { GeneralEntityAppState, RouterNav, Store } from '@stratosui/store';
+import { Router } from '@angular/router';
 
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
@@ -55,17 +54,12 @@ export class SetupWelcomeComponent {
     )
 
   ];
-  private store = inject(Store<GeneralEntityAppState>);
+  private router = inject(Router);
   public title = inject(APP_TITLE);
 
   public selectionChange(tile: ITileConfig<ITileData>) {
     if (tile) {
-      this.store.dispatch(new RouterNav({
-        path: `setup/${tile.data.type}`,
-        query: {
-          [BASE_REDIRECT_QUERY]: 'setup'
-        }
-      }));
+      this.router.navigate(`setup/${tile.data.type}`.split('/'), { queryParams: { [BASE_REDIRECT_QUERY]: 'setup' } });
     }
   }
 

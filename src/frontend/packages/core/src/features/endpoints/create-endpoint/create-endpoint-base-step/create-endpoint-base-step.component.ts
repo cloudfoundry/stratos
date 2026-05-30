@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, Injector, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointsDataService,
   GeneralEntityAppState,
-  RouterNav,
   Store,
   entityCatalog,
 } from '@stratosui/store';
@@ -34,6 +34,8 @@ import { TileSelectorComponent } from '../../../../shared/components/tile-select
 })
 export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
 
+  private router = inject(Router);
+
   // FWT-956: signal-native step handle. Endpoint-type tile selector is a
   // confirmation-style step (no submission, Next button hidden); navigation
   // happens via the selectedTile setter below.
@@ -42,12 +44,10 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
   set selectedTile(tile: ITileConfig<ICreateEndpointTilesData>) {
     super.selectedTile = tile;
     if (tile) {
-      this.store.dispatch(new RouterNav({
-        path: `endpoints/new/${tile.data.parentType || tile.data.type}/${tile.data.parentType ? tile.data.type : ''}`,
-        query: {
-          [BASE_REDIRECT_QUERY]: 'endpoints/new'
-        }
-      }));
+      this.router.navigate(
+        `endpoints/new/${tile.data.parentType || tile.data.type}/${tile.data.parentType ? tile.data.type : ''}`.split('/'),
+        { queryParams: { [BASE_REDIRECT_QUERY]: 'endpoints/new' } }
+      );
     }
   }
 
