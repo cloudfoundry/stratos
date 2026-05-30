@@ -1,21 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
-import { Store } from '@stratosui/store';
+import { RoutingHistoryService } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
 import { StOrgDetail, StSpace } from '../../../services/endpoint-data/stratos-types';
-import { CFAppState } from '../../../cf-app-state';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
@@ -52,7 +50,8 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
+  private routingHistory = inject(RoutingHistoryService);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfOrgService = inject(CloudFoundryOrganizationService, { optional: true });
@@ -117,7 +116,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   }
 
   private setupRouteObservable(defaultBackLink: string) {
-    this.route$ = this.store.select(getPreviousRoutingState).pipe(
+    this.route$ = this.routingHistory.previousState$.pipe(
       map(route => {
         return {
           url: route && route.state ? route.state.url : defaultBackLink,
@@ -182,10 +181,9 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   }
 
   back() {
-    this.store.dispatch(new RouterNav({
-      path: this.previousUrl,
-      query: this.previousQueryParams
-    }
-    ));
+    // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch
+    // (the RouterEffect did exactly this: split a string path into segments
+    // and pass query params through NavigationExtras).
+    this.router.navigate(this.previousUrl.split('/'), { queryParams: this.previousQueryParams });
   }
 }

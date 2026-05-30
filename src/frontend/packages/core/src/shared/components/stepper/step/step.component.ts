@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild } from '@angular/core';
-import { IRouterNavPayload } from '@stratosui/store';
 import { from, Observable, of as observableOf } from 'rxjs';
+
+import { StepperRedirectPayload } from '../stepper.types';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -14,7 +15,7 @@ export interface StepOnNextResult {
   message?: string;
   // Should we redirect to the store previous state?
   redirect?: boolean;
-  redirectPayload?: IRouterNavPayload;
+  redirectPayload?: StepperRedirectPayload;
   // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
   ignoreSuccess?: boolean;
   data?: any;

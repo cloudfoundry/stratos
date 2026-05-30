@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { AppState, getPreviousRoutingState } from '@stratosui/store';
+import { RoutingHistoryService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, distinctUntilChanged, map, share, switchMap, tap } from 'rxjs/operators';
 
@@ -36,7 +35,7 @@ export enum EventFilterValues {
 })
 export class EventsPageComponent implements OnInit {
   private eventService = inject(GlobalEventService);
-  private store = inject<Store<AppState>>(Store);
+  private routingHistory = inject(RoutingHistoryService);
   private activatedRoute = inject(ActivatedRoute);
 
   public unreadEvents$: Observable<IGlobalEvent[]>;
@@ -94,7 +93,7 @@ export class EventsPageComponent implements OnInit {
       }),
       share()
     );
-    this.back$ = this.store.select(getPreviousRoutingState).pipe(take(1)).pipe(
+    this.back$ = this.routingHistory.previousState$.pipe(take(1)).pipe(
       map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home'),
       map((returnUrl: string) => {
         // Override return url if we've come from the error page

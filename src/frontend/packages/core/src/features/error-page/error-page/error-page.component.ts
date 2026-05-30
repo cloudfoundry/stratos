@@ -8,7 +8,7 @@ import {
   InternalEventMonitorFactory,
   EndpointModel,
   EndpointsDataService,
-  getPreviousRoutingState,
+  RoutingHistoryService,
   StratosStatus,
   endpointEntityType,
   InternalEventState,
@@ -40,6 +40,7 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 export class ErrorPageComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private store = inject<Store<AppState>>(Store);
+  private routingHistory = inject(RoutingHistoryService);
   private internalEventMonitorFactory = inject(InternalEventMonitorFactory);
   private sanitizer = inject(DomSanitizer);
   private endpointsData = inject(EndpointsDataService);
@@ -84,9 +85,7 @@ export class ErrorPageComponent implements OnInit {
   }
 
   constructor() {
-    const store = this.store;
-
-    this.back$ = store.select(getPreviousRoutingState).pipe(take(1)).pipe(
+    this.back$ = this.routingHistory.previousState$.pipe(take(1)).pipe(
       map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home')
     );
 
