@@ -1,19 +1,11 @@
 import { NavigationExtras } from '@angular/router';
 import { Action } from '@ngrx/store';
 
+import { RouterRedirect } from './auth.actions';
+
 export const RouterActions = {
   GO: '[Router] Go To',
 };
-
-// A redirect to replay after login. Previously lived in routing.reducer.ts
-// (alongside the now-removed routingReducer); kept here next to RouterNav,
-// its primary consumer, and re-used by the auth slice.
-export interface RouterRedirect {
-  path: string;
-  queryParams?: {
-    [key: string]: string
-  };
-}
 
 export interface RouterQueryParams {
   [key: string]: any;
