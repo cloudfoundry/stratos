@@ -276,6 +276,12 @@ export type {
 // dispatch into one place so downstream consumers stay Store-free.
 export { AuthDataService } from './services/auth-data.service';
 
+// Signal-native routing-history service. Replaces the ngrx router-store
+// `state.routing` slice read via `getPreviousRoutingState` /
+// `getCurrentRoutingState`; tracks current/previous route from Angular Router
+// NavigationEnd events.
+export { RoutingHistoryService } from './services/routing-history.service';
+
 // W36-C Wave 2 — signal-native current-user-roles data service. Single
 // bridge over the legacy `currentUserRoles` ngrx slice. Replaces direct
 // `store.select(getCurrentUserStratosRole(...))` /
