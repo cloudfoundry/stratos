@@ -1,66 +1,63 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
-import type { AuthState, SessionData } from '@stratosui/store';
+import { AuthDataService } from '@stratosui/store';
+import type { SessionData } from '@stratosui/store';
 
 import { SessionService } from './session.service';
 
 describe('SessionService', () => {
-  let auth$: BehaviorSubject<AuthState>;
-
-  function makeAuthState(sessionData: SessionData | null): AuthState {
-    return {
-      loggedIn: !!sessionData,
-      loggingIn: false,
-      verifying: false,
-      error: false,
-      errorResponse: null,
-      sessionData,
-    } as unknown as AuthState;
-  }
+  let sessionData: ReturnType<typeof signal<SessionData | null>>;
 
   beforeEach(() => {
-    auth$ = new BehaviorSubject<AuthState>(makeAuthState(null));
+    sessionData = signal<SessionData | null>(null);
 
-    const stubStore = {
-      select: (selector: unknown) => {
-        if (typeof selector === 'function') {
-          return auth$.asObservable().pipe();
-        }
-        return auth$.asObservable();
-      },
-      dispatch: () => undefined,
+    // SessionService -> AuthSignalService -> AuthDataService; stub the data
+    // service so we drive sessionData directly.
+    const stubAuthData = {
+      auth: signal(undefined),
+      loggedIn: signal(false),
+      loggingIn: signal(false),
+      verifying: signal(false),
+      error: signal(false),
+      errorResponse: signal(undefined),
+      sessionData,
+      sessionValid: signal(false),
+      redirect: signal(undefined),
+      loginCompletedAt: signal(0),
+      login: () => undefined,
+      logout: () => undefined,
+      verifySession: () => undefined,
+      navigateAndRememberRedirect: () => undefined,
     };
 
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
+        { provide: AuthDataService, useValue: stubAuthData },
         SessionService,
       ],
     });
   });
 
-  it('exposes null sessionData when the store has no auth payload', () => {
+  it('exposes null sessionData when there is no auth payload', () => {
     const service = TestBed.inject(SessionService);
     expect(service.sessionData()).toBeNull();
     expect(service.config()).toBeNull();
   });
 
   it('exposes sessionData and config once the auth state populates', () => {
-    const sessionData = {
+    const data = {
       valid: true,
       sessionExpiresOn: 0,
       plugins: { demo: false },
       config: { homeViewShowFavoritesOnly: true, listMaxSize: 100 },
     } as unknown as SessionData;
 
-    auth$.next(makeAuthState(sessionData));
+    sessionData.set(data);
 
     const service = TestBed.inject(SessionService);
-    expect(service.sessionData()).toBe(sessionData);
+    expect(service.sessionData()).toBe(data);
     expect(service.config()).toEqual({ homeViewShowFavoritesOnly: true, listMaxSize: 100 });
   });
 
@@ -68,14 +65,12 @@ describe('SessionService', () => {
     const service = TestBed.inject(SessionService);
     expect(service.config()).toBeNull();
 
-    const newSession = {
+    sessionData.set({
       valid: true,
       sessionExpiresOn: 0,
       plugins: { demo: false },
       config: { homeViewShowFavoritesOnly: false },
-    } as unknown as SessionData;
-
-    auth$.next(makeAuthState(newSession));
+    } as unknown as SessionData);
 
     expect(service.config()).toEqual({ homeViewShowFavoritesOnly: false });
   });
