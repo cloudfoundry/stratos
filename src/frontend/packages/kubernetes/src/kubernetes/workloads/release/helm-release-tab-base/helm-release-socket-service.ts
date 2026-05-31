@@ -6,11 +6,14 @@ import { catchError, map, share, switchMap } from 'rxjs/operators';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { AppState, Store, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
 import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
-import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { BasicKubeAPIResource, KubernetesPod } from '../../../store/kube.types';
-import { KubePaginationAction } from '../../../store/kubernetes.actions';
-import { HelmReleaseGraph, HelmReleasePod, HelmReleaseService } from '../../workload.types';
+import {
+  KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
+  KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
+} from '../../../../services/domain-data/kube-generic-resource-data.services';
+import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
+import { KubeServiceDataService } from '../../../../services/domain-data/kube-service-data.service';
+import { BasicKubeAPIResource } from '../../../store/kube.types';
+import { HelmReleaseGraph } from '../../workload.types';
 import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
@@ -29,6 +32,14 @@ export class HelmReleaseSocketService implements OnDestroy {
   private helmReleaseHelper = inject(HelmReleaseHelperService);
   private store = inject<Store<AppState>>(Store);
   private snackbarService = inject(SnackBarService);
+  private podData = inject(KubePodDataService);
+  private serviceData = inject(KubeServiceDataService);
+  private jobData = inject(KubeJobDataService);
+  private secretData = inject(KubeSecretDataService);
+  private pvcData = inject(KubePersistentVolumeClaimDataService);
+  private replicaSetData = inject(KubeReplicaSetDataService);
+  private roleData = inject(KubeRoleDataService);
+  private serviceAccountData = inject(KubeServiceAccountDataService);
 
 
   private sub: Subscription;
@@ -106,21 +117,7 @@ export class HelmReleaseSocketService implements OnDestroy {
               }
             });
 
-            Object.entries(resources).forEach(([entityType, resourcesOfType]) => {
-              let action: KubePaginationAction;
-              if (entityType === 'pod') {
-                resourcesOfType = resourcesOfType || [];
-                resourcesOfType = (resourcesOfType as any[]).map((pod: KubernetesPod) =>
-                  KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
-                ) as BasicKubeAPIResource[];
-              }
-              action = (kubeEntityCatalog as any)[entityType].actions.getInWorkload(
-                this.helmReleaseHelper.endpointGuid,
-                this.helmReleaseHelper.namespace,
-                this.helmReleaseHelper.releaseTitle
-              );
-              this.populateList(action, resourcesOfType);
-            });
+            this.writeManifestResources(resources);
           }
 
           // const resources = { ...manifest };
@@ -222,27 +219,25 @@ export class HelmReleaseSocketService implements OnDestroy {
     this.store.dispatch(successWrapper);
   }
 
-  private populateList(action: KubePaginationAction, resources: any[]) {
-    const entity = entityCatalog.getEntity(action);
-    const newResources: any = {};
-    resources.forEach((resource: any) => {
-      const newResource: HelmReleasePod | HelmReleaseService = {
-        endpointId: action.kubeGuid,
-        releaseTitle: this.helmReleaseHelper.releaseTitle,
-        ...resource
-      };
-      newResource.metadata.kubeId = action.kubeGuid;
-      // The service entity from manifest is missing this, but apply here to ensure any others are caught
-      newResource.metadata.namespace = this.helmReleaseHelper.namespace;
-      const entityId = (action.entity as any)[0].getId(resource);
-      newResources[entityId] = newResource;
+  // Push each manifest resource group into the matching signal-native
+  // domain service under the release's workload scope. Replaces the legacy
+  // per-type ngrx `getInWorkload` pagination dispatch.
+  protected writeManifestResources(resources: { [type: string]: BasicKubeAPIResource[] }): void {
+    const guid = this.helmReleaseHelper.endpointGuid;
+    const ns = this.helmReleaseHelper.namespace;
+    const rel = this.helmReleaseHelper.releaseTitle;
+    Object.entries(resources).forEach(([type, list]) => {
+      const items = (list ?? []) as any[];
+      switch (type) {
+        case 'pod': this.podData.setWorkloadPods(guid, ns, rel, items); break;
+        case 'service': this.serviceData.setWorkloadServices(guid, ns, rel, items); break;
+        case 'job': this.jobData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'secrets': this.secretData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'pvc': this.pvcData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'replicaSet': this.replicaSetData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'role': this.roleData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'serviceAccount': this.serviceAccountData.setWorkloadItems(guid, ns, rel, items); break;
+      }
     });
-
-    const releasePods = {
-      entities: { [entity.entityKey]: newResources },
-      result: Object.keys(newResources)
-    };
-    const successWrapper = new WrapperRequestActionSuccess(releasePods, action, 'fetch', releasePods.result.length, 1);
-    this.store.dispatch(successWrapper);
   }
 }
