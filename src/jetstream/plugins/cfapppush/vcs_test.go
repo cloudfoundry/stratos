@@ -1,6 +1,8 @@
 package cfapppush
 
 import (
+	"os"
+	"os/exec"
 	"strings"
 	"testing"
 )
@@ -137,8 +139,11 @@ func TestResetToCommitCmdTemplateIncludesArgumentSeparator(t *testing.T) {
 		t.Fatalf("expected exactly one resetToCommitCmd template, got %d", len(vcsGit.resetToCommitCmd))
 	}
 	tmpl := vcsGit.resetToCommitCmd[0]
-	if !strings.Contains(tmpl, "-- {commit}") {
-		t.Errorf("expected resetToCommitCmd template to place '--' immediately before {commit} to force positional parsing, got %q", tmpl)
+	// reset's {commit} is a revision, not a path: "--end-of-options" stops
+	// option parsing without turning the value into a pathspec (which "--"
+	// would, breaking "reset --hard"). See FWT-922.
+	if !strings.Contains(tmpl, "--end-of-options {commit}") {
+		t.Errorf("expected resetToCommitCmd template to place '--end-of-options' immediately before {commit} to force positional parsing, got %q", tmpl)
 	}
 }
 
@@ -193,7 +198,7 @@ func TestResetToCommitCmdArgv_UserControlledCommitStaysPositional(t *testing.T) 
 	sepIdx := -1
 	commitIdx := -1
 	for i, a := range args {
-		if a == "--" && sepIdx == -1 {
+		if a == "--end-of-options" && sepIdx == -1 {
 			sepIdx = i
 		}
 		if a == "-exec=evil" {
@@ -201,12 +206,53 @@ func TestResetToCommitCmdArgv_UserControlledCommitStaysPositional(t *testing.T) 
 		}
 	}
 	if sepIdx == -1 {
-		t.Fatalf("expected a literal '--' argv element in the assembled argv, got %v", args)
+		t.Fatalf("expected a literal '--end-of-options' argv element in the assembled argv, got %v", args)
 	}
 	if commitIdx == -1 {
 		t.Fatalf("expected the crafted commit value to appear as its own argv element, got %v", args)
 	}
 	if commitIdx <= sepIdx {
-		t.Errorf("expected '-exec=evil' to appear AFTER the '--' separator so git treats it as a positional commit; separator at %d, commit at %d, argv=%v", sepIdx, commitIdx, args)
+		t.Errorf("expected '-exec=evil' to appear AFTER the '--end-of-options' separator so git treats it as a positional commit; separator at %d, commit at %d, argv=%v", sepIdx, commitIdx, args)
+	}
+}
+
+// Behavioral guard: ResetBranchToCommit must actually move HEAD to an
+// arbitrary historical commit. The template-only tests above never forked
+// git, so they missed that a plain "--" separator makes git treat the SHA as
+// a pathspec ("fatal: Cannot do hard reset with paths" → exit 128). This runs
+// real git to prove the reset works end to end.
+func TestResetBranchToCommit_MovesHeadToHistoricalCommit(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available on PATH")
+	}
+	dir := t.TempDir()
+
+	git := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command("git", args...)
+		cmd.Dir = dir
+		cmd.Env = append(os.Environ(),
+			"GIT_AUTHOR_NAME=t", "GIT_AUTHOR_EMAIL=t@t.io",
+			"GIT_COMMITTER_NAME=t", "GIT_COMMITTER_EMAIL=t@t.io",
+		)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("git %v failed: %v\n%s", args, err, out)
+		}
+		return strings.TrimSpace(string(out))
+	}
+
+	git("init", "-q")
+	git("commit", "-q", "--allow-empty", "-m", "c1")
+	target := git("rev-parse", "HEAD")
+	git("commit", "-q", "--allow-empty", "-m", "c2")
+	git("commit", "-q", "--allow-empty", "-m", "c3")
+
+	if err := vcsGit.ResetBranchToCommit(dir, target); err != nil {
+		t.Fatalf("ResetBranchToCommit returned error: %v", err)
+	}
+
+	if head := git("rev-parse", "HEAD"); head != target {
+		t.Errorf("expected HEAD to be reset to %s, got %s", target, head)
 	}
 }
