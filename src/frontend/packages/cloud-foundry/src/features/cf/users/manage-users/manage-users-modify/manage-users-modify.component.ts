@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, computed, Signal, WritableSignal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take,
@@ -19,16 +19,15 @@ import { take,
 import {
   TailwindSnackBarService,
   TailwindSnackBarRef,
-  ITableListDataSource,
-  ITableColumn,
   EnumerateComponent,
-  TableComponent,
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListCellTemplateDirective,
 } from '@stratosui/core';
 import { getRowMetadata, APIResource } from '@stratosui/store';
 import { IOrganization } from '../../../../../cf-api.types';
-import {
-  TableCellRoleOrgSpaceComponent,
-} from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
+import { CfRoleCheckboxComponent } from '../../../../../shared/components/cf-role-checkbox/cf-role-checkbox.component';
 import {
   TableCellSelectOrgComponent,
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
@@ -39,7 +38,6 @@ import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
-interface Org { metadata: { guid: string, }; }
 interface CfUserWithWarning extends StUser {
   showWarning: boolean;
 }
@@ -53,7 +51,10 @@ interface CfUserWithWarning extends StUser {
   imports: [
     CommonModule,
     EnumerateComponent,
-    TableComponent,
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+    TableCellSelectOrgComponent,
+    CfRoleCheckboxComponent,
   ]
 })
 export class UsersRolesModifyComponent implements OnInit, OnDestroy {
@@ -75,50 +76,51 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
 
 
   @Input() setUsernames = false;
-  orgColumns: ITableColumn<Org>[] = [
-    {
-      columnId: 'org',
-      headerCell: () => 'Organization',
-      cellComponent: TableCellSelectOrgComponent
-    },
-    {
-      columnId: 'manager',
-      headerCell: () => 'Manager',
-      cellComponent: TableCellRoleOrgSpaceComponent,
-      class: 'app-table__cell--table-column-additional-padding',
-      cellConfig: {
-        role: OrgUserRoleNames.MANAGER
-      }
-    },
-    {
-      columnId: 'auditor',
-      headerCell: () => 'Auditor',
-      cellComponent: TableCellRoleOrgSpaceComponent,
-      class: 'app-table__cell--table-column-additional-padding',
-      cellConfig: {
-        role: OrgUserRoleNames.AUDITOR
-      }
-    },
-    {
-      columnId: 'billingManager',
-      headerCell: () => 'Billing Manager',
-      cellComponent: TableCellRoleOrgSpaceComponent,
-      class: 'app-table__cell--table-column-additional-padding',
-      cellConfig: {
-        role: OrgUserRoleNames.BILLING_MANAGERS
-      }
-    },
-    {
-      columnId: 'user',
-      headerCell: () => 'User',
-      cellComponent: TableCellRoleOrgSpaceComponent,
-      class: 'app-table__cell--table-column-additional-padding',
-      cellConfig: {
-        role: OrgUserRoleNames.USER
-      }
-    }
-  ];
-  orgDataSource!: ITableListDataSource<APIResource<IOrganization>>;
+
+  // ── Org table (signal-list) ───────────────────────────────────────────
+  // The org table is a single row — the selected org — with the org-select
+  // cell plus a role checkbox per org role. Rows + loading are pushed from
+  // the orgConnect$/isTableLoading$ chains built in ngOnInit.
+  private readonly orgRows: WritableSignal<APIResource<IOrganization>[]> = signal([]);
+  private readonly orgLoading: WritableSignal<boolean> = signal(true);
+  private readonly orgPageIndex: WritableSignal<number> = signal(0);
+  private readonly orgPageSize: WritableSignal<number> = signal(100);
+  private readonly orgTotal: Signal<number> = computed(() => this.orgRows().length);
+  private readonly orgTotalPages: Signal<number> = computed(() => {
+    const size = this.orgPageSize();
+    return size > 0 ? Math.max(1, Math.ceil(this.orgTotal() / size)) : 1;
+  });
+  private readonly orgPagedItems: Signal<APIResource<IOrganization>[]> = computed(() => {
+    const size = this.orgPageSize();
+    const idx = this.orgPageIndex();
+    return this.orgRows().slice(idx * size, idx * size + size);
+  });
+
+  listConfig: SignalListConfig<APIResource<IOrganization>> = {
+    pagedItems: this.orgPagedItems,
+    totalFilteredResults: this.orgTotal,
+    totalPages: this.orgTotalPages,
+    pageIndex: this.orgPageIndex,
+    pageSize: this.orgPageSize,
+    hidePagerWhenSingle: true,
+    isAnyLoading: this.orgLoading,
+    errorsByCnsi: signal(new Map()),
+    getRowKey: (row: APIResource<IOrganization>) => getRowMetadata(row),
+    columns: this.buildOrgColumns(),
+  };
+
+  private buildOrgColumns(): SignalListColumn<APIResource<IOrganization>>[] {
+    return [
+      { header: 'Organization', key: 'org', kind: 'template', templateName: 'org',
+        render: (row: APIResource<IOrganization>) => row.entity.name },
+      { header: 'Manager', key: 'manager', kind: 'template', templateName: 'manager', render: () => '' },
+      { header: 'Auditor', key: 'auditor', kind: 'template', templateName: 'auditor', render: () => '' },
+      { header: 'Billing Manager', key: 'billingManager', kind: 'template', templateName: 'billingManager', render: () => '' },
+      { header: 'User', key: 'user', kind: 'template', templateName: 'user', render: () => '' },
+    ];
+  }
+
+  private orgSubs: Subscription[] = [];
 
   @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
   spaceRolesTable!: ViewContainerRef;
@@ -163,13 +165,10 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       map(orgEntity => orgEntity.entityRequestInfo.fetching),
       startWith(true)
     );
-    // Data source that will power the orgs table
-    this.orgDataSource = {
-      isTableLoading$,
-      connect: () => orgConnect$,
-      disconnect: () => { },
-      trackBy: (index, row) => getRowMetadata(row)
-    } as ITableListDataSource<APIResource<IOrganization>>;
+    // Feed the signal-list: orgConnect$ emits a single-element array (the
+    // selected org), isTableLoading$ tracks the fetch.
+    this.orgSubs.push(orgConnect$.subscribe(rows => this.orgRows.set(rows ?? [])));
+    this.orgSubs.push(isTableLoading$.subscribe(loading => this.orgLoading.set(loading)));
 
     // Set the starting state of the org table
     if (this.activeRouteCfOrgSpace.orgGuid) {
@@ -251,6 +250,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     if (this.orgGuidChangedSub) {
       this.orgGuidChangedSub.unsubscribe();
     }
+    this.orgSubs.forEach(s => s.unsubscribe());
     this.destroySpacesList();
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
