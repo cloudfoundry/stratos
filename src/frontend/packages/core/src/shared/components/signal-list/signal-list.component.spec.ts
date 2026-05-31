@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { SignalListComponent } from './signal-list.component';
-import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption } from './signal-list.component';
+import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption, SignalListRowState } from './signal-list.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 
 // SignalListComponent now applies [routerLink] to the card / table row when a
@@ -784,5 +784,252 @@ describe('SignalListComponent', () => {
       await fixture.whenStable();
       expect(spy).not.toHaveBeenCalled();
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SignalListComponent],
+  template: `<app-signal-list [config]="config" />`
+})
+class RowStateHost {
+  items = signal([{ name: 'one' }, { name: 'two' }]);
+  states: Record<string, ReturnType<typeof signal<SignalListRowState>>> = {
+    one: signal<SignalListRowState>({ warning: true, message: 'name taken' }),
+    two: signal<SignalListRowState>({}),
+  };
+  config: SignalListConfig<{ name: string }> = {
+    pagedItems: this.items.asReadonly(),
+    totalFilteredResults: signal(2).asReadonly(),
+    totalPages: signal(1).asReadonly(),
+    pageIndex: signal(0),
+    pageSize: signal(10),
+    isAnyLoading: signal(false).asReadonly(),
+    errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+    columns: [{ header: 'Name', render: r => r.name }],
+    getRowKey: r => r.name,
+    rowState: r => this.states[r.name] ?? null,
+  };
+}
+
+describe('SignalListComponent rowState', () => {
+  it('renders a message sub-row only for rows with a message', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.detectChanges();
+    const msgs = fixture.nativeElement.querySelectorAll('[data-test="row-message"]');
+    expect(msgs.length).toBe(1);
+    expect(msgs[0].textContent).toContain('name taken');
+  });
+
+  it('tints the row by severity and uses the warning icon for warning state', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.detectChanges();
+    const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
+    expect(rows[0].className).toContain('border-yellow-500');
+    const icon = fixture.nativeElement.querySelector('[data-test="row-message"] .material-icons');
+    expect(icon.textContent).toContain('warning');
+  });
+
+  it('uses the info icon for info state and red tint for error', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.componentInstance.states['one'].set({ info: true, message: 'just connecting' });
+    fixture.componentInstance.states['two'].set({ error: true, message: 'bad' });
+    fixture.detectChanges();
+    const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
+    expect(rows[1].className).toContain('border-red-500');
+    const icons = fixture.nativeElement.querySelectorAll('[data-test="row-message"] .material-icons');
+    expect(icons[0].textContent).toContain('info');
+    expect(icons[1].textContent).toContain('warning'); // error → warning glyph
+  });
+
+  it('re-renders a row when its state signal changes (no pagedItems identity change)', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(1);
+    fixture.componentInstance.states['two'].set({ error: true, message: 'now invalid' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(2);
+    expect(fixture.nativeElement.textContent).toContain('now invalid');
+  });
+
+  it('renders structured segments: bold, line break, and link', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.componentInstance.states['one'].set({
+      error: true,
+      message: [
+        { text: 'Conflict', bold: true },
+        { text: 'see docs', break: true, link: ['/help'] },
+      ],
+    });
+    fixture.detectChanges();
+    const msg = fixture.nativeElement.querySelector('[data-test="row-message"]');
+    expect(msg.querySelector('.font-semibold')?.textContent).toContain('Conflict');
+    expect(msg.querySelector('br')).not.toBeNull();
+    const link = msg.querySelector('a');
+    expect(link).not.toBeNull();
+    expect(link.textContent).toContain('see docs');
+  });
+
+  it('renders no message rows and no tint when rowState returns null', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, rowState: () => null };
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(0);
+    const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
+    expect(rows[0].className).not.toContain('border-yellow-500');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SignalListComponent, SignalListCellTemplateDirective],
+  template: `
+    <app-signal-list [config]="config">
+      <ng-template appSignalListCell="__rowMessage" let-row>
+        <span data-test="custom-msg">custom for {{ row.name }}</span>
+      </ng-template>
+    </app-signal-list>`
+})
+class RowMessageTemplateHost {
+  items = signal([{ name: 'one' }]);
+  config: SignalListConfig<{ name: string }> = {
+    pagedItems: this.items.asReadonly(),
+    totalFilteredResults: signal(1).asReadonly(),
+    totalPages: signal(1).asReadonly(),
+    pageIndex: signal(0),
+    pageSize: signal(10),
+    isAnyLoading: signal(false).asReadonly(),
+    errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+    columns: [{ header: 'Name', render: r => r.name }],
+    getRowKey: r => r.name,
+    rowState: () => signal<SignalListRowState>({ warning: true, message: 'plain that should be overridden' }).asReadonly(),
+  };
+}
+
+describe('SignalListComponent rowState __rowMessage template', () => {
+  it('projects the custom message template instead of the declarative message', () => {
+    const fixture = TestBed.createComponent(RowMessageTemplateHost);
+    fixture.detectChanges();
+    const msg = fixture.nativeElement.querySelector('[data-test="row-message"]');
+    expect(msg).not.toBeNull();
+    expect(msg.querySelector('[data-test="custom-msg"]')?.textContent).toContain('custom for one');
+    expect(msg.textContent).not.toContain('plain that should be overridden');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SignalListComponent],
+  template: `<app-signal-list [config]="config" />`
+})
+class SelectAllHost {
+  items = signal([{ name: 'one' }, { name: 'two' }, { name: 'three' }]);
+  selected = signal<ReadonlySet<string>>(new Set());
+  toggled = 0;
+  config: SignalListConfig<{ name: string }> = {
+    pagedItems: this.items.asReadonly(),
+    totalFilteredResults: signal(3).asReadonly(),
+    totalPages: signal(1).asReadonly(),
+    pageIndex: signal(0),
+    pageSize: signal(10),
+    isAnyLoading: signal(false).asReadonly(),
+    errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+    columns: [
+      {
+        header: '', key: 'sel', kind: 'checkbox', render: () => '',
+        checkbox: {
+          selectedKeys: this.selected,
+          selectAll: {
+            selectableCount: () => 3,
+            onToggle: () => { this.toggled++; },
+          },
+        },
+      },
+      { header: 'Name', key: 'name', render: r => r.name },
+    ],
+    getRowKey: r => r.name,
+  };
+}
+
+describe('SignalListComponent checkbox select-all header', () => {
+  it('renders a tri-state select-all header checkbox for a checkbox column with selectAll', () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="select-all"]')).not.toBeNull();
+  });
+
+  it('is unchecked + not indeterminate when nothing is selected', () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    fixture.detectChanges();
+    const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
+    expect(cb.checked).toBe(false);
+    expect(cb.indeterminate).toBe(false);
+  });
+
+  it('is indeterminate when some but not all rows are selected', () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    fixture.componentInstance.selected.set(new Set(['one']));
+    fixture.detectChanges();
+    const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
+    expect(cb.checked).toBe(false);
+    expect(cb.indeterminate).toBe(true);
+  });
+
+  it('is checked when all selectable rows are selected', () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    fixture.componentInstance.selected.set(new Set(['one', 'two', 'three']));
+    fixture.detectChanges();
+    const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
+    expect(cb.checked).toBe(true);
+    expect(cb.indeterminate).toBe(false);
+  });
+
+  it('invokes onToggle when the header checkbox is clicked', () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    fixture.detectChanges();
+    const cb = fixture.nativeElement.querySelector('[data-test="select-all"]') as HTMLInputElement;
+    cb.click();
+    expect(fixture.componentInstance.toggled).toBe(1);
+  });
+
+  it('renders no select-all header when the checkbox binding omits selectAll', () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: '', key: 'sel', kind: 'checkbox', render: () => '', checkbox: { selectedKeys: fixture.componentInstance.selected } },
+        { header: 'Name', key: 'name', render: r => r.name },
+      ],
+    };
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="select-all"]')).toBeNull();
+  });
+});
+
+describe('SignalListComponent rowState blocked/deleting/busy (multiline-ops feedback)', () => {
+  it('renders a "Deleting" bar and dims/locks the row when deleting', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.componentInstance.states['one'].set({ deleting: true });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="row-deleting"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="row-deleting"]').textContent).toContain('Deleting');
+    const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
+    expect(rows[0].className).toContain('pointer-events-none');
+  });
+
+  it('dims and locks a blocked row', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.componentInstance.states['two'].set({ blocked: true });
+    fixture.detectChanges();
+    const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
+    expect(rows[1].className).toContain('opacity-60');
+    expect(rows[1].className).toContain('pointer-events-none');
+  });
+
+  it('renders a busy spinner row when busy', () => {
+    const fixture = TestBed.createComponent(RowStateHost);
+    fixture.componentInstance.states['one'].set({ busy: true, message: 'working' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="row-busy"]')).not.toBeNull();
   });
 });

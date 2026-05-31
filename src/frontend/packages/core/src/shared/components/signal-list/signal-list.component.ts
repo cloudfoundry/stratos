@@ -16,6 +16,38 @@ export interface SignalListCompoundSegment {
   readonly link?: readonly (string | number)[];
 }
 
+// ── Per-row state (RowState) ────────────────────────────────────────────
+// Restores the legacy `<app-list>` table's per-row state affordance: row
+// coloring + an icon/message sub-row driven by a validation/operation state.
+// Used by the kube-config import wizard (validation messages, per-row import
+// result) and the per-row feedback layer for bulk/multi-row operations.
+
+// A row-state message: either a plain string (single line) or rich,
+// structured segments. Mirrors `SignalListCompoundSegment` but adds emphasis
+// (bold), per-segment color (tone), and line breaks. Rendered declaratively
+// — never via innerHTML, so server/user-sourced text can't inject markup.
+export type SignalListRowMessage = string | readonly SignalListMessageSegment[];
+
+export interface SignalListMessageSegment {
+  readonly text: string;
+  readonly bold?: boolean;                        // emphasis accent
+  readonly tone?: SignalListPillColor;            // per-segment color override
+  readonly link?: readonly (string | number)[];  // routerLink target
+  readonly break?: boolean;                       // start a new line BEFORE this segment
+}
+
+export interface SignalListRowState {
+  readonly error?: boolean;
+  readonly warning?: boolean;
+  readonly info?: boolean;
+  readonly blocked?: boolean;     // reserved — destructive in-flight (bulk ops); rendering deferred
+  readonly deleting?: boolean;    // reserved — see blocked
+  readonly highlighted?: boolean;
+  readonly disabled?: boolean;
+  readonly busy?: boolean;        // reserved — consumers showing progress via a status column today
+  readonly message?: SignalListRowMessage;
+}
+
 // Binding for a `kind: 'favorite'` column. The consumer owns persistence
 // (typically via UserFavoriteManager); SignalListComponent just reads
 // membership in the signal and calls toggle on click. Keys are row keys
@@ -52,6 +84,38 @@ export interface SignalListGaugeBinding<T> {
 export interface SignalListCheckboxBinding<T> {
   readonly selectedKeys: WritableSignal<ReadonlySet<string>>;
   readonly isDisabled?: (row: T) => boolean;
+  // Optional per-row toggle callback, fired AFTER selectedKeys updates, with
+  // the row and its new selected state. Lets the consumer run per-row side
+  // effects (e.g. kube-config re-validates a row on select). CF bulk-select
+  // omits it — selection is just set membership.
+  readonly onToggle?: (row: T, selected: boolean) => void;
+  // Optional tri-state select-all header. When provided, the column header
+  // renders a checkbox that is checked when all selectable rows are
+  // selected, indeterminate when only some are, and empty when none are —
+  // restoring the legacy `TableHeaderSelectComponent` affordance (v4.9.2).
+  // Framework-level: serves both k8s (kube-config import) and CF bulk/
+  // multi-row operations (manage users, route unmap/delete).
+  readonly selectAll?: SignalListSelectAllBinding;
+}
+
+// Tri-state select-all header binding (see SignalListCheckboxBinding.selectAll).
+// Consumer-driven, mirroring the legacy `dataSource.selectAllFilteredRows()`:
+// the component renders the header checkbox state from `selectableCount`
+// vs the current selection size, and delegates the actual flip to `onToggle`
+// so the consumer can run per-row side effects (e.g. kube-config validity).
+export interface SignalListSelectAllBinding {
+  // Number of rows eligible for selection across the filtered set (NOT just
+  // the current page). Drives: checked = count > 0 && selected >= count;
+  // indeterminate = 0 < selected < count.
+  readonly selectableCount: () => number;
+  // Number currently selected (across the filtered set). Defaults to the
+  // checkbox column's `selectedKeys().size` when omitted — supply it when
+  // selection lives outside selectedKeys (e.g. a per-row `_selected` flag).
+  readonly selectedCount?: () => number;
+  // Invoked on header-checkbox click. Consumer selects-all when not already
+  // all-selected, else clears — and runs any per-row side effects.
+  readonly onToggle: () => void;
+  readonly isDisabled?: () => boolean;
 }
 
 // Binding for a `kind: 'radio'` column. Single-row selection: the
@@ -307,6 +371,14 @@ export interface SignalListConfig<T> {
   // to a success/danger/neutral color so a quick glance over a wall of
   // cards surfaces problems.
   readonly cardAccentColor?: (row: T) => SignalListPillColor;
+  // Optional — when provided, each row is decorated with its state: row
+  // coloring (error/warning/info) + an icon/message sub-row. MUST return a
+  // STABLE Signal per row (store it on the row / in the consumer — do NOT
+  // create a fresh signal per call). Returning a signal (vs a plain value)
+  // lets a row re-render when its state changes without the pagedItems array
+  // changing identity; reading it in the template registers a per-row
+  // dependency (zoneless-friendly). Returns null → no decoration for that row.
+  readonly rowState?: (row: T) => Signal<SignalListRowState> | null;
   // Optional — when provided, the toolbar shows a table/card view toggle
   // and the body renders either a table or a card grid. When absent,
   // the list is table-only.
@@ -743,12 +815,47 @@ export class SignalListComponent<T> implements AfterViewInit {
     if (!col.checkbox || this.isCheckboxDisabled(col, row)) return;
     const key = this.config.getRowKey(row);
     const next = new Set(col.checkbox.selectedKeys());
+    let nowSelected: boolean;
     if (next.has(key)) {
       next.delete(key);
+      nowSelected = false;
     } else {
       next.add(key);
+      nowSelected = true;
     }
     col.checkbox.selectedKeys.set(next);
+    col.checkbox.onToggle?.(row, nowSelected);
+  }
+
+  // Select-all header (tri-state) — restores v4.9.2 TableHeaderSelectComponent.
+  // selectedCount defaults to selectedKeys().size when the binding doesn't
+  // supply one (selection lives outside selectedKeys, e.g. a `_selected` flag).
+  private selectAllCounts(col: SignalListColumn<T>): { selected: number; count: number } | null {
+    const sa = col.checkbox?.selectAll;
+    if (!sa) return null;
+    const count = sa.selectableCount();
+    const selected = sa.selectedCount ? sa.selectedCount() : (col.checkbox?.selectedKeys().size ?? 0);
+    return { selected, count };
+  }
+
+  selectAllChecked(col: SignalListColumn<T>): boolean {
+    const c = this.selectAllCounts(col);
+    return !!c && c.count > 0 && c.selected >= c.count;
+  }
+
+  selectAllIndeterminate(col: SignalListColumn<T>): boolean {
+    const c = this.selectAllCounts(col);
+    return !!c && c.selected > 0 && c.selected < c.count;
+  }
+
+  selectAllDisabled(col: SignalListColumn<T>): boolean {
+    return !!col.checkbox?.selectAll?.isDisabled?.();
+  }
+
+  onToggleSelectAll(col: SignalListColumn<T>, ev: Event): void {
+    ev.stopPropagation();
+    if (this.selectAllDisabled(col)) return;
+    col.checkbox?.selectAll?.onToggle();
   }
 
   // Cell-template helpers ----------------------------------------------
@@ -756,6 +863,106 @@ export class SignalListComponent<T> implements AfterViewInit {
   cellTemplateFor(col: SignalListColumn<T>): TemplateRef<{ $implicit: T; row: T }> | undefined {
     if (col.kind !== 'template' || !col.templateName || !this.cellTemplates) return undefined;
     return this.cellTemplates.find(d => d.name === col.templateName)?.template;
+  }
+
+  // Per-row state (RowState) -------------------------------------------
+  // Reserved name for a fully-custom message body projected via
+  // `<ng-template appSignalListCell="__rowMessage" let-row>`.
+  private static readonly ROW_MESSAGE_TEMPLATE = '__rowMessage';
+
+  // Current state for a row, or null when no rowState provider is configured
+  // (or it returns null for this row). Reading the returned signal here
+  // registers this view's dependency on it — zoneless re-renders the row
+  // when the consumer mutates its state signal.
+  rowStateOf(row: T): SignalListRowState | null {
+    return this.config.rowState?.(row)?.() ?? null;
+  }
+
+  // Tailwind tint for the row <tr>, by severity precedence
+  // error → warning → info, then highlighted. blocked/deleting/disabled rows
+  // also dim and go non-interactive (cf. v4.9.2 table-row), the per-row
+  // feedback for multiline/bulk operations.
+  rowStateRowClass(row: T): string {
+    const s = this.rowStateOf(row);
+    if (!s) return '';
+    const dim = (s.blocked || s.deleting || s.disabled) ? ' opacity-60 pointer-events-none' : '';
+    if (s.error)   return 'bg-red-50 dark:bg-red-900/20 border-l-2 border-red-500' + dim;
+    if (s.warning) return 'bg-yellow-50 dark:bg-yellow-900/20 border-l-2 border-yellow-500' + dim;
+    if (s.info)    return 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500' + dim;
+    if (s.highlighted) return 'bg-accent/5' + dim;
+    return dim.trim();
+  }
+
+  // Blocked/deleting rows suppress navigation (cf. legacy non-interactive rows).
+  rowStateBlocksNav(row: T): boolean {
+    const s = this.rowStateOf(row);
+    return !!s && (!!s.blocked || !!s.deleting);
+  }
+
+  // True while a row is mid-delete — renders the "Deleting" indeterminate bar.
+  rowStateDeleting(row: T): boolean {
+    return !!this.rowStateOf(row)?.deleting;
+  }
+
+  // True while a row has a non-delete operation in flight — renders a spinner.
+  rowStateBusy(row: T): boolean {
+    const s = this.rowStateOf(row);
+    return !!s && !!s.busy && !s.deleting;
+  }
+
+  // True when a row has a non-empty message to render in a sub-row.
+  hasRowMessage(row: T): boolean {
+    const m = this.rowStateOf(row)?.message;
+    if (!m) return false;
+    return typeof m === 'string' ? m.length > 0 : m.length > 0;
+  }
+
+  // Leading icon for the message sub-row: warning glyph for error/warning,
+  // info glyph otherwise. Mirrors the legacy table-row treatment.
+  rowMessageIcon(row: T): 'warning' | 'info' {
+    const s = this.rowStateOf(row);
+    return s && (s.error || s.warning) ? 'warning' : 'info';
+  }
+
+  // Text color for the message icon, matching severity.
+  rowMessageIconClass(row: T): string {
+    const s = this.rowStateOf(row);
+    if (s?.error)   return 'text-red-600 dark:text-red-400';
+    if (s?.warning) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-blue-600 dark:text-blue-400';
+  }
+
+  // Normalize string | segments into a segment array for uniform rendering.
+  rowMessageSegments(row: T): readonly SignalListMessageSegment[] {
+    const m = this.rowStateOf(row)?.message;
+    if (!m) return [];
+    return typeof m === 'string' ? [{ text: m }] : m;
+  }
+
+  // The projected `__rowMessage` template, if the host supplied one.
+  rowMessageTemplate(): TemplateRef<{ $implicit: T; row: T }> | undefined {
+    return this.cellTemplates?.find(d => d.name === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
+  }
+
+  // Per-segment text classes: bold emphasis + optional tone color.
+  segmentClass(seg: SignalListMessageSegment): string {
+    const weight = seg.bold ? 'font-semibold ' : '';
+    switch (seg.tone) {
+      case 'success': return weight + 'text-green-700 dark:text-green-300';
+      case 'warning': return weight + 'text-yellow-700 dark:text-yellow-300';
+      case 'danger':  return weight + 'text-red-700 dark:text-red-300';
+      case 'neutral': return weight + 'text-content-muted';
+      default:        return weight.trim();
+    }
+  }
+
+  // colspan for the message sub-row: data columns (excluding the
+  // favorite/actions columns, which collapse into one leading control cell)
+  // plus 1 when that leading control cell is present.
+  totalColumnCount(): number {
+    const dataCols = this.config.columns.filter(c => c.kind !== 'favorite' && c.kind !== 'actions').length;
+    const leading = (this.favoriteColumn() || this.actionsColumn()) ? 1 : 0;
+    return dataCols + leading;
   }
 
   // Compound-cell overflow ---------------------------------------------
