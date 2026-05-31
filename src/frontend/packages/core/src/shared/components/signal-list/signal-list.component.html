@@ -433,7 +433,18 @@
             @for (col of config.columns; track col.key) {
               @if (col.kind !== 'favorite' && col.kind !== 'actions') {
                 <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap">
-                  @if (isSortable(col)) {
+                  @if (col.kind === 'checkbox' && col.checkbox?.selectAll) {
+                    <input
+                      data-test="select-all"
+                      type="checkbox"
+                      [checked]="selectAllChecked(col)"
+                      [indeterminate]="selectAllIndeterminate(col)"
+                      [disabled]="selectAllDisabled(col)"
+                      (click)="onToggleSelectAll(col, $event)"
+                      [class.cursor-pointer]="!selectAllDisabled(col)"
+                      [class.cursor-not-allowed]="selectAllDisabled(col)"
+                      [class.opacity-40]="selectAllDisabled(col)" />
+                  } @else if (isSortable(col)) {
                     <button
                       type="button"
                       (click)="onHeaderSort(col)"
@@ -458,10 +469,10 @@
         <tbody>
           @for (row of config.pagedItems(); track trackByRow($index, row)) {
             <tr data-test="row"
-                [routerLink]="rowLink(row)"
+                [routerLink]="rowStateBlocksNav(row) ? null : rowLink(row)"
                 [queryParams]="rowLinkQueryParams(row)"
                 [class]="'border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900 ' +
-                  (rowLink(row) ? 'cursor-pointer' : '')">
+                  (rowLink(row) && !rowStateBlocksNav(row) ? 'cursor-pointer ' : '') + rowStateRowClass(row)">
               @if (favoriteColumn() || actionsColumn()) {
                 <td class="px-2 py-2 overflow-visible whitespace-nowrap">
                   <div class="flex items-center gap-0">
@@ -642,6 +653,46 @@
                 }
               }
             </tr>
+            @if (rowStateDeleting(row)) {
+              <tr data-test="row-deleting">
+                <td [attr.colspan]="totalColumnCount()" class="px-3 pb-2 pt-0">
+                  <div class="flex items-center gap-2 text-xs text-content-muted">
+                    <span>Deleting…</span>
+                    <span class="inline-block h-1 flex-1 rounded bg-content-border overflow-hidden">
+                      <span class="block h-full w-1/3 bg-red-400 animate-pulse"></span>
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (hasRowMessage(row) || rowStateBusy(row)) {
+              <tr data-test="row-message" [class]="rowStateRowClass(row)">
+                <td [attr.colspan]="totalColumnCount()" class="px-3 pb-2 pt-0 text-sm">
+                  <div class="flex items-start gap-2">
+                    @if (rowStateBusy(row)) {
+                      <span data-test="row-busy" class="spinner spinner-primary shrink-0"></span>
+                    } @else {
+                      <span class="material-icons text-base leading-5 shrink-0" [class]="rowMessageIconClass(row)">{{ rowMessageIcon(row) }}</span>
+                    }
+                    <div class="min-w-0">
+                      @if (rowMessageTemplate(); as tpl) {
+                        <ng-container *ngTemplateOutlet="tpl; context: { $implicit: row, row: row }"></ng-container>
+                      } @else {
+                        @for (seg of rowMessageSegments(row); track $index) {
+                          @if (seg.break) { <br> }
+                          @if (seg.link) {
+                            <a [routerLink]="seg.link" (click)="$event.stopPropagation()"
+                               [class]="'text-accent hover:underline ' + segmentClass(seg)">{{ seg.text }}</a>
+                          } @else {
+                            <span [class]="segmentClass(seg)">{{ seg.text }}</span>
+                          }
+                        }
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
