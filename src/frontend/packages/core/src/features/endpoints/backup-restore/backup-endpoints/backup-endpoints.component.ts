@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, Injector, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Injector, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { format } from 'date-fns';
@@ -12,9 +12,12 @@ import { safeUnsubscribe } from '../../../../core/utils.service';
 import { naturalCompare } from '../../../../shared/utils/natural-sort';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { ITableListDataSource } from '../../../../shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
-import { TableComponent } from '../../../../shared/components/list/list-table/table.component';
+import {
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+} from '../../../../shared/components/signal-list/signal-list.component';
+import { SignalListCellTemplateDirective } from '../../../../shared/components/signal-list/signal-list-cell-template.directive';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { StepComponent, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
@@ -44,7 +47,10 @@ interface BackupPasswordForm {
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
-    TableComponent,
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+    BackupCheckboxCellComponent,
+    BackupConnectionCellComponent,
     ShowHideButtonComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -63,35 +69,41 @@ export class BackupEndpointsComponent implements OnDestroy {
   selectStepHandle!: SignalStepHandle;
   passwordStepHandle!: SignalStepHandle;
 
-  // Step 1
-  columns: ITableColumn<EndpointModel>[] = [
-    {
-      columnId: 'name',
-      headerCell: () => 'Name',
-      cellDefinition: {
-        valuePath: 'name'
-      }
-    },
-    {
-      columnId: 'type',
-      headerCell: () => 'Type',
-      cellDefinition: {
-        getValue: this.getEndpointTypeString
-      } },
-    {
-      columnId: 'endpoint',
-      headerCell: () => 'Backup',
-      cellComponent: BackupCheckboxCellComponent,
-      cellConfig: {
-        type: BackupEndpointTypes.ENDPOINT
-      }
-    },
-    {
-      columnId: 'connect',
-      headerCell: () => 'Connection Details',
-      cellComponent: BackupConnectionCellComponent },
-  ];
-  endpointDataSource!: ITableListDataSource<EndpointModel>;
+  // Static config for the Backup checkbox column's projected cell.
+  readonly endpointCheckboxConfig = { type: BackupEndpointTypes.ENDPOINT };
+
+  // Step 1 — signal-list state
+  readonly pageSize: WritableSignal<number> = signal(100);
+  readonly pageIndex: WritableSignal<number> = signal(0);
+  // Bumped after Select All/None so the in-memory `service.state` mutation
+  // (a plain object — not signal-tracked) forces the endpoints signal to a
+  // fresh array reference and re-renders the projected OnPush cells. Per-row
+  // checkbox/select edits don't need this: they fire events in their own view.
+  private readonly refreshTick: WritableSignal<number> = signal(0);
+
+  private readonly endpoints: Signal<EndpointModel[]> = computed(() => {
+    this.refreshTick();
+    const list = this.endpointsData.endpointsList();
+    return list ? [...list].sort((a, b) => naturalCompare(a.name, b.name)) : [];
+  });
+  private readonly loading: Signal<boolean> = toSignal(
+    toObservable(this.endpointsData.loading, { injector: this.injector }),
+    { initialValue: false },
+  );
+
+  private readonly pagedItems: Signal<EndpointModel[]> = computed(() => {
+    const size = this.pageSize();
+    const idx = this.pageIndex();
+    return this.endpoints().slice(idx * size, idx * size + size);
+  });
+  private readonly totalFilteredResults: Signal<number> = computed(() => this.endpoints().length);
+  private readonly totalPages: Signal<number> = computed(() => {
+    const size = this.pageSize();
+    return size > 0 ? Math.max(1, Math.ceil(this.totalFilteredResults() / size)) : 1;
+  });
+
+  listConfig!: SignalListConfig<EndpointModel>;
+
   disableSelectAll$!: Observable<boolean>;
   disableSelectNone$!: Observable<boolean>;
   selectValid$!: Observable<boolean>;
@@ -127,15 +139,21 @@ export class BackupEndpointsComponent implements OnDestroy {
       filter(entities => !!entities),
       map(endpoints => [...endpoints].sort((a, b) => naturalCompare(a.name, b.name)))
     );
-    const fetching$ = toObservable(this.endpointsData.loading, { injector: this.injector });
 
     endpoints$.pipe(take(1), defaultIfEmpty([] as EndpointModel[])).subscribe(entities => this.service.initialize(entities));
 
-    this.endpointDataSource = {
-      isTableLoading$: fetching$,
-      connect: () => endpoints$,
-      disconnect: () => { },
-      trackBy: (index: number, row: EndpointModel) => row.guid
+    this.listConfig = {
+      pagedItems: this.pagedItems,
+      totalFilteredResults: this.totalFilteredResults,
+      totalPages: this.totalPages,
+      pageIndex: this.pageIndex,
+      pageSize: this.pageSize,
+      pageSizeOptions: [25, 50, 100],
+      hidePagerWhenSingle: true,
+      isAnyLoading: this.loading,
+      errorsByCnsi: signal(new Map()),
+      getRowKey: (row: EndpointModel) => row.guid,
+      columns: this.buildColumns(),
     };
 
     this.disableSelectAll$ = toObservable(this.service.allChanged, { injector: this.injector });
@@ -148,6 +166,42 @@ export class BackupEndpointsComponent implements OnDestroy {
     this.selectStepHandle = {
       valid: this.service.hasChanges,
     };
+  }
+
+  private buildColumns(): SignalListColumn<EndpointModel>[] {
+    return [
+      {
+        header: 'Name', key: 'name', kind: 'text',
+        render: (row: EndpointModel) => row.name,
+      },
+      {
+        header: 'Type', key: 'type', kind: 'text',
+        render: (row: EndpointModel) => this.getEndpointTypeString(row),
+      },
+      {
+        header: 'Backup', key: 'endpoint', kind: 'template',
+        templateName: 'endpoint',
+        render: () => '',
+      },
+      {
+        header: 'Connection Details', key: 'connect', kind: 'template',
+        templateName: 'connect',
+        render: () => '',
+      },
+    ];
+  }
+
+  // Mutates the shared service state then forces a row re-render — see
+  // refreshTick. Keeps the visible checkboxes/selects in sync with the
+  // programmatic Select All / Select None.
+  selectAll(): void {
+    this.service.selectAll();
+    this.refreshTick.update(v => v + 1);
+  }
+
+  selectNone(): void {
+    this.service.selectNone();
+    this.refreshTick.update(v => v + 1);
   }
 
   setupPasswordStep() {
