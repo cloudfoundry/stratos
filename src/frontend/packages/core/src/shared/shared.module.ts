@@ -7,7 +7,6 @@ import { InternalEventMonitorFactory } from '@stratosui/store';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -207,7 +206,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MaxListMessageComponent, // Now standalone - moved to imports
     MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
     AppActionMonitorIconComponent, // Now standalone - moved to imports
-    AppActionMonitorComponent, // Now standalone - moved to imports
     MetricsRangeSelectorComponent, // Now standalone - moved to imports
     ProfileSettingsComponent, // Now standalone - moved to imports
     StackedInputActionsComponent, // Now standalone - moved to imports
@@ -358,7 +356,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     StratosTitleComponent,
     IntroScreenComponent,
     UploadProgressIndicatorComponent,
-    AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     BooleanIndicatorComponent,
     TableComponent,
