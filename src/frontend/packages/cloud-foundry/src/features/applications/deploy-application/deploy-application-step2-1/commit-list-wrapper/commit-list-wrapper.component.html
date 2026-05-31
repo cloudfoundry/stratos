@@ -1,10 +1,15 @@
 @if (listConfig(); as cfg) {
-  <app-signal-list class="block h-[28rem]" [config]="cfg">
-    <ng-template appSignalListCell="sha" let-row>
-      <a [href]="row.html_url" target="_blank">{{ row.sha.substring(0, 8) }}</a>
-    </ng-template>
-    <ng-template appSignalListCell="author" let-row>
-      <app-github-commit-author [commit]="row"></app-github-commit-author>
-    </ng-template>
-  </app-signal-list>
+  <!-- Bounded height + internal scroll so the stepper's footer buttons stay on
+       screen; the signal-list host is h-full, so it must size to a parent with
+       a definite height rather than carry the height itself. -->
+  <div class="h-[24rem] min-h-0">
+    <app-signal-list [config]="cfg">
+      <ng-template appSignalListCell="sha" let-row>
+        <a [href]="row.html_url" target="_blank">{{ row.sha.substring(0, 8) }}</a>
+      </ng-template>
+      <ng-template appSignalListCell="author" let-row>
+        <app-github-commit-author [commit]="row"></app-github-commit-author>
+      </ng-template>
+    </app-signal-list>
+  </div>
 }

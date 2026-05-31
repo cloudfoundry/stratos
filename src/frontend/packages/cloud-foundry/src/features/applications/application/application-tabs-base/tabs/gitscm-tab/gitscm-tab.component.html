@@ -111,17 +111,19 @@
           }
         </app-tile-group>
         @if (listConfig(); as cfg) {
-          <app-signal-list class="block h-[28rem]" [config]="cfg">
-            <ng-template appSignalListCell="sha" let-row>
-              <a [href]="row.html_url" target="_blank">{{ row.sha | limitTo: 8 }}</a>
-              @if (isDeployedCommit(row)) {
-                <span class="text-content-muted"> (deployed)</span>
-              }
-            </ng-template>
-            <ng-template appSignalListCell="author" let-row>
-              <app-github-commit-author [commit]="row"></app-github-commit-author>
-            </ng-template>
-          </app-signal-list>
+          <div class="h-[28rem] min-h-0">
+            <app-signal-list [config]="cfg">
+              <ng-template appSignalListCell="sha" let-row>
+                <a [href]="row.html_url" target="_blank">{{ row.sha | limitTo: 8 }}</a>
+                @if (isDeployedCommit(row)) {
+                  <span class="text-content-muted"> (deployed)</span>
+                }
+              </ng-template>
+              <ng-template appSignalListCell="author" let-row>
+                <app-github-commit-author [commit]="row"></app-github-commit-author>
+              </ng-template>
+            </app-signal-list>
+          </div>
         }
       </app-tile-grid>
     }
