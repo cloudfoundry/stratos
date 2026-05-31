@@ -1,7 +1,0 @@
-@if ((cellMetric$ | async); as cellMetric) {
-  <a [routerLink]="[cellLink]">
-    {{cellMetric.bosh_job_id}}
-  </a>
-} @else {
-  <app-progress-spinner diameter="20" mode="indeterminate"></app-progress-spinner>
-}

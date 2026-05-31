@@ -3,16 +3,13 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
-import { ListPaginationMultiFilterChange, naturalCompare, valueOrCommonFalsy } from '@stratosui/core';
+import { naturalCompare } from '@stratosui/core';
 import {
   EndpointModel,
   EndpointsDataService,
   PaginatedAction,
   PaginationEntityState,
   PaginationMonitorFactory,
-  PaginationParam,
-  ResetPagination,
-  SetParams,
   Store,
 } from '@stratosui/store';
 import { CFAppState } from '../../cf-app-state';
@@ -21,15 +18,7 @@ import { IOrganization, ISpace } from '../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
-import { QParam, QParamJoiners } from '../q-param';
 import { CfOrgSpaceDebug, createCfOrgSpaceDebug } from './cf-org-space-debug';
-
-export function spreadPaginationParams(params: PaginationParam): PaginationParam {
-  return {
-    ...params
-  };
-}
-
 
 export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
   // Bridge layer for the legacy IListMultiFilterConfig interface in the
@@ -79,58 +68,6 @@ export interface CfOrgSpaceItem<T = any> {
   /** @deprecated Bridge for `IListMultiFilterConfig.loading$`. */
   readonly loading$: Observable<boolean>;
 }
-
-export const createCfOrSpaceMultipleFilterFn = (
-  store: Store<CFAppState>,
-  action: PaginatedAction,
-  setQParam: (setQ: QParam, qs: QParam[]) => boolean,
-  preResetUpdate?: () => void
-) => {
-  return (changes: ListPaginationMultiFilterChange[], params: PaginationParam) => {
-    if (!changes.length) {
-      return;
-    }
-    const qParamStrings = (params.q || []) as string[];
-    const qParamObject = QParam.fromStrings(qParamStrings);
-
-    const startingCfGuid = valueOrCommonFalsy(action.endpointGuid);
-    const startingOrgGuid = valueOrCommonFalsy(qParamObject.find((q: QParam) => q.key === 'organization_guid'), {}).value;
-    const startingSpaceGuid = valueOrCommonFalsy(qParamObject.find((q: QParam) => q.key === 'space_guid'), {}).value;
-
-    const qChanges = changes.reduce((qs: QParam[], change) => {
-      switch (change.key) {
-        case 'cf':
-          action.endpointGuid = change.value;
-          setQParam(new QParam('organization_guid', '', QParamJoiners.in), qs);
-          setQParam(new QParam('space_guid', '', QParamJoiners.in), qs);
-          break;
-        case 'org':
-          setQParam(new QParam('organization_guid', change.value, QParamJoiners.in), qs);
-          break;
-        case 'space':
-          setQParam(new QParam('space_guid', change.value, QParamJoiners.in), qs);
-          break;
-      }
-      return qs;
-    }, qParamObject);
-
-    const cfGuidChanged = startingCfGuid !== valueOrCommonFalsy(action.endpointGuid);
-    const orgChanged = startingOrgGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'organization_guid'), {}).value;
-    const spaceChanged = startingSpaceGuid !== valueOrCommonFalsy(qChanges.find((q: QParam) => q.key === 'space_guid'), {}).value;
-
-    if (preResetUpdate) {
-      preResetUpdate();
-    }
-
-    if (cfGuidChanged && !orgChanged && !spaceChanged) {
-      store.dispatch(new ResetPagination(action, action.paginationKey));
-    } else if (orgChanged || spaceChanged) {
-      const newParams = spreadPaginationParams(params);
-      newParams.q = qChanges.map(qChange => qChange.toString());
-      store.dispatch(new SetParams(action, action.paginationKey, newParams, true, true));
-    }
-  };
-};
 
 interface InitialValues { cf: string; org: string; space: string; }
 

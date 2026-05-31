@@ -8,7 +8,6 @@ export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
-export const appAutoscalerAppMetricEntityType = 'autoscalerAppMetric';
 export const appAutoscalerCredentialEntityType = 'autoscalerCredential';
 
 export const AUTOSCALER_ENDPOINT_TYPE = 'autoscaler';
@@ -65,11 +64,6 @@ entityCache[appAutoscalerHealthEntityType] = new AutoscalerEntitySchema(
 );
 entityCache[appAutoscalerScalingHistoryEntityType] = new AutoscalerEntitySchema(
   appAutoscalerScalingHistoryEntityType,
-  {},
-  { idAttribute: getCFCompositeEntityId }
-);
-entityCache[appAutoscalerAppMetricEntityType] = new AutoscalerEntitySchema(
-  appAutoscalerAppMetricEntityType,
   {},
   { idAttribute: getCFCompositeEntityId }
 );
