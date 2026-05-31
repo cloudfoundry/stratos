@@ -152,4 +152,26 @@ describe('KubePodDataService', () => {
     expect(a()).toEqual([]);
     expect(b()).toEqual([]);
   });
+
+  describe('workload scope', () => {
+    it('setWorkloadPods stores normalized pods readable via podsInWorkload', () => {
+      const sig = svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-x');
+      expect(sig()).toEqual([]);
+
+      svc.setWorkloadPods('cnsi-1', 'ns-a', 'rel-x', [
+        { metadata: { name: 'p1' }, status: { phase: 'Running' } } as any,
+      ]);
+
+      const pods = svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-x')();
+      expect(pods.length).toBe(1);
+      expect(pods[0].kubeGuid).toBe('cnsi-1');
+      expect(pods[0].metadata.kubeId).toBe('cnsi-1');
+      expect(pods[0].expandedStatus.status).toBe('Running'); // normalizePod ran
+    });
+
+    it('keys workload pods by kubeGuid:namespace:release (no cross-release leak)', () => {
+      svc.setWorkloadPods('cnsi-1', 'ns-a', 'rel-x', [{ metadata: { name: 'p1' } } as any]);
+      expect(svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-y')()).toEqual([]);
+    });
+  });
 });
