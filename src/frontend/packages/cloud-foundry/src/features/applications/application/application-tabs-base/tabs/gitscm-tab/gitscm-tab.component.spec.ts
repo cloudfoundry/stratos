@@ -1,4 +1,6 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -11,6 +13,7 @@ import { TailwindSnackBarService } from '@stratosui/core';
 import { EMPTY } from 'rxjs';
 
 import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
+import { CfDeployAppDataService } from '../../../../../../services/domain-data/cf-deploy-app-data.service';
 import { ApplicationService } from '../../../../application.service';
 import { GitSCMTabComponent } from './gitscm-tab.component';
 
@@ -29,6 +32,8 @@ const makeDataStub = () => ({
  */
 const makeAppServiceStub = () => ({
   applicationStratProject$: EMPTY,
+  waitForAppEntity$: EMPTY,
+  appSpace$: EMPTY,
 });
 
 describe('GitSCMTabComponent', () => {
@@ -42,6 +47,8 @@ describe('GitSCMTabComponent', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([]),
         provideNoopAnimations(),
         TailwindSnackBarService,
@@ -50,6 +57,7 @@ describe('GitSCMTabComponent', () => {
         GitSCMService,
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: ApplicationService, useFactory: makeAppServiceStub },
+        { provide: CfDeployAppDataService, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA]
     })
