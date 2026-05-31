@@ -17,9 +17,6 @@ import {
   KubernetesSATokenAuthFormComponent,
 } from './auth-forms/kubernetes-serviceaccount-auth-form/kubernetes-serviceaccount-auth-form.component';
 import { KubeConfigImportComponent } from './kube-config-registration/kube-config-import/kube-config-import.component';
-import {
-  KubeConfigTableImportStatusComponent,
-} from './kube-config-registration/kube-config-import/kube-config-table-import-status/kube-config-table-import-status.component';
 import { KubeConfigRegistrationComponent } from './kube-config-registration/kube-config-registration.component';
 import {
   KubeConfigSelectionComponent,
@@ -89,7 +86,6 @@ import {
         KubeConfigSelectionComponent,
         KubeConfigImportComponent,
         KubeConfigTableUserSelectComponent,
-        KubeConfigTableImportStatusComponent,
         KubeConfigTableSubTypeSelectComponent,
         KubeConfigTableCertComponent
     ],
