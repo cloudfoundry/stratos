@@ -18,6 +18,8 @@ import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.re
 // with different filtering semantics).
 
 const nsKey = (kubeGuid: string, namespace: string) => `${kubeGuid}/${namespace}`;
+const workloadKey = (kubeGuid: string, namespace: string, release: string) =>
+  `${kubeGuid}/${namespace}/${release}`;
 
 @Injectable({ providedIn: 'root' })
 export class KubeServiceDataService {
@@ -29,6 +31,7 @@ export class KubeServiceDataService {
 
   private readonly _clusterServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _namespaceServices = signal<Map<string, KubeService[]>>(new Map());
+  private readonly _workloadServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _clusterEndpoints = signal<Map<string, KubeEndpoint[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
 
@@ -44,6 +47,23 @@ export class KubeServiceDataService {
 
   endpointsInCluster(kubeGuid: string): Signal<KubeEndpoint[]> {
     return computed(() => this._clusterEndpoints().get(kubeGuid) ?? []);
+  }
+
+  servicesInWorkload(kubeGuid: string, namespace: string, release: string): Signal<KubeService[]> {
+    return computed(() => this._workloadServices().get(workloadKey(kubeGuid, namespace, release)) ?? []);
+  }
+
+  setWorkloadServices(kubeGuid: string, namespace: string, release: string, services: KubeService[]): void {
+    const items = (services ?? []).map(s => ({
+      ...s,
+      kubeGuid,
+      metadata: { ...(s.metadata ?? { name: '' }), kubeId: kubeGuid },
+    })) as KubeService[];
+    this._workloadServices.update(curr => {
+      const next = new Map(curr);
+      next.set(workloadKey(kubeGuid, namespace, release), items);
+      return next;
+    });
   }
 
   errors(): Signal<StratosError[]> {

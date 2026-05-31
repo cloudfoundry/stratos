@@ -94,4 +94,17 @@ describe('KubeServiceDataService', () => {
     expect(svc.servicesInNamespace('kube-1', 'default')()).toHaveLength(1);
     expect(svc.servicesInNamespace('kube-1', 'kube-system')()).toHaveLength(2);
   });
+
+  describe('workload scope', () => {
+    it('setWorkloadServices stores services readable via servicesInWorkload, keyed by release', () => {
+      const svc = TestBed.inject(KubeServiceDataService);
+      expect(svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-x')()).toEqual([]);
+      svc.setWorkloadServices('cnsi-1', 'ns-a', 'rel-x', [{ metadata: { name: 's1' } } as any]);
+      const out = svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-x')();
+      expect(out.length).toBe(1);
+      expect(out[0].kubeGuid).toBe('cnsi-1');
+      expect(out[0].metadata.kubeId).toBe('cnsi-1');
+      expect(svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-y')()).toEqual([]);
+    });
+  });
 });
