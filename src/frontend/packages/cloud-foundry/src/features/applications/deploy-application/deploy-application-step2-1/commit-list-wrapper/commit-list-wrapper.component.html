@@ -1,1 +1,10 @@
-<app-list></app-list>
+@if (listConfig(); as cfg) {
+  <app-signal-list class="block h-[28rem]" [config]="cfg">
+    <ng-template appSignalListCell="sha" let-row>
+      <a [href]="row.html_url" target="_blank">{{ row.sha.substring(0, 8) }}</a>
+    </ng-template>
+    <ng-template appSignalListCell="author" let-row>
+      <app-github-commit-author [commit]="row"></app-github-commit-author>
+    </ng-template>
+  </app-signal-list>
+}
