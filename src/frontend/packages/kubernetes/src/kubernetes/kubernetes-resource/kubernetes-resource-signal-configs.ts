@@ -437,6 +437,9 @@ function buildGenericResourceConfig<T extends GenericRow>(
   namespaced: boolean,
 ): SignalListConfig<T & { kubeGuid: string }> {
   const dataSignal = computed<Array<T & { kubeGuid: string }>>(() => {
+    if (ctx.isWorkloadView) {
+      return dataSvc.itemsInWorkload(ctx.kubeGuid, ctx.workloadNamespace as string, ctx.workloadTitle as string)();
+    }
     const ns = ctx.selectedNamespace();
     const items = ns && namespaced
       ? dataSvc.itemsInNamespace(ctx.kubeGuid, ns)
@@ -454,7 +457,7 @@ function buildGenericResourceConfig<T extends GenericRow>(
     emptyMessage,
     emptyFilterMessage,
     loadingMessage,
-    () => dataSvc.refresh({ kubeGuid: ctx.kubeGuid }),
+    ctx.isWorkloadView ? undefined : () => dataSvc.refresh({ kubeGuid: ctx.kubeGuid }),
     dataSvc.errors(),
     signal(false).asReadonly(),
   );
