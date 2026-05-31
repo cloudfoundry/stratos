@@ -1,4 +1,4 @@
-@if ((helper.clusters$ | async) === false) {
+@if (!(helper.clusters$ | async)) {
   <div class="flex flex-1 items-center justify-center">
     <div class="text-center">
       <app-custom-icon class="text-[96px] h-24 w-24 opacity-70">insert_drive_file</app-custom-icon>
@@ -12,7 +12,46 @@
   </div>
 } @else {
   <div class="flex-1">
-    <app-table [dataSource]="dataSource" [columns]="columns" minRowHeight="57px"></app-table>
+    <app-signal-list [config]="listConfig">
+      <ng-template appSignalListCell="name" let-row>
+        @if (editRowId() === row._id) {
+          <div class="flex items-center gap-1">
+            <input
+              class="flex-1 min-w-0 px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text"
+              [value]="editRowName()"
+              (click)="$event.stopPropagation()"
+              (input)="editRowName.set($any($event.target).value)" />
+            <button id="kube-config-name-edit-done" type="button" title="Save"
+              class="inline-flex items-center justify-center p-0.5 text-green-600 hover:text-green-700 dark:text-green-400"
+              (click)="$event.stopPropagation(); saveEdit(row)">
+              <span class="material-icons text-base leading-none">done</span>
+            </button>
+            <button id="kube-config-name-edit-cancel" type="button" title="Cancel"
+              class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-content-text"
+              (click)="$event.stopPropagation(); cancelEdit()">
+              <span class="material-icons text-base leading-none">clear</span>
+            </button>
+          </div>
+        } @else {
+          <div class="flex items-center gap-1">
+            <span class="flex-1 min-w-0 truncate" [attr.title]="row.name">{{ row.name }}</span>
+            <button type="button" title="Edit name"
+              class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent opacity-60 hover:opacity-100"
+              (click)="$event.stopPropagation(); startEdit(row)">
+              <span class="material-icons text-base leading-none">edit</span>
+            </button>
+          </div>
+        }
+      </ng-template>
+      <ng-template appSignalListCell="type" let-row>
+        <app-kube-config-table-sub-type-select [row]="row"></app-kube-config-table-sub-type-select>
+      </ng-template>
+      <ng-template appSignalListCell="user" let-row>
+        <app-kube-config-table-user-select [row]="row"></app-kube-config-table-user-select>
+      </ng-template>
+      <ng-template appSignalListCell="cert" let-row>
+        <app-kube-config-table-cert [row]="row"></app-kube-config-table-cert>
+      </ng-template>
+    </app-signal-list>
   </div>
 }
-

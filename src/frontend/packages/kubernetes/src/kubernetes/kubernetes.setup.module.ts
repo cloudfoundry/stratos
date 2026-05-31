@@ -28,12 +28,6 @@ import {
   KubeConfigTableCertComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-cert/kube-config-table-cert.component';
 import {
-  KubeConfigTableNameComponent,
-} from './kube-config-registration/kube-config-selection/kube-config-table-name/kube-config-table-name.component';
-import {
-  KubeConfigTableSelectComponent,
-} from './kube-config-registration/kube-config-selection/kube-config-table-select/kube-config-table-select.component';
-import {
   KubeConfigTableSubTypeSelectComponent,
 } from './kube-config-registration/kube-config-selection/kube-config-table-sub-type-select/kube-config-table-sub-type-select.component';
 import {
@@ -94,11 +88,9 @@ import {
         KubeConfigRegistrationComponent,
         KubeConfigSelectionComponent,
         KubeConfigImportComponent,
-        KubeConfigTableSelectComponent,
         KubeConfigTableUserSelectComponent,
         KubeConfigTableImportStatusComponent,
         KubeConfigTableSubTypeSelectComponent,
-        KubeConfigTableNameComponent,
         KubeConfigTableCertComponent
     ],
     declarations: [
