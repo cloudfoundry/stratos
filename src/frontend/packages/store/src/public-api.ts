@@ -165,7 +165,7 @@ export {
 } from './entity-catalog/entity-catalog.types';
 export { EntityService, isEntityBlocked } from './entity-service';
 export type { APIResource, EntityInfo, NormalizedResponse } from './types/api.types';
-export { getFullEndpointApiUrl } from './endpoint-utils';
+export { getFullEndpointApiUrl, countDuplicateUrlEndpoints } from './endpoint-utils';
 export type { PaginatedAction, BasePaginatedAction, PaginationClientFilter, PaginationParam } from './types/pagination.types';
 export { PaginationEntityState, isPaginatedAction } from './types/pagination.types';
 export { MAX_RECENT_COUNT } from './reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
