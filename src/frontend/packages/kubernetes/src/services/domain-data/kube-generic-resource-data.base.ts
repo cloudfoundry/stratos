@@ -27,6 +27,8 @@ export interface KubeGenericResourceConfig {
 }
 
 const nsKey = (kubeGuid: string, namespace: string) => `${kubeGuid}/${namespace}`;
+const workloadKey = (kubeGuid: string, namespace: string, release: string) =>
+  `${kubeGuid}/${namespace}/${release}`;
 
 export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: { name: string; namespace?: string; kubeId?: string; creationTimestamp?: string } }> {
   protected abstract readonly http: HttpClient;
@@ -34,6 +36,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
 
   private readonly _clusterItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _namespaceItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
+  private readonly _workloadItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
 
   // ---- Read API ----------------------------------------------------------
@@ -44,6 +47,23 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
 
   itemsInNamespace(kubeGuid: string, namespace: string): Signal<Array<T & { kubeGuid: string }>> {
     return computed(() => this._namespaceItems().get(nsKey(kubeGuid, namespace)) ?? []);
+  }
+
+  itemsInWorkload(kubeGuid: string, namespace: string, release: string): Signal<Array<T & { kubeGuid: string }>> {
+    return computed(() => this._workloadItems().get(workloadKey(kubeGuid, namespace, release)) ?? []);
+  }
+
+  setWorkloadItems(kubeGuid: string, namespace: string, release: string, items: T[]): void {
+    const stamped = (items ?? []).map((item) => ({
+      ...item,
+      kubeGuid,
+      metadata: { ...((item.metadata ?? { name: '' }) as T['metadata']), kubeId: kubeGuid } as T['metadata'],
+    })) as Array<T & { kubeGuid: string }>;
+    this._workloadItems.update(curr => {
+      const next = new Map(curr);
+      next.set(workloadKey(kubeGuid, namespace, release), stamped);
+      return next;
+    });
   }
 
   errors(): Signal<StratosError[]> {
