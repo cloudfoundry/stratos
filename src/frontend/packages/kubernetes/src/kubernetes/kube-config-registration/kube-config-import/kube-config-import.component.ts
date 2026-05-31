@@ -1,4 +1,4 @@
-import {Component, EnvironmentInjector, Injector, OnDestroy, signal, WritableSignal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EnvironmentInjector, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
@@ -16,21 +16,25 @@ import {
 } from '../../../../../core/src/features/endpoints/connect.service';
 import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import {
+  AppActionMonitorIconComponent,
   IActionMonitorComponentState,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import {
-  ITableListDataSource,
   RowState,
 } from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { TableComponent } from '../../../../../core/src/shared/components/list/list-table/table.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+import {
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListRowState,
+} from '../../../../../core/src/shared/components/signal-list/signal-list.component';
+import {
+  SignalListCellTemplateDirective,
+} from '../../../../../core/src/shared/components/signal-list/signal-list-cell-template.directive';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeConfigAuthHelper } from '../kube-config-auth.helper';
 import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.types';
-import {
-  KubeConfigTableImportStatusComponent,
-} from './kube-config-table-import-status/kube-config-table-import-status.component';
 
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
@@ -70,8 +74,10 @@ selector: 'app-kube-config-import',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    TableComponent
-]
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+    AppActionMonitorIconComponent,
+  ]
 })
 export class KubeConfigImportComponent implements OnDestroy {
 
@@ -83,39 +89,74 @@ export class KubeConfigImportComponent implements OnDestroy {
   data = createSignalWrapper<KubeConfigImportAction[]>([]);
   data$ = this.data.asObservable();
 
-  public dataSource: ITableListDataSource<KubeConfigImportAction> = {
-    connect: () => this.data$,
-    disconnect: () => { },
-    // Ensure unique per entry to step (in case user went back step and updated)
-    trackBy: (index, item) => item.cluster.name + this.iteration,
-    isTableLoading$: this.data$.pipe(map(data => !(data && data.length > 0))),
-    getRowState: (row: KubeConfigImportAction): Observable<RowState> => {
-      return row ? row.state.asObservable() : observableOf({});
-    }
+  // ── signal-list paging ────────────────────────────────────────────────
+  // The import list is a handful of sequential actions, so it's effectively
+  // single-page; hidePagerWhenSingle hides the pager chrome.
+  private readonly pageIndex: WritableSignal<number> = signal(0);
+  private readonly pageSize: WritableSignal<number> = signal(100);
+  private readonly totalFilteredResults: Signal<number> = computed(() => this.data().length);
+  private readonly totalPages: Signal<number> = computed(() => {
+    const size = this.pageSize();
+    return size > 0 ? Math.max(1, Math.ceil(this.totalFilteredResults() / size)) : 1;
+  });
+  private readonly pagedItems: Signal<KubeConfigImportAction[]> = computed(() => {
+    const size = this.pageSize();
+    const idx = this.pageIndex();
+    return this.data().slice(idx * size, idx * size + size);
+  });
+  // Loading while the actions list is still empty — mirrors the legacy
+  // isTableLoading$ = !(data && data.length > 0).
+  private readonly loading: Signal<boolean> = computed(() => this.data().length === 0);
+
+  public listConfig: SignalListConfig<KubeConfigImportAction> = {
+    pagedItems: this.pagedItems,
+    totalFilteredResults: this.totalFilteredResults,
+    totalPages: this.totalPages,
+    pageIndex: this.pageIndex,
+    pageSize: this.pageSize,
+    hidePagerWhenSingle: true,
+    isAnyLoading: this.loading,
+    errorsByCnsi: signal(new Map()),
+    // description is stable + unique per action ("Register …" / "Connect …");
+    // `action` is nulled on skip so it can't key the row. iteration keeps
+    // keys distinct across step re-entries.
+    getRowKey: (row: KubeConfigImportAction) => `${row.description}#${this.iteration}`,
+    // Per-action error/warning messages (skip notice, register/connect
+    // failures) ride rowState; `state` is a createSignalWrapper, callable
+    // as a Signal and stable per action.
+    rowState: (row: KubeConfigImportAction) => row.state as unknown as Signal<SignalListRowState>,
+    columns: this.buildColumns(),
   };
-  public columns: ITableColumn<KubeConfigImportAction>[] = [
-    {
-      columnId: 'action', headerCell: () => 'Action',
-      cellDefinition: {
-        valuePath: 'action'
+
+  private buildColumns(): SignalListColumn<KubeConfigImportAction>[] {
+    return [
+      {
+        header: 'Action', key: 'action', kind: 'text', widthHint: '16rem',
+        render: (row: KubeConfigImportAction) => row.action || '',
       },
-      cellFlex: '1',
-    },
-    {
-      columnId: 'description', headerCell: () => 'Description',
-      cellDefinition: {
-        valuePath: 'description'
+      {
+        header: 'Description', key: 'description', kind: 'text',
+        render: (row: KubeConfigImportAction) => row.description,
       },
-      cellFlex: '4',
-    },
-    // Right-hand column to show the action progress
-    {
-      columnId: 'monitorState',
-      cellComponent: KubeConfigTableImportStatusComponent,
-      cellConfig: (row) => row.actionState.asObservable(),
-      cellFlex: '0 0 24px'
+      {
+        header: '', key: 'status', kind: 'template', templateName: 'status', widthHint: '3rem',
+        render: () => '',
+      },
+    ];
+  }
+
+  // Stable per-row Observable for the action-monitor icon. `actionState`'s
+  // asObservable() mints a fresh observable each call; cache by action so the
+  // template binding doesn't re-subscribe every change-detection pass.
+  private readonly actionStateObs = new WeakMap<KubeConfigImportAction, Observable<IActionMonitorComponentState>>();
+  actionStateFor(row: KubeConfigImportAction): Observable<IActionMonitorComponentState> {
+    let obs = this.actionStateObs.get(row);
+    if (!obs) {
+      obs = row.actionState.asObservable();
+      this.actionStateObs.set(row, obs);
     }
-  ];
+    return obs;
+  }
 
   subs: Subscription[] = [];
   // FWT-959 Part 2: applyStarted promoted from a plain boolean to a signal
