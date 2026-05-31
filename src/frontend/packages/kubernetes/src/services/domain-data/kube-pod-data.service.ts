@@ -79,6 +79,21 @@ export class KubePodDataService {
     return computed(() => this._byScope().get(key)?.items ?? []);
   }
 
+  // Push-only: data arrives via the HelmRelease websocket stream, never
+  // REST-fetched, so no ensureLoaded call here.
+  podsInWorkload(kubeGuid: string, namespace: string, release: string): Signal<KubePod[]> {
+    const key = workloadKey(kubeGuid, namespace, release);
+    return computed(() => this._byScope().get(key)?.items ?? []);
+  }
+
+  // Socket-fed write path: HelmReleaseSocketService pushes the release's
+  // pods from the /status manifest stream. Normalize through the same
+  // normalizePod() the REST paths use so expandedStatus/kubeId match.
+  setWorkloadPods(kubeGuid: string, namespace: string, release: string, pods: KubePod[]): void {
+    const items = (pods ?? []).map(p => normalizePod(p, kubeGuid));
+    this.storeItems(workloadKey(kubeGuid, namespace, release), items);
+  }
+
   // -- Refresh -------------------------------------------------------------
 
   // Force a refresh on the matching scope. If only `kubeGuid` is given,
@@ -237,6 +252,10 @@ function nsKey(kubeGuid: string, namespace: string): string {
 
 function nodeKey(kubeGuid: string, nodeName: string): string {
   return `node:${kubeGuid}:${nodeName}`;
+}
+
+function workloadKey(kubeGuid: string, namespace: string, release: string): string {
+  return `workload:${kubeGuid}:${namespace}:${release}`;
 }
 
 function normalizePod(p: KubePod, kubeGuid: string): KubePod {
