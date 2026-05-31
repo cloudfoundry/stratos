@@ -183,7 +183,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     // Signal-config path: if the registry has an entry for this entity
     // type, build a SignalListConfig and skip the legacy provider.
     const signalFactory = this.signalConfigRegistry.get(this.entityCatalogKey);
-    if (signalFactory && !this.isWorkloadView) {
+    if (signalFactory) {
       this.isNamespacedView = !!(catalogEntity as unknown as { definition?: KubeResourceEntityDefinition }).definition?.apiNamespaced;
       const config = signalFactory(
         {
@@ -215,6 +215,11 @@ export class KubernetesResourceListComponent implements OnDestroy {
   // user's first refresh click. Idempotent: subsequent visits return
   // immediately from the cache.
   private warmRegistryCache(): void {
+    // Workload view is socket-fed (HelmReleaseSocketService, started by the
+    // parent tab-base). No REST kick — data arrives via the /status stream.
+    if (this.isWorkloadView) {
+      return;
+    }
     const reg = this.injector.get(KubeEndpointDataRegistry);
     const svc = reg.getService(this.kubeId);
     svc.load().subscribe({ next: () => undefined, error: () => undefined });

@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { TabNavService } from '@stratosui/core';
+import { TabNavService, SignalListConfig } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import {
   entityCatalog,
@@ -17,6 +19,43 @@ import {
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list.component';
+import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
+import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
+
+// Minimal SignalListConfig stub — only the fields the shell reads after
+// construction (signalListConfig() truthiness check).
+function makeMinimalSignalConfig(): SignalListConfig<unknown> {
+  return {
+    pagedItems: signal([]),
+    totalFilteredResults: signal(0),
+    totalPages: signal(0),
+    pageIndex: signal(0),
+    pageSize: signal(10),
+    isAnyLoading: signal(false),
+    errorsByCnsi: signal(new Map()),
+    columns: [],
+    getRowKey: (row: unknown) => String(row),
+  };
+}
+
+// Workload route: data.isWorkload=true, entityCatalogKey='pod',
+// parent.parent.params.guid encodes endpointId:namespace:releaseTitle.
+const WORKLOAD_GUID = 'cnsi-1:ns-a:rel-x';
+const workloadRoute = {
+  snapshot: {
+    data: {
+      isWorkload: true,
+      entityCatalogKey: 'pod',
+    },
+    params: {},
+    queryParams: {},
+    parent: {
+      parent: {
+        params: { guid: WORKLOAD_GUID },
+      },
+    },
+  },
+};
 
 describe('KubernetesResourceListComponent', () => {
   let component: KubernetesResourceListComponent;
@@ -91,5 +130,83 @@ describe('KubernetesResourceListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // -------------------------------------------------------------------------
+  // Workload path tests
+  // -------------------------------------------------------------------------
+  describe('workload view (isWorkload=true)', () => {
+    let workloadFixture: ComponentFixture<KubernetesResourceListComponent>;
+
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+
+      // Re-register catalog entities after reset
+      const testEntityCatalog = entityCatalog as TestEntityCatalog;
+      testEntityCatalog.clear();
+      const entities = [
+        ...generateStratosEntities(),
+        ...kubeEntityCatalog.allKubeEntities(),
+      ];
+      entities.forEach(entity => entityCatalog.register(entity));
+
+      await TestBed.configureTestingModule({
+        imports: [
+          createBasicStoreModule(),
+          EntityCatalogProvidersModule,
+          KubernetesResourceListComponent,
+        ],
+        providers: [
+          ...STORE_TEST_PROVIDERS,
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          {
+            provide: BaseKubeGuid,
+            // BaseKubeGuid is not used in workload mode (kubeId comes from
+            // the helm-release guid), but must be present to satisfy DI.
+            useValue: { guid: 'unused-for-workload' },
+          },
+          TabNavService,
+          {
+            provide: Router,
+            useValue: { url: '/kubernetes/cnsi-1/workloads/cnsi-1:ns-a:rel-x/pods' },
+          },
+          {
+            provide: ActivatedRoute,
+            useValue: workloadRoute,
+          },
+          provideZonelessChangeDetection(),
+          provideNoopAnimations(),
+        ],
+      }).compileComponents();
+
+      // Initialize EntityCatalogHelper for Angular 20 compatibility
+      const helper = TestBed.inject(EntityCatalogHelper);
+      EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+      // Register a 'pod' factory so the signal-config gate is truthy.
+      const registry = TestBed.inject(KubernetesSignalConfigRegistry);
+      registry.register('pod', () => makeMinimalSignalConfig());
+    });
+
+    afterEach(() => {
+      if (workloadFixture) {
+        workloadFixture.destroy();
+      }
+    });
+
+    it('builds a signal config for the workload view (gate removed)', () => {
+      workloadFixture = TestBed.createComponent(KubernetesResourceListComponent);
+      // Constructor runs synchronously; detectChanges is not required for
+      // the signal assignment check but triggers no harm.
+      expect(workloadFixture.componentInstance.signalListConfig()).toBeDefined();
+    });
+
+    it('warmRegistryCache does not fire REST kicks in workload mode', () => {
+      const pod = TestBed.inject(KubePodDataService);
+      const spy = vi.spyOn(pod, 'refresh');
+      workloadFixture = TestBed.createComponent(KubernetesResourceListComponent);
+      expect(spy).not.toHaveBeenCalled();
+    });
   });
 });
