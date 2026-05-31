@@ -11,7 +11,7 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { ApplicationWallComponent } from './application-wall.component';
-import { countDuplicateUrlEndpoints } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
+import { countDuplicateUrlEndpoints } from '@stratosui/store';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 

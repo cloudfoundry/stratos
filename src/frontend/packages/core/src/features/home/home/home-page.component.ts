@@ -16,6 +16,7 @@ import { DashboardPreferencesService } from '../../../core/dashboard-preferences
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
+import { HomeUrlBannerComponent } from './home-url-banner/home-url-banner.component';
 import { HomePageCardLayout } from './../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card/home-page-endpoint-card.component';
 import { EndpointDataRegistry } from '../../../../../cloud-foundry/src/services/endpoint-data/endpoint-data.registry';
@@ -46,7 +47,8 @@ const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
     PageHeaderComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
-    HomePageEndpointCardComponent
+    HomePageEndpointCardComponent,
+    HomeUrlBannerComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

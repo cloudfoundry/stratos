@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { EndpointModel, getFullEndpointApiUrl } from '@stratosui/store';
+import { EndpointModel, countDuplicateUrlEndpoints } from '@stratosui/store';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 
 // Shared dup-URL banner — surfaces when 2+ connected CF endpoints point at
@@ -41,22 +41,4 @@ export class DuplicateUrlBannerComponent {
     this.cloudFoundryService.connectedCFEndpoints$.pipe(
       map((endpoints: EndpointModel[]) => countDuplicateUrlEndpoints(endpoints)),
     );
-}
-
-// Counts endpoints whose api_url appears 2+ times across connected CFs.
-// An endpoint is in a "duplicate group" if its URL is shared by another
-// connected endpoint. Returns null when all URLs are distinct so the
-// banner can early-exit via `@if … as dupCount`.
-export function countDuplicateUrlEndpoints(endpoints: EndpointModel[]): number | null {
-  if (!endpoints || endpoints.length < 2) return null;
-  const urlCounts = new Map<string, number>();
-  for (const ep of endpoints) {
-    const url = getFullEndpointApiUrl(ep);
-    urlCounts.set(url, (urlCounts.get(url) ?? 0) + 1);
-  }
-  let dupCount = 0;
-  for (const count of urlCounts.values()) {
-    if (count > 1) dupCount += count;
-  }
-  return dupCount > 0 ? dupCount : null;
 }
