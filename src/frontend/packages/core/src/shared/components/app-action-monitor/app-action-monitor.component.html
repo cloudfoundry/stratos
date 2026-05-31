@@ -1,6 +1,0 @@
-@if (replayData$ | async; as data) {
-  <div>
-    <app-table [dataSource]="dataSource" [columns]="allColumns" [prominentErrorBar]="data.length > 1">
-    </app-table>
-  </div>
-}

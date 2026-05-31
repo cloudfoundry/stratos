@@ -148,7 +148,6 @@ export { ApplicationStateComponent } from './shared/components/application-state
 export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-favorite-star.component';
 export { DotContentComponent } from './core/dot-content/dot-content.component';
 export { AppMonitorComponentTypes } from './shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-export { AppActionMonitorComponent } from './shared/components/app-action-monitor/app-action-monitor.component';
 
 // List Components
 export { ListComponent } from './shared/components/list/list.component';
