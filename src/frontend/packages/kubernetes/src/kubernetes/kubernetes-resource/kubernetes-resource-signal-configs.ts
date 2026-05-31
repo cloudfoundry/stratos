@@ -89,7 +89,7 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
   emptyMessage: string,
   emptyFilterMessage: string,
   loadingMessage: string,
-  refresh: () => Promise<void>,
+  refresh: (() => Promise<void>) | undefined,
   errors: Signal<StratosError[]>,
   isLoading: Signal<boolean>,
 ): SignalListConfig<T> {
@@ -163,7 +163,7 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     loadingMessage,
     pageSizeOptions: { table: [10, 25, 50, 100], card: [6, 12, 24, 48, 96] },
     nameFilter,
-    onRefresh: () => refresh(),
+    onRefresh: refresh ? () => refresh() : undefined,
     onClear: () => {
       nameFilter.set('');
       sort.set({ field: 'name', direction: 'asc' });
@@ -184,10 +184,14 @@ export function buildPodsSignalConfig(
 ): SignalListConfig<KubePod> {
   const podData = injector.get(KubePodDataService);
 
-  // The data signal switches when the namespace dropdown changes.
+  // The data signal switches between workload scope (socket-pushed) and
+  // cluster/namespace scope (REST-fetched) based on ctx.isWorkloadView.
   // computed() over selectedNamespace re-evaluates and re-binds to a
   // new podsInCluster/podsInNamespace projection.
   const dataSignal = computed<KubePod[]>(() => {
+    if (ctx.isWorkloadView) {
+      return podData.podsInWorkload(ctx.kubeGuid, ctx.workloadNamespace as string, ctx.workloadTitle as string)();
+    }
     const ns = ctx.selectedNamespace();
     const pods = ns
       ? podData.podsInNamespace(ctx.kubeGuid, ns)
@@ -259,7 +263,7 @@ export function buildPodsSignalConfig(
     'There are no pods',
     'No pods match the current filter',
     'Loading pods…',
-    () => podData.refresh({ kubeGuid: ctx.kubeGuid }),
+    ctx.isWorkloadView ? undefined : () => podData.refresh({ kubeGuid: ctx.kubeGuid }),
     podData.errors(),
     signal(false).asReadonly(),
   );
@@ -274,6 +278,9 @@ export function buildServicesSignalConfig(
   const serviceData = injector.get(KubeServiceDataService);
 
   const dataSignal = computed<KubeService[]>(() => {
+    if (ctx.isWorkloadView) {
+      return serviceData.servicesInWorkload(ctx.kubeGuid, ctx.workloadNamespace as string, ctx.workloadTitle as string)();
+    }
     const ns = ctx.selectedNamespace();
     const services = ns
       ? serviceData.servicesInNamespace(ctx.kubeGuid, ns)
@@ -342,7 +349,7 @@ export function buildServicesSignalConfig(
     'There are no services',
     'No services match the current filter',
     'Loading services…',
-    () => serviceData.refresh({ kubeGuid: ctx.kubeGuid }),
+    ctx.isWorkloadView ? undefined : () => serviceData.refresh({ kubeGuid: ctx.kubeGuid }),
     serviceData.errors(),
     signal(false).asReadonly(),
   );
