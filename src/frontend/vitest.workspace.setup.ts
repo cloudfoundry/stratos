@@ -15,6 +15,7 @@ import {
 } from '@angular/platform-browser/testing';
 console.log('[WORKSPACE SETUP] Angular testing loaded');
 import { getTestBed } from '@angular/core/testing';
+import { execSync } from 'node:child_process';
 console.log('[WORKSPACE SETUP] All imports complete');
 
 // CRITICAL: Expose vitest globals to window BEFORE any imports
@@ -181,26 +182,49 @@ if (!testBed.platform) {
   console.log('[WORKSPACE SETUP] TestBed platform already initialized (reusing)');
 }
 
-// Suppress network connection errors in test environment
-// Vite HMR and other services may try to connect during tests, causing noisy stderr output
-// We suppress these specific errors to keep test output clean
-if (typeof console !== 'undefined') {
+// Suppress Vite HMR connection noise in the test environment.
+//
+// In `vitest run` (the gate / CI) nothing serves the Vite dev server, so the
+// Vite client injected into the compiled Angular bundles keeps dialing its
+// HMR endpoint on localhost:3000 and logs ECONNREFUSED / "socket hang up"
+// (ECONNRESET) — pure noise, swallowed by --dangerouslyIgnoreUnhandledErrors
+// (0 test impact), but it clutters the output and reads like a real failure.
+//
+// Gate the suppression on an actual probe of :3000 (the behaviour Norm asked
+// for): when a dev server IS listening there (interactive `vitest` watch
+// alongside `make dev`) leave every error visible so a genuine HMR problem
+// surfaces; only when nothing is listening do we treat these specific errors
+// as the known spurious dial and silence them.
+const HMR_NOISE = /(ECONNREFUSED[^\n]*(127\.0\.0\.1|::1|localhost):3000)|(::1:3000)|(socket hang up)|(ECONNRESET)|(socketCloseListener)/;
+
+function devServerListeningOn3000(): boolean {
+  // lsof returns non-zero (throws) when nothing is LISTENing; ENOENT if lsof
+  // is absent. Either way, treat as "no dev server" → safe to suppress.
+  try {
+    const out = execSync('lsof -nP -iTCP:3000 -sTCP:LISTEN', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).toString();
+    return out.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+const suppressHmrNoise = !devServerListeningOn3000();
+
+if (suppressHmrNoise && typeof console !== 'undefined') {
   const originalConsoleError = console.error;
   const originalConsoleWarn = console.warn;
 
   console.error = function(...args: any[]) {
     const str = args.join(' ');
-    // Suppress ECONNREFUSED errors to localhost:3000 (Vite HMR)
-    if (str.includes('ECONNREFUSED') && (str.includes('127.0.0.1:3000') || str.includes('::1:3000'))) {
-      return; // Suppress this error
+    if (HMR_NOISE.test(str)) {
+      return; // Suppress Vite HMR connection noise
     }
     if (str.includes('AggregateError') && args.length > 0 && typeof args[0] === 'object') {
-      // Check if this is an AggregateError with ECONNREFUSED errors
+      // Check if this is an AggregateError wrapping only HMR connection errors
       const errors = args[0]?.errors || [];
-      const allConnectionErrors = errors.every((e: any) =>
-        e?.message?.includes('ECONNREFUSED') &&
-        (e?.message?.includes('127.0.0.1:3000') || e?.message?.includes('::1:3000'))
-      );
+      const allConnectionErrors = errors.every((e: any) => HMR_NOISE.test(e?.message ?? ''));
       if (allConnectionErrors && errors.length > 0) {
         return; // Suppress this AggregateError
       }
@@ -210,11 +234,33 @@ if (typeof console !== 'undefined') {
 
   console.warn = function(...args: any[]) {
     const str = args.join(' ');
-    // Suppress ECONNREFUSED warnings to localhost:3000
-    if (str.includes('ECONNREFUSED') && (str.includes('127.0.0.1:3000') || str.includes('::1:3000'))) {
-      return; // Suppress this warning
+    if (HMR_NOISE.test(str)) {
+      return; // Suppress Vite HMR connection noise
     }
     return originalConsoleWarn.apply(console, args);
+  };
+}
+
+// The errors above also reach process.stderr directly (Node's default
+// unhandled-rejection / socket-error printer bypasses the console patch),
+// which is why they still leaked into the gate log. Filter those raw writes
+// too — but only the HMR-noise lines, and only when no dev server is up.
+// Vitest's own failure reporter formats results separately and never emits
+// these socket signatures, so real test failures are unaffected.
+if (suppressHmrNoise && typeof process !== 'undefined' && process.stderr && typeof process.stderr.write === 'function') {
+  const originalStderrWrite = process.stderr.write.bind(process.stderr);
+  (process.stderr as any).write = (chunk: any, ...rest: any[]): boolean => {
+    try {
+      const str = typeof chunk === 'string' ? chunk : chunk?.toString?.() ?? '';
+      if (HMR_NOISE.test(str)) {
+        const cb = rest[rest.length - 1];
+        if (typeof cb === 'function') { cb(); }
+        return true; // swallow the HMR connection noise
+      }
+    } catch {
+      // fall through to the original writer on any inspection error
+    }
+    return (originalStderrWrite as any)(chunk, ...rest);
   };
 }
 
