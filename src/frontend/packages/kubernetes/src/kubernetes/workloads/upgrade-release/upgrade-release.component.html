@@ -3,8 +3,8 @@
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
   <app-step title="Version" [signalHandle]="versionStepHandle">
-    @if (listConfig) {
-      <app-list class="w-full" [listConfig]="listConfig"></app-list>
+    @if (listConfig(); as cfg) {
+      <app-signal-list class="w-full h-[28rem] block" [config]="cfg"></app-signal-list>
     }
   </app-step>
   <app-step title="Overrides" [signalHandle]="overridesStepHandle">

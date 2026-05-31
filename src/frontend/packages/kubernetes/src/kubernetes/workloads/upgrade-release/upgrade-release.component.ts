@@ -1,18 +1,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
-  OnDestroy,
   signal,
   ViewChild,
+  WritableSignal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
-import { combineLatest, firstValueFrom, Observable, Subscription } from 'rxjs';
+import { format, formatDistance } from 'date-fns';
+import { combineLatest, firstValueFrom, Observable } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import {
+  SignalListComponent,
+  SignalListConfig,
+  SignalListDropdownOption,
+} from '../../../../../core/src/shared/components/signal-list/signal-list.component';
 import {
   SignalStepHandle,
   StepComponent,
@@ -27,7 +32,7 @@ import { HelmUpgradePayload } from '../../../services/endpoint-data/kube-types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
-import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config';
+import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-signal-config.service';
 
 @Component({
   selector: 'app-upgrade-release',
@@ -36,13 +41,14 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   standalone: true,
   imports: [
     ChartValuesEditorComponent,
-    ListComponent,
     PageHeaderComponent,
+    SignalListComponent,
     StepComponent,
     SteppersComponent
   ],
   providers: [
     HelmReleaseHelperService,
+    HelmReleaseVersionsSignalConfigService,
     {
       provide: HelmReleaseGuid,
       useFactory: (activatedRoute: ActivatedRoute) => ({
@@ -55,13 +61,14 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
     ...createMonocularProviders()
   ]
 })
-export class UpgradeReleaseComponent implements OnDestroy {
+export class UpgradeReleaseComponent {
 
   @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
 
   public cancelUrl;
-  public listConfig: ReleaseUpgradeVersionsListConfig;
-  public validate$: Observable<boolean>;
+  // Signal-native list config for the version picker; undefined until the
+  // upgrade target chart resolves (hasUpgrade emits).
+  public readonly listConfig: WritableSignal<SignalListConfig<MonocularVersion> | undefined> = signal(undefined);
   private version: MonocularVersion;
 
   public config: ChartValuesConfig;
@@ -72,31 +79,27 @@ export class UpgradeReleaseComponent implements OnDestroy {
   public showAdvancedOptions = false;
 
   private chartUrl: string;
-  private store = inject(Store<any>);
   public helper = inject(HelmReleaseHelperService);
   private chartsService = inject(ChartsService);
   private router = inject(Router);
   private helmDataService = inject(KubeHelmDataService);
+  private readonly versionsConfig = inject(HelmReleaseVersionsSignalConfigService);
 
   // FWT-959 Part 2: signal-native step handles.
   //
-  // - versionStepHandle: validity tracks "exactly one version selected" via
-  //   a signal mirror of the listConfig's selectedRows$ stream. submit()
-  //   replaces the legacy onNext — fetches release+chart-version metadata
-  //   and primes `this.config` for the editor.
-  // - overridesStepHandle: submit() runs the upgrade and on success
-  //   navigates back to the release detail page (legacy `redirect: true`
-  //   + redirectPayload = cancelUrl).
-  //
-  // The list-config + validate$ stream are set asynchronously inside the
-  // hasUpgrade() subscribe, so the version-handle's `valid` signal starts
-  // false and is fed by a subscription wired in the same subscribe block.
-  private versionValid = signal<boolean>(false);
-  private validateSub: Subscription;
-
+  // - versionStepHandle: validity tracks "a version is selected" directly off
+  //   the signal-config's radio selection. submit() captures the chosen
+  //   version then fetches release+chart-version metadata to prime the editor.
+  // - overridesStepHandle: submit() runs the upgrade and on success navigates
+  //   back to the release detail page (legacy `redirect: true`).
   versionStepHandle: SignalStepHandle = {
-    valid: this.versionValid.asReadonly(),
+    valid: computed(() => this.versionsConfig.selectedKey() != null),
     submit: async () => {
+      const selected = this.versionsConfig.selectedVersion();
+      if (!selected) {
+        throw new Error('No version selected');
+      }
+      this.version = selected;
       await firstValueFrom(this.fetchVersionDetails$());
     },
   };
@@ -138,24 +141,60 @@ export class UpgradeReleaseComponent implements OnDestroy {
       const name = chart.upgrade.name;
       const repoName = chart.upgrade.repo.name;
       const version = chart.release.chart.metadata.version;
-      this.listConfig = new ReleaseUpgradeVersionsListConfig(this.store, repoName, name, version, chart.monocularEndpointId);
       this.monocularEndpointId = chart.monocularEndpointId;
 
-      // First step is valid when a version has been selected
-      this.validate$ = this.listConfig.versionsDataSource.selectedRows$.pipe(
-        map((rows: Map<string, any>) => {
-          if (rows && rows.size === 1) {
-            this.version = rows.values().next().value;
-            return true;
-          }
-          return false;
-        })
-      );
-
-      // Mirror validate$ into the version-step handle's signal so the
-      // signal-handle valid() flips reactively as the user picks a row.
-      this.validateSub = this.validate$.subscribe(v => this.versionValid.set(!!v));
+      this.versionsConfig.initialize(repoName, name, version, chart.monocularEndpointId);
+      void this.versionsConfig.loadAll();
+      this.listConfig.set(this.buildListConfig());
     });
+  }
+
+  private buildListConfig(): SignalListConfig<MonocularVersion> {
+    const versionTypeOptions = signal<SignalListDropdownOption[]>([
+      { label: 'Release Versions', value: 'release' },
+      { label: 'All Versions', value: 'all' },
+    ]);
+    return {
+      pagedItems: this.versionsConfig.view.pagedItems,
+      totalFilteredResults: this.versionsConfig.view.totalFilteredResults,
+      totalPages: this.versionsConfig.view.totalPages,
+      pageIndex: this.versionsConfig.pageIndex,
+      pageSize: this.versionsConfig.pageSize,
+      isAnyLoading: this.versionsConfig.isLoading(),
+      errorsByCnsi: signal(new Map()),
+      pageSizeOptions: [10, 25, 50, 100],
+      columns: [
+        {
+          header: '', key: 'radio',
+          kind: 'radio',
+          radio: { selectedKey: this.versionsConfig.selectedKey },
+          render: () => '',
+          widthHint: '3rem',
+        },
+        {
+          header: 'Version', key: 'version',
+          kind: 'text',
+          render: (v: MonocularVersion) =>
+            v.attributes.version + (this.versionsConfig.isCurrent(v) ? ' (current)' : ''),
+        },
+        {
+          header: 'Created', key: 'created',
+          kind: 'text',
+          render: (v: MonocularVersion) => format(new Date(v.attributes.created), 'PPPppp'),
+        },
+        {
+          header: 'Age', key: 'age',
+          kind: 'text',
+          render: (v: MonocularVersion) => formatDistance(new Date(v.attributes.created), new Date()),
+        },
+      ],
+      getRowKey: this.versionsConfig.getRowKey,
+      emptyMessage: 'There are no versions',
+      loadingMessage: 'Loading versions…',
+      filterDropdowns: [
+        { label: 'Versions', options: versionTypeOptions, selected: this.versionsConfig.versionType },
+      ],
+    };
   }
 
   // Update the editor with the chosen version when the user moves to the
@@ -222,9 +261,5 @@ export class UpgradeReleaseComponent implements OnDestroy {
         sub.complete();
       });
     });
-  }
-
-  ngOnDestroy(): void {
-    this.validateSub?.unsubscribe();
   }
 }
