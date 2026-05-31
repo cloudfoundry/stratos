@@ -28,7 +28,6 @@ export { getSpaceRoles, IUserRole, getOrgRolesString } from './features/cf/cf.he
 export { getCFEntityKey } from './cf-entity-helpers';
 export { getStartedAppInstanceCount } from './cf.helpers';
 export { createOrgQuotaDefinition } from './features/cf/services/cloud-foundry-organization.service';
-export { createCfOrSpaceMultipleFilterFn } from './shared/data-services/cf-org-space-service.service';
 
 // Permissions
 export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
