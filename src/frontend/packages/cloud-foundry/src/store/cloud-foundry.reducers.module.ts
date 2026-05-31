@@ -1,11 +1,9 @@
 import { NgModule } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
 
-import { createAppReducer } from './reducers/create-application.reducer';
-
+// The `createApplication` ngrx feature slice was removed in favour of the
+// signal-native CreateAppStateService; this module is retained (empty)
+// because several feature/test modules still import it.
 @NgModule({
-  imports: [
-    StoreModule.forFeature('createApplication', createAppReducer),
-  ]
+  imports: []
 })
 export class CloudFoundryReducersModule { }

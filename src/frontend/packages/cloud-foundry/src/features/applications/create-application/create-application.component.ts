@@ -43,9 +43,8 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
 
   // FWT-959 Part 2 (Partition B): SignalStepHandle wiring for the 3-step
   // create-application flow. Cross-step state (CF/org/space + new app
-  // name) continues to live in CfOrgSpaceDataService + ngrx
-  // (SetCFDetails / SetNewAppName) — children read/write it via the
-  // existing observable surface.
+  // name) lives in CfOrgSpaceDataService + the signal-native
+  // CreateAppStateService — children read/write it via that service.
   //
   // The steppers component renders only the active step's content
   // template at any given time (see steppers.component.html line 71:
@@ -127,7 +126,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     valid: this.step1Valid.asReadonly(),
     blocked: computed(() => !!this.isLoadingSignal()),
     submit: async () => {
-      // step1.onNext dispatches SetCFDetails and returns of({ success: true }).
+      // step1.onNext stores the CF details via CreateAppStateService and returns of({ success: true }).
       const result = await firstValueFrom(this._step1!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to save Cloud Foundry details');

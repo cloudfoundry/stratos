@@ -6,14 +6,12 @@ import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } 
 import { CustomFormFieldComponent } from '@stratosui/core';
 import { Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { Store } from '@stratosui/store';
 import { defer, firstValueFrom, from, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
-import { SetCFDetails, SetNewAppName } from '../../../../../cloud-foundry/src/actions/create-applications-page.actions';
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
 import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CreateAppStateService } from '../../../shared/data-services/create-app-state.service';
 import { AppDetailDataService } from '../app-detail-data.service';
 import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
@@ -58,7 +56,7 @@ interface EditApplicationForm {
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
-  private store = inject<Store<CFAppState>>(Store);
+  private createAppState = inject(CreateAppStateService);
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private apps = inject(CfAppsSignalConfigService);
@@ -156,13 +154,13 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       map(app => app.app.entity)
     ).subscribe(app => {
       this.app = app;
-      this.store.dispatch(new SetCFDetails({
+      this.createAppState.setCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
         org: '',
         space: this.app.space_guid,
-      }));
+      });
 
-      this.store.dispatch(new SetNewAppName(this.app.name));
+      this.createAppState.setName(this.app.name);
       this.editAppForm.setValue({
         name: this.app.name,
         instances: this.app.instances,

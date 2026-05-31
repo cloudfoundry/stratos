@@ -1,13 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
-import { CFAppState } from '../../../cf-app-state';
-import { selectNewAppState } from './../../../store/selectors/create-application.selectors';
+import { CreateAppStateService } from '../../data-services/create-app-state.service';
 
 const APP_UNIQUE_NAME_PROVIDER = {
   provide: NG_ASYNC_VALIDATORS, useExisting: forwardRef(() => AppNameUniqueDirective), multi: true
@@ -43,7 +41,7 @@ selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique
 standalone: true
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private createAppState = inject(CreateAppStateService);
   private http = inject(HttpClient);
 
 
@@ -110,12 +108,12 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   }
 
   private getDefaultRequestData(name: string) {
-    return this.store.select(selectNewAppState).pipe(
+    return this.createAppState.cloudFoundryDetails$.pipe(
       take(1),
       switchMap(
-        newAppState => {
-          const cfGuid = newAppState.cloudFoundryDetails.cloudFoundry;
-          const spaceGuid = newAppState.cloudFoundryDetails.space;
+        cloudFoundryDetails => {
+          const cfGuid = cloudFoundryDetails!.cloudFoundry;
+          const spaceGuid = cloudFoundryDetails!.space;
           const request = this.getDefaultRequest(cfGuid, spaceGuid, name);
           return this.nameTaken(
             request,
