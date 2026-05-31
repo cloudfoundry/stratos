@@ -1,12 +1,15 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject, runInInjectionContext } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { helmEntityCatalog } from '../../../../helm/helm-entity-catalog';
 import { ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
 import { ChartMetadata } from '../../../../helm/store/helm.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
+import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
+import { KubePod } from '../../../../services/endpoint-data/kube-types';
 import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
+
 import { getHelmReleaseDetailsFromGuid } from '../../store/workloads-entity-factory';
 import {
   HelmRelease,
@@ -104,6 +107,9 @@ export class HelmReleaseHelperService {
   public namespace: string;
   public releaseTitle: string;
 
+  private podData = inject(KubePodDataService);
+  private injector = inject(Injector);
+
   constructor() {
     const helmReleaseGuid = inject(HelmReleaseGuid);
 
@@ -155,13 +161,9 @@ export class HelmReleaseHelperService {
   }
 
   public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
-    return (kubeEntityCatalog.pod.store as any).getInWorkload.getPaginationMonitor(
-      this.endpointGuid,
-      this.namespace,
-      this.releaseTitle
-    ).currentPage$.pipe(
-      filter((pods: any) => !!pods),
-      map((pods: any) => this.mapPods(pods))
+    const podsSig = this.podData.podsInWorkload(this.endpointGuid, this.namespace, this.releaseTitle);
+    return runInInjectionContext(this.injector, () => toObservable(podsSig)).pipe(
+      map((pods: KubePod[]) => this.mapPods(pods as any)),
     );
   }
 

@@ -1,7 +1,51 @@
-import { describe, it, expect } from 'vitest';
-import { Version } from './helm-release-helper.service';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
+import { describe, it, expect, beforeEach } from 'vitest';
+
+import { CATALOGUE_ENTITIES } from '@stratosui/store';
+import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
+import { generateHelmEntities } from '../../../../helm/helm-entity-generator';
+import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
+import { HelmReleaseGuid } from '../../workload.types';
+import { HelmReleaseHelperService, Version } from './helm-release-helper.service';
 
 describe('HelmReleaseHelperService', () => {
+
+  describe('fetchReleaseChartStats', () => {
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [...KubernetesBaseTestModules],
+        providers: [
+          provideZonelessChangeDetection(),
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          HelmReleaseHelperService,
+          { provide: HelmReleaseGuid, useValue: { guid: 'cnsi-1:ns-a:rel-x' } },
+          {
+            provide: CATALOGUE_ENTITIES,
+            useFactory: () => generateHelmEntities(),
+            multi: true,
+          },
+        ],
+      }).compileComponents();
+    });
+
+    it('builds chart stats from the signal pod workload scope', async () => {
+      const pod = TestBed.inject(KubePodDataService);
+      const helper = TestBed.inject(HelmReleaseHelperService);
+      helper.endpointGuid = 'cnsi-1'; helper.namespace = 'ns-a'; helper.releaseTitle = 'rel-x';
+      pod.setWorkloadPods('cnsi-1', 'ns-a', 'rel-x', [
+        { metadata: { name: 'p1' }, status: { phase: 'Running', containerStatuses: [{ state: { running: {} } }] } } as any,
+      ]);
+      const data = await firstValueFrom(helper.fetchReleaseChartStats());
+      expect(data.podsChartData.find(d => d.name === 'Running')?.value).toBe(1);
+      expect(data.containersChartData.find(d => d.name === 'Ready')?.value).toBe(1);
+    });
+  });
 
   describe('Version', () => {
 
