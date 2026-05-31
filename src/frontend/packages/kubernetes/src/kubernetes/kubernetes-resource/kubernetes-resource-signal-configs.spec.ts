@@ -6,9 +6,10 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../../services/endpoint-data/kube-endpoint-data.registry';
+import { KubeJobDataService } from '../../services/domain-data/kube-generic-resource-data.services';
 import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../../services/domain-data/kube-service-data.service';
-import { buildPodsSignalConfig, buildServicesSignalConfig } from './kubernetes-resource-signal-configs';
+import { buildJobsSignalConfig, buildPodsSignalConfig, buildServicesSignalConfig } from './kubernetes-resource-signal-configs';
 
 describe('kubernetes-resource-signal-configs — workload mode', () => {
   beforeEach(() => {
@@ -19,6 +20,7 @@ describe('kubernetes-resource-signal-configs — workload mode', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         KubeEndpointDataRegistry,
+        KubeJobDataService,
         KubePodDataService,
         KubeServiceDataService,
       ],
@@ -77,5 +79,18 @@ describe('kubernetes-resource-signal-configs — workload mode', () => {
     };
     const cfg = buildServicesSignalConfig(ctx as any, injector);
     expect(cfg.onRefresh).toBeDefined();
+  });
+
+  it('jobs factory in workload mode reads itemsInWorkload and omits onRefresh', () => {
+    const jobs = TestBed.inject(KubeJobDataService);
+    jobs.setWorkloadItems('cnsi-1', 'ns-a', 'rel-x', [{ metadata: { name: 'j1' } } as any]);
+    const injector = TestBed.inject(Injector);
+    const ctx = {
+      kubeGuid: 'cnsi-1', selectedNamespace: signal(undefined).asReadonly(),
+      isWorkloadView: true, workloadNamespace: 'ns-a', workloadTitle: 'rel-x',
+    };
+    const cfg = buildJobsSignalConfig(ctx as any, injector);
+    expect(cfg.totalFilteredResults()).toBe(1);
+    expect(cfg.onRefresh).toBeUndefined();
   });
 });
