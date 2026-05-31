@@ -1,9 +1,0 @@
-@if (row.commit.author.name) {
-  <div>
-    @if (row.author) {
-      <app-github-commit-author [commit]="row"></app-github-commit-author>
-    } @else {
-      {{row.commit.author.name}}
-    }
-  </div>
-}

@@ -5,9 +5,6 @@ import { CoreModule, CreateEndpointModule, MDAppModule, SharedModule } from '@st
 import { GitEndpointDetailsComponent } from './components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from './components/git-registration/git-registration.component';
 import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
-import {
-  TableCellCommitAuthorComponent,
-} from './components/list/list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
 import { GitSCMService } from './scm/scm.service';
 
 @NgModule({
@@ -20,13 +17,11 @@ import { GitSCMService } from './scm/scm.service';
         // HOWEVER as this module is not lazy loaded it will be brought in on app load
         CreateEndpointModule,
         // Standalone components
-        TableCellCommitAuthorComponent,
         GithubCommitAuthorComponent,
         GitRegistrationComponent,
         GitEndpointDetailsComponent,
     ],
     exports: [
-        TableCellCommitAuthorComponent,
         GithubCommitAuthorComponent,
         GitRegistrationComponent,
         GitEndpointDetailsComponent,
