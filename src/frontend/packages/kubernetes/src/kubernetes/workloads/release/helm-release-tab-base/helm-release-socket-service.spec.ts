@@ -102,4 +102,14 @@ describe('HelmReleaseSocketService.writeManifestResources', () => {
     expect(pods[0].kubeGuid).toBe('cnsi-1');
     expect(pods[0].metadata.kubeId).toBe('cnsi-1');
   });
+
+  it('stamps the release namespace onto manifest rows missing it', () => {
+    const svc = TestBed.inject(KubeServiceDataService);
+    const socket = TestBed.inject(HelmReleaseSocketService);
+    (socket as any).writeManifestResources({
+      service: [{ metadata: { name: 's1' } } as any], // no namespace
+    });
+    const out = svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-x')();
+    expect(out[0].metadata.namespace).toBe('ns-a');
+  });
 });

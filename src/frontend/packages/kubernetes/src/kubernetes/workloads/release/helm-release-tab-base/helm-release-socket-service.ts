@@ -227,7 +227,14 @@ export class HelmReleaseSocketService implements OnDestroy {
     const ns = this.helmReleaseHelper.namespace;
     const rel = this.helmReleaseHelper.releaseTitle;
     Object.entries(resources).forEach(([type, list]) => {
-      const items = (list ?? []) as any[];
+      // Stamp the release namespace onto every row — manifest entities
+      // (notably Services) often omit metadata.namespace, and all release
+      // resources live in the release's namespace. (Restores the stamp the
+      // legacy populateList performed.)
+      const items = (list ?? []).map((r: any) => ({
+        ...r,
+        metadata: { ...(r?.metadata ?? {}), namespace: ns },
+      }));
       switch (type) {
         case 'pod': this.podData.setWorkloadPods(guid, ns, rel, items); break;
         case 'service': this.serviceData.setWorkloadServices(guid, ns, rel, items); break;
