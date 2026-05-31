@@ -24,8 +24,7 @@ import { EndpointsService } from '../../../../core/endpoints.service';
            style="background-color: var(--info-bg); border-color: var(--info-border); color: var(--info-text);">
         <span class="material-icons text-base leading-5">info</span>
         <span>
-          {{ dupCount }} Cloud Foundry endpoints share a URL. Applications and organizations from
-          each are shown together — use the Cloud Foundry filter to view a single endpoint.
+          {{ dupCount }} Cloud Foundry endpoints share a URL.
         </span>
       </div>
     }
