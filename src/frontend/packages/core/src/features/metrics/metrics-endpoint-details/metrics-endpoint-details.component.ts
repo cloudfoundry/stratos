@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, Input, signal  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
@@ -37,7 +36,6 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
   public guid = this._guid.asReadonly();
   public guid$: Observable<string>;
 
-  public store = inject<Store<AppState>>(Store);
   private metricsService = inject(MetricsService);
 
   constructor() {
@@ -62,11 +60,6 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
       map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
       filter(provider => !!provider),
       filter(data => data.provider.connectionStatus === 'connected'),
-      tap(data => {
-        if (!this.hasStratosData(data)) {
-          this.store.dispatch(new MetricsStratosAction(data.provider.guid));
-        }
-      }),
       map((provider) => this.processProvider(provider)),
       publishReplay(1),
       refCount()

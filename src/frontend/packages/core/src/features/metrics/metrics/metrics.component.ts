@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { MetricsAPIAction, MetricsAPITargets, MetricsStratosAction, AppState } from '@stratosui/store';
+import { MetricsAPITargets } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
@@ -44,7 +43,6 @@ interface PrometheusJobs {
 export class MetricsComponent {
   private activatedRoute = inject(ActivatedRoute);
   private metricsService = inject(MetricsService);
-  private store = inject<Store<AppState>>(Store);
 
   public metricsEndpoint$: Observable<MetricsEndpointProvider>;
   public metricsInfo$: Observable<MetricsEndpointInfo[]>;
@@ -57,8 +55,6 @@ export class MetricsComponent {
   constructor() {
 
     const metricsGuid = getIdFromRoute(this.activatedRoute, 'metricsId');
-    this.store.dispatch(new MetricsAPIAction(metricsGuid, 'targets'));
-    this.store.dispatch(new MetricsStratosAction(metricsGuid));
 
     // Raw endpoint data for this metrics endpoint
     this.metricsEndpoint$ = this.metricsService.metricsEndpoints$.pipe(
