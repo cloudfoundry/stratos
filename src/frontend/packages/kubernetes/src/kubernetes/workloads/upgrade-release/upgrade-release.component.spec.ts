@@ -99,15 +99,10 @@ describe('UpgradeReleaseComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // Regression guard for the FWT-959 Part 2 OnDestroy fix. validateSub
-  // is subscribed inside helper.hasUpgrade()'s callback to mirror
-  // validate$ into the version-step handle's signal; without ngOnDestroy
-  // teardown the hot listConfig.versionsDataSource.selectedRows$ stream
-  // would keep emitting after component destruction.
-  it('unsubscribes validateSub on destroy', () => {
-    const sub = { unsubscribe: vi.fn() };
-    (component as any).validateSub = sub;
-    component.ngOnDestroy();
-    expect(sub.unsubscribe).toHaveBeenCalled();
+  // The version-step handle is valid only once a row is selected. With no
+  // upgrade target resolved (hasUpgrade → null here) nothing is loaded or
+  // auto-selected, so the step starts invalid.
+  it('version step starts invalid until a version is selected', () => {
+    expect(component.versionStepHandle.valid()).toBe(false);
   });
 });
