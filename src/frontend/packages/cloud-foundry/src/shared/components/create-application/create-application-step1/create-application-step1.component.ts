@@ -8,12 +8,12 @@ import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
-import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
 import { ISpace } from '../../../../cf-api.types';
 import { CFAppState } from '../../../../cf-app-state';
 import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { CreateAppStateService } from '../../../data-services/create-app-state.service';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -33,6 +33,7 @@ import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-servi
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
   private store = inject<Store<CFAppState>>(Store);
+  private createAppState = inject(CreateAppStateService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   route = inject(ActivatedRoute);
 
@@ -117,11 +118,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetCFDetails({
+    this.createAppState.setCFDetails({
       cloudFoundry: this.cfOrgSpaceService.cf.select(),
       org: this.cfOrgSpaceService.org.select(),
       space: this.cfOrgSpaceService.space.select()
-    }));
+    });
     return of({ success: true });
   };
 

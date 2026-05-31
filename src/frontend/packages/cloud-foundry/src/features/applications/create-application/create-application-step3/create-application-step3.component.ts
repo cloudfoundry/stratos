@@ -3,18 +3,15 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
 import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
 import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import type { StDomain } from '../../../../services/endpoint-data/stratos-types';
-import { selectNewAppState } from '../../../../store/selectors/create-application.selectors';
-import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
+import { CreateAppStateService, NewAppCFDetails } from '../../../../shared/data-services/create-app-state.service';
 
 interface DomainHostForm {
   domain: FormControl<string>;
@@ -39,7 +36,7 @@ interface DomainHostForm {
   ]
 })
 export class CreateApplicationStep3Component implements OnInit, OnDestroy {
-  private store = inject(Store<CFAppState>);
+  private createAppState = inject(CreateAppStateService);
   private router = inject(Router);
   private http = inject(HttpClient);
   private endpointDataRegistry = inject(EndpointDataRegistry);
@@ -64,7 +61,7 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
 
   message: any = null;
 
-  newAppData!: CreateNewApplicationState;
+  newAppData!: { cloudFoundryDetails: NewAppCFDetails; name: string };
   onNext: StepOnNextFunction = () => {
     const { cloudFoundryDetails } = this.newAppData;
     const { cloudFoundry } = cloudFoundryDetails;
@@ -164,13 +161,13 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.domains$ = this.store.select(selectNewAppState).pipe(
+    this.domains$ = this.createAppState.state$.pipe(
       filter(state => !!state.cloudFoundryDetails?.cloudFoundry && !!state.cloudFoundryDetails?.org),
       mergeMap(state => {
         this.hostControl().setValue(state.name.split(' ').join('-').toLowerCase());
         this.hostControl().markAsDirty();
-        this.newAppData = state;
-        const { cloudFoundry, org } = state.cloudFoundryDetails;
+        this.newAppData = state as { cloudFoundryDetails: NewAppCFDetails; name: string };
+        const { cloudFoundry, org } = state.cloudFoundryDetails!;
         return this.http.get<{ resources: StDomain[]; totalResults: number }>(
           `/pp/v1/cf/org/${cloudFoundry}/${org}/private_domains`,
         ).pipe(

@@ -1,13 +1,11 @@
 
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule,FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Store } from '@stratosui/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CustomFormFieldComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StatefulIconComponent, StepOnNextFunction } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { SetNewAppName } from '../../../../actions/create-applications-page.actions';
+import { CreateAppStateService } from '../../../../shared/data-services/create-app-state.service';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 
 interface CreateApplicationForm {
@@ -31,7 +29,7 @@ selector: 'app-create-application-step2',
 ]
 })
 export class CreateApplicationStep2Component implements OnInit {
-  private store = inject(Store<CFAppState>);
+  private createAppState = inject(CreateAppStateService);
   private fb = inject(FormBuilder);
 
   form!: FormGroup<CreateApplicationForm>;
@@ -42,7 +40,7 @@ export class CreateApplicationStep2Component implements OnInit {
   appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetNewAppName(this.appName.value ?? ''));
+    this.createAppState.setName(this.appName.value ?? '');
     return observableOf({ success: true });
   }
 
