@@ -7,7 +7,7 @@ import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { Observable, Subscription } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/signal-list/cell-base';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IOrganization } from '../../../../../../cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cf/cf-page.types';

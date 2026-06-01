@@ -1,10 +1,15 @@
-import { Component, Directive, Input } from '@angular/core';
+import { Component, Directive } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { IListDataSource, RowState } from './data-sources-controllers/list-data-source-types';
+import { TableCellCustom as SignalTableCellCustom } from '../signal-list/cell-base';
+import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 
+// Legacy-only extension of the signal-list cell base. The signal-native base
+// (signal-list/cell-base) is ngrx-free; the dying ngrx list framework's own
+// cells still read/write `.dataSource`, so this subclass re-adds it. Both this
+// subclass and its `dataSource` coupling die with the `list/` framework (D).
 @Directive()
-export abstract class TableCellCustom<T, C = any> {
+export abstract class TableCellCustom<T, C = any> extends SignalTableCellCustom<T, C> {
   protected pDataSource: IListDataSource<T>;
   set dataSource(dataSource: IListDataSource<T>) {
     this.pDataSource = dataSource;
@@ -12,34 +17,6 @@ export abstract class TableCellCustom<T, C = any> {
   get dataSource(): IListDataSource<T> {
     return this.pDataSource;
   }
-
-  protected pRow: T;
-  @Input()
-  get row(): T {
-    return this.pRow;
-  }
-  set row(row: T) {
-    this.pRow = row;
-  }
-
-  protected pEntityKey: string;
-  set entityKey(entityKey: string) {
-    this.pEntityKey = entityKey;
-  }
-  get entityKey(): string {
-    return this.pEntityKey;
-  }
-
-  protected pConfig: C;
-  @Input()
-  set config(config: C) {
-    this.pConfig = config;
-  }
-  get config(): C {
-    return this.pConfig;
-  }
-
-  rowState: Observable<RowState>;
 }
 
 export abstract class CardCell<T> extends TableCellCustom<T> {

@@ -6,7 +6,7 @@ import { CustomCheckboxComponent } from '../../../../../../core/src/shared/compo
 import { ProgressSpinnerComponent } from '../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
 import { timeout } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/signal-list/cell-base';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 

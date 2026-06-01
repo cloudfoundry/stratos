@@ -2,7 +2,7 @@ import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { CfRoleChangeWithNames } from '../../../../../../../../cloud-foundry/src/store/types/users-roles.types';
 import { AppChip, AppChipsComponent } from '../../../../../../../../core/src/shared/components/chips/chips.component';
-import { TableCellCustom } from '../../../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../../../core/src/shared/components/signal-list/cell-base';
 
 @Component({
   selector: 'app-table-cell-confirm-org-space',

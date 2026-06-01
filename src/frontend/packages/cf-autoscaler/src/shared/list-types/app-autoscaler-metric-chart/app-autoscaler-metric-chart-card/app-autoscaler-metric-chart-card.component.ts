@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, Input, Signal, computed, effect, in
 import { BaseChartDirective } from 'ng2-charts';
 
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
-import { CardCell, IListRowCell } from '../../../../../../core/src/shared/components/list/list.types';
+import { CardCell } from '../../../../../../core/src/shared/components/signal-list/cell-base';
 import { APIResource } from '../../../../../../store/src/types/api.types';
 import { AutoscalerConstants, buildLegendData } from '../../../../core/autoscaler-helpers/autoscaler-util';
 import { buildMetricData } from '../../../../core/autoscaler-helpers/autoscaler-transform-metric';
@@ -31,16 +31,11 @@ import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.comp
   ]
 })
 
-export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> implements IListRowCell {
+export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<AppScalingTrigger>> {
   private appService = inject(ApplicationService);
   private metricService = inject(AutoscalerMetricDataService);
 
   static columns = 1;
-  listData!: {
-    label: string;
-    data$: import('rxjs').Observable<string>;
-    customStyle?: string;
-  }[];
 
   envVarUrl!: string;
 

@@ -267,7 +267,8 @@ export { CreateEndpointBaseStepComponent } from './features/endpoints/create-end
 export { BaseEndpointAuth, EndpointAuthTypeNames } from './core/endpoint-auth';
 
 // List Types and Components
-export * from './shared/components/list/list.types';
+export { IListRowCell } from './shared/components/list/list.types';
+export { TableCellCustom, CardCell } from './shared/components/signal-list/cell-base';
 export * from './shared/components/list/list-table/table.types';
 export * from './shared/components/list/data-sources-controllers/local-filtering-sorting';
 export { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';

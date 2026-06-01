@@ -6,7 +6,7 @@ import { CustomTooltipDirective } from '../../../../shared/components/custom-too
 import { FormsModule } from '@angular/forms';
 import { entityCatalog, EndpointModel, SystemSharedUserGuid } from '@stratosui/store';
 
-import { TableCellCustom } from '../../../../shared/components/list/list.types';
+import { TableCellCustom } from '../../../../shared/components/signal-list/cell-base';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-restore.types';
 
