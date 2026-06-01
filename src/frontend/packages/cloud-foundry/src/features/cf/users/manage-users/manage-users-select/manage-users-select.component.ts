@@ -16,7 +16,7 @@ import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
   CfSelectUsersSignalConfigService,
-} from '../../../../../shared/components/list/list-types/cf-select-users/cf-select-users-signal-config.service';
+} from '../../../../../shared/signal-list-configs/cf-select-users/cf-select-users-signal-config.service';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';

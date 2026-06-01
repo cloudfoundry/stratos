@@ -7,9 +7,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 
 import { CfUsersSignalConfigService } from './cf-users-signal-config.service';
-import { CfUsersPagedDataService } from '../../../../data-services/cf-users-paged-data.service';
-import { CfUserListDiagnosticsService } from '../../../../../services/diagnostics/cf-user-list-diagnostics.service';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
+import { CfUsersPagedDataService } from '../../data-services/cf-users-paged-data.service';
+import { CfUserListDiagnosticsService } from '../../../services/diagnostics/cf-user-list-diagnostics.service';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ListStateStore } from '@stratosui/core';
 
 // ─── Stub factories ──────────────────────────────────────────────────────────

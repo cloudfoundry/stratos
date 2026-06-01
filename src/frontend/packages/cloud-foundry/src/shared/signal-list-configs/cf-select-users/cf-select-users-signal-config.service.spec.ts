@@ -5,8 +5,8 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 
 import { CfSelectUsersSignalConfigService } from './cf-select-users-signal-config.service';
-import { CfUsersPagedDataService } from '../../../../data-services/cf-users-paged-data.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { CfUsersPagedDataService } from '../../data-services/cf-users-paged-data.service';
+import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
 
 const CNSI = 'cf1';
 const P1 = `/pp/v1/cf/users/${CNSI}?per_page=500&page=1`;

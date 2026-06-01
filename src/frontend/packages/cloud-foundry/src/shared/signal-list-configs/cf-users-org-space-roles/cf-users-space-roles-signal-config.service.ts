@@ -15,16 +15,16 @@ import { take } from 'rxjs/operators';
 
 import { ListStateStore, SignalListConfig, SignalListColumn } from '@stratosui/core';
 
-import { canUpdateOrgSpaceRoles } from '../../../../../features/cf/cf.helpers';
-import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
-import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
-import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
-import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
-import { SortSpec, ViewPipeline } from '../../../../../services/data-sources/view-pipeline';
+import { canUpdateOrgSpaceRoles } from '../../../features/cf/cf.helpers';
+import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
+import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
+import { OrgDataService } from '../../../services/endpoint-data/org-data.service';
+import type { StSpace } from '../../../services/endpoint-data/stratos-types';
+import { SortSpec, ViewPipeline } from '../../../services/data-sources/view-pipeline';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+} from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
 
 // Signal-native list config for the manage-users wizard "Modify Roles"
 // step — the spaces table where managers/auditors/developers checkboxes

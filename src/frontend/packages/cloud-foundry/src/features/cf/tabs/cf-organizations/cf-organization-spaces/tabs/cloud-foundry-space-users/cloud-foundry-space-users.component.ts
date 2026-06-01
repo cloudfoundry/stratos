@@ -9,7 +9,7 @@ import {
   SignalListRowAction,
 } from '@stratosui/core';
 
-import { CfUsersSignalConfigService } from '../../../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
+import { CfUsersSignalConfigService } from '../../../../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';

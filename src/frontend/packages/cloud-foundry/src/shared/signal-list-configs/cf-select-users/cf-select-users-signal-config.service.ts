@@ -14,10 +14,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ListStateStore, SignalListConfig, SignalListColumn } from '@stratosui/core';
 
-import { SortSpec, ViewPipeline } from '../../../../../services/data-sources/view-pipeline';
-import { CfUsersPagedDataService } from '../../../../data-services/cf-users-paged-data.service';
-import { StUser } from '../../../../../services/endpoint-data/stratos-types';
-import { ActiveRouteCfOrgSpace } from '../../../../../features/cf/cf-page.types';
+import { SortSpec, ViewPipeline } from '../../../services/data-sources/view-pipeline';
+import { CfUsersPagedDataService } from '../../data-services/cf-users-paged-data.service';
+import { StUser } from '../../../services/endpoint-data/stratos-types';
+import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
 
 // Signal-native list config for the manage-users wizard "Select Users"
 // step. Replaces CfSelectUsersListConfigService + CfSelectUsersDataSource
