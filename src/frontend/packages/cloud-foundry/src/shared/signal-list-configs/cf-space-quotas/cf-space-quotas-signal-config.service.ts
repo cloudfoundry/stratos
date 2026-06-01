@@ -5,10 +5,10 @@ import { ListStateStore } from '@stratosui/core';
 
 import { firstValueFrom } from 'rxjs';
 
-import { CnsiSpaceQuotasSource } from '../../../../../services/data-sources/cnsi-space-quotas-source';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { QuotaDataService } from '../../../../../services/endpoint-data/quota-data.service';
-import type { StSpaceQuota } from '../../../../../services/endpoint-data/stratos-types';
+import { CnsiSpaceQuotasSource } from '../../../services/data-sources/cnsi-space-quotas-source';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import type { StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
 
 // CF Space Quotas list config — single-CNSI, read-only. Drives the
 // per-CF Space Quotas tab on the foundation overview. Each space quota

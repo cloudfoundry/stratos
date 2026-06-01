@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { CfAuditEventsSignalConfigService } from './cf-audit-events-signal-config.service';
-import type { StAuditEvent } from '../../../../../services/endpoint-data/stratos-types';
+import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types';
 
 function makeEvent(overrides: Partial<StAuditEvent>): StAuditEvent {
   return {

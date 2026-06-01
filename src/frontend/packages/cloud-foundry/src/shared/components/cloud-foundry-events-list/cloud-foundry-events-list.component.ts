@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleCha
 
 import { SignalListComponent, SignalListConfig, SignalListDropdown } from '@stratosui/core';
 
-import { CfAuditEventsSignalConfigService } from '../list/list-types/cf-events/cf-audit-events-signal-config.service';
+import { CfAuditEventsSignalConfigService } from '../../signal-list-configs/cf-events/cf-audit-events-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../features/cf/services/cloud-foundry-endpoint.service';
 import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types';
 

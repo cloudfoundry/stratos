@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { CfFeatureFlagsSignalConfigService } from './cf-feature-flags-signal-config.service';
-import type { StFeatureFlag } from '../../../../../services/endpoint-data/stratos-types';
+import type { StFeatureFlag } from '../../../services/endpoint-data/stratos-types';
 
 function makeFlag(overrides: Partial<StFeatureFlag>): StFeatureFlag {
   return {

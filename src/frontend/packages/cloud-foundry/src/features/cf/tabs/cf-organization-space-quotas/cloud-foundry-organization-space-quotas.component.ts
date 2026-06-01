@@ -15,7 +15,7 @@ import {
 } from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 
-import { CfSpaceQuotasSignalConfigService } from '../../../../shared/components/list/list-types/cf-space-quotas/cf-space-quotas-signal-config.service';
+import { CfSpaceQuotasSignalConfigService } from '../../../../shared/signal-list-configs/cf-space-quotas/cf-space-quotas-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';

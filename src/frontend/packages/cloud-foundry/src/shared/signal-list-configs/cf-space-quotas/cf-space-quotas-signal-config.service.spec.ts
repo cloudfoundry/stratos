@@ -3,15 +3,24 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { CfStacksSignalConfigService } from './cf-stacks-signal-config.service';
-import type { StStack } from '../../../../../services/endpoint-data/stratos-types';
+import { CfSpaceQuotasSignalConfigService } from './cf-space-quotas-signal-config.service';
+import type { StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
 
-function makeStack(overrides: Partial<StStack>): StStack {
+function makeQuota(overrides: Partial<StSpaceQuota>): StSpaceQuota {
   return {
-    guid: 'stack-1',
-    name: 'cflinuxfs4',
-    description: 'Cloud Foundry Linux-based filesystem',
-    default: true,
+    guid: 'sq-1',
+    name: 'small',
+    totalMemoryInMB: 2048,
+    totalInstanceMemoryInMB: 1024,
+    totalInstances: 50,
+    totalAppTasks: 25,
+    paidServicesAllowed: true,
+    totalServiceInstances: 10,
+    totalServiceKeys: 10,
+    totalRoutes: 50,
+    totalReservedPorts: 5,
+    organizationGuid: 'org-1',
+    spaceCount: 2,
     cnsiGuid: 'cnsi-1',
     createdAt: '2026-04-22T12:00:00Z',
     updatedAt: '2026-04-22T12:00:00Z',
@@ -19,12 +28,12 @@ function makeStack(overrides: Partial<StStack>): StStack {
   };
 }
 
-function makeHttp(stacks: StStack[]): HttpClient {
+function makeHttp(quotas: StSpaceQuota[]): HttpClient {
   return {
     get: vi.fn(() => of({
-      resources: stacks,
+      resources: quotas,
       pagination: {
-        totalResults: stacks.length,
+        totalResults: quotas.length,
         totalPages: 1,
         next: null,
         previous: null,
@@ -35,26 +44,26 @@ function makeHttp(stacks: StStack[]): HttpClient {
   } as unknown as HttpClient;
 }
 
-function makeSvc(http: HttpClient): CfStacksSignalConfigService {
+function makeSvc(http: HttpClient): CfSpaceQuotasSignalConfigService {
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
       { provide: HttpClient, useValue: http },
-      CfStacksSignalConfigService,
+      CfSpaceQuotasSignalConfigService,
     ],
   });
-  return TestBed.inject(CfStacksSignalConfigService);
+  return TestBed.inject(CfSpaceQuotasSignalConfigService);
 }
 
 beforeEach(() => TestBed.resetTestingModule());
 
-describe('CfStacksSignalConfigService', () => {
-  it('exposes empty stacks before initialize', () => {
+describe('CfSpaceQuotasSignalConfigService', () => {
+  it('exposes empty quotas before initialize', () => {
     const svc = makeSvc(makeHttp([]));
-    expect(svc.stacks()).toEqual([]);
+    expect(svc.spaceQuotas()).toEqual([]);
   });
 
-  it('exposes the filter, sort, pageSize, pageIndex, nameFilter signals', () => {
+  it('exposes filter, sort, pageSize, pageIndex, nameFilter signals', () => {
     const svc = makeSvc(makeHttp([]));
     svc.initialize('cnsi-1');
     expect(svc.filter).toBeDefined();
@@ -64,25 +73,25 @@ describe('CfStacksSignalConfigService', () => {
     expect(svc.nameFilter).toBeDefined();
   });
 
-  it('builds a ViewPipeline driven by the stacks signal', () => {
+  it('builds a ViewPipeline driven by the spaceQuotas signal', () => {
     const svc = makeSvc(makeHttp([]));
     svc.initialize('cnsi-1');
     expect(svc.view).toBeDefined();
   });
 
-  it('loads stacks from /pp/v1/cf/stacks/:cnsi', async () => {
+  it('loads space quotas from /pp/v1/cf/space_quotas/:cnsi', async () => {
     const http = makeHttp([
-      makeStack({ guid: 'stack-1', name: 'cflinuxfs4' }),
-      makeStack({ guid: 'stack-2', name: 'windows', default: false }),
+      makeQuota({ guid: 'sq-1', name: 'small' }),
+      makeQuota({ guid: 'sq-2', name: 'large' }),
     ]);
     const svc = makeSvc(http);
     svc.initialize('cnsi-1');
     await svc.loadAll();
 
-    expect(svc.stacks().length).toBe(2);
-    expect(svc.stacks()[0].name).toBe('cflinuxfs4');
+    expect(svc.spaceQuotas().length).toBe(2);
+    expect(svc.spaceQuotas()[0].name).toBe('small');
     expect(http.get).toHaveBeenCalledWith(
-      expect.stringContaining('/pp/v1/cf/stacks/cnsi-1'),
+      expect.stringContaining('/pp/v1/cf/space_quotas/cnsi-1'),
     );
   });
 

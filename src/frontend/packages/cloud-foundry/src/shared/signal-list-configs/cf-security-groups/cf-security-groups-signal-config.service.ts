@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { CnsiSecurityGroupsSource } from '../../../../../services/data-sources/cnsi-security-groups-source';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StSecurityGroup } from '../../../../../services/endpoint-data/stratos-types';
+import { CnsiSecurityGroupsSource } from '../../../services/data-sources/cnsi-security-groups-source';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StSecurityGroup } from '../../../services/endpoint-data/stratos-types';
 
 // CF Security Groups list config — single-CNSI, read-only. Drives the
 // per-CF /cloud-foundry/:cnsi/security-groups tab. Security groups are

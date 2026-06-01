@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { CfBuildpacksSignalConfigService } from './cf-buildpacks-signal-config.service';
-import type { StBuildpack } from '../../../../../services/endpoint-data/stratos-types';
+import type { StBuildpack } from '../../../services/endpoint-data/stratos-types';
 
 function makeBuildpack(overrides: Partial<StBuildpack>): StBuildpack {
   return {

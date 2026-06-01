@@ -15,7 +15,7 @@ import {
 } from '@stratosui/core';
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 
-import { CfOrgQuotasSignalConfigService } from '../../../../shared/components/list/list-types/cf-quotas/cf-org-quotas-signal-config.service';
+import { CfOrgQuotasSignalConfigService } from '../../../../shared/signal-list-configs/cf-quotas/cf-org-quotas-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
