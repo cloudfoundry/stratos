@@ -2,12 +2,12 @@ import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, eff
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
-import { CfUserListDiagnosticsService } from '../../../../../services/diagnostics/cf-user-list-diagnostics.service';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StUser } from '../../../../../services/endpoint-data/stratos-types';
-import { CfUsersPagedDataService } from '../../../../data-services/cf-users-paged-data.service';
+import { CfUserListDiagnosticsService } from '../../../services/diagnostics/cf-user-list-diagnostics.service';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StUser } from '../../../services/endpoint-data/stratos-types';
+import { CfUsersPagedDataService } from '../../data-services/cf-users-paged-data.service';
 
 // Users list config service — single-CNSI, optionally org- or space-scoped.
 // Modelled on CfRoutesSignalConfigService (which also fetches its own list

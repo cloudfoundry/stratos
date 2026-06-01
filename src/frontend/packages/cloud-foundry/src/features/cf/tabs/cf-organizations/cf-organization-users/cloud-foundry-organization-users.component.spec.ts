@@ -11,7 +11,7 @@ import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry
 import { CloudFoundryOrganizationUsersComponent } from './cloud-foundry-organization-users.component';
 import {
   CfUsersSignalConfigService,
-} from '../../../../../shared/components/list/list-types/user/cf-users-signal-config.service';
+} from '../../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StUser } from '../../../../../services/endpoint-data/stratos-types';

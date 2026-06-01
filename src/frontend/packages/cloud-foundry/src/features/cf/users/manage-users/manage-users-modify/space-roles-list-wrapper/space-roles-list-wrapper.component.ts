@@ -16,7 +16,7 @@ import {
 import { CfRoleCheckboxComponent } from '../../../../../../shared/components/cf-role-checkbox/cf-role-checkbox.component';
 import {
   CfUsersSpaceRolesSignalConfigService,
-} from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/cf-users-org-space-roles/cf-users-space-roles-signal-config.service';
 import { SpaceUserRoleNames } from '../../../../../../store/types/cf-user.types';
 import type { StSpace } from '../../../../../../services/endpoint-data/stratos-types';
 
