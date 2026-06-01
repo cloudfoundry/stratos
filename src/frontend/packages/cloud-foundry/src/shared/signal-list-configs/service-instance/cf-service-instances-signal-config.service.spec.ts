@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { CfServiceInstancesSignalConfigService } from './cf-service-instances-signal-config.service';
-import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { StServiceInstance } from '../../../../../services/endpoint-data/stratos-types';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
 function makeInstance(overrides: Partial<StServiceInstance> = {}): StServiceInstance {
   return {

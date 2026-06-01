@@ -10,7 +10,7 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 
-import { CfServiceInstancesSignalConfigService } from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+import { CfServiceInstancesSignalConfigService } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { ServiceInstancesComponent } from './service-instances.component';
 
 describe('ServiceInstancesComponent (signal-native)', () => {

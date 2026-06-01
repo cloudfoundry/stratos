@@ -25,7 +25,7 @@ import {
 } from '../../../../cf-entity-types';
 import {
   CfServiceInstancesSignalConfigService,
-} from '../../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+} from '../../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';

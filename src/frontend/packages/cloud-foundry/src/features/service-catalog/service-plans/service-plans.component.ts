@@ -23,7 +23,7 @@ import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { SERVICE_PLAN_URL_PARAM } from '../../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import {
   CfServicePlansSignalConfigService,
-} from '../../../shared/components/list/list-types/service-plans/cf-service-plans-signal-config.service';
+} from '../../../shared/signal-list-configs/service-plans/cf-service-plans-signal-config.service';
 import type { StServicePlan } from '../../../services/endpoint-data/stratos-types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 

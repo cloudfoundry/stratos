@@ -2,13 +2,13 @@ import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, eff
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import type { EndpointModel } from '@stratosui/store';
-import { CnsiServiceInstancesSource } from '../../../../../services/data-sources/cnsi-service-instances-source';
-import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
-import type { StServiceInstance } from '../../../../../services/endpoint-data/stratos-types';
-import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
+import { CnsiServiceInstancesSource } from '../../../services/data-sources/cnsi-service-instances-source';
+import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
 

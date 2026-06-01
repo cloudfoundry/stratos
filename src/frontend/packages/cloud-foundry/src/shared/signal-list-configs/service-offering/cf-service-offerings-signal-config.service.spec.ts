@@ -4,9 +4,9 @@ import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { GlobalEventService } from '@stratosui/core';
 import { CfServiceOfferingsSignalConfigService } from './cf-service-offerings-signal-config.service';
-import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 
 // Stub the GlobalEventService — its real impl injects the ngrx Store
 // which requires module wiring outside this spec's scope. The signal-

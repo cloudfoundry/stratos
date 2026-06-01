@@ -12,7 +12,7 @@ import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry
 import { ServicesWallComponent } from './services-wall.component';
 import {
   CfServiceInstancesSignalConfigService,
-} from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 function makeStubSignalConfigService() {

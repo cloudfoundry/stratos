@@ -28,7 +28,7 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import {
   CfServiceInstancesSignalConfigService,
-} from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 

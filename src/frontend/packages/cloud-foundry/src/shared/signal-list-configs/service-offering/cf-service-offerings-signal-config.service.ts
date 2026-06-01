@@ -2,12 +2,12 @@ import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effe
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import type { EndpointModel } from '@stratosui/store';
-import { CnsiServiceOfferingsSource } from '../../../../../services/data-sources/cnsi-service-offerings-source';
-import { MergeOrchestrator } from '../../../../../services/data-sources/merge-orchestrator';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
-import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
+import { CnsiServiceOfferingsSource } from '../../../services/data-sources/cnsi-service-offerings-source';
+import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import { GlobalEventService, ListStateStore } from '@stratosui/core';
 import type { SignalListDropdownOption } from '@stratosui/core';
 
