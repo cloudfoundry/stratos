@@ -21,6 +21,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list.component';
 import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
+import { kubernetesNodesEntityType } from '../../kubernetes-entity-factory';
 
 // Minimal SignalListConfig stub — only the fields the shell reads after
 // construction (signalListConfig() truthiness check).
@@ -87,7 +88,8 @@ describe('KubernetesResourceListComponent', () => {
         {
           provide: Router,
           useValue: {
-            url: '/kubernetes/test-guid/pods'
+            url: '/kubernetes/test-guid/pods',
+            navigate: vi.fn().mockResolvedValue(true),
           }
         },
         {
@@ -111,6 +113,11 @@ describe('KubernetesResourceListComponent', () => {
     // Initialize EntityCatalogHelper for Angular 20 compatibility
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    // Register a 'pod' factory so the signal-config gate is truthy and
+    // the constructor does not fall through to the redirect branch.
+    const registry = TestBed.inject(KubernetesSignalConfigRegistry);
+    registry.register('pod', () => makeMinimalSignalConfig());
   });
 
   beforeEach(() => {
@@ -207,6 +214,163 @@ describe('KubernetesResourceListComponent', () => {
       const spy = vi.spyOn(pod, 'refresh');
       workloadFixture = TestBed.createComponent(KubernetesResourceListComponent);
       expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Signal-only rendering — no legacy app-list-view
+  // -------------------------------------------------------------------------
+  describe('signal-only rendering', () => {
+    let signalFixture: ComponentFixture<KubernetesResourceListComponent>;
+
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+
+      const testEntityCatalog = entityCatalog as TestEntityCatalog;
+      testEntityCatalog.clear();
+      const entities = [
+        ...generateStratosEntities(),
+        ...kubeEntityCatalog.allKubeEntities(),
+      ];
+      entities.forEach(entity => entityCatalog.register(entity));
+
+      await TestBed.configureTestingModule({
+        imports: [
+          createBasicStoreModule(),
+          EntityCatalogProvidersModule,
+          KubernetesResourceListComponent,
+        ],
+        providers: [
+          ...STORE_TEST_PROVIDERS,
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          {
+            provide: BaseKubeGuid,
+            useValue: { guid: 'test-guid' },
+          },
+          TabNavService,
+          {
+            provide: Router,
+            useValue: {
+              url: '/kubernetes/test-guid/pods',
+              navigate: vi.fn().mockResolvedValue(true),
+            },
+          },
+          {
+            provide: ActivatedRoute,
+            useValue: {
+              snapshot: {
+                data: { entityCatalogKey: 'pod' },
+                params: {},
+                queryParams: {},
+              },
+            },
+          },
+          provideZonelessChangeDetection(),
+          provideNoopAnimations(),
+        ],
+      }).compileComponents();
+
+      const helper = TestBed.inject(EntityCatalogHelper);
+      EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+      // Register a 'pod' factory so the signal-config gate is truthy.
+      const registry = TestBed.inject(KubernetesSignalConfigRegistry);
+      registry.register('pod', () => makeMinimalSignalConfig());
+    });
+
+    afterEach(() => {
+      if (signalFixture) {
+        signalFixture.destroy();
+      }
+    });
+
+    it('renders only app-signal-list — no app-list-view in the template', () => {
+      signalFixture = TestBed.createComponent(KubernetesResourceListComponent);
+      signalFixture.detectChanges();
+      expect(signalFixture.componentInstance.signalListConfig()).toBeDefined();
+      expect(signalFixture.nativeElement.querySelector('app-list-view')).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Unregistered entity key → redirect to cluster summary
+  // -------------------------------------------------------------------------
+  describe('unregistered entity key redirect', () => {
+    let unregFixture: ComponentFixture<KubernetesResourceListComponent>;
+    let navigateSpy: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+
+      const testEntityCatalog = entityCatalog as TestEntityCatalog;
+      testEntityCatalog.clear();
+      const entities = [
+        ...generateStratosEntities(),
+        ...kubeEntityCatalog.allKubeEntities(),
+      ];
+      entities.forEach(entity => entityCatalog.register(entity));
+
+      navigateSpy = vi.fn().mockResolvedValue(true);
+
+      await TestBed.configureTestingModule({
+        imports: [
+          createBasicStoreModule(),
+          EntityCatalogProvidersModule,
+          KubernetesResourceListComponent,
+        ],
+        providers: [
+          ...STORE_TEST_PROVIDERS,
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          {
+            provide: BaseKubeGuid,
+            useValue: { guid: 'test-guid' },
+          },
+          TabNavService,
+          {
+            provide: Router,
+            useValue: {
+              url: '/kubernetes/test-guid/node',
+              navigate: navigateSpy,
+            },
+          },
+          {
+            provide: ActivatedRoute,
+            // Use 'node' (kubernetesNodesEntityType) — it exists in the catalog
+            // but has no signal factory registered, so the fallback branch fires.
+            useValue: {
+              snapshot: {
+                data: { entityCatalogKey: kubernetesNodesEntityType },
+                params: {},
+                queryParams: {},
+              },
+            },
+          },
+          provideZonelessChangeDetection(),
+          provideNoopAnimations(),
+        ],
+      }).compileComponents();
+
+      const helper = TestBed.inject(EntityCatalogHelper);
+      EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+      // Intentionally do NOT register a 'node' factory — this exercises the
+      // no-signal-factory branch we are about to replace with a redirect.
+    });
+
+    afterEach(() => {
+      if (unregFixture) {
+        unregFixture.destroy();
+      }
+    });
+
+    it('redirects to cluster summary for an unregistered entity key (no ngrx provider built)', () => {
+      unregFixture = TestBed.createComponent(KubernetesResourceListComponent);
+      unregFixture.detectChanges();
+      expect(unregFixture.componentInstance.signalListConfig()).toBeUndefined();
+      expect((unregFixture.componentInstance as any).provider).toBeUndefined();
+      expect(navigateSpy).toHaveBeenCalledWith(['/kubernetes', 'test-guid']);
     });
   });
 });
