@@ -5,10 +5,10 @@ import { ListStateStore } from '@stratosui/core';
 
 import { firstValueFrom } from 'rxjs';
 
-import { CnsiOrgQuotasSource } from '../../../../../services/data-sources/cnsi-org-quotas-source';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { QuotaDataService } from '../../../../../services/endpoint-data/quota-data.service';
-import type { StOrgQuota } from '../../../../../services/endpoint-data/stratos-types';
+import { CnsiOrgQuotasSource } from '../../../services/data-sources/cnsi-org-quotas-source';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import type { StOrgQuota } from '../../../services/endpoint-data/stratos-types';
 
 // CF Org Quotas list config — single-CNSI, read-only. Drives the
 // per-CF /cloud-foundry/:cnsi/quotas-definitions tab (Org Quotas tab on

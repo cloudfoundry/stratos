@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, s
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
-import { CfStacksSignalConfigService } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-signal-config.service';
+import { CfStacksSignalConfigService } from '../../../../shared/signal-list-configs/cf-stacks/cf-stacks-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StStack } from '../../../../services/endpoint-data/stratos-types';
 

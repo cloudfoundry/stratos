@@ -3,24 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { CfSpaceQuotasSignalConfigService } from './cf-space-quotas-signal-config.service';
-import type { StSpaceQuota } from '../../../../../services/endpoint-data/stratos-types';
+import { CfSecurityGroupsSignalConfigService } from './cf-security-groups-signal-config.service';
+import type { StSecurityGroup } from '../../../services/endpoint-data/stratos-types';
 
-function makeQuota(overrides: Partial<StSpaceQuota>): StSpaceQuota {
+function makeGroup(overrides: Partial<StSecurityGroup>): StSecurityGroup {
   return {
-    guid: 'sq-1',
-    name: 'small',
-    totalMemoryInMB: 2048,
-    totalInstanceMemoryInMB: 1024,
-    totalInstances: 50,
-    totalAppTasks: 25,
-    paidServicesAllowed: true,
-    totalServiceInstances: 10,
-    totalServiceKeys: 10,
-    totalRoutes: 50,
-    totalReservedPorts: 5,
-    organizationGuid: 'org-1',
-    spaceCount: 2,
+    guid: 'sg-1',
+    name: 'public_networks',
+    globallyEnabledRunning: true,
+    globallyEnabledStaging: false,
+    ruleCount: 2,
+    runningSpaceCount: 1,
+    stagingSpaceCount: 0,
     cnsiGuid: 'cnsi-1',
     createdAt: '2026-04-22T12:00:00Z',
     updatedAt: '2026-04-22T12:00:00Z',
@@ -28,12 +22,12 @@ function makeQuota(overrides: Partial<StSpaceQuota>): StSpaceQuota {
   };
 }
 
-function makeHttp(quotas: StSpaceQuota[]): HttpClient {
+function makeHttp(groups: StSecurityGroup[]): HttpClient {
   return {
     get: vi.fn(() => of({
-      resources: quotas,
+      resources: groups,
       pagination: {
-        totalResults: quotas.length,
+        totalResults: groups.length,
         totalPages: 1,
         next: null,
         previous: null,
@@ -44,26 +38,26 @@ function makeHttp(quotas: StSpaceQuota[]): HttpClient {
   } as unknown as HttpClient;
 }
 
-function makeSvc(http: HttpClient): CfSpaceQuotasSignalConfigService {
+function makeSvc(http: HttpClient): CfSecurityGroupsSignalConfigService {
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
       { provide: HttpClient, useValue: http },
-      CfSpaceQuotasSignalConfigService,
+      CfSecurityGroupsSignalConfigService,
     ],
   });
-  return TestBed.inject(CfSpaceQuotasSignalConfigService);
+  return TestBed.inject(CfSecurityGroupsSignalConfigService);
 }
 
 beforeEach(() => TestBed.resetTestingModule());
 
-describe('CfSpaceQuotasSignalConfigService', () => {
-  it('exposes empty quotas before initialize', () => {
+describe('CfSecurityGroupsSignalConfigService', () => {
+  it('exposes empty groups before initialize', () => {
     const svc = makeSvc(makeHttp([]));
-    expect(svc.spaceQuotas()).toEqual([]);
+    expect(svc.securityGroups()).toEqual([]);
   });
 
-  it('exposes filter, sort, pageSize, pageIndex, nameFilter signals', () => {
+  it('exposes the filter, sort, pageSize, pageIndex, nameFilter signals', () => {
     const svc = makeSvc(makeHttp([]));
     svc.initialize('cnsi-1');
     expect(svc.filter).toBeDefined();
@@ -73,25 +67,25 @@ describe('CfSpaceQuotasSignalConfigService', () => {
     expect(svc.nameFilter).toBeDefined();
   });
 
-  it('builds a ViewPipeline driven by the spaceQuotas signal', () => {
+  it('builds a ViewPipeline driven by the securityGroups signal', () => {
     const svc = makeSvc(makeHttp([]));
     svc.initialize('cnsi-1');
     expect(svc.view).toBeDefined();
   });
 
-  it('loads space quotas from /pp/v1/cf/space_quotas/:cnsi', async () => {
+  it('loads security groups from /pp/v1/cf/security_groups/:cnsi', async () => {
     const http = makeHttp([
-      makeQuota({ guid: 'sq-1', name: 'small' }),
-      makeQuota({ guid: 'sq-2', name: 'large' }),
+      makeGroup({ guid: 'sg-1', name: 'public_networks' }),
+      makeGroup({ guid: 'sg-2', name: 'dns', globallyEnabledStaging: true }),
     ]);
     const svc = makeSvc(http);
     svc.initialize('cnsi-1');
     await svc.loadAll();
 
-    expect(svc.spaceQuotas().length).toBe(2);
-    expect(svc.spaceQuotas()[0].name).toBe('small');
+    expect(svc.securityGroups().length).toBe(2);
+    expect(svc.securityGroups()[0].name).toBe('public_networks');
     expect(http.get).toHaveBeenCalledWith(
-      expect.stringContaining('/pp/v1/cf/space_quotas/cnsi-1'),
+      expect.stringContaining('/pp/v1/cf/security_groups/cnsi-1'),
     );
   });
 

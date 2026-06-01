@@ -5,11 +5,11 @@ import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
 
-import { CnsiAuditEventsSource } from '../../../../../services/data-sources/cnsi-audit-events-source';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
-import type { StAuditEvent } from '../../../../../services/endpoint-data/stratos-types';
+import { CnsiAuditEventsSource } from '../../../services/data-sources/cnsi-audit-events-source';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types';
 
 // CF Audit Events list config — single-CNSI, read-only. Drives four
 // page consumers — the foundation-wide CF Events tab plus the org /

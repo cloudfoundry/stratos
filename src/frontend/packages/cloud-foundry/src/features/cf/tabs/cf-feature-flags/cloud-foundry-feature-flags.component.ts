@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, s
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
-import { CfFeatureFlagsSignalConfigService } from '../../../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-signal-config.service';
+import { CfFeatureFlagsSignalConfigService } from '../../../../shared/signal-list-configs/cf-feature-flags/cf-feature-flags-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StFeatureFlag } from '../../../../services/endpoint-data/stratos-types';
 

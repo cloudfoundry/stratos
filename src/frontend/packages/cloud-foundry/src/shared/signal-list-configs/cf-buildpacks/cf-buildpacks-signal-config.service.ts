@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { CnsiBuildpacksSource } from '../../../../../services/data-sources/cnsi-buildpacks-source';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StBuildpack } from '../../../../../services/endpoint-data/stratos-types';
+import { CnsiBuildpacksSource } from '../../../services/data-sources/cnsi-buildpacks-source';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StBuildpack } from '../../../services/endpoint-data/stratos-types';
 
 // CF Buildpacks list config — single-CNSI, read-only. Drives the per-CF
 // /cloud-foundry/:cnsi/buildpacks tab. Buildpacks are foundation-level
