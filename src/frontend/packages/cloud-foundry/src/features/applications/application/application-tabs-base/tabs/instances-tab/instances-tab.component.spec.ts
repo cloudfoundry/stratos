@@ -26,7 +26,7 @@ import {
 import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { AppInstanceActionsService } from '../../../../../../shared/services/app-instance-actions.service';
-import { CfAppInstancesSignalConfigService } from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-signal-config.service';
+import { CfAppInstancesSignalConfigService } from '../../../../../../shared/signal-list-configs/app-instance/cf-app-instances-signal-config.service';
 import { InstancesTabComponent } from './instances-tab.component';
 
 describe('InstancesTabComponent', () => {

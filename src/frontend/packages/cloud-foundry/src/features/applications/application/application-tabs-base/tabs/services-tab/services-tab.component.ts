@@ -29,7 +29,7 @@ import { ApplicationService } from '../../../../application.service';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
 import {
   CfAppServiceBindingsSignalConfigService,
-} from '../../../../../../shared/components/list/list-types/app-sevice-bindings/cf-app-service-bindings-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/app-sevice-bindings/cf-app-service-bindings-signal-config.service';
 import { AppServiceBindingActionsService } from '../../../../../../shared/services/app-service-binding-actions.service';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions.types';
 import { CSI_CANCEL_URL } from '../../../../../../shared/components/add-service-instance/csi-mode.service';

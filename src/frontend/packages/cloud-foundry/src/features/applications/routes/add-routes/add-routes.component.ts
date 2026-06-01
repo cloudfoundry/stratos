@@ -36,7 +36,7 @@ import {
 } from '../../../../shared/services/app-route-actions.service';
 import {
   CfMapRoutesSignalConfigService,
-} from '../../../../shared/components/list/list-types/app-route/cf-map-routes-signal-config.service';
+} from '../../../../shared/signal-list-configs/app-route/cf-map-routes-signal-config.service';
 import type { StRoute } from '../../../../services/endpoint-data/stratos-types';
 
 const hostPattern = '^([\\w\\-\\.]*)$';

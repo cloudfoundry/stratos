@@ -2,10 +2,10 @@ import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInje
 
 import { ListStateStore, SignalListColumn, SignalListRowAction } from '@stratosui/core';
 
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { AppServiceBindingActionsService } from '../../../../services/app-service-binding-actions.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StServiceCredentialBinding } from '../../../../../services/endpoint-data/stratos-types';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { AppServiceBindingActionsService } from '../../services/app-service-binding-actions.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
 
 // CF App Service Bindings signal-list config — single-app, per-binding rows
 // of the app-detail Service Bindings tab. Replaces the legacy

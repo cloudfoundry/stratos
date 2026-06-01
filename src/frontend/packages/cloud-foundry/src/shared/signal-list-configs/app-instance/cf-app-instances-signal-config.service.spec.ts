@@ -5,9 +5,9 @@ import { TestBed } from '@angular/core/testing';
 import { UtilsService } from '@stratosui/core';
 
 import { CfAppInstancesSignalConfigService } from './cf-app-instances-signal-config.service';
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { AppInstanceActionsService } from '../../../../services/app-instance-actions.service';
-import type { StAppStat } from '../../../../../services/endpoint-data/stratos-types';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { AppInstanceActionsService } from '../../services/app-instance-actions.service';
+import type { StAppStat } from '../../../services/endpoint-data/stratos-types';
 
 // Minimal StAppStat factory.
 function makeStat(overrides: Partial<StAppStat> = {}): StAppStat {

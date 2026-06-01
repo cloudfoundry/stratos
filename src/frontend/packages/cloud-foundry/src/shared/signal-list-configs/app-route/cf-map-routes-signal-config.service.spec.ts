@@ -5,10 +5,10 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CfMapRoutesSignalConfigService } from './cf-map-routes-signal-config.service';
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppNameResolverService } from '../../../../services/app-name-resolver.service';
-import type { StRoute, StRoutesResponse } from '../../../../../services/endpoint-data/stratos-types';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { ApplicationService } from '../../../features/applications/application.service';
+import { AppNameResolverService } from '../../services/app-name-resolver.service';
+import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
 
 // Minimal StRoute factory.
 function makeRoute(overrides: Partial<StRoute> = {}): StRoute {

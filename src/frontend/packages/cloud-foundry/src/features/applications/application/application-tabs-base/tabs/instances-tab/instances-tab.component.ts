@@ -30,7 +30,7 @@ import { CardAppStatusComponent } from '../../../../../../shared/components/card
 import { CardAppUsageComponent } from '../../../../../../shared/components/cards/card-app-usage/card-app-usage.component';
 import {
   CfAppInstancesSignalConfigService,
-} from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/app-instance/cf-app-instances-signal-config.service';
 import { AppInstanceActionsService } from '../../../../../../shared/services/app-instance-actions.service';
 import type { StAppStat } from '../../../../../../services/endpoint-data/stratos-types';
 import { AppDetailDataService } from '../../../../app-detail-data.service';

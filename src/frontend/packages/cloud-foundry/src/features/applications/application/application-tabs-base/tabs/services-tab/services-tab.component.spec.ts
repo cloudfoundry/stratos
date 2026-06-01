@@ -25,7 +25,7 @@ import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { AppServiceBindingActionsService } from '../../../../../../shared/services/app-service-binding-actions.service';
 import {
   CfAppServiceBindingsSignalConfigService,
-} from '../../../../../../shared/components/list/list-types/app-sevice-bindings/cf-app-service-bindings-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/app-sevice-bindings/cf-app-service-bindings-signal-config.service';
 import { ServicesTabComponent } from './services-tab.component';
 
 describe('ServicesTabComponent', () => {

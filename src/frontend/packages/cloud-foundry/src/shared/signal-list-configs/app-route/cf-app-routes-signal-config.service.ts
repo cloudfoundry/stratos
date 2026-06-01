@@ -2,12 +2,12 @@ import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInje
 
 import { ListStateStore, SignalListColumn, SignalListCompoundSegment, SignalListRowAction } from '@stratosui/core';
 
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StRoute } from '../../../../../services/endpoint-data/stratos-types';
-import { AppNameResolverService } from '../../../../services/app-name-resolver.service';
-import { AppRouteActionsService } from '../../../../services/app-route-actions.service';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { ApplicationService } from '../../../features/applications/application.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StRoute } from '../../../services/endpoint-data/stratos-types';
+import { AppNameResolverService } from '../../services/app-name-resolver.service';
+import { AppRouteActionsService } from '../../services/app-route-actions.service';
 
 // CF App Routes signal-list config — single-app, per-route rows of the
 // app-detail Routes tab. Replaces the legacy CfAppRoutesListConfigService

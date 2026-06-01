@@ -2,9 +2,9 @@ import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInje
 
 import { ListStateStore, SignalListColumn, SignalListRowAction } from '@stratosui/core';
 
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { AppVariableActionsService } from '../../../../services/app-variable-actions.service';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { AppVariableActionsService } from '../../services/app-variable-actions.service';
 import { ListAppEnvVar } from './cf-app-variables.types';
 
 // CF App Variables signal-list config — single-app, per-variable rows of

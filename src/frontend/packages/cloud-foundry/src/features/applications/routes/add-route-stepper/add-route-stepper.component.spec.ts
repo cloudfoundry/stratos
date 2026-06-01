@@ -24,7 +24,7 @@ import { generateCFEntities, generateTestCfEndpointServiceProvider, ActiveRouteC
 import { ApplicationService } from '../../application.service';
 import { AddRouteStepperComponent } from './add-route-stepper.component';
 import { AppRouteActionsService } from '../../../../shared/services/app-route-actions.service';
-import { CfMapRoutesSignalConfigService } from '../../../../shared/components/list/list-types/app-route/cf-map-routes-signal-config.service';
+import { CfMapRoutesSignalConfigService } from '../../../../shared/signal-list-configs/app-route/cf-map-routes-signal-config.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
 
 // Stub factories for the tab/page-scoped services. The stepper's job is to
