@@ -21,7 +21,7 @@ import {
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import {
   RowState,
-} from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+} from '../../../../../core/src/shared/components/signal-list/row-state.types';
 import {
   SignalListColumn,
   SignalListComponent,

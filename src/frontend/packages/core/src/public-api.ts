@@ -162,6 +162,7 @@ export { TableComponent } from './shared/components/list/list-table/table.compon
 export { EnumerateComponent } from './shared/components/enumerate/enumerate.component';
 export * from './shared/components/list/list.component.types';
 export * from './shared/components/list/data-sources-controllers/list-data-source-types';
+export { RowState, RowsState, getDefaultRowState } from './shared/components/signal-list/row-state.types';
 export * from './shared/components/list/data-sources-controllers/list-data-source';
 export * from './shared/components/list/data-sources-controllers/list-data-source-config';
 export { ActionSchemaConfig, MultiActionConfig } from './shared/components/list/data-sources-controllers/list-data-source-config';

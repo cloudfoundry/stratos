@@ -6,7 +6,7 @@ import { filter, map, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { createGuid } from '../../../../core/src/core/utils.service';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
 import { EndpointModel } from '../../../../store/src/public-api';
 import { KubeConfigAuthHelper } from './kube-config-auth.helper';
