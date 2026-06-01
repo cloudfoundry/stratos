@@ -85,3 +85,37 @@ export function affectedSlices(
   walk(rootEntityType);
   return slices;
 }
+
+/**
+ * Return the EDS slice names of entity types that **reference**
+ * `rootEntityType` as a direct child in the relation graph (reverse edges,
+ * one hop).
+ *
+ * Deleting an entity changes the relationship lists/counts embedded in its
+ * parents' and siblings' list rows — e.g. deleting a space decrements the
+ * org's "spaces" count; deleting a service binding changes the bound-app and
+ * bound-instance lists. `affectedSlices` (descendants) cannot see these, so
+ * the delete chokepoint unions both. This is what preserves — and corrects —
+ * the non-containment cascades the legacy hand-curated `cascade-registry` had
+ * (route→apps, serviceBinding→apps+serviceInstances), without re-encoding them
+ * by hand: they fall straight out of the same descriptors, walked in reverse.
+ *
+ * Pure and synchronous.
+ */
+export function referencingSlices(
+  rootEntityType: string,
+  registry: RelationDescriptorRegistry,
+): string[] {
+  const slices: string[] = [];
+  for (const [parentEntityType, descriptors] of registry) {
+    const references = descriptors.some(d => d.childEntityType === rootEntityType);
+    if (!references) {
+      continue;
+    }
+    const slice = ENTITY_TYPE_TO_SLICE[parentEntityType];
+    if (slice && !slices.includes(slice)) {
+      slices.push(slice);
+    }
+  }
+  return slices;
+}

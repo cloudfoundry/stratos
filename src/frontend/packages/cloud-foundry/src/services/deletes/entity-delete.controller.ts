@@ -8,7 +8,7 @@ import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EndpointDataRegistry } from '../endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../endpoint-data/endpoint-data.service';
 import { SignalRelationFetcherService } from '../../entity-relations/signal/signal-relation-fetcher.service';
-import { affectedSlices } from './affected-slices';
+import { affectedSlices, ENTITY_TYPE_TO_SLICE, referencingSlices } from './affected-slices';
 import type { DeleteCleanupHook, DeleteEvent, DeleteHandle, DeleteRequest } from './delete-event.types';
 
 // ---------------------------------------------------------------------------
@@ -108,22 +108,35 @@ export class EntityDeleteController {
     return { events$: subject.asObservable(), done };
   }
 
-  // On success: walk the relation graph for the deleted entity, mark every
-  // affected EDS slice stale, remove the deleted row, then fire cleanup hooks.
-  // Each step is isolated so one failure can't strand the others or reject the
-  // done promise. Cleanup hooks run even without a cached EDS — favorites and
-  // recents live outside the per-cnsi cache.
+  // On success: derive the full invalidation set from the relation graph —
+  // descendants (affectedSlices, containment) UNION referencing parents/siblings
+  // (referencingSlices, reverse edges, so parent count columns + sibling
+  // relationship lists refresh). Remove the deleted row, then fire cleanup
+  // hooks. Each step is isolated so one failure can't strand the others or
+  // reject the done promise. Cleanup hooks run even without a cached EDS —
+  // favorites and recents live outside the per-cnsi cache.
   private invalidateAndCleanup(req: DeleteRequest): void {
     const eds = this.endpoints.peek(req.cnsiGuid);
     if (eds) {
+      const remover = ROW_REMOVERS[req.entityKind];
+      const slices = new Set<string>();
       try {
-        for (const slice of affectedSlices(req.entityKind, this.relations.snapshotRegistry())) {
-          eds.markStale(slice as EntityKind);
-        }
+        const registry = this.relations.snapshotRegistry();
+        affectedSlices(req.entityKind, registry).forEach(s => slices.add(s));
+        referencingSlices(req.entityKind, registry).forEach(s => slices.add(s));
       } catch { /* invalidation is best-effort */ }
-      try {
-        ROW_REMOVERS[req.entityKind]?.(eds, req.deleteGuid);
-      } catch { /* row removal is best-effort */ }
+      // Count-only slices (e.g. routes) have no row list to patch, so there is
+      // no remover — mark the entity's own slice stale to refetch its count.
+      if (!remover) {
+        const ownSlice = ENTITY_TYPE_TO_SLICE[req.entityKind];
+        if (ownSlice) slices.add(ownSlice);
+      }
+      for (const slice of slices) {
+        try { eds.markStale(slice as EntityKind); } catch { /* per-slice best-effort */ }
+      }
+      if (remover) {
+        try { remover(eds, req.deleteGuid); } catch { /* row removal is best-effort */ }
+      }
     }
     for (const cleanup of this.cleanups) {
       try { cleanup(req); } catch { /* one bad hook can't block the rest */ }
