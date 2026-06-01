@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { take, catchError, filter, map } from 'rxjs/operators';
 
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
-import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
+import { IListAction } from '../../../core/src/shared/components/signal-list/list-action.types';
 import { AppState } from '../../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,

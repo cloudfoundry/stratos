@@ -86,11 +86,13 @@ import {
 } from '../signal-list/page-size.types';
 import {
   IGlobalListAction,
+  IMultiListAction,
+  IOptionalAction,
+} from '../signal-list/list-action.types';
+import {
   IListConfig,
   IListFilter,
   IListMultiFilterConfigItem,
-  IMultiListAction,
-  IOptionalAction,
   ListConfig,
   ListViewTypes,
   MultiFilterManager,
