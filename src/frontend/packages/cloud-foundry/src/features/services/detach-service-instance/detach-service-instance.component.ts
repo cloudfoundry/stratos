@@ -10,7 +10,9 @@ import {
   SteppersComponent,
 } from '@stratosui/core';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
-import { CnsiServiceBindingsSource } from '../../../services/data-sources/cnsi-service-bindings-source';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
+import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
@@ -48,11 +50,7 @@ export class DetachServiceInstanceComponent implements OnDestroy {
   private http = inject(HttpClient);
   private serviceCatalog = inject(ServiceCatalogDataService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
-
-  // Single source instance reused across the parallel delete calls; the
-  // EDS lookup happens once in the constructor so each delete patches the
-  // same canonical _serviceCredentialBindings list.
-  private bindingsSource!: CnsiServiceBindingsSource;
+  private deleteController = inject(EntityDeleteController);
 
 
   private _instanceSource!: SignalSource<StServiceInstance | null>;
@@ -119,8 +117,9 @@ export class DetachServiceInstanceComponent implements OnDestroy {
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
     const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
     this._instanceSource = this.serviceCatalog.serviceInstance(this.cfGuid, serviceInstanceId);
-    const eds = this.endpointDataRegistry.acquire(this.cfGuid);
-    this.bindingsSource = new CnsiServiceBindingsSource(this.cfGuid, this.http, eds);
+    // Hold a refcount on the endpoint's data service so the delete chokepoint
+    // can find (peek) it to invalidate the binding rollups after each detach.
+    this.endpointDataRegistry.acquire(this.cfGuid);
   }
 
   ngOnDestroy() {
@@ -133,11 +132,15 @@ export class DetachServiceInstanceComponent implements OnDestroy {
 
   private async detachOne(bindingGuid: string): Promise<void> {
     try {
-      // Route through CnsiServiceBindingsSource so the canonical
-      // EDS._serviceCredentialBindings list updates and the
-      // serviceBinding.delete cascade fires (apps/SI consumers
-      // re-fetch their binding rollups).
-      await this.bindingsSource.delete(bindingGuid);
+      // Route through the EntityDeleteController chokepoint so the canonical
+      // EDS._serviceCredentialBindings list updates and the graph-derived
+      // invalidation fires (bound apps/SI re-fetch their binding rollups).
+      await runCfDelete(this.deleteController, this.http, {
+        cnsiGuid: this.cfGuid,
+        entityKind: serviceCredentialBindingEntityType,
+        deleteGuid: bindingGuid,
+        path: `/pp/v1/cf/service_bindings/${this.cfGuid}/${bindingGuid}`,
+      });
       this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'success' }));
     } catch (err: unknown) {
       const message = err instanceof StratosJobError

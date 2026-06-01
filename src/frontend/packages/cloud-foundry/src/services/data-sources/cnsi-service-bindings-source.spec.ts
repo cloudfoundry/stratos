@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { CnsiServiceBindingsSource } from './cnsi-service-bindings-source';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
@@ -28,26 +28,6 @@ describe('CnsiServiceBindingsSource', () => {
     expect(eds.applyCascade).toHaveBeenCalledWith('serviceBinding.create');
   });
 
-  it('delete(bindingGuid) goes through writeWithJob + patches items + cascade("serviceBinding.delete")', async () => {
-    const http = {
-      get: vi.fn(() => of({ resources: [], pagination: { totalResults: 0, totalPages: 0, next: null, previous: null, first: { href: '' }, last: { href: '' } } })),
-      delete: vi.fn(() => of(new HttpResponse({ status: 200, body: null }))),
-    } as unknown as HttpClient;
-    const eds = makeEds();
-    const src = new CnsiServiceBindingsSource('cnsi-1', http, eds);
-    await src.delete('b-1');
-    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/service_bindings/cnsi-1/b-1', { observe: 'response' });
-    expect(eds.removeServiceCredentialBinding).toHaveBeenCalledWith('b-1');
-    expect(eds.applyCascade).toHaveBeenCalledWith('serviceBinding.delete');
-  });
-
-  it('eds is optional — source still patches its own _items without it', async () => {
-    const http = {
-      get: vi.fn(() => of({ resources: [], pagination: { totalResults: 0, totalPages: 0, next: null, previous: null, first: { href: '' }, last: { href: '' } } })),
-      delete: vi.fn(() => of(new HttpResponse({ status: 200, body: null }))),
-    } as unknown as HttpClient;
-    const src = new CnsiServiceBindingsSource('cnsi-1', http);  // no eds
-    await src.delete('b-1');  // does not throw
-    expect(http.delete).toHaveBeenCalled();
-  });
+  // binding delete moved to EntityDeleteController (see cf-apps-signal-config
+  // deleteServiceBinding + the detach-service-instance stepper); create stays.
 });

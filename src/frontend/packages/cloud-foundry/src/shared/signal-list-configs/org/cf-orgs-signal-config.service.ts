@@ -7,6 +7,7 @@ import type { EndpointDataService } from '../../../services/endpoint-data/endpoi
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { CnsiOrgsSource } from '../../../services/data-sources/cnsi-orgs-source';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { organizationEntityType } from '../../../cf-entity-types';
 import type { StOrg } from '../../../services/endpoint-data/stratos-types';
 
@@ -154,19 +155,13 @@ export class CfOrgsSignalConfigService {
   // path where the org summary page is deep-linked without the org list tab
   // ever mounting, which previously left every cache stale (the reproduced bug).
   async deleteOrg(cnsiGuid: string, orgGuid: string, orgName: string = orgGuid): Promise<void> {
-    const result = await this.deleteController.delete({
+    await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
-      // Display-only in the event/diagnostics stream; no endpoint-name source
-      // is wired into this service yet, so fall back to the guid.
-      cnsiName: cnsiGuid,
       entityKind: organizationEntityType,
       deleteGuid: orgGuid,
       deleteName: orgName,
-      call: () => this.http.delete(`/pp/v1/cf/orgs/${cnsiGuid}/${orgGuid}`, { observe: 'response' }),
-    }).done;
-    if (result.state === 'failure') {
-      throw result.error ?? new Error(`Failed to delete organization "${orgName}"`);
-    }
+      path: `/pp/v1/cf/orgs/${cnsiGuid}/${orgGuid}`,
+    });
   }
 
   // Create an org via CnsiOrgsSource. The source POSTs to /pp/v1/cf/orgs,

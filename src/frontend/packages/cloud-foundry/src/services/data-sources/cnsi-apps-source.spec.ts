@@ -27,33 +27,8 @@ describe('CnsiAppsSource', () => {
     expect(src.items()).toHaveLength(1);
   });
 
-  it('delete hits DELETE /pp/v1/cf/apps/{cnsi}/{guid} and removes the row from items()', async () => {
-    const resp = {
-      resources: [{ guid: 'a', name: 'app-a' }, { guid: 'b', name: 'app-b' }] as unknown as StApp[],
-      pagination: { totalResults: 2, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } }
-    };
-    const http = makeHttp(resp);
-    const src = new CnsiAppsSource('cnsi-1', http);
-    await src.load();
-    await src.delete('a');
-    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/apps/cnsi-1/a', { observe: 'response' });
-    expect(src.items().map(i => (i as { guid?: string }).guid)).toEqual(['b']);
-  });
-
-  it('delete does not mutate items on HTTP error', async () => {
-    const resp = {
-      resources: [{ guid: 'a', name: 'app-a' }] as unknown as StApp[],
-      pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } }
-    };
-    const http = {
-      get: vi.fn(() => of(resp)),
-      delete: vi.fn(() => { throw new Error('forbidden'); }),
-    } as unknown as HttpClient;
-    const src = new CnsiAppsSource('cnsi-1', http);
-    await src.load();
-    await expect(src.delete('a')).rejects.toThrow('forbidden');
-    expect(src.items().map(i => (i as { guid?: string }).guid)).toEqual(['a']);
-  });
+  // app delete moved to EntityDeleteController (see cf-apps-signal-config
+  // deleteApp); create/update/action/deleteInstance stay here.
 
   it('update(guid, patch) issues PATCH and patches local items', async () => {
     const initial = {

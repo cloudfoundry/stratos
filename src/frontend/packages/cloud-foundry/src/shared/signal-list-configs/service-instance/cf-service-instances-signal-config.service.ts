@@ -7,6 +7,9 @@ import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestr
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
+import { serviceInstancesEntityType } from '../../../cf-entity-types';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import type { SignalListDropdownOption } from '@stratosui/core';
@@ -126,6 +129,7 @@ export class CfServiceInstancesSignalConfigService {
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
+  private readonly deleteController = inject(EntityDeleteController);
   // Optional so unit tests don't have to provide it; the real app always
   // does (providedIn: 'root'). When present, used to short-circuit the
   // orchestrator's HTTP drain on revisit by pre-seeding each per-CNSI
@@ -511,28 +515,23 @@ export class CfServiceInstancesSignalConfigService {
     return runInInjectionContext(this.injector, fn);
   }
 
-  // Delete a service instance through CnsiServiceInstancesSource. The
-  // source handles writeWithJob (which waits for CF's async job to
-  // terminate), patches its own _items, patches EndpointDataService's
-  // serviceInstances signal, and fires the serviceInstance.delete cascade
-  // (marks apps + bindings stale). Replaces the previous
-  // optimistic-remove + refresh hybrid, which could leave server + local
-  // state out of sync if the trailing refresh's page-2 refetch failed.
-  async deleteServiceInstance(cnsiGuid: string, siGuid: string): Promise<void> {
-    const src = this.orchestrator?.sourceFor(cnsiGuid) as CnsiServiceInstancesSource | undefined;
-    if (src) {
-      await src.delete(siGuid);
-      // Mirror the orchestrator's aggregated view: even though the source
-      // patches its own _items, the orchestrator-level removeRow keeps
-      // the aggregated allItems Signal in sync for the merged-CNSI case.
-      this.orchestrator.removeRow(cnsiGuid, siGuid);
-      return;
-    }
-    // Orchestrator-undefined fallback (cold bookmark / HMR): instantiate
-    // a one-shot source for the delete. EDS is still threaded so the
-    // cascade fires.
-    const eds = this.registry.acquire(cnsiGuid);
-    const oneShot = new CnsiServiceInstancesSource(cnsiGuid, this.http, eds);
-    await oneShot.delete(siGuid);
+  // Delete a service instance through the EntityDeleteController chokepoint.
+  // The controller issues the DELETE via writeWithJob, derives the
+  // invalidation set from the relation graph (descendant bindings + the
+  // space's serviceInstance-count via reverse edge), removes the SI from the
+  // EDS cache, and fires cleanup hooks. We then drop the row from the list
+  // orchestrator's aggregated view so it disappears without a refresh.
+  // Routing through the root-singleton controller removes the prior
+  // orchestrator-undefined cold-fallback branch (removeRow no-ops when there
+  // is no orchestrator).
+  async deleteServiceInstance(cnsiGuid: string, siGuid: string, siName: string = siGuid): Promise<void> {
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: serviceInstancesEntityType,
+      deleteGuid: siGuid,
+      deleteName: siName,
+      path: `/pp/v1/cf/service_instances/${cnsiGuid}/${siGuid}`,
+    });
+    this.orchestrator?.removeRow(cnsiGuid, siGuid);
   }
 }

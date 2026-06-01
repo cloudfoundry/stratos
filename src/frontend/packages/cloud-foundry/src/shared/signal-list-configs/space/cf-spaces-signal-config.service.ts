@@ -5,8 +5,9 @@ import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
 
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
-import { CnsiSpacesSource } from '../../../services/data-sources/cnsi-spaces-source';
-import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
+import { spaceEntityType } from '../../../cf-entity-types';
 import type { StSpace } from '../../../services/endpoint-data/stratos-types';
 
 /**
@@ -39,7 +40,7 @@ interface PagedSpaces {
 export class CfSpacesSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly injector = inject(Injector);
-  private readonly endpointRegistry = inject(EndpointDataRegistry);
+  private readonly deleteController = inject(EntityDeleteController);
 
   private cnsiGuid = '';
   private orgGuid = '';
@@ -122,10 +123,18 @@ export class CfSpacesSignalConfigService {
     });
   }
 
-  async deleteSpace(cnsiGuid: string, spaceGuid: string): Promise<void> {
-    const eds = this.endpointRegistry.acquire(cnsiGuid);
-    const source = new CnsiSpacesSource(cnsiGuid, this.http, eds);
-    await source.delete(spaceGuid);
+  // Delete a space through the EntityDeleteController chokepoint. The
+  // controller derives the full invalidation set from the relation graph
+  // (descendant apps/routes/serviceInstances/bindings + the org's space-count
+  // via reverse edge), removes the space row, and fires cleanup hooks.
+  async deleteSpace(cnsiGuid: string, spaceGuid: string, spaceName: string = spaceGuid): Promise<void> {
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: spaceEntityType,
+      deleteGuid: spaceGuid,
+      deleteName: spaceName,
+      path: `/pp/v1/cf/spaces/${cnsiGuid}/${spaceGuid}`,
+    });
   }
 
   /**

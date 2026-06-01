@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { CnsiServiceInstancesSource } from './cnsi-service-instances-source';
 import type { StServiceInstance } from '../endpoint-data/stratos-types';
@@ -15,24 +15,8 @@ function makeEds(): EndpointDataService {
 }
 
 describe('CnsiServiceInstancesSource mutations', () => {
-  it('delete: DELETE + writeWithJob + patchItems + removeServiceInstance + cascade("serviceInstance.delete")', async () => {
-    const resp = {
-      resources: [{ guid: 'si-1', name: 'mydb' }] as unknown as StServiceInstance[],
-      pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
-    };
-    const http = {
-      get: vi.fn(() => of(resp)),
-      delete: vi.fn(() => of(new HttpResponse({ status: 200, body: null }))),
-    } as unknown as HttpClient;
-    const eds = makeEds();
-    const src = new CnsiServiceInstancesSource('cnsi-1', http, eds);
-    await src.load();
-    await src.delete('si-1');
-    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/service_instances/cnsi-1/si-1', { observe: 'response' });
-    expect(src.items().map(s => s.guid)).toEqual([]);
-    expect(eds.removeServiceInstance).toHaveBeenCalledWith('si-1');
-    expect(eds.applyCascade).toHaveBeenCalledWith('serviceInstance.delete');
-  });
+  // SI delete moved to EntityDeleteController (see cf-service-instances-signal-
+  // config deleteServiceInstance). create/update stay here.
 
   it('create: POST + patchItems + addServiceInstance + cascade("serviceInstance.create")', async () => {
     const created = { guid: 'si-2', name: 'cache' } as unknown as StServiceInstance;
@@ -68,18 +52,15 @@ describe('CnsiServiceInstancesSource mutations', () => {
     expect(eds.applyCascade).toHaveBeenCalledWith('serviceInstance.update');
   });
 
-  it('eds optional — source still patches its own _items', async () => {
-    const resp = {
-      resources: [{ guid: 'si-1' }] as unknown as StServiceInstance[],
-      pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
-    };
+  it('eds optional — create still patches its own _items without an eds', async () => {
+    const created = { guid: 'si-2', name: 'cache' } as unknown as StServiceInstance;
     const http = {
-      get: vi.fn(() => of(resp)),
-      delete: vi.fn(() => of(new HttpResponse({ status: 200, body: null }))),
+      get: vi.fn(() => of({ resources: [], pagination: { totalResults: 0, totalPages: 0, next: null, previous: null, first: { href: '' }, last: { href: '' } } })),
+      post: vi.fn(() => of(created)),
     } as unknown as HttpClient;
     const src = new CnsiServiceInstancesSource('cnsi-1', http);  // no eds
     await src.load();
-    await src.delete('si-1');
-    expect(src.items().map(s => s.guid)).toEqual([]);
+    await src.create({ name: 'cache' });
+    expect(src.items().map(s => s.guid)).toEqual(['si-2']);
   });
 });
