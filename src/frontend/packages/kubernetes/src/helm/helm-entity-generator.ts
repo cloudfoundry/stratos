@@ -55,7 +55,6 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         techPreview: false,
         authTypes: [],
         endpointListActions: (
-          _store: Store<AppState>,
           endpointsService: EndpointsDataService,
         ): IListAction<EndpointModel>[] => {
           return [{
