@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, s
 
 import { SignalListComponent, SignalListConfig, SignalListPillColor } from '@stratosui/core';
 
-import { CfCellsSignalConfigService, CfCellRow } from '../../../../shared/components/list/list-types/cf-cells/cf-cells-signal-config.service';
+import { CfCellsSignalConfigService, CfCellRow } from '../../../../shared/signal-list-configs/cf-cells/cf-cells-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 // Signal-native CF Cells tab. Replaces the legacy ListConfig +

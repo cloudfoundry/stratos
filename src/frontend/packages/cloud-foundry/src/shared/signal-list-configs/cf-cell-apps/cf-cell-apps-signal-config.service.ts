@@ -5,8 +5,8 @@ import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
 import { MetricQueryConfig, MetricQueryType, MetricsDataService, MetricsRequest } from '@stratosui/store';
 
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { StApp } from '../../../../../services/endpoint-data/stratos-types';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { StApp } from '../../../services/endpoint-data/stratos-types';
 
 // Per-cell app placement row. Joins the Diego rep CPU-percentage metric
 // (which lists the app/instance pairs scheduled on this cell) with the

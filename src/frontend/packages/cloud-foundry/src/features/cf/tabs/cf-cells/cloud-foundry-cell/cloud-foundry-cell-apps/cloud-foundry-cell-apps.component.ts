@@ -7,7 +7,7 @@ import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import {
   CfCellAppRow,
   CfCellAppsSignalConfigService,
-} from '../../../../../../shared/components/list/list-types/cf-cell-apps/cf-cell-apps-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/cf-cell-apps/cf-cell-apps-signal-config.service';
 
 @Component({
   selector: 'app-cloud-foundry-cell-apps',

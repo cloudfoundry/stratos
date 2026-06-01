@@ -17,7 +17,7 @@ import {
   CfCellHealthEntry,
   CfCellHealthSignalConfigService,
   CfCellHealthState,
-} from '../../../../../../shared/components/list/list-types/cf-cell-health/cf-cell-health-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/cf-cell-health/cf-cell-health-signal-config.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CardStatusComponent } from '../../../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { MetadataItemComponent } from '../../../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
