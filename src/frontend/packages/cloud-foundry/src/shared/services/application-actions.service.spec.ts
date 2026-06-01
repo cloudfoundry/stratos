@@ -9,7 +9,7 @@ import { AppDetailDataService } from '../../features/applications/app-detail-dat
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
-import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import { ConfirmationDialogService } from '@stratosui/core';
 import type { StratosJob, JobStage } from '../../services/async-jobs/async-job.types';
 

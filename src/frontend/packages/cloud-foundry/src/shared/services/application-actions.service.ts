@@ -9,7 +9,7 @@ import { AppDetailDataService } from '../../features/applications/app-detail-dat
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
-import { CfAppsSignalConfigService } from '../components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
 
 /**

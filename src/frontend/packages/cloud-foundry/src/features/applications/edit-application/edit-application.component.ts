@@ -10,7 +10,7 @@ import { defer, firstValueFrom, from, Observable, of as observableOf, Subscripti
 import { filter, map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { CustomSlideToggleComponent } from '../../../../../core/src/shared/components/custom-slide-toggle/custom-slide-toggle.component';
 
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CreateAppStateService } from '../../../shared/data-services/create-app-state.service';
 import { AppDetailDataService } from '../app-detail-data.service';
 import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';

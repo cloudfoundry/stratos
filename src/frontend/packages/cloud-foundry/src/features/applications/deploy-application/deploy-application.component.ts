@@ -18,7 +18,7 @@ import { AsyncPipe } from '@angular/common';
 
 import { SourceType } from '../../../store/types/deploy-application.types';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';

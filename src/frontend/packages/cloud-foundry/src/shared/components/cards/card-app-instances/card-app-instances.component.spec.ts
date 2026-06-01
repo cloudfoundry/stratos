@@ -9,7 +9,7 @@ import { ConfirmationDialogService, CurrentUserPermissionsService, TailwindSnack
 import { CardAppInstancesComponent } from './card-app-instances.component';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
-import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../signal-list-configs/app/cf-apps-signal-config.service';
 
 interface DataStubOpts {
   desired?: number;

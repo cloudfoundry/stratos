@@ -3,10 +3,10 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
-import { CloudFoundryService } from '../../../../data-services/cloud-foundry.service';
-import type { StApp } from '../../../../../services/endpoint-data/stratos-types';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import type { StApp } from '../../../services/endpoint-data/stratos-types';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 
 function makeHttp(): HttpClient {
   return {

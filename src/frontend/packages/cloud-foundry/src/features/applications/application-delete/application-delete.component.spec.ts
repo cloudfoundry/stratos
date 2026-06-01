@@ -17,7 +17,7 @@ import {
 import { ApplicationDeleteComponent } from './application-delete.component';
 import { AppDeleteSelectionService } from '../app-delete-selection.service';
 import { AppDetailDataService } from '../app-detail-data.service';
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 
 function makeStubAppDetailDataService() {
   const _errors = signal<Record<string, unknown | null>>({
