@@ -13,6 +13,7 @@ export type EntityKind =
   | 'orgs'
   | 'apps'
   | 'spaces'
+  | 'routes'
   | 'serviceInstances'
   | 'serviceOfferings'
   | 'servicePlans'

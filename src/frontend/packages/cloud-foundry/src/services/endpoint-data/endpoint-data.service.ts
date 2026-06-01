@@ -81,6 +81,12 @@ export class EndpointDataService {
   private readonly _orgsStale = signal<boolean>(false);
   private readonly _appsStale = signal<boolean>(false);
   private readonly _spacesStale = signal<boolean>(false);
+  // Routes have no full-list signal here (only _routeCount, populated by
+  // load()'s home-card fast path). The stale flag busts that count's
+  // warm-cache short-circuit so a delete that cascades to routes forces the
+  // count to refetch. This is the slice the legacy cascade-registry never
+  // marked — the gap the relation-graph invalidation closes.
+  private readonly _routesStale = signal<boolean>(false);
   private readonly _serviceInstancesStale = signal<boolean>(false);
   private readonly _serviceOfferingsStale = signal<boolean>(false);
   private readonly _servicePlansStale = signal<boolean>(false);
@@ -123,6 +129,7 @@ export class EndpointDataService {
   readonly orgsStale: Signal<boolean> = this._orgsStale.asReadonly();
   readonly appsStale: Signal<boolean> = this._appsStale.asReadonly();
   readonly spacesStale: Signal<boolean> = this._spacesStale.asReadonly();
+  readonly routesStale: Signal<boolean> = this._routesStale.asReadonly();
   readonly serviceInstancesStale: Signal<boolean> = this._serviceInstancesStale.asReadonly();
   readonly serviceOfferingsStale: Signal<boolean> = this._serviceOfferingsStale.asReadonly();
   readonly servicePlansStale: Signal<boolean> = this._servicePlansStale.asReadonly();
@@ -160,8 +167,10 @@ export class EndpointDataService {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'load' });
     // Warm-cache short-circuit: signals already populated, no network needed.
     // Without this, every consumer that calls load() fires the full HTTP
-    // fan-out — measured as ~3-15s per endpoint on adepttech.
-    if (this._lastFetched() !== null && this._recentApps().length > 0) {
+    // fan-out — measured as ~3-15s per endpoint on adepttech. A stale routes
+    // flag (set when a delete cascades to routes) busts the short-circuit so
+    // the route count refetches.
+    if (!this._routesStale() && this._lastFetched() !== null && this._recentApps().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'load' });
       return of(undefined);
     }
@@ -198,6 +207,8 @@ export class EndpointDataService {
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
+        // Route count has just been refetched — clear the cascade stale flag.
+        this._routesStale.set(false);
         // Shim write-through is intentionally NOT called here. Counts + recent
         // apps populate service signals for the home card directly; the NGRX
         // pagination store only needs the full lists, which loadDetails()
@@ -455,6 +466,7 @@ export class EndpointDataService {
       case 'orgs': this._orgsStale.set(true); break;
       case 'apps': this._appsStale.set(true); break;
       case 'spaces': this._spacesStale.set(true); break;
+      case 'routes': this._routesStale.set(true); break;
       case 'serviceInstances': this._serviceInstancesStale.set(true); break;
       case 'serviceOfferings': this._serviceOfferingsStale.set(true); break;
       case 'servicePlans': this._servicePlansStale.set(true); break;

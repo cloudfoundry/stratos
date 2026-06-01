@@ -3,7 +3,13 @@ import { inject, Injectable, InjectionToken } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import type { AsyncJobResult } from '../async-jobs/async-job.types';
 import { writeWithJob } from '../async-jobs/write-with-job';
-import type { DeleteEvent, DeleteHandle, DeleteRequest } from './delete-event.types';
+import type { EntityKind } from '../data-sources/cascade-registry';
+import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
+import { EndpointDataRegistry } from '../endpoint-data/endpoint-data.registry';
+import type { EndpointDataService } from '../endpoint-data/endpoint-data.service';
+import { SignalRelationFetcherService } from '../../entity-relations/signal/signal-relation-fetcher.service';
+import { affectedSlices } from './affected-slices';
+import type { DeleteCleanupHook, DeleteEvent, DeleteHandle, DeleteRequest } from './delete-event.types';
 
 // ---------------------------------------------------------------------------
 // Injection token — lets tests supply a fake without touching HttpClient.
@@ -25,6 +31,22 @@ export const WRITE_WITH_JOB = new InjectionToken<WriteWithJobFn>(
 );
 
 // ---------------------------------------------------------------------------
+// entityKind → EndpointDataService row-remover. Removing the deleted row keeps
+// the originating slice consistent locally without a refetch; the *child*
+// slices (from affectedSlices) are marked stale instead. Routes are a
+// count-only slice with no row list, so they have no remover — they're handled
+// purely via markStale('routes').
+// ---------------------------------------------------------------------------
+
+const ROW_REMOVERS: Readonly<Record<string, (eds: EndpointDataService, guid: string) => void>> = {
+  organization: (eds, guid) => eds.removeOrg(guid),
+  space: (eds, guid) => eds.removeSpace(guid),
+  application: (eds, guid) => eds.removeApp(guid),
+  serviceInstance: (eds, guid) => eds.removeServiceInstance(guid),
+  serviceCredentialBinding: (eds, guid) => eds.removeServiceCredentialBinding(guid),
+};
+
+// ---------------------------------------------------------------------------
 // Controller
 // ---------------------------------------------------------------------------
 
@@ -32,6 +54,18 @@ export const WRITE_WITH_JOB = new InjectionToken<WriteWithJobFn>(
 export class EntityDeleteController {
   private readonly http = inject(HttpClient);
   private readonly writeFn = inject(WRITE_WITH_JOB);
+  private readonly endpoints = inject(EndpointDataRegistry);
+  private readonly relations = inject(SignalRelationFetcherService);
+  private readonly diagnostics = inject(StratosDiagnostics);
+
+  // Cleanup subscribers (favorites, recents). Registered once at bootstrap;
+  // invoked after every successful delete.
+  private readonly cleanups: DeleteCleanupHook[] = [];
+
+  /** Register a cleanup hook fired after each successful delete. */
+  registerCleanup(hook: DeleteCleanupHook): void {
+    this.cleanups.push(hook);
+  }
 
   delete(req: DeleteRequest): DeleteHandle {
     const subject = new ReplaySubject<DeleteEvent>(3);
@@ -49,6 +83,9 @@ export class EntityDeleteController {
     // lifecycle — the terminal event and done resolution must always happen.
     const safeNext = (event: DeleteEvent): void => {
       try { subject.next(event); } catch { /* observer threw */ }
+      try {
+        this.diagnostics.emitCounter('delete-event', { state: event.state, entityKind: event.entityKind });
+      } catch { /* diagnostics must never break the lifecycle */ }
     };
 
     const done = (async (): Promise<DeleteEvent> => {
@@ -56,6 +93,9 @@ export class EntityDeleteController {
       try {
         safeNext({ ...base, state: 'start' });
         await this.writeFn(this.http, req.call());
+        // Invalidate caches + run cleanup BEFORE emitting success so a
+        // success observer sees a consistent post-delete world.
+        this.invalidateAndCleanup(req);
         terminal = { ...base, state: 'success' };
       } catch (error: unknown) {
         terminal = { ...base, state: 'failure', error };
@@ -66,5 +106,27 @@ export class EntityDeleteController {
     })();
 
     return { events$: subject.asObservable(), done };
+  }
+
+  // On success: walk the relation graph for the deleted entity, mark every
+  // affected EDS slice stale, remove the deleted row, then fire cleanup hooks.
+  // Each step is isolated so one failure can't strand the others or reject the
+  // done promise. Cleanup hooks run even without a cached EDS — favorites and
+  // recents live outside the per-cnsi cache.
+  private invalidateAndCleanup(req: DeleteRequest): void {
+    const eds = this.endpoints.peek(req.cnsiGuid);
+    if (eds) {
+      try {
+        for (const slice of affectedSlices(req.entityKind, this.relations.snapshotRegistry())) {
+          eds.markStale(slice as EntityKind);
+        }
+      } catch { /* invalidation is best-effort */ }
+      try {
+        ROW_REMOVERS[req.entityKind]?.(eds, req.deleteGuid);
+      } catch { /* row removal is best-effort */ }
+    }
+    for (const cleanup of this.cleanups) {
+      try { cleanup(req); } catch { /* one bad hook can't block the rest */ }
+    }
   }
 }

@@ -30,3 +30,11 @@ export interface DeleteHandle {
   events$: Observable<DeleteEvent>;
   done: Promise<DeleteEvent>;
 }
+
+/**
+ * Hook invoked after a successful delete so subscribers (favorites, recents)
+ * can clean up references to the removed entity. Runs regardless of whether an
+ * EndpointDataService cache exists for the endpoint — favorites/recents live
+ * outside the per-cnsi cache.
+ */
+export type DeleteCleanupHook = (req: DeleteRequest) => void;
