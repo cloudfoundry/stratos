@@ -174,7 +174,12 @@ export class SignalRelationFetcherService {
     this.inFlight.clear();
   }
 
-  private snapshotRegistry(): RelationDescriptorRegistry {
+  /**
+   * Snapshot the current descriptor set as a parent→children registry.
+   * Public so the entity-delete chokepoint can derive invalidation closures
+   * (affectedSlices) from the same descriptors that drive fetch.
+   */
+  snapshotRegistry(): RelationDescriptorRegistry {
     return indexDescriptors(this.descriptors);
   }
 

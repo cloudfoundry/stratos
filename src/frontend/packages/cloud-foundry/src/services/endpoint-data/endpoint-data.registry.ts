@@ -129,6 +129,16 @@ export class EndpointDataRegistry implements OnDestroy {
     return service;
   }
 
+  // Side-effect-free lookup of an already-acquired instance. Unlike acquire()
+  // this does NOT create an instance, bump refCount, or enqueue a load — it
+  // returns undefined when nothing is cached for the guid. Used by the
+  // entity-delete chokepoint to invalidate an endpoint's slices only when a
+  // cache actually exists (a delete against an un-visited endpoint has nothing
+  // to clean up).
+  peek(guid: string): EndpointDataService | undefined {
+    return this.instances.get(guid)?.service;
+  }
+
   release(guid: string): void {
     const entry = this.instances.get(guid);
     if (!entry) { return; }

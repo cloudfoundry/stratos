@@ -3,9 +3,14 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { config as rxjsConfig } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AsyncJobResult } from '../async-jobs/async-job.types';
 import { StratosJobError } from '../async-jobs/async-job.types';
+import { EndpointDataRegistry } from '../endpoint-data/endpoint-data.registry';
+import { SignalRelationFetcherService } from '../../entity-relations/signal/signal-relation-fetcher.service';
+import { indexDescriptors } from '../../entity-relations/signal/signal-relation-tree';
+import { CF_RELATION_DESCRIPTORS } from '../../entity-relations/signal/cf-relation-registrations';
+import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { EntityDeleteController, WRITE_WITH_JOB } from './entity-delete.controller';
 import type { DeleteRequest } from './delete-event.types';
 
@@ -25,6 +30,17 @@ const makeRequest = (): DeleteRequest => ({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+// Lightweight fakes for the invalidation collaborators the controller injects.
+// The lifecycle-only describe blocks below don't exercise invalidation, but
+// the controller still resolves these at construction, so every TestBed needs
+// them. peek() → undefined keeps invalidation a no-op; an empty relation
+// registry yields no affected slices.
+const stubInvalidationProviders = () => [
+  { provide: EndpointDataRegistry, useValue: { peek: () => undefined } },
+  { provide: SignalRelationFetcherService, useValue: { snapshotRegistry: () => indexDescriptors([]) } },
+  { provide: StratosDiagnostics, useValue: { emitCounter: () => { /* noop */ } } },
+];
 
 /** Collect all events$ emissions into an array then return them. */
 const collectStates = async (ctrl: EntityDeleteController, req: DeleteRequest): Promise<string[]> => {
@@ -52,6 +68,7 @@ describe('EntityDeleteController', () => {
           provideZonelessChangeDetection(),
           EntityDeleteController,
           { provide: WRITE_WITH_JOB, useValue: fakeWrite },
+          ...stubInvalidationProviders(),
         ],
       });
       ctrl = TestBed.inject(EntityDeleteController);
@@ -130,6 +147,7 @@ describe('EntityDeleteController', () => {
           provideZonelessChangeDetection(),
           EntityDeleteController,
           { provide: WRITE_WITH_JOB, useValue: fakeWrite },
+          ...stubInvalidationProviders(),
         ],
       });
       ctrl = TestBed.inject(EntityDeleteController);
@@ -153,6 +171,122 @@ describe('EntityDeleteController', () => {
       // The done promise must never reject — the caller reads the terminal event.
       const req = makeRequest();
       await expect(ctrl.delete(req).done).resolves.toBeDefined();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Invalidation + cleanup on the success path (Task 4). The controller walks
+  // the relation graph for the deleted entity, marks every affected EDS slice
+  // stale, removes the deleted row, and fires registered cleanup hooks. This
+  // is the mechanism that closes the silently-dropped-delete bug.
+  // -------------------------------------------------------------------------
+
+  describe('invalidation + cleanup on success', () => {
+    const ORG_REQUEST: DeleteRequest = {
+      cnsiGuid: 'cnsi-guid-1',
+      cnsiName: 'My CF',
+      entityKind: 'organization',
+      deleteGuid: 'org-guid-1',
+      deleteName: 'demo-org',
+      call: () => of(new HttpResponse({ status: 200 })),
+    };
+
+    const makeEds = () => ({
+      markStale: vi.fn(),
+      removeOrg: vi.fn(),
+      removeSpace: vi.fn(),
+      removeApp: vi.fn(),
+      removeServiceInstance: vi.fn(),
+      removeServiceCredentialBinding: vi.fn(),
+    });
+
+    const configure = (opts: { eds: ReturnType<typeof makeEds> | undefined }) => {
+      const diag = { emitCounter: vi.fn() };
+      const registry = { peek: vi.fn(() => opts.eds) };
+      const relations = { snapshotRegistry: () => indexDescriptors(CF_RELATION_DESCRIPTORS) };
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          EntityDeleteController,
+          { provide: WRITE_WITH_JOB, useValue: async () => ({ status: 'COMPLETE', state: undefined } as AsyncJobResult<void>) },
+          { provide: EndpointDataRegistry, useValue: registry },
+          { provide: SignalRelationFetcherService, useValue: relations },
+          { provide: StratosDiagnostics, useValue: diag },
+        ],
+      });
+      return { ctrl: TestBed.inject(EntityDeleteController), diag, registry };
+    };
+
+    it('marks every relation-graph slice of the deleted org stale', async () => {
+      const eds = makeEds();
+      const { ctrl } = configure({ eds });
+      await ctrl.delete(ORG_REQUEST).done;
+
+      const marked = eds.markStale.mock.calls.map(c => c[0]);
+      expect(marked).toEqual(
+        expect.arrayContaining(['spaces', 'apps', 'routes', 'serviceInstances', 'serviceCredentialBindings']),
+      );
+    });
+
+    it('removes the deleted org row from the EDS cache', async () => {
+      const eds = makeEds();
+      const { ctrl } = configure({ eds });
+      await ctrl.delete(ORG_REQUEST).done;
+      expect(eds.removeOrg).toHaveBeenCalledWith('org-guid-1');
+    });
+
+    it('invokes registered cleanup hooks with the request', async () => {
+      const eds = makeEds();
+      const { ctrl } = configure({ eds });
+      const hook = vi.fn();
+      ctrl.registerCleanup(hook);
+      await ctrl.delete(ORG_REQUEST).done;
+      expect(hook).toHaveBeenCalledWith(ORG_REQUEST);
+    });
+
+    it('emits a delete-event success diagnostics counter', async () => {
+      const eds = makeEds();
+      const { ctrl, diag } = configure({ eds });
+      await ctrl.delete(ORG_REQUEST).done;
+      expect(diag.emitCounter).toHaveBeenCalledWith('delete-event', {
+        state: 'success',
+        entityKind: 'organization',
+      });
+    });
+
+    it('does not throw and still runs cleanup when no EDS instance is cached', async () => {
+      const { ctrl } = configure({ eds: undefined });
+      const hook = vi.fn();
+      ctrl.registerCleanup(hook);
+      const terminal = await ctrl.delete(ORG_REQUEST).done;
+      expect(terminal.state).toBe('success');
+      expect(hook).toHaveBeenCalledWith(ORG_REQUEST);
+    });
+
+    it('does not invalidate or run cleanup on the failure path', async () => {
+      const eds = makeEds();
+      const diag = { emitCounter: vi.fn() };
+      const registry = { peek: vi.fn(() => eds) };
+      const relations = { snapshotRegistry: () => indexDescriptors(CF_RELATION_DESCRIPTORS) };
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          EntityDeleteController,
+          { provide: WRITE_WITH_JOB, useValue: async () => { throw new Error('boom'); } },
+          { provide: EndpointDataRegistry, useValue: registry },
+          { provide: SignalRelationFetcherService, useValue: relations },
+          { provide: StratosDiagnostics, useValue: diag },
+        ],
+      });
+      const ctrl = TestBed.inject(EntityDeleteController);
+      const hook = vi.fn();
+      ctrl.registerCleanup(hook);
+      const terminal = await ctrl.delete(ORG_REQUEST).done;
+
+      expect(terminal.state).toBe('failure');
+      expect(eds.markStale).not.toHaveBeenCalled();
+      expect(eds.removeOrg).not.toHaveBeenCalled();
+      expect(hook).not.toHaveBeenCalled();
     });
   });
 });

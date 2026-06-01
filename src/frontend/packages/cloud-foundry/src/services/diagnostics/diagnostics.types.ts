@@ -11,6 +11,7 @@ export const DIAGNOSTIC_CODE_FAMILIES = [
   'in-flight-hit',
   'buffer-overflow',
   'cascade-apply',
+  'delete-event',
 ] as const;
 
 export type DiagnosticCode = typeof DIAGNOSTIC_CODE_FAMILIES[number];
