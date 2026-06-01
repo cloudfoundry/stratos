@@ -1,6 +1,6 @@
 import { ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ActionState, AppState, EndpointModel, EndpointsDataService, entityCatalog, Store, stratosEntityCatalog } from '@stratosui/store';
+import { ActionState, EndpointModel, EndpointsDataService, entityCatalog, stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -55,7 +55,6 @@ function combineCreateVisibles(
 
 @Injectable()
 export class EndpointListHelper {
-  private store = inject<Store<AppState>>(Store);
   private router = inject(Router);
   private dialog = inject(TailwindDialogService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
@@ -71,7 +70,7 @@ export class EndpointListHelper {
     const customActions = entityCatalog.getAllEndpointTypes()
       .map(endpoint => endpoint.definition.endpointListActions)
       .filter(endpointListActions => !!endpointListActions)
-      .map(endpointListActions => endpointListActions(this.store, this.endpointsData))
+      .map(endpointListActions => endpointListActions(this.endpointsData))
       .reduce((res, actions) => res.concat(actions), []);
 
     if (includeSeparators && customActions.length) {

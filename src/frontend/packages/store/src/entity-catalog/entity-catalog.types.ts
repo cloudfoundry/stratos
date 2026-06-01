@@ -180,7 +180,6 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    * Note - These should be restricted by type
    */
   readonly endpointListActions?: (
-    store: Store<AppState>,
     endpointsService: EndpointsDataService,
   ) => IListAction<EndpointModel>[];
 
