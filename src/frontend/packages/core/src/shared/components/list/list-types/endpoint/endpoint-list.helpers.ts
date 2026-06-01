@@ -13,7 +13,7 @@ import { UserProfileService } from '../../../../../core/user-profile.service';
 import { SnackBarService } from '../../../../services/snackbar.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { createMetaCardMenuItemSeparator } from '../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { createMetaCardMenuItemSeparator } from '../../../meta-card/meta-card-base/meta-card.component';
 import { IListAction } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 

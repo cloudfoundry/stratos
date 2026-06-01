@@ -31,11 +31,11 @@ import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean
 
 // Import non-standalone dependencies directly
 import { PageHeaderEventsComponent } from '../../../../page-header/page-header-events/page-header-events.component';
-import { MetaCardComponent } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardItemComponent } from '../../../list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MetaCardComponent } from '../../../../meta-card/meta-card-base/meta-card.component';
+import { MetaCardTitleComponent } from '../../../../meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardItemComponent } from '../../../../meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../../meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../../../meta-card/meta-card-value/meta-card-value.component';
 import { TableCellEndpointStatusComponent } from '../table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { DisableRouterLinkDirective } from '../../../../../../core/disable-router-link.directive';
 
