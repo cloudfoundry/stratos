@@ -4,10 +4,10 @@ import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { CnsiSpacesSource } from '../../../../../services/data-sources/cnsi-spaces-source';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { CnsiSpacesSource } from '../../../services/data-sources/cnsi-spaces-source';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { StSpace } from '../../../services/endpoint-data/stratos-types';
 
 /**
  * Wire shape of /pp/v1/cf/org/{cnsi}/{org}/spaces. Mirrors

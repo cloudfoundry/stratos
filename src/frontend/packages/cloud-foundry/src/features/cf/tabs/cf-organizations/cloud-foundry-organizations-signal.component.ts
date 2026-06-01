@@ -23,7 +23,7 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { CfOrgsSignalConfigService } from '../../../../shared/components/list/list-types/org/cf-orgs-signal-config.service';
+import { CfOrgsSignalConfigService } from '../../../../shared/signal-list-configs/org/cf-orgs-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrg } from '../../../../services/endpoint-data/stratos-types';

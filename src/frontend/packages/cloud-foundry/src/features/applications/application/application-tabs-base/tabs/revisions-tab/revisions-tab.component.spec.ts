@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
 import { RevisionsTabComponent } from './revisions-tab.component';
-import { RevisionsSignalConfigService } from '../../../../../../shared/components/list/list-types/revisions/revisions-signal-config.service';
+import { RevisionsSignalConfigService } from '../../../../../../shared/signal-list-configs/revisions/revisions-signal-config.service';
 import type { RevisionRow } from '../../../../../../shared/services/revisions.service';
 
 function makeRevision(overrides: Partial<RevisionRow> = {}): RevisionRow {

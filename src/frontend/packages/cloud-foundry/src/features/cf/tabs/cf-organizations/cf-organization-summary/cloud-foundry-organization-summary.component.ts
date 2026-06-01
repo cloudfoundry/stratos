@@ -13,7 +13,7 @@ import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-use
 import { goToAppWall } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { CfOrgsSignalConfigService } from '../../../../../shared/components/list/list-types/org/cf-orgs-signal-config.service';
+import { CfOrgsSignalConfigService } from '../../../../../shared/signal-list-configs/org/cf-orgs-signal-config.service';
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { TileGridComponent } from '../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from '../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';

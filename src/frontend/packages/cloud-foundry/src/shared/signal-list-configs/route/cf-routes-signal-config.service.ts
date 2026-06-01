@@ -3,11 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
-import { EndpointDataRegistry } from '../../../../../services/endpoint-data/endpoint-data.registry';
-import type { EndpointDataService } from '../../../../../services/endpoint-data/endpoint-data.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { CnsiRoutesSource } from '../../../../../services/data-sources/cnsi-routes-source';
-import type { StRoute, StRoutesResponse } from '../../../../../services/endpoint-data/stratos-types';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { CnsiRoutesSource } from '../../../services/data-sources/cnsi-routes-source';
+import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
 
 // Routes list config service — single-CNSI, single-space. Analog of
 // CfSpacesSignalConfigService, but routes are not carried on

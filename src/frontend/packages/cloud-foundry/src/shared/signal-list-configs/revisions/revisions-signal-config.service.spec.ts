@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { RevisionsSignalConfigService } from './revisions-signal-config.service';
-import type { RevisionRow, RevisionsResponse } from '../../../../services/revisions.service';
+import type { RevisionRow, RevisionsResponse } from '../../services/revisions.service';
 
 function makeRevision(overrides: Partial<RevisionRow> = {}): RevisionRow {
   return {

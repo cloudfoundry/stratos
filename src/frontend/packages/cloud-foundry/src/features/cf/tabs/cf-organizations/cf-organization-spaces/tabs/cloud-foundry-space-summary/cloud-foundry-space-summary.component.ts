@@ -11,7 +11,7 @@ import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { CfSpacesSignalConfigService } from '../../../../../../../shared/components/list/list-types/space/cf-spaces-signal-config.service';
+import { CfSpacesSignalConfigService } from '../../../../../../../shared/signal-list-configs/space/cf-spaces-signal-config.service';
 import {
   PageSubNavComponent,
   TileGridComponent,

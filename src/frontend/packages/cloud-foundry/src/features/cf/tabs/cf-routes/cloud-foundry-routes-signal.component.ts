@@ -20,7 +20,7 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { CfRoutesSignalConfigService } from '../../../../shared/components/list/list-types/route/cf-routes-signal-config.service';
+import { CfRoutesSignalConfigService } from '../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '../../../../services/extract-error-message';

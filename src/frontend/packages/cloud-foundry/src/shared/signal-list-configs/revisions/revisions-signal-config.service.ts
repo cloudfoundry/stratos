@@ -3,9 +3,9 @@ import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { RevisionsService } from '../../../../services/revisions.service';
-import type { RevisionRow } from '../../../../services/revisions.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { RevisionsService } from '../../services/revisions.service';
+import type { RevisionRow } from '../../services/revisions.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 
 // Revisions list config — single-app, read-only list. Drives the per-app
 // /apps/:cnsi/:app/revisions tab. Revisions represent past deployments; the
