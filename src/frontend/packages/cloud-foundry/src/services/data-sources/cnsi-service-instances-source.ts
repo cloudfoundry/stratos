@@ -3,7 +3,6 @@ import { firstValueFrom } from 'rxjs';
 import { CnsiEntitySource } from './cnsi-entity-source';
 import type { StServiceInstance } from '../endpoint-data/stratos-types';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
-import { writeWithJob } from '../async-jobs/write-with-job';
 
 // Per-CNSI source for service instances. Reads
 // /pp/v1/cf/service_instances/{cnsi}, which now emits the nested-ref
@@ -52,14 +51,7 @@ export class CnsiServiceInstancesSource extends CnsiEntitySource<StServiceInstan
     return updated;
   }
 
-  async delete(siGuid: string): Promise<void> {
-    const call = this.http.delete(
-      `/pp/v1/cf/service_instances/${this.cnsiGuid}/${siGuid}`,
-      { observe: 'response' },
-    );
-    await writeWithJob(this.http, call);
-    this.patchItems(items => items.filter(si => si.guid !== siGuid));
-    this.eds?.removeServiceInstance(siGuid);
-    this.eds?.applyCascade('serviceInstance.delete');
-  }
+  // NOTE: service-instance delete routes through EntityDeleteController (see
+  // CfServiceInstancesSignalConfigService.deleteServiceInstance); create/update
+  // stay here.
 }

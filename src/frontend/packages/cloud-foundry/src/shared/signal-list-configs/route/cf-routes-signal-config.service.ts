@@ -6,7 +6,9 @@ import { ListStateStore, naturalCompare } from '@stratosui/core';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
-import { CnsiRoutesSource } from '../../../services/data-sources/cnsi-routes-source';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
+import { routeEntityType } from '../../../cf-entity-types';
 import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
 
 // Routes list config service — single-CNSI, single-space. Analog of
@@ -26,6 +28,7 @@ export class CfRoutesSignalConfigService {
   private readonly registry = inject(EndpointDataRegistry);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly deleteController = inject(EntityDeleteController);
 
   private endpointDataService?: EndpointDataService;
   private cnsiGuid = '';
@@ -272,13 +275,16 @@ export class CfRoutesSignalConfigService {
   }
 
   async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    const eds = this.registry.acquire(cnsiGuid);
-    const source = new CnsiRoutesSource(cnsiGuid, this.http, eds);
-    await source.delete(routeGuid);
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: routeEntityType,
+      deleteGuid: routeGuid,
+      path: `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}`,
+    });
     // The local _routes list lives on this config service (via fetchRoutes),
-    // not the source — the source's _items is discarded. Re-fetch the list
-    // so the just-deleted row leaves the view. The applyCascade in delete()
-    // also marks apps stale for the cross-tab UX.
+    // not on the EDS cache — re-fetch so the just-deleted row leaves the view.
+    // The controller has already marked the routes/space/app slices stale for
+    // the cross-tab UX.
     await this.fetchRoutes();
   }
 

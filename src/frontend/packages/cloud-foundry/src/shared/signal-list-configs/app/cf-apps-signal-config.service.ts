@@ -4,10 +4,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../services/data-sources/cnsi-apps-source';
-import { CnsiRoutesSource } from '../../../services/data-sources/cnsi-routes-source';
-import { CnsiServiceBindingsSource } from '../../../services/data-sources/cnsi-service-bindings-source';
 import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
+import { applicationEntityType, routeEntityType } from '../../../cf-entity-types';
+import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse } from '../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
@@ -162,6 +164,7 @@ export class CfAppsSignalConfigService {
   private _lockedSpaceGuid = '';
 
   private readonly endpointRegistry = inject(EndpointDataRegistry);
+  private readonly deleteController = inject(EntityDeleteController);
 
   constructor(private readonly http: HttpClient) {
     const cfService = inject(CloudFoundryService, { optional: true });
@@ -883,25 +886,34 @@ export class CfAppsSignalConfigService {
   // CnsiServiceBindingsSource so the binding row is dropped from
   // EndpointDataService._serviceCredentialBindings on success and the
   // serviceBinding.delete cascade fires (marks apps + SI stale).
+  // Deletes a service credential binding through the EntityDeleteController
+  // chokepoint. The controller removes the binding from
+  // EndpointDataService._serviceCredentialBindings and (via reverse edges)
+  // marks the bound app + service-instance lists stale.
   async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<void> {
-    const eds = this.endpointRegistry.acquire(cnsiGuid);
-    const source = new CnsiServiceBindingsSource(cnsiGuid, this.http, eds);
-    await source.delete(bindingGuid);
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: serviceCredentialBindingEntityType,
+      deleteGuid: bindingGuid,
+      path: `/pp/v1/cf/service_bindings/${cnsiGuid}/${bindingGuid}`,
+    });
   }
 
-  // Deletes a CF route through CnsiRoutesSource. The source handles
-  // writeWithJob, patches its own _items, and fires the route.delete
-  // cascade (marks apps stale so app-detail route lists refetch).
+  // Deletes a CF route through the EntityDeleteController chokepoint. Routes
+  // are a count-only EDS slice (no row list), so the controller marks the
+  // routes slice stale + the referencing space/app lists.
   //
   // Used by the signal-native delete stepper when the user opts to delete
-  // attached routes alongside the app. Throws StratosJobError on FAILED
-  // terminal state — callers should either surface the error or swallow it
-  // (the route may fail to delete because the app delete already cascaded
-  // through CF's reference checks).
+  // attached routes alongside the app. Throws on FAILED terminal state —
+  // callers should either surface the error or swallow it (the route may fail
+  // to delete because the app delete already cascaded through CF's checks).
   async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    const eds = this.endpointRegistry.acquire(cnsiGuid);
-    const source = new CnsiRoutesSource(cnsiGuid, this.http, eds);
-    await source.delete(routeGuid);
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: routeEntityType,
+      deleteGuid: routeGuid,
+      path: `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}`,
+    });
   }
 
   // Lifecycle actions. The CF v3 /v3/apps/{guid}/actions/{action} endpoints
@@ -957,22 +969,19 @@ export class CfAppsSignalConfigService {
     await writeWithJob(this.http, call);
   }
 
-  async deleteApp(cnsiGuid: string, appGuid: string): Promise<void> {
-    // Orchestrator-undefined fallback (cold bookmark / HMR): no source to
-    // update, but we still need to issue the delete and wait for CF's
-    // async job to terminate before the caller refreshes.
-    if (!this.orchestrator) {
-      const call = this.http.delete(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`, { observe: 'response' });
-      await writeWithJob(this.http, call);
-      return;
-    }
-    const src = this.orchestrator.sourceFor(cnsiGuid) as CnsiAppsSource | undefined;
-    if (!src) {
-      const call = this.http.delete(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`, { observe: 'response' });
-      await writeWithJob(this.http, call);
-      return;
-    }
-    // Source-aware path: waits for terminal state and updates local cache.
-    await src.delete(appGuid);
+  // Deletes an app through the EntityDeleteController chokepoint, then drops
+  // the row from the orchestrator's aggregated view (no-op when there is no
+  // orchestrator — the prior cold-fallback branch). The controller removes the
+  // app from the EDS cache and marks descendant routes/bindings + the space's
+  // app-count stale.
+  async deleteApp(cnsiGuid: string, appGuid: string, appName: string = appGuid): Promise<void> {
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: applicationEntityType,
+      deleteGuid: appGuid,
+      deleteName: appName,
+      path: `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`,
+    });
+    this.orchestrator?.removeRow(cnsiGuid, appGuid);
   }
 }

@@ -2,25 +2,20 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { StSpace } from '../endpoint-data/stratos-types';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
-import { writeWithJob } from '../async-jobs/write-with-job';
 
 // Thin mutation surface for spaces. Mirrors CnsiOrgsSource — see that
 // file for the architectural rationale. Spaces cache lives on
 // EndpointDataService._spaces; this class patches it on success and fires
 // the cascade marker for downstream slices (apps / SI / bindings).
+//
+// NOTE: space *delete* routes through EntityDeleteController (see
+// CfSpacesSignalConfigService.deleteSpace); create/update stay here.
 export class CnsiSpacesSource {
   constructor(
     readonly cnsiGuid: string,
     private readonly http: HttpClient,
     private readonly eds: EndpointDataService,
   ) {}
-
-  async delete(spaceGuid: string): Promise<void> {
-    const call = this.http.delete(`/pp/v1/cf/spaces/${this.cnsiGuid}/${spaceGuid}`, { observe: 'response' });
-    await writeWithJob(this.http, call);
-    this.eds.removeSpace(spaceGuid);
-    this.eds.applyCascade('space.delete');
-  }
 
   async create(payload: unknown): Promise<StSpace> {
     const created = await firstValueFrom(

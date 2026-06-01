@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { CnsiRoutesSource } from './cnsi-routes-source';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
@@ -21,21 +21,6 @@ describe('CnsiRoutesSource', () => {
     expect(eds.applyCascade).toHaveBeenCalledWith('route.delete');
   });
 
-  it('delete(routeGuid) goes through writeWithJob + patches _items + cascade("route.delete")', async () => {
-    const resp = {
-      resources: [{ guid: 'route-1', host: 'foo' }],
-      pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
-    };
-    const http = {
-      get: vi.fn(() => of(resp)),
-      delete: vi.fn(() => of(new HttpResponse({ status: 200, body: null }))),
-    } as unknown as HttpClient;
-    const eds = makeEds();
-    const src = new CnsiRoutesSource('cnsi-1', http, eds);
-    await src.load();
-    await src.delete('route-1');
-    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/routes/cnsi-1/route-1', { observe: 'response' });
-    expect(src.items().map(r => r.guid)).toEqual([]);
-    expect(eds.applyCascade).toHaveBeenCalledWith('route.delete');
-  });
+  // route delete moved to EntityDeleteController (see cf-routes-signal-config
+  // + cf-apps-signal-config deleteRoute); create + unmapApp stay here.
 });

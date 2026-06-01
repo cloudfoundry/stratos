@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CnsiEntitySource } from './cnsi-entity-source';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
-import { writeWithJob } from '../async-jobs/write-with-job';
 
 export interface StRoute {
   guid: string;
@@ -24,15 +23,9 @@ export class CnsiRoutesSource extends CnsiEntitySource<StRoute> {
     super(cnsiGuid, http, pageSize);
   }
 
-  async delete(routeGuid: string): Promise<void> {
-    const call = this.http.delete(
-      `/pp/v1/cf/routes/${this.cnsiGuid}/${routeGuid}`,
-      { observe: 'response' },
-    );
-    await writeWithJob(this.http, call);
-    this.patchItems(items => items.filter(r => r.guid !== routeGuid));
-    this.eds?.applyCascade('route.delete');
-  }
+  // NOTE: route delete routes through EntityDeleteController (see
+  // CfRoutesSignalConfigService.deleteRoute + CfAppsSignalConfigService.
+  // deleteRoute); create + unmapApp (relationship-only) stay here.
 
   async create(payload: unknown): Promise<StRoute> {
     const created = await firstValueFrom(this.http.post<StRoute>(`/pp/v1/cf/routes/${this.cnsiGuid}`, payload));

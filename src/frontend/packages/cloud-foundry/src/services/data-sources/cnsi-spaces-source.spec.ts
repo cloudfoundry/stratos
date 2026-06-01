@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { CnsiSpacesSource } from './cnsi-spaces-source';
 import type { StSpace } from '../endpoint-data/stratos-types';
@@ -15,17 +15,8 @@ function makeEds(): EndpointDataService {
 }
 
 describe('CnsiSpacesSource', () => {
-  it('delete: DELETE + writeWithJob + removeSpace + cascade("space.delete")', async () => {
-    const http = {
-      delete: vi.fn(() => of(new HttpResponse({ status: 200, body: null }))),
-    } as unknown as HttpClient;
-    const eds = makeEds();
-    const src = new CnsiSpacesSource('cnsi-1', http, eds);
-    await src.delete('sp-1');
-    expect(http.delete).toHaveBeenCalledWith('/pp/v1/cf/spaces/cnsi-1/sp-1', { observe: 'response' });
-    expect(eds.removeSpace).toHaveBeenCalledWith('sp-1');
-    expect(eds.applyCascade).toHaveBeenCalledWith('space.delete');
-  });
+  // Space delete moved to EntityDeleteController (see cf-spaces-signal-config
+  // deleteSpace + entity-delete.controller.spec). create/update stay here.
 
   it('create: POST + addSpace + cascade("space.create")', async () => {
     const newSpace: StSpace = { guid: 'sp-2', name: 'new' } as unknown as StSpace;
