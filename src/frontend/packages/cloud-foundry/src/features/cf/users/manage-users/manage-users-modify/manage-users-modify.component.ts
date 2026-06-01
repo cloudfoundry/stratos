@@ -30,7 +30,7 @@ import { IOrganization } from '../../../../../cf-api.types';
 import { CfRoleCheckboxComponent } from '../../../../../shared/components/cf-role-checkbox/cf-role-checkbox.component';
 import {
   TableCellSelectOrgComponent,
-} from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
+} from './table-cell-select-org/table-cell-select-org.component';
 import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
