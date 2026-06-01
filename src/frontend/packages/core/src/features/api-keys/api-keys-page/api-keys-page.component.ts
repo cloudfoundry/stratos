@@ -14,7 +14,7 @@ import { ApiKey } from '@stratosui/store';
 import { ApiKeysDataService } from '../api-keys-data.service';
 import {
   ApiKeysSignalConfigService,
-} from '../../../shared/components/list/list-types/apiKeys/api-keys-signal-config.service';
+} from '../../../shared/signal-list-configs/apiKeys/api-keys-signal-config.service';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
