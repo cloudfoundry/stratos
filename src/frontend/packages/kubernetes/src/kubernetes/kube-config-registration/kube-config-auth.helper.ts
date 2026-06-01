@@ -3,7 +3,7 @@ import { FormBuilder } from '@angular/forms';
 
 import { naturalCompare } from '@stratosui/core';
 import { ConnectEndpointData } from '../../../../core/src/features/endpoints/connect.service';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { EndpointAuthTypeConfig, IAuthForm } from '../../../../store/src/extension-types';
 import { entityCatalog } from '../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';

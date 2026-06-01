@@ -4,7 +4,7 @@ import { WritableSignal } from '@angular/core';
 import {
   IActionMonitorComponentState,
 } from '../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { EndpointAuthTypeConfig } from '../../../../store/src/extension-types';
 import { ActionStatus } from './../../../../store/src/reducers/api-request-reducer/types';
 

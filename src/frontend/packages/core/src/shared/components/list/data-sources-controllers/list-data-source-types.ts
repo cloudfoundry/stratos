@@ -13,6 +13,8 @@ import {
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
+import { RowState, RowsState } from '../../signal-list/row-state.types';
+
 export interface IEntitySelectItem {
   page: number;
   label: string;
@@ -143,29 +145,7 @@ export interface IListDataSource<T> extends ICoreListDataSource<T>, ICoreTableLi
 }
 
 export type getRowUniqueId<T> = (row: T) => string;
-export interface RowsState {
-  [rowUID: string]: RowState;
-}
-
-export interface RowState {
-  busy?: boolean;
-  error?: boolean;
-  message?: string;
-  blocked?: boolean;
-  highlighted?: boolean;
-  deleting?: boolean;
-  warning?: boolean;
-  disabled?: boolean;
-  [customState: string]: any;
-}
-
-export const getDefaultRowState = (): RowState => ({
-  busy: false,
-  error: false,
-  blocked: false,
-  deleting: false,
-  message: null
-});
+export { RowState, RowsState, getDefaultRowState } from '../../signal-list/row-state.types';
 
 export interface ListPaginationMultiFilterChange {
   key: string;
