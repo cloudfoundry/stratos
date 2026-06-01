@@ -7,9 +7,9 @@ import { take, distinctUntilChanged, filter, map, mergeMap, switchMap, withLates
 import { naturalCompare } from '@stratosui/core';
 import { CfUsersRolesDataService, RoleChangeApplyState } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
-  TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
+  TableCellConfirmOrgSpaceComponent } from './table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
-  TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+  TableCellConfirmRoleAddRemComponent } from './table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
 import { StUser } from '../../../../../services/endpoint-data/stratos-types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
