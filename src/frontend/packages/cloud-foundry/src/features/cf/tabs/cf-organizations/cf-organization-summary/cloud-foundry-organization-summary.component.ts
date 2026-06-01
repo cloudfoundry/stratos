@@ -94,7 +94,7 @@ export class CloudFoundryOrganizationSummaryComponent {
       const cfGuid = this.cfOrgService.cfGuid;
       const orgGuid = this.cfOrgService.orgGuid;
       try {
-        await this.orgsConfig.deleteOrg(cfGuid, orgGuid);
+        await this.orgsConfig.deleteOrg(cfGuid, orgGuid, name);
         this.router.navigate(['/cloud-foundry', cfGuid, 'organizations']);
       } catch (err: any) {
         this.snackBar.error(`Failed to delete organization: ${err?.message ?? err}`, 'Close');

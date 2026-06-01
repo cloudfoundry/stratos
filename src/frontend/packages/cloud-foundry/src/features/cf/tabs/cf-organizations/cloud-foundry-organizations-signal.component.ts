@@ -233,7 +233,7 @@ export class CloudFoundryOrganizationsSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.orgsConfig.deleteOrg(org.cnsiGuid, org.guid));
+            await runAction('Delete', () => this.orgsConfig.deleteOrg(org.cnsiGuid, org.guid, org.name));
           });
         },
       },
