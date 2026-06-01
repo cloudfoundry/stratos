@@ -22,7 +22,7 @@ import { userProvidedServiceInstanceEntityType } from '../../../../../../../cf-e
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import {
   CfServiceInstancesSignalConfigService,
-} from '../../../../../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+} from '../../../../../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';

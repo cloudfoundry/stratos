@@ -20,7 +20,7 @@ import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpo
 import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import {
   CfServiceOfferingsSignalConfigService,
-} from '../../../shared/components/list/list-types/service-offering/cf-service-offerings-signal-config.service';
+} from '../../../shared/signal-list-configs/service-offering/cf-service-offerings-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import type { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 

@@ -25,7 +25,7 @@ import {
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import {
   CfServiceInstancesSignalConfigService,
-} from '../../../shared/components/list/list-types/service-instance/cf-service-instances-signal-config.service';
+} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 

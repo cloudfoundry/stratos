@@ -17,7 +17,7 @@ import { UserFavorite, UserFavoriteManager } from '@stratosui/store';
 import { serviceEntityType } from '../../../../cf-entity-types';
 import {
   CfServiceOfferingsSignalConfigService,
-} from '../../../../shared/components/list/list-types/service-offering/cf-service-offerings-signal-config.service';
+} from '../../../../shared/signal-list-configs/service-offering/cf-service-offerings-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';

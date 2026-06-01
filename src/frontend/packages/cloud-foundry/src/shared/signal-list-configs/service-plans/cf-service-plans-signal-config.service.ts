@@ -11,13 +11,13 @@ import {
 
 import { ListStateStore, SignalListColumn } from '@stratosui/core';
 
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import { ServiceCatalogDataService, SignalSource } from '../../../../../services/endpoint-data/service-catalog-data.service';
-import type { StServicePlan } from '../../../../../services/endpoint-data/stratos-types';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import type { StServicePlan } from '../../../services/endpoint-data/stratos-types';
 import {
   canShowServicePlanCosts,
   getServicePlanName,
-} from '../../../../../features/service-catalog/services-helper';
+} from '../../../features/service-catalog/services-helper';
 
 /**
  * CfServicePlansSignalConfigService — service-offering Plans tab signal-list
