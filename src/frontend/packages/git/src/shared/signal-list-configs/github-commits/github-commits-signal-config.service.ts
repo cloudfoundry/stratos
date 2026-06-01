@@ -4,8 +4,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { naturalCompare, SignalListSort } from '@stratosui/core';
 
-import { GitCommit } from '../../../../../store/git.public-types';
-import { GitSCM } from '../../../../scm/scm';
+import { GitCommit } from '../../../store/git.public-types';
+import { GitSCM } from '../../scm/scm';
 
 type SortValue = string | number;
 

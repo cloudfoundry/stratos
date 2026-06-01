@@ -5,8 +5,8 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { GitCommit } from '../../../../../store/git.public-types';
-import { GitSCM } from '../../../../scm/scm';
+import { GitCommit } from '../../../store/git.public-types';
+import { GitSCM } from '../../scm/scm';
 import { GithubCommitsSignalConfigService } from './github-commits-signal-config.service';
 
 const commit = (sha: string, message: string, name: string, date: string): GitCommit => ({
