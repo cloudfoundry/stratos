@@ -6,6 +6,8 @@ import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-d
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { CnsiOrgsSource } from '../../../services/data-sources/cnsi-orgs-source';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { organizationEntityType } from '../../../cf-entity-types';
 import type { StOrg } from '../../../services/endpoint-data/stratos-types';
 
 // Orgs list config service — single-CNSI analog to CfAppsSignalConfigService.
@@ -19,6 +21,7 @@ export class CfOrgsSignalConfigService {
   private readonly registry = inject(EndpointDataRegistry);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly deleteController = inject(EntityDeleteController);
 
   // Wrapped in a signal so the `orgs` / `spaces` computeds re-run when the
   // active CNSI swaps. With a plain field the computeds tracked only the
@@ -139,15 +142,31 @@ export class CfOrgsSignalConfigService {
     });
   }
 
-  // Delete an org via CnsiOrgsSource. The source handles writeWithJob,
-  // patches EndpointDataService._orgs in place, and fires the org.delete
-  // cascade so spaces/apps/SI/bindings get marked stale (for repaint when
-  // the user navigates to those tabs).
-  async deleteOrg(_cnsiGuid: string, orgGuid: string): Promise<void> {
-    if (!this.orgsSource) {
-      throw new Error('CfOrgsSignalConfigService: initialize() not called before deleteOrg');
+  // Delete an org through the EntityDeleteController chokepoint. The controller
+  // issues the DELETE via writeWithJob, then derives the *complete* set of
+  // affected EndpointDataService slices from the relation graph (spaces, apps,
+  // routes, serviceInstances, serviceCredentialBindings — note routes, which
+  // the old org.delete cascade omitted), removes the org row, and fires the
+  // favorites/recents cleanup hooks.
+  //
+  // Routing through the root-singleton controller (not orgsSource) means delete
+  // no longer depends on initialize() having run — fixing the cold/fallback
+  // path where the org summary page is deep-linked without the org list tab
+  // ever mounting, which previously left every cache stale (the reproduced bug).
+  async deleteOrg(cnsiGuid: string, orgGuid: string, orgName: string = orgGuid): Promise<void> {
+    const result = await this.deleteController.delete({
+      cnsiGuid,
+      // Display-only in the event/diagnostics stream; no endpoint-name source
+      // is wired into this service yet, so fall back to the guid.
+      cnsiName: cnsiGuid,
+      entityKind: organizationEntityType,
+      deleteGuid: orgGuid,
+      deleteName: orgName,
+      call: () => this.http.delete(`/pp/v1/cf/orgs/${cnsiGuid}/${orgGuid}`, { observe: 'response' }),
+    }).done;
+    if (result.state === 'failure') {
+      throw result.error ?? new Error(`Failed to delete organization "${orgName}"`);
     }
-    await this.orgsSource.delete(orgGuid);
   }
 
   // Create an org via CnsiOrgsSource. The source POSTs to /pp/v1/cf/orgs,
