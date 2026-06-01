@@ -1,9 +1,0 @@
-@if (component) {
-  <div class="cards {{'cards__columns-' + columns}}">
-    @for (item of dataSource.page$ | async; let i = $index; track trackByFn(i, item)) {
-      <app-card [item]="item" [component]="component" [dataSource]="dataSource">
-      </app-card>
-    }
-    <app-card class="row-filler"></app-card>
-  </div>
-}

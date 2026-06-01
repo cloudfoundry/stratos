@@ -8,7 +8,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { ListConfig, TabNavService } from '@stratosui/core';
+import { TabNavService } from '@stratosui/core';
 import {
   appReducers,
   TEST_CATALOGUE_ENTITIES,
@@ -153,11 +153,7 @@ describe('AddRouteStepperComponent', () => {
     expect(svc).toBeTruthy();
   });
 
-  it('does NOT provide a ListConfig at the stepper page scope (legacy ngrx leak guard)', () => {
-    // ListConfig was the legacy provider used by MapRoutesComponent. The
-    // signal-native rebuild embeds <app-signal-list> directly, so this
-    // injection token must NOT be reachable from the stepper page injector.
-    const lc = fixture.debugElement.injector.get(ListConfig as any, null);
-    expect(lc).toBeNull();
-  });
+  // (Removed the legacy "does NOT provide a ListConfig" leak-guard: the
+  // ListConfig type was deleted with the list framework, so the leak it
+  // guarded against is now structurally impossible.)
 });
