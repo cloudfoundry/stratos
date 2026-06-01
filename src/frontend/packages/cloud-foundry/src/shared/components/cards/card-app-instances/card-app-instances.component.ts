@@ -26,7 +26,7 @@ import {
 } from '@stratosui/core';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
-import { CfAppsSignalConfigService } from '../../list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../signal-list-configs/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig(

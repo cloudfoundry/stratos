@@ -15,7 +15,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 

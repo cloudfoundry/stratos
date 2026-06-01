@@ -12,7 +12,7 @@ import {
 import {
   ApplicationService } from '@stratosui/cloud-foundry';
 
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
 import { AppDetailDataService } from '../app-detail-data.service';
 import type { StRoute, StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';

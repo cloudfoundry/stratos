@@ -22,7 +22,7 @@ import {
 } from '@stratosui/store';
 
 import { applicationEntityType } from '../../../../../../../cf-entity-types';
-import { CfAppsSignalConfigService } from '../../../../../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';

@@ -30,7 +30,7 @@ import { CFAppState } from '../../../cf-app-state';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';

@@ -12,7 +12,7 @@ import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry
 
 import { ApplicationWallComponent } from './application-wall.component';
 import { countDuplicateUrlEndpoints } from '@stratosui/store';
-import { CfAppsSignalConfigService } from '../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 function makeStubSignalConfigService() {

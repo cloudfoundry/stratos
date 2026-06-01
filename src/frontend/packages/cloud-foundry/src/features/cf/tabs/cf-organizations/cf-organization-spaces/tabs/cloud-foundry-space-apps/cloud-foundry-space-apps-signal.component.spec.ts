@@ -10,7 +10,7 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { CloudFoundrySpaceAppsSignalComponent } from './cloud-foundry-space-apps-signal.component';
-import { CfAppsSignalConfigService } from '../../../../../../../shared/components/list/list-types/app/cf-apps-signal-config.service';
+import { CfAppsSignalConfigService } from '../../../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 
