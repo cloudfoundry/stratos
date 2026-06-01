@@ -19,7 +19,7 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { CfSpacesSignalConfigService } from '../../../../../shared/components/list/list-types/space/cf-spaces-signal-config.service';
+import { CfSpacesSignalConfigService } from '../../../../../shared/signal-list-configs/space/cf-spaces-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';

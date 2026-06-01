@@ -19,7 +19,7 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { CfRoutesSignalConfigService } from '../../../../../../../shared/components/list/list-types/route/cf-routes-signal-config.service';
+import { CfRoutesSignalConfigService } from '../../../../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';

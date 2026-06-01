@@ -10,7 +10,7 @@ import {
 
 import { SignalListComponent, SignalListConfig, TailwindDialogService } from '@stratosui/core';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
-import { RevisionsSignalConfigService } from '../../../../../../shared/components/list/list-types/revisions/revisions-signal-config.service';
+import { RevisionsSignalConfigService } from '../../../../../../shared/signal-list-configs/revisions/revisions-signal-config.service';
 import {
   RollbackDialogComponent,
   RollbackDialogResult,
