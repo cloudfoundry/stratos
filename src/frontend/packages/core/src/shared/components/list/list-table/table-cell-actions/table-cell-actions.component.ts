@@ -6,7 +6,8 @@ import { combineLatest, Observable, of as observableOf, Subscription } from 'rxj
 import { map } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
-import { IListAction, ListConfig } from '../../list.component.types';
+import { IListAction } from '../../../signal-list/list-action.types';
+import { ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 
 // Signal wrapper to provide BehaviorSubject-like API for dynamic creation

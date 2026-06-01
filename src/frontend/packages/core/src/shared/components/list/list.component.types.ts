@@ -1,5 +1,5 @@
 import { Type, WritableSignal } from '@angular/core';
-import { ActionState, ListView } from '@stratosui/store';
+import { ListView } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map, startWith, switchMap } from 'rxjs/operators';
 
@@ -9,6 +9,7 @@ import { CardTypes } from './list-cards/card/card.component';
 import { ITableColumn, ITableText } from './list-table/table.types';
 import { CardCell, TableCellCustom } from './list.types';
 import { defaultPaginationPageSizeOptionsCards } from '../signal-list/page-size.types';
+import { IGlobalListAction, IListAction, IMultiListAction } from '../signal-list/list-action.types';
 
 // Re-export for external use
 export { TableCellCustom };
@@ -156,34 +157,6 @@ export class ListConfig<T, A = T> implements IListConfig<T> {
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getFilters = (): IListFilter[] => [];
   getInitialised = () => observableOf(true);
-}
-
-export interface IBaseListAction<T> {
-  icon?: string;
-  label: string;
-  description?: string;
-}
-
-export interface IListAction<T> extends IBaseListAction<T> {
-  action: (item: T) => void;
-  createVisible?: (row$: Observable<T>) => Observable<boolean>;
-  createEnabled?: (row$: Observable<T>) => Observable<boolean>;
-}
-
-export interface IOptionalAction<T> extends IBaseListAction<T> {
-  visible$?: Observable<boolean>;
-  enabled$?: Observable<boolean>;
-}
-
-export interface IMultiListAction<T> extends IOptionalAction<T> {
-  /**
-   * Return true if the selection should be cleared
-   */
-  action: (items?: T[]) => boolean | Observable<ActionState>;
-}
-
-export interface IGlobalListAction<T> extends IOptionalAction<T> {
-  action: () => void;
 }
 
 export class MultiFilterManager<T> {
