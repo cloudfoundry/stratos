@@ -36,31 +36,17 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
-import { listCardComponents } from './components/list/list-cards/card.types';
 import { MetaCardComponent } from './components/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/meta-card/meta-card-value/meta-card-value.component';
-import { EntityListViewComponent } from './components/list/list-generics/entity-list-view/entity-list-view.component';
-import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
-import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
-import {
-  } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import {
-} from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
-import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
-import { listTableComponents } from './components/list/list-table/table-components';
-import { TableComponent } from './components/list/list-table/table.component';
 import { EndpointCardComponent } from './components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from './components/endpoint-list/endpoint-list.helpers';
 import {
   TableCellEndpointNameComponent,
 } from './components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './components/endpoint-list/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { ListComponent } from './components/list/list.component';
-import { ListConfig } from './components/list/list.component.types';
-import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component'; // Now standalone
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -203,7 +189,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MarkdownContentObserverDirective, // Now standalone - moved to imports
     JsonViewerComponent, // Now standalone - moved to imports
     SimpleUsageChartComponent, // Now standalone - moved to imports
-    MaxListMessageComponent, // Now standalone - moved to imports
     MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
     AppActionMonitorIconComponent, // Now standalone - moved to imports
     MetricsRangeSelectorComponent, // Now standalone - moved to imports
@@ -218,11 +203,9 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MetaCardItemComponent, // Now standalone - moved to imports
     MetaCardKeyComponent, // Now standalone - moved to imports
     MetaCardValueComponent, // Now standalone - moved to imports
-    TableComponent, // Now standalone - moved to imports
     DisableRouterLinkDirective, // Now standalone - moved to imports
     TableCellEndpointStatusComponent, // Now standalone - moved to imports
     TableCellEndpointNameComponent, // Now standalone - moved to imports
-    TableCellStatusDirective, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -237,16 +220,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BlurDirective,
     UniqueDirective,
     UserPermissionDirective,
-    ListHostDirective,
     TailwindSortDirective,
     TailwindSortHeaderDirective,
-    // === Standalone Components ===
-    ListComponent,
-    ListViewComponent,
-    EntityListViewComponent,
-    // === Card/Table Component Arrays (all standalone) ===
-    ...listCardComponents,
-    ...listTableComponents,
     // === Custom Material Wrapper Components ===
     CustomExpansionPanelComponent,
     CustomExpansionPanelHeaderComponent,
@@ -293,12 +268,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CapitalizeFirstPipe,
 
     // === Standalone Directives (imported above) ===
-    TableCellStatusDirective,
     FocusDirective,
     BlurDirective,
     UniqueDirective,
     UserPermissionDirective,
-    ListHostDirective,
     TailwindSortDirective,
     TailwindSortHeaderDirective,
     DisableRouterLinkDirective,
@@ -341,9 +314,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MetadataItemComponent,
     UsageGaugeComponent,
     SnackBarReturnComponent,
-    ListComponent,
-    ListViewComponent,
-    EntityListViewComponent,
     FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -358,7 +328,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     UploadProgressIndicatorComponent,
     AppActionMonitorIconComponent,
     BooleanIndicatorComponent,
-    TableComponent,
     RoutingIndicatorComponent,
     DateTimeComponent,
     StartEndDateComponent,
@@ -382,7 +351,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TableCellEndpointNameComponent,
     EndpointCardComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent,
     ProfileSettingsComponent,
     ProductNameComponent,
     NoContentMessageComponent,
@@ -417,7 +385,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomDatepickerToggleComponent,
   ],
   providers: [
-    ListConfig,
     EndpointListHelper,
     ConfirmationDialogService,
     InternalEventMonitorFactory,
