@@ -23,11 +23,11 @@ import { SharedModule } from '../src/shared/shared.module';
 import { ApplicationStateIconComponent } from '../src/shared/components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../src/shared/components/application-state/application-state-icon/application-state-icon.pipe';
 import { CardStatusComponent } from '../src/shared/components/cards/card-status/card-status.component';
-import { MetaCardComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from '../src/shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { MetaCardComponent } from '../src/shared/components/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../src/shared/components/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../src/shared/components/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from '../src/shared/components/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from '../src/shared/components/meta-card/meta-card-value/meta-card-value.component';
 import { MultilineTitleComponent } from '../src/shared/components/multiline-title/multiline-title.component';
 import { CoreTestingModule } from './core-test.modules';
 

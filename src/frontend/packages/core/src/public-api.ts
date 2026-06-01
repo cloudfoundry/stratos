@@ -277,11 +277,11 @@ export { createTableColumnFavorite } from './shared/components/list/list-table/t
 export { ITableCellRequestMonitorIconConfig } from './shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 
 // Meta Card Components
-export { MetaCardComponent } from './shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-export { MetaCardItemComponent } from './shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-export { MetaCardTitleComponent } from './shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-export { MetaCardValueComponent } from './shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-export { MetaCardKeyComponent } from './shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+export { MetaCardComponent } from './shared/components/meta-card/meta-card-base/meta-card.component';
+export { MetaCardItemComponent } from './shared/components/meta-card/meta-card-item/meta-card-item.component';
+export { MetaCardTitleComponent } from './shared/components/meta-card/meta-card-title/meta-card-title.component';
+export { MetaCardValueComponent } from './shared/components/meta-card/meta-card-value/meta-card-value.component';
+export { MetaCardKeyComponent } from './shared/components/meta-card/meta-card-key/meta-card-key.component';
 
 // Preview Components
 export * from './shared/previewable-component';

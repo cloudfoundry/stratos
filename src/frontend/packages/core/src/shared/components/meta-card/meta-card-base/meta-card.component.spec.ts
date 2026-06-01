@@ -2,11 +2,8 @@ import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_S
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import {
-  ComponentEntityMonitorConfig,
-  EntityMonitorFactory,
-  EntitySchema,
   EntityServiceFactory,
   IFavoriteMetadata,
   StratosStatus,
@@ -46,31 +43,6 @@ class UserFavoriteManagerMock {
   }
 }
 
-class EntityMonitorFactoryMock {
-  entity = {
-    entity: {
-      entity: {
-        cfGuid: 1,
-      },
-      metadata: {
-        guid: 2,
-      }
-    }
-  };
-
-  monitor = {
-    isDeletingEntity$: of(false),
-    entity$: new Observable(subscriber => {
-      subscriber.next(this.entity);
-      subscriber.complete();
-    }),
-  };
-
-  create() {
-    return this.monitor;
-  }
-}
-
 describe('MetaCardComponent', () => {
   // Register generic mock entities BEFORE any test data is created
   // This must run at module load time because const declarations below use the catalog
@@ -79,12 +51,10 @@ describe('MetaCardComponent', () => {
   generateGenericMockEntities().forEach(entity => entityCatalog.register(entity));
 
   const favorite = new UserFavorite<IFavoriteMetadata>('endpoint', 'endpointType', 'entityType');
-  const entityConfig = new ComponentEntityMonitorConfig('guid', new EntitySchema('schema', 'endpointType'));
 
   let component: MetaCardComponent;
   let fixture: ComponentFixture<WrapperComponent>;
   let element: HTMLElement;
-  let entityMonitorFactory: EntityMonitorFactoryMock;
 
   beforeEach(async () => {
 
@@ -99,7 +69,6 @@ describe('MetaCardComponent', () => {
       declarations: [WrapperComponent],
       providers: [
         EntityServiceFactory,
-        { provide: EntityMonitorFactory, useClass: EntityMonitorFactoryMock },
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
         provideZonelessChangeDetection(),
       ],
@@ -109,7 +78,6 @@ describe('MetaCardComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(WrapperComponent);
-    entityMonitorFactory = TestBed.inject(EntityMonitorFactory) as any as EntityMonitorFactoryMock;
     component = fixture.componentInstance.metaCard;
     element = fixture.debugElement.nativeElement;
     // Don't call detectChanges here - let each test control when it happens
@@ -119,12 +87,11 @@ describe('MetaCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show progress bar if entity is being deleted', () => {
-    entityMonitorFactory.monitor.isDeletingEntity$ = of(true);
-    component.entityConfig = entityConfig;
-    fixture.detectChanges();
-
-    expect(element.querySelector('app-progress-bar')).toBeTruthy();
+  it('constructs without an EntityMonitorFactory (ngrx-free)', () => {
+    // The legacy entity-monitor favorite-star fallback was removed; the
+    // component must construct without that ngrx dependency being provided.
+    expect(component).toBeTruthy();
+    expect((component as unknown as { entityMonitorFactory?: unknown }).entityMonitorFactory).toBeUndefined();
   });
 
   it('should show action menu', () => {
