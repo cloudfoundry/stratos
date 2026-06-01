@@ -10,40 +10,15 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { PageSubNavComponent, ListViewComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
-import { GeneralAppState } from '../../../../../store/src/app-state';
-
-import { ListConfigUpdate } from '../../../../../core/src/shared/components/list/list-generics/list-config-provider.types';
-import {
-  ActionListConfigProvider,
-} from '../../../../../core/src/shared/components/list/list-generics/list-providers/action-list-config-provider';
-import {
-  TableCellSidePanelComponent,
-  TableCellSidePanelConfig,
-} from '../../../../../core/src/shared/components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
-import { ListViewTypes } from '../../../../../core/src/shared/components/list/list.component.types';
+import { PageSubNavComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { entityCatalog } from '../../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import {
-  KubernetesResourceViewerComponent,
-  KubernetesResourceViewerConfig,
-} from '../../kubernetes-resource-viewer/kubernetes-resource-viewer.component';
-import { KubernetesUIConfigService } from '../../kubernetes-ui-service';
-import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
-import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
-import {
-  KubeAPIResource,
-  KubeResourceEntityDefinition,
-  SimpleColumnValueGetter,
-  SimpleKubeListColumn,
-} from '../../store/kube.types';
+import { KubeResourceEntityDefinition } from '../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../workloads/store/workloads-entity-factory';
 import { KubeCurrentNamespaceService } from '../../../services/domain-data/kube-current-namespace.service';
 import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
@@ -72,8 +47,6 @@ import {
   kubernetesStatefulSetsEntityType,
 } from '../../kubernetes-entity-factory';
 
-const namespaceColumnId = 'namespace';
-
 @Component({
   selector: 'app-kubernetes-resource-list',
   templateUrl: './kubernetes-resource-list.component.html',
@@ -82,7 +55,6 @@ const namespaceColumnId = 'namespace';
   imports: [
     CommonModule,
     PageSubNavComponent,
-    ListViewComponent,
     SignalListComponent,
   ]
 })
@@ -94,18 +66,14 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
   selectedNamespace: string;
 
-  public showNamespaceLink = true;
-
-  public provider: ActionListConfigProvider<KubeAPIResource>;
-
   public isNamespacedView = true;
   public isWorkloadView = false;
   public menuOpen = false;
 
   // Signal-native code path: when the entity type is registered with
   // KubernetesSignalConfigRegistry, the shell builds a SignalListConfig
-  // and renders <app-signal-list> instead of the legacy <app-list-view>.
-  // useSignalList = !!signalListConfig().
+  // and renders <app-signal-list>. For unregistered types (vestigial
+  // generic-route hits), the constructor redirects to the cluster summary.
   public readonly signalListConfig: WritableSignal<SignalListConfig<unknown> | undefined> = signal(undefined);
   // Drives the signal-config dataSignal projection — namespace dropdown
   // writes flow into here so factories that consume `selectedNamespace`
@@ -117,11 +85,9 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private kubeId: string;
   private workloadTitle: string;
   private workloadNamespace: string;
-  private store = inject(Store<GeneralAppState>);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private baseKubeGuid = inject(BaseKubeGuid);
-  private uiConfigService = inject(KubernetesUIConfigService);
   private signalConfigRegistry = inject(KubernetesSignalConfigRegistry);
   private currentNamespaceService = inject(KubeCurrentNamespaceService);
   private injector = inject(Injector);
@@ -168,15 +134,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
           return;
         }
         this.selectedNamespace = ns === '*' ? undefined : ns;
-        // Mirror into the signal so the signal-config factory's
-        // computed() data projection re-evaluates.
         this._selectedNamespaceSignal.set(this.selectedNamespace);
-        if (this.isNamespacedView && !this.signalListConfig()) {
-          // Only rebuild the legacy provider when we're NOT on the
-          // signal-config path — signal-configs react to the namespace
-          // signal directly without a rebuild.
-          this.createProvider(catalogEntity as any);
-        }
       });
     }
 
@@ -203,8 +161,12 @@ export class KubernetesResourceListComponent implements OnDestroy {
       return;
     }
 
-    this.createProvider(catalogEntity as any);
-
+    // No signal factory for this entity type. The only keys that reach here
+    // are vestigial generic-route hits (node/dashboard/analysisReport) which
+    // have dedicated routes and no generic-list config — never linked. Send
+    // them to the cluster summary rather than the retired ngrx list path.
+    this.router.navigate(['/kubernetes', this.kubeId]);
+    return;
 
   }
 
@@ -268,129 +230,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
     }
   }
 
-  private createProvider(catalogEntity: { definition: KubeResourceEntityDefinition; actions: any }) {
-    this.isNamespacedView = !this.isWorkloadView && !!catalogEntity.definition.apiNamespaced;
-    let action;
-    if (this.isWorkloadView) {
-      action = catalogEntity.actions.getInWorkload(this.kubeId, this.workloadNamespace, this.workloadTitle);
-    } else if (this.selectedNamespace && this.isNamespacedView) {
-      action = catalogEntity.actions.getInNamespace(this.kubeId, this.selectedNamespace);
-    } else {
-      action = catalogEntity.actions.getMultiple(this.kubeId);
-    }
-
-    const provider = new ActionListConfigProvider<KubeAPIResource>(this.store, action);
-    const listConfigName = catalogEntity.definition ? catalogEntity.definition.listConfig : null;
-    const listConfig: ListConfigUpdate<any> = this.uiConfigService.listConfig.get(listConfigName) || {
-      pageSizeOptions: defaultHelmKubeListPageSize,
-      viewType: ListViewTypes.TABLE_ONLY,
-      enableTextFilter: true,
-      text: {
-        title: null,
-        filter: 'Filter by Name',
-        noEntries: 'There are no resources'
-      },
-      getColumns: () => this.getColumns(catalogEntity.definition),
-    };
-    listConfig.hideRefresh = this.isWorkloadView;
-
-    provider.updateListConfig(listConfig);
-    provider.updateDataSourceConfig({
-      transformEntities: [{ type: 'filter', field: 'metadata.name' }]
-    });
-    this.provider = provider;
-  }
-
   select(item?: string) {
     this.currentNamespaceService.set(this.kubeId, item);
-  }
-
-  private getColumns(definition: KubeResourceEntityDefinition): ITableColumn<KubeAPIResource>[] {
-    const component = this.uiConfigService.previewComponent.get(definition.type);
-    let columns: Array<ITableColumn<KubeAPIResource>> = [
-      // Name
-      {
-        columnId: 'name', headerCell: () => 'Name',
-        cellComponent: TableCellSidePanelComponent,
-        sort: {
-          type: 'natural-sort',
-          orderKey: 'name',
-          field: 'metadata.name'
-        },
-        cellFlex: '3',
-        cellConfig: (resource): TableCellSidePanelConfig<KubernetesResourceViewerConfig> => {
-          return ({
-            text: resource.metadata.name,
-            sidePanelComponent: KubernetesResourceViewerComponent,
-            sidePanelConfig: {
-              title: resource.metadata.name,
-              resourceKind: definition.label,
-              resource$: of(resource),
-              component,
-              definition,
-            }
-          });
-        }
-      },
-      // Namespace
-      {
-        columnId: namespaceColumnId, headerCell: () => 'Namespace',
-        cellDefinition: {
-          valuePath: 'metadata.namespace',
-          getLink: row => this.showNamespaceLink ? `/kubernetes/${this.kubeId}/namespaces/${row.metadata.namespace}` : null
-        },
-        sort: {
-          type: 'natural-sort',
-          orderKey: namespaceColumnId,
-          field: 'metadata.namespace'
-        },
-        cellFlex: '2',
-      },
-    ];
-
-    // We hide the namespace column if we are in a given namespace OR the resource is not namespaced
-    // let hideNamespaceColumn = !!this.selectedNamespace;
-    let hideNamespaceColumn = false;
-    if (definition && definition.apiNamespaced === false) {
-      hideNamespaceColumn = true;
-    }
-
-    if (hideNamespaceColumn) {
-      // Hide the namespace column
-      columns = columns.filter(column => column.columnId !== namespaceColumnId);
-    }
-
-    if (definition && definition.listColumns) {
-      definition.listColumns.forEach(c => columns.push(this.simpleCellToTableCell(c)));
-    }
-
-    columns.push(createKubeAgeColumn());
-    return columns;
-  }
-
-  private simpleCellToTableCell(cell: SimpleKubeListColumn): ITableColumn<KubeAPIResource> {
-
-    const tableCell: ITableColumn<KubeAPIResource> = {
-      columnId: cell.header.toLowerCase(),
-      headerCell: () => cell.header,
-      cellDefinition: {},
-      cellFlex: cell.flex || '1'
-    };
-
-    if (typeof (cell.field) === 'string') {
-      tableCell.cellDefinition.valuePath = cell.field as string;
-    } else {
-      tableCell.cellDefinition.getValue = cell.field as SimpleColumnValueGetter<KubeAPIResource>;
-    }
-
-    if (cell.sort && typeof (cell.field) === 'string') {
-      tableCell.sort = {
-        type: 'natural-sort',
-        orderKey: tableCell.columnId,
-        field: cell.field as string
-      };
-    }
-
-    return tableCell;
   }
 }
