@@ -5,6 +5,8 @@ import { MDAppModule } from '../../core/src/core/md.module';
 import { SharedModule } from '@stratosui/core';
 import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { generateCFEntities } from './cf-entity-generator';
+import { registerCfRelationDescriptors } from './entity-relations/signal/cf-relation-registrations';
+import { SignalRelationFetcherService } from './entity-relations/signal/signal-relation-fetcher.service';
 import { setCfInfoHelperInjector } from './services/endpoint-data/cf-info-helper';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
@@ -34,5 +36,10 @@ export class CloudFoundryPackageModule {
     // Angular injection context) can resolve CfInfoDataRegistry and trigger
     // a signal-native refresh. Replaces the deleted GetCFInfo ngrx effect.
     setCfInfoHelperInjector(inject(Injector));
+
+    // Register the CF parent→child relation graph so the entity-delete
+    // chokepoint can derive a complete invalidation closure (affectedSlices).
+    // One source of truth for both fetch (wave β) and delete invalidation.
+    registerCfRelationDescriptors(inject(SignalRelationFetcherService));
   }
 }
