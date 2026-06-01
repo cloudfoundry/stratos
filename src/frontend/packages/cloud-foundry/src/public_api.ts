@@ -113,7 +113,6 @@ export { cfEntityFactory } from './cf-entity-factory';
 export { cfEntityCatalog } from './cf-entity-catalog';
 
 // List Configuration Base Class
-export { BaseCfListConfig } from './shared/components/list/list-types/base-cf/base-cf-list-config';
 
 // Components
 export { CfEndpointsMissingComponent } from './shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
@@ -126,8 +125,6 @@ export { RunningInstancesComponent } from './shared/components/running-instances
 export { CfUserPermissionDirective } from './shared/directives/cf-user-permission/cf-user-permission.directive';
 
 // List Table Cell Components
-export { TableCellAppInstancesComponent } from './shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
-export { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 
 // FWT-934 entity-key namespacing + diagnostics channel
 export { cfEntityId, parseCfEntityId, isComposite } from './cf-entity-ref';

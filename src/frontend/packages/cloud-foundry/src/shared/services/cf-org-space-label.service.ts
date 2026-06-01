@@ -1,9 +1,9 @@
 import { combineLatest, Observable, of } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
-import { EndpointModel } from '@stratosui/store';
+import { APIResource, EndpointModel } from '@stratosui/store';
 import { EndpointsSignalService } from '@stratosui/core';
-import { APIResource, IOrganization, ISpace } from '../../cf-api.types';
+import { IOrganization, ISpace } from '../../cf-api.types';
 import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
 import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
