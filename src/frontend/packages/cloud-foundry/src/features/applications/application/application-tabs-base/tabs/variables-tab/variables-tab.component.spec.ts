@@ -26,7 +26,7 @@ import { AppDetailDataService } from '../../../../app-detail-data.service';
 import { AppVariableActionsService } from '../../../../../../shared/services/app-variable-actions.service';
 import {
   CfAppVariablesSignalConfigService,
-} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-signal-config.service';
+} from '../../../../../../shared/signal-list-configs/app-variables/cf-app-variables-signal-config.service';
 import { VariablesTabComponent } from './variables-tab.component';
 
 describe('VariablesTabComponent', () => {

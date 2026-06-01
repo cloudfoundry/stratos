@@ -4,11 +4,11 @@ import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore, SignalListColumn, SignalListCompoundSegment } from '@stratosui/core';
 
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StRoute, StRoutesResponse } from '../../../../../services/endpoint-data/stratos-types';
-import { AppNameResolverService } from '../../../../services/app-name-resolver.service';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { ApplicationService } from '../../../features/applications/application.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
+import { AppNameResolverService } from '../../services/app-name-resolver.service';
 
 // CfMapRoutesSignalConfigService — single-row radio-select picker config
 // for the "Map existing route" stepper inside AddRoutesComponent.

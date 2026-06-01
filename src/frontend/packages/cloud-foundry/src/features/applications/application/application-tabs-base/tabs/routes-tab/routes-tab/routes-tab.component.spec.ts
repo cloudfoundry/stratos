@@ -24,7 +24,7 @@ import {
 
 import { AppDetailDataService } from '../../../../../app-detail-data.service';
 import { AppRouteActionsService } from '../../../../../../../shared/services/app-route-actions.service';
-import { CfAppRoutesSignalConfigService } from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-signal-config.service';
+import { CfAppRoutesSignalConfigService } from '../../../../../../../shared/signal-list-configs/app-route/cf-app-routes-signal-config.service';
 import { RoutesTabComponent } from './routes-tab.component';
 
 describe('RoutesTabComponent', () => {

@@ -3,11 +3,11 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { CfAppRoutesSignalConfigService } from './cf-app-routes-signal-config.service';
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppNameResolverService } from '../../../../services/app-name-resolver.service';
-import { AppRouteActionsService } from '../../../../services/app-route-actions.service';
-import type { StRoute } from '../../../../../services/endpoint-data/stratos-types';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { ApplicationService } from '../../../features/applications/application.service';
+import { AppNameResolverService } from '../../services/app-name-resolver.service';
+import { AppRouteActionsService } from '../../services/app-route-actions.service';
+import type { StRoute } from '../../../services/endpoint-data/stratos-types';
 
 // Minimal StRoute factory.
 function makeRoute(overrides: Partial<StRoute> = {}): StRoute {

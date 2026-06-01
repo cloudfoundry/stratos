@@ -3,9 +3,9 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { CfAppServiceBindingsSignalConfigService } from './cf-app-service-bindings-signal-config.service';
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { AppServiceBindingActionsService } from '../../../../services/app-service-binding-actions.service';
-import type { StServiceCredentialBinding } from '../../../../../services/endpoint-data/stratos-types';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { AppServiceBindingActionsService } from '../../services/app-service-binding-actions.service';
+import type { StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
 
 function makeBinding(overrides: Partial<StServiceCredentialBinding> = {}): StServiceCredentialBinding {
   return {

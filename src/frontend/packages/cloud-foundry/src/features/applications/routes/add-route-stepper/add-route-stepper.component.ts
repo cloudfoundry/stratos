@@ -7,7 +7,7 @@ import { AddRoutesComponent } from '../add-routes/add-routes.component';
 import { AppRouteActionsService } from '../../../../shared/services/app-route-actions.service';
 import {
   CfMapRoutesSignalConfigService,
-} from '../../../../shared/components/list/list-types/app-route/cf-map-routes-signal-config.service';
+} from '../../../../shared/signal-list-configs/app-route/cf-map-routes-signal-config.service';
 
 /**
  * AddRouteStepperComponent — Slice 3.5 wires the signal-native page-route

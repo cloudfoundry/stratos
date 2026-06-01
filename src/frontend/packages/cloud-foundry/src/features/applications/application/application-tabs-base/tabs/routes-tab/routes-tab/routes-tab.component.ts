@@ -25,7 +25,7 @@ import {
 
 import {
   CfAppRoutesSignalConfigService,
-} from '../../../../../../../shared/components/list/list-types/app-route/cf-app-routes-signal-config.service';
+} from '../../../../../../../shared/signal-list-configs/app-route/cf-app-routes-signal-config.service';
 import { AppRouteActionsService } from '../../../../../../../shared/services/app-route-actions.service';
 import type { StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
 import { AppDetailDataService } from '../../../../../app-detail-data.service';

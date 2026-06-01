@@ -2,10 +2,10 @@ import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInje
 
 import { ListStateStore, SignalListColumn, SignalListRowAction, UtilsService } from '@stratosui/core';
 
-import { AppDetailDataService } from '../../../../../features/applications/app-detail-data.service';
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
-import type { StAppStat } from '../../../../../services/endpoint-data/stratos-types';
-import { AppInstanceActionsService } from '../../../../services/app-instance-actions.service';
+import { AppDetailDataService } from '../../../features/applications/app-detail-data.service';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StAppStat } from '../../../services/endpoint-data/stratos-types';
+import { AppInstanceActionsService } from '../../services/app-instance-actions.service';
 
 // CF App Instances signal-list config — single-app, per-instance rows of
 // the app-detail Instances tab. Tab-scoped (NOT providedIn:'root') so

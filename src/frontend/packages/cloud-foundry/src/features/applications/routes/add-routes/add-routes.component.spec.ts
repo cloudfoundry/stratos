@@ -12,7 +12,7 @@ import { AddRoutesComponent } from './add-routes.component';
 import { ApplicationService } from '../../application.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
 import { AppRouteActionsService, CreateRouteRequest } from '../../../../shared/services/app-route-actions.service';
-import { CfMapRoutesSignalConfigService } from '../../../../shared/components/list/list-types/app-route/cf-map-routes-signal-config.service';
+import { CfMapRoutesSignalConfigService } from '../../../../shared/signal-list-configs/app-route/cf-map-routes-signal-config.service';
 import type { StRoute } from '../../../../services/endpoint-data/stratos-types';
 
 // Spy holders, refreshed per test.
