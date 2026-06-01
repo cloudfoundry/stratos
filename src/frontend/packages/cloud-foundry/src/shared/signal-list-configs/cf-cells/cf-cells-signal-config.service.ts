@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 
 // Diego cell metric label set returned by Prometheus for the rep-health
 // query. We don't reuse IMetricCell from the legacy store types because

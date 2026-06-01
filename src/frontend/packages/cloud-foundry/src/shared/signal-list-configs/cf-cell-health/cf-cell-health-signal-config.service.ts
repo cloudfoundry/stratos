@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { ViewPipeline, SortSpec } from '../../../../../services/data-sources/view-pipeline';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 
 // Two metric names cover Diego rep health across versions. Newer Diego
 // emits the garden-health-check-failed metric; pre-v2.31 foundations
