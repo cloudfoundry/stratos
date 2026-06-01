@@ -5,6 +5,7 @@ import {
   AddRecentlyVisitedEntityAction,
   CleanRecentsForEndpointsAction,
   PruneRecentsToConnectedAction,
+  RemoveRecentEntityAction,
   SetRecentlyVisitedEntityAction,
 } from '../../actions/recently-visited.actions';
 import { IRecentlyVisitedState } from '../../types/recently-visited.types';
@@ -39,6 +40,15 @@ export function recentlyVisitedReducer(
     case PruneRecentsToConnectedAction.ACTION_TYPE: {
       const pruneAction = action as PruneRecentsToConnectedAction;
       return cleanRecentsList(state, pruneAction.connectedEndpointGuids, true);
+    }
+    case RemoveRecentEntityAction.ACTION_TYPE: {
+      const removeAction = action as RemoveRecentEntityAction;
+      if (!state[removeAction.guid]) {
+        return state;
+      }
+      const newState = { ...state };
+      delete newState[removeAction.guid];
+      return newState;
     }
   }
   return state;

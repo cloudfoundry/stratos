@@ -116,7 +116,8 @@ export {
 export type { RoutingEvent } from './types/routing.type';
 export type { IFavoriteMetadata, IFavoritesInfo, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { UserFavorite } from './types/user-favorites.types';
-export { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction } from './actions/recently-visited.actions';
+export { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction, RemoveRecentEntityAction } from './actions/recently-visited.actions';
+export { RemoveUserFavoriteAction } from './actions/user-favourites.actions';
 export { UserFavoriteManager } from './user-favorite-manager';
 export { TestEntityCatalog, entityCatalog } from './entity-catalog/entity-catalog';
 export { ENTITY_CATALOG_TOKEN } from './tokens/store-injection.tokens';

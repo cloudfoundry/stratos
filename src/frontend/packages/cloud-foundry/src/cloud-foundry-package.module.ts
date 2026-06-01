@@ -7,6 +7,8 @@ import { EntityCatalogModule } from '../../store/src/entity-catalog.module';
 import { generateCFEntities } from './cf-entity-generator';
 import { registerCfRelationDescriptors } from './entity-relations/signal/cf-relation-registrations';
 import { SignalRelationFetcherService } from './entity-relations/signal/signal-relation-fetcher.service';
+import { EntityDeleteController } from './services/deletes/entity-delete.controller';
+import { FavoritesRecentsDeleteCleanup } from './services/deletes/favorites-recents-cleanup.service';
 import { setCfInfoHelperInjector } from './services/endpoint-data/cf-info-helper';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
@@ -41,5 +43,10 @@ export class CloudFoundryPackageModule {
     // chokepoint can derive a complete invalidation closure (affectedSlices).
     // One source of truth for both fetch (wave β) and delete invalidation.
     registerCfRelationDescriptors(inject(SignalRelationFetcherService));
+
+    // Restore the favorites + recents cleanup the signal-delete migration
+    // dropped: on a successful delete the controller fires this hook to remove
+    // any stranded favorite/recent for the gone entity.
+    inject(EntityDeleteController).registerCleanup(inject(FavoritesRecentsDeleteCleanup).hook);
   }
 }
