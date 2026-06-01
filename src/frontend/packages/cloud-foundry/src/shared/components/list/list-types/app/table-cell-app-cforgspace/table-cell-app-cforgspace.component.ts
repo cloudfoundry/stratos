@@ -1,7 +1,6 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
+import { EndpointsSignalService } from '@stratosui/core';
 import { APIResource } from '../../../../../../../../store/src/types/api.types';
 import { IApp, ISpace } from '../../../../../../cf-api.types';
 import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
@@ -28,7 +27,7 @@ export class TableCellAppCfOrgSpaceComponent extends TableCellAppCfOrgSpaceBase 
   }
 
   constructor() {
-    super(inject(Store<CFAppState>), inject(CfCurrentUserRolesSignalService));
+    super(inject(EndpointsSignalService), inject(CfCurrentUserRolesSignalService));
   }
 
 }

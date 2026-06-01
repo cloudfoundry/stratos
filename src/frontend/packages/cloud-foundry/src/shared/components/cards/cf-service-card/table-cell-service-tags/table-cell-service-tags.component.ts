@@ -2,7 +2,7 @@ import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 import { of } from 'rxjs';
 
 import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
-import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
+import { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
 export interface ServiceTag {
   value: string;

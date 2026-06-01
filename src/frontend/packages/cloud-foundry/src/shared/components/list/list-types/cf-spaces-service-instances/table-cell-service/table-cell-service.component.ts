@@ -17,7 +17,7 @@ import {
   TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
-} from '../../cf-services/table-cell-service-broker/table-cell-service-broker.component';
+} from '../../../../cards/cf-service-card/table-cell-service-broker/table-cell-service-broker.component';
 
 @Component({
   selector: 'app-table-cell-service',

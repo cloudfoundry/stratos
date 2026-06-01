@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
   BooleanIndicatorComponent,
-} from '../../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
+} from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellServiceActiveComponent } from './table-cell-service-active.component';
 
 describe('TableCellServiceActiveComponent', () => {

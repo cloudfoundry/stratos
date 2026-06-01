@@ -3,8 +3,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
-import { LongRunningCfOperationsService } from '../../../../../data-services/long-running-cf-op.service';
-import { CfOrgSpaceLinksComponent } from '../../../../cf-org-space-links/cf-org-space-links.component';
+import { LongRunningCfOperationsService } from '../../../../data-services/long-running-cf-op.service';
+import { CfOrgSpaceLinksComponent } from '../../../cf-org-space-links/cf-org-space-links.component';
 import { TableCellServiceCfBreadcrumbsComponent } from './table-cell-service-cf-breadcrumbs.component';
 describe('TableCellServiceCfBreadcrumbsComponent', () => {
   let component: TableCellServiceCfBreadcrumbsComponent;

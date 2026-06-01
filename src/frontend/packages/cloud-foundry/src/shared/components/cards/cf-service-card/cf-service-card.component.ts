@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@stratosui/store';
 
 import {
   CardCell,
+  EndpointsSignalService,
   MetaCardComponent,
   MetaCardItemComponent,
   MetaCardKeyComponent,
@@ -12,28 +12,25 @@ import {
   MetaCardValueComponent,
   MultilineTitleComponent
 } from '@stratosui/core';
-import { EntityServiceFactory } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../cf-app-state';
-import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
-import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
-import { CfOrgSpaceLabelService } from '../../../../../services/cf-org-space-label.service';
-import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
-import { TableCellServiceActiveComponent } from '../table-cell-service-active/table-cell-service-active.component';
-import { TableCellServiceBindableComponent } from '../table-cell-service-bindable/table-cell-service-bindable.component';
+import { CfCurrentUserRolesSignalService } from '../../../../user-permissions/cf-current-user-roles-signal.service';
+import { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';
+import { CfOrgSpaceLabelService } from '../../../services/cf-org-space-label.service';
+import { ServiceIconComponent } from '../../service-icon/service-icon.component';
+import { TableCellServiceActiveComponent } from './table-cell-service-active/table-cell-service-active.component';
+import { TableCellServiceBindableComponent } from './table-cell-service-bindable/table-cell-service-bindable.component';
 import {
   TableCellServiceBrokerComponent,
   TableCellServiceBrokerComponentConfig,
   TableCellServiceBrokerComponentMode,
-} from '../table-cell-service-broker/table-cell-service-broker.component';
-import { TableCellServiceCfBreadcrumbsComponent } from '../table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
-import { TableCellServiceReferencesComponent } from '../table-cell-service-references/table-cell-service-references.component';
-import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-cell-service-tags.component';
+} from './table-cell-service-broker/table-cell-service-broker.component';
+import { TableCellServiceCfBreadcrumbsComponent } from './table-cell-service-cf-breadcrumbs/table-cell-service-cf-breadcrumbs.component';
+import { TableCellServiceReferencesComponent } from './table-cell-service-references/table-cell-service-references.component';
+import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-cell-service-tags.component';
 
 @Component({
   selector: 'app-cf-service-card',
   templateUrl: './cf-service-card.component.html',
-  providers: [EntityServiceFactory],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -54,7 +51,7 @@ import { TableCellServiceTagsComponent } from '../table-cell-service-tags/table-
   ]
 })
 export class CfServiceCardComponent extends CardCell<StServiceOffering> {
-  private store = inject<Store<CFAppState>>(Store);
+  private endpoints = inject(EndpointsSignalService);
   private router = inject(Router);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
 
@@ -82,7 +79,7 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
       this.providerDisplayName = typeof provider === 'string' ? provider : null;
 
       if (!this.cfOrgSpace) {
-        this.cfOrgSpace = new CfOrgSpaceLabelService(this.store, this.cfRoles, row.cnsiGuid);
+        this.cfOrgSpace = new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, row.cnsiGuid);
       }
     }
   }

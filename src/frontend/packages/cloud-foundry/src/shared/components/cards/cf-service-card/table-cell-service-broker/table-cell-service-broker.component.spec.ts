@@ -4,8 +4,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellServiceBrokerComponent, TableCellServiceBrokerComponentMode } from './table-cell-service-broker.component';
-import { ServiceCatalogDataService, SignalSource } from '../../../../../../services/endpoint-data/service-catalog-data.service';
-import { StServiceBroker, StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
+import { ServiceCatalogDataService, SignalSource } from '../../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceBroker, StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
 describe('TableCellServiceBrokerComponent', () => {
   let component: TableCellServiceBrokerComponent;

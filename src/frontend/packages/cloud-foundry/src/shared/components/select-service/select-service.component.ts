@@ -18,7 +18,7 @@ import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
-import { CfServiceCardComponent } from '../list/list-types/cf-services/cf-service-card/cf-service-card.component';
+import { CfServiceCardComponent } from '../cards/cf-service-card/cf-service-card.component';
 import { CsiGuidsService } from '../add-service-instance/csi-guids.service';
 import { CsiStateService } from '../add-service-instance/csi-state.service';
 

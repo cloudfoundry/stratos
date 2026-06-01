@@ -2,11 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, Injector, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
+import { EndpointsSignalService } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import { applicationEntityType } from '../../../../../../../../cloud-foundry/src/cf-entity-types';
 import { ApplicationStateComponent } from '../../../../../../../../core/src/shared/components/application-state/application-state.component';
 import { CardCell } from '../../../../../../../../core/src/shared/components/list/list.types';
@@ -51,7 +50,7 @@ import { RunningInstancesComponent } from '../../../../running-instances/running
   ]
 })
 export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private endpoints = inject(EndpointsSignalService);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
   private appStateService = inject(ApplicationStateService);
   private userFavoriteManager = inject(UserFavoriteManager);
@@ -70,7 +69,7 @@ export class CardAppComponent extends CardCell<APIResource<IApp>> implements OnI
   ngOnInit() {
     this.entityConfig = new ComponentEntityMonitorConfig(this.row.metadata.guid, cfEntityFactory(applicationEntityType));
     this.cfOrgSpace = new CfOrgSpaceLabelService(
-      this.store,
+      this.endpoints,
       this.cfRoles,
       this.row.entity.cfGuid,
       (this.row.entity.space as APIResource<ISpace>).entity.organization_guid,

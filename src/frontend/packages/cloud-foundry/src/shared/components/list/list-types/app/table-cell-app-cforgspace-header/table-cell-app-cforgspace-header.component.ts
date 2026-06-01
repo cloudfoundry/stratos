@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@stratosui/store';
 
-import { CFAppState } from '../../../../../../cf-app-state';
+import { EndpointsSignalService } from '@stratosui/core';
 import { CfCurrentUserRolesSignalService } from '../../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 
@@ -18,10 +17,10 @@ import { TableCellAppCfOrgSpaceBase } from '../TableCellAppCfOrgSpaceBase';
 export class TableCellAppCfOrgSpaceHeaderComponent extends TableCellAppCfOrgSpaceBase {
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
+    const endpoints = inject(EndpointsSignalService);
     const cfRoles = inject(CfCurrentUserRolesSignalService);
 
-    super(store, cfRoles);
+    super(endpoints, cfRoles);
     this.init();
   }
 
