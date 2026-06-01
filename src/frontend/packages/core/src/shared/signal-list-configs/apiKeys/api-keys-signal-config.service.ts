@@ -2,12 +2,12 @@ import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject,
 
 import { ApiKey } from '@stratosui/store';
 
-import { ApiKeysDataService } from '../../../../../features/api-keys/api-keys-data.service';
-import { SortSpec, ViewPipeline } from '../../../../../features/endpoints/endpoints-page/endpoints-signal-config.service';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { ListStateStore } from '../../../signal-list/list-state-store.service';
-import { SignalListColumn, SignalListConfig, SignalListRowAction } from '../../../signal-list/signal-list.component';
+import { ApiKeysDataService } from '../../../features/api-keys/api-keys-data.service';
+import { SortSpec, ViewPipeline } from '../../../features/endpoints/endpoints-page/endpoints-signal-config.service';
+import { ConfirmationDialogConfig } from '../../components/confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../components/confirmation-dialog.service';
+import { ListStateStore } from '../../components/signal-list/list-state-store.service';
+import { SignalListColumn, SignalListConfig, SignalListRowAction } from '../../components/signal-list/signal-list.component';
 
 // Signal-native config for the API Keys page list. Replaces
 // ApiKeyListConfigService + ApiKeyDataSource (ngrx ListDataSource over
