@@ -1,7 +1,7 @@
 import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
 
 import { ClickStopPropagationDirective, TableCellCustom } from '@stratosui/core';
-import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
+import { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-table-cell-service-references',

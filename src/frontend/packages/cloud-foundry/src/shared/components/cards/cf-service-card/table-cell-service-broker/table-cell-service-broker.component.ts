@@ -3,10 +3,10 @@ import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal
 import { RouterModule } from '@angular/router';
 
 import { TableCellCustom } from '@stratosui/core';
-import { ServiceCatalogDataService, SignalSource } from '../../../../../../services/endpoint-data/service-catalog-data.service';
-import { SpaceDataRegistry } from '../../../../../../services/endpoint-data/space-data.registry';
-import { SpaceDataService } from '../../../../../../services/endpoint-data/space-data.service';
-import { StServiceBroker, StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
+import { ServiceCatalogDataService, SignalSource } from '../../../../../services/endpoint-data/service-catalog-data.service';
+import { SpaceDataRegistry } from '../../../../../services/endpoint-data/space-data.registry';
+import { SpaceDataService } from '../../../../../services/endpoint-data/space-data.service';
+import { StServiceBroker, StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
 export enum TableCellServiceBrokerComponentMode {
   NAME = 'NAME',

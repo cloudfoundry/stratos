@@ -1,68 +1,55 @@
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, tap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { take, filter, map } from 'rxjs/operators';
 
-import {
-  APIResource,
-  endpointEntityType,
-  EndpointModel,
-  entityCatalog,
-  selectEntity,
-  STRATOS_ENDPOINT_TYPE
-} from '@stratosui/store';
-import { IOrganization, ISpace } from '../../cf-api.types';
-import { CFAppState } from '../../cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../cf-entity-types';
+import { EndpointModel } from '@stratosui/store';
+import { EndpointsSignalService } from '@stratosui/core';
+import { APIResource, IOrganization, ISpace } from '../../cf-api.types';
 import { haveMultiConnectedCfs } from '../../features/cf/cf.helpers';
-import { selectCfEntity } from '../../store/selectors/api.selectors';
 import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import { cfOsDebugLog } from '../data-services/cf-org-space-debug';
 
+/**
+ * Signal-native projection of the CF/org/space breadcrumb labels.
+ *
+ * The CF endpoint name is sourced from {@link EndpointsSignalService} rather
+ * than the legacy ngrx `store.select(selectEntity(...))`. The public
+ * observable interface (`getCfName`/`getOrgName`/`getSpaceName`/`getLabel`/
+ * `getValue` + the `*URL` builders + `multipleConnectedEndpoints$`) is kept
+ * byte-identical so the renderer `CfOrgSpaceLinksComponent` is untouched.
+ *
+ * Org/space resolution was only ever exercised by the now-dead app cells
+ * (`card-app`, `TableCellAppCfOrgSpaceBase`, slated for workstream D); the
+ * live breadcrumb path (cf-service-card cluster) passes only `cfGuid`, so
+ * org/space stay empty exactly as they did under ngrx.
+ */
 export class CfOrgSpaceLabelService {
 
   public multipleConnectedEndpoints$: Observable<boolean>;
-  private cf$: Observable<EndpointModel>;
-  private org$: Observable<APIResource<IOrganization>>;
-  private space$: Observable<APIResource<ISpace>>;
+  private org$: Observable<APIResource<IOrganization> | null> = of(null);
+  private space$: Observable<APIResource<ISpace> | null> = of(null);
 
   /**
-   * @param store NgRx Store instance
+   * @param endpoints Signal-native endpoints projection (CF name source)
+   * @param cfRoles Current-user CF roles (drives multipleConnectedEndpoints$)
    * @param cfGuid Only important if using getValue
    * @param orgGuid Only important if using getValue
    * @param spaceGuid Only important if using getValue
    */
   constructor(
-    private store: Store<CFAppState>,
+    private endpoints: EndpointsSignalService,
     cfRoles: CfCurrentUserRolesSignalService,
     private cfGuid?: string,
     private orgGuid?: string,
     private spaceGuid?: string) {
-    // FWT-917 diagnostic: log the GUIDs the caller passed in. If any are
-    // missing here, every breadcrumb / link rendered by this service will
-    // be empty regardless of store state — that's the H1 fingerprint for
-    // the breadcrumb path.
     cfOsDebugLog('labelService:construct', { cfGuid, orgGuid, spaceGuid });
 
     this.multipleConnectedEndpoints$ = haveMultiConnectedCfs(cfRoles);
-    // FIXME: hide STRATOS_ENDPOINT_TYPE from extensions - STRAT-154
-    const endpointEntityKey = entityCatalog.getEntityKey(STRATOS_ENDPOINT_TYPE, endpointEntityType);
+  }
 
-    this.cf$ = this.store.select<EndpointModel>(selectEntity(endpointEntityKey, this.cfGuid)).pipe(
-      tap(cf => cfOsDebugLog('labelService:cf-emit', {
-        guid: this.cfGuid, found: !!cf, name: cf?.name ?? null,
-      })),
-    );
-
-    this.org$ = this.store.select<APIResource<IOrganization>>(selectCfEntity(organizationEntityType, this.orgGuid)).pipe(
-      tap(org => cfOsDebugLog('labelService:org-emit', {
-        guid: this.orgGuid, found: !!org, name: org?.entity?.name ?? null,
-      })),
-    );
-    this.space$ = this.store.select<APIResource<ISpace>>(selectCfEntity(spaceEntityType, this.spaceGuid)).pipe(
-      tap(space => cfOsDebugLog('labelService:space-emit', {
-        guid: this.spaceGuid, found: !!space, name: space?.entity?.name ?? null,
-      })),
-    );
+  // Read the endpoints signal on each access so the async-pipe binding picks
+  // up the CF entity once the endpoints slice has hydrated.
+  private get cf$(): Observable<EndpointModel | null> {
+    return of(this.cfGuid ? this.endpoints.endpoints()[this.cfGuid] ?? null : null);
   }
 
   getLabel(): Observable<string> {
@@ -72,16 +59,18 @@ export class CfOrgSpaceLabelService {
   }
 
   getValue(): Observable<string> {
-    return combineLatest(
+    return combineLatest([
       this.cf$,
       this.org$,
       this.space$,
       this.multipleConnectedEndpoints$
-    ).pipe(
+    ]).pipe(
       filter(([cf, org, space]) => !!cf && !!org && !!space),
       take(1),
       map(([cf, org, space, multipleConnectedEndpoints]) =>
-        multipleConnectedEndpoints ? `${cf.name}/${org.entity.name}/${space.entity.name}` : `${org.entity.name}/${space.entity.name}`
+        multipleConnectedEndpoints
+          ? `${cf!.name}/${org!.entity.name}/${space!.entity.name}`
+          : `${org!.entity.name}/${space!.entity.name}`
       )
     );
   }

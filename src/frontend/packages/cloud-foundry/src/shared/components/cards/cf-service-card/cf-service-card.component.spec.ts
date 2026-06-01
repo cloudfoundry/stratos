@@ -10,8 +10,8 @@ import { StoreModule } from '@ngrx/store';
 import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
-import { generateCFEntities } from '../../../../../../cf-entity-generator';
-import { StServiceOffering } from '../../../../../../services/endpoint-data/stratos-types';
+import { generateCFEntities } from '../../../../cf-entity-generator';
+import { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';
 import { CfServiceCardComponent } from './cf-service-card.component';
 
 const makeOffering = (overrides: Partial<StServiceOffering> = {}): StServiceOffering => ({

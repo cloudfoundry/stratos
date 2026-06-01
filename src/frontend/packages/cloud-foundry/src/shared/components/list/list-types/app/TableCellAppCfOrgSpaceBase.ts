@@ -1,6 +1,5 @@
-import { Store } from '@ngrx/store';
+import { EndpointsSignalService } from '@stratosui/core';
 
-import { CFAppState } from '../../../../../../../cloud-foundry/src/cf-app-state';
 import { TableCellCustom } from '../../../../../../../core/src/shared/components/list/list.types';
 import { APIResource } from '../../../../../../../store/src/types/api.types';
 import { IApp } from '../../../../../cf-api.types';
@@ -13,7 +12,7 @@ export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp
   public cfOrgSpace!: CfOrgSpaceLabelService;
 
   constructor(
-    private store: Store<CFAppState>,
+    private endpoints: EndpointsSignalService,
     private cfRoles: CfCurrentUserRolesSignalService,
   ) {
     super();
@@ -22,7 +21,7 @@ export class TableCellAppCfOrgSpaceBase extends TableCellCustom<APIResource<IApp
   protected init(cfGuid?: string, orgGuid?: string, spaceGuid?: string) {
     if (!this.cfOrgSpace) {
       this.cfOrgSpace = new CfOrgSpaceLabelService(
-        this.store,
+        this.endpoints,
         this.cfRoles,
         cfGuid,
         orgGuid,
