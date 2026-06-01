@@ -40,3 +40,17 @@ export class PruneRecentsToConnectedAction implements Action {
   constructor(public connectedEndpointGuids: string[]) { }
 }
 
+/**
+ * Remove a single recents entry by its favorite guid. Dispatched by the
+ * entity-delete cleanup hook when an entity is deleted, so a stale recent
+ * doesn't linger and deep-link to a 404. Replaces the recents-side effect of
+ * the legacy `EntityDeleteCompleteAction` (which the ngrx delete pipeline
+ * dispatched and which is being retired) without coupling to the
+ * RecursiveDelete machinery.
+ */
+export class RemoveRecentEntityAction implements Action {
+  static ACTION_TYPE = '[Recently visited] Remove entity';
+  public type = RemoveRecentEntityAction.ACTION_TYPE;
+  constructor(public guid: string) { }
+}
+
