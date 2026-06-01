@@ -83,6 +83,8 @@ import {
   defaultPaginationPageSizeOptionsTable,
   isPageSizeSentinel,
   resolvePageSize,
+} from '../signal-list/page-size.types';
+import {
   IGlobalListAction,
   IListConfig,
   IListFilter,
