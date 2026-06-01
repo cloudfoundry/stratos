@@ -12,6 +12,7 @@ export interface DeleteEvent {
   deleteName: string;
   deleteGuid: string;
   entityKind: string;
+  /** Populated when state === 'blocked'. */
   reason?: BlockReason;
   error?: unknown;
 }

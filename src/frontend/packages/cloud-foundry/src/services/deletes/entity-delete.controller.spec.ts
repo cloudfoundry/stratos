@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
+import { config as rxjsConfig } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { AsyncJobResult } from '../async-jobs/async-job.types';
 import { StratosJobError } from '../async-jobs/async-job.types';
@@ -24,13 +25,6 @@ const makeRequest = (): DeleteRequest => ({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/** Drain the microtask queue so ReplaySubject emissions are synchronously visible. */
-const tick = async (): Promise<void> => {
-  for (let i = 0; i < 4; i++) {
-    await Promise.resolve();
-  }
-};
 
 /** Collect all events$ emissions into an array then return them. */
 const collectStates = async (ctrl: EntityDeleteController, req: DeleteRequest): Promise<string[]> => {
@@ -91,6 +85,27 @@ describe('EntityDeleteController', () => {
       const states: string[] = [];
       handle.events$.subscribe(e => states.push(e.state));
       expect(states).toEqual(['start', 'success']);
+    });
+
+    it('done still resolves with success even when a subscriber next handler throws synchronously', async () => {
+      // RxJS v7 defers uncaught observer errors via setTimeout (reportUnhandledError).
+      // Install a no-op handler so that deliberate throws in this test don't leak
+      // as vitest "unhandled errors".  Drain the macrotask queue before restoring so
+      // the deferred setTimeout fires while the handler is still installed.
+      const prevHandler = rxjsConfig.onUnhandledError;
+      rxjsConfig.onUnhandledError = () => { /* expected: observer intentionally throws */ };
+
+      const req = makeRequest();
+      const handle = ctrl.delete(req);
+      // Subscribe with a handler that throws on every event.
+      handle.events$.subscribe(() => { throw new Error('observer exploded'); });
+      // done must settle and carry the success terminal — not hang or reject.
+      const terminal = await handle.done;
+      // Drain macrotasks so the RxJS-deferred rethrow fires before we restore.
+      await new Promise<void>(r => setTimeout(r, 0));
+
+      rxjsConfig.onUnhandledError = prevHandler;
+      expect(terminal.state).toBe('success');
     });
   });
 

@@ -34,7 +34,7 @@ export class EntityDeleteController {
   private readonly writeFn = inject(WRITE_WITH_JOB);
 
   delete(req: DeleteRequest): DeleteHandle {
-    const subject = new ReplaySubject<DeleteEvent>();
+    const subject = new ReplaySubject<DeleteEvent>(3);
 
     // Base fields shared by every event in this lifecycle.
     const base: Omit<DeleteEvent, 'state'> = {
@@ -45,25 +45,25 @@ export class EntityDeleteController {
       deleteName: req.deleteName,
     };
 
-    const done = new Promise<DeleteEvent>((resolve) => {
-      // Kick off the async operation; subscription happens inside.
-      (async () => {
-        const startEvent: DeleteEvent = { ...base, state: 'start' };
-        subject.next(startEvent);
+    // Wrap subject.next so a synchronous observer throw cannot abort the
+    // lifecycle — the terminal event and done resolution must always happen.
+    const safeNext = (event: DeleteEvent): void => {
+      try { subject.next(event); } catch { /* observer threw */ }
+    };
 
-        let terminal: DeleteEvent;
-        try {
-          await this.writeFn(this.http, req.call());
-          terminal = { ...base, state: 'success' };
-        } catch (error: unknown) {
-          terminal = { ...base, state: 'failure', error };
-        }
-
-        subject.next(terminal);
-        subject.complete();
-        resolve(terminal);
-      })();
-    });
+    const done = (async (): Promise<DeleteEvent> => {
+      let terminal: DeleteEvent;
+      try {
+        safeNext({ ...base, state: 'start' });
+        await this.writeFn(this.http, req.call());
+        terminal = { ...base, state: 'success' };
+      } catch (error: unknown) {
+        terminal = { ...base, state: 'failure', error };
+      }
+      safeNext(terminal);
+      try { subject.complete(); } catch { /* observer threw */ }
+      return terminal;
+    })();
 
     return { events$: subject.asObservable(), done };
   }
