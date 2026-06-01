@@ -6,7 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
-import { CoreModule } from '../../../../../../core/core.module';
+import { CoreModule } from '../../../../core/core.module';
 
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { TableCellEndpointAddressComponent } from './table-cell-endpoint-address.component';

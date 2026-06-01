@@ -4,18 +4,18 @@ import { ActionState, EndpointModel, EndpointsDataService, entityCatalog, strato
 import { combineLatest, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { TailwindDialogService } from '../../../../services/tailwind-dialog.service';
-import { CurrentUserPermissionsService } from '../../../../../core/permissions/current-user-permissions.service';
-import { StratosCurrentUserPermissions } from '../../../../../core/permissions/stratos-user-permissions.checker';
-import { ConnectEndpointDialogComponent } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { SessionService } from '../../../../../shared/services/session.service';
-import { UserProfileService } from '../../../../../core/user-profile.service';
-import { SnackBarService } from '../../../../services/snackbar.service';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { createMetaCardMenuItemSeparator } from '../../../meta-card/meta-card-base/meta-card.component';
-import { IListAction } from '../../../signal-list/list-action.types';
-import { TableCellCustom } from '../../list.types';
+import { TailwindDialogService } from '../../services/tailwind-dialog.service';
+import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
+import { ConnectEndpointDialogComponent } from '../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { SessionService } from '../../../shared/services/session.service';
+import { UserProfileService } from '../../../core/user-profile.service';
+import { SnackBarService } from '../../services/snackbar.service';
+import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { createMetaCardMenuItemSeparator } from '../meta-card/meta-card-base/meta-card.component';
+import { IListAction } from '../signal-list/list-action.types';
+import { TableCellCustom } from '../signal-list/cell-base';
 
 interface EndpointDetailsContainerRefs {
   componentRef: ComponentRef<EndpointListDetailsComponent>;

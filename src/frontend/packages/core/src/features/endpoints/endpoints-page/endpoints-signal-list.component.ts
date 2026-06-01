@@ -27,7 +27,7 @@ import {
   SignalListRowAction,
 } from '../../../shared/components/signal-list/signal-list.component';
 import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
-import { TableCellEndpointAddressComponent } from '../../../shared/components/list/list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
+import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { ConnectEndpointDialogComponent } from '../connect-endpoint-dialog/connect-endpoint-dialog.component';

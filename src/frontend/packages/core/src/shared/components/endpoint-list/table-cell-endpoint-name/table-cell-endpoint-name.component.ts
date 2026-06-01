@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Injector, Input, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
+import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 import { entityCatalog, EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { TableCellCustom } from '../../../list.types';
-import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
+import { EndpointsService } from '../../../../core/endpoints.service';
+import { TableCellCustom } from '../../signal-list/cell-base';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 export interface RowWithEndpointId {
   endpointId: string;

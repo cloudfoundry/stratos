@@ -6,7 +6,7 @@ import {
 import { Observable, defer, from } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
-import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointListDetailsComponent } from '../../shared/components/endpoint-list/endpoint-list.helpers';
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';

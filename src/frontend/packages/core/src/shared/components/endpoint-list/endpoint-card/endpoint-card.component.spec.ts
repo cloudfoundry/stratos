@@ -10,7 +10,7 @@ import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/t
 import { CurrentUserPermissionsService, SessionService } from '@stratosui/core';
 import { EndpointListHelper } from '../endpoint-list.helpers';
 import { EndpointCardComponent } from './endpoint-card.component';
-import { MetricsService } from '../../../../../../features/metrics/services/metrics-service';
+import { MetricsService } from '../../../../features/metrics/services/metrics-service';
 
 describe('EndpointCardComponent', () => {
   let component: EndpointCardComponent;

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
-import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
+import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
@@ -14,30 +14,30 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { EndpointsSignalService } from '../../../../../../core/signals/endpoints-signal.service';
+import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
 import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { EndpointsService } from '../../../../../../core/endpoints.service';
-import { safeUnsubscribe } from '../../../../../../core/utils.service';
-import { CardCell } from '../../../list.types';
+import { EndpointsService } from '../../../../core/endpoints.service';
+import { safeUnsubscribe } from '../../../../core/utils.service';
+import { CardCell } from '../../signal-list/cell-base';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
-import { CopyToClipboardComponent } from './../../../../copy-to-clipboard/copy-to-clipboard.component';
-import { SessionService } from '../../../../../services/session.service';
-import { CurrentUserPermissionsService } from '../../../../../../core/permissions/current-user-permissions.service';
-import { StratosCurrentUserPermissions } from '../../../../../../core/permissions/stratos-user-permissions.checker';
-import { MultilineTitleComponent } from '../../../../multiline-title/multiline-title.component';
-import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
+import { CopyToClipboardComponent } from '../../copy-to-clipboard/copy-to-clipboard.component';
+import { SessionService } from '../../../services/session.service';
+import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
+import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
+import { MultilineTitleComponent } from '../../multiline-title/multiline-title.component';
+import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 
 // Import non-standalone dependencies directly
-import { PageHeaderEventsComponent } from '../../../../page-header/page-header-events/page-header-events.component';
-import { MetaCardComponent } from '../../../../meta-card/meta-card-base/meta-card.component';
-import { MetaCardTitleComponent } from '../../../../meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardItemComponent } from '../../../../meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from '../../../../meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardValueComponent } from '../../../../meta-card/meta-card-value/meta-card-value.component';
+import { PageHeaderEventsComponent } from '../../page-header/page-header-events/page-header-events.component';
+import { MetaCardComponent } from '../../meta-card/meta-card-base/meta-card.component';
+import { MetaCardTitleComponent } from '../../meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardItemComponent } from '../../meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../../meta-card/meta-card-value/meta-card-value.component';
 import { TableCellEndpointStatusComponent } from '../table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { DisableRouterLinkDirective } from '../../../../../../core/disable-router-link.directive';
+import { DisableRouterLinkDirective } from '../../../../core/disable-router-link.directive';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -208,7 +208,3 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
 
 }
-
-// Register this card component to avoid circular dependency issues
-import { listCards } from '../../../list-cards/card/card.component';
-listCards.push(EndpointCardComponent);

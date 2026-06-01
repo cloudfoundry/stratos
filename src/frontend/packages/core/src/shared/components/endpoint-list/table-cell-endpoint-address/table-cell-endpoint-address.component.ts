@@ -5,10 +5,10 @@ import { EndpointModel, EndpointsDataService, getFullEndpointApiUrl } from '@str
 import { from, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
-import { EndpointsSignalService } from '../../../../../../core/signals/endpoints-signal.service';
-import { CopyToClipboardComponent } from '../../../../copy-to-clipboard/copy-to-clipboard.component';
-import { CustomTooltipDirective } from '../../../../custom-tooltip/custom-tooltip.directive';
-import { TableCellCustom } from '../../../list.types';
+import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
+import { CopyToClipboardComponent } from '../../copy-to-clipboard/copy-to-clipboard.component';
+import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
+import { TableCellCustom } from '../../signal-list/cell-base';
 import { RowWithEndpointId } from '../table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 @Component({

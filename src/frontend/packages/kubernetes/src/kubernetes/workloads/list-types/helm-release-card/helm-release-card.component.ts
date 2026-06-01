@@ -9,7 +9,7 @@ import { MetaCardKeyComponent } from '../../../../../../core/src/shared/componen
 import { MetaCardTitleComponent } from '../../../../../../core/src/shared/components/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from '../../../../../../core/src/shared/components/meta-card/meta-card-value/meta-card-value.component';
 import { MultilineTitleComponent } from '../../../../../../core/src/shared/components/multiline-title/multiline-title.component';
-import { TableCellEndpointNameComponent } from '../../../../../../core/src/shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellEndpointNameComponent } from '../../../../../../core/src/shared/components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { CustomIconComponent } from '../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { HelmRelease } from '../../workload.types';
 
