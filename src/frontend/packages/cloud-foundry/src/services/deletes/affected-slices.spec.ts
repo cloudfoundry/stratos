@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { indexDescriptors } from '../../entity-relations/signal/signal-relation-tree';
 import type { RelationDescriptor } from '../../entity-relations/signal/signal-relation-types';
-import { affectedSlices } from './affected-slices';
+import { affectedSlices, referencingSlices } from './affected-slices';
 
 // ---------------------------------------------------------------------------
 // Helpers — build a RelationDescriptorRegistry from an inline descriptor list.
@@ -115,5 +115,35 @@ describe('affectedSlices', () => {
     it('returns [] against an empty registry', () => {
       expect(affectedSlices('organization', indexDescriptors([]))).toEqual([]);
     });
+  });
+});
+
+describe('referencingSlices (reverse edges, one hop)', () => {
+  it('returns the parent slice that references the type (space → org)', () => {
+    expect(referencingSlices('space', testRegistry)).toContain('orgs');
+  });
+
+  it('returns every type that references the child (route ← space)', () => {
+    // testRegistry: space → route only references route.
+    expect(referencingSlices('route', testRegistry)).toEqual(expect.arrayContaining(['spaces']));
+  });
+
+  it('returns multiple referencers when several types point at the child', () => {
+    const reg = indexDescriptors([
+      makeDescriptor('application', 'serviceCredentialBinding', 'serviceCredentialBindings'),
+      makeDescriptor('serviceInstance', 'serviceCredentialBinding', 'serviceCredentialBindings'),
+    ]);
+    expect(referencingSlices('serviceCredentialBinding', reg).sort()).toEqual(
+      ['apps', 'serviceInstances'].sort(),
+    );
+  });
+
+  it('returns [] for a type nothing references (organization is a root)', () => {
+    expect(referencingSlices('organization', testRegistry)).toEqual([]);
+  });
+
+  it('de-duplicates referencer slices', () => {
+    const result = referencingSlices('route', testRegistry);
+    expect(result).toHaveLength(new Set(result).size);
   });
 });
