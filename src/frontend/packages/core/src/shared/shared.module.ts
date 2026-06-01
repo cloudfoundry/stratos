@@ -52,12 +52,12 @@ import {
 import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
 import { listTableComponents } from './components/list/list-table/table-components';
 import { TableComponent } from './components/list/list-table/table.component';
-import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointCardComponent } from './components/endpoint-list/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './components/endpoint-list/endpoint-list.helpers';
 import {
   TableCellEndpointNameComponent,
-} from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-import { TableCellEndpointStatusComponent } from './components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+} from './components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellEndpointStatusComponent } from './components/endpoint-list/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component'; // Now standalone

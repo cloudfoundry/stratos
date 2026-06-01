@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 import {
   EndpointListDetailsComponent,
-} from '../../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
+} from '../../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 

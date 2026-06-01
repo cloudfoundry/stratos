@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/cor
 
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
-import { TableCellCustom } from '../../../list.types';
-import { CustomIconComponent } from '../../../../../../shared/components/custom-material/custom-material.component';
+import { TableCellCustom } from '../../signal-list/cell-base';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',

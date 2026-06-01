@@ -13,13 +13,13 @@ import { coreEndpointListDetailsComponents } from '../../../../features/endpoint
 import { TableCellCustom } from '../list.types';
 import {
   TableCellEndpointAddressComponent,
-} from '../list-types/endpoint/table-cell-endpoint-address/table-cell-endpoint-address.component';
+} from '../../endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import {
   TableCellEndpointDetailsComponent,
 } from '../list-types/endpoint/table-cell-endpoint-details/table-cell-endpoint-details.component';
 import {
   TableCellEndpointNameComponent,
-} from '../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+} from '../../endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellDefaultComponent } from './app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellBooleanIndicatorComponent } from './table-cell-boolean-indicator/table-cell-boolean-indicator.component';

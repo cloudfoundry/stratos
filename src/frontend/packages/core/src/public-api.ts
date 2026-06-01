@@ -273,8 +273,8 @@ export { IListRowCell } from './shared/components/list/list.types';
 export { TableCellCustom, CardCell } from './shared/components/signal-list/cell-base';
 export * from './shared/components/list/list-table/table.types';
 export * from './shared/components/list/data-sources-controllers/local-filtering-sorting';
-export { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-export { EndpointListDetailsComponent } from './shared/components/list/list-types/endpoint/endpoint-list.helpers';
+export { TableCellEndpointNameComponent } from './shared/components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
+export { EndpointListDetailsComponent } from './shared/components/endpoint-list/endpoint-list.helpers';
 export { createTableColumnFavorite } from './shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
 export { ITableCellRequestMonitorIconConfig } from './shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 

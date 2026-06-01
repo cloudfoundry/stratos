@@ -6,8 +6,8 @@ import { take, filter, map } from 'rxjs/operators';
 
 import { SignalListComponent } from '@stratosui/core';
 
-import { EndpointCardComponent } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from '../../../../core/src/shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointCardComponent } from '../../../../core/src/shared/components/endpoint-list/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from '../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import {
   KubernetesEndpointsSignalConfigService,

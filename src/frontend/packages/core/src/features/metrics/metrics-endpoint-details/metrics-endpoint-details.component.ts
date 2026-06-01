@@ -5,7 +5,7 @@ import { EndpointModel } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointListDetailsComponent } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';

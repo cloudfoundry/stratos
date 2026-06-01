@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, Typ
 import { entityCatalog, EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../../list.types';
-import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
+import { EndpointListDetailsComponent, EndpointListHelper } from '../../../../endpoint-list/endpoint-list.helpers';
 
 @Component({
   selector: 'app-table-cell-endpoint-details',
