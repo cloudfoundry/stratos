@@ -27,8 +27,8 @@ export type KubernetesSignalConfigFactory = (
 // Registry of signal-native configs keyed by entity catalog `type`
 // (e.g. 'pod', 'service', 'namespace'). When the generic resource list
 // route resolves an entity type that exists in this registry, the shell
-// renders <app-signal-list> with the factory's config; otherwise it
-// falls back to the legacy <app-list-view> path.
+// renders <app-signal-list> with the factory's config; otherwise the
+// shell redirects to the cluster summary (there is no legacy list fallback).
 //
 // Wave-2-genericlist scope: register pods, services, and namespaces
 // (the wave-2 signal-configs already in tree). Wave-3 lifts the
