@@ -15,5 +15,5 @@ export { GitHubSCM } from './shared/scm/github-scm';
 export * from './shared/github.helpers';
 export * from './store/git-entity-factory';
 export * from './store/git-entity-generator';
-export * from './shared/components/list/list-types/github-commits/github-commits-signal-config.service';
+export * from './shared/signal-list-configs/github-commits/github-commits-signal-config.service';
 export * from './shared/components/github-commit-author/github-commit-author.component';
