@@ -1,11 +1,13 @@
 import { HTTP_INTERCEPTORS, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
+import { NO_ERRORS_SCHEMA, Signal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { Observable } from 'rxjs';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { firstValueFrom, Observable } from 'rxjs';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
 import { ConfirmationDialogService, TabNavService } from '@stratosui/core';
@@ -51,7 +53,18 @@ describe('CreateReleaseComponent', () => {
   let fixture: ComponentFixture<CreateReleaseComponent>;
   let httpMock: HttpTestingController;
 
+  // Stub the namespace data service so the namespace list read and the
+  // create write don't hit live HTTP.
+  const createNs = vi.fn().mockResolvedValue(undefined);
+  const refreshNs = vi.fn().mockResolvedValue(undefined);
+  const namespaceDataStub = {
+    create: createNs,
+    refresh: refreshNs,
+    allNamespacesAcrossEndpoints: (_g: readonly string[]) => signal([]) as Signal<unknown[]>,
+  };
+
   beforeEach(async () => {
+    vi.clearAllMocks();
     await TestBed.configureTestingModule({
       imports: [
         CreateReleaseComponent,
@@ -87,6 +100,7 @@ describe('CreateReleaseComponent', () => {
         },
         { provide: ChartsService, useValue: new MockChartService() },
         { provide: ConfigService, useValue: { appName: 'appName' } },
+        { provide: KubeNamespaceDataService, useValue: namespaceDataStub },
         provideZonelessChangeDetection(),
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -144,6 +158,31 @@ describe('CreateReleaseComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('createNamespace delegates to KubeNamespaceDataService.create on success', async () => {
+    component.details.controls.endpoint.setValue('k1');
+    component.details.controls.releaseNamespace.setValue('ns-new');
+    component.details.controls.createNamespace.enable();
+    component.details.controls.createNamespace.setValue(true);
+
+    const result = await firstValueFrom(component.createNamespace());
+
+    expect(createNs).toHaveBeenCalledWith('k1', 'ns-new');
+    expect(result.success).toBe(true);
+  });
+
+  it('createNamespace surfaces a failure message when create rejects', async () => {
+    createNs.mockRejectedValueOnce(new Error('already exists'));
+    component.details.controls.endpoint.setValue('k1');
+    component.details.controls.releaseNamespace.setValue('dup');
+    component.details.controls.createNamespace.enable();
+    component.details.controls.createNamespace.setValue(true);
+
+    const result = await firstValueFrom(component.createNamespace());
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('already exists');
   });
 
   afterEach(() => {

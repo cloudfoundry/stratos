@@ -4,9 +4,8 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { interval, Observable, Subscription } from 'rxjs';
-import { take, map, startWith } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import {
@@ -16,15 +15,11 @@ import {
 import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
-import {
-  PaginationMonitorFactory,
-  AppState,
-  entityCatalog,
-  getCurrentPageRequestInfo,
-  PaginatedAction,
-  PaginationEntityState
-} from '@stratosui/store';
-import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
+import { entityCatalog } from '@stratosui/store';
+import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
+import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
+import { KubernetesNode, KubernetesPod } from '../../store/kube.types';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 interface IEndpointDetails {
@@ -62,8 +57,9 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   public kubeEndpointService = inject(KubernetesEndpointService);
   public httpClient = inject(HttpClient);
-  public paginationMonitorFactory = inject(PaginationMonitorFactory);
-  private store = inject(Store<AppState>);
+  private podData = inject(KubePodDataService);
+  private nodeData = inject(KubeNodeDataService);
+  private namespaceData = inject(KubeNamespaceDataService);
   private ngZone = inject(NgZone);
   private router = inject(Router);
   private injector = inject(Injector);
@@ -127,15 +123,19 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const guid = this.kubeEndpointService.baseKube.guid;
 
-    const podsObs = kubeEntityCatalog.pod.store.getPaginationService(guid);
-    const pods$ = podsObs.entities$;
-    this.poll(kubeEntityCatalog.pod.actions.getMultiple(guid), podsObs.pagination$);
-    const nodesObs = kubeEntityCatalog.node.store.getPaginationService(guid);
-    const nodes$ = nodesObs.entities$;
-    this.poll(kubeEntityCatalog.node.actions.getMultiple(guid), nodesObs.pagination$);
-    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(guid);
-    const namespaces$ = namespacesObs.entities$;
-    this.poll(kubeEntityCatalog.namespace.actions.getMultiple(guid), namespacesObs.pagination$);
+    // Cluster lists now come from the signal-native data services. Bridge
+    // each signal to an Observable for the existing kubeEndpointService
+    // count/capacity/status helpers. The pod/node helpers are typed against
+    // the legacy KubernetesPod/KubernetesNode shapes; the runtime k8s JSON is
+    // identical, so cast the native-shape bridges at this boundary.
+    const pods$ = toObservable(this.podData.podsInCluster(guid), { injector: this.injector }) as unknown as Observable<KubernetesPod[]>;
+    const nodes$ = toObservable(this.nodeData.nodesInCluster(guid), { injector: this.injector }) as unknown as Observable<KubernetesNode[]>;
+    const namespaces$ = toObservable(this.namespaceData.namespacesForEndpoint(guid), { injector: this.injector });
+
+    // Prime the caches now, then poll them on the same 10s cadence the old
+    // pagination dispatch poll drove.
+    this.refreshAll(guid);
+    this.poll(guid);
 
     this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
     this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
@@ -211,22 +211,22 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     });
   }
 
-  private poll(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
+  private poll(guid: string) {
     this.ngZone.runOutsideAngular(() =>
       this.polls.push(
         interval(10000).subscribe(() => {
-          this.ngZone.run(() => this.updateList(action, pagination$));
+          this.ngZone.run(() => this.refreshAll(guid));
         })
       )
     );
   }
 
-  private updateList(action: PaginatedAction, pagination$: Observable<PaginationEntityState>) {
-    pagination$.pipe(take(1)).subscribe(pag => {
-      if (!getCurrentPageRequestInfo(pag, { busy: true, error: false, message: '' }).busy) {
-        this.store.dispatch(action);
-      }
-    });
+  // Refresh the three cluster caches. Each data service dedups in-flight
+  // fetches, so overlapping polls don't stack duplicate requests.
+  private refreshAll(guid: string) {
+    void this.podData.refresh({ kubeGuid: guid });
+    void this.nodeData.refresh(guid);
+    void this.namespaceData.refresh({ kubeGuid: guid });
   }
 
   ngOnDestroy() {

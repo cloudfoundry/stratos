@@ -10,13 +10,14 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { PageSubNavComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
 import { entityCatalog } from '../../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
-import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubeResourceEntityDefinition } from '../../store/kube.types';
 import { getHelmReleaseDetailsFromGuid } from '../../workloads/store/workloads-entity-factory';
@@ -90,6 +91,7 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private baseKubeGuid = inject(BaseKubeGuid);
   private signalConfigRegistry = inject(KubernetesSignalConfigRegistry);
   private currentNamespaceService = inject(KubeCurrentNamespaceService);
+  private namespaceData = inject(KubeNamespaceDataService);
   private injector = inject(Injector);
 
 
@@ -121,8 +123,9 @@ export class KubernetesResourceListComponent implements OnDestroy {
     } else {
       // Namespaced
       this.kubeId = this.baseKubeGuid.guid;
-      const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(this.baseKubeGuid.guid);
-      this.namespaces$ = namespacesObs.entities$.pipe(map(ns => ns.map(n => n.metadata.name)));
+      void this.namespaceData.refresh({ kubeGuid: this.kubeId });
+      this.namespaces$ = toObservable(this.namespaceData.namespacesForEndpoint(this.kubeId), { injector: this.injector })
+        .pipe(map(ns => ns.map(n => n.metadata.name)));
 
       // Watch for namespace changes via the signal-native current-namespace
       // service. effect() runs whenever the per-endpoint selection signal

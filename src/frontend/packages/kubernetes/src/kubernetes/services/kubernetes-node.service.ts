@@ -9,7 +9,7 @@ import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions
 import { MetricsDataService, MetricsRequest } from '../../../../store/src/services/metrics-data.service';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
+import { KubeNodeDataService } from '../../services/domain-data/kube-node-data.service';
 import { KubernetesNode, MetricStatistic } from '../store/kube.types';
 import { KubernetesEndpointService } from './kubernetes-endpoint.service';
 
@@ -27,6 +27,7 @@ export class KubernetesNodeService {
   kubeEndpointService = inject(KubernetesEndpointService);
   activatedRoute = inject(ActivatedRoute);
   private metricsDataService = inject(MetricsDataService);
+  private nodeData = inject(KubeNodeDataService);
   private injector = inject(Injector);
 
   public nodeName: string;
@@ -41,17 +42,22 @@ export class KubernetesNodeService {
     this.nodeName = getIdFromRoute(activatedRoute, 'nodeName');
     this.kubeGuid = kubeEndpointService.kubeGuid;
 
-    const nodeEntityService = kubeEntityCatalog.node.store.getEntityService(this.nodeName, this.kubeGuid);
+    // Prime the cluster cache, then project the single node by name. The
+    // data service returns the native KubeNode shape; consumers read the
+    // structurally-identical k8s JSON via the legacy KubernetesNode type.
+    void this.nodeData.refresh(this.kubeGuid);
+    const node = this.nodeData.nodeByName(this.kubeGuid, this.nodeName);
 
-    this.node$ = nodeEntityService.entityObs$.pipe(
-      filter(p => !!p && !!p.entity),
+    this.nodeEntity$ = toObservable(node, { injector: this.injector }).pipe(
+      filter((n): n is NonNullable<typeof n> => !!n),
       take(1),
+      map(n => n as unknown as KubernetesNode),
       publishReplay(1),
       refCount()
     );
 
-    this.nodeEntity$ = this.node$.pipe(
-      map(p => p.entity)
+    this.node$ = this.nodeEntity$.pipe(
+      map(entity => ({ entity } as unknown as EntityInfo<KubernetesNode>))
     );
   }
 

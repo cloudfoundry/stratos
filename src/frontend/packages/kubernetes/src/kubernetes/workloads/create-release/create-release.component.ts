@@ -18,18 +18,18 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
 import {
+  catchError,
   distinctUntilChanged,
-  filter,
   map,
-  pairwise,
   startWith,
   switchMap,
   take,
 } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
+import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
@@ -38,15 +38,13 @@ import {
   StepOnNextResult,
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { RequestInfoState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
 import { KubeHelmDataService } from '../../../services/endpoint-data/kube-helm-data.service';
-import { HelmChartReference, HelmInstallPayload } from '../../../services/endpoint-data/kube-types';
+import { HelmChartReference, HelmInstallPayload, KubeNamespace } from '../../../services/endpoint-data/kube-types';
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
-import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesNamespace } from '../../store/kube.types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from './../chart-values-editor/chart-values-editor.component';
 
 interface CreateReleaseForm {
@@ -98,6 +96,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   private chartsService = inject(ChartsService);
   private router = inject(Router);
   private helmDataService = inject(KubeHelmDataService);
+  private namespaceData = inject(KubeNamespaceDataService);
 
   // FWT-959 Part 2: signal-native step handles.
   //
@@ -142,25 +141,29 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
 
     this.kubeEndpoints$ = this.endpointsService.connectedEndpointsOfTypes(KUBERNETES_ENDPOINT_TYPE);
 
-    const allNamespaces$ = kubeEntityCatalog.namespace.store.getPaginationService(null).entities$.pipe(
-      filter(namespaces => !!namespaces),
-      take(1)
+    // All namespaces across the connected kube endpoints, sourced from the
+    // signal data service: refresh each endpoint once, then read the
+    // aggregate signal. Replaces the legacy getPaginationService(null) read.
+    const allNamespaces$ = this.kubeEndpoints$.pipe(
+      take(1),
+      switchMap(async (endpoints: EndpointModel[]) => {
+        const guids = endpoints.map(e => e.guid);
+        await Promise.all(guids.map((g: string) => this.namespaceData.refresh({ kubeGuid: g })));
+        return this.namespaceData.allNamespacesAcrossEndpoints(guids)();
+      }),
     );
     this.namespaces$ = combineLatest([
       allNamespaces$,
-      // endpointChanged stream — need to expose via toObservable; reuse
-      // the original Observable construction by reading the signal in a
-      // statusChanges-driven map for parity with the legacy stream.
       this.details.controls.endpoint.valueChanges.pipe(startWith('')),
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
-      map(([namespaces, kubeId, namespace]: [KubernetesNamespace[], string, string]) => ([
+      map(([namespaces, kubeId, namespace]: [KubeNamespace[], string, string]) => ([
         namespaces.filter(ns => ns.metadata.kubeId === kubeId),
         namespace
       ])),
       // Map to endpoint names
-      map(([namespaces, namespace]: [KubernetesNamespace[], string]) => [
+      map(([namespaces, namespace]: [KubeNamespace[], string]) => [
         namespaces.map(ns => ns.metadata.name),
         namespace
       ]),
@@ -282,25 +285,19 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       });
     }
 
-    return kubeEntityCatalog.namespace.api.create<RequestInfoState>(
+    return from(this.namespaceData.create(
+      this.details.controls.endpoint.value,
       this.details.controls.releaseNamespace.value,
-      this.details.controls.endpoint.value
-    ).pipe(
-      pairwise(),
-      filter(([oldVal, newVal]) => oldVal.creating && !newVal.creating),
-      map(([, newVal]) => newVal),
-      map(state => {
-        if (state.error) {
-          return {
-            success: false,
-            message: `Failed to create namespace '${this.details.controls.releaseNamespace.value}': ` + state.message
-          };
-        }
+    )).pipe(
+      map((): StepOnNextResult => {
         this.createdNamespace = true;
-        return {
-          success: true
-        };
-      })
+        return { success: true };
+      }),
+      catchError((err: unknown) => of<StepOnNextResult>({
+        success: false,
+        message: `Failed to create namespace '${this.details.controls.releaseNamespace.value}': `
+          + ((err as Error)?.message ?? String(err)),
+      })),
     );
   }
 

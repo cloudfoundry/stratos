@@ -2,17 +2,17 @@
   <app-tile-group class="ml-0 mr-4 mt-4">
     <app-tile>
       <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/nodes" icon="apps" label="Nodes"
-        labelSingular="Node" value="{{ nodeCount$ | async }}">
+        labelSingular="Node" value="{{ nodeCount() }}">
       </app-card-number-metric>
     </app-tile>
     <app-tile>
       <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/resource/namespace" icon="language"
-        label="Namespaces" labelSingular="Node" value="{{ namespaceCount$ | async }}">
+        label="Namespaces" labelSingular="Node" value="{{ namespaceCount() }}">
       </app-card-number-metric>
     </app-tile>
     <app-tile>
       <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/resource/pod" icon="apps" label="Pods"
-        labelSingular="Pod" value="{{ podCount$ | async }}">
+        labelSingular="Pod" value="{{ podCount() }}">
       </app-card-number-metric>
     </app-tile>
   </app-tile-group>

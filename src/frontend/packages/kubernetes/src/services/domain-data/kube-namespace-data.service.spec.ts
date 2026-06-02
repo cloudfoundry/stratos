@@ -61,6 +61,17 @@ describe('KubeNamespaceDataService', () => {
     expect(sig()).toHaveLength(2);
   });
 
+  it('namespaceByName projects the single namespace matching the name', async () => {
+    const refreshPromise = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(NS_URL).flush({
+      [KUBE_GUID]: { items: [{ metadata: { name: 'kube-system' } }, { metadata: { name: 'default' } }] },
+    });
+    await refreshPromise;
+
+    expect(svc.namespaceByName(KUBE_GUID, 'default')()?.metadata.name).toBe('default');
+    expect(svc.namespaceByName(KUBE_GUID, 'nope')()).toBeUndefined();
+  });
+
   it('allNamespacesAcrossEndpoints aggregates per-endpoint signals', async () => {
     const aggregate = svc.allNamespacesAcrossEndpoints(['kube-1', 'kube-2']);
     expect(aggregate()).toEqual([]);
@@ -74,6 +85,31 @@ describe('KubeNamespaceDataService', () => {
     await r2;
 
     expect(aggregate()).toHaveLength(2);
+  });
+
+  it('create POSTs a new namespace then refreshes the cache', async () => {
+    const creating = svc.create(KUBE_GUID, 'new-ns');
+
+    const post = httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces');
+    expect(post.request.method).toBe('POST');
+    expect(post.request.body).toEqual({ metadata: { name: 'new-ns' } });
+    expect(post.request.headers.get('x-cap-cnsi-list')).toBe(KUBE_GUID);
+    post.flush({});
+
+    // The POST resolves a microtask before create() calls refresh(), which
+    // dispatches the list GET — let those microtasks settle first.
+    await Promise.resolve();
+    await Promise.resolve();
+    httpMock.expectOne(NS_URL).flush({ [KUBE_GUID]: { items: [{ metadata: { name: 'new-ns' } }] } });
+    await creating;
+  });
+
+  it('create rejects on an error status', async () => {
+    const creating = svc.create(KUBE_GUID, 'dup');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces')
+      .flush({ message: 'already exists' }, { status: 409, statusText: 'Conflict' });
+
+    await expect(creating).rejects.toBeDefined();
   });
 
   it('fetchDirect collects errors when the request fails', async () => {
