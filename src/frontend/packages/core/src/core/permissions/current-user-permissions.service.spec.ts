@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   AppState,
   BaseEntityValues,
+  CurrentUserRolesDataService,
   EntityCatalogEntityConfig,
   EntityCatalogTestModule,
   EntityServiceFactory,
@@ -493,6 +494,20 @@ describe('CurrentUserPermissionsService', () => {
       ],
 
     });
+
+    // Roles are no longer read from the ngrx slice — seed the signal-native
+    // source of truth (favorites/roles island Wave 2) with the same fixture the
+    // store module is built from, so the permission checker (which now reads via
+    // CurrentUserRolesDataService) sees the test roles.
+    const roles = createStoreState().currentUserRoles;
+    const rolesData = TestBed.inject(CurrentUserRolesDataService);
+    if (roles?.endpoints?.cf) {
+      rolesData.updateEndpointRoles('cf', () => roles.endpoints.cf);
+    }
+    if (roles?.internal) {
+      rolesData.applySessionScopes({ admin: roles.internal.isAdmin, scopes: roles.internal.scopes } as any);
+    }
+
     service = TestBed.inject(CurrentUserPermissionsService);
   });
 

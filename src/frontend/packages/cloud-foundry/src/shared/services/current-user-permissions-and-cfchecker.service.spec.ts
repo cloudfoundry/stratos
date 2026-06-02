@@ -19,6 +19,7 @@ import {
   EntityServiceFactory,
   EntityCatalogHelper,
   EntityCatalogHelpers,
+  CurrentUserRolesDataService,
 } from '@stratosui/store';
 import { PaginationState } from '@stratosui/store/types/pagination.types';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
@@ -959,6 +960,19 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     // Initialize EntityCatalogHelper for Angular 20 compatibility
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+
+    // Roles are no longer read from the ngrx slice — seed the signal-native
+    // source of truth (favorites/roles island Wave 2) with the same fixture the
+    // store module is built from, so the CF/stratos permission checkers (which
+    // now read via CurrentUserRolesDataService) see the test roles.
+    const roles = createStoreState().currentUserRoles;
+    const rolesData = TestBed.inject(CurrentUserRolesDataService);
+    if (roles?.endpoints?.cf) {
+      rolesData.updateEndpointRoles('cf', () => roles.endpoints.cf);
+    }
+    if (roles?.internal) {
+      rolesData.applySessionScopes({ admin: roles.internal.isAdmin, scopes: roles.internal.scopes } as any);
+    }
 
     service = TestBed.inject(CurrentUserPermissionsService);
   });

@@ -11,8 +11,6 @@ import type {
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
-  EntityUserRolesFetch,
-  EntityUserRolesReducer,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
@@ -167,14 +165,6 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly favoriteFromEntity?: <M extends IEntityMetadata = IEntityMetadata>(
     entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;
-  /**
-   * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type
-   */
-  readonly userRolesFetch?: EntityUserRolesFetch;
-  /**
-   * Allows the user roles to be stored, updated and removed in the current user permissions section of the store
-   */
-  readonly userRolesReducer?: EntityUserRolesReducer;
   /**
    * A list of actions that will be displayed in the endpoints lists
    * Note - These should be restricted by type

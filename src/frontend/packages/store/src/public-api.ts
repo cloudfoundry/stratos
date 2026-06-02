@@ -185,16 +185,11 @@ export {
   setEntityRequestState,
   startApiRequest,
 } from './reducers/api-request-reducer/request-helpers';
-export { GetCurrentUsersRelations } from './actions/permissions.actions';
 export type { EndpointModel, EndpointUser, INewlyConnectedEndpointInfo } from './types/endpoint.types';
 export { SystemSharedUserGuid } from './types/endpoint.types';
 export { stratosEntityCatalog } from './stratos-entity-catalog';
 export { EntityCatalogHelper } from './entity-catalog/entity-catalog-entity/entity-catalog.service';
-export {
-  PermissionValues,
-  getCurrentUserStratosHasScope,
-  getCurrentUserStratosRole,
-} from './selectors/current-user-role.selectors';
+export type { PermissionValues } from './types/current-user-roles.types';
 export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './types/auth.types';

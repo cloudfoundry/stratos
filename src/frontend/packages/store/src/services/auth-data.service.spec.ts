@@ -8,8 +8,8 @@ import { StratosBrandingService } from '@stratosui/theme';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
-import { CURRENT_USER_ROLES_SESSION_VERIFIED } from '../actions/permissions.actions';
 import { RouterRedirect } from '../types/auth.types';
+import { CurrentUserRolesDataService } from './current-user-roles-data.service';
 import { EndpointsDataService } from './endpoints-data.service';
 import { AuthDataService } from './auth-data.service';
 
@@ -27,6 +27,7 @@ function okEnvelope(overrides: Record<string, unknown> = {}) {
 describe('AuthDataService', () => {
   let httpMock: HttpTestingController;
   let dispatch: ReturnType<typeof vi.fn>;
+  let applySessionScopes: ReturnType<typeof vi.fn>;
   let navigate: ReturnType<typeof vi.fn>;
   let activateUserPreferences: ReturnType<typeof vi.fn>;
   let getAll: ReturnType<typeof vi.fn>;
@@ -35,6 +36,7 @@ describe('AuthDataService', () => {
 
   beforeEach(() => {
     dispatch = vi.fn();
+    applySessionScopes = vi.fn();
     navigate = vi.fn();
     activateUserPreferences = vi.fn();
     getAll = vi.fn().mockResolvedValue([]);
@@ -48,6 +50,7 @@ describe('AuthDataService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: Store, useValue: { dispatch, select: () => ({ subscribe: () => ({ unsubscribe() {} }) }) } },
+        { provide: CurrentUserRolesDataService, useValue: { applySessionScopes } },
         { provide: Router, useValue: { navigate } },
         { provide: StratosBrandingService, useValue: { activateUserPreferences } },
         { provide: DashboardDataService, useValue: { hydrateFromStorage: vi.fn() } },
@@ -87,9 +90,10 @@ describe('AuthDataService', () => {
     expect(svc.loginCompletedAt()).toBeGreaterThan(0);
     expect(activateUserPreferences).toHaveBeenCalledTimes(1);
     expect(getAll).toHaveBeenCalledWith(true);
-    // Feeds the current-user-roles slice (decoupled from the deleted auth slice).
-    const verified = dispatch.mock.calls.map(c => c[0]).find(a => a.type === CURRENT_USER_ROLES_SESSION_VERIFIED);
-    expect(verified).toBeDefined();
+    // Applies the verified session user's internal scopes to the signal-native
+    // roles source of truth (replaces the deleted CURRENT_USER_ROLES_SESSION_VERIFIED
+    // dispatch).
+    expect(applySessionScopes).toHaveBeenCalled();
   });
 
   it('verifySession without login does not mark logged-in', async () => {

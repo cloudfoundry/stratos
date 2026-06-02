@@ -118,11 +118,14 @@ export class CfEndpointRoleSyncService implements OnDestroy {
     });
   }
 
-  private async runFetch(endpoint: { guid: string, user?: { admin?: boolean } | null }): Promise<void> {
+  private async runFetch(endpoint: { guid?: string, user?: { admin?: boolean } | null }): Promise<void> {
+    if (!endpoint.guid) {
+      return;
+    }
     this.beginGlobalFetch();
     let ok = false;
     try {
-      ok = await fetchCfUserRolesForEndpoint(this.cfRoles, this.http, endpoint);
+      ok = await fetchCfUserRolesForEndpoint(this.cfRoles, this.http, { guid: endpoint.guid, user: endpoint.user });
     } finally {
       this.endGlobalFetch(ok);
     }
