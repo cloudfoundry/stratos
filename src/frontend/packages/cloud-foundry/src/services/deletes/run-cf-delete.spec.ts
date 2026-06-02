@@ -57,6 +57,16 @@ describe('runCfDelete', () => {
     ).rejects.toBe(boom);
   });
 
+  it('throws the terminal error when the delete is blocked', async () => {
+    const boom = new Error('CF-AssociationNotEmpty');
+    const controller = makeController({ state: 'blocked', reason: 'has-dependents', error: boom });
+    await expect(
+      runCfDelete(controller, makeHttp(), {
+        cnsiGuid: 'c1', entityKind: 'organization', deleteGuid: 'o1', path: '/pp/v1/cf/orgs/c1/o1',
+      }),
+    ).rejects.toBe(boom);
+  });
+
   it('resolves void on success', async () => {
     const controller = makeController({});
     await expect(
