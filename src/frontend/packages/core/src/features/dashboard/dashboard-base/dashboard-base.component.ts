@@ -6,9 +6,6 @@ import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, R
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  AppState,
-  GetCurrentUsersRelations,
-  Store,
   entityCatalog,
   stratosEntityCatalog,
 } from '@stratosui/store';
@@ -49,7 +46,6 @@ import { ShowPageHeaderComponent } from '../../../shared/components/page-header/
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
   pageHeaderService = inject(PageHeaderService);
-  private store = inject<Store<AppState>>(Store);
   private breakpointObserver = inject(BreakpointObserver);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
@@ -146,10 +142,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     }
   }
 
-  dispatchRelations() {
-    this.store.dispatch(new GetCurrentUsersRelations());
-  }
-
   sideHelpClosed() {
     this.sidePanelService.hide();
   }
@@ -174,7 +166,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       }
     });
 
-    this.dispatchRelations();
+    // CF current-user roles now fetch via CfEndpointRoleSyncService's signal
+    // effect on connected CF endpoints (favorites/roles island Wave 2) — no
+    // dashboard-load dispatch needed.
     // Initialize user favorites - fire and forget action, no subscription needed
     stratosEntityCatalog.userFavorite.api.getAll();
 

@@ -214,4 +214,32 @@ export class CfCurrentUserRolesDataService {
       distinctUntilChanged(),
     );
   }
+
+  /**
+   * Space guids within an org where the connected user has the given space role,
+   * or `'all'` when role state is unknown (no endpoint/org row) — replaces the
+   * `getSpacesFromOrgWithRole` selector. `'all'` lets callers fall back to the
+   * full space list (the legacy selector's sentinel).
+   */
+  spacesWithRoleInOrg$(endpointGuid: string, orgGuid: string, role: string): Observable<string[] | 'all'> {
+    return this.cfEndpointRolesState$(endpointGuid).pipe(
+      map(state => {
+        if (!state) {
+          return 'all' as const;
+        }
+        const org = state.organizations[orgGuid];
+        if (!org) {
+          return 'all' as const;
+        }
+        return org.spaceGuids.reduce((array: string[], spaceGuid: string) => {
+          const space = state.spaces[spaceGuid];
+          if (space && (space as Record<string, any>)[role]) {
+            array.push(spaceGuid);
+          }
+          return array;
+        }, []);
+      }),
+      distinctUntilChanged(),
+    );
+  }
 }

@@ -3,14 +3,12 @@ import { AfterContentInit, Component, Input, OnInit, Signal, ViewChild, ChangeDe
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { ISpace } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
-import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
+import { CfCurrentUserRolesDataService } from '../../../../services/cf-current-user-roles-data.service';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CreateAppStateService } from '../../../data-services/create-app-state.service';
@@ -32,7 +30,7 @@ import { CreateAppStateService } from '../../../data-services/create-app-state.s
   ]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private cfCurrentUserRoles = inject(CfCurrentUserRolesDataService);
   private createAppState = inject(CreateAppStateService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   route = inject(ActivatedRoute);
@@ -165,7 +163,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     return this.orgSelect$.pipe(
       withLatestFrom(this.cfSelect$),
       switchMap(([orgGuid, endpointGuid]) => {
-        return this.store.select(getSpacesFromOrgWithRole(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER));
+        return this.cfCurrentUserRoles.spacesWithRoleInOrg$(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER);
       }),
       switchMap((spacesOrAll => {
         if (spacesOrAll === 'all') {
