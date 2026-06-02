@@ -18,16 +18,13 @@ import { PageHeaderComponent } from '../../../../core/src/shared/components/page
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
 import { MetricsRequest } from '../../../../store/src/services/metrics-data.service';
-import { EntityInfo } from '../../../../store/src/types/api.types';
 import { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 import { formatAxisCPUTime, formatCPUTime } from '../kubernetes-metrics.helpers';
 import { IKubernetesMetric } from '../kubernetes-metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
-import { KubernetesPod } from '../store/kube.types';
 
 const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
 
@@ -70,7 +67,6 @@ function buildPodMetricRequest(podName: string, endpointGuid: string, query: str
 })
 export class PodMetricsComponent {
   podName: string;
-  podEntity$: Observable<EntityInfo<KubernetesPod>>;
   namespaceName: string;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
@@ -198,10 +194,5 @@ export class PodMetricsComponent {
         }];
       })
     );
-    this.podEntity$ = kubeEntityCatalog.pod.store.getEntityService(this.podName, this.kubeEndpointService.kubeGuid, {
-      namespace: this.namespaceName
-    }).entityObs$;
-
-
   }
 }

@@ -21,6 +21,7 @@ import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesResourceListComponent } from './kubernetes-resource-list.component';
 import { KubernetesSignalConfigRegistry } from '../kubernetes-signal-config-registry';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { kubernetesNodesEntityType } from '../../kubernetes-entity-factory';
 
 // Minimal SignalListConfig stub — only the fields the shell reads after
@@ -62,7 +63,18 @@ describe('KubernetesResourceListComponent', () => {
   let component: KubernetesResourceListComponent;
   let fixture: ComponentFixture<KubernetesResourceListComponent>;
 
+  // Stub the cluster namespace data service the component reads for its
+  // namespace dropdown so the test doesn't depend on live HTTP.
+  const namespacesSig = signal<Array<{ metadata: { name: string } }>>([]);
+  const namespaceRefresh = vi.fn().mockResolvedValue(undefined);
+  const namespaceStub = {
+    namespacesForEndpoint: (_g: string) => namespacesSig,
+    refresh: namespaceRefresh,
+  };
+
   beforeEach(async () => {
+    namespacesSig.set([]);
+    namespaceRefresh.mockClear();
     // Manually register catalog entities before TestBed setup
     const testEntityCatalog = entityCatalog as TestEntityCatalog;
     testEntityCatalog.clear();
@@ -80,6 +92,7 @@ describe('KubernetesResourceListComponent', () => {
       ],
       providers: [
         ...STORE_TEST_PROVIDERS,
+        { provide: KubeNamespaceDataService, useValue: namespaceStub },
         {
           provide: BaseKubeGuid,
           useValue: { guid: 'test-guid' }
@@ -137,6 +150,17 @@ describe('KubernetesResourceListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('sources the namespace dropdown from KubeNamespaceDataService (namespaced view)', () => {
+    namespacesSig.set([{ metadata: { name: 'alpha' } }, { metadata: { name: 'beta' } }]);
+
+    fixture.detectChanges(); // runs ngOnInit — namespaced (non-workload) path
+
+    expect(namespaceRefresh).toHaveBeenCalledWith({ kubeGuid: 'test-guid' });
+    let emitted: string[] | undefined;
+    component.namespaces$.subscribe(v => emitted = v);
+    expect(emitted).toEqual(['alpha', 'beta']);
   });
 
   // -------------------------------------------------------------------------

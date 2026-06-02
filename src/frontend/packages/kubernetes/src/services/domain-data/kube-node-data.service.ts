@@ -31,6 +31,13 @@ export class KubeNodeDataService {
     return computed(() => this._nodes().get(kubeGuid) ?? []);
   }
 
+  // Single-node projection by name — derived from the cluster cache. Callers
+  // that need a specific node (e.g. the node detail page) refresh() first,
+  // then read this signal.
+  nodeByName(kubeGuid: string, name: string): Signal<KubeNode | undefined> {
+    return computed(() => this.nodesInCluster(kubeGuid)().find(n => n.metadata.name === name));
+  }
+
   // Force a fresh fetch. Pushes the result into the per-endpoint cache
   // so signal projections light up. Updates the endpoint-service's node
   // *count* signal as a side-effect so the cluster summary card stays

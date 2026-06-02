@@ -36,6 +36,13 @@ export class KubeNamespaceDataService {
     return computed(() => svc.namespaces());
   }
 
+  // Single-namespace projection by name — derived from the per-endpoint
+  // cache. Callers (e.g. the namespace detail page) refresh() first.
+  namespaceByName(kubeGuid: string, name: string): Signal<KubeNamespace | undefined> {
+    const list = this.namespacesForEndpoint(kubeGuid);
+    return computed(() => list().find(ns => ns.metadata.name === name));
+  }
+
   // Cross-endpoint aggregation. Wave-1 ships the single-endpoint page
   // so this folds to namespacesForEndpoint when only one kubeGuid is
   // active. Wave-2 multi-endpoint pages can pass an array of kubeGuids.
@@ -48,6 +55,16 @@ export class KubeNamespaceDataService {
   // service so cache + signals stay coherent across consumers.
   async refresh(scope: { kubeGuid: string }): Promise<void> {
     await this.registry.getService(scope.kubeGuid).refresh('namespaces');
+  }
+
+  // Create a namespace on the target endpoint. POSTs through the jetstream
+  // proxy (single-endpoint, targeted by the x-cap-cnsi-list header) and
+  // rejects on a non-2xx so the caller can surface the failure. Refreshes
+  // the per-endpoint cache on success so the new namespace appears.
+  async create(kubeGuid: string, name: string): Promise<void> {
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    await firstValueFrom(this.http.post('/pp/v1/proxy/api/v1/namespaces', { metadata: { name } }, { headers }));
+    await this.refresh({ kubeGuid });
   }
 
   errors(): Signal<StratosError[]> {

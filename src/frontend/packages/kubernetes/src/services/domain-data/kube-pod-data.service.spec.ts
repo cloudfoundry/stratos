@@ -73,6 +73,17 @@ describe('KubePodDataService', () => {
     expect(pods()).toHaveLength(2);
   });
 
+  it('podByName finds a pod by name within a namespace scope', async () => {
+    const pod = svc.podByName(KUBE_GUID, 'coredns', 'kube-system');
+    httpMock.expectOne(NS_PODS_URL('kube-system')).flush({
+      [KUBE_GUID]: { items: [{ metadata: { name: 'coredns' }, status: { phase: 'Running' } }] },
+    });
+    await Promise.resolve();
+
+    expect(pod()?.metadata.name).toBe('coredns');
+    expect(svc.podByName(KUBE_GUID, 'missing', 'kube-system')()).toBeUndefined();
+  });
+
   it('expandedStatus surfaces a waiting reason ahead of phase', async () => {
     const pods = svc.podsInCluster(KUBE_GUID);
     httpMock.expectOne(CLUSTER_PODS_URL).flush({

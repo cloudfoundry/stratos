@@ -62,6 +62,20 @@ describe('KubeNodeDataService', () => {
     expect(errs[0].code).toBe('UNAUTHORIZED');
   });
 
+  it('nodeByName projects the single node matching the name', async () => {
+    const refreshing = svc.refresh(KUBE_GUID);
+    httpMock.expectOne(NODES_URL).flush({
+      [KUBE_GUID]: { items: [
+        { metadata: { name: 'node-a' } },
+        { metadata: { name: 'node-b' } },
+      ] },
+    });
+    await refreshing;
+
+    expect(svc.nodeByName(KUBE_GUID, 'node-b')()?.metadata.name).toBe('node-b');
+    expect(svc.nodeByName(KUBE_GUID, 'missing')()).toBeUndefined();
+  });
+
   it('two refresh calls on different endpoints keep caches isolated', async () => {
     const r1 = svc.refresh('kube-1');
     httpMock.expectOne(NODES_URL).flush({ 'kube-1': { items: [{ metadata: { name: 'a' } }] } });

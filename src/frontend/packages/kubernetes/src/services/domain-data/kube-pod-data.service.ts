@@ -79,6 +79,14 @@ export class KubePodDataService {
     return computed(() => this._byScope().get(key)?.items ?? []);
   }
 
+  // Single-pod projection by name. Namespaced when a namespace is given
+  // (the detail/metrics pages know it), else cluster-scoped. Reads through
+  // the scope getter so the underlying list auto-loads.
+  podByName(kubeGuid: string, name: string, namespace?: string): Signal<KubePod | undefined> {
+    const list = namespace ? this.podsInNamespace(kubeGuid, namespace) : this.podsInCluster(kubeGuid);
+    return computed(() => list().find(p => p.metadata.name === name));
+  }
+
   // Push-only: data arrives via the HelmRelease websocket stream, never
   // REST-fetched, so no ensureLoaded call here.
   podsInWorkload(kubeGuid: string, namespace: string, release: string): Signal<KubePod[]> {
