@@ -3,11 +3,9 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
-import { Store } from '@ngrx/store';
 import {
-  AppState,
   endpointEntityType,
-  recentlyVisitedSelector,
+  RecentlyVisitedDataService,
   IRecentlyVisitedEntity,
   entityCatalog,
   MAX_RECENT_COUNT,
@@ -62,7 +60,7 @@ class RenderableRecent {
   ]
 })
 export class RecentEntitiesComponent {
-  private store = inject(Store<AppState>);
+  private recents = inject(RecentlyVisitedDataService);
   private endpointsSignals = inject(EndpointsSignalService);
 
   @Input()
@@ -78,7 +76,7 @@ export class RecentEntitiesComponent {
   private endpointEntities$ = toObservable(this.endpointsSignals.endpoints);
 
   constructor() {
-    const recentEntities$ = this.store.select(recentlyVisitedSelector);
+    const recentEntities$ = this.recents.state$;
     this.recentEntities$ = recentEntities$.pipe(
       map(entities => Object.values(entities)),
       map((entities: IRecentlyVisitedEntity[]) => {

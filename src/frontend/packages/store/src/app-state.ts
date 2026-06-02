@@ -5,7 +5,6 @@ import type { BaseEntityValues, ExtendedRequestState } from './types/entity.type
 import type { IUserFavoritesGroupsState } from './types/favorite-groups.types';
 import type { InternalEventsState } from './types/internal-events.types';
 import type { PaginationEntityTypeState } from './types/pagination.types';
-import type { IRecentlyVisitedState } from './types/recently-visited.types';
 export interface IRequestTypeState {
   [entityKey: string]: any;
 }
@@ -26,7 +25,6 @@ export abstract class AppState<
   internalEvents!: InternalEventsState;
   currentUserRoles!: ICurrentUserRolesState;
   userFavoritesGroups!: IUserFavoritesGroupsState;
-  recentlyVisited!: IRecentlyVisitedState;
 }
 
 export interface GeneralRequestDataState {

@@ -4,13 +4,13 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Action } from '@ngrx/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CLEAR_ENDPOINT_ERROR_EVENTS } from '../types/internal-events.types';
-import { CleanRecentsForEndpointsAction, PruneRecentsToConnectedAction } from '../actions/recently-visited.actions';
 import { RESET_PAGINATION_OF_TYPE } from '../actions/pagination.actions';
 import { EndpointDisconnectCleanupService } from './endpoint-disconnect-cleanup.service';
 import { EndpointConnectEvent, EndpointsDataService } from './endpoints-data.service';
+import { RecentlyVisitedDataService } from './recently-visited-data.service';
 
 const SYSTEM_INFO_URL = '/pp/v1/info';
 
@@ -20,8 +20,12 @@ describe('EndpointDisconnectCleanupService', () => {
   let store: MockStore;
   let httpMock: HttpTestingController;
   let dispatched: Action[];
+  let cleanForEndpoints: ReturnType<typeof vi.fn>;
+  let pruneToConnected: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    cleanForEndpoints = vi.fn();
+    pruneToConnected = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -31,6 +35,7 @@ describe('EndpointDisconnectCleanupService', () => {
         provideMockStore({ initialState: {} }),
         EndpointsDataService,
         EndpointDisconnectCleanupService,
+        { provide: RecentlyVisitedDataService, useValue: { cleanForEndpoints, pruneToConnected } },
       ],
     });
     svc = TestBed.inject(EndpointsDataService);
@@ -69,10 +74,8 @@ describe('EndpointDisconnectCleanupService', () => {
     const cleared = dispatched.filter(a => a.type === CLEAR_ENDPOINT_ERROR_EVENTS);
     expect(cleared.length).toBeGreaterThanOrEqual(1);
 
-    // Recents cleanup dispatched with the disconnected guid.
-    const recents = dispatched.filter(a => a.type === CleanRecentsForEndpointsAction.ACTION_TYPE) as CleanRecentsForEndpointsAction[];
-    expect(recents.length).toBe(1);
-    expect(recents[0].endpointGuids).toEqual(['cf-1']);
+    // Recents cleanup (signal-native) called with the disconnected guid.
+    expect(cleanForEndpoints).toHaveBeenCalledWith(['cf-1']);
   });
 
   it('invokes registered disconnect handlers per event', async () => {
@@ -114,19 +117,16 @@ describe('EndpointDisconnectCleanupService', () => {
     expect(svc.connectedSignal()).toHaveLength(0);
   });
 
-  it('emits PruneRecentsToConnectedAction when the endpoints set changes', async () => {
+  it('prunes recents to connected endpoints when the endpoints set changes', async () => {
     // Initial set with one connected endpoint.
     svc['_endpoints'].set(new Map([
       ['cf-1', { guid: 'cf-1', name: 'cf-one', cnsi_type: 'cf', user: { guid: 'u' } } as any],
     ]));
     await flushTick();
 
-    const prunes = dispatched.filter(
-      a => a.type === PruneRecentsToConnectedAction.ACTION_TYPE,
-    ) as PruneRecentsToConnectedAction[];
-    expect(prunes.length).toBeGreaterThanOrEqual(1);
-    const last = prunes[prunes.length - 1];
-    expect(last.connectedEndpointGuids).toEqual(['cf-1']);
+    expect(pruneToConnected).toHaveBeenCalled();
+    const lastCall = pruneToConnected.mock.calls[pruneToConnected.mock.calls.length - 1];
+    expect(lastCall[0]).toEqual(['cf-1']);
   });
 
   it('integration: disconnect() emits + cleanup drains within one microtask cycle', async () => {
@@ -151,8 +151,7 @@ describe('EndpointDisconnectCleanupService', () => {
     await flushTick();
 
     expect(svc.disconnectedSignal()).toHaveLength(0);
-    const recents = dispatched.filter(a => a.type === CleanRecentsForEndpointsAction.ACTION_TYPE);
-    expect(recents.length).toBeGreaterThanOrEqual(1);
+    expect(cleanForEndpoints).toHaveBeenCalled();
     // Pagination wipe is best-effort: the entity catalog under test may have
     // no registered cf-typed entities, so only assert the action ran without
     // error (count may be zero).

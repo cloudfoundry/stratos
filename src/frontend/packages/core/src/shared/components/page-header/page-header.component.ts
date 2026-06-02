@@ -4,14 +4,12 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
   UserFavorite,
-  AddRecentlyVisitedEntityAction,
+  RecentlyVisitedDataService,
   StratosStatus,
-  AppState,
   UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
@@ -58,7 +56,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
-  private store = inject<Store<AppState>>(Store);
+  private recents = inject(RecentlyVisitedDataService);
   private route = inject(ActivatedRoute);
   private tabNavService = inject(TabNavService);
   private router = inject(Router);
@@ -151,7 +149,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
         this.pFavorite = favorite;
-        this.store.dispatch(new AddRecentlyVisitedEntityAction({
+        this.recents.add({
           guid: favorite.guid,
           date: getTime(new Date()),
           entityType: favorite.entityType,
@@ -162,7 +160,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
           prettyType: favorite.getPrettyTypeName(),
           endpointId: favorite.endpointId,
           metadata: { name: favorite.metadata.name },
-        }));
+        });
       }
     }
   }

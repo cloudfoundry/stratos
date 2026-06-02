@@ -116,7 +116,6 @@ export {
 export type { RoutingEvent } from './types/routing.type';
 export type { IFavoriteMetadata, IFavoritesInfo, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { UserFavorite } from './types/user-favorites.types';
-export { AddRecentlyVisitedEntityAction, SetRecentlyVisitedEntityAction, RemoveRecentEntityAction } from './actions/recently-visited.actions';
 export { RemoveUserFavoriteAction } from './actions/user-favourites.actions';
 export { UserFavoriteManager } from './user-favorite-manager';
 export { TestEntityCatalog, entityCatalog } from './entity-catalog/entity-catalog';
@@ -149,7 +148,6 @@ export type { IUserFavoritesGroups } from './types/favorite-groups.types';
 export { getEndpointIDFromFavorite } from './user-favorite-helpers';
 export type { MenuItem } from './types/menu-item.types';
 export type { IRecentlyVisitedEntity } from './types/recently-visited.types';
-export { recentlyVisitedSelector } from './selectors/recently-visitied.selectors';
 export { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 export type { EndpointAuthTypeConfig, EndpointType, IAuthForm, IEndpointAuthComponent } from './extension-types';
 export { EntityMonitor, setEntityMonitorPollingEnabledSource } from './monitors/entity-monitor';
@@ -168,7 +166,7 @@ export type { APIResource, EntityInfo, NormalizedResponse } from './types/api.ty
 export { getFullEndpointApiUrl, countDuplicateUrlEndpoints } from './endpoint-utils';
 export type { PaginatedAction, BasePaginatedAction, PaginationClientFilter, PaginationParam } from './types/pagination.types';
 export { PaginationEntityState, isPaginatedAction } from './types/pagination.types';
-export { MAX_RECENT_COUNT } from './reducers/current-user-roles-reducer/recently-visited.reducer.helpers';
+export { MAX_RECENT_COUNT, RecentlyVisitedDataService } from './services/recently-visited-data.service';
 export type { ActionState, RequestInfoState } from './reducers/api-request-reducer/types';
 export { getDefaultActionState, rootUpdatingKey } from './reducers/api-request-reducer/types';
 export {

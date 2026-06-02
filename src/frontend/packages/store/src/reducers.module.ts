@@ -4,7 +4,6 @@ import { ActionReducerMap, StoreModule } from '@ngrx/store';
 import { LocalStorageService } from './helpers/local-storage-service';
 import { requestReducer } from './reducers/api-request-reducers.generator';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
-import { recentlyVisitedReducer } from './reducers/current-user-roles-reducer/recently-visited.reducer';
 import { userFavoriteGroupsReducer } from './reducers/current-user-roles-reducer/user-favorites-groups.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
@@ -30,7 +29,6 @@ export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   internalEvents: internalEventReducer,
   currentUserRoles: currentUserRolesReducer,
   userFavoritesGroups: userFavoriteGroupsReducer,
-  recentlyVisited: recentlyVisitedReducer,
 };
 
 @NgModule({
