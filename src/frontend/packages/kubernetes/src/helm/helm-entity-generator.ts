@@ -19,18 +19,12 @@ import {
   HELM_HUB_ENDPOINT_TYPE,
   HELM_REPO_ENDPOINT_TYPE,
   helmEntityFactory,
-  helmVersionsEntityType,
-  monocularChartsEntityType,
-  monocularChartVersionsEntityType } from './helm-entity-factory';
+  monocularChartsEntityType } from './helm-entity-factory';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
 import {
   HelmChartActionBuilders,
-  helmChartActionBuilders,
-  HelmChartVersionsActionBuilders,
-  helmChartVersionsActionBuilders,
-  HelmVersionActionBuilders,
-  helmVersionActionBuilders } from './store/helm.action-builders';
-import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
+  helmChartActionBuilders } from './store/helm.action-builders';
+import { MonocularChart } from './store/helm.types';
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
@@ -107,8 +101,6 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
   return [
     generateEndpointEntity(endpointDefinition),
     generateChartEntity(endpointDefinition),
-    generateVersionEntity(endpointDefinition),
-    generateChartVersionsEntity(endpointDefinition),
   ];
 }
 
@@ -133,36 +125,6 @@ function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinit
     }
   );
   return helmEntityCatalog.chart;
-}
-
-function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmVersionsEntityType,
-    schema: helmEntityFactory(helmVersionsEntityType),
-    endpoint: endpointDefinition
-  };
-  helmEntityCatalog.version = new StratosCatalogEntity<IFavoriteMetadata, HelmVersion, HelmVersionActionBuilders>(
-    definition,
-    {
-      actionBuilders: helmVersionActionBuilders
-    }
-  );
-  return helmEntityCatalog.version;
-}
-
-function generateChartVersionsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: monocularChartVersionsEntityType,
-    schema: helmEntityFactory(monocularChartVersionsEntityType),
-    endpoint: endpointDefinition
-  };
-  helmEntityCatalog.chartVersions = new StratosCatalogEntity<IFavoriteMetadata, MonocularVersion[], HelmChartVersionsActionBuilders>(
-    definition,
-    {
-      actionBuilders: helmChartVersionsActionBuilders
-    }
-  );
-  return helmEntityCatalog.chartVersions;
 }
 
 

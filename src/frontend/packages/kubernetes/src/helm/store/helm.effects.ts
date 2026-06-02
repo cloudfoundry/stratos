@@ -5,7 +5,7 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, flatMap, map, mergeMap } from 'rxjs/operators';
 
 import { environment } from '../../../../core/src/environments/environment';
-import { ClearPaginationOfType, ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
+import { ResetPaginationOfType } from '../../../../store/src/actions/pagination.actions';
 import { EntitySchema } from '../../../../store/src/helpers/entity-schema';
 import { isJetstreamError } from '../../../../store/src/jetstream';
 import {
@@ -20,29 +20,18 @@ import {
   entityCatalog,
   NormalizedResponse,
   ofType } from '../../../../store/src/public-api';
-import { ApiRequestTypes } from '../../../../store/src/reducers/api-request-reducer/request-helpers';
 import { EndpointDisconnectCleanupService } from '../../../../store/src/services/endpoint-disconnect-cleanup.service';
 import {
-  EntityRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed } from '../../../../store/src/types/request.types';
 import { helmEntityCatalog } from '../helm-entity-catalog';
 import { HELM_ENDPOINT_TYPE, HELM_HUB_ENDPOINT_TYPE, HELM_REPO_ENDPOINT_TYPE } from '../helm-entity-factory';
 import { Chart } from '../monocular/shared/models/chart';
-import { ChartVersion } from '../monocular/shared/models/chart-version';
-import { stratosMonocularEndpointGuid } from '../monocular/stratos-monocular.helper';
 import {
-  GET_HELM_VERSIONS,
-  GET_MONOCULAR_CHART_VERSIONS,
   GET_MONOCULAR_CHARTS,
-  GetHelmChartVersions,
-  GetHelmVersions,
   GetMonocularCharts,
-  HELM_INSTALL,
   HELM_SYNCHRONISE,
-  HelmInstall,
   HelmSynchronise } from './helm.actions';
-import { HelmVersion } from './helm.types';
 
 type MonocularChartsResponse = {
   data: Chart[];
@@ -167,100 +156,6 @@ export class HelmEffects {
   ));
 
   
-  fetchVersions$ = createEffect(() => this.actions$.pipe(
-    ofType<GetHelmVersions>(GET_HELM_VERSIONS),
-    flatMap(action => {
-      const entityKey = entityCatalog.getEntityKey(action);
-      return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/helm/versions`, (response) => {
-        const processedData: NormalizedResponse = {
-          entities: { [entityKey]: {} },
-          result: []
-        };
-
-        // Go through each endpoint ID
-        Object.keys(response).forEach(endpoint => {
-          const responseObj = response as Record<string, unknown>;
-          const endpointData = responseObj[endpoint] || {};
-          if (isJetstreamError(endpointData)) {
-            throw endpointData;
-          }
-          // Maintain typing
-          const version: HelmVersion = {
-            endpointId: endpoint,
-            ...endpointData as Omit<HelmVersion, 'endpointId'>
-          };
-          processedData.entities[entityKey][action.entity[0].getId(version)] = version;
-          processedData.result.push(endpoint);
-        });
-        return processedData;
-      }, []);
-    })
-  ));
-
-  
-  fetchChartVersions$ = createEffect(() => this.actions$.pipe(
-    ofType<GetHelmChartVersions>(GET_MONOCULAR_CHART_VERSIONS),
-    flatMap(action => {
-      const entityKey = entityCatalog.getEntityKey(action);
-      return this.makeRequest(action, `/pp/${this.proxyAPIVersion}/chartsvc/v1/charts/${action.repoName}/${action.chartName}/versions`,
-        (response) => {
-          const base: NormalizedResponse = {
-            entities: { [entityKey]: {} },
-            result: []
-          };
-
-          const items = (response as { data: ChartVersion[] }).data;
-          const processedData = items.reduce((res, data) => {
-            const id = action.entity[0].getId(data);
-            res.entities[entityKey][id] = data;
-            // Promote the name to the top-level object for simplicity
-            (data as unknown as { name: string }).name = data.attributes.name;
-            res.result.push(id);
-            return res;
-          }, base);
-          return processedData;
-        }, [], {
-        'x-cap-cnsi-list': action.monocularEndpoint && action.monocularEndpoint !== stratosMonocularEndpointGuid ?
-          action.monocularEndpoint :
-          ''
-      });
-    })
-  ));
-
-  
-  helmInstall$ = createEffect(() => this.actions$.pipe(
-    ofType<HelmInstall>(HELM_INSTALL),
-    flatMap(action => {
-      const requestType: ApiRequestTypes = 'create';
-      const url = '/pp/v1/helm/install';
-      this.store.dispatch(new StartRequestAction(action, requestType));
-      return this.httpClient.post(url, action.values).pipe(
-        mergeMap(() => {
-          this.appRef.tick();
-          return [
-            new ClearPaginationOfType(action),
-            new WrapperRequestActionSuccess(null, action)
-          ];
-        }),
-        catchError(error => {
-          this.appRef.tick();
-          const { status, message } = HelmEffects.createHelmError(error);
-          const errorMessage = `Failed to install helm chart: ${message}`;
-          return [
-            new WrapperRequestActionFailed(errorMessage, action, requestType, {
-              endpointIds: [action.values.endpoint],
-              url: error.url || url,
-              eventCode: status,
-              message: errorMessage,
-              error
-            })
-          ];
-        })
-      );
-    })
-  ));
-
-
   helmSynchronise$ = createEffect(() => this.actions$.pipe(
     ofType<HelmSynchronise>(HELM_SYNCHRONISE),
     flatMap((action): Action[] => {
@@ -294,8 +189,6 @@ export class HelmEffects {
       }
       this.appRef.tick();
       this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.chart.getSchema()));
-      this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.chartVersions.getSchema()));
-      this.store.dispatch(new ResetPaginationOfType(helmEntityCatalog.version.getSchema()));
     });
 
     // Replaces legacy `registerEndpoint$` (REGISTER_ENDPOINTS_SUCCESS) —
@@ -388,39 +281,6 @@ export class HelmEffects {
     return helmRepoEndpoints ?
       this.httpClient.get<MonocularChartsResponse>(`/pp/${this.proxyAPIVersion}/chartsvc/v1/charts`) :
       of({ data: [] });
-  }
-
-  private makeRequest(
-    action: EntityRequestAction,
-    url: string,
-    mapResult: (response: unknown) => NormalizedResponse,
-    endpointIds: string[],
-    headers: Record<string, string> = {}
-  ): Observable<Action> {
-    this.store.dispatch(new StartRequestAction(action));
-    const requestArgs: { headers: Record<string, string>; params: null } = {
-      headers,
-      params: null
-    };
-    return this.httpClient.get(url, requestArgs).pipe(
-      mergeMap((response: unknown) => {
-        this.appRef.tick();
-        return [new WrapperRequestActionSuccess(mapResult(response), action)];
-      }),
-      catchError(error => {
-        this.appRef.tick();
-        const { status, message } = HelmEffects.createHelmError(error);
-        return [
-          new WrapperRequestActionFailed(message, action, 'fetch', {
-            endpointIds,
-            url: error.url || url,
-            eventCode: status,
-            message,
-            error
-          })
-        ];
-      })
-    );
   }
 
   private checkSyncStatus(): void {

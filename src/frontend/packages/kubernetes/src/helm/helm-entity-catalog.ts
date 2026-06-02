@@ -5,10 +5,8 @@ import {
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import {
   HelmChartActionBuilders,
-  HelmChartVersionsActionBuilders,
-  HelmVersionActionBuilders,
 } from './store/helm.action-builders';
-import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
+import { MonocularChart } from './store/helm.types';
 
 /**
  * A strongly typed collection of Helm Catalog Entities.
@@ -17,8 +15,6 @@ import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.type
 export class HelmEntityCatalog {
   endpoint!: StratosCatalogEndpointEntity;
   chart!: StratosCatalogEntity<IFavoriteMetadata, MonocularChart, HelmChartActionBuilders>;
-  version!: StratosCatalogEntity<IFavoriteMetadata, HelmVersion, HelmVersionActionBuilders>;
-  chartVersions!: StratosCatalogEntity<IFavoriteMetadata, MonocularVersion[], HelmChartVersionsActionBuilders>;
 }
 
 /**
