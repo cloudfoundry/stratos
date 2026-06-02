@@ -5,8 +5,10 @@ import type { EntityDeleteController } from './entity-delete.controller';
  * Shared helper that routes a CF entity delete through the
  * EntityDeleteController chokepoint. Builds the DeleteRequest (a CF v3
  * DELETE with `observe: 'response'` so writeWithJob can read the 202 + job
- * URL), awaits the terminal lifecycle event, and throws on failure so the
- * calling component's catch can surface a snackbar.
+ * URL), awaits the terminal lifecycle event, and throws on a non-success
+ * terminal (failure or blocked) so the calling component's catch can surface
+ * a snackbar — for blocked, the stored CF error (e.g. association_not_empty)
+ * carries through.
  *
  * Every per-entity signal-config `deleteX` is a thin call to this so the
  * delete-and-invalidate path has exactly one implementation.
@@ -34,7 +36,7 @@ export async function runCfDelete(
     deleteName,
     call: () => http.delete(req.path, { observe: 'response' }),
   }).done;
-  if (result.state === 'failure') {
+  if (result.state === 'failure' || result.state === 'blocked') {
     throw result.error ?? new Error(`Failed to delete ${req.entityKind} "${deleteName}"`);
   }
 }
