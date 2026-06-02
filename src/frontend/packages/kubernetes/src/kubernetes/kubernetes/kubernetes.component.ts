@@ -57,7 +57,7 @@ export class KubernetesComponent implements OnInit, OnDestroy {
           // Single connected endpoint → auto-navigate into its detail
           // page. Was previously a `RouterNav` ngrx action — flipped to
           // the Angular Router directly so this component sheds its
-          // last @ngrx/store import alongside the list config migration.
+          // last ngrx/store import alongside the list config migration.
           void this.router.navigate(['kubernetes', connectedEndpoints[0].guid]);
         }
         return connectedEndpoints.length;

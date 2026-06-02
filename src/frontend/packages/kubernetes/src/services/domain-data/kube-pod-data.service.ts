@@ -219,6 +219,30 @@ export class KubePodDataService {
     });
   }
 
+  // -- Delete --------------------------------------------------------------
+
+  // Signal-native pod delete (replaces the ngrx deleteResource pipeline).
+  // DELETEs through the Jetstream proxy, then drops the pod from every cached
+  // scope so the lists/graph update immediately. Errors propagate to the
+  // caller (resource viewer renders the failure snackbar).
+  async delete(kubeGuid: string, name: string, namespace?: string): Promise<void> {
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    const url = namespace
+      ? `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/pods/${encodeURIComponent(name)}`
+      : `/pp/v1/proxy/api/v1/pods/${encodeURIComponent(name)}`;
+    await firstValueFrom(this.http.delete(url, { headers }));
+    this._byScope.update(curr => {
+      const next = new Map(curr);
+      for (const [key, entry] of next) {
+        const filtered = entry.items.filter(p => !(p.metadata.kubeId === kubeGuid && p.metadata.name === name));
+        if (filtered.length !== entry.items.length) {
+          next.set(key, { ...entry, items: filtered });
+        }
+      }
+      return next;
+    });
+  }
+
   private markUnavailable(key: string, err: unknown, title: string, kubeGuid: string): void {
     this._unavailable.update(curr => {
       const next = new Set(curr);

@@ -283,3 +283,7 @@ export { RoutingHistoryService } from './services/routing-history.service';
 // `CurrentUserRolesSignalService` and underpins the cf-side
 // `CfCurrentUserRolesDataService` in the cloud-foundry package.
 export { CurrentUserRolesDataService } from './services/current-user-roles-data.service';
+// Shared favorites/recents cleanup for entity deletes — invoked by signal-native
+// delete paths (CF delete controller hook, kube resource delete) so they stay
+// @ngrx-free while the favorites/recents stores remain ngrx.
+export { EntityDeleteCleanupService } from './services/entity-delete-cleanup.service';

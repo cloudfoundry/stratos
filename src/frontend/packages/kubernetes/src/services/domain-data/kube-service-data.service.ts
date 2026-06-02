@@ -70,6 +70,32 @@ export class KubeServiceDataService {
     return this._errors.asReadonly();
   }
 
+  // ---- Delete ------------------------------------------------------------
+
+  // Signal-native service delete (replaces the ngrx deleteResource pipeline).
+  // DELETEs through the Jetstream proxy, then drops the service from every
+  // cached scope. Errors propagate to the caller (viewer renders the snackbar).
+  async delete(kubeGuid: string, name: string, namespace?: string): Promise<void> {
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    const url = namespace
+      ? `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/services/${encodeURIComponent(name)}`
+      : `/pp/v1/proxy/api/v1/services/${encodeURIComponent(name)}`;
+    await firstValueFrom(this.http.delete(url, { headers }));
+    const drop = (curr: Map<string, KubeService[]>) => {
+      const next = new Map(curr);
+      for (const [key, arr] of next) {
+        const filtered = arr.filter(s => !(s.metadata.kubeId === kubeGuid && s.metadata.name === name));
+        if (filtered.length !== arr.length) {
+          next.set(key, filtered);
+        }
+      }
+      return next;
+    };
+    this._clusterServices.update(drop);
+    this._namespaceServices.update(drop);
+    this._workloadServices.update(drop);
+  }
+
   // ---- Refresh -----------------------------------------------------------
 
   // Refresh dispatches based on scope. Without a namespace it refreshes

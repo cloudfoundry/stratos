@@ -21,13 +21,16 @@ import { MetadataItemComponent } from '../../../../core/src/shared/components/me
 import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
 import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
-import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { entityDeleted } from '../../../../store/src/operators';
-import { DeleteActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { EntityDeleteCleanupService } from '../../../../store/src/services/entity-delete-cleanup.service';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import {
+  KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
+  KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
+} from '../../services/domain-data/kube-generic-resource-data.services';
+import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
+import { KubeServiceDataService } from '../../services/domain-data/kube-service-data.service';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { KubeResourceActionBuilders } from '../store/action-builders/kube-resource.action-builder';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
 import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
 import { SidePanelService } from './../../../../core/src/shared/services/side-panel.service';
@@ -84,6 +87,20 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   private sidePanelService = inject(SidePanelService);
   private snackBarService = inject(SnackBarService);
   private cdr = inject(ChangeDetectorRef);
+
+  // Signal-native delete: resolve the resource's data service by catalog type
+  // and route favorites/recents cleanup through the shared store helper.
+  private deleteCleanup = inject(EntityDeleteCleanupService);
+  private deleteServices: Record<string, { delete: (kubeGuid: string, name: string, namespace?: string) => Promise<void> }> = {
+    pod: inject(KubePodDataService),
+    service: inject(KubeServiceDataService),
+    job: inject(KubeJobDataService),
+    secrets: inject(KubeSecretDataService),
+    pvc: inject(KubePersistentVolumeClaimDataService),
+    replicaSet: inject(KubeReplicaSetDataService),
+    role: inject(KubeRoleDataService),
+    serviceAccount: inject(KubeServiceAccountDataService),
+  };
 
   public title: string;
   public resource$: Observable<KubernetesResourceViewerResource>;
@@ -274,21 +291,31 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     );
     this.confirmDialog.openWithCancel(confirmation,
       () => {
-        const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
-          StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
-        catalogEntity.api.deleteResource(
-          this.data.resource,
-          this.data.endpointId,
-          this.data.resource.metadata.name,
-          this.data.resource.metadata.namespace
-        ).pipe(
-          entityDeleted(),
-          take(1)
-        ).subscribe((result: DeleteActionState) => {
-          const msg = result.error ? `Could not delete resource: ${result.message}` : `Deleted resource '${this.data.resource.metadata.name}'`;
-          this.snackBarService.show(msg);
+        const name = this.data.resource.metadata.name;
+        const namespace = this.data.resource.metadata.namespace;
+        const dataService = this.deleteServices[defn.type];
+        if (!dataService) {
+          this.snackBarService.show(`Delete not supported for ${defn.label}`);
+          return;
         }
-        );
+        // Signal-native delete (replaces the ngrx deleteResource pipeline).
+        // On success drop the favorite/recent the legacy EntityDeleteComplete
+        // path used to clean up, then surface the same snackbar.
+        dataService.delete(this.data.endpointId, name, namespace)
+          .then(() => {
+            if (this.favorite) {
+              this.deleteCleanup.removeFavoriteAndRecent(
+                this.favorite.endpointId,
+                this.favorite.endpointType,
+                this.favorite.entityType,
+                this.favorite.entityId,
+              );
+            }
+            this.snackBarService.show(`Deleted resource '${name}'`);
+          })
+          .catch((err: unknown) => {
+            this.snackBarService.show(`Could not delete resource: ${(err as Error)?.message ?? String(err)}`);
+          });
       },
       () => {
         this.sidePanelService.open();

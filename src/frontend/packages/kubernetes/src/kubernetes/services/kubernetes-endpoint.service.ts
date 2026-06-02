@@ -100,7 +100,7 @@ export class KubernetesEndpointService {
 
   // Static helpers retained as a public surface for callers outside the
   // service instance lifecycle (e.g. KubernetesHomeCardComponent's
-  // imperative load() method). Wave-3.5 dropped the @ngrx Store
+  // imperative load() method). Wave-3.5 dropped the ngrx Store
   // dependency; the helpers now require SessionService + HttpClient
   // injected by the caller (mirrors the wave-3 cf-autoscaler pattern).
   public static hasKubeTerminalEnabled(session: SessionService): Observable<boolean> {

@@ -107,4 +107,20 @@ describe('KubeServiceDataService', () => {
       expect(svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-y')()).toEqual([]);
     });
   });
+
+  describe('delete', () => {
+    it('DELETEs the namespaced service and drops it from cached scopes', async () => {
+      svc.setWorkloadServices('cnsi-1', 'ns-a', 'rel-x', [
+        { metadata: { name: 's1' } } as any,
+        { metadata: { name: 's2' } } as any,
+      ]);
+      const done = svc.delete('cnsi-1', 's1', 'ns-a');
+      const req = httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns-a/services/s1');
+      expect(req.request.method).toBe('DELETE');
+      expect(req.request.headers.get('x-cap-cnsi-list')).toBe('cnsi-1');
+      req.flush(null);
+      await done;
+      expect(svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-x')().map(s => s.metadata.name)).toEqual(['s2']);
+    });
+  });
 });

@@ -185,4 +185,20 @@ describe('KubePodDataService', () => {
       expect(svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-y')()).toEqual([]);
     });
   });
+
+  describe('delete', () => {
+    it('DELETEs the namespaced pod and drops it from cached scopes', async () => {
+      svc.setWorkloadPods('cnsi-1', 'ns-a', 'rel-x', [
+        { metadata: { name: 'p1' } } as any,
+        { metadata: { name: 'p2' } } as any,
+      ]);
+      const done = svc.delete('cnsi-1', 'p1', 'ns-a');
+      const req = httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns-a/pods/p1');
+      expect(req.request.method).toBe('DELETE');
+      expect(req.request.headers.get('x-cap-cnsi-list')).toBe('cnsi-1');
+      req.flush(null);
+      await done;
+      expect(svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-x')().map(p => p.metadata.name)).toEqual(['p2']);
+    });
+  });
 });
