@@ -1,18 +1,16 @@
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppState } from '../app-state';
 import { MultiActionListEntity } from '../monitors/pagination-monitor';
-import { errorFetchingFavoritesSelector, fetchingFavoritesSelector } from '../selectors/favorite-groups.selectors';
+import { UserFavoritesDataService } from '../services/user-favorites-data.service';
 import { APIResource } from '../types/api.types';
 import { IFavoritesInfo } from '../types/user-favorites.types';
 
 
-export function getFavoriteInfoObservable(store: Store<AppState>): Observable<IFavoritesInfo> {
+export function getFavoriteInfoObservable(userFavorites: UserFavoritesDataService): Observable<IFavoritesInfo> {
   return combineLatest(
-    store.select(fetchingFavoritesSelector),
-    store.select(errorFetchingFavoritesSelector)
+    userFavorites.fetching$,
+    userFavorites.error$
   ).pipe(
     map(([fetching, error]) => ({
       fetching,

@@ -1,22 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
+import { IRequestEntityTypeState } from './app-state';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
 import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from './public-api';
-import {
-  errorFetchingFavoritesSelector,
-  favoriteEntitiesSelector,
-  favoriteGroupsSelector,
-  fetchingFavoritesSelector,
-} from './selectors/favorite-groups.selectors';
-import { isFavorite } from './selectors/favorite.selectors';
 import { EndpointsDataService } from './services/endpoints-data.service';
-import { stratosEntityCatalog } from './stratos-entity-catalog';
+import { UserFavoritesDataService } from './services/user-favorites-data.service';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
 import {
   IEndpointFavMetadata,
@@ -36,13 +28,22 @@ interface IGroupedFavorites {
   providedIn: 'root'
 })
 export class UserFavoriteManager {
-  private store = inject(Store<GeneralEntityAppState>);
   private endpointsService = inject(EndpointsDataService);
+  private userFavorites = inject(UserFavoritesDataService);
+
+  // The flat favorites map (legacy `favoriteEntitiesSelector`), projected from
+  // the signal source of truth as the `{ [guid]: UserFavorite }` shape callers
+  // (hydrateGroup, getFavoritesForEndpoint) expect.
+  private getFavoriteEntitiesObservable(): Observable<IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>> {
+    return this.userFavorites.favorites$.pipe(
+      map(favs => Object.fromEntries(favs) as IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>)
+    );
+  }
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
-    const favoriteGroups$ = this.store.select(favoriteGroupsSelector);
-    const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
+    const favoriteGroups$ = this.userFavorites.groups$;
+    const favoriteEntities$ = this.getFavoriteEntitiesObservable();
     const combined$ = combineLatest(
       favoriteGroups$,
       favoriteEntities$
@@ -53,8 +54,8 @@ export class UserFavoriteManager {
 
   private getWaitForFavoritesObservable() {
     return combineLatest(
-      this.store.select(fetchingFavoritesSelector),
-      this.store.select(errorFetchingFavoritesSelector)
+      this.userFavorites.fetching$,
+      this.userFavorites.error$
     ).pipe(
       tap(([fetching, error]) => {
         // Defensive: Log error details before throwing
@@ -141,9 +142,7 @@ export class UserFavoriteManager {
       return of(false);
     }
 
-    return this.store.select(
-      isFavorite(favorite)
-    );
+    return this.userFavorites.isFavorite$(favorite);
   }
 
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
@@ -153,13 +152,13 @@ export class UserFavoriteManager {
       return;
     }
 
-    stratosEntityCatalog.userFavorite.api.toggle(favorite);
+    this.userFavorites.toggle(favorite);
   }
 
   // Get all favorites for the given endpoint ID
   public getFavoritesForEndpoint(endpointID: string): Observable<UserFavorite<IFavoriteMetadata>[]> {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
-    const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
+    const favoriteEntities$ = this.getFavoriteEntitiesObservable();
     return waitForFavorites$.pipe(switchMap(() => favoriteEntities$)).pipe(
       map(favs => {
         const result: Array<UserFavorite<IFavoriteMetadata>> = [];
