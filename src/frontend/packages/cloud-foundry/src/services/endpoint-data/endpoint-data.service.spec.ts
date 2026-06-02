@@ -468,23 +468,20 @@ describe('EndpointDataService', () => {
       expect(service.appsStale()).toBe(true);
     });
 
-    it('applyCascade("org.delete") marks spaces+apps+serviceInstances+bindings stale', () => {
-      service.applyCascade('org.delete');
-      expect(service.spacesStale()).toBe(true);
+    // Entity-delete cascades (org/space/app/serviceInstance/serviceBinding
+    // .delete) moved to EntityDeleteController (relation-graph derived) and are
+    // covered by entity-delete.controller.spec + affected-slices.spec. The
+    // applyCascade path still serves the surviving create/update + route-unmap
+    // cascades:
+    it('applyCascade("route.delete") marks apps stale (route unmap cascade)', () => {
+      service.applyCascade('route.delete');
       expect(service.appsStale()).toBe(true);
-      expect(service.serviceInstancesStale()).toBe(true);
-      expect(service.serviceCredentialBindingsStale()).toBe(true);
-      // Orgs itself is NOT in the cascade — the source patches its own slice
-      expect(service.orgsStale()).toBe(false);
     });
 
-    it('applyCascade("space.delete") marks apps+SI+bindings stale (no orgs/spaces)', () => {
-      service.applyCascade('space.delete');
+    it('applyCascade("serviceBinding.create") marks apps+serviceInstances stale', () => {
+      service.applyCascade('serviceBinding.create');
       expect(service.appsStale()).toBe(true);
       expect(service.serviceInstancesStale()).toBe(true);
-      expect(service.serviceCredentialBindingsStale()).toBe(true);
-      expect(service.orgsStale()).toBe(false);
-      expect(service.spacesStale()).toBe(false);
     });
 
     it('loadOrgs() refetches when stale even with warm cache', async () => {
