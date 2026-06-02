@@ -9,7 +9,13 @@ import { EndpointDataRegistry } from '../endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../endpoint-data/endpoint-data.service';
 import { SignalRelationFetcherService } from '../../entity-relations/signal/signal-relation-fetcher.service';
 import { affectedSlices, ENTITY_TYPE_TO_SLICE, referencingSlices } from './affected-slices';
-import type { DeleteCleanupHook, DeleteEvent, DeleteHandle, DeleteRequest } from './delete-event.types';
+import { classifyBlock } from './block-classification';
+import type { BlockReason, DeleteCleanupHook, DeleteEvent, DeleteHandle, DeleteRequest } from './delete-event.types';
+
+/** Identity of a delete target, for latch keying. */
+type DeleteKey = Pick<DeleteRequest, 'cnsiGuid' | 'entityKind' | 'deleteGuid'>;
+
+const latchKey = (req: DeleteKey): string => `${req.cnsiGuid}:${req.entityKind}:${req.deleteGuid}`;
 
 // ---------------------------------------------------------------------------
 // Injection token — lets tests supply a fake without touching HttpClient.
@@ -62,9 +68,26 @@ export class EntityDeleteController {
   // invoked after every successful delete.
   private readonly cleanups: DeleteCleanupHook[] = [];
 
+  // Persistent blocked latch (Increment 3). Keyed by entity identity, holds
+  // the classified reason + original error. While an entry is set the
+  // mechanism refuses to re-attempt — delete() short-circuits to `blocked`
+  // until an explicit clear(). Stops auto-retry/refresh loops from hammering a
+  // delete that needs human resolution (remove dependents, fix permissions).
+  private readonly blocked = new Map<string, { reason: BlockReason; error: unknown }>();
+
   /** Register a cleanup hook fired after each successful delete. */
   registerCleanup(hook: DeleteCleanupHook): void {
     this.cleanups.push(hook);
+  }
+
+  /** True while a delete for this entity is latched blocked. */
+  isBlocked(req: DeleteKey): boolean {
+    return this.blocked.has(latchKey(req));
+  }
+
+  /** Release the blocked latch so a subsequent delete re-attempts the server. */
+  clear(req: DeleteKey): void {
+    this.blocked.delete(latchKey(req));
   }
 
   delete(req: DeleteRequest): DeleteHandle {
@@ -88,17 +111,38 @@ export class EntityDeleteController {
       } catch { /* diagnostics must never break the lifecycle */ }
     };
 
+    const key = latchKey(req);
+
     const done = (async (): Promise<DeleteEvent> => {
+      // Latched: refuse to re-attempt. Re-emit blocked from the stored
+      // classification (no `start`, no server call) until the caller clear()s.
+      const held = this.blocked.get(key);
+      if (held) {
+        const terminal: DeleteEvent = { ...base, state: 'blocked', reason: held.reason, error: held.error };
+        safeNext(terminal);
+        try { subject.complete(); } catch { /* observer threw */ }
+        return terminal;
+      }
+
       let terminal: DeleteEvent;
       try {
         safeNext({ ...base, state: 'start' });
         await this.writeFn(this.http, req.call());
+        // A prior block for this key is now moot — the entity is gone.
+        this.blocked.delete(key);
         // Invalidate caches + run cleanup BEFORE emitting success so a
         // success observer sees a consistent post-delete world.
         this.invalidateAndCleanup(req);
         terminal = { ...base, state: 'success' };
       } catch (error: unknown) {
-        terminal = { ...base, state: 'failure', error };
+        const reason = classifyBlock(error);
+        if (reason) {
+          // Classified non-retryable: latch the entity and surface `blocked`.
+          this.blocked.set(key, { reason, error });
+          terminal = { ...base, state: 'blocked', reason, error };
+        } else {
+          terminal = { ...base, state: 'failure', error };
+        }
       }
       safeNext(terminal);
       try { subject.complete(); } catch { /* observer threw */ }
