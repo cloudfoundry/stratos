@@ -4,8 +4,6 @@ import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets'
 import { catchError, map, share, switchMap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { AppState, Store, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
-import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
 import {
   KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
   KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
@@ -13,8 +11,8 @@ import {
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../../../../services/domain-data/kube-service-data.service';
 import { BasicKubeAPIResource } from '../../../store/kube.types';
-import { HelmReleaseGraph } from '../../workload.types';
-import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
+import { HelmReleaseGraph, HelmReleaseResources } from '../../workload.types';
+import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
 
@@ -30,7 +28,7 @@ interface SocketMessage {
 @Injectable()
 export class HelmReleaseSocketService implements OnDestroy {
   private helmReleaseHelper = inject(HelmReleaseHelperService);
-  private store = inject<Store<AppState>>(Store);
+  private releaseData = inject(HelmReleaseDataService);
   private snackbarService = inject(SnackBarService);
   private podData = inject(KubePodDataService);
   private serviceData = inject(KubeServiceDataService);
@@ -95,11 +93,7 @@ export class HelmReleaseSocketService implements OnDestroy {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
         } else if (messageObj.kind === 'Graph') {
-          const graph: HelmReleaseGraph = messageObj.data;
-          graph.endpointId = this.helmReleaseHelper.endpointGuid;
-          graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          const releaseGraphAction = workloadsEntityCatalog.graph.actions.get(graph.releaseTitle, graph.endpointId);
-          this.addResource(releaseGraphAction, graph);
+          this.writeReleaseGraph(messageObj.data);
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
@@ -120,16 +114,8 @@ export class HelmReleaseSocketService implements OnDestroy {
             this.writeManifestResources(resources);
           }
 
-          // const resources = { ...manifest };
           // kind === 'Resources' is an array, really they should go into a pagination section
-          messageObj.endpointId = this.helmReleaseHelper.endpointGuid;
-          messageObj.releaseTitle = this.helmReleaseHelper.releaseTitle;
-
-          const releaseResourceAction = workloadsEntityCatalog.resource.actions.get(
-            this.helmReleaseHelper.releaseTitle,
-            this.helmReleaseHelper.endpointGuid,
-          );
-          this.addResource(releaseResourceAction, messageObj);
+          this.writeReleaseResources(messageObj);
         } else if (messageObj.kind === 'ManifestErrors') {
           if (messageObj.data) {
             this.snackbarService.show('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss');
@@ -203,20 +189,22 @@ export class HelmReleaseSocketService implements OnDestroy {
     this.snackbarService.hide();
   }
 
-  private addResource(action: EntityRequestAction, data: any) {
-    const catalogEntity = entityCatalog.getEntity(action);
-    const response: any = {
-      entities: {
-        [catalogEntity.entityKey]: {
-          [action.guid as string]: data
-        }
-      },
-      result: [
-        action.guid
-      ]
-    };
-    const successWrapper = new WrapperRequestActionSuccess(response, action);
-    this.store.dispatch(successWrapper);
+  // Write the socket-streamed release graph into the signal data service
+  // (replaces the legacy `WrapperRequestActionSuccess` dispatch into the
+  // ngrx `graph` entity-catalog).
+  protected writeReleaseGraph(data: any): void {
+    const graph: HelmReleaseGraph = data;
+    graph.endpointId = this.helmReleaseHelper.endpointGuid;
+    graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
+    this.releaseData.setGraph(this.helmReleaseHelper.guid, graph);
+  }
+
+  // Write the socket-streamed release resources message into the signal data
+  // service (replaces the legacy `resource` entity-catalog dispatch).
+  protected writeReleaseResources(messageObj: any): void {
+    messageObj.endpointId = this.helmReleaseHelper.endpointGuid;
+    messageObj.releaseTitle = this.helmReleaseHelper.releaseTitle;
+    this.releaseData.setResources(this.helmReleaseHelper.guid, messageObj as HelmReleaseResources);
   }
 
   // Push each manifest resource group into the matching signal-native

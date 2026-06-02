@@ -1,4 +1,4 @@
-import { ComponentRef, Injectable, ViewContainerRef, inject } from '@angular/core';
+import { ComponentRef, EnvironmentInjector, Injectable, ViewContainerRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActionState, EndpointModel, EndpointsDataService, entityCatalog, stratosEntityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -63,6 +63,7 @@ export class EndpointListHelper {
   private sessionService = inject(SessionService);
   private userProfileService = inject(UserProfileService);
   private endpointsData = inject(EndpointsDataService);
+  private envInjector = inject(EnvironmentInjector);
 
 
   endpointActions(includeSeparators = false): IListAction<EndpointModel>[] {
@@ -70,7 +71,7 @@ export class EndpointListHelper {
     const customActions = entityCatalog.getAllEndpointTypes()
       .map(endpoint => endpoint.definition.endpointListActions)
       .filter(endpointListActions => !!endpointListActions)
-      .map(endpointListActions => endpointListActions(this.endpointsData))
+      .map(endpointListActions => endpointListActions(this.endpointsData, this.envInjector))
       .reduce((res, actions) => res.concat(actions), []);
 
     if (includeSeparators && customActions.length) {

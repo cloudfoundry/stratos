@@ -4,6 +4,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { KubeHelmDataService } from './kube-helm-data.service';
 import { HelmInstallPayload, HelmUpgradePayload } from './kube-types';
 
@@ -13,8 +14,10 @@ const CHARTS_URL = '/pp/v1/chartsvc/v1/charts';
 describe('KubeHelmDataService', () => {
   let svc: KubeHelmDataService;
   let httpMock: HttpTestingController;
+  let snackbarCalls: { kind: 'open' | 'error'; message: string }[];
 
   beforeEach(() => {
+    snackbarCalls = [];
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -22,6 +25,13 @@ describe('KubeHelmDataService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         KubeHelmDataService,
+        {
+          provide: TailwindSnackBarService,
+          useValue: {
+            open: (message: string) => { snackbarCalls.push({ kind: 'open', message }); return {} as any; },
+            error: (message: string) => { snackbarCalls.push({ kind: 'error', message }); return {} as any; },
+          },
+        },
       ],
     });
     svc = TestBed.inject(KubeHelmDataService);
@@ -139,6 +149,27 @@ describe('KubeHelmDataService', () => {
     await promise;
     expect(svc.errors()().length).toBeGreaterThan(0);
     expect(svc.errors()()[0].title).toBe('helm-releases');
+  });
+
+  it('synchronise posts to chartrepos, snackbars success, resolves true', async () => {
+    const promise = svc.synchronise({ guid: 'kube-1', name: 'My Repo' } as any);
+    const req = httpMock.expectOne('/pp/v1/chartrepos/kube-1');
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+    const ok = await promise;
+    expect(ok).toBe(true);
+    expect(snackbarCalls).toEqual([{ kind: 'open', message: 'Helm Repository synchronization started' }]);
+  });
+
+  it('synchronise snackbars error and resolves false on failure', async () => {
+    const promise = svc.synchronise({ guid: 'kube-1', name: 'My Repo' } as any);
+    httpMock.expectOne('/pp/v1/chartrepos/kube-1').flush(
+      { error: { message: 'nope' } },
+      { status: 500, statusText: 'Server Error' },
+    );
+    const ok = await promise;
+    expect(ok).toBe(false);
+    expect(snackbarCalls).toEqual([{ kind: 'error', message: `Failed to Synchronize Helm Repository 'My Repo'` }]);
   });
 
   it('refresh re-runs both legs', async () => {

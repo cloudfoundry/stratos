@@ -1,7 +1,9 @@
-import { Injector } from '@angular/core';
+import { EnvironmentInjector, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of } from 'rxjs';
-import { take, catchError, filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
+
+import { KubeHelmDataService } from '../services/endpoint-data/kube-helm-data.service';
 
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import { IListAction } from '../../../core/src/shared/components/signal-list/list-action.types';
@@ -50,14 +52,16 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         authTypes: [],
         endpointListActions: (
           endpointsService: EndpointsDataService,
+          injector: EnvironmentInjector,
         ): IListAction<EndpointModel>[] => {
           return [{
             action: (item: EndpointModel) => {
-              helmEntityCatalog.chart.api.synchronise(item).pipe(
-                catchError((): Observable<null> => of(null)), // Be super safe to ensure we pass the first filter
-                take(1)
-              ).subscribe((res: unknown) => {
-                if (res != null) {
+              // Signal-native synchronise (replaces the orphaned `helmSynchronise$`
+              // ngrx effect). Resolve KubeHelmDataService from the injector since
+              // this callback runs outside an injection context.
+              const helmData = runInInjectionContext(injector, () => inject(KubeHelmDataService));
+              void helmData.synchronise(item).then((ok: boolean) => {
+                if (ok) {
                   void endpointsService.getAll(false);
                 }
               });

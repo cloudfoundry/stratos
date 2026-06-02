@@ -1,4 +1,4 @@
-import type { Type } from '@angular/core';
+import type { EnvironmentInjector, Type } from '@angular/core';
 import type { Store } from '@ngrx/store';
 import type { Observable } from 'rxjs';
 
@@ -181,6 +181,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
    */
   readonly endpointListActions?: (
     endpointsService: EndpointsDataService,
+    injector: EnvironmentInjector,
   ) => IListAction<EndpointModel>[];
 
   /**
