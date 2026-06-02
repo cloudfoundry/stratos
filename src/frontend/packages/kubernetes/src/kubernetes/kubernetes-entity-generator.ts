@@ -86,7 +86,6 @@ import {
   SimpleKubeListColumn,
 } from './store/kube.types';
 import { KubeDashboardStatus } from './services/kubernetes-endpoint.service';
-import { generateWorkloadsEntities } from './workloads/store/workloads-entity-generator';
 
 
 export interface IKubeResourceFavMetadata extends IFavoriteMetadata {
@@ -534,7 +533,6 @@ export class KubeEntityCatalog {
   public allKubeEntities(): StratosBaseCatalogEntity[] {
     return [
       ...Object.getOwnPropertyNames(this).map(s => (this as any)[s]).filter(v => v instanceof StratosBaseCatalogEntity),
-      ...generateWorkloadsEntities(this.endpoint.definition)
     ];
   }
 

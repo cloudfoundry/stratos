@@ -1,12 +1,10 @@
 import { OrchestratedActionBuilders } from '../../../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import {
-  DeleteKubernetesResource,
   GetKubernetesResource,
   GetKubernetesResources,
   GetKubernetesResourcesInNamespace,
   GetKubernetesResourcesInWorkload,
 } from '../kube-resource.actions';
-import { BasicKubeAPIResource } from '../kube.types';
 
 
 export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
@@ -28,12 +26,6 @@ export interface KubeResourceActionBuilders extends OrchestratedActionBuilders {
     namespace: string,
     releaseTitle: string
   ) => GetKubernetesResourcesInWorkload;
-  deleteResource: (
-    resource: BasicKubeAPIResource,
-    kubeGuid: string,
-    resourceName: string,
-    namespace?: string
-  ) => DeleteKubernetesResource;
 }
 
 export function createKubeResourceActionBuilder(entityType: string): KubeResourceActionBuilders {
@@ -43,7 +35,5 @@ export function createKubeResourceActionBuilder(entityType: string): KubeResourc
     getInNamespace: (kubeGuid: string, namespace: string) => new GetKubernetesResourcesInNamespace(entityType, kubeGuid, namespace),
     getInWorkload: (kubeGuid: string, namespace: string, releaseTitle: string) =>
       new GetKubernetesResourcesInWorkload(entityType, kubeGuid, namespace, releaseTitle),
-    deleteResource: (resource: BasicKubeAPIResource, resName: string, kubeGuid: string, namespace: string) =>
-      new DeleteKubernetesResource(entityType, resource, kubeGuid, resName, namespace)
   };
 }
