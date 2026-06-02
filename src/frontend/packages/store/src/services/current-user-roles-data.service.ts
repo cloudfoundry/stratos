@@ -1,72 +1,134 @@
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription, distinctUntilChanged, map } from 'rxjs';
+import { Injectable, Signal, WritableSignal, computed, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable, defer, distinctUntilChanged, map, startWith } from 'rxjs';
 
-import { CurrentUserRolesAppState } from '../app-state';
-import { PermissionValues } from '../selectors/current-user-role.selectors';
+import { SessionUser } from '../types/auth.types';
 import {
   ICurrentUserRolesState,
   IStratosRolesState,
+  PermissionValues,
+  RolesRequestState,
+  getDefaultRolesRequestState,
 } from '../types/current-user-roles.types';
 import { UserScopeStrings } from '../types/endpoint.types';
 
+const getDefaultState = (): ICurrentUserRolesState => ({
+  internal: {
+    isAdmin: false,
+    scopes: [] as UserScopeStrings[],
+  },
+  endpoints: {},
+  state: getDefaultRolesRequestState(),
+});
+
 /**
- * W36-C Wave 2 signal-native facade over the legacy `currentUserRoles`
- * ngrx slice.
+ * Signal-native source of truth for the current user's roles — stratos-global
+ * `internal` admin/scopes plus the per-endpoint role subtrees (e.g. the CF
+ * roles under `endpoints[CF_ENDPOINT_TYPE]`).
  *
- * The reducer (`current-user-roles.reducer.ts` plus per-endpoint reducers
- * such as `permission.reducer.ts`) remains the canonical store of truth —
- * it's still driven by `permission-fetcher.service` and the auth
- * `VerifySession` cycle. This service is the single bridge point: it
- * subscribes to `store.select(s => s.currentUserRoles)` ONCE on
- * construction and mirrors the slice into signals so downstream consumers
- * (the stratos + cf permission checkers, the cf-side data service in the
- * cloud-foundry package, list config helpers, etc.) can stay Store-free.
+ * Replaces the `currentUserRoles` ngrx slice + its reducer/effect/selectors
+ * (favorites/roles island, Wave 2). This service no longer bridges a Store
+ * slice — it OWNS the state in a {@link WritableSignal} and exposes write
+ * methods that every roles writer calls directly:
+ *   - stratos: {@link applySessionScopes} + request-state transitions
+ *   - per-endpoint: {@link updateEndpointRoles} — a CF-agnostic write seam the
+ *     cloud-foundry package's role facade uses to commit its own transforms
+ *     (the store package must not depend on CF role types). This replaces the
+ *     entity-catalog `getAllCurrentUserReducers` composition.
  *
- * Mirrors the W36-C Wave 1 `AuthDataService` shape:
- *   - signal-out for new consumers
- *   - parametric `*$` observable getters preserved so the legacy
- *     rxjs-shaped checker pipelines (`combineLatest`, `switchMap`,
- *     `distinctUntilChanged`) keep compiling unchanged through the
- *     facade in {@link CurrentUserRolesSignalService}
- *
- * When the underlying reducer eventually migrates into a future wave's
- * data service, the `Store` bridge is the only piece that has to go —
- * the public signal + observable API stays put.
+ * Read surface (signals + `*$` observable getters) is unchanged from the
+ * former bridge facade, so the cf-side read facades keep compiling untouched.
  */
 @Injectable({ providedIn: 'root' })
 export class CurrentUserRolesDataService {
-  private store = inject<Store<CurrentUserRolesAppState>>(Store);
-
-  /** Mirror of the `currentUserRoles` slice. `undefined` until the store emits. */
-  private readonly _state = signal<ICurrentUserRolesState | undefined>(undefined);
+  /** The owned roles state. */
+  private readonly _state: WritableSignal<ICurrentUserRolesState> = signal(getDefaultState());
 
   readonly state: Signal<ICurrentUserRolesState | undefined> = this._state.asReadonly();
 
   readonly stratos: Signal<IStratosRolesState | undefined> = computed(
-    () => this._state()?.internal,
+    () => this._state().internal,
   );
 
-  /** Long-lived source observable; data services in dependent packages reuse it. */
-  readonly state$: Observable<ICurrentUserRolesState | undefined>;
+  private readonly _state$ = toObservable(this._state);
 
-  private subscription: Subscription;
+  /**
+   * Long-lived source observable; data services in dependent packages reuse it.
+   * Emits the current value synchronously on subscribe (BehaviorSubject-like,
+   * matching the legacy `store.select`) — `toObservable` alone replays via an
+   * effect that flushes on a later tick, so we `startWith` the live signal value
+   * at subscribe time and `distinctUntilChanged` dedups the duplicate.
+   */
+  readonly state$: Observable<ICurrentUserRolesState | undefined> = defer(() =>
+    this._state$.pipe(startWith(this._state())),
+  ).pipe(distinctUntilChanged());
 
-  constructor() {
-    // Single bridge subscription. Long-lived (service is providedIn root)
-    // so we don't need to manage teardown.
-    this.state$ = this.store
-      .select((s: CurrentUserRolesAppState) => s.currentUserRoles)
-      .pipe(distinctUntilChanged());
-    this.subscription = this.state$.subscribe(next => {
-      this._state.set(next);
-    });
+  // ---- writes -------------------------------------------------------------
+
+  /**
+   * Apply the verified session user's internal admin flag + scopes. Replaces
+   * the reducer's `CURRENT_USER_ROLES_SESSION_VERIFIED` case
+   * (`applyInternalScopes`). No-op on internal roles when `user` is absent.
+   */
+  applySessionScopes(user: SessionUser): void {
+    if (!user) {
+      return;
+    }
+    this._state.update(s => ({
+      ...s,
+      internal: {
+        ...s.internal,
+        // The admin scope is configurable - so look at the flag from the backend
+        isAdmin: user.admin,
+        scopes: (user.scopes || []) as UserScopeStrings[],
+      },
+    }));
   }
+
+  /** Global roles fetch started (replaces `GET_CURRENT_USER_RELATIONS`). */
+  setStratosFetching(): void {
+    this.patchRequestState({ fetching: true });
+  }
+
+  /** Global roles fetch succeeded (replaces `GET_CURRENT_USER_RELATIONS_SUCCESS`). */
+  setStratosFetched(): void {
+    this.patchRequestState({ initialised: true, fetching: false });
+  }
+
+  /** Global roles fetch failed (replaces `GET_CURRENT_USER_RELATIONS_FAILED`). */
+  setStratosFailed(): void {
+    this.patchRequestState({ fetching: false, error: true });
+  }
+
+  /**
+   * CF-agnostic per-endpoint-type write seam. The cloud-foundry role facade
+   * supplies an `updater` that maps the previous role subtree to the next one;
+   * the store package never needs to know the subtree's shape. Replaces the
+   * entity-catalog `getAllCurrentUserReducers` per-endpoint composition.
+   */
+  updateEndpointRoles<T = any>(endpointType: string, updater: (prev: T | undefined) => T): void {
+    this._state.update(s => ({
+      ...s,
+      endpoints: {
+        ...s.endpoints,
+        [endpointType]: updater(s.endpoints[endpointType] as T | undefined),
+      },
+    }));
+  }
+
+  private patchRequestState(patch: Partial<RolesRequestState>): void {
+    this._state.update(s => ({
+      ...s,
+      state: { ...s.state, ...patch },
+    }));
+  }
+
+  // ---- reads --------------------------------------------------------------
 
   /** Per-role boolean signal — replaces `getCurrentUserStratosRole(role)`. */
   stratosRole(role: PermissionValues): Signal<boolean> {
     return computed(() => {
-      const internal = this._state()?.internal as Record<string, any> | undefined;
+      const internal = this._state().internal as Record<string, any> | undefined;
       if (!internal) {
         return false;
       }
@@ -78,7 +140,7 @@ export class CurrentUserRolesDataService {
   /** Per-scope boolean signal — replaces `getCurrentUserStratosHasScope(scope)`. */
   stratosHasScope(scope: UserScopeStrings | string): Signal<boolean> {
     return computed(() => {
-      const scopes = this._state()?.internal?.scopes;
+      const scopes = this._state().internal?.scopes;
       return !!scopes?.includes(scope as UserScopeStrings);
     });
   }

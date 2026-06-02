@@ -5,6 +5,8 @@ import {
 } from '@stratosui/store';
 import { Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
 
+import { APIResource } from '../../../store/src/types/api.types';
+import { CfUserRelationTypes } from '../actions/permissions.actions';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import {
   IAllCfRolesState,
@@ -12,6 +14,25 @@ import {
   IGlobalRolesState,
 } from '../store/types/cf-current-user-roles.types';
 import { CfScopeStrings } from '../user-permissions/cf-user-permissions.types';
+import {
+  applyCfRoleChange,
+  applyCfUserRelations,
+  CfRoleCacheChange,
+  CfRolesRequestStage,
+  propagateCfConnectedAdmin,
+  propagateCfSessionAdmin,
+  registerCfEndpoint,
+  removeCfEndpoint,
+  removeCfOrg,
+  removeCfSpace,
+  setCfRequestState,
+} from './cf-roles-state.helpers';
+
+/** Minimal endpoint shape the session/connect admin-propagation transforms read. */
+interface CfRolesEndpoint {
+  guid: string;
+  user?: { scopes?: string[] } | null;
+}
 
 /**
  * W36-C Wave 2 signal-native facade over the cf-side
@@ -36,6 +57,78 @@ import { CfScopeStrings } from '../user-permissions/cf-user-permissions.types';
 @Injectable({ providedIn: 'root' })
 export class CfCurrentUserRolesDataService {
   private rolesData = inject(CurrentUserRolesDataService);
+
+  // ---- writes -------------------------------------------------------------
+  //
+  // Commit CF role transforms into the single source of truth via the
+  // store package's CF-agnostic `updateEndpointRoles` seam. These replace the
+  // former `currentCfUserRolesReducer` dispatch surface — every CF roles writer
+  // (endpoint lifecycle, the roles fetch, role mutations, org/space delete)
+  // now calls these directly. The store package never sees CF role shapes.
+
+  private update(updater: (prev: IAllCfRolesState) => IAllCfRolesState): void {
+    this.rolesData.updateEndpointRoles<IAllCfRolesState>(
+      CF_ENDPOINT_TYPE,
+      prev => updater(prev ?? {}),
+    );
+  }
+
+  /** Apply one relation bucket (org/space) returned by the roles fetch. */
+  applyUserRelations(relationType: CfUserRelationTypes, endpointGuid: string, data: APIResource<any>[]): void {
+    this.update(prev => applyCfUserRelations(prev, relationType, endpointGuid, data));
+  }
+
+  /** Roles fetch started for an endpoint. */
+  setFetching(endpointGuid: string): void {
+    this.update(prev => setCfRequestState(prev, endpointGuid, CfRolesRequestStage.START));
+  }
+
+  /** Roles fetch succeeded for an endpoint. */
+  setFetched(endpointGuid: string): void {
+    this.update(prev => setCfRequestState(prev, endpointGuid, CfRolesRequestStage.SUCCESS));
+  }
+
+  /** Roles fetch failed for an endpoint. */
+  setFailed(endpointGuid: string): void {
+    this.update(prev => setCfRequestState(prev, endpointGuid, CfRolesRequestStage.FAILURE));
+  }
+
+  /** Propagate admin scopes from verified-session CF endpoints. */
+  propagateSessionAdmin(cfEndpoints: CfRolesEndpoint[]): void {
+    this.update(prev => propagateCfSessionAdmin(prev, cfEndpoints));
+  }
+
+  /** Propagate admin scopes for a newly-connected CF endpoint. */
+  propagateConnectedAdmin(guid: string, user: CfRolesEndpoint['user']): void {
+    this.update(prev => propagateCfConnectedAdmin(prev, guid, user));
+  }
+
+  /** Seed a default role row for a newly-registered CF endpoint. */
+  registerEndpoint(guid: string): void {
+    this.update(prev => registerCfEndpoint(prev, guid));
+  }
+
+  /** Drop a removed CF endpoint's role row. */
+  removeEndpoint(guid: string): void {
+    this.update(prev => removeCfEndpoint(prev, guid));
+  }
+
+  /** Drop a deleted org's role row. */
+  removeOrg(endpointGuid: string, orgGuid: string): void {
+    this.update(prev => removeCfOrg(prev, endpointGuid, orgGuid));
+  }
+
+  /** Drop a deleted space's role row + prune it from the org. */
+  removeSpace(endpointGuid: string, spaceGuid: string): void {
+    this.update(prev => removeCfSpace(prev, endpointGuid, spaceGuid));
+  }
+
+  /** Apply an add/remove of a single role for the connected user. */
+  applyRoleChange(change: CfRoleCacheChange, isAdd: boolean): void {
+    this.update(prev => applyCfRoleChange(prev, change, isAdd));
+  }
+
+  // ---- reads --------------------------------------------------------------
 
   /** All cf endpoint role state — keyed by endpoint guid. */
   readonly cfRolesState: Signal<IAllCfRolesState | undefined> = computed(

@@ -1,43 +1,51 @@
 import { Injectable, OnDestroy, effect, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { HttpClient } from '@angular/common/http';
 
 import {
-  AppState,
   AuthDataService,
-  EndpointsDataService,
+  CurrentUserRolesDataService,
   EndpointDisconnectCleanupService,
+  EndpointsDataService,
 } from '@stratosui/store';
 
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
-import {
-  CfRoleEndpointConnectedAction,
-  CfRoleEndpointRegisteredAction,
-  CfRoleEndpointRemovedAction,
-  CfRoleSessionEndpointsAction,
-} from '../actions/cf-endpoint-role.actions';
+import { CfCurrentUserRolesDataService } from '../../services/cf-current-user-roles-data.service';
+import { fetchCfUserRolesForEndpoint } from '../../user-permissions/cf-user-roles-fetch';
 
 /**
- * Wave 5 (W36-B) — CF role-state lifecycle wiring.
+ * CF role-state lifecycle + fetch wiring (favorites/roles island, Wave 2).
  *
- * Replaces the legacy ngrx-action listeners on REGISTER/CONNECT/DISCONNECT/
- * UNREGISTER_ENDPOINTS_SUCCESS in `currentCfUserRolesReducer`. The cleanup
- * service exposes connect/disconnect deltas + the live endpoints map; this
- * service translates those into the new CF-specific role-state actions.
+ * Replaces the former ngrx-action listeners in `currentCfUserRolesReducer`
+ * (REGISTER/CONNECT/DISCONNECT/SESSION) AND the catalog `userRolesFetch`
+ * plug-in trigger (dashboard `GetCurrentUsersRelations` + the per-connect fetch
+ * in `EndpointDisconnectCleanupService`). All CF role state now flows directly
+ * into the signal source of truth via {@link CfCurrentUserRolesDataService}.
  *
- * Bootstrapped eagerly from `CloudFoundryStoreModule` so the signal
- * effects start observing before any user-driven mutation can fire.
+ * Bootstrapped eagerly from `CloudFoundryStoreModule` so the signal effects
+ * start observing before any user-driven mutation or the dashboard renders —
+ * the roles fetch therefore fires as soon as connected CF endpoints appear
+ * (≤ the legacy dashboard-load trigger, and also covers endpoints connected
+ * after initial load, which the one-shot dashboard dispatch missed).
  */
 @Injectable({ providedIn: 'root' })
 export class CfEndpointRoleSyncService implements OnDestroy {
   private endpointsService = inject(EndpointsDataService);
   private cleanup = inject(EndpointDisconnectCleanupService);
   private authData = inject(AuthDataService);
-  private store = inject<Store<AppState>>(Store);
+  private cfRoles = inject(CfCurrentUserRolesDataService);
+  private globalRoles = inject(CurrentUserRolesDataService);
+  private http = inject(HttpClient);
 
-  /** Track which CF endpoint guids we've already seeded a role-state row for. */
+  /** CF endpoint guids we've already seeded a role-state row for. */
   private seenCfGuids = new Set<string>();
+  /** CF endpoint guids we've already fetched roles for (cleared on disconnect). */
+  private fetchedCfGuids = new Set<string>();
 
-  /** Detect newly-registered CF endpoints (legacy REGISTER_ENDPOINTS_SUCCESS). */
+  /** Roles fetches in flight across the current batch (drives the global request state). */
+  private inFlight = 0;
+  private batchFailed = false;
+
+  /** Seed a default role row for each registered CF endpoint (legacy REGISTER_ENDPOINTS_SUCCESS). */
   private readonly registerEffect = effect(() => {
     const endpoints = this.endpointsService.endpoints();
     endpoints.forEach((ep, guid) => {
@@ -46,11 +54,10 @@ export class CfEndpointRoleSyncService implements OnDestroy {
       }
       if (!this.seenCfGuids.has(guid)) {
         this.seenCfGuids.add(guid);
-        this.store.dispatch(new CfRoleEndpointRegisteredAction(guid));
+        this.cfRoles.registerEndpoint(guid);
       }
     });
-    // Also drop tracking for endpoints that disappeared (covers unregister
-    // without explicit disconnect dispatch).
+    // Drop tracking for endpoints that disappeared (covers unregister).
     for (const tracked of Array.from(this.seenCfGuids)) {
       if (!endpoints.has(tracked)) {
         this.seenCfGuids.delete(tracked);
@@ -59,15 +66,40 @@ export class CfEndpointRoleSyncService implements OnDestroy {
   });
 
   /**
-   * Propagate CF admin permissions from verified-session endpoints. Replaces
-   * the auth slice's `SESSION_VERIFIED` reducer case: fires whenever
-   * `AuthDataService.sessionData` gains endpoints (i.e. once per verify, since
-   * the signal holds the same object until the next verify replaces it).
+   * Fetch the connected user's roles for each connected CF endpoint, once.
+   * Replaces both the dashboard `GetCurrentUsersRelations` dispatch and the
+   * per-connect fetch the store-package cleanup service used to drive via the
+   * catalog plug-in. The fetch kickoff is deferred to a microtask so the
+   * signal writes it performs happen outside this effect's reactive run.
+   */
+  private readonly fetchEffect = effect(() => {
+    const endpoints = this.endpointsService.endpoints();
+    const connected = Array.from(endpoints.values())
+      .filter(ep => ep.cnsi_type === CF_ENDPOINT_TYPE && ep.connectionStatus === 'connected');
+
+    const toFetch = connected.filter(ep => !this.fetchedCfGuids.has(ep.guid));
+    toFetch.forEach(ep => this.fetchedCfGuids.add(ep.guid));
+    if (toFetch.length) {
+      queueMicrotask(() => toFetch.forEach(ep => void this.runFetch(ep)));
+    }
+
+    // Allow a reconnect to refetch: drop guids that are no longer connected.
+    for (const tracked of Array.from(this.fetchedCfGuids)) {
+      const ep = endpoints.get(tracked);
+      if (!ep || ep.connectionStatus !== 'connected') {
+        this.fetchedCfGuids.delete(tracked);
+      }
+    }
+  });
+
+  /**
+   * Propagate CF admin permissions from verified-session endpoints (replaces
+   * the auth slice's SESSION_VERIFIED reducer case). Fires once per verify.
    */
   private readonly sessionEndpointsEffect = effect(() => {
     const sessionData = this.authData.sessionData();
     if (sessionData?.endpoints) {
-      this.store.dispatch(new CfRoleSessionEndpointsAction(sessionData));
+      this.cfRoles.propagateSessionAdmin(Object.values(sessionData.endpoints.cf || {}));
     }
   });
 
@@ -76,18 +108,51 @@ export class CfEndpointRoleSyncService implements OnDestroy {
       if (event.type !== CF_ENDPOINT_TYPE) {
         return;
       }
-      this.store.dispatch(new CfRoleEndpointConnectedAction(event.guid, event.user));
+      this.cfRoles.propagateConnectedAdmin(event.guid, event.user);
     });
     this.cleanup.registerDisconnectHandler(event => {
       if (event.type !== CF_ENDPOINT_TYPE) {
         return;
       }
-      this.store.dispatch(new CfRoleEndpointRemovedAction(event.guid));
+      this.cfRoles.removeEndpoint(event.guid);
     });
+  }
+
+  private async runFetch(endpoint: { guid: string, user?: { admin?: boolean } | null }): Promise<void> {
+    this.beginGlobalFetch();
+    let ok = false;
+    try {
+      ok = await fetchCfUserRolesForEndpoint(this.cfRoles, this.http, endpoint);
+    } finally {
+      this.endGlobalFetch(ok);
+    }
+  }
+
+  private beginGlobalFetch(): void {
+    if (this.inFlight === 0) {
+      this.batchFailed = false;
+      this.globalRoles.setStratosFetching();
+    }
+    this.inFlight++;
+  }
+
+  private endGlobalFetch(ok: boolean): void {
+    if (!ok) {
+      this.batchFailed = true;
+    }
+    this.inFlight--;
+    if (this.inFlight === 0) {
+      if (this.batchFailed) {
+        this.globalRoles.setStratosFailed();
+      } else {
+        this.globalRoles.setStratosFetched();
+      }
+    }
   }
 
   ngOnDestroy(): void {
     this.registerEffect.destroy();
+    this.fetchEffect.destroy();
     this.sessionEndpointsEffect.destroy();
   }
 }

@@ -1,32 +1,21 @@
 import { HttpClient } from '@angular/common/http';
-import { Store } from '@ngrx/store';
-import { combineLatest, defer, from, Observable, of } from 'rxjs';
-import { take, catchError, map, share, switchMap, tap } from 'rxjs/operators';
+import { Observable, firstValueFrom, of } from 'rxjs';
+import { catchError, map, share, take } from 'rxjs/operators';
 
-import {
-  AppState,
-  EndpointsDataService,
-  EntityUserRolesEndpoint,
-  EntityUserRolesFetch,
-  APIResource } from '@stratosui/store';
-import {
-  CfUserRelationTypes,
-  GET_CURRENT_CF_USER_RELATIONS,
-  GET_CURRENT_CF_USER_RELATIONS_FAILED,
-  GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
-  GetCfUserRelations,
-  GetCurrentCfUserRelationsComplete } from '../actions/permissions.actions';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
+import { APIResource } from '@stratosui/store';
+
+import { CfUserRelationTypes } from '../actions/permissions.actions';
+import { CfCurrentUserRolesDataService } from '../services/cf-current-user-roles-data.service';
 import { getFeatureFlagsSource } from './feature-flags-cache';
 
 /**
  * Wire shape returned by GET /pp/v1/cf/current-user-roles/:cnsiGuid
  * (handler: getNativeCurrentUserRoles). Each bucket key matches a
  * {@link CfUserRelationTypes} enum value; every canonical key is present
- * (empty buckets serialize as `[]`, never absent). Entry shape mirrors
- * the legacy V2 envelope so the existing role reducers (which read
- * `metadata.guid` for org buckets and additionally `entity.organization_guid`
- * for space buckets) need zero change.
+ * (empty buckets serialize as `[]`, never absent). Entry shape mirrors the
+ * legacy V2 envelope so the role transforms (which read `metadata.guid` for org
+ * buckets and additionally `entity.organization_guid` for space buckets) need
+ * zero change.
  */
 export interface CfCurrentUserRolesResponse {
   buckets: {
@@ -34,159 +23,32 @@ export interface CfCurrentUserRolesResponse {
   };
 }
 
-const createEndpointArray = (
-  endpointsService: EndpointsDataService,
-  endpoints: string[] | EntityUserRolesEndpoint[]
-): Observable<EntityUserRolesEndpoint[]> => {
-  // If there's no endpoints get all from store. Alternatively fetch specific endpoint id's from store
-  if (!endpoints || !endpoints.length || typeof (endpoints[0]) === 'string') {
-    const endpointIds = endpoints as string[];
-    // Wave 2 (W36-B): connected CF endpoint enumeration now reads from
-    // {@link EndpointsDataService} signals instead of
-    // `connectedEndpointsOfTypesSelector`. Wrapped in `defer(from(whenReady))`
-    // to preserve the legacy `take(1)` first-emission semantic — callers
-    // still get a single-shot observable that resolves once the data
-    // service has hydrated.
-    return defer(() => from(endpointsService.whenReady())).pipe(
-      map(() =>
-        Array.from(endpointsService.endpoints().values())
-          .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected')
-      ),
-      map(cfEndpoints => endpointIds.length === 0 ?
-        cfEndpoints :
-        cfEndpoints.filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))
-      ),
-      take(1),
-    );
-  }
-  return of(endpoints as EntityUserRolesEndpoint[]);
-};
-
-export const cfUserRolesFetch: EntityUserRolesFetch = (
-  endpoints: string[] | EntityUserRolesEndpoint[],
-  store: Store<AppState>,
-  httpClient: HttpClient,
-  endpointsService: EndpointsDataService
-) => {
-  return createEndpointArray(endpointsService, endpoints).pipe(
-    switchMap((cfEndpoints: EntityUserRolesEndpoint[]) => {
-      const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
-      // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
-      if (isAllAdmins) {
-        cfEndpoints.forEach(endpoint => store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS)));
-      } else {
-        // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
-        const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, httpClient);
-        const allRequestsCompleted = handleCfRequests(flagsAndRoleRequests);
-        return combineLatest(allRequestsCompleted).pipe(
-          map(succeeds => succeeds.every(succeeded => !!succeeded)),
-        );
-      }
-      return of(true);
-    })
-  );
-};
-
-interface CfsRequestState {
-  [cfGuid: string]: Observable<boolean>[];
-}
-
-function dispatchRoleRequests(
-  endpoints: EntityUserRolesEndpoint[],
-  store: Store<AppState>,
-  httpClient: HttpClient
-): CfsRequestState {
-  const requests: CfsRequestState = {};
-
-  // Per endpoint fetch feature flags and user roles (unless admin, where we don't need to), then mark endpoint as initialised
-  endpoints.forEach(endpoint => {
-    if (endpoint.user.admin) {
-      // We don't need permissions for admin users (they can do everything)
-      requests[endpoint.guid] = [of(true)];
-      store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS));
-    } else {
-      // START fetching cf roles for current user
-      store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS));
-
-      // Prime the shared feature-flags cache so downstream permission
-      // checkers (cf-user-permissions-checkers) read flags from the same
-      // CnsiFeatureFlagsSource we drain here. Completion signal feeds
-      // the same role-fetch barrier that the legacy ngrx pagination
-      // watcher used to drive.
-      const ffSource = getFeatureFlagsSource(endpoint.guid, httpClient);
-      requests[endpoint.guid] = [from(ffSource.load()).pipe(
-        map(() => true),
-        catchError(() => of(false)),
-      )];
-
-      // Single drained call to the native handler replaces the legacy
-      // 7-sequential-fetch fanout (one per CfUserRelationTypes value
-      // hitting pp/v1/proxy/v2/users/{guid}/{relType}). The handler
-      // emits the 7 buckets in one response; we dispatch one
-      // GetCurrentCfUserRelationsComplete per bucket so the existing
-      // reducer keeps driving each per-relation state slice unchanged.
-      requests[endpoint.guid].push(fetchCfCurrentUserRoles(store, endpoint.guid, httpClient));
-
-      // FINISH fetching cf roles for current user
-      combineLatest(requests[endpoint.guid]).pipe(
-        take(1),
-        tap(succeeds => {
-          store.dispatch(new GetCfUserRelations(
-            endpoint.guid,
-            succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_CF_USER_RELATIONS_SUCCESS : GET_CURRENT_CF_USER_RELATIONS_FAILED)
-          );
-        }),
-        catchError(err => {
-          console.warn('Failed to fetch current user permissions for a cf: ', err);
-          store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_FAILED));
-          return of(err);
-        })
-      ).subscribe();
-    }
-  });
-  return requests;
-}
-
-function handleCfRequests(requests: CfsRequestState): Observable<boolean>[] {
-  const allCompleted: Observable<boolean>[] = [];
-  Object.keys(requests).forEach(cfGuid => {
-    const successes = requests[cfGuid];
-    allCompleted.push(...successes);
-  });
-  return allCompleted;
+/** Endpoint shape the fetch reads: guid + connected user (for the admin shortcut). */
+export interface CfRolesFetchEndpoint {
+  guid: string;
+  user?: { admin?: boolean } | null;
 }
 
 /**
  * Single-fetch replacement for the legacy 7-fanout permission fetch.
  *
- * Hits GET /pp/v1/cf/current-user-roles/{endpointGuid}. The native
- * handler (getNativeCurrentUserRoles) makes one /v3/roles?user_guids={me}
- * call and projects rows into the 7 buckets the frontend reducer
- * expects. On success we dispatch one GetCurrentCfUserRelationsComplete
- * per CfUserRelationTypes value off the response, exactly mirroring
- * the dispatch surface the per-relation flow produced — the reducer
- * sees the same actions in the same shape.
- *
- * Bucket entries arrive as legacy V2 envelopes
- * ({ metadata: { guid }, entity: { organization_guid? } }) so
- * downstream reducers (current-cf-user-roles-org/space) keep reading
- * `metadata.guid` / `entity.organization_guid` unchanged.
- *
- * Round-trip count drops 7→1 per CF endpoint per app load — at CAPI
- * RTTs of 50–200 ms this is the primary perceived-perf lever for
- * permission-gated action buttons.
+ * Hits GET /pp/v1/cf/current-user-roles/{endpointGuid} once and applies each of
+ * the 7 returned buckets to the signal source of truth via the CF roles facade
+ * (replaces the former per-bucket `GetCurrentCfUserRelationsComplete` dispatch).
+ * Missing buckets default to `[]` so a now-empty relation clears prior roles.
+ * On HTTP error: swallow + return false so the caller can mark the endpoint
+ * failed.
  */
 export function fetchCfCurrentUserRoles(
-  store: Store<AppState>,
+  cfRoles: CfCurrentUserRolesDataService,
   endpointGuid: string,
-  httpClient: HttpClient
+  httpClient: HttpClient,
 ): Observable<boolean> {
   return httpClient.get<CfCurrentUserRolesResponse>(`pp/v1/cf/current-user-roles/${endpointGuid}`).pipe(
     map(response => {
       const buckets = response?.buckets ?? {};
       Object.values(CfUserRelationTypes).forEach((relationType: CfUserRelationTypes) => {
-        const data = buckets[relationType] ?? [];
-        store.dispatch(new GetCurrentCfUserRelationsComplete(relationType, endpointGuid, data));
+        cfRoles.applyUserRelations(relationType, endpointGuid, buckets[relationType] ?? []);
       });
       return true;
     }),
@@ -199,3 +61,40 @@ export function fetchCfCurrentUserRoles(
   );
 }
 
+/**
+ * Fetch + commit the connected user's CF roles for a single endpoint, driving
+ * the per-endpoint request state. Admins skip the role fetch entirely (they can
+ * do everything) and are marked initialised. Replaces the orchestration the
+ * legacy `cfUserRolesFetch` catalog plug-in performed via `GetCfUserRelations`
+ * dispatches.
+ */
+export async function fetchCfUserRolesForEndpoint(
+  cfRoles: CfCurrentUserRolesDataService,
+  httpClient: HttpClient,
+  endpoint: CfRolesFetchEndpoint,
+): Promise<boolean> {
+  if (endpoint.user?.admin) {
+    // Admins need no per-org/space roles — just mark the endpoint initialised.
+    cfRoles.setFetched(endpoint.guid);
+    return true;
+  }
+  cfRoles.setFetching(endpoint.guid);
+  try {
+    // Prime the shared feature-flags cache so downstream permission checkers
+    // read flags from the same CnsiFeatureFlagsSource.
+    const ffSource = getFeatureFlagsSource(endpoint.guid, httpClient);
+    const ffOk = await ffSource.load().then(() => true).catch(() => false);
+    const rolesOk = await firstValueFrom(fetchCfCurrentUserRoles(cfRoles, endpoint.guid, httpClient));
+    const ok = ffOk && rolesOk;
+    if (ok) {
+      cfRoles.setFetched(endpoint.guid);
+    } else {
+      cfRoles.setFailed(endpoint.guid);
+    }
+    return ok;
+  } catch (err) {
+    console.warn('Failed to fetch current user permissions for a cf: ', err);
+    cfRoles.setFailed(endpoint.guid);
+    return false;
+  }
+}

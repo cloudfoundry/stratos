@@ -164,7 +164,6 @@ import { populatePaginationFromParent } from './entity-relations/entity-relation
 import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { cfUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
-import { currentCfUserRolesReducer } from './store/reducers/current-cf-user-roles-reducer/current-cf-user-roles.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
 import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
 import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
@@ -172,7 +171,6 @@ import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
 import { CfAPIResource, CFResponse } from './store/types/cf-api.types';
 import { CfUser } from './store/types/cf-user.types';
-import { cfUserRolesFetch } from './user-permissions/cf-user-roles-fetch';
 
 function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
   const result$ = populatePaginationFromParent(store, action);
@@ -375,8 +373,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
       // facade) via the shared handlers, not store.select(selectSessionData()).
       ...cfMaxedStateHandlers,
     },
-    userRolesFetch: cfUserRolesFetch,
-    userRolesReducer: currentCfUserRolesReducer
   };
   return [
     generateCfEndpointEntity(endpointDefinition),

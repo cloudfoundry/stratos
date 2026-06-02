@@ -1,140 +1,104 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
 import { CurrentUserRolesDataService } from '@stratosui/store';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { CF_ENDPOINT_TYPE } from '../cf-types';
-import {
-  IAllCfRolesState,
-  IGlobalRolesState,
-} from '../store/types/cf-current-user-roles.types';
+import { CfUserRelationTypes } from '../actions/permissions.actions';
 import { CfScopeStrings } from '../user-permissions/cf-user-permissions.types';
 import { CfCurrentUserRolesDataService } from './cf-current-user-roles-data.service';
 
 const ENDPOINT_A = 'cf-guid-a';
 const ENDPOINT_B = 'cf-guid-b';
 
-function makeGlobal(overrides: Partial<IGlobalRolesState> = {}): IGlobalRolesState {
-  return {
-    isAdmin: false,
-    isReadOnlyAdmin: false,
-    isGlobalAuditor: false,
-    canRead: true,
-    canWrite: false,
-    scopes: [],
-    ...overrides,
-  };
-}
-
-function makeCfRolesState(overrides: { global?: Partial<IGlobalRolesState> } = {}) {
-  return {
-    global: makeGlobal(overrides.global),
-    spaces: {},
-    organizations: {},
-    state: { initialised: true, fetching: false, error: false },
-  };
-}
-
-function makeAllCfRolesState(byGuid: Record<string, ReturnType<typeof makeCfRolesState>>): IAllCfRolesState {
-  return byGuid as unknown as IAllCfRolesState;
-}
-
-function makeOuterState(cfState?: IAllCfRolesState) {
-  return {
-    internal: { isAdmin: false, scopes: [] },
-    endpoints: cfState ? { [CF_ENDPOINT_TYPE]: cfState } : {},
-    state: { initialised: false, fetching: false, error: false },
-  };
-}
-
 describe('CfCurrentUserRolesDataService', () => {
-  let slice$: BehaviorSubject<unknown>;
+  let svc: CfCurrentUserRolesDataService;
 
   beforeEach(() => {
-    slice$ = new BehaviorSubject<unknown>(makeOuterState());
-    const stubStore = {
-      select: () => slice$.asObservable(),
-      dispatch: () => undefined,
-    };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
         CurrentUserRolesDataService,
         CfCurrentUserRolesDataService,
       ],
     });
+    svc = TestBed.inject(CfCurrentUserRolesDataService);
   });
 
-  it('returns null for endpoint state until the slice populates', () => {
-    const svc = TestBed.inject(CfCurrentUserRolesDataService);
+  it('returns empty/null reads before any write', () => {
     expect(svc.cfRolesState()).toBeUndefined();
     expect(svc.cfEndpointRolesState(ENDPOINT_A)()).toBeNull();
     expect(svc.cfGlobalState(ENDPOINT_A, 'isAdmin')()).toBe(false);
     expect(svc.cfEndpointHasScope(ENDPOINT_A, 'scope.x' as CfScopeStrings)()).toBe(false);
   });
 
-  it('projects cf-side state per-endpoint guid through signals', () => {
-    const svc = TestBed.inject(CfCurrentUserRolesDataService);
-    slice$.next(
-      makeOuterState(
-        makeAllCfRolesState({
-          [ENDPOINT_A]: makeCfRolesState({
-            global: { isAdmin: true, scopes: ['cloud_controller.admin'] },
-          }),
-        }),
-      ),
-    );
-
+  it('registerEndpoint seeds a default row that reads reflect', () => {
+    svc.registerEndpoint(ENDPOINT_A);
     expect(svc.cfEndpointRolesState(ENDPOINT_A)()).not.toBeNull();
-    expect(svc.cfGlobalState(ENDPOINT_A, 'isAdmin')()).toBe(true);
-    expect(svc.cfGlobalState(ENDPOINT_A, 'isReadOnlyAdmin')()).toBe(false);
-    expect(svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.admin' as CfScopeStrings)).toBeDefined();
-    expect(
-      svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.admin' as CfScopeStrings)(),
-    ).toBe(true);
-    expect(
-      svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.write' as CfScopeStrings)(),
-    ).toBe(false);
+    expect(svc.cfGlobalState(ENDPOINT_A, 'isAdmin')()).toBe(false);
   });
 
-  it('exposes observable variants matching the legacy selector shape', async () => {
-    const svc = TestBed.inject(CfCurrentUserRolesDataService);
-    slice$.next(
-      makeOuterState(
-        makeAllCfRolesState({
-          [ENDPOINT_A]: makeCfRolesState({
-            global: { isAdmin: true, scopes: ['scope.a'] },
-          }),
-        }),
-      ),
-    );
+  it('propagateConnectedAdmin derives global flags + scopes', () => {
+    svc.propagateConnectedAdmin(ENDPOINT_A, { admin: true, scopes: ['cloud_controller.admin'] });
+    expect(svc.cfGlobalState(ENDPOINT_A, 'isAdmin')()).toBe(true);
+    expect(svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.admin' as CfScopeStrings)()).toBe(true);
+    expect(svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.write' as CfScopeStrings)()).toBe(false);
+  });
 
+  it('propagateSessionAdmin derives global flags for multiple endpoints', () => {
+    svc.propagateSessionAdmin([
+      { guid: ENDPOINT_A, user: { scopes: ['cloud_controller.admin'] } },
+      { guid: ENDPOINT_B, user: { scopes: ['cloud_controller.read'] } },
+    ]);
+    expect(svc.cfGlobalState(ENDPOINT_A, 'isAdmin')()).toBe(true);
+    expect(svc.cfGlobalState(ENDPOINT_B, 'canRead')()).toBe(true);
+    expect(svc.cfGlobalState(ENDPOINT_B, 'isAdmin')()).toBe(false);
+  });
+
+  it('applyUserRelations commits org roles', () => {
+    svc.applyUserRelations(CfUserRelationTypes.MANAGED_ORGANIZATION, ENDPOINT_A, [
+      { metadata: { guid: 'org-1' }, entity: {} } as any,
+    ]);
+    expect(svc.cfEndpointRolesState(ENDPOINT_A)()?.organizations['org-1'].isManager).toBe(true);
+  });
+
+  it('request-state writes drive the endpoint state flag', () => {
+    svc.registerEndpoint(ENDPOINT_A);
+    svc.setFetching(ENDPOINT_A);
+    expect(svc.cfEndpointRolesState(ENDPOINT_A)()?.state.fetching).toBe(true);
+    svc.setFetched(ENDPOINT_A);
+    expect(svc.cfEndpointRolesState(ENDPOINT_A)()?.state).toEqual({ initialised: true, fetching: false, error: false });
+    svc.setFailed(ENDPOINT_A);
+    expect(svc.cfEndpointRolesState(ENDPOINT_A)()?.state.error).toBe(true);
+  });
+
+  it('removeEndpoint drops the row', () => {
+    svc.registerEndpoint(ENDPOINT_A);
+    svc.removeEndpoint(ENDPOINT_A);
+    expect(svc.cfEndpointRolesState(ENDPOINT_A)()).toBeNull();
+  });
+
+  it('exposes observable variants reflecting writes', async () => {
+    // Global flags derive purely from scopes (legacy getEndpointRoles ignored
+    // user.admin) — so isAdmin requires the cloud_controller.admin scope.
+    svc.propagateConnectedAdmin(ENDPOINT_A, { scopes: ['cloud_controller.admin', 'scope.a'] });
     await expect(firstValueFrom(svc.cfGlobalState$(ENDPOINT_A, 'isAdmin'))).resolves.toBe(true);
     await expect(
       firstValueFrom(svc.cfEndpointHasScope$(ENDPOINT_A, 'scope.a' as CfScopeStrings)),
     ).resolves.toBe(true);
     const rolesState = await firstValueFrom(svc.cfEndpointRolesState$(ENDPOINT_A));
-    expect(rolesState).toBeDefined();
     expect(rolesState?.global?.isAdmin).toBe(true);
   });
 
   it('returns null/false for endpoints that are not present', async () => {
-    const svc = TestBed.inject(CfCurrentUserRolesDataService);
-    slice$.next(makeOuterState(makeAllCfRolesState({})));
+    svc.registerEndpoint(ENDPOINT_A);
     expect(svc.cfEndpointRolesState('missing')()).toBeNull();
     expect(svc.cfGlobalState('missing', 'isAdmin')()).toBe(false);
     await expect(firstValueFrom(svc.cfGlobalState$('missing', 'isAdmin'))).resolves.toBe(false);
   });
 
   it('memoizes cfEndpointRolesState$ per endpointGuid (same observable instance)', () => {
-    const svc = TestBed.inject(CfCurrentUserRolesDataService);
-    // Multiple permission directives on one page request the same endpoint's
-    // roles state — they should share one pipe instead of rebuilding map +
-    // distinctUntilChanged + shareReplay each subscription.
     const a1 = svc.cfEndpointRolesState$(ENDPOINT_A);
     const a2 = svc.cfEndpointRolesState$(ENDPOINT_A);
     const b1 = svc.cfEndpointRolesState$(ENDPOINT_B);
