@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import {
-  SetRecentlyVisitedEntityAction,
+  RecentlyVisitedDataService,
   GeneralEntityAppState,
   GeneralRequestDataState,
   EntityCatalogModule,
@@ -19,7 +19,6 @@ import {
   getAPIRequestDataState,
   selectEntity,
   internalEventStateSelector,
-  recentlyVisitedSelector,
   AppStoreModule,
   stratosEntityCatalog,
   generateStratosEntities,
@@ -145,6 +144,7 @@ class AppStoreDebugModule { }
 })
 export class AppModule {
   private store = inject<Store<GeneralEntityAppState>>(Store);
+  private recents = inject(RecentlyVisitedDataService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private appRef = inject(ApplicationRef);
 
@@ -278,7 +278,7 @@ export class AppModule {
     const allFavs$ = this.userFavoriteManager.getAllFavorites().pipe(
       filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities)
     );
-    const recents$ = this.store.select(recentlyVisitedSelector);
+    const recents$ = this.recents.state$;
     const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));
     debouncedApiRequestData$.pipe(
       withLatestFrom(allFavs$)
@@ -322,10 +322,10 @@ export class AppModule {
             const name = entityToMetadata?.name;
             if (name && name !== recentEntity.name) {
               // Update the entity name
-              this.store.dispatch(new SetRecentlyVisitedEntityAction({
+              this.recents.set({
                 ...recentEntity,
                 name
-              }));
+              });
             }
           }
         });

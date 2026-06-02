@@ -9,10 +9,6 @@ import {
   GET_CURRENT_USER_RELATIONS_FAILED,
   GET_CURRENT_USER_RELATIONS_SUCCESS,
 } from '../actions/permissions.actions';
-import {
-  CleanRecentsForEndpointsAction,
-  PruneRecentsToConnectedAction,
-} from '../actions/recently-visited.actions';
 import { SendClearEndpointEventsAction } from '../actions/internal-events.actions';
 import { ResetPaginationOfType } from '../actions/pagination.actions';
 import { RemoveEntitiesForEndpoint } from '../actions/remove-entities-for-endpoint.actions';
@@ -24,6 +20,7 @@ import {
   EndpointDisconnectEvent,
   EndpointsDataService,
 } from './endpoints-data.service';
+import { RecentlyVisitedDataService } from './recently-visited-data.service';
 
 /**
  * Wave 4 part 1 (W36-B) — endpoint cleanup orchestration.
@@ -65,6 +62,7 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
   private endpointsService = inject(EndpointsDataService);
   private store = inject<Store<AppState>>(Store);
   private httpClient = inject(HttpClient);
+  private recents = inject(RecentlyVisitedDataService);
 
   private disconnectHandlers: Array<(event: EndpointDisconnectEvent) => void> = [];
   private connectHandlers: Array<(event: EndpointConnectEvent) => void> = [];
@@ -133,7 +131,7 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
         connectedGuids.push(guid);
       }
     });
-    this.store.dispatch(new PruneRecentsToConnectedAction(connectedGuids));
+    this.recents.pruneToConnected(connectedGuids);
   });
 
   /**
@@ -220,7 +218,7 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
     // 3. Recents cleanup — replaces the legacy
     //    `recently-visited.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`
     //    branch.
-    this.store.dispatch(new CleanRecentsForEndpointsAction([event.guid]));
+    this.recents.cleanForEndpoints([event.guid]);
     // 4. Per-entity-slice prune — replaces the legacy per-entity
     //    `endpointDisconnectRemoveEntitiesReducer()` dataReducers (26 cf +
     //    4 git inline registrations) and the

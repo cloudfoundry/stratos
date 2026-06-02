@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RemoveRecentEntityAction, RemoveUserFavoriteAction, UserFavorite } from '@stratosui/store';
+import { RecentlyVisitedDataService, RemoveUserFavoriteAction, UserFavorite } from '@stratosui/store';
 import { FavoritesRecentsDeleteCleanup } from './favorites-recents-cleanup.service';
 import type { DeleteRequest } from './delete-event.types';
 
@@ -17,15 +17,18 @@ const ORG_REQUEST: DeleteRequest = {
 
 describe('FavoritesRecentsDeleteCleanup', () => {
   let dispatch: ReturnType<typeof vi.fn>;
+  let removeRecent: ReturnType<typeof vi.fn>;
   let service: FavoritesRecentsDeleteCleanup;
 
   beforeEach(() => {
     dispatch = vi.fn();
+    removeRecent = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         FavoritesRecentsDeleteCleanup,
         { provide: Store, useValue: { dispatch } },
+        { provide: RecentlyVisitedDataService, useValue: { removeForDeletedEntity: removeRecent } },
       ],
     });
     service = TestBed.inject(FavoritesRecentsDeleteCleanup);
@@ -42,13 +45,9 @@ describe('FavoritesRecentsDeleteCleanup', () => {
     expect((fav as RemoveUserFavoriteAction).guid).toBe(expected.guid);
   });
 
-  it('dispatches RemoveRecentEntityAction with the matching favorite guid', () => {
+  it('removes the recent (signal-native) with the matching favorite guid', () => {
     service.hook(ORG_REQUEST);
-    const recent = dispatch.mock.calls
-      .map(c => c[0])
-      .find(a => a instanceof RemoveRecentEntityAction) as RemoveRecentEntityAction;
     const expected = new UserFavorite('cnsi-1', 'cf', 'organization', 'org-1');
-    expect(recent).toBeInstanceOf(RemoveRecentEntityAction);
-    expect(recent.guid).toBe(expected.guid);
+    expect(removeRecent).toHaveBeenCalledWith(expected.guid);
   });
 });
