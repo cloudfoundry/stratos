@@ -2,9 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { SharedModule } from '@stratosui/core';
@@ -15,17 +14,14 @@ import { HelmTestingModule } from '../../helm-testing.module';
 import { MockChartService } from '../../monocular/shared/services/chart.service.mock';
 import { ChartsService } from '../../monocular/shared/services/charts.service';
 import { CatalogTabComponent } from './catalog-tab.component';
-import { helmEntityCatalog } from '../../helm-entity-catalog';
 import { generateHelmEntities } from '../../helm-entity-generator';
 
 describe('CatalogTabComponent', () => {
   let component: CatalogTabComponent;
   let fixture: ComponentFixture<CatalogTabComponent>;
-  let mockChartMonitor: any;
 
   beforeEach(async () => {
-    // Manually register catalog entities before TestBed setup
-    // This ensures helmEntityCatalog.chart is defined
+    // Register catalog entities before TestBed setup.
     const testEntityCatalog = entityCatalog as TestEntityCatalog;
     testEntityCatalog.clear();
     const entities = [
@@ -33,23 +29,6 @@ describe('CatalogTabComponent', () => {
       ...generateHelmEntities(),
     ];
     entities.forEach(entity => entityCatalog.register(entity));
-
-    mockChartMonitor = {
-      currentPage$: new BehaviorSubject([]),
-      pagination$: new BehaviorSubject({
-        clientPagination: {
-          filter: {
-            string: '',
-            items: {}
-          }
-        }
-      }),
-      fetchingEntities$: new BehaviorSubject(false),
-      hasEntities$: new BehaviorSubject(false),
-      totalEntities$: new BehaviorSubject(0)
-    };
-
-    vi.spyOn(helmEntityCatalog.chart.store, 'getPaginationMonitor').mockReturnValue(mockChartMonitor);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -85,13 +64,6 @@ describe('CatalogTabComponent', () => {
   });
 
   afterEach(() => {
-    if (mockChartMonitor) {
-      mockChartMonitor.currentPage$.complete();
-      mockChartMonitor.pagination$.complete();
-      mockChartMonitor.fetchingEntities$.complete();
-      mockChartMonitor.hasEntities$.complete();
-      mockChartMonitor.totalEntities$.complete();
-    }
     // Absorb any pending company-config request from StratosBrandingService
     const httpMock = TestBed.inject(HttpTestingController);
     httpMock.match(() => true);

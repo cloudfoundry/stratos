@@ -10,23 +10,15 @@ import { IListAction } from '../../../core/src/shared/components/signal-list/lis
 import { AppState } from '../../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
-  StratosCatalogEndpointEntity,
-  StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+  StratosCatalogEndpointEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { AuthDataService, EndpointModel, EndpointsDataService, Store } from '../../../store/src/public-api';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
   HELM_ENDPOINT_TYPE,
   HELM_HUB_ENDPOINT_TYPE,
-  HELM_REPO_ENDPOINT_TYPE,
-  helmEntityFactory,
-  monocularChartsEntityType } from './helm-entity-factory';
+  HELM_REPO_ENDPOINT_TYPE } from './helm-entity-factory';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
-import {
-  HelmChartActionBuilders,
-  helmChartActionBuilders } from './store/helm.action-builders';
-import { MonocularChart } from './store/helm.types';
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
@@ -104,7 +96,6 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
 
   return [
     generateEndpointEntity(endpointDefinition),
-    generateChartEntity(endpointDefinition),
   ];
 }
 
@@ -114,21 +105,6 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
     () => '/monocular',
   );
   return helmEntityCatalog.endpoint;
-}
-
-function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: monocularChartsEntityType,
-    schema: helmEntityFactory(monocularChartsEntityType),
-    endpoint: endpointDefinition
-  };
-  helmEntityCatalog.chart = new StratosCatalogEntity<IFavoriteMetadata, MonocularChart, HelmChartActionBuilders>(
-    definition,
-    {
-      actionBuilders: helmChartActionBuilders
-    }
-  );
-  return helmEntityCatalog.chart;
 }
 
 
