@@ -93,6 +93,45 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
     });
   }
 
+  // ---- Delete ------------------------------------------------------------
+
+  // Signal-native resource delete (replaces the ngrx `deleteResource` action +
+  // generic delete pipeline). DELETEs the k8s resource through the Jetstream
+  // proxy, then drops the row from every cached scope so the lists/graph that
+  // read these signals update immediately. Errors propagate to the caller
+  // (the resource viewer renders the failure snackbar). Favorites/recents
+  // cleanup is performed by the caller, which holds the catalog entity type.
+  async delete(kubeGuid: string, name: string, namespace?: string): Promise<void> {
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    const base = `/pp/v1/proxy${this.config.apiPath}`;
+    const url = (namespace && this.config.namespaced)
+      ? `${base}/namespaces/${encodeURIComponent(namespace)}/${this.config.resourceName}/${encodeURIComponent(name)}`
+      : `${base}/${this.config.resourceName}/${encodeURIComponent(name)}`;
+    await firstValueFrom(this.http.delete(url, { headers }));
+    this.removeRow(kubeGuid, name);
+  }
+
+  // Drop the named row (matched by kubeGuid + metadata.name) from every cached
+  // scope — cluster, namespace and workload — so any view reading these
+  // signals reflects the deletion without a refetch.
+  private removeRow(kubeGuid: string, name: string): void {
+    const matches = (item: T & { kubeGuid: string }) =>
+      item.kubeGuid === kubeGuid && item.metadata?.name === name;
+    const drop = (curr: Map<string, Array<T & { kubeGuid: string }>>) => {
+      const next = new Map(curr);
+      for (const [key, arr] of next) {
+        const filtered = arr.filter(item => !matches(item));
+        if (filtered.length !== arr.length) {
+          next.set(key, filtered);
+        }
+      }
+      return next;
+    };
+    this._clusterItems.update(drop);
+    this._namespaceItems.update(drop);
+    this._workloadItems.update(drop);
+  }
+
   // ---- HTTP fetchers -----------------------------------------------------
 
   private async fetchCluster(kubeGuid: string): Promise<Array<T & { kubeGuid: string }>> {

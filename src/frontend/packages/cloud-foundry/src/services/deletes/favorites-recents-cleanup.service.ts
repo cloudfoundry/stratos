@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { RemoveRecentEntityAction, RemoveUserFavoriteAction, UserFavorite } from '@stratosui/store';
+import { EntityDeleteCleanupService } from '@stratosui/store';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import type { DeleteCleanupHook, DeleteRequest } from './delete-event.types';
 
@@ -11,22 +10,19 @@ import type { DeleteCleanupHook, DeleteRequest } from './delete-event.types';
 // signal-native delete path never dispatched it, so favorites stranded on the
 // Home page (the reproduced bug) and recents kept dead deep-links.
 //
-// This hook rebuilds the same UserFavorite identity (guid = entityId +
-// endpointId + entityType + endpointType) the favorite/recent were stored
-// under and dispatches the existing remove actions. Favorites are still ngrx
-// today; when the favorites/roles island migrates to signals this becomes a
-// direct signal call (see island-currentuserroles-favorites-design).
+// Delegates to the shared EntityDeleteCleanupService (store package), which
+// owns the still-ngrx favorites/recents removal — so this CF hook and the kube
+// resource delete share one cleanup path. When the favorites/roles island
+// migrates to signals, only that shared service changes.
 @Injectable({ providedIn: 'root' })
 export class FavoritesRecentsDeleteCleanup {
-  private readonly store = inject(Store);
+  private readonly cleanup = inject(EntityDeleteCleanupService);
 
   /** Bound so it can be registered directly as a DeleteCleanupHook. */
   readonly hook: DeleteCleanupHook = (req: DeleteRequest): void => {
     // entityKind matches the favorite entityType for favoritable CF entities
     // (organization/space/application); non-favoritable kinds (route, binding…)
     // simply have no matching favorite/recent and the removes no-op.
-    const favorite = new UserFavorite(req.cnsiGuid, CF_ENDPOINT_TYPE, req.entityKind, req.deleteGuid);
-    this.store.dispatch(new RemoveUserFavoriteAction(favorite));
-    this.store.dispatch(new RemoveRecentEntityAction(favorite.guid));
+    this.cleanup.removeFavoriteAndRecent(req.cnsiGuid, CF_ENDPOINT_TYPE, req.entityKind, req.deleteGuid);
   };
 }
