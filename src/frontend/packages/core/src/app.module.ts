@@ -20,12 +20,12 @@ import {
   selectEntity,
   internalEventStateSelector,
   AppStoreModule,
-  stratosEntityCatalog,
   generateStratosEntities,
   EndpointModel,
   IFavoriteMetadata,
   UserFavorite,
   UserFavoriteManager,
+  UserFavoritesDataService,
   setEntityMonitorPollingEnabledSource,
 } from '@stratosui/store';
 import { StratosThemeModule } from '../../theme/theme.module';
@@ -146,6 +146,7 @@ export class AppModule {
   private store = inject<Store<GeneralEntityAppState>>(Store);
   private recents = inject(RecentlyVisitedDataService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private userFavorites = inject(UserFavoritesDataService);
   private appRef = inject(ApplicationRef);
 
   constructor() {
@@ -358,7 +359,7 @@ export class AppModule {
         if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
           const fav = this.userFavoriteManager.getUserFavoriteFromObject(favorite);
           fav.metadata = newMetadata;
-          stratosEntityCatalog.userFavorite.api.updateFavorite(fav);
+          this.userFavorites.updateMetadata(fav);
         }
       }
     }

@@ -7,7 +7,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   entityCatalog,
-  stratosEntityCatalog,
+  UserFavoritesDataService,
 } from '@stratosui/store';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
@@ -57,6 +57,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private cd = inject(ChangeDetectorRef);
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
+  private userFavorites = inject(UserFavoritesDataService);
 
   public activeTabLabel$!: Observable<string>;
   public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
@@ -169,8 +170,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     // CF current-user roles now fetch via CfEndpointRoleSyncService's signal
     // effect on connected CF endpoints (favorites/roles island Wave 2) — no
     // dashboard-load dispatch needed.
-    // Initialize user favorites - fire and forget action, no subscription needed
-    stratosEntityCatalog.userFavorite.api.getAll();
+    // Initialize user favorites - fire and forget, no subscription needed
+    this.userFavorites.load();
 
     // Re-evaluate scroll shadow after route changes (content height changes)
     // Use delay(100) to let the new route's content render before measuring

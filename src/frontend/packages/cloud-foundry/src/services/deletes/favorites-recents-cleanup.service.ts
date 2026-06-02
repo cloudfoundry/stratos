@@ -11,9 +11,8 @@ import type { DeleteCleanupHook, DeleteRequest } from './delete-event.types';
 // Home page (the reproduced bug) and recents kept dead deep-links.
 //
 // Delegates to the shared EntityDeleteCleanupService (store package), which
-// owns the still-ngrx favorites/recents removal — so this CF hook and the kube
-// resource delete share one cleanup path. When the favorites/roles island
-// migrates to signals, only that shared service changes.
+// owns the now signal-native favorites/recents removal — so this CF hook and
+// the kube resource delete share one cleanup path.
 @Injectable({ providedIn: 'root' })
 export class FavoritesRecentsDeleteCleanup {
   private readonly cleanup = inject(EntityDeleteCleanupService);
