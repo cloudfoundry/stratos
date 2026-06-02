@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
 import { config as rxjsConfig } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -287,6 +287,137 @@ describe('EntityDeleteController', () => {
       expect(eds.markStale).not.toHaveBeenCalled();
       expect(eds.removeOrg).not.toHaveBeenCalled();
       expect(hook).not.toHaveBeenCalled();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // blocked state + persistent latch (Increment 3). A classified failure
+  // (422 association_not_empty / 403 / in-progress) terminates as `blocked`
+  // with a reason and latches the entity: subsequent delete()s short-circuit
+  // to blocked (no server call) until an explicit clear().
+  // -------------------------------------------------------------------------
+
+  describe('blocked state + latch', () => {
+    // CF-AssociationNotEmpty 422 — the canonical has-dependents block.
+    const assocError = new HttpErrorResponse({
+      status: 422,
+      statusText: 'error',
+      error: { errors: [{ code: 10006, title: 'CF-AssociationNotEmpty', detail: 'spaces remain' }] },
+    });
+
+    // Builds a controller whose write throws `error` on every call, with a
+    // call-count so tests can assert the server was (not) hit.
+    const configureThrowing = (error: unknown) => {
+      const writeFn = vi.fn(async () => { throw error; });
+      const eds = {
+        markStale: vi.fn(), removeOrg: vi.fn(), removeSpace: vi.fn(), removeApp: vi.fn(),
+        removeServiceInstance: vi.fn(), removeServiceCredentialBinding: vi.fn(),
+      };
+      const diag = { emitCounter: vi.fn() };
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          EntityDeleteController,
+          { provide: WRITE_WITH_JOB, useValue: writeFn },
+          { provide: EndpointDataRegistry, useValue: { peek: () => eds } },
+          { provide: SignalRelationFetcherService, useValue: { snapshotRegistry: () => indexDescriptors([]) } },
+          { provide: StratosDiagnostics, useValue: diag },
+        ],
+      });
+      return { ctrl: TestBed.inject(EntityDeleteController), writeFn, eds, diag };
+    };
+
+    it('terminates a classified failure as blocked with a reason', async () => {
+      const { ctrl } = configureThrowing(assocError);
+      const states = await collectStates(ctrl, makeRequest());
+      expect(states).toEqual(['start', 'blocked']);
+    });
+
+    it('blocked terminal carries reason and error', async () => {
+      const { ctrl } = configureThrowing(assocError);
+      const terminal = await ctrl.delete(makeRequest()).done;
+      expect(terminal.state).toBe('blocked');
+      expect(terminal.reason).toBe('has-dependents');
+      expect(terminal.error).toBe(assocError);
+    });
+
+    it('emits a blocked diagnostics counter', async () => {
+      const { ctrl, diag } = configureThrowing(assocError);
+      await ctrl.delete(makeRequest()).done;
+      expect(diag.emitCounter).toHaveBeenCalledWith('delete-event', { state: 'blocked', entityKind: 'app' });
+    });
+
+    it('does not invalidate or run cleanup on the blocked path', async () => {
+      const { ctrl, eds } = configureThrowing(assocError);
+      const hook = vi.fn();
+      ctrl.registerCleanup(hook);
+      await ctrl.delete(makeRequest()).done;
+      expect(eds.markStale).not.toHaveBeenCalled();
+      expect(eds.removeApp).not.toHaveBeenCalled();
+      expect(hook).not.toHaveBeenCalled();
+    });
+
+    it('latches the entity so a second delete short-circuits without calling write', async () => {
+      const { ctrl, writeFn } = configureThrowing(assocError);
+      const req = makeRequest();
+      await ctrl.delete(req).done;             // first attempt hits the server -> blocked
+      expect(writeFn).toHaveBeenCalledTimes(1);
+      expect(ctrl.isBlocked(req)).toBe(true);
+
+      const states = await collectStates(ctrl, req); // second attempt is latched
+      expect(states).toEqual(['blocked']);     // no `start` — never attempted
+      expect(writeFn).toHaveBeenCalledTimes(1); // still 1: server not hit again
+    });
+
+    it('the short-circuited blocked event preserves the original reason + error', async () => {
+      const { ctrl } = configureThrowing(assocError);
+      const req = makeRequest();
+      await ctrl.delete(req).done;
+      const terminal = await ctrl.delete(req).done;
+      expect(terminal.state).toBe('blocked');
+      expect(terminal.reason).toBe('has-dependents');
+      expect(terminal.error).toBe(assocError);
+    });
+
+    it('clear() releases the latch so the next delete attempts the server again', async () => {
+      const { ctrl, writeFn } = configureThrowing(assocError);
+      const req = makeRequest();
+      await ctrl.delete(req).done;
+      ctrl.clear(req);
+      expect(ctrl.isBlocked(req)).toBe(false);
+      await ctrl.delete(req).done;
+      expect(writeFn).toHaveBeenCalledTimes(2); // attempted again after clear
+    });
+
+    it('an unclassified failure stays failure and does NOT latch', async () => {
+      const { ctrl } = configureThrowing(new Error('boom'));
+      const req = makeRequest();
+      const terminal = await ctrl.delete(req).done;
+      expect(terminal.state).toBe('failure');
+      expect(ctrl.isBlocked(req)).toBe(false);
+    });
+
+    it('a successful delete clears any stale latch for that entity', async () => {
+      // First block, then a write that succeeds clears the latch defensively.
+      const writeFn = vi.fn()
+        .mockImplementationOnce(async () => { throw assocError; })
+        .mockImplementationOnce(async () => ({ status: 'COMPLETE', state: undefined }));
+      TestBed.configureTestingModule({
+        providers: [
+          provideZonelessChangeDetection(),
+          EntityDeleteController,
+          { provide: WRITE_WITH_JOB, useValue: writeFn },
+          ...stubInvalidationProviders(),
+        ],
+      });
+      const ctrl = TestBed.inject(EntityDeleteController);
+      const req = makeRequest();
+      await ctrl.delete(req).done;
+      expect(ctrl.isBlocked(req)).toBe(true);
+      ctrl.clear(req);
+      const terminal = await ctrl.delete(req).done;
+      expect(terminal.state).toBe('success');
+      expect(ctrl.isBlocked(req)).toBe(false);
     });
   });
 });
