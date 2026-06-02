@@ -1,85 +1,79 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  ICurrentUserRolesState,
-  IStratosRolesState,
-} from '../types/current-user-roles.types';
+import { SessionUser } from '../types/auth.types';
 import { UserScopeStrings } from '../types/endpoint.types';
 import { CurrentUserRolesDataService } from './current-user-roles-data.service';
 
-function makeStratos(overrides: Partial<IStratosRolesState> = {}): IStratosRolesState {
-  return {
-    isAdmin: false,
-    scopes: [],
-    ...overrides,
-  };
-}
-
-function makeState(overrides: Partial<ICurrentUserRolesState> = {}): ICurrentUserRolesState {
-  return {
-    internal: makeStratos(),
-    endpoints: {},
-    state: { initialised: false, fetching: false, error: false },
-    ...overrides,
-  };
-}
-
 describe('CurrentUserRolesDataService', () => {
-  let slice$: BehaviorSubject<ICurrentUserRolesState>;
+  let svc: CurrentUserRolesDataService;
 
   beforeEach(() => {
-    slice$ = new BehaviorSubject<ICurrentUserRolesState>(makeState());
-    const stubStore = {
-      select: () => slice$.asObservable(),
-      dispatch: () => undefined,
-    };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: stubStore },
         CurrentUserRolesDataService,
       ],
     });
+    svc = TestBed.inject(CurrentUserRolesDataService);
   });
 
-  it('mirrors the initial currentUserRoles slice on construction', () => {
-    const svc = TestBed.inject(CurrentUserRolesDataService);
-    expect(svc.state()).toBeDefined();
+  it('seeds a default roles state on construction (no store bridge)', () => {
+    expect(svc.state()).toEqual({
+      internal: { isAdmin: false, scopes: [] },
+      endpoints: {},
+      state: { initialised: false, fetching: false, error: false },
+    });
     expect(svc.stratos()?.isAdmin).toBe(false);
     expect(svc.stratosRole('isAdmin')()).toBe(false);
     expect(svc.stratosHasScope('any.scope' as UserScopeStrings)()).toBe(false);
   });
 
-  it('reflects subsequent slice updates through stratosRole + stratosHasScope', () => {
-    const svc = TestBed.inject(CurrentUserRolesDataService);
-    const isAdminSig = svc.stratosRole('isAdmin');
-    const hasScopeSig = svc.stratosHasScope('cloud_controller.admin' as UserScopeStrings);
+  it('applySessionScopes applies the session user admin flag + scopes', () => {
+    svc.applySessionScopes({
+      admin: true,
+      scopes: ['cloud_controller.admin'],
+    } as SessionUser);
 
-    slice$.next(makeState({
-      internal: makeStratos({
-        isAdmin: true,
-        scopes: ['cloud_controller.admin' as UserScopeStrings],
-      }),
-    }));
-
-    expect(isAdminSig()).toBe(true);
-    expect(hasScopeSig()).toBe(true);
+    expect(svc.stratosRole('isAdmin')()).toBe(true);
+    expect(svc.stratosHasScope('cloud_controller.admin' as UserScopeStrings)()).toBe(true);
     expect(svc.stratosHasScope('something.else' as UserScopeStrings)()).toBe(false);
   });
 
-  it('exposes observable variants for legacy rxjs-shaped pipelines', async () => {
-    const svc = TestBed.inject(CurrentUserRolesDataService);
-    slice$.next(makeState({
-      internal: makeStratos({
-        isAdmin: true,
-        scopes: ['scope.a' as UserScopeStrings],
-      }),
-    }));
+  it('applySessionScopes with no user leaves internal roles untouched', () => {
+    svc.applySessionScopes(undefined as unknown as SessionUser);
+    expect(svc.stratos()).toEqual({ isAdmin: false, scopes: [] });
+  });
+
+  it('drives the global request-state through fetching/fetched/failed', () => {
+    svc.setStratosFetching();
+    expect(svc.state()?.state).toEqual({ initialised: false, fetching: true, error: false });
+
+    svc.setStratosFetched();
+    expect(svc.state()?.state).toEqual({ initialised: true, fetching: false, error: false });
+
+    svc.setStratosFetching();
+    svc.setStratosFailed();
+    expect(svc.state()?.state).toEqual({ initialised: true, fetching: false, error: true });
+  });
+
+  it('updateEndpointRoles applies an updater to the keyed endpoint subtree', () => {
+    svc.updateEndpointRoles('cf', () => ({ seeded: true }));
+    expect(svc.state()?.endpoints['cf']).toEqual({ seeded: true });
+
+    // updater receives the previous subtree
+    svc.updateEndpointRoles('cf', (prev: any) => ({ ...prev, extra: 1 }));
+    expect(svc.state()?.endpoints['cf']).toEqual({ seeded: true, extra: 1 });
+
+    // other endpoint types are untouched
+    expect(svc.state()?.endpoints['metrics']).toBeUndefined();
+  });
+
+  it('exposes observable variants reflecting writes', async () => {
+    svc.applySessionScopes({ admin: true, scopes: ['scope.a'] } as SessionUser);
     await expect(firstValueFrom(svc.stratosRole$('isAdmin'))).resolves.toBe(true);
     await expect(
       firstValueFrom(svc.stratosHasScope$('scope.a' as UserScopeStrings)),
@@ -87,12 +81,5 @@ describe('CurrentUserRolesDataService', () => {
     await expect(
       firstValueFrom(svc.stratosHasScope$('scope.b' as UserScopeStrings)),
     ).resolves.toBe(false);
-  });
-
-  it('returns false for stratosRole when state is undefined', () => {
-    const svc = TestBed.inject(CurrentUserRolesDataService);
-    slice$.next(undefined as unknown as ICurrentUserRolesState);
-    expect(svc.stratosRole('isAdmin')()).toBe(false);
-    expect(svc.stratosHasScope('scope.x' as UserScopeStrings)()).toBe(false);
   });
 });

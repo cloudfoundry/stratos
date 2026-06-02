@@ -9,8 +9,8 @@ import { DashboardDataService } from '../../../core/src/core/dashboard-data.serv
 import { AppState, DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { LocalStorageService } from '../helpers/local-storage-service';
-import { CurrentUserRolesSessionVerified } from '../actions/permissions.actions';
 import { AuthState, RouterRedirect, SessionData, SessionDataEnvelope } from '../types/auth.types';
+import { CurrentUserRolesDataService } from './current-user-roles-data.service';
 import { EndpointsDataService } from './endpoints-data.service';
 
 const SETUP_HEADER = 'stratos-setup-required';
@@ -60,6 +60,7 @@ export class AuthDataService {
   // — which fetch on init — wherever this root service is pulled in, even in
   // code paths that never authenticate.
   private injector = inject(Injector);
+  private rolesData = inject(CurrentUserRolesDataService);
 
   /** Authoritative auth state. */
   private readonly _auth = signal<AuthState>(defaultAuthState);
@@ -239,10 +240,11 @@ export class AuthDataService {
   // `_updateEndpoints` is retained for call-site symmetry with verifySession;
   // endpoints are always (re)loaded via endpointsService.getAll(true) now.
   private setVerifiedSession(sessionData: SessionData, _updateEndpoints: boolean, login: boolean): void {
-    // Feed the current-user-roles slice the verified session so it can apply
-    // the user's internal admin scopes (replaces its SESSION_VERIFIED case).
-    // The cf-roles slice observes the sessionData signal separately.
-    this.store.dispatch(new CurrentUserRolesSessionVerified(sessionData));
+    // Apply the verified session user's internal admin scopes directly to the
+    // signal source of truth (replaces the former SESSION_VERIFIED reducer
+    // case). CF endpoint admin scopes are propagated separately by
+    // CfEndpointRoleSyncService observing the sessionData signal.
+    this.rolesData.applySessionScopes(sessionData.user);
     this.patch({
       error: false,
       errorResponse: '',

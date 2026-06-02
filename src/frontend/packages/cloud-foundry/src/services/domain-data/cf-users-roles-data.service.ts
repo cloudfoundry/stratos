@@ -1,7 +1,10 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TailwindSnackBarService } from '@stratosui/core';
+import { EndpointsDataService } from '@stratosui/store';
 import { firstValueFrom } from 'rxjs';
+
+import { CfCurrentUserRolesDataService } from '../cf-current-user-roles-data.service';
 
 import {
   IUserPermissionInOrg,
@@ -30,6 +33,8 @@ export type RoleChangeApplyState = 'busy' | 'done' | 'error';
 export class CfUsersRolesDataService {
   private readonly http = inject(HttpClient);
   private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly cfRoles = inject(CfCurrentUserRolesDataService);
+  private readonly endpoints = inject(EndpointsDataService);
 
   private readonly _cfGuid = signal<string>('');
   private readonly _users = signal<StUser[]>([]);
@@ -187,6 +192,30 @@ export class CfUsersRolesDataService {
       }
     }
     this._applyStatus.set(status);
+
+    // Keep the connected user's own role cache in step with the mutation
+    // (restores the legacy ADD/REMOVE_CF_ROLE_SUCCESS reducer update, which
+    // went dead when role changes moved off the ngrx pipeline). Only the
+    // connected, non-admin user's cache is affected — mirrors the legacy
+    // `updateConnectedUser` guard. Admins need no per-org/space roles.
+    const connectedUser = this.endpoints.endpoints().get(cfGuid)?.user;
+    const connectedGuid = connectedUser?.guid;
+    if (connectedGuid && !connectedUser?.admin) {
+      for (const r of results) {
+        const c = changes[r.index];
+        if (!c || !r.success || c.userGuid !== connectedGuid) {
+          continue;
+        }
+        this.cfRoles.applyRoleChange({
+          endpointGuid: cfGuid,
+          isSpace: !!c.spaceGuid,
+          entityGuid: c.spaceGuid ?? c.orgGuid,
+          orgGuid: c.orgGuid,
+          permissionTypeKey: c.role,
+          updateConnectedUser: true,
+        }, c.add);
+      }
+    }
 
     if (errors.length) {
       this.snackBar.error(`${errors.length} of ${changes.length} role changes failed: ${errors.join('; ')}`);

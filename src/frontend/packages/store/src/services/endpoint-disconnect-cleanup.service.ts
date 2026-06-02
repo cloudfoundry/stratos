@@ -1,20 +1,13 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy, effect, inject } from '@angular/core';
-import { Action, Store } from '@ngrx/store';
-import { firstValueFrom } from 'rxjs';
+import { Store } from '@ngrx/store';
 
 import { EndpointModel } from '../types/endpoint.types';
 
-import {
-  GET_CURRENT_USER_RELATIONS_FAILED,
-  GET_CURRENT_USER_RELATIONS_SUCCESS,
-} from '../actions/permissions.actions';
 import { SendClearEndpointEventsAction } from '../actions/internal-events.actions';
 import { ResetPaginationOfType } from '../actions/pagination.actions';
 import { RemoveEntitiesForEndpoint } from '../actions/remove-entities-for-endpoint.actions';
 import { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
-import { EntityUserRolesEndpoint } from '../entity-request-pipeline/entity-request-pipeline.types';
 import {
   EndpointConnectEvent,
   EndpointDisconnectEvent,
@@ -61,7 +54,6 @@ import { RecentlyVisitedDataService } from './recently-visited-data.service';
 export class EndpointDisconnectCleanupService implements OnDestroy {
   private endpointsService = inject(EndpointsDataService);
   private store = inject<Store<AppState>>(Store);
-  private httpClient = inject(HttpClient);
   private recents = inject(RecentlyVisitedDataService);
 
   private disconnectHandlers: Array<(event: EndpointDisconnectEvent) => void> = [];
@@ -229,35 +221,11 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
   }
 
   private runGenericConnectCleanup(event: EndpointConnectEvent): void {
-    // 1. Internal-events log clear — replaces the legacy
-    //    `internal-events.reducer.ts CONNECT_ENDPOINTS_SUCCESS` branch.
+    // Internal-events log clear — replaces the legacy
+    // `internal-events.reducer.ts CONNECT_ENDPOINTS_SUCCESS` branch.
+    // (Per-endpoint user-roles fetch on connect moved to the CF package's
+    // CfEndpointRoleSyncService signal effect — favorites/roles island Wave 2.)
     this.store.dispatch(new SendClearEndpointEventsAction(event.guid));
-    // 2. Per-endpoint user-roles fetch — replaces the legacy
-    //    `permissions.effect.ts getPermissionForNewlyConnectedEndpoint$`
-    //    ngrx effect.
-    void this.fetchUserRolesForConnectedEndpoint(event);
-  }
-
-  private async fetchUserRolesForConnectedEndpoint(event: EndpointConnectEvent): Promise<void> {
-    const endpointType = entityCatalog.getEndpoint(event.type);
-    if (!endpointType?.definition?.userRolesFetch) {
-      return;
-    }
-    const endpoint: EntityUserRolesEndpoint = {
-      guid: event.guid,
-      user: event.user,
-    };
-    try {
-      const succeeded = await firstValueFrom(
-        endpointType.definition.userRolesFetch([endpoint], this.store, this.httpClient, this.endpointsService),
-      );
-      const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
-      const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
-      this.store.dispatch(succeeded ? successAction : failedAction);
-    } catch (err) {
-      console.warn('Failed to fetch current user permissions after endpoint connected: ', err);
-      this.store.dispatch({ type: GET_CURRENT_USER_RELATIONS_FAILED });
-    }
   }
 }
 
