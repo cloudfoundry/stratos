@@ -3,9 +3,9 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { helmEntityCatalog } from '../../../../helm/helm-entity-catalog';
 import { ChartAttributes } from '../../../../helm/monocular/shared/models/chart';
 import { ChartMetadata } from '../../../../helm/store/helm.types';
+import { KubeHelmDataService } from '../../../../services/endpoint-data/kube-helm-data.service';
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
 import { KubePod } from '../../../../services/endpoint-data/kube-types';
 import { ContainerStateCollection, KubernetesPod } from '../../../store/kube.types';
@@ -19,7 +19,7 @@ import {
   HelmReleaseResources,
   HelmReleaseRevision,
 } from '../../workload.types';
-import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
+import { HelmReleaseDataService } from '../helm-release-data.service';
 
 // Simple class to represent MAJOR.MINOR.REVISION version
 export class Version {
@@ -108,6 +108,8 @@ export class HelmReleaseHelperService {
   public releaseTitle: string;
 
   private podData = inject(KubePodDataService);
+  private releaseData = inject(HelmReleaseDataService);
+  private helmData = inject(KubeHelmDataService);
   private injector = inject(Injector);
 
   constructor() {
@@ -119,14 +121,13 @@ export class HelmReleaseHelperService {
     this.namespace = namespace;
     this.endpointGuid = endpointId;
 
-    const entityService = workloadsEntityCatalog.release.store.getEntityService(
-      this.releaseTitle,
-      this.endpointGuid,
-      { namespace: this.namespace }
-    );
+    // Signal-native release detail (replaces the ngrx `release` entity-catalog
+    // getEntityService). Kick off the fetch; the read flows through the
+    // HelmReleaseDataService signal.
+    void this.releaseData.loadReleaseDetail(this.endpointGuid, this.namespace, this.releaseTitle);
 
-    this.release$ = entityService.waitForEntity$.pipe(
-      map((item: any) => item.entity),
+    this.release$ = toObservable(this.releaseData.releaseDetail(this.guid), { injector: this.injector }).pipe(
+      filter((item): item is HelmRelease => !!item),
       map((item: HelmRelease) => {
         if (!item.chart.metadata.icon) {
           const copy = JSON.parse(JSON.stringify(item));
@@ -137,7 +138,7 @@ export class HelmReleaseHelperService {
       })
     );
 
-    this.isFetching$ = entityService.isFetchingEntity$;
+    this.isFetching$ = toObservable(this.releaseData.isFetchingDetail(this.guid), { injector: this.injector });
   }
 
   public guidAsUrlFragment(): string {
@@ -145,18 +146,16 @@ export class HelmReleaseHelperService {
   }
 
   public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
-    // Get helm release
-    const guid = workloadsEntityCatalog.graph.actions.get(this.releaseTitle, this.endpointGuid).guid;
-    return workloadsEntityCatalog.graph.store.getEntityMonitor(guid).entity$.pipe(
-      filter((graph: any) => !!graph)
+    // Socket-fed graph signal (written by HelmReleaseSocketService).
+    return toObservable(this.releaseData.graph(this.guid), { injector: this.injector }).pipe(
+      filter((graph): graph is HelmReleaseGraph => !!graph)
     );
   }
 
   public fetchReleaseResources(): Observable<HelmReleaseResources> {
-    // Get helm release
-    const guid = workloadsEntityCatalog.resource.actions.get(this.releaseTitle, this.endpointGuid).guid;
-    return workloadsEntityCatalog.resource.store.getEntityMonitor(guid).entity$.pipe(
-      filter((resources: any) => !!resources)
+    // Socket-fed resources signal (written by HelmReleaseSocketService).
+    return toObservable(this.releaseData.resources(this.guid), { injector: this.injector }).pipe(
+      filter((resources): resources is HelmReleaseResources => !!resources)
     );
   }
 
@@ -169,19 +168,18 @@ export class HelmReleaseHelperService {
 
   // Check to see if a workload has updates available
   public getCharts() {
-    return helmEntityCatalog.chart.store.getPaginationService().entities$.pipe(
+    void this.helmData.loadCharts();
+    return toObservable(this.helmData.monocularCharts(), { injector: this.injector }).pipe(
       filter((charts: any) => !!charts)
     );
   }
 
   public fetchReleaseHistory(): Observable<HelmReleaseRevision[]> {
-    // Get the history for a Helm release
-    return workloadsEntityCatalog.history.store.getEntityService(
-      this.releaseTitle,
-      this.endpointGuid,
-      { namespace: this.namespace }
-    ).waitForEntity$.pipe(
-      map((historyEntity: any) => historyEntity.entity.revisions)
+    // Get the history for a Helm release (signal-native; replaces the ngrx
+    // `history` entity-catalog getEntityService).
+    void this.releaseData.loadHistory(this.endpointGuid, this.namespace, this.releaseTitle);
+    return toObservable(this.releaseData.history(this.guid), { injector: this.injector }).pipe(
+      filter((revisions): revisions is HelmReleaseRevision[] => !!revisions)
     );
   }
 

@@ -2,6 +2,8 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import {
   HelmInstallPayload,
   HelmRelease,
@@ -37,6 +39,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class KubeHelmDataService {
   private readonly http = inject(HttpClient);
+  private readonly snackBar = inject(TailwindSnackBarService);
 
   // --- Release state ---
   private readonly _releases = signal<HelmRelease[]>([]);
@@ -201,6 +204,23 @@ export class KubeHelmDataService {
       await this.loadReleases();
     } catch (err) {
       throw new Error(this.errorMessage(err, 'Failed to delete helm release'));
+    }
+  }
+
+  // Trigger a Helm repository re-sync. Signal-native replacement for the
+  // legacy `helmSynchronise$` ngrx effect (which was orphaned when the
+  // Angular-20 NgModule removal dropped its EffectsModule registration).
+  // POSTs to the chartrepos sync endpoint and surfaces a snackbar; resolves
+  // true on success so the caller can refresh the endpoint list.
+  async synchronise(endpoint: EndpointModel): Promise<boolean> {
+    const url = `/pp/v1/chartrepos/${endpoint.guid}`;
+    try {
+      await firstValueFrom(this.http.post(url, { headers: null, params: null }));
+      this.snackBar.open('Helm Repository synchronization started', 'Dismiss', { duration: 3000 });
+      return true;
+    } catch {
+      this.snackBar.error(`Failed to Synchronize Helm Repository '${endpoint.name}'`);
+      return false;
     }
   }
 

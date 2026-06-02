@@ -2,7 +2,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
@@ -12,15 +11,17 @@ import {
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../../../../services/domain-data/kube-service-data.service';
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
+import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 import { HelmReleaseSocketService } from './helm-release-socket-service';
 
 // Minimal stub for HelmReleaseHelperService — only the fields read by
-// HelmReleaseSocketService.writeManifestResources are needed.
+// HelmReleaseSocketService are needed.
 const stubHelper = {
   endpointGuid: 'cnsi-1',
   namespace: 'ns-a',
   releaseTitle: 'rel-x',
+  guid: 'cnsi-1:ns-a:rel-x',
 };
 
 describe('HelmReleaseSocketService.writeManifestResources', () => {
@@ -33,8 +34,6 @@ describe('HelmReleaseSocketService.writeManifestResources', () => {
         provideHttpClientTesting(),
         HelmReleaseSocketService,
         { provide: HelmReleaseHelperService, useValue: stubHelper },
-        // Store stub — only dispatch() is called (via addResource in the socket path)
-        { provide: Store, useValue: { dispatch: () => {} } },
         // SnackBarService stub
         { provide: SnackBarService, useValue: { show: () => {}, hide: () => {} } },
       ],
@@ -111,5 +110,23 @@ describe('HelmReleaseSocketService.writeManifestResources', () => {
     });
     const out = svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-x')();
     expect(out[0].metadata.namespace).toBe('ns-a');
+  });
+
+  it('writeReleaseGraph stamps endpoint/release and writes to the release data service', () => {
+    const releaseData = TestBed.inject(HelmReleaseDataService);
+    const socket = TestBed.inject(HelmReleaseSocketService);
+    (socket as any).writeReleaseGraph({ nodes: {}, links: {} });
+    const g = releaseData.graph('cnsi-1:ns-a:rel-x')();
+    expect(g?.endpointId).toBe('cnsi-1');
+    expect(g?.releaseTitle).toBe('rel-x');
+  });
+
+  it('writeReleaseResources stamps endpoint/release and writes to the release data service', () => {
+    const releaseData = TestBed.inject(HelmReleaseDataService);
+    const socket = TestBed.inject(HelmReleaseSocketService);
+    (socket as any).writeReleaseResources({ kind: 'Resources', data: [] });
+    const r = releaseData.resources('cnsi-1:ns-a:rel-x')();
+    expect(r?.endpointId).toBe('cnsi-1');
+    expect(r?.kind).toBe('Resources');
   });
 });
