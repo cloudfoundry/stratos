@@ -4,7 +4,9 @@ import { firstValueFrom } from 'rxjs';
 
 import { ApplicationService } from '../../features/applications/application.service';
 import type { StRoute } from '../../services/endpoint-data/stratos-types';
-import { writeWithJob } from '../../services/async-jobs/write-with-job';
+import { EntityDeleteController } from '../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../services/deletes/run-cf-delete';
+import { routeEntityType } from '../../cf-entity-types';
 
 /**
  * Stratos-shape mirror of CF V3's `capi.RouteCreateRequest`. Sent as the
@@ -57,6 +59,7 @@ export interface CreateRouteRequest {
 export class AppRouteActionsService {
   private http = inject(HttpClient);
   private applicationService = inject(ApplicationService);
+  private deleteController = inject(EntityDeleteController);
 
   /** GUID of the route currently being unmapped/deleted; null when idle. */
   private readonly _transitioningRouteGuid = signal<string | null>(null);
@@ -99,13 +102,17 @@ export class AppRouteActionsService {
       throw new Error('Another route action is already in flight');
     }
     const { cfGuid } = this.applicationService;
-    const url = `/pp/v1/cf/routes/${cfGuid}/${routeGuid}`;
     this._transitioningRouteGuid.set(routeGuid);
     try {
-      // observe: 'response' so writeWithJob can discriminate 200 fast-path
-      // from 202 + Location handoff.
-      const call = this.http.delete(url, { observe: 'response' });
-      await writeWithJob(this.http, call);
+      // Route through the chokepoint so the route delete invalidates the
+      // routes count + reverse-edge slices (space/app lists) and fires cleanup
+      // — the tab still evicts its own row via removeRoute.
+      await runCfDelete(this.deleteController, this.http, {
+        cnsiGuid: cfGuid,
+        entityKind: routeEntityType,
+        deleteGuid: routeGuid,
+        path: `/pp/v1/cf/routes/${cfGuid}/${routeGuid}`,
+      });
     } finally {
       this._transitioningRouteGuid.set(null);
     }

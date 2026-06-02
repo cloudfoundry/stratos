@@ -2,29 +2,21 @@ import { describe, it, expect } from 'vitest';
 import { CASCADE_RULES, cascadeFor } from './cascade-registry';
 
 describe('cascade-registry', () => {
-  it('cascadeFor returns the registered entry', () => {
-    expect(cascadeFor('org.delete')).toEqual(['spaces', 'apps', 'serviceInstances', 'serviceCredentialBindings']);
-  });
+  // Entity-delete cascades moved to EntityDeleteController (relation-graph
+  // derived), so org/space/app/serviceInstance/serviceBinding `.delete` keys
+  // were removed. What remains: create/update cascades + route.delete (fired by
+  // route *unmap*) + the dormant serviceBroker.* pair.
 
   it('cascadeFor("org.create") returns empty (no cascade on create)', () => {
     expect(cascadeFor('org.create')).toEqual([]);
   });
 
-  it('cascadeFor("space.delete") cascades to apps + SI + bindings (not orgs/spaces)', () => {
-    const list = cascadeFor('space.delete');
-    expect(list).toContain('apps');
-    expect(list).toContain('serviceInstances');
-    expect(list).toContain('serviceCredentialBindings');
-    expect(list).not.toContain('orgs');
-    expect(list).not.toContain('spaces');
+  it('cascadeFor("route.delete") still cascades to apps (route unmap path)', () => {
+    expect(cascadeFor('route.delete')).toEqual(['apps']);
   });
 
-  it('cascadeFor("app.delete") drops only bindings (no cross-org cascade)', () => {
-    expect(cascadeFor('app.delete')).toEqual(['serviceCredentialBindings']);
-  });
-
-  it('cascadeFor("serviceBinding.delete") affects apps + serviceInstances', () => {
-    expect(cascadeFor('serviceBinding.delete')).toEqual(['apps', 'serviceInstances']);
+  it('cascadeFor("serviceBinding.create") affects apps + serviceInstances', () => {
+    expect(cascadeFor('serviceBinding.create')).toEqual(['apps', 'serviceInstances']);
   });
 
   it('cascadeFor("serviceBroker.delete") affects offerings + plans', () => {

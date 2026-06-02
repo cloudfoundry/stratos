@@ -2,7 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApplicationService } from '../../features/applications/application.service';
-import { writeWithJob } from '../../services/async-jobs/write-with-job';
+import { EntityDeleteController } from '../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../services/deletes/run-cf-delete';
+import { serviceCredentialBindingEntityType } from '../../entity-relations/signal/cf-relation-registrations';
 
 /**
  * AppServiceBindingActionsService
@@ -31,6 +33,7 @@ import { writeWithJob } from '../../services/async-jobs/write-with-job';
 export class AppServiceBindingActionsService {
   private http = inject(HttpClient);
   private applicationService = inject(ApplicationService);
+  private deleteController = inject(EntityDeleteController);
 
   /** GUID of the binding currently being unbound; null when idle. */
   private readonly _transitioningBindingGuid = signal<string | null>(null);
@@ -52,11 +55,17 @@ export class AppServiceBindingActionsService {
       throw new Error('Another binding action is already in flight');
     }
     const { cfGuid } = this.applicationService;
-    const url = `/pp/v1/cf/service_bindings/${cfGuid}/${bindingGuid}`;
     this._transitioningBindingGuid.set(bindingGuid);
     try {
-      const call = this.http.delete(url, { observe: 'response' });
-      await writeWithJob(this.http, call);
+      // Route through the chokepoint so the binding delete also invalidates
+      // the EDS cache + reverse-edge slices (bound app/SI rollups) and fires
+      // cleanup hooks — the tab still evicts its own row via removeServiceBinding.
+      await runCfDelete(this.deleteController, this.http, {
+        cnsiGuid: cfGuid,
+        entityKind: serviceCredentialBindingEntityType,
+        deleteGuid: bindingGuid,
+        path: `/pp/v1/cf/service_bindings/${cfGuid}/${bindingGuid}`,
+      });
     } finally {
       this._transitioningBindingGuid.set(null);
     }

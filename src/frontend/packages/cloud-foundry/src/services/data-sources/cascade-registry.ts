@@ -20,55 +20,46 @@ export type EntityKind =
   | 'serviceBrokers'
   | 'serviceCredentialBindings';
 
+// NOTE: entity *delete* cascades now derive from the relation graph via
+// EntityDeleteController (affectedSlices ∪ referencingSlices), so the
+// org/space/app/serviceInstance/serviceBinding `.delete` keys were removed —
+// nothing dispatches them anymore. `route.delete` stays: it's still fired by
+// route *unmap* (CnsiRoutesSource.unmapApp), a relationship op that isn't an
+// entity delete. create/update cascades still flow through applyCascade.
+// (serviceBroker.* remain as dormant scaffolding for the parked broker UI.)
 export type CascadeKey =
-  | 'org.delete'
   | 'org.create'
   | 'org.update'
-  | 'space.delete'
   | 'space.create'
   | 'space.update'
-  | 'app.delete'
   | 'app.create'
   | 'app.update'
   | 'route.delete'
   | 'route.create'
-  | 'serviceInstance.delete'
   | 'serviceInstance.create'
   | 'serviceInstance.update'
-  | 'serviceBinding.delete'
   | 'serviceBinding.create'
   | 'serviceBroker.delete'
   | 'serviceBroker.create';
 
 export const CASCADE_RULES: Readonly<Record<CascadeKey, readonly EntityKind[]>> = {
-  // Deleting an org cascades server-side to its spaces, apps, routes,
-  // and service instances. All of those slices in EndpointDataService
-  // become potentially stale.
-  'org.delete': ['spaces', 'apps', 'serviceInstances', 'serviceCredentialBindings'],
   'org.create': [],
   'org.update': [],
 
-  // Deleting a space cascades to its apps, routes, service instances.
-  'space.delete': ['apps', 'serviceInstances', 'serviceCredentialBindings'],
   'space.create': [],
   'space.update': [],
 
-  // Apps own their service bindings; deleting an app drops bindings.
-  'app.delete': ['serviceCredentialBindings'],
   'app.create': [],
   'app.update': [],
 
-  // Routes attached to apps; deleting affects per-app route lists.
+  // Route unmap (relationship op) affects per-app route lists.
   'route.delete': ['apps'],
   'route.create': ['apps'],
 
-  // Service instance lifecycle affects bound apps.
-  'serviceInstance.delete': ['apps', 'serviceCredentialBindings'],
   'serviceInstance.create': [],
   'serviceInstance.update': [],
 
   // Service bindings link apps ↔ instances.
-  'serviceBinding.delete': ['apps', 'serviceInstances'],
   'serviceBinding.create': ['apps', 'serviceInstances'],
 
   // Broker mutations invalidate offerings + plans (broker catalog).
