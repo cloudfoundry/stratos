@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 import { signal, computed } from '@angular/core';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
-import { EntityService, RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
+import { RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { IApp, IAppSummary } from '../src/cf-api.types';
 import { StDomain, StOrg, StSpace } from '../src/services/endpoint-data/stratos-types';
@@ -112,12 +112,12 @@ export class ApplicationServiceMock {
   appSpace$: Observable<StSpace | undefined> = this.appSpaceSubject.asObservable();
   applicationRunning$: Observable<boolean> = observableOf(false);
   orgDomains$: Observable<StDomain[]> = observableOf([]);
-  entityService: EntityService<APIResource<IApp<unknown>>> = {
+  entityService: any = {
     waitForEntity$: of({}),
     updatingSection$: of({}),
     entityObs$: this.entityObsSubject.asObservable(),
     poll: () => of({})
-  } as EntityService<APIResource<IApp<unknown>>>
+  }
 }
 
 /**

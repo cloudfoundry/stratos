@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { EndpointType } from '../extension-types';
 import { httpErrorResponseToSafeString } from '../jetstream';
-import { ActionState, getDefaultActionState } from '../reducers/api-request-reducer/types';
+import { ActionState, getDefaultActionState } from '../types/entity-pipeline.types';
 import { EndpointModel } from '../types/endpoint.types';
 import { SystemInfo } from '../types/system.types';
 

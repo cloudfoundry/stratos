@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, Component, input } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EntityMonitorFactory } from '@stratosui/store';
 import { MetricsChartComponent, MetricsParentRangeSelectorComponent } from '@stratosui/core';
 import { MetricsTabComponent } from './metrics-tab.component';
 import { ApplicationService } from '@stratosui/cloud-foundry';
@@ -47,7 +46,6 @@ describe('MetricsTabComponent', () => {
       imports: [MetricsTabComponent],
       providers: [
         { provide: ApplicationService, useValue: mockApplicationService },
-        { provide: EntityMonitorFactory, useValue: mockEntityMonitorFactory },
         provideZonelessChangeDetection(),
       ]
     })

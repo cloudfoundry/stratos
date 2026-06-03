@@ -1,11 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import {
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { ConnectEndpointComponent } from './connect-endpoint.component';
 
@@ -20,7 +16,6 @@ describe('ConnectEndpointComponent', () => {
         ConnectEndpointComponent,
       ],
       providers: [
-        EntityServiceFactory,
         ...(STORE_TEST_PROVIDERS || []),
         provideZonelessChangeDetection(),
       ]

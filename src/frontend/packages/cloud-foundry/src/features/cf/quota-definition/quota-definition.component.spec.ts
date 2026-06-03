@@ -10,15 +10,7 @@ import { StoreModule } from '@ngrx/store';
 import {
   TabNavService
 } from '@stratosui/core';
-import {
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule,
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import {generateCFEntities,
@@ -53,7 +45,6 @@ describe('QuotaDefinitionComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
         ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,

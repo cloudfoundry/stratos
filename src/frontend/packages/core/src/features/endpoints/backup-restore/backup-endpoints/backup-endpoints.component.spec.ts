@@ -5,15 +5,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  EndpointsDataService,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityCatalogTestModuleManualStore,
-  EntityServiceFactory,
-  generateStratosEntities,
-  TEST_CATALOGUE_ENTITIES
-} from '@stratosui/store';
+import { EndpointsDataService, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModuleManualStore, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, testSCFEndpoint, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { signal } from '@angular/core';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
@@ -45,7 +37,6 @@ describe('BackupEndpointsComponent', () => {
       ],
       providers: [
         TabNavService,
-        EntityServiceFactory,
         CurrentUserPermissionsService,
         {
           provide: ConfirmationDialogService,

@@ -3,7 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
-import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 
 import { MetricsRangeSelectorService } from '../../services/metrics-range-selector.service';
 import { MetricsParentRangeSelectorComponent } from './metrics-parent-range-selector.component';
@@ -21,8 +20,6 @@ describe('MetricsParentRangeSelectorComponent', () => {
       ],
       providers: [
         ...STORE_TEST_PROVIDERS,
-        EntityServiceFactory,
-        EntityMonitorFactory,
         MetricsRangeSelectorService,
         provideZonelessChangeDetection(),
       ]

@@ -1,7 +1,5 @@
 /// <reference types="vite" />
-import { IRequestEntityTypeState } from '../app-state';
 import { STRATOS_ENDPOINT_TYPE } from '../helpers/stratos-entity-factory';
-import { ExtraApiReducers } from '../reducers/api-request-reducers.generator.helpers';
 import { OrchestratedActionBuilders } from './action-orchestrator/action-orchestrator';
 import {
   StratosBaseCatalogEntity,
@@ -553,20 +551,6 @@ export class EntityCatalog {
       console.error('Error getting all endpoint types:', error);
       return [];
     }
-  }
-
-  public getAllEntityRequestDataReducers() {
-    const entities = this.getAllEntitiesTypes();
-    const endpoints = this.getAllEndpointTypes();
-    return [...entities, ...endpoints].reduce((allEntityReducers, entity) => {
-      if (entity.entityKey && entity.builders.dataReducers && entity.builders.dataReducers.length) {
-        return {
-          ...allEntityReducers,
-          [entity.entityKey]: entity.builders.dataReducers
-        };
-      }
-      return allEntityReducers;
-    }, {} as ExtraApiReducers<IRequestEntityTypeState<any>>);
   }
 
 }

@@ -3,7 +3,7 @@ export type SortDirection = 'asc' | 'desc' | '';
 import { Action } from '@ngrx/store';
 
 import { ListsState } from '../reducers/list.reducer';
-import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination-reducer-reset-pagination';
+import { defaultClientPaginationPageSize } from '../types/pagination.types';
 
 
 export class ListPagination {

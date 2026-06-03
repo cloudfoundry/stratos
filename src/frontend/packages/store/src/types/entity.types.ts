@@ -1,5 +1,5 @@
 import type { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import type { RequestInfoState } from '../reducers/api-request-reducer/types';
+import type { RequestInfoState } from './entity-pipeline.types';
 import type { IMetrics } from './base-metric.types';
 import type { EndpointModel } from './endpoint.types';
 import type { SystemInfo } from './system.types';

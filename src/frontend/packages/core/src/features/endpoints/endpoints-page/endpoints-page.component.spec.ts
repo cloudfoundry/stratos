@@ -5,11 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
-import {
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
@@ -71,7 +67,6 @@ describe('EndpointsPageComponent', () => {
         EndpointsPageComponent,
       ],
       providers: [
-        EntityServiceFactory,
         TabNavService,
         SidePanelService,
         CurrentUserPermissionsService,

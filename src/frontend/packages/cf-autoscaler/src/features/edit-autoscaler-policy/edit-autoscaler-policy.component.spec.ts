@@ -10,7 +10,6 @@ import { createEmptyStoreModule } from "@stratosui/store/testing";
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import { TabNavService, CurrentUserPermissionsService } from '@stratosui/core';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from './edit-autoscaler-policy-service';
 import { EditAutoscalerPolicyComponent } from './edit-autoscaler-policy.component';
@@ -50,9 +49,6 @@ describe('EditAutoscalerPolicyComponent', () => {
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
-        { provide: EntityServiceFactory, useValue: mockEntityServiceFactory },
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EditAutoscalerPolicyService,
         CurrentUserPermissionsService,
         {

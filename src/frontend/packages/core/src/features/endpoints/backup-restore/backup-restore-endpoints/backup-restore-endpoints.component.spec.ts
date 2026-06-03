@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { EntityCatalogTestModule, EntityServiceFactory, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppTestModule, BaseTestModulesNoShared } from "@test-framework/core-test.helper";
 import { SharedModule } from '@stratosui/core';
@@ -38,7 +38,6 @@ describe('BackupRestoreEndpointsComponent', () => {
       ],
       providers: [
         TabNavService,
-        EntityServiceFactory,
         ...(STORE_TEST_PROVIDERS || []),
         provideRouter([]),
         provideZonelessChangeDetection(),

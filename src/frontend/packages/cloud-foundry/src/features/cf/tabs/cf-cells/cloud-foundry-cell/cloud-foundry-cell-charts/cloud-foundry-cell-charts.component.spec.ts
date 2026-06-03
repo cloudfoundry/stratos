@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory, MetricQueryConfig, MetricQueryType } from '@stratosui/store';
+import { MetricQueryConfig, MetricQueryType } from '@stratosui/store';
 import { MetricsConfig, MetricsChartTypes, MetricsLineChartConfig, MetricsChartHelpers } from '@stratosui/core';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule } from '../../../../../../cloud-foundry-test.module';
@@ -56,7 +56,6 @@ describe('CloudFoundryCellChartsComponent', () => {
           createBasicStoreModule(),
           CloudFoundryTestingModule
         ),
-        EntityServiceFactory,
         {
           provide: CloudFoundryCellService,
           useValue: new MockCloudFoundryCellService(),

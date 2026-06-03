@@ -2,14 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
-import {
-  entityCatalog,
-  EntityServiceFactory,
-  generateStratosEntities,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  StratosCatalogEndpointEntity
-} from '@stratosui/store';
+import { entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
@@ -54,7 +47,6 @@ describe('CreateEndpointCfStep1Component', () => {
         CreateEndpointCfStep1Component,
       ],
       providers: [
-        EntityServiceFactory,
         { provide: EndpointsSignalConfigService, useValue: stubSignalConfig },
         {
           provide: ActivatedRoute,

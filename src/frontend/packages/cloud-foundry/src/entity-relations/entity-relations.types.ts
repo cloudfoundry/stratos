@@ -1,62 +1,9 @@
-import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-
 import {
   EntityCatalogEntityConfig,
   getPaginationKey,
-  APIResponse,
-  GeneralEntityAppState,
-  GeneralRequestDataState,
-  IRequestTypeState,
   EntityRequestAction,
 } from '@stratosui/store';
 import { EntityTreeRelation } from './entity-relation-tree';
-
-export class ValidateEntityRelationsConfig<T extends GeneralEntityAppState = GeneralEntityAppState> {
-  /**
-   * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
-   */
-  cfGuid!: string;
-  store!: Store<T>;
-  /**
-   * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
-   */
-  allEntities!: GeneralRequestDataState;
-  /**
-   * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
-   * and quicker
-   */
-  allPagination!: IRequestTypeState;
-  /**
-   * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
-   * have an entity/entities
-   */
-  newEntities?: IRequestTypeState;
-  /**
-   * The action that has fetched the entity/entities
-   */
-  action!: EntityRequestAction;
-  /**
-   * Collection of entity (guids) whose children may be missing. For example a list of organizations that have missing spaces
-   */
-  parentEntities!: string[];
-  /**
-   * If a child is missing, should we raise an action to fetch it?
-   *
-   */
-  populateMissing = true;
-  /**
-   * If we're validating an api request we'll have the apiResponse, otherwise it's null and we're ad hoc validating an entity/list
-   *
-   */
-  apiResponse!: APIResponse;
-}
-
-export class EntityTree {
-  rootRelation!: EntityTreeRelation;
-  requiredParamNames!: string[];
-  maxDepth?: number;
-}
 
 export function createEntityRelationPaginationKey(parentSchemaKey: string, parentGuid = 'all', childSchemaRelation?: string) {
   let key = getPaginationKey(parentSchemaKey, parentGuid);
@@ -108,37 +55,5 @@ export interface EntityInlineParentAction extends EntityRequestAction {
 
 export function isEntityInlineParentAction(anything: any): EntityInlineParentAction {
   return anything && !!anything.includeRelations && anything.populateMissing !== undefined ? anything as EntityInlineParentAction : null;
-}
-
-
-/**
- * The result of a validation run. Indicates if any separate api requests have been started and a promise firing when they have completed
- *
- * @export
- */
-export class ValidationResult {
-  /**
-   * True if data was missing an api requests have been kicked off to fetch
-   */
-  started!: boolean;
-  /**
-   * Promise that fires when the api requests kicked off to fetch missing data have all completed. Contains the new apiResponse (for the
-   * case of validating api calls this might be updated to ensure parent entities are associated with missing children).
-   */
-  completed!: Promise<APIResponse>;
-}
-
-export interface ValidateResultFetchingState {
-  fetching: boolean;
-}
-
-/**
- * An object to represent the action and status of a missing inline depth/entity relation.
- * @export
- */
-export interface ValidateEntityResult {
-  action: Action;
-  fetchingState$?: Observable<ValidateResultFetchingState>;
-  abortDispatch?: boolean;
 }
 

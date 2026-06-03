@@ -6,14 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  EntityServiceFactory,
-  PaginationMonitorFactory,
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { ActiveRouteCfCell, generateCFEntities } from '@test-framework/cf';
 import { CloudFoundryCellAppsComponent } from './cloud-foundry-cell-apps.component';
@@ -46,8 +39,6 @@ describe('CloudFoundryCellAppsComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
-        PaginationMonitorFactory,
         {
           provide: ActiveRouteCfCell,
           useValue: { cfGuid: testSCFEndpointGuid, cellId: 'test-cell' }

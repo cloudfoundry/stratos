@@ -6,7 +6,6 @@ import { provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import {
@@ -67,8 +66,6 @@ describe('ServiceSummaryComponent', () => {
         provideRouter([]),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
-        EntityServiceFactory,
-        EntityMonitorFactory,
         { provide: EndpointDataRegistry, useClass: FakeRegistry },
         { provide: ServiceCatalogDataService, useClass: FakeCatalog },
       ],

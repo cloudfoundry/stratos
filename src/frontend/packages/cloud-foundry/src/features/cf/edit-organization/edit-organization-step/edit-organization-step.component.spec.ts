@@ -7,15 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import {
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule,
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider, CloudFoundryOrganizationServiceMock } from '@test-framework/cf';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
@@ -50,7 +42,6 @@ describe('EditOrganizationStepComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
         ...cfCurrentUserPermissionsService,
         {
           provide: ActivatedRoute,

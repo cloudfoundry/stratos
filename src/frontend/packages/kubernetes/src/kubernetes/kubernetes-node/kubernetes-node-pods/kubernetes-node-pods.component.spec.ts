@@ -5,7 +5,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
@@ -27,7 +26,6 @@ describe('KubernetesNodePodsComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        EntityServiceFactory,
         BaseKubeGuid,
         KubernetesEndpointService,
         KubernetesNodeService,

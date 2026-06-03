@@ -7,16 +7,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import {
-  PaginationMonitorFactory,
-  EntityMonitorFactory,
-  EntityServiceFactory,
-  EntityCatalogTestModule,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreModule } from '@stratosui/core';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
@@ -63,9 +54,6 @@ describe('DeployApplicationComponent', () => {
         },
         CfOrgSpaceDataService,
         ApplicationDeploySourceTypes,
-        PaginationMonitorFactory,
-        EntityMonitorFactory,
-        EntityServiceFactory,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]

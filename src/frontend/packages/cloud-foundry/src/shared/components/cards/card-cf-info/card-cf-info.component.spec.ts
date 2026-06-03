@@ -7,7 +7,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, entityCatalog, TestEntityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { entityCatalog, TestEntityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { TailwindDialogService } from '@stratosui/core';
 import { generateTestCfEndpointService } from '@test-framework/cf';
 import { generateASEntities } from '@stratosui/cf-autoscaler';
@@ -41,9 +41,6 @@ describe('CardCfInfoComponent', () => {
           ...STORE_TEST_PROVIDERS,
           importProvidersFrom(createBasicStoreModule()),
           ...generateTestCfEndpointService(),
-          EntityServiceFactory,
-          EntityMonitorFactory,
-          PaginationMonitorFactory,
           EntityCatalogHelper,
           UserInviteService,
           UserInviteConfigureService,

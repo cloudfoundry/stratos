@@ -3,7 +3,6 @@ import { Signal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../kubernetes.testing.module';
@@ -38,7 +37,6 @@ describe('KubernetesHomeCardComponent', () => {
         KubernetesHomeCardComponent,
       ],
       providers: [
-        EntityServiceFactory,
         KubernetesEndpointService,
         BaseKubeGuid,
         { provide: KubePodDataService, useValue: podStub },

@@ -16,15 +16,7 @@ import {
 import {
   MetricsChartHelpers,
 } from '@stratosui/core';
-import {
-  EntityServiceFactory,
-  MetricQueryConfig,
-  MetricQueryType,
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule
-} from '@stratosui/store';
+import { MetricQueryConfig, MetricQueryType, appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { generateCFEntities } from '@test-framework/cf';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
@@ -97,7 +89,6 @@ describe('CloudFoundryCellSummaryComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
         {
           provide: CloudFoundryCellService,
           useValue: new MockCloudFoundryCellService(),

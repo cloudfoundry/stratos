@@ -5,9 +5,10 @@ import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import type { EntitySchema } from '../helpers/entity-schema';
-import type { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import type { NormalizedResponse } from './api.types';
 import type { PaginatedAction } from './pagination.types';
+
+export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
 export interface SingleEntityAction {
   // For single entity requests

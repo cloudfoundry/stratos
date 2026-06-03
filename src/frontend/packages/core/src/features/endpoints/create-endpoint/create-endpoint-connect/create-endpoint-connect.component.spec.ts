@@ -1,12 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  EntityCatalogTestModuleManualStore,
-  EntityServiceFactory,
-  generateStratosEntities,
-  TEST_CATALOGUE_ENTITIES
-} from '@stratosui/store';
+import { EntityCatalogTestModuleManualStore, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { SidePanelService } from '@stratosui/core';
 
@@ -26,7 +21,6 @@ describe('CreateEndpointConnectComponent', () => {
         ConnectEndpointComponent,
       ],
       providers: [
-        EntityServiceFactory,
         {
           provide: TEST_CATALOGUE_ENTITIES,
           useValue: generateStratosEntities()

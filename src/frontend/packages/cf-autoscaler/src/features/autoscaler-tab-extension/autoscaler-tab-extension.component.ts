@@ -36,7 +36,6 @@ import {
 } from '@stratosui/cloud-foundry';
 import {
   AppState,
-  EntityServiceFactory,
 } from '@stratosui/store';
 import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { buildMetricData } from '../../core/autoscaler-helpers/autoscaler-transform-metric';
@@ -72,7 +71,7 @@ interface AutoscalerTabPaginationParams {
   iconFont: 'stratos-icons',
   hidden: (
     _store: Store<AppState>,
-    esf: EntityServiceFactory,
+    esf: unknown,
     activatedRoute: ActivatedRoute,
     cups: CurrentUserPermissionsService,
     http: HttpClient,

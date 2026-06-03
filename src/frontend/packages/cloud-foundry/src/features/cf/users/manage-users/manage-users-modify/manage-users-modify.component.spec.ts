@@ -9,17 +9,7 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
 
-import {
-  EntityMonitorFactory,
-  PaginationMonitorFactory,
-  EntityServiceFactory,
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityCatalogTestModule
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities, CfUserServiceTestProvider, generateCfTopLevelStoreEntities } from '@test-framework/cf';
 import { CloudFoundryReducersModule } from '../../../../../store/cloud-foundry.reducers.module';
@@ -79,9 +69,6 @@ describe('UsersRolesModifyComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
         CfUserServiceTestProvider,
         { provide: CfRolesService, useValue: mockCfRolesService },

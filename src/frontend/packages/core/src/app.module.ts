@@ -3,30 +3,18 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import {
-  RecentlyVisitedDataService,
-  GeneralEntityAppState,
-  GeneralRequestDataState,
   EntityCatalogModule,
   entityCatalog,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  endpointEntityType,
-  STRATOS_ENDPOINT_TYPE,
-  getAPIRequestDataState,
   AppStoreModule,
   generateStratosEntities,
-  IFavoriteMetadata,
-  UserFavorite,
-  UserFavoriteManager,
-  UserFavoritesDataService,
-  setEntityMonitorPollingEnabledSource,
 } from '@stratosui/store';
 import { StratosThemeModule } from '../../theme/theme.module';
-import { debounceTime, filter, take, withLatestFrom } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
@@ -140,10 +128,6 @@ class AppStoreDebugModule { }
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
-  private recents = inject(RecentlyVisitedDataService);
-  private userFavoriteManager = inject(UserFavoriteManager);
-  private userFavorites = inject(UserFavoritesDataService);
   private appRef = inject(ApplicationRef);
 
   constructor() {
@@ -179,11 +163,6 @@ export class AppModule {
     // `state.dashboard.{timeoutSession,pollingEnabled}` event configs.
     const dashboardData = inject(DashboardDataService);
     const envInjector = inject(EnvironmentInjector);
-
-    // Hand the dashboard polling-enabled signal to EntityMonitor so its
-    // `.poll()` callers continue to honour the user pref now that the
-    // ngrx dashboard slice is gone.
-    setEntityMonitorPollingEnabledSource(dashboardData.pollingEnabled, envInjector);
 
     runInInjectionContext(envInjector, () => {
       effect(() => {
@@ -241,62 +220,10 @@ export class AppModule {
     // Init Auth Types and Endpoint Types provided by extensions
     // Once the CF modules become an extension point, these should be moved to a CF specific module
 
-    const allFavs$ = this.userFavoriteManager.getAllFavorites().pipe(
-      filter(([groups, favoriteEntities]) => !!groups && !!favoriteEntities)
-    );
-    const recents$ = this.recents.state$;
-    const debouncedApiRequestData$ = this.store.select(getAPIRequestDataState).pipe(debounceTime(2000));
-    debouncedApiRequestData$.pipe(
-      withLatestFrom(allFavs$)
-    ).subscribe(
-      ([entities, [favoriteGroups, favorites]]) => {
-        if (!favoriteGroups || !favorites) {
-          return;
-        }
-        Object.keys(favoriteGroups).forEach(endpointId => {
-          const favoriteGroup = favoriteGroups[endpointId];
-          if (!favoriteGroup || !favoriteGroup.ethereal) {
-            const endpointFavorite = favorites[endpointId];
-            this.syncFavorite(endpointFavorite, entities);
-          }
-          if (favoriteGroup?.entitiesIds) {
-            favoriteGroup.entitiesIds.forEach(id => {
-              const favorite = favorites[id];
-              this.syncFavorite(favorite, entities);
-            });
-          }
-        });
-      }
-    );
-
-    // This updates the names of any recents
-    debouncedApiRequestData$.pipe(
-      withLatestFrom(recents$)
-    ).subscribe(
-      ([entities, recents]) => {
-        if (!recents || !entities) {
-          return;
-        }
-        Object.values(recents).forEach(recentEntity => {
-          if (!recentEntity) {
-            return;
-          }
-          const entityKey = entityCatalog.getEntityKey(recentEntity);
-          if (entities[entityKey] && entities[entityKey][recentEntity.entityId]) {
-            const entity = entities[entityKey][recentEntity.entityId];
-            const entityToMetadata = this.userFavoriteManager.getEntityMetadata(recentEntity, entity);
-            const name = entityToMetadata?.name;
-            if (name && name !== recentEntity.name) {
-              // Update the entity name
-              this.recents.set({
-                ...recentEntity,
-                name
-              });
-            }
-          }
-        });
-      }
-    );
+    // NOTE: The favorites/recents name-refresh that used to subscribe to the
+    // ngrx `requestData` store (via getAPIRequestDataState) has been removed
+    // with the request/pagination store engine. That refresh is already-broken
+    // lost functionality being restored signal-natively in a follow-up PR.
 
     // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
     customizationService.set({
@@ -305,51 +232,4 @@ export class AppModule {
     });
   }
 
-  private syncFavorite(favorite: UserFavorite<IFavoriteMetadata>, entities: GeneralRequestDataState) {
-    if (favorite && entities) {
-      const isEndpoint = (favorite.entityType === endpointEntityType);
-      // If the favorite is an endpoint ensure we look in the stratosEndpoint part of the store instead of, for example, cfEndpoint
-      const entityKey = isEndpoint ? entityCatalog.getEntityKey({
-        ...favorite,
-        endpointType: STRATOS_ENDPOINT_TYPE
-      }) : entityCatalog.getEntityKey(favorite);
-
-      if (!entities[entityKey]) {
-        return;
-      }
-
-      const entity = entities[entityKey][favorite.entityId || favorite.endpointId];
-      if (entity) {
-        const newMetadata = this.userFavoriteManager.getEntityMetadata(favorite, entity);
-        if (this.metadataHasChanged(favorite.metadata, newMetadata)) {
-          const fav = this.userFavoriteManager.getUserFavoriteFromObject(favorite);
-          fav.metadata = newMetadata;
-          this.userFavorites.updateMetadata(fav);
-        }
-      }
-    }
-  }
-
-  private metadataHasChanged(oldMeta: IFavoriteMetadata, newMeta: IFavoriteMetadata) {
-    if ((!oldMeta && newMeta) || (oldMeta && !newMeta)) {
-      return true;
-    }
-    if (!oldMeta && !newMeta) {
-      return false;
-    }
-    const oldKeys = Object.keys(oldMeta);
-    const newKeys = Object.keys(newMeta);
-    const oldValues = Object.values(oldMeta);
-    const newValues = Object.values(newMeta);
-    if (oldKeys.length !== newKeys.length) {
-      return true;
-    }
-    if (oldKeys.sort().join(',') !== newKeys.sort().join(',')) {
-      return true;
-    }
-    if (oldValues.sort().join(',') !== newValues.sort().join(',')) {
-      return true;
-    }
-    return false;
-  }
 }

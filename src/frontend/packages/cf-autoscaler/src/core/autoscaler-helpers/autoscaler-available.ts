@@ -3,7 +3,6 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler-info-data.service';
 import { AutoscalerInfo } from '../../store/app-autoscaler.types';
@@ -73,7 +72,7 @@ function asEntityInfoObservable(
 
 export const fetchAutoscalerInfo = (
   endpointGuid: string,
-  _esf?: EntityServiceFactory,
+  _esf?: unknown,
 ): Observable<EntityInfo<APIResource<AutoscalerInfo>>> => {
   const svc = getDataService();
   void svc.load(endpointGuid);
@@ -87,7 +86,7 @@ export const fetchAutoscalerInfo = (
  */
 export const isAutoscalerEnabled = (
   endpointGuid: string,
-  _esf?: EntityServiceFactory,
+  _esf?: unknown,
 ): Observable<boolean> => {
   const svc = getDataService();
   void svc.load(endpointGuid);

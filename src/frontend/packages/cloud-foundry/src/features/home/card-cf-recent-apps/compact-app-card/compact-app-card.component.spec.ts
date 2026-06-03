@@ -7,17 +7,7 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ApplicationStateIconComponent } from '@stratosui/core';
-import {
-  EntityCatalogTestModule,
-  generateStratosEntities,
-  TEST_CATALOGUE_ENTITIES,
-  appReducers,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityServiceFactory,
-  EntityMonitorFactory,
-  PaginationMonitorFactory
-} from '@stratosui/store';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
 import { ApplicationStateService } from '../../../../shared/services/application-state.service';
@@ -53,9 +43,6 @@ describe('CompactAppCardComponent', () => {
             ...generateCFEntities(),
           ]
         },
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
       ]
     })

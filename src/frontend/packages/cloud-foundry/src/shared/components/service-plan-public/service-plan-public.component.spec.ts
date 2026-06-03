@@ -4,7 +4,6 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -56,8 +55,6 @@ describe('ServicePlanPublicComponent', () => {
         provideHttpClient(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
-        EntityServiceFactory,
-        EntityMonitorFactory,
         { provide: ServiceCatalogDataService, useValue: catalogStub },
         { provide: ComponentFixtureAutoDetect, useValue: true },
       ],

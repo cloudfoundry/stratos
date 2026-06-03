@@ -2,9 +2,7 @@ import { NgModule } from '@angular/core';
 import { ActionReducerMap, StoreModule } from '@ngrx/store';
 
 import { LocalStorageService } from './helpers/local-storage-service';
-import { requestReducer } from './reducers/api-request-reducers.generator';
 import { listReducer } from './reducers/list.reducer';
-import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 
 
 // NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
@@ -18,10 +16,6 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 // }
 
 export const appReducers: ActionReducerMap<Record<string, unknown>> = {
-  pagination: requestPaginationReducer,
-  request: requestReducer,
-  // This is added as part of the entity catalog module.
-  // requestData,
   lists: listReducer,
 };
 

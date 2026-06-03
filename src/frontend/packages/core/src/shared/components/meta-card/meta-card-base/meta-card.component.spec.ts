@@ -3,15 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
-import {
-  EntityServiceFactory,
-  IFavoriteMetadata,
-  StratosStatus,
-  UserFavorite,
-  UserFavoriteManager,
-  entityCatalog,
-  TestEntityCatalog,
-} from '@stratosui/store';
+import { IFavoriteMetadata, StratosStatus, UserFavorite, UserFavoriteManager, entityCatalog, TestEntityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
 import { MetaCardComponent } from './meta-card.component';
@@ -68,7 +60,6 @@ describe('MetaCardComponent', () => {
       ],
       declarations: [WrapperComponent],
       providers: [
-        EntityServiceFactory,
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
         provideZonelessChangeDetection(),
       ],

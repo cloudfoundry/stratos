@@ -11,13 +11,11 @@ import type {
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
+  PaginationPageIteratorConfig,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
-} from '../entity-request-pipeline/entity-request-pipeline.types';
-import type {
-  PaginationPageIteratorConfig,
-} from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
+} from '../types/entity-pipeline.types';
 import type { EndpointAuthTypeConfig } from '../extension-types';
 import type { EntitySchema } from '../helpers/entity-schema';
 import type { EndpointsDataService } from '../services/endpoints-data.service';

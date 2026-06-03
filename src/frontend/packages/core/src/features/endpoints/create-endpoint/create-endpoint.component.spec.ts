@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { entityCatalog, EntityServiceFactory, generateStratosEntities } from '@stratosui/store';
+import { entityCatalog, generateStratosEntities } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TabNavService, CurrentUserPermissionsService, SidePanelService } from '@stratosui/core';
 import { AppTestModule } from '@test-framework/core-test.helper';
@@ -27,7 +27,6 @@ describe('CreateEndpointComponent', () => {
         ConnectEndpointComponent,
       ],
       providers: [
-        EntityServiceFactory,
         {
           provide: ActivatedRoute,
           useValue: {

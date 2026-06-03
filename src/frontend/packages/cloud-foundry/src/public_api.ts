@@ -96,9 +96,6 @@ export { RemoveCfUserRole } from './actions/users.actions';
 
 // CF Route Actions
 
-// CF Selectors
-export { selectCfEntity } from './store/selectors/api.selectors';
-
 // CF Actions
 export { UpdateExistingApplication } from './actions/application.actions';
 

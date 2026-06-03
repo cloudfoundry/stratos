@@ -6,17 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  EntityCatalogTestModule,
-  generateStratosEntities,
-  TEST_CATALOGUE_ENTITIES,
-  appReducers,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityServiceFactory,
-  EntityMonitorFactory,
-  PaginationMonitorFactory
-} from '@stratosui/store';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { MetadataItemComponent, BooleanIndicatorComponent, CapitalizeFirstPipe } from '@stratosui/core';
 import { CloudFoundryTestingModule, generateCFEntities, CloudFoundryOrganizationServiceMock } from '@test-framework/cf';
@@ -55,9 +45,6 @@ describe('CardCfOrgUserDetailsComponent', () => {
             ...generateCFEntities(),
           ]
         },
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
         { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
       ]

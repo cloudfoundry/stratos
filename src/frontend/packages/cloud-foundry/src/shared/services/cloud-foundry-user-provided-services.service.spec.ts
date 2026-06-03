@@ -5,7 +5,6 @@ import { firstValueFrom } from 'rxjs';
 import { describe, it, beforeEach, afterEach, expect } from 'vitest';
 
 import { CloudFoundryUserProvidedServicesService } from './cloud-foundry-user-provided-services.service';
-import { PaginationMonitorFactory } from '@stratosui/store';
 
 // Tests targeting the V3-native rewrite of the create/update paths —
 // asserts the wire shape against /pp/v1/cf/user_provided_service_instances/{cfGuid}
@@ -20,7 +19,6 @@ describe('CloudFoundryUserProvidedServicesService — V3 write surface', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: PaginationMonitorFactory, useValue: {} },
         CloudFoundryUserProvidedServicesService,
       ],
     });
@@ -120,7 +118,6 @@ describe('CloudFoundryUserProvidedServicesService — V3 read surface', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: PaginationMonitorFactory, useValue: {} },
         CloudFoundryUserProvidedServicesService,
       ],
     });

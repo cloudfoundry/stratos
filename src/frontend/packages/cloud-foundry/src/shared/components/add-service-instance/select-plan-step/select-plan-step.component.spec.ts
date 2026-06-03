@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PaginationMonitorFactory } from '@stratosui/store';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicePlanPriceComponent } from '../../service-plan-price/service-plan-price.component';
 import { ServicePlanPublicComponent } from '../../service-plan-public/service-plan-public.component';
@@ -40,7 +39,6 @@ describe('SelectPlanStepComponent', () => {
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         CsiStateService,
-        PaginationMonitorFactory,
         CsiModeService,
         provideZonelessChangeDetection(),
       ]

@@ -1,4 +1,4 @@
-import type { RequestInfoState } from './reducers/api-request-reducer/types';
+import type { RequestInfoState } from './types/entity-pipeline.types';
 import type { ListsState } from './reducers/list.reducer';
 import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import type { PaginationEntityTypeState } from './types/pagination.types';

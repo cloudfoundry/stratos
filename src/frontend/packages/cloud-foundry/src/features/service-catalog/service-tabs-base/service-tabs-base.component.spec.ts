@@ -8,7 +8,6 @@ import { Observable, of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { CoreModule, TabNavService } from '@stratosui/core';
-import { EntityMonitorFactory, EntityServiceFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { cfCurrentUserPermissionsService } from '../../../user-permissions/cf-user-permissions-checkers';
@@ -74,8 +73,6 @@ describe('ServiceTabsBaseComponent', () => {
         provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
-        EntityServiceFactory,
-        EntityMonitorFactory,
         TabNavService,
         { provide: EndpointDataRegistry, useClass: FakeRegistry },
         { provide: ServiceCatalogDataService, useClass: FakeCatalog },

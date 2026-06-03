@@ -6,7 +6,6 @@ import { SessionService } from '../../../../../../core/src/shared/services/sessi
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { UtilsService } from '../../../../../../core/src/core/utils.service';
 import { BaseTestModulesNoShared } from '../../../../../../core/test-framework/core-test.helper';
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
 import { HelmReleaseActivatedRouteMock } from '../../../helm-testing.module';
 import { ChartDetailsUsageComponent } from './chart-details-usage.component';
 
@@ -18,7 +17,6 @@ describe('Component: ChartDetailsUsage', () => {
         HelmReleaseActivatedRouteMock,
         EndpointsService,
         UtilsService,
-        PaginationMonitorFactory,
         SessionService,
 
         provideZonelessChangeDetection(),

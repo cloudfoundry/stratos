@@ -6,12 +6,10 @@ import type {
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
-} from '../../entity-request-pipeline/entity-request-pipeline.types';
-import type {
+  EntityPipelineEntity,
   PaginationPageIteratorConfig,
-} from '../../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import type { EntityPipelineEntity } from '../../entity-request-pipeline/pipeline.types';
-import { stratosEndpointGuidKey } from '../../entity-request-pipeline/pipeline.types';
+} from '../../types/entity-pipeline.types';
+import { stratosEndpointGuidKey } from '../../types/entity-pipeline.types';
 import type { EndpointAuthTypeConfig } from '../../extension-types';
 import { EntitySchema } from '../../helpers/entity-schema';
 import { endpointEntityType, STRATOS_ENDPOINT_TYPE, stratosEntityFactory } from '../../helpers/stratos-entity-factory';
@@ -36,8 +34,6 @@ import type {
   StratosEndpointExtensionDefinition,
 } from '../entity-catalog.types';
 import { ActionBuilderConfigMapper } from './action-builder-config.mapper';
-import { ActionDispatchers, EntityCatalogEntityStoreHelpers } from './entity-catalog-entity-store-helpers';
-import type { EntityCatalogEntityStore } from './entity-catalog-entity.types';
 import type { NonOptionalKeys, RemoveIndex } from './type.helpers';
 
 export type KnownActionBuilders<ABC extends OrchestratedActionBuilders> = Pick<
@@ -89,23 +85,6 @@ export class StratosBaseCatalogEntity<
     this.actions = actionBuilders as KnownActionBuilders<ABC>;
 
     this.actionOrchestrator = new ActionOrchestrator<ABC>(this.entityKey, actionBuilders as ABC);
-
-    this.store = {
-      ...EntityCatalogEntityStoreHelpers.createCoreStore<Y, ABC>(
-        this.actionOrchestrator,
-        this.entityKey,
-        (schemaKey: string) => this.getSchema(schemaKey)
-      ),
-      ...EntityCatalogEntityStoreHelpers.getPaginationStore<Y, ABC>(
-        this.actions,
-        this.entityKey,
-        (schemaKey: string) => this.getSchema(schemaKey)
-      )
-    };
-    this.api = EntityCatalogEntityStoreHelpers.getActionDispatchers<Y, ABC>(
-      this.store,
-      actionBuilders as ABC
-    );
   }
 
 
@@ -113,15 +92,6 @@ export class StratosBaseCatalogEntity<
    * Create actions specific to the entity type
    */
   public readonly actions: KnownActionBuilders<ABC>;
-  /**
-   * Create and dispatch actions specific to the entity type. Response will provide an observable reporting entity or pagination state
-   */
-  public readonly api: ActionDispatchers<KnownActionBuilders<ABC>>;
-  /**
-   * Monitor an entity or collection of entities. Services will fetch the entity/entities if missing, monitors will not
-   */
-  public readonly store: EntityCatalogEntityStore<Y, ABC>;
-
 
   public readonly entityKey: string;
   public readonly type: string;
