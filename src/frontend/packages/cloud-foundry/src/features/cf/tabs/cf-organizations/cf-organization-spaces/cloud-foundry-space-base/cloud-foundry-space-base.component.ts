@@ -19,7 +19,6 @@ import { IHeaderBreadcrumb } from '../../../../../../../../core/src/shared/compo
 import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
 import { UserFavorite } from '../../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../../store/src/user-favorite-manager';
-import { cfEntityFactory } from '../../../../../../cf-entity-factory';
 import { spaceEntityType } from '../../../../../../cf-entity-types';
 import { ISpaceFavMetadata } from '../../../../../../cf-metadata-types';
 import { SpaceDataRegistry } from '../../../../../../services/endpoint-data/space-data.registry';
@@ -66,6 +65,10 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   cfOrgService = inject(CloudFoundryOrganizationService);
   spaceDataService = inject(SpaceDataService);
   private injector = inject(Injector);
+
+  // Drives the loading-page overlay from the signal-native data service,
+  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
+  isLoading$ = toObservable(this.spaceDataService.isLoading);
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -114,8 +117,6 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
-
-  public schema = cfEntityFactory(spaceEntityType);
 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 

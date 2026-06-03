@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -70,6 +70,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   // so the test doesn't need to wire HttpClient against the native handler.
   const mockOrgDataService = {
     org: () => null,
+    isLoading: signal(false),
     load: () => of(undefined),
   };
 

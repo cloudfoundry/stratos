@@ -2,7 +2,7 @@
   [favorite]="favorite()">
   <h1>{{ orgDataService.org()?.name }}</h1>
 </app-page-header>
-<app-loading-page [entityId]="cfOrgService.orgGuid" [entitySchema]="schema" deleteText="Deleting organization"
+<app-loading-page [isLoading]="isLoading$"
   [text]="'Retrieving organization'">
   <router-outlet></router-outlet>
 </app-loading-page>

@@ -1,5 +1,5 @@
 <ng-content></ng-content>
-@if ((isLoading | async) || (isDeleting | async)) {
+@if (isLoading | async) {
   <div
     [@leaveLoaderAnimation]
     class="loading-page loading-page__overlay">
@@ -9,7 +9,7 @@
           {{ alert }}
         </div>
       }
-      <div class="loading-page__text">{{ text$ | async }}</div>
+      <div class="loading-page__text">{{ text }}</div>
       <div class="loading-page__progress">
         <div class="loading-page__progress-bar"></div>
       </div>
