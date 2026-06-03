@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, Injector, Signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
@@ -14,9 +13,9 @@ import {
   LoadingPageComponent,
   CardNumberMetricComponent
 } from '@stratosui/core';
-import { CFAppState } from '../../../../cf-app-state';
 import { goToAppWall } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
 import { CardCfRecentAppsComponent } from '../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { PollingIndicatorComponent } from '../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
@@ -42,7 +41,7 @@ import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoin
   ]
 })
 export class CloudFoundrySummaryTabComponent {
-  private store = inject(Store<CFAppState>);
+  private appsConfig = inject(CfAppsSignalConfigService);
   private router = inject(Router);
   public cfEndpointService = inject(CloudFoundryEndpointService);
   private registry = inject(EndpointDataRegistry);
@@ -61,7 +60,7 @@ export class CloudFoundrySummaryTabComponent {
 
   constructor() {
     this.appLink = () => {
-      goToAppWall(this.store, this.router, this.cfEndpointService.cfGuid);
+      goToAppWall(this.appsConfig, this.router, this.cfEndpointService.cfGuid);
     };
 
     const endpointData = this.registry.acquire(this.cfEndpointService.cfGuid);

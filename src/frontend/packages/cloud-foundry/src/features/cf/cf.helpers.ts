@@ -1,28 +1,21 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
   extractActualListEntity,
   getIdFromRoute,
-  pathGet,
   PermissionConfig
 } from '@stratosui/core';
 import {
   APIResource,
-  PaginationEntityState,
-  selectPaginationState,
-  SetClientFilter
+  PaginationEntityState
 } from '@stratosui/store';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
 import { CFFeatureFlagTypes, IApp, IRoute, ISpace } from '../../cf-api.types';
-import { CFAppState } from '../../cf-app-state';
-import { getCFEntityKey } from '../../cf-entity-helpers';
 import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
-import { applicationEntityType } from '../../cf-entity-types';
-import { CFEntityConfig } from '../../cf-types';
+import { CfAppsSignalConfigService } from '../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { ICfRolesState } from '../../store/types/cf-current-user-roles.types';
 import { CfCurrentUserRolesSignalService } from '../../user-permissions/cf-current-user-roles-signal.service';
 import {
@@ -245,34 +238,23 @@ export const getActiveRouteCfCellProvider = {
 };
 
 export function goToAppWall(
-  store: Store<CFAppState>,
+  appsConfig: CfAppsSignalConfigService,
   router: Router,
   cfGuid: string,
   orgGuid?: string,
   spaceGuid?: string
 ) {
-  const appWallPagKey = 'applicationWall';
-  const entityKey = getCFEntityKey(applicationEntityType);
-  store.dispatch(new SetClientFilter(new CFEntityConfig(applicationEntityType), appWallPagKey,
-    {
-      string: '',
-      items: {
-        cf: cfGuid,
-        org: orgGuid,
-        space: spaceGuid
-      }
-    }
-  ));
-  store.select(selectPaginationState(entityKey, appWallPagKey)).pipe(
-    filter((state: PaginationEntityState) => {
-      const items = pathGet('clientPagination.filter.items', state);
-      return items ? items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid : false;
-    }),
-    take(1),
-    tap(() => {
-      router.navigate(['applications']);
-    })
-  ).subscribe();
+  // Scope the signal-native app wall by writing the toolbar selections on the
+  // root-singleton CfAppsSignalConfigService — the same signals the wall's
+  // filter predicate (app.cnsiGuid/orgGuid/spaceGuid) and dropdowns read.
+  // Setting them before navigation means the wall mounts pre-filtered. (The
+  // former ngrx SetClientFilter on the `applicationWall` pagination key +
+  // selectPaginationState wait is removed — the signal wall never consumed it,
+  // so that scoping was a dead no-op since the wall's signal migration.)
+  appsConfig.selectedCnsi.set(cfGuid ?? null);
+  appsConfig.selectedOrg.set(orgGuid ?? null);
+  appsConfig.selectedSpace.set(spaceGuid ?? null);
+  router.navigate(['applications']);
 }
 
 export function canUpdateOrgSpaceRoles(
