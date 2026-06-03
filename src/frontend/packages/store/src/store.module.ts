@@ -8,7 +8,6 @@ import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SystemEffects } from './effects/system.effects';
-import { UserFavoritesEffect } from './effects/user-favorites-effect';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
@@ -34,7 +33,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
       SetClientFilterEffect,
       UserProfileEffect,
       RecursiveDeleteEffect,
-      UserFavoritesEffect,
     ])
   ]
 })
