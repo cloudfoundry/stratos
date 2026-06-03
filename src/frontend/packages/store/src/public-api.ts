@@ -80,7 +80,6 @@ export {
   STRATOS_ENDPOINT_TYPE,
   endpointEntityType,
   stratosEntityFactory,
-  userFavouritesEntityType,
 } from './helpers/stratos-entity-factory';
 export type { IMetricApplication, IMetricCell } from './types/metric.types';
 export { MetricQueryType } from './types/metric.types';

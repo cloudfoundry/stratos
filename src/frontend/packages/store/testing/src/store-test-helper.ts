@@ -196,14 +196,10 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
         }
       },
       metrics: {},
-      stratosUserProfile: {},
-      stratosUserFavorites: {},
-    },
+      stratosUserProfile: {},    },
     request: {
       stratosUserProfile: {},
-      metrics: {},
-      stratosUserFavorites: {},
-      stratosEndpoint: {
+      metrics: {},      stratosEndpoint: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
@@ -227,9 +223,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
       },
       system: {},
     },
-    requestData: {
-      stratosUserFavorites: {},
-      stratosEndpoint: {
+    requestData: {      stratosEndpoint: {
         [testSCFEndpointGuid]: {
           guid: testSCFEndpointGuid,
           name: 'SCF',
