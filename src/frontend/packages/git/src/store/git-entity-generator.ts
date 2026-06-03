@@ -12,14 +12,6 @@ import {
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { GitEndpointDetailsComponent } from '../shared/components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
-import {
-  GitBranchActionBuilders,
-  gitBranchActionBuilders,
-  GitCommitActionBuilders,
-  gitCommitActionBuilders,
-  GitRepoActionBuilders,
-  gitRepoActionBuilders,
-} from './git-action-builders';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
 import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
@@ -35,20 +27,17 @@ class GitEntityCatalog {
 
   public commit: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    GitCommit,
-    GitCommitActionBuilders
+    GitCommit
   >;
 
   public repo: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    GitRepo,
-    GitRepoActionBuilders
+    GitRepo
   >;
 
   public branch: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    GitBranch,
-    GitBranchActionBuilders
+    GitBranch
   >;
 
   constructor() {
@@ -126,10 +115,9 @@ class GitEntityCatalog {
       //   };
       // },
     };
-    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuilders>(
+    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit>(
       definition,
       {
-        actionBuilders: gitCommitActionBuilders,
         entityBuilder: {
           getMetadata: ent => ({
             name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
@@ -151,13 +139,9 @@ class GitEntityCatalog {
     };
     return new StratosCatalogEntity<
       IFavoriteMetadata,
-      GitRepo,
-      GitRepoActionBuilders
+      GitRepo
     >(
-      definition,
-      {
-        actionBuilders: gitRepoActionBuilders,
-      }
+      definition
     );
   }
 
@@ -169,11 +153,8 @@ class GitEntityCatalog {
       labelPlural: 'Git Branches',
       endpoint: endpointDefinition
     };
-    return new StratosCatalogEntity<IFavoriteMetadata, GitBranch, GitBranchActionBuilders>(
-      definition,
-      {
-        actionBuilders: gitBranchActionBuilders,
-      }
+    return new StratosCatalogEntity<IFavoriteMetadata, GitBranch>(
+      definition
     );
   }
 
