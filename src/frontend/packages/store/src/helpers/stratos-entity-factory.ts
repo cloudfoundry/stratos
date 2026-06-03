@@ -1,6 +1,5 @@
 import { EntitySchema } from './entity-schema';
 
-export const userFavouritesEntityType = 'userFavorites';
 export const endpointEntityType = 'endpoint';
 export const userProfileEntityType = 'userProfile';
 export const systemInfoEntityType = 'systemInfo';
@@ -16,9 +15,6 @@ class StratosEntitySchema extends EntitySchema {
     super(entityType, STRATOS_ENDPOINT_TYPE, {}, { idAttribute });
   }
 }
-
-const UserFavouritesSchema = new StratosEntitySchema(userFavouritesEntityType, 'guid');
-entityCache[userFavouritesEntityType] = UserFavouritesSchema;
 
 const SystemInfoSchema = new StratosEntitySchema(systemInfoEntityType, 'guid');
 entityCache[systemInfoEntityType] = SystemInfoSchema;
