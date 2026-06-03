@@ -147,7 +147,6 @@ export { ApplicationStateIconPipe } from './shared/components/application-state/
 export { ApplicationStateComponent } from './shared/components/application-state/application-state.component';
 export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-favorite-star.component';
 export { DotContentComponent } from './core/dot-content/dot-content.component';
-export { AppMonitorComponentTypes } from './shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 
 // List Components
 export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction, SignalListCheckboxBinding, SignalListRadioBinding, SignalListGaugeBinding } from './shared/components/signal-list/signal-list.component';
