@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { PaginationMonitorFactory, EntityCatalogHelper } from '@stratosui/store';
+import { EntityCatalogHelper } from '@stratosui/store';
 
 // Tailwind Material Replacements
 import { TailwindDialogService } from '../shared/services/tailwind-dialog.service';
@@ -76,7 +76,6 @@ import { TruncatePipe } from './truncate.pipe';
         // Note: Most services already use providedIn: 'root' and don't need to be provided here
         // Keeping only services that require special configuration or don't use providedIn
         EntityCatalogHelper,
-        PaginationMonitorFactory,
         {
             provide: APP_TITLE,
             useFactory: appTitleFactory,
