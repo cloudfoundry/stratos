@@ -1,75 +1,37 @@
 import { Injectable, OnDestroy, Signal, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import { naturalCompare } from '@stratosui/core';
 import {
   EndpointModel,
   EndpointsDataService,
-  PaginatedAction,
-  PaginationEntityState,
-  PaginationMonitorFactory,
-  Store,
 } from '@stratosui/store';
-import { CFAppState } from '../../cf-app-state';
-import { cfEntityFactory } from '../../cf-entity-factory';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../../cf-types';
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
 import { CfOrgSpaceDebug, createCfOrgSpaceDebug } from './cf-org-space-debug';
 
-export function createCfOrgSpaceFilterConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
-  // Bridge layer for the legacy IListMultiFilterConfig interface in the
-  // core list framework, which still requires `list$: Observable<...>`
-  // and `loading$: Observable<boolean>`. See
-  // project_ilistmultifilterconfig_signal_debt — retires when that
-  // interface migrates to Signal.
-  return {
-    key,
-    label,
-    select: cfOrgSpaceItem.select,
-    loading$: cfOrgSpaceItem.loading$,
-    list$: cfOrgSpaceItem.list$.pipe(map((entities: any[]) => {
-      return entities.map(entity => ({
-        label: entity.name,
-        item: entity,
-        value: entity.guid
-      }));
-    })),
-  };
-}
-
 /**
  * Signal-native cf/org/space picker state. `list` / `loading` / `select`
  * are signals; consumers read via signal-call and write via `.set()`.
- *
- * `list$` and `loading$` are deprecated bridge views retained only for
- * `createCfOrgSpaceFilterConfig` → `IListMultiFilterConfig` in the core
- * list framework. They retire when the list framework multi-filter API
- * migrates to Signal. See `project_ilistmultifilterconfig_signal_debt`.
  */
 export interface CfOrgSpaceItem<T = any> {
   list: Signal<T[]>;
   loading: Signal<boolean>;
   /**
    * Source-of-truth WritableSignal augmented with `next`/`asObservable`
-   * compat for the framework `IListMultiFilterConfig.select` slot.
-   * Consumers should use `select.set(v)` and `select()`; the augmentation
-   * methods are only there so the framework keeps working.
+   * compat for consumers that still bind it as an rxjs Subject (e.g. the
+   * signal-list multi-filter `select` slot). Consumers should prefer
+   * `select.set(v)` and `select()`; the augmentation methods are only
+   * there so legacy bindings keep working.
    */
   select: WritableSignal<string | null> & {
     next: (v: string | null) => void;
     asObservable: () => Observable<string | null>;
   };
-  /** @deprecated Bridge for `IListMultiFilterConfig.list$`. */
-  readonly list$: Observable<T[]>;
-  /** @deprecated Bridge for `IListMultiFilterConfig.loading$`. */
-  readonly loading$: Observable<boolean>;
 }
-
-interface InitialValues { cf: string; org: string; space: string; }
 
 /**
  * Signal-native cf/org/space picker store.
@@ -84,19 +46,11 @@ interface InitialValues { cf: string; org: string; space: string; }
  * - Cascade (cf change clears org+space, org change clears space) and
  *   singleton auto-pick are `effect()` reactions to the selection
  *   signals. No rxjs operators in the control flow.
- * - The legacy `cf/org/space.{list$, loading$, select}` shape is kept as
- *   a thin shim — `list$`/`loading$` are `toObservable(signal)` and
- *   `select` is a BehaviorSubject backed by the underlying signal so
- *   `select.next(v)` writes the signal and signal updates emit on the
- *   BehaviorSubject. Existing rxjs consumers keep working until they
- *   migrate; the shim is the only intentional rxjs surface.
- * - The connected-CF-endpoint list still comes from the ngrx endpoint
- *   store via a one-line `toSignal(store.select(...))` bridge — there's
- *   no signal-based replacement for that store yet.
- * - The setInitialValuesFromAction path remains rxjs because it reads
- *   from a caller-supplied ngrx PaginatedAction's persisted client-filter
- *   state. That bridge retires when services-wall (its only caller)
- *   migrates to signal-native.
+ * - `cf/org/space.select` is a WritableSignal augmented with `.next` /
+ *   `.asObservable` so consumers that still bind it as an rxjs Subject
+ *   keep working; that augmentation is the only intentional rxjs surface.
+ * - The connected-CF-endpoint list comes from `EndpointsDataService`
+ *   signals — no ngrx store dependency.
  *
  * This service relies on OnDestroy, so must be `provided` by a component.
  */
@@ -104,10 +58,8 @@ interface InitialValues { cf: string; org: string; space: string; }
   providedIn: 'root'
 })
 export class CfOrgSpaceDataService implements OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
   private endpointsService = inject(EndpointsDataService);
   private endpointRegistry = inject(EndpointDataRegistry);
-  paginationMonitorFactory = inject(PaginationMonitorFactory);
 
   // Per-CNSI acquired EndpointDataService handles. Each handle is
   // released on destroy. The registry refcounts so multiple acquirers
@@ -176,40 +128,28 @@ export class CfOrgSpaceDataService implements OnDestroy {
   public space!: CfOrgSpaceItem<ISpace>;
   public isLoading!: Signal<boolean>;
 
-  // setInitialValuesFromAction support (services-wall persisted filter)
-  public initialValues$!: Observable<any>;
-  public initialValuesMap!: (param: any) => InitialValues;
-
   constructor() {
     this.debug.log('service:construct');
 
     // Build the signal-native picker triples. `list` / `loading` are
     // signals; `select` is a WritableSignal augmented with `.next` /
-    // `.asObservable` so the legacy `IListMultiFilterConfig.select`
-    // contract keeps working. The Observable bridge views `list$` /
-    // `loading$` are kept narrowly for the framework's filter config
-    // (see `project_ilistmultifilterconfig_signal_debt`).
+    // `.asObservable` so consumers that still bind it as an rxjs Subject
+    // keep working.
     const cfLoading = computed(() => this.connectedCfList().length === 0);
     this.cf = {
       list: this.connectedCfList,
       loading: cfLoading,
       select: this.augmentSelect(this._cfSelected, 'cf'),
-      list$: toObservable(this.connectedCfList) as Observable<EndpointModel[]>,
-      loading$: toObservable(cfLoading),
     };
     this.org = {
       list: this.orgList as Signal<IOrganization[]>,
       loading: this._orgFetching.asReadonly(),
       select: this.augmentSelect(this._orgSelected, 'org'),
-      list$: toObservable(this.orgList) as Observable<IOrganization[]>,
-      loading$: toObservable(this._orgFetching),
     };
     this.space = {
       list: this.spaceList as Signal<ISpace[]>,
       loading: this._spaceFetching.asReadonly(),
       select: this.augmentSelect(this._spaceSelected, 'space'),
-      list$: toObservable(this.spaceList) as Observable<ISpace[]>,
-      loading$: toObservable(this._spaceFetching),
     };
     this.isLoading = computed(() =>
       this.connectedCfList().length === 0 || this._orgFetching() || this._spaceFetching()
@@ -256,9 +196,9 @@ export class CfOrgSpaceDataService implements OnDestroy {
     });
 
     // Cascade: cf change clears org and space — but skip on null→non-null
-    // transition so setInitialValuesFromAction's seed sequence (cf, org,
-    // space written back-to-back) isn't wiped by the cascade firing on a
-    // microtask after the org/space writes.
+    // transition so an initial (cf, org, space) selection written
+    // back-to-back isn't wiped by the cascade firing on a microtask after
+    // the org/space writes.
     let prevCf: string | null = this._cfSelected();
     effect(() => {
       const cf = this._cfSelected();
@@ -332,62 +272,13 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   /**
-   * Persisted-filter restoration plumbing for services-wall (and any
-   * other caller of this method). Reads cf/org/space guids out of a
-   * caller-supplied PaginatedAction's client-filter state and seeds the
-   * select signals.
-   */
-  public setInitialValuesFromAction(
-    paginatedAction: PaginatedAction,
-    cfKey: string,
-    orgKey: string,
-    spaceKey: string,
-  ) {
-    this.initialValuesMap = (p: PaginationEntityState) => ({
-      cf: p.clientPagination?.filter?.items[cfKey],
-      org: p.clientPagination?.filter?.items[orgKey],
-      space: p.clientPagination?.filter?.items[spaceKey]
-    });
-    this.initialValues$ = this.paginationMonitorFactory.create(
-      paginatedAction.paginationKey,
-      cfEntityFactory(paginatedAction.entityType),
-      paginatedAction.flattenPagination
-    ).pagination$.pipe(
-      filter(p => !!p?.clientPagination?.filter),
-    );
-
-    this.initialValues$.pipe(
-      take(1),
-      map(this.initialValuesMap),
-    ).subscribe(values => {
-      this.debug.log('initialValues:resolved', values);
-      if (values.cf) { this._cfSelected.set(values.cf); }
-      if (values.org) { this._orgSelected.set(values.org); }
-      if (values.space) { this._spaceSelected.set(values.space); }
-    });
-  }
-
-  /**
    * Opt-in singleton auto-pick. After this is called, the next-arriving
    * org list with exactly one entry auto-selects that org; same for
    * spaces. Used by create-application; the add-service-instance wizard
    * does not call this so users always pick org/space explicitly.
-   *
-   * If a consumer has previously called setInitialValuesFromAction, those
-   * persisted filter values are also seeded here so they take precedence
-   * over the auto-pick (services-wall pattern).
    */
   public enableAutoSelectors() {
     this._autoSelectEnabled.set(true);
-
-    if (this.initialValues$) {
-      const map$ = this.initialValuesMap || ((a: any) => a);
-      this.initialValues$.pipe(take(1), map(map$)).subscribe(values => {
-        if (values.cf) { this._cfSelected.set(values.cf); }
-        if (values.org) { this._orgSelected.set(values.org); }
-        if (values.space) { this._spaceSelected.set(values.space); }
-      });
-    }
   }
 
   ngOnDestroy(): void {
