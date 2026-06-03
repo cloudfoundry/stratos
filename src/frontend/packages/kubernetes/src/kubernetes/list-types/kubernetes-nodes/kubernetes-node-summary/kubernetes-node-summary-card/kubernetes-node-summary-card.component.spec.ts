@@ -3,7 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
@@ -21,7 +20,6 @@ describe('KubernetesNodeSummaryCardComponent', () => {
         ...KubernetesBaseTestModules,
       ],
       providers: [
-        EntityServiceFactory,
         BaseKubeGuid,
         KubernetesEndpointService,
         KubernetesNodeService,

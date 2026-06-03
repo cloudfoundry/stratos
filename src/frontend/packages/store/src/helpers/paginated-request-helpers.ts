@@ -3,7 +3,7 @@ import { forkJoin, Observable, of as observableOf, of } from 'rxjs';
 import { take, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { UpdatePaginationMaxedState } from '../actions/pagination.actions';
-import { ActionDispatcher } from '../entity-request-pipeline/entity-request-pipeline.types';
+import { ActionDispatcher } from '../types/entity-pipeline.types';
 
 
 // TODO: See #4208. This should be replaced with

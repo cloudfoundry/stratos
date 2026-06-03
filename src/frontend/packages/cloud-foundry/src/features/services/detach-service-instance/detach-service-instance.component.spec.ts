@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
-import { PaginationMonitorFactory, EntityServiceFactory, EntityMonitorFactory, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { CloudFoundryTestingModule } from "@test-framework/cf";
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { StServiceCredentialBinding } from '../../../services/endpoint-data/stratos-types';
@@ -30,9 +30,6 @@ function configureModule(routerStub: { navigate: ReturnType<typeof vi.fn> }) {
       ...STORE_TEST_PROVIDERS,
       DatePipe,
       TabNavService,
-      PaginationMonitorFactory,
-      EntityServiceFactory,
-      EntityMonitorFactory,
       provideHttpClient(),
       provideHttpClientTesting(),
       {

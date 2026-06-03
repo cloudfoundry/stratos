@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, catchError, map, of } from 'rxjs';
 
 import { proxyAPIVersion } from '../jetstream';
-import { ActionState, getDefaultActionState } from '../reducers/api-request-reducer/types';
+import { ActionState, getDefaultActionState } from '../types/entity-pipeline.types';
 import { UserProfileInfo, UserProfilePasswordUpdate } from '../types/user-profile.types';
 
 /**

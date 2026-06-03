@@ -2,24 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import {
-  AppState,
-  BaseEntityValues,
-  entityCatalog,
-  EntityServiceFactory,
-  Store,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityMonitorFactory,
-  PaginationMonitorFactory,
-  stratosEntityFactory,
-  endpointEntityType,
-  NormalizedResponse,
-  WrapperRequestActionSuccess,
-  EntityCatalogTestModuleManualStore,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities
-} from '@stratosui/store';
+import { AppState, BaseEntityValues, entityCatalog, Store, EntityCatalogHelper, EntityCatalogHelpers, stratosEntityFactory, endpointEntityType, NormalizedResponse, WrapperRequestActionSuccess, EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
@@ -47,10 +30,7 @@ describe('EditEndpointComponent', () => {
         EntityCatalogTestModuleManualStore,
       ],
       providers: [
-        EntityServiceFactory,
         EntityCatalogHelper,
-        PaginationMonitorFactory,
-        EntityMonitorFactory,
         {
           provide: ActivatedRoute,
           useValue: activatedRoute

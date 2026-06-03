@@ -2,20 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
-import {
-  AppState,
-  BaseEntityValues,
-  CurrentUserRolesDataService,
-  EntityCatalogEntityConfig,
-  EntityCatalogTestModule,
-  EntityServiceFactory,
-  EndpointModel,
-  PaginationState,
-  TEST_CATALOGUE_ENTITIES,
-  endpointEntityType,
-  generateStratosEntities,
-  stratosEntityFactory,
-} from '@stratosui/store';
+import { AppState, BaseEntityValues, CurrentUserRolesDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
 import {
   createBasicStoreModule,
   createEntityStoreState,
@@ -477,7 +464,6 @@ describe('CurrentUserPermissionsService', () => {
     TestBed.configureTestingModule({
       providers: [
         CurrentUserPermissionsService,
-        EntityServiceFactory,
         ...STORE_TEST_PROVIDERS,
         {
           provide: TEST_CATALOGUE_ENTITIES,

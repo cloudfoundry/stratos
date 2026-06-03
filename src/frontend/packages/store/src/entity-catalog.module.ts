@@ -4,8 +4,6 @@ import { ReducerManager, Store } from '@ngrx/store';
 import { InitCatalogEntitiesAction } from './entity-catalog.actions';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { requestDataReducerFactory } from './reducers/api-request-data-reducer/request-data-reducer.factory';
-import { chainApiReducers, requestActions } from './reducers/api-request-reducers.generator.helpers';
 
 // FIXME: Needs spelling update
 export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
@@ -31,7 +29,6 @@ export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
 export class EntityCatalogFeatureModule {
   constructor() {
     const store = inject<Store<any>>(Store);
-    const reducerManager = inject(ReducerManager);
     const entityGroups = inject<StratosBaseCatalogEntity[][]>(CATALOGUE_ENTITIES as any);
 
     // Flatten multi-provider arrays and register all entities synchronously
@@ -43,12 +40,6 @@ export class EntityCatalogFeatureModule {
     // NOTE: Validation has been moved to AppModule constructor to run once after ALL feature modules load.
     // This eliminates false-positive warnings from validation running in the first EntityCatalogFeatureModule
     // instance before subsequent instances (CF, K8s) complete their registrations.
-
-    // Add dynamic reducers for entity request data
-    const dataReducer = requestDataReducerFactory(requestActions);
-    const extraReducers = entityCatalog.getAllEntityRequestDataReducers();
-    const chainedReducers = chainApiReducers(dataReducer, extraReducers);
-    reducerManager.addReducer('requestData', chainedReducers);
 
     // Notify store that entities are registered
     store.dispatch(new InitCatalogEntitiesAction(entities));

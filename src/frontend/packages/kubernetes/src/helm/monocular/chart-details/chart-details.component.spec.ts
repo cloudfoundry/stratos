@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 import { EntitySummaryTitleComponent } from '@stratosui/core';
 import { BaseTestModulesNoShared } from '../../../../../core/test-framework/core-test.helper';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { EntityServiceFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { HelmTestingModule } from '../../helm-testing.module';
 import { ChartItemComponent } from '../chart-item/chart-item.component';
 import { ListItemComponent } from '../list-item/list-item.component';
@@ -54,8 +53,6 @@ describe('ChartDetailsComponent', () => {
           },
           snapshot: { params: {}, queryParams: {} }
         }},
-        EntityServiceFactory,
-        PaginationMonitorFactory,
         provideZonelessChangeDetection()
       ]
     }).compileComponents();

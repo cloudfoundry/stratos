@@ -6,16 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  PaginationMonitorFactory,
-  EntityMonitorFactory,
-  EntityServiceFactory,
-  EntityCatalogTestModule,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import {
   TabNavService,
@@ -76,9 +67,6 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
         ConfirmationDialogService,
         TailwindSnackBarService,
         ...cfCurrentUserPermissionsService,
-        PaginationMonitorFactory,
-        EntityMonitorFactory,
-        EntityServiceFactory,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     })

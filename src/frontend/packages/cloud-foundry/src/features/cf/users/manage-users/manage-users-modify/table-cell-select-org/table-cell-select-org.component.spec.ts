@@ -6,17 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 
-import {
-  EntityMonitorFactory,
-  EntityServiceFactory,
-  PaginationMonitorFactory,
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateASEntities } from '@stratosui/cf-autoscaler';
 import { AppTestModule } from '@test-framework';
@@ -60,9 +50,6 @@ describe('TableCellSelectOrgComponent', () => {
             ...generateASEntities()
           ]
         },
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
         CfUserServiceTestProvider,
         CfRolesService,

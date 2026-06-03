@@ -3,7 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card.component';
 import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
@@ -25,7 +24,6 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
         KubernetesTestingModule,
       ],
       providers: [
-        EntityServiceFactory,
         KubernetesNodeService,
         KubernetesEndpointService,
         BaseKubeGuid,

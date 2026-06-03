@@ -3,7 +3,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { BaseTestModulesNoShared } from "@test-framework/core-test.helper";
 import { CurrentUserPermissionsService } from '@stratosui/core';
 import { TabNavService } from '../../../tab-nav.service';
@@ -22,7 +21,6 @@ describe('PageSideNavComponent', () => {
       providers: [
         ...BASE_TEST_PROVIDERS,
         TabNavService,
-        EntityServiceFactory,
         CurrentUserPermissionsService,
         ...(STORE_TEST_PROVIDERS || []),
         provideZonelessChangeDetection(),

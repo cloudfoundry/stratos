@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of, Subject } from 'rxjs';
 import { Store } from '@ngrx/store';
 
-import { PaginationMonitorFactory } from '@stratosui/store';
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { CFHomeCardComponent } from "./cfhome-card.component";
@@ -64,7 +63,6 @@ describe('CFHomeCardComponent', () => {
       providers: [
         provideZonelessChangeDetection(),
         { provide: Store, useValue: mockStore },
-        { provide: PaginationMonitorFactory, useValue: mockPmf },
         { provide: ChangeDetectorRef, useValue: mockCdr },
         { provide: EndpointDataRegistry, useValue: mockEndpointDataRegistry },
       ],

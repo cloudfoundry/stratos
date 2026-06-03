@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { BaseKubeGuid } from '../../../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../../../services/kubernetes-endpoint.service';
@@ -70,7 +69,6 @@ describe('KubernetesNodeConditionCardComponent', () => {
         ...KubernetesBaseTestModules,
       ],
       providers: [
-        EntityServiceFactory,
         BaseKubeGuid,
         KubernetesEndpointService,
         {

@@ -19,7 +19,6 @@ import {
   StratosCatalogEntity,
   StratosEndpointExtensionDefinition
 } from '@stratosui/store';
-import { cfMaxedStateHandlers } from './cf-pagination-maxed-state';
 import {
   StApp,
   StAuditEvent,
@@ -151,7 +150,6 @@ import {
   userProvidedServiceActionBuilder,
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
-import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { cfUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
@@ -245,13 +243,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     // health pulse still produces a fresh /pp/v1/cf/info/{guid} fetch.
     healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => refreshCfInfo(endpoint.guid)),
     getEndpointIdFromEntity: (entity: CfAPIResource) => entity.entity.cfGuid,
-    globalPreRequest: (request, action) => {
-      return addCfRelationParams(request, action);
-    },
-    globalPrePaginationRequest: (request, action, catalogEntity, appState) => {
-      const rWithRelations = addCfRelationParams(request, action);
-      return addCfQParams(rWithRelations, action, catalogEntity, appState);
-    },
     globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
       if (data) {
         if (data.entity) {
@@ -292,9 +283,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
           return all + resp.total_results;
         }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' }),
-      // session-data reads route through AuthDataService (the signal-native
-      // facade) via the shared handlers, not store.select(selectSessionData()).
-      ...cfMaxedStateHandlers,
     },
   };
   return [
@@ -353,7 +341,6 @@ function generateCFQuotaDefinitionEntity(endpointDefinition: StratosEndpointExte
     label: 'Organization Quota',
     labelPlural: 'Organization Quotas',
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -451,7 +438,6 @@ function generateCFSpaceQuotaEntity(endpointDefinition: StratosEndpointExtension
     label: 'Space Quota',
     labelPlural: 'Space Quotas',
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -567,7 +553,6 @@ function generateCFBuildPackEntity(endpointDefinition: StratosEndpointExtensionD
     schema: cfEntityFactory(buildpackEntityType),
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -604,7 +589,6 @@ function generateCFServiceBrokerEntity(endpointDefinition: StratosEndpointExtens
     schema: cfEntityFactory(serviceBrokerEntityType),
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -647,7 +631,6 @@ function generateCFSecurityGroupEntity(endpointDefinition: StratosEndpointExtens
     labelPlural: 'Security Groups',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -747,7 +730,6 @@ function generateCFServicePlanEntity(endpointDefinition: StratosEndpointExtensio
     labelPlural: 'Service Plans',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -804,7 +786,6 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
     labelPlural: 'Marketplace Services',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -876,7 +857,6 @@ function generateCFDomainEntity(endpointDefinition: StratosEndpointExtensionDefi
     labelPlural: 'Domains',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -915,7 +895,6 @@ function generateEventEntity(endpointDefinition: StratosEndpointExtensionDefinit
     labelPlural: 'Events',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -984,7 +963,6 @@ function generateRouteEntity(endpointDefinition: StratosEndpointExtensionDefinit
     // to read totalResults off the flat envelope and stamp a single page.
     // The list is server-drained, so a single page is correct.
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: (responses: JetstreamResponse) =>
         Object.values(responses).length > 0 ? 1 : 0,
       getTotalEntities: (responses: JetstreamResponse) =>
@@ -1032,7 +1010,6 @@ function generateStackEntity(endpointDefinition: StratosEndpointExtensionDefinit
     labelPlural: 'Stacks',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -1076,7 +1053,6 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
     labelPlural: 'Feature Flags',
     endpoint: endpointDefinition,
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -1139,7 +1115,6 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
       ]
     },
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -1195,7 +1170,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     icon: 'virtual_space',
     iconFont: 'stratos-icons',
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,
@@ -1240,7 +1214,6 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     icon: 'organization',
     iconFont: 'stratos-icons',
     paginationConfig: {
-      ...cfMaxedStateHandlers,
       getTotalPages: v3PaginationConfig.getTotalPages,
       getTotalEntities: v3PaginationConfig.getTotalEntities,
       getPaginationParameters: v3PaginationConfig.getPaginationParameters,

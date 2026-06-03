@@ -14,7 +14,6 @@ import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapt
 import { stOrgToAPIResource } from '../../../services/endpoint-data/st-org-adapter';
 
 import {
-  EntityService,
   EndpointsDataService,
   getDefaultRequestState,
   APIResource,
@@ -83,7 +82,7 @@ export class CloudFoundryEndpointService {
    * observables, async-pipe templates).
    */
   endpoint!: Signal<EntityInfo<EndpointModel> | undefined>;
-  cfEndpointEntityService!: EntityService<EndpointModel>;
+  cfEndpointEntityService: any;
   connected$!: Observable<boolean>;
   currentUser$!: Observable<EndpointUser>;
   cfGuid: string;
@@ -126,7 +125,7 @@ export class CloudFoundryEndpointService {
     // field is retained as `any` for backward-compat (some downstream
     // tests still reference its type) but no consumer reads from it
     // directly within this service.
-    this.cfEndpointEntityService = null as unknown as EntityService<EndpointModel>;
+    this.cfEndpointEntityService = null;
 
     // V3-native CF info: acquire the registry-cached signal and trigger
     // load() (idempotent — warm-cache short-circuit + in-flight dedup).

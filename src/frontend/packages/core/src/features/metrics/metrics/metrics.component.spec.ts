@@ -6,14 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import {
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityCatalogTestModule,
-  EntityServiceFactory,
-  generateStratosEntities,
-  TEST_CATALOGUE_ENTITIES
-} from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
@@ -59,7 +52,6 @@ describe('MetricsComponent', () => {
         },
         TabNavService,
         CurrentUserPermissionsService,
-        EntityServiceFactory,
         EntityCatalogHelper,
         ...(STORE_TEST_PROVIDERS || []),
         provideZonelessChangeDetection(),

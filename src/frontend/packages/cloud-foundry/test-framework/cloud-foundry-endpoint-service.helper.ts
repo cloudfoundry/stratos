@@ -4,7 +4,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule, SharedModule } from '@stratosui/core';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, appReducers } from '@stratosui/store';
+import { appReducers } from '@stratosui/store';
 import { testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { AppTestModule, generateBaseTestStoreModules } from '@test-framework';
 
@@ -21,10 +21,7 @@ import { CloudFoundryService } from '../src/shared/data-services/cloud-foundry.s
 import { CfUserServiceTestProvider } from './user-service-helper';
 
 export const cfEndpointServiceProviderDeps = [
-  EntityServiceFactory,
   CfOrgSpaceDataService,
-  PaginationMonitorFactory,
-  EntityMonitorFactory,
   UserInviteService,
   HttpClient,
   HttpHandler,

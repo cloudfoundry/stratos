@@ -3,7 +3,7 @@ import type { Action } from '@ngrx/store';
 
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import type { ListActionState } from '../reducers/api-request-reducer/types';
+import type { ListActionState } from './entity-pipeline.types';
 import type { EntityRequestAction } from './request.types';
 
 
@@ -100,4 +100,44 @@ export interface PaginationEntityTypeState {
 
 export interface PaginationState {
   [entityKey: string]: PaginationEntityTypeState;
+}
+
+// --- Relocated from the deleted pagination-reducer/pagination-reducer-reset-pagination.ts ---
+// Still consumed by list.actions.ts (default page size) and the test helper
+// (default pagination entity state seed).
+
+export const defaultClientPaginationPageSize = 6;
+
+const defaultPaginationEntityState: PaginationEntityState = {
+  pageCount: 0,
+  currentPage: 1,
+  totalResults: 0,
+  ids: {},
+  pageRequests: {
+  },
+  params: {
+  },
+  clientPagination: {
+    pageSize: defaultClientPaginationPageSize,
+    currentPage: 1,
+    filter: {
+      string: '',
+      items: {}
+    },
+    totalResults: 0
+  },
+  maxedState: {
+    isMaxedMode: false
+  },
+  isListPagination: false
+};
+
+export function getDefaultPaginationEntityState(ignoreMaxed?: boolean): PaginationEntityState {
+  return {
+    ...defaultPaginationEntityState,
+    maxedState: {
+      ...defaultPaginationEntityState.maxedState,
+      ignoreMaxed
+    }
+  };
 }

@@ -1,4 +1,4 @@
-import { stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
+import { stratosEndpointGuidKey } from '../types/entity-pipeline.types';
 
 export const mergeState = (state: any, newState: any) => {
   const baseState = { ...state };

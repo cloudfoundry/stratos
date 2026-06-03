@@ -8,7 +8,7 @@ import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 
-import { EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/cf';
 
@@ -50,9 +50,6 @@ describe('UsersRolesConfirmComponent', () => {
           }),
           CloudFoundryReducersModule
         ),
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
         ...CfUserServiceTestProvider,
         CfRolesService,

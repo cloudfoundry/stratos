@@ -49,6 +49,7 @@ import { KubernetesUIConfigService } from './kubernetes-ui-service';
 import { KubernetesEndpointService } from './services/kubernetes-endpoint.service';
 import { KubernetesNodeService } from './services/kubernetes-node.service';
 import { KubernetesService } from './services/kubernetes.service';
+import { KubeEndpointDataRegistry } from '../services/endpoint-data/kube-endpoint-data.registry';
 import { KubeEndpointRegistryHook } from '../services/endpoint-data/kube-endpoint-registry.hook';
 import { KubernetesSignalConfigRegistry } from './kubernetes-resource/kubernetes-signal-config-registry';
 import {
@@ -110,12 +111,19 @@ export class KubernetesSetupModule {
     // diff is computed) before the user navigates into any kubernetes
     // page. Replaces the wave-2 ngrx-Actions bridge.
     inject(KubeEndpointRegistryHook);
+    const kubeEndpointData = inject(KubeEndpointDataRegistry);
 
     if (parentModule) {
       // Module has already been imported
     } else {
       endpointService.registerHealthCheck(
-        new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => kubeEntityCatalog.node.api.healthCheck(endpoint.guid))
+        // Signal-native health check: refresh the per-endpoint data service
+        // (pings /pp/v1/proxy/api/v1/nodes), errors surface via its tristate
+        // unavailable state. Replaces the legacy
+        // `kubeEntityCatalog.node.api.healthCheck(guid)` ngrx dispatch.
+        new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => {
+          kubeEndpointData.acquire(endpoint.guid).refresh().catch(() => { /* errors land in the service tristate */ });
+        })
       );
 
       // Register signal-native list configs for the generic resource

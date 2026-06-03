@@ -5,22 +5,7 @@ import { take, timeout } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { PermissionConfig, CurrentUserPermissionsService, StratosScopeStrings } from '@stratosui/core';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import {
-  AppState,
-  EntityCatalogTestModule,
-  TEST_CATALOGUE_ENTITIES,
-  EntityCatalogEntityConfig,
-  endpointEntityType,
-  stratosEntityFactory,
-  generateStratosEntities,
-  APIResource,
-  EndpointModel,
-  BaseEntityValues,
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  CurrentUserRolesDataService,
-} from '@stratosui/store';
+import { AppState, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, EntityCatalogEntityConfig, endpointEntityType, stratosEntityFactory, generateStratosEntities, APIResource, EndpointModel, BaseEntityValues, EntityCatalogHelper, EntityCatalogHelpers, CurrentUserRolesDataService } from '@stratosui/store';
 import { PaginationState } from '@stratosui/store/types/pagination.types';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
@@ -933,7 +918,6 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     TestBed.configureTestingModule({
       providers: [
         CurrentUserPermissionsService,
-        EntityServiceFactory,
         ...STORE_TEST_PROVIDERS,
         CfUserPermissionsChecker,
         {

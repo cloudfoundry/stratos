@@ -3,7 +3,7 @@ import { importProvidersFrom, provideZonelessChangeDetection, APP_INITIALIZER } 
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
@@ -35,12 +35,9 @@ describe('SelectServiceComponent', () => {
           deps: [EntityCatalogHelper],
           multi: true
         },
-        PaginationMonitorFactory,
         ServicesWallService,
-        EntityServiceFactory,
         CsiGuidsService,
         CsiStateService,
-        EntityMonitorFactory,
         provideZonelessChangeDetection(),
       ]
     })

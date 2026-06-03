@@ -9,17 +9,7 @@ import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of, firstValueFrom } from 'rxjs';
 
-import {
-  EntityMonitorFactory,
-  PaginationMonitorFactory,
-  EntityServiceFactory,
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogHelper,
-  EntityCatalogHelpers,
-  EntityCatalogTestModule,
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/cf';
 
@@ -59,9 +49,6 @@ describe('InviteUsersCreateComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
         ...CfUserServiceTestProvider,
         UserInviteService,

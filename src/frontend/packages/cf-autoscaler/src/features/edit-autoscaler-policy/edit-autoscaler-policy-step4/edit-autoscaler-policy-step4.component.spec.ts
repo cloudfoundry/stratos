@@ -6,7 +6,6 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute } from '@angular/router';
 import { createEmptyStoreModule } from "@stratosui/store/testing";
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import { TabNavService } from '@stratosui/core';
@@ -32,9 +31,6 @@ describe('EditAutoscalerPolicyStep4Component', () => {
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EditAutoscalerPolicyService,
         {
           provide: ActivatedRoute,

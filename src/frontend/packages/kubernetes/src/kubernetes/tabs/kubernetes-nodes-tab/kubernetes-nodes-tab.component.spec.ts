@@ -4,7 +4,6 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { EntityServiceFactory } from '@stratosui/store';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { KubernetesNodesTabComponent } from './kubernetes-nodes-tab.component';
@@ -22,7 +21,6 @@ describe('KubernetesNodesTabComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        EntityServiceFactory,
         BaseKubeGuid,
         provideZonelessChangeDetection(),
       ]

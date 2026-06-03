@@ -6,5 +6,4 @@ export interface IEntityCatalog {
   getEntity(endpointType: string, entityType: string): any;
   getEntity(action: any): any;
   register(entity: any): void;
-  getAllEntityRequestDataReducers(): any;
 }

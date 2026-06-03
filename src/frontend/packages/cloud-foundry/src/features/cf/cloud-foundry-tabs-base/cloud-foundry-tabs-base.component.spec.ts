@@ -9,15 +9,7 @@ import {
   TabNavService
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import {
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule,
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -47,7 +39,6 @@ describe('CloudFoundryTabsBaseComponent', () => {
               ...generateCFEntities()
             ]
           },
-          EntityServiceFactory,
           ...cfCurrentUserPermissionsService,
           ...generateTestCfEndpointServiceProvider(),
           { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: testSCFEndpointGuid } },

@@ -4,7 +4,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TabNavService } from '@stratosui/core';
-import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, PaginationMonitorFactory, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { CF_BASE_TEST_PROVIDERS, generateCfActiveRouteMock } from '@test-framework/cf';
 
@@ -43,7 +43,6 @@ describe('CloudFoundryComponent', () => {
         EntityCatalogHelper,
         ...CF_BASE_TEST_PROVIDERS,
         generateCfActiveRouteMock(testSCFEndpointGuid),
-        PaginationMonitorFactory,
         CloudFoundryService,
         TabNavService,
       ]
