@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { AppState, EntityServiceFactory, Store } from '@stratosui/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
@@ -33,8 +32,6 @@ export interface IPageSideNavTab extends StratosTabMetadata {
 })
 export class PageSideNavComponent implements OnInit {
   tabNavService = inject(TabNavService);
-  private store = inject<Store<AppState>>(Store);
-  private esf = inject(EntityServiceFactory);
   private activatedRoute = inject(ActivatedRoute);
   private cups = inject(CurrentUserPermissionsService);
   private http = inject(HttpClient);
@@ -52,7 +49,7 @@ export class PageSideNavComponent implements OnInit {
     }
     this.pTabs = tabs.map(tab => ({
       ...tab,
-      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups, this.http) : of(false))
+      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
     }));
   }
   get tabs(): IPageSideNavTab[] {
