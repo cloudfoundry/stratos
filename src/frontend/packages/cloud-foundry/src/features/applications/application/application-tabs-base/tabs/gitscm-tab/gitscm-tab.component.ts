@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import {
   GitCommit,
-  gitEntityCatalog,
+  GitDataService,
   GithubCommitsSignalConfigService,
   GitMeta,
   GitRepo,
@@ -83,6 +83,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   private datePipe = inject(DatePipe);
   private router = inject(Router);
   private deployData = inject(CfDeployAppDataService);
+  private gitData = inject(GitDataService);
   private readonly signalConfig = inject(GithubCommitsSignalConfigService);
 
 
@@ -175,13 +176,12 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       this.deployedCommitSha = stProject.deploySource.commit.trim();
       this.icon$ = of(baseGitMeta.scm.getIcon());
 
-      this.hasRepo$ = gitEntityCatalog.repo.store.getRepoInfo
-        .getEntityService(baseGitMeta).entityObs$.pipe(
-          map(entity => entity.entity ? true : entity.entityRequestInfo.error ? false : undefined),
-          startWith(undefined),
-          publishReplay(1),
-          refCount()
-        );
+      this.hasRepo$ = this.gitData.getRepository(baseGitMeta.scm, baseGitMeta.projectName).state$.pipe(
+        map(state => state.value ? true : state.error ? false : undefined),
+        startWith(undefined),
+        publishReplay(1),
+        refCount()
+      );
 
       this.isLoading$ = this.hasRepo$.pipe(
         filter(hasRepo => hasRepo !== undefined),
@@ -195,9 +195,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       );
 
       this.gitSCMRepo$ = blockedOnRepo$.pipe(
-        map(([, meta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(meta)),
-        switchMap(repoService => repoService.waitForEntity$),
-        map(p => p.entity)
+        switchMap(([, meta]) => this.gitData.getRepository(meta.scm, meta.projectName).waitForValue$)
       );
 
       // Once the repo resolves, capture its URL (for Compare links) and kick
@@ -212,8 +210,8 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       this.gitSCMRepoErrorSub = this.hasRepo$.pipe(
         filter(hasRepo => hasRepo === false),
         switchMap(() => coreInfo$),
-        switchMap(([, meta]) => gitEntityCatalog.repo.store.getRepoInfo.getEntityService(meta).entityMonitor.entityRequest$),
-        map(request => request.message),
+        switchMap(([, meta]) => this.gitData.getRepository(meta.scm, meta.projectName).state$),
+        map(state => state.errorMessage),
         distinctUntilChanged(),
         withLatestFrom(coreInfo$)
       ).subscribe(([errorMessage, [, meta]]) => {
@@ -224,12 +222,9 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       });
 
       this.commit$ = blockedOnRepo$.pipe(
-        map(([project, meta]) => gitEntityCatalog.commit.store.getEntityService(null, null, {
-          ...meta,
-          commitSha: project.deploySource.commit.trim()
-        })),
-        switchMap(commitService => commitService.waitForEntity$),
-        map(p => p.entity)
+        switchMap(([project, meta]) =>
+          this.gitData.getCommit(meta.scm, meta.projectName, project.deploySource.commit.trim()).waitForValue$
+        )
       );
       // Capture the deployed commit's timestamp — the Compare action is only
       // offered for commits newer than the deployed one (see the legacy
@@ -238,13 +233,11 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         this.deployedTime = getUnixTime(new Date(deployedCommit.commit.author.date));
       });
       this.isHead$ = blockedOnRepo$.pipe(
-        map(([project, meta]) => gitEntityCatalog.branch.store.getEntityService(undefined, undefined, {
-          ...meta,
-          branchName: project.deploySource.branch
-        })),
-        switchMap(branchService => branchService.waitForEntity$),
+        switchMap(([project, meta]) =>
+          this.gitData.getBranch(meta.scm, meta.projectName, project.deploySource.branch).waitForValue$
+        ),
         withLatestFrom(blockedOnRepo$),
-        map(([p, [project]]) => p.entity.commit.sha === project.deploySource.commit.trim()),
+        map(([branch, [project]]) => branch.commit.sha === project.deploySource.commit.trim()),
       );
     });
   }

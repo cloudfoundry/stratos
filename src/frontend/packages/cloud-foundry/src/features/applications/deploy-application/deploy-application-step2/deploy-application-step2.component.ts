@@ -8,7 +8,7 @@ import {
   BaseSCM,
   GitBranch,
   GitCommit,
-  gitEntityCatalog,
+  GitDataService,
   GitHubSCM,
   GitRepo,
   GitSCM,
@@ -43,7 +43,6 @@ import {
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
 import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
@@ -73,6 +72,7 @@ export class DeployApplicationStep2Component
   private httpClient = inject(HttpClient);
   private appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
   private deployData = inject(CfDeployAppDataService);
+  private gitData = inject(GitDataService);
   private deployState$ = toObservable(this.deployData.state);
   private sourceType$$ = toObservable(this.deployData.sourceType);
   private projectExists$ = toObservable(this.deployData.projectExists);
@@ -150,15 +150,13 @@ export class DeployApplicationStep2Component
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
-      gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
-        projectName: this.repository,
-        scm: this.scm,
-      }).waitForEntity$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
+      this.gitData.getRepository(this.scm, this.repository)
+        .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
         if (!repo) { return; }
         this.deployData.saveAppDetails({
           projectName: this.repository,
           branch: this.repositoryBranch,
-          url: repo.entity.clone_url,
+          url: repo.clone_url,
           accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo.sha : undefined,
           endpointGuid: this.sourceType.endpointGuid,
@@ -274,13 +272,8 @@ export class DeployApplicationStep2Component
         // Wait for a new project name change
         filter(state => state && !state.checking && !state.error && state.exists),
         distinctUntilChanged((x, y) => x.name.toLowerCase() === y.name.toLowerCase()),
-        // Convert project name into branches pagination observable
-        switchMap(state =>
-          gitEntityCatalog.branch.store.getPaginationService(null, null, {
-            scm: this.scm,
-            projectName: state.name
-          }).entities$
-        ),
+        // Convert project name into branches observable
+        switchMap(state => this.gitData.getBranches(this.scm, state.name)),
         // Find the specific branch we're interested in
         withLatestFrom(deployBranchName$),
         filter(([, branchName]) => !!branchName),
@@ -307,20 +300,15 @@ export class DeployApplicationStep2Component
 
           if (this.isRedeploy) {
             const commitSha = commit || branch.commit.sha;
-            const commitGuid = getCommitGuid(this.scm.getType(), projectInfo.full_name, commitSha);
-            const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitGuid, null, {
-              projectName: projectInfo.full_name,
-              scm: this.scm, commitSha
-            });
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();
             }
-            this.commitSubscription = commitEntityService.waitForEntity$.pipe(
-              take(1),
-              map(p => p.entity),
-              tap(p => this.commitInfo = p),
-            ).subscribe();
+            this.commitSubscription = this.gitData.getCommit(this.scm, projectInfo.full_name, commitSha)
+              .waitForValue$.pipe(
+                take(1),
+                tap(p => this.commitInfo = p),
+              ).subscribe();
           }
         }
       })

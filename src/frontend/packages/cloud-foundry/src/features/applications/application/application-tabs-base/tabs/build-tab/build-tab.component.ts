@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { combineLatest, distinct, map, startWith, switchMap } from 'rxjs/operators';
 
@@ -66,6 +66,7 @@ export class BuildTabComponent implements OnInit {
   // the operator is looking, in addition to the bottom-of-page snackbar.
   actions = inject(AppApplicationActionsService);
   private scmService = inject(GitSCMService);
+  private gitData = inject(GitDataService);
   private cups = inject(CurrentUserPermissionsService);
 
   cardTwoFetching$!: Observable<boolean>;
@@ -119,10 +120,9 @@ export class BuildTabComponent implements OnInit {
       map(project => {
         const scmType = project.deploySource.scm || project.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType, project.deploySource.endpointGuid);
-        return gitEntityCatalog.repo.store.getRepoInfo.getEntityService({ projectName: project.deploySource.project, scm });
+        return this.gitData.getRepository(scm, project.deploySource.project);
       }),
-      switchMap(repoService => repoService.waitForEntity$),
-      map(p => p.entity)
+      switchMap(repoResource => repoResource.waitForValue$)
     );
 
     const deploySource$ = observableCombineLatest(
@@ -168,19 +168,15 @@ export class BuildTabComponent implements OnInit {
           const scm = this.scmService.getSCM(scmType, deploySource.endpointGuid);
           deploySource.label = scm.getLabel();
           deploySource.icon = scm.getIcon();
-          res.push(gitEntityCatalog.commit.store.getEntityService(null, scm.endpointGuid, {
-            projectName: deploySource.project,
-            scm,
-            commitSha: deploySource.commit
-          }).entityObs$);
+          res.push(this.gitData.getCommit(scm, deploySource.project, deploySource.commit).state$);
         } else {
           res.push(of(null));
         }
         return observableCombineLatest(res);
       }),
-      map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, EntityInfo<GitCommit>]) => {
+      map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, GitResourceState<GitCommit>]) => {
         if (deploySource) {
-          deploySource.commitURL = commit?.entity?.html_url;
+          deploySource.commitURL = commit?.value?.html_url;
         }
         return deploySource;
       }),
