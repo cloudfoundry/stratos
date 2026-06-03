@@ -1,10 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Action } from '@ngrx/store';
 
-import { SendEventAction } from '../../actions/internal-events.actions';
 import { StratosBaseCatalogEntity } from '../../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntitySchema } from '../../helpers/entity-schema';
-import { InternalEventSeverity } from '../../types/internal-events.types';
 import { APISuccessOrFailedAction, EntityRequestAction } from '../../types/request.types';
 import { endpointErrorsHandlerFactory } from './endpoint-errors.handler';
 import { JetstreamError } from './handle-multi-endpoints.pipe';
@@ -51,24 +49,16 @@ describe('endpoint-error-handler', () => {
       errors,
     );
 
-    // Verify both actions were dispatched
-    expect(actions.length).toBe(2);
+    // Only the request-state failure action is dispatched now; the
+    // internal-events bus (SendEventAction) was removed — endpoint errors
+    // surface via the signal-native EndpointErrorEventsService.
+    expect(actions.length).toBe(1);
 
-    // Check first action
     const successOrFailure = actions[0] as APISuccessOrFailedAction;
     expect(successOrFailure instanceof APISuccessOrFailedAction).toBe(true);
     expect(successOrFailure.response).toBe(error.jetstreamErrorResponse.error.status);
     expect(successOrFailure.apiAction.endpointGuid).toBe(endpointGuid);
     expect(successOrFailure.apiAction.type).toBe('test');
     expect(successOrFailure.type).toBe(entity.getRequestAction('failure', requestType).type);
-
-    // Check second action
-    const eventAction = actions[1] as SendEventAction;
-    expect(eventAction instanceof SendEventAction).toBe(true);
-    expect(eventAction.eventState.eventCode).toBe(error.errorCode);
-    expect(eventAction.eventState.severity).toBe(InternalEventSeverity.ERROR);
-    expect(eventAction.eventState.message).toBe('test');
-    expect(eventAction.eventState.metadata.url).toBe(error.url);
-    expect(eventAction.eventState.metadata.errorResponse.errorResponse).toEqual(error.jetstreamErrorResponse);
   });
 });

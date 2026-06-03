@@ -3,11 +3,11 @@ import { Store } from '@ngrx/store';
 
 import { EndpointModel } from '../types/endpoint.types';
 
-import { SendClearEndpointEventsAction } from '../actions/internal-events.actions';
 import { ResetPaginationOfType } from '../actions/pagination.actions';
 import { RemoveEntitiesForEndpoint } from '../actions/remove-entities-for-endpoint.actions';
 import { AppState } from '../app-state';
 import { entityCatalog } from '../entity-catalog/entity-catalog';
+import { EndpointErrorEventsService } from './endpoint-error-events.service';
 import {
   EndpointConnectEvent,
   EndpointDisconnectEvent,
@@ -55,6 +55,7 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
   private endpointsService = inject(EndpointsDataService);
   private store = inject<Store<AppState>>(Store);
   private recents = inject(RecentlyVisitedDataService);
+  private errorEvents = inject(EndpointErrorEventsService);
 
   private disconnectHandlers: Array<(event: EndpointDisconnectEvent) => void> = [];
   private connectHandlers: Array<(event: EndpointConnectEvent) => void> = [];
@@ -203,10 +204,11 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
         }),
       );
     }
-    // 2. Internal-events log clear — replaces the legacy
+    // 2. Endpoint error-log clear — replaces the legacy
     //    `internal-events.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`
-    //    branches.
-    this.store.dispatch(new SendClearEndpointEventsAction(event.guid));
+    //    branches; now drops the endpoint's history from the signal-native
+    //    EndpointErrorEventsService.
+    this.errorEvents.clearEndpoint(event.guid);
     // 3. Recents cleanup — replaces the legacy
     //    `recently-visited.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`
     //    branch.
@@ -221,11 +223,11 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
   }
 
   private runGenericConnectCleanup(event: EndpointConnectEvent): void {
-    // Internal-events log clear — replaces the legacy
+    // Endpoint error-log clear — replaces the legacy
     // `internal-events.reducer.ts CONNECT_ENDPOINTS_SUCCESS` branch.
     // (Per-endpoint user-roles fetch on connect moved to the CF package's
     // CfEndpointRoleSyncService signal effect — favorites/roles island Wave 2.)
-    this.store.dispatch(new SendClearEndpointEventsAction(event.guid));
+    this.errorEvents.clearEndpoint(event.guid);
   }
 }
 

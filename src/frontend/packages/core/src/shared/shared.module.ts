@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { InternalEventMonitorFactory } from '@stratosui/store';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -387,7 +386,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
   providers: [
     EndpointListHelper,
     ConfirmationDialogService,
-    InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
     SessionService,

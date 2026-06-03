@@ -11,7 +11,7 @@ import { KubeNamespaceDataService } from '../../../services/domain-data/kube-nam
 
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
 import { ConfirmationDialogService, TabNavService } from '@stratosui/core';
-import { EntityMonitorFactory, InternalEventMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
+import { EntityMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { createBasicStoreModule } from '@stratosui/store/testing';
 import { MockChartService } from '../../../helm/monocular/shared/services/chart.service.mock';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
@@ -86,7 +86,6 @@ describe('CreateReleaseComponent', () => {
         },
         PaginationMonitorFactory,
         EntityMonitorFactory,
-        InternalEventMonitorFactory,
         TabNavService,
         ConfirmationDialogService,
         {

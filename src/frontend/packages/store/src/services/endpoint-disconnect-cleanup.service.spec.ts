@@ -6,9 +6,9 @@ import { Action } from '@ngrx/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CLEAR_ENDPOINT_ERROR_EVENTS } from '../types/internal-events.types';
 import { RESET_PAGINATION_OF_TYPE } from '../actions/pagination.actions';
 import { EndpointDisconnectCleanupService } from './endpoint-disconnect-cleanup.service';
+import { EndpointErrorEventsService } from './endpoint-error-events.service';
 import { EndpointConnectEvent, EndpointsDataService } from './endpoints-data.service';
 import { RecentlyVisitedDataService } from './recently-visited-data.service';
 
@@ -22,10 +22,12 @@ describe('EndpointDisconnectCleanupService', () => {
   let dispatched: Action[];
   let cleanForEndpoints: ReturnType<typeof vi.fn>;
   let pruneToConnected: ReturnType<typeof vi.fn>;
+  let clearEndpoint: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     cleanForEndpoints = vi.fn();
     pruneToConnected = vi.fn();
+    clearEndpoint = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -36,6 +38,7 @@ describe('EndpointDisconnectCleanupService', () => {
         EndpointsDataService,
         EndpointDisconnectCleanupService,
         { provide: RecentlyVisitedDataService, useValue: { cleanForEndpoints, pruneToConnected } },
+        { provide: EndpointErrorEventsService, useValue: { clearEndpoint } },
       ],
     });
     svc = TestBed.inject(EndpointsDataService);
@@ -70,9 +73,8 @@ describe('EndpointDisconnectCleanupService', () => {
     // Drain happened: disconnectedSignal back to empty after effect ran.
     expect(svc.disconnectedSignal()).toHaveLength(0);
 
-    // Internal-events log clear dispatched.
-    const cleared = dispatched.filter(a => a.type === CLEAR_ENDPOINT_ERROR_EVENTS);
-    expect(cleared.length).toBeGreaterThanOrEqual(1);
+    // Endpoint error-log clear delegated to the signal-native service.
+    expect(clearEndpoint).toHaveBeenCalledWith('cf-1');
 
     // Recents cleanup (signal-native) called with the disconnected guid.
     expect(cleanForEndpoints).toHaveBeenCalledWith(['cf-1']);
