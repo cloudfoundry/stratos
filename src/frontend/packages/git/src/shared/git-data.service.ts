@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, Signal, inject, signal } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -111,10 +111,10 @@ export class GitDataService {
     const state$ = toObservable(state, { injector: this.injector });
 
     const resource: GitResource<T> = {
-      value: () => state().value,
-      fetching: () => state().fetching,
-      error: () => state().error,
-      errorMessage: () => state().errorMessage,
+      value: computed(() => state().value),
+      fetching: computed(() => state().fetching),
+      error: computed(() => state().error),
+      errorMessage: computed(() => state().errorMessage),
       state$,
       waitForValue$: state$.pipe(
         filter(s => s.value !== null),
