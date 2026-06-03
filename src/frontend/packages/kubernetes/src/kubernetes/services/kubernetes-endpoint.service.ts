@@ -6,8 +6,6 @@ import { catchError, map, shareReplay, startWith } from 'rxjs/operators';
 
 import {
   EndpointsDataService,
-  EntityService,
-  EntityServiceFactory,
   EndpointModel,
   EntityInfo,
   EndpointUser,
@@ -80,11 +78,9 @@ export class KubernetesEndpointService {
   baseKube = inject(BaseKubeGuid);
   private session = inject(SessionService);
   private http = inject(HttpClient);
-  private entityServiceFactory = inject(EntityServiceFactory);
   private endpointsService = inject(EndpointsDataService);
 
   info$: Observable<EntityInfo<any>>;
-  cfInfoEntityService: EntityService<any>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
