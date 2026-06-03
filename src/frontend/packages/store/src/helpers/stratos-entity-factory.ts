@@ -1,7 +1,6 @@
 import { EntitySchema } from './entity-schema';
 
 export const endpointEntityType = 'endpoint';
-export const userProfileEntityType = 'userProfile';
 export const systemInfoEntityType = 'systemInfo';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
@@ -21,9 +20,6 @@ entityCache[systemInfoEntityType] = SystemInfoSchema;
 
 const EndpointSchema = new StratosEntitySchema(endpointEntityType, 'guid');
 entityCache[endpointEntityType] = EndpointSchema;
-
-const UserProfileInfoSchema = new StratosEntitySchema(userProfileEntityType, 'id');
-entityCache[userProfileEntityType] = UserProfileInfoSchema;
 
 export function stratosEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

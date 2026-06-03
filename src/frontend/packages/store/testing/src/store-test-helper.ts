@@ -196,9 +196,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
         }
       },
       metrics: {},
-      stratosUserProfile: {},    },
+    },
     request: {
-      stratosUserProfile: {},
       metrics: {},      stratosEndpoint: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
@@ -261,31 +260,6 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
       },
       metrics: {},
       system: {},
-      stratosUserProfile: {
-        id: 'test-user',
-        name: {
-          familyName: 'User',
-          givenName: 'Test',
-        },
-        userName: 'tesy-user-name',
-        meta: {
-          version: 1,
-          created: '',
-          lastModified: '',
-        },
-        verified: true,
-        active: true,
-        emails: [
-          {
-            primary: true,
-            value: 'test@test.com',
-          }
-        ],
-        passwordLastModified: '',
-        schemas: '',
-        zoneId: '',
-        origin: ''
-      },
     },
   };
 }
