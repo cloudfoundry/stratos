@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState, GeneralEntityAppState, EntityServiceFactory } from '@stratosui/store';
+import { GeneralEntityAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
@@ -24,8 +24,6 @@ export interface StratosTabMetadata {
   icon?: string;
   iconFont?: string;
   hidden?: (
-    store: Store<AppState>,
-    esf: EntityServiceFactory,
     activatedRoute: ActivatedRoute,
     cups: CurrentUserPermissionsService,
     http: HttpClient
