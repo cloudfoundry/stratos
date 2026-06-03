@@ -2,32 +2,23 @@
 
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Action, Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, take, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
-  ActionDispatcher,
   APIResource,
   EndpointHealthCheck,
-  EntityInfo,
   EntitySchema,
-  GeneralEntityAppState,
-  ICFAction,
   IFavoriteMetadata,
   IStratosEntityDefinition,
   JetstreamError,
   JetstreamResponse,
-  PaginatedAction,
-  PaginationEntityState,
-  RequestInfoState,
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
   StratosEndpointExtensionDefinition
 } from '@stratosui/store';
-import { CfValidateEntitiesStart } from './actions/relations-actions';
 import { cfMaxedStateHandlers } from './cf-pagination-maxed-state';
 import {
   StApp,
@@ -161,8 +152,6 @@ import {
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
 import { addCfQParams, addCfRelationParams } from './entity-relations/cf-entity-relations.getters';
-import { populatePaginationFromParent } from './entity-relations/entity-relations';
-import { isEntityInlineParentAction } from './entity-relations/entity-relations.types';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
 import { cfUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
 import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
@@ -172,52 +161,6 @@ import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
 import { CfAPIResource, CFResponse } from './store/types/cf-api.types';
 import { CfUser } from './store/types/cf-user.types';
-
-function safePopulatePaginationFromParent(store: Store<GeneralEntityAppState>, action: PaginatedAction): Observable<Action> {
-  const result$ = populatePaginationFromParent(store, action);
-  // Guard against null/undefined Observable from populatePaginationFromParent
-  if (!result$) {
-    return of(action);
-  }
-  return result$.pipe(
-    map(newAction => newAction || action)
-  );
-}
-
-function getPaginationCompareString(paginationEntity: PaginationEntityState) {
-  if (!paginationEntity) {
-    return '';
-  }
-  let params = '';
-  if (paginationEntity.params) {
-    params = JSON.stringify(paginationEntity.params);
-  }
-  // paginationEntity.totalResults included to ensure we cover the 'ResetPagination' case, for instance after AddParam
-  return paginationEntity.totalResults + paginationEntity.currentPage + params + paginationEntity.pageCount;
-}
-
-function shouldValidate(action: ICFAction, isValidated: boolean, entityInfo: RequestInfoState) {
-  // Validate if..
-  // 1) The action is the correct type
-  const parentAction = isEntityInlineParentAction(action);
-  if (!parentAction) {
-    return false;
-  }
-  // 2) We have basic request info
-  // 3) The action states it should not be skipped
-  // 4) It's already been validated
-  // 5) There are actual relations to validate
-  if (!entityInfo || action.skipValidation || isValidated || parentAction.includeRelations.length === 0) {
-    return false;
-  }
-  // 6) The entity isn't in the process of being updated
-  return !entityInfo.fetching &&
-    !entityInfo.error &&
-    !entityInfo.deleting?.busy &&
-    !entityInfo.deleting?.deleted &&
-    // This is required to ensure that we don't continue trying to fetch missing relations when we're already fetching missing relations
-    !(entityInfo.updating && Object.keys(entityInfo.updating).find(key => entityInfo.updating[key]?.busy));
-}
 
 export interface CFBasePipelineRequestActionMeta {
   /**
@@ -334,43 +277,6 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
         message += `\n${getCfError(error.jetstreamErrorResponse)}`;
         return message;
       }, 'Multiple Cloud Foundry Errors. ');
-    },
-    entityEmitHandler: (action: ICFAction, dispatcher: ActionDispatcher) => {
-      let validated = false;
-      return (entityInfo: EntityInfo) => {
-        if (!entityInfo || entityInfo.entity) {
-          if (shouldValidate(action, validated, entityInfo.entityRequestInfo)) {
-            validated = true;
-            dispatcher(new CfValidateEntitiesStart(
-              action,
-              [action.guid]
-            ));
-          }
-        }
-      };
-    },
-    entitiesEmitHandler: (action: PaginatedAction | PaginatedAction[], dispatcher: ActionDispatcher) => {
-      let lastValidationFootprint: string;
-      const actionsArray = Array.isArray(action) ? action : [action];
-      return (state: PaginationEntityState) => {
-        const newValidationFootprint = getPaginationCompareString(state);
-        if (lastValidationFootprint !== newValidationFootprint) {
-          lastValidationFootprint = newValidationFootprint;
-          actionsArray.forEach(actionFromArray => dispatcher(new CfValidateEntitiesStart(
-            actionFromArray,
-            (state.ids as Record<number, string[]>)[actionFromArray.__forcedPageNumber__ || state.currentPage]
-          )));
-        }
-      };
-    },
-    entitiesFetchHandler: (store: Store<GeneralEntityAppState>, actions: PaginatedAction[]) => () => {
-      combineLatest(actions.map(action => safePopulatePaginationFromParent(store, action))).pipe(
-        take(1),
-      ).subscribe(newActions => newActions?.forEach(newAction => {
-        if (newAction) {
-          store.dispatch(newAction);
-        }
-      }));
     },
     paginationConfig: {
       getEntitiesFromResponse: (response: CFResponse) => response.resources,
