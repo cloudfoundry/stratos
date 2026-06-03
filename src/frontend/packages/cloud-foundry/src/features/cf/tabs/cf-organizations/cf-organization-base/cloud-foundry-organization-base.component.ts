@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, inject, OnInit, Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -17,10 +18,8 @@ import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboar
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderComponent } from '../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
-import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import {
@@ -62,6 +61,10 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   cfOrgService = inject(CloudFoundryOrganizationService);
   orgDataService = inject(OrgDataService);
+
+  // Drives the loading-page overlay from the signal-native data service,
+  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
+  isLoading$ = toObservable(this.orgDataService.isLoading);
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -105,8 +108,6 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
 
-  public schema: EntitySchema;
-
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
   // Favorite recomputes when the org signal lands. Built from the V3-native
@@ -118,7 +119,6 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   constructor() {
     const userFavoriteManager = inject(UserFavoriteManager);
 
-    this.schema = cfEntityFactory(organizationEntityType);
     this.favorite = computed(() => {
       const org = this.orgDataService.org();
       if (!org) return null;

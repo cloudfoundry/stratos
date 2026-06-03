@@ -22,8 +22,6 @@ import {
   IHeaderBreadcrumb
 } from '@stratosui/core';
 import {
-  entityCatalog,
-  EntitySchema,
   EndpointModel,
   IFavoriteMetadata,
   UserFavoriteManager
@@ -77,7 +75,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   private injector = inject(Injector);
   private errorRedirectEffect?: EffectRef;
   public appState$!: Observable<ApplicationStateData>;
-  public schema: EntitySchema;
   public favorite$: Observable<any>;
 
   isBusyUpdating$!: Observable<{ updating: boolean; }>;
@@ -99,8 +96,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       filter(info => !!info?.entity?.entity?.cfGuid),
       map(info => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(info.entity, applicationEntityType, CF_ENDPOINT_TYPE))
     );
-    const catalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, applicationEntityType);
-    this.schema = catalogEntity.getSchema();
     const endpoints$ = toObservable(this.cfEndpoints.all);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
