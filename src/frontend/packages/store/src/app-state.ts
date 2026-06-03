@@ -1,7 +1,6 @@
 import type { RequestInfoState } from './reducers/api-request-reducer/types';
 import type { ListsState } from './reducers/list.reducer';
 import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
-import type { InternalEventsState } from './types/internal-events.types';
 import type { PaginationEntityTypeState } from './types/pagination.types';
 export interface IRequestTypeState {
   [entityKey: string]: any;
@@ -20,7 +19,6 @@ export abstract class AppState<
   request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData!: T;
   lists!: ListsState;
-  internalEvents!: InternalEventsState;
 }
 
 export interface GeneralRequestDataState {

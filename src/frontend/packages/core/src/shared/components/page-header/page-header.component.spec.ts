@@ -8,7 +8,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 
-import { InternalEventMonitorFactory, appReducers } from '@stratosui/store';
+import { appReducers } from '@stratosui/store';
 import { CoreTestingModule } from '@test-framework';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -25,7 +25,6 @@ describe('PageHeaderComponent', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       providers: [
-        InternalEventMonitorFactory,
         {
           provide: ActivatedRoute,
           useValue: {

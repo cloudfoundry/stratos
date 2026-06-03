@@ -4,7 +4,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
-import { InternalEventMonitorFactory } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
@@ -29,7 +28,6 @@ describe('AddServiceInstanceComponent', () => {
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         CfOrgSpaceDataService,
-        InternalEventMonitorFactory,
         CloudFoundryService,
         TabNavService,
         LongRunningCfOperationsService,

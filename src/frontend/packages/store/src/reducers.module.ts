@@ -3,7 +3,6 @@ import { ActionReducerMap, StoreModule } from '@ngrx/store';
 
 import { LocalStorageService } from './helpers/local-storage-service';
 import { requestReducer } from './reducers/api-request-reducers.generator';
-import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 
@@ -24,7 +23,6 @@ export const appReducers: ActionReducerMap<Record<string, unknown>> = {
   // This is added as part of the entity catalog module.
   // requestData,
   lists: listReducer,
-  internalEvents: internalEventReducer,
 };
 
 @NgModule({

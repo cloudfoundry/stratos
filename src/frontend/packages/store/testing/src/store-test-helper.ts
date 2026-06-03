@@ -149,12 +149,6 @@ function getDefaultInitialTestStratosStoreState() {
       message: ''
     },
     lists: {},
-    internalEvents: {
-      types: {
-        global: {},
-        endpoint: {}
-      }
-    },
     currentUserRoles: {
       internal: {
         isAdmin: false,
