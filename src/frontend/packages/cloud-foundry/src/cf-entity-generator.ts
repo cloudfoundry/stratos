@@ -1,8 +1,10 @@
 
 
+import { HttpClient } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { catchError, take, map } from 'rxjs/operators';
 
 import { BaseEndpointAuth, urlValidationExpression } from '@stratosui/core';
 import {
@@ -11,7 +13,6 @@ import {
   EndpointHealthCheck,
   EntityInfo,
   EntitySchema,
-  entityFetchedWithoutError,
   GeneralEntityAppState,
   ICFAction,
   IFavoriteMetadata,
@@ -258,6 +259,22 @@ function cfShortcuts(id: string) {
       iconFont: 'stratos-icons'
     },
   ];
+}
+
+// Favorites validation: probe whether a favorited entity still exists with a
+// direct GET against the same jetstream URL the (removed) ngrx entity pipeline
+// hit — 200 => valid, any error => the entity was deleted and the favorite
+// should be offered for removal. Replaces the former
+// `cfEntityCatalog.X.api.get(...).pipe(entityFetchedWithoutError())`, which
+// coupled favorites to the entity request pipeline / EntityMonitor. Must be
+// called within an injection context (FavoritesMetaCardComponent wraps the
+// getIsValid call in runInInjectionContext).
+function isValidByExistenceProbe(url: string): Observable<boolean> {
+  const http = inject(HttpClient);
+  return http.get(url).pipe(
+    map(() => true),
+    catchError(() => of(false)),
+  );
 }
 
 export function generateCFEntities(): StratosBaseCatalogEntity[] {
@@ -1251,7 +1268,7 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
         }),
         getLink: favorite => `/applications/${favorite.endpointId}/${favorite.entityId}/summary`,
         getGuid: entity => entity.metadata.guid,
-        getIsValid: (fav) => cfEntityCatalog.application.api.get(fav.entityId, fav.endpointId, {}).pipe(entityFetchedWithoutError())
+        getIsValid: (fav) => isValidByExistenceProbe(`/pp/v1/cf/apps/${fav.endpointId}/${fav.entityId}`)
       },
       actionBuilders: applicationActionBuilder
     },
@@ -1300,7 +1317,7 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
         }),
         getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.metadata.orgGuid}/spaces/${favorite.entityId}/summary`,
         getGuid: entity => entity.metadata.guid,
-        getIsValid: (fav) => cfEntityCatalog.space.api.get(fav.entityId, fav.endpointId).pipe(entityFetchedWithoutError())
+        getIsValid: (fav) => isValidByExistenceProbe(`/pp/v1/cf/spaces/${fav.endpointId}/${fav.entityId}`)
       }
     }
   );
@@ -1348,7 +1365,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
         }),
         getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.entityId}`,
         getGuid: entity => entity.metadata.guid,
-        getIsValid: (favorite) => cfEntityCatalog.org.api.get(favorite.entityId, favorite.endpointId, {}).pipe(entityFetchedWithoutError())
+        getIsValid: (favorite) => isValidByExistenceProbe(`/pp/v1/cf/org/${favorite.endpointId}/${favorite.entityId}`)
       }
     }
   );

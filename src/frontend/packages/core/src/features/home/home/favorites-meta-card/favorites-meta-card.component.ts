@@ -1,6 +1,6 @@
 
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, inject, runInInjectionContext } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { take, defaultIfEmpty } from 'rxjs/operators';
@@ -25,6 +25,7 @@ export class FavoritesMetaCardComponent {
   private router = inject(Router);
   private confirmDialog = inject(ConfirmationDialogService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private injector = inject(Injector);
 
 
   @Input()
@@ -60,8 +61,11 @@ export class FavoritesMetaCardComponent {
       return;
     }
     const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
+    // getIsValid hooks now use inject(HttpClient) for a direct existence
+    // probe (signal-native; no ngrx pipeline), so the call must run inside
+    // an injection context.
     const isValidObs = (entityDef.builders.entityBuilder && entityDef.builders.entityBuilder.getIsValid) ?
-    entityDef.builders.entityBuilder.getIsValid(this.favorite) : of(true);
+    runInInjectionContext(this.injector, () => entityDef.builders.entityBuilder.getIsValid(this.favorite)) : of(true);
     isValidObs.pipe(take(1), defaultIfEmpty(false)).subscribe(isValid => {
       this.valid = isValid;
       if (!isValid) {

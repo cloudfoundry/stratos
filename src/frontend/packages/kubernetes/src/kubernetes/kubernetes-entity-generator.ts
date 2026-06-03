@@ -1,7 +1,10 @@
 
 
+import { inject } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { formatDuration, intervalToDuration } from 'date-fns';
+import { from } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import {
@@ -18,8 +21,8 @@ import {
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointAuthTypeConfig, EndpointType } from '../../../store/src/extension-types';
-import { entityFetchedWithoutError } from '../../../store/src/operators';
 import { IFavoriteMetadata, UserFavorite } from '../../../store/src/types/user-favorites.types';
+import { KubeNamespaceDataService } from '../services/domain-data/kube-namespace-data.service';
 import { KubernetesAWSAuthFormComponent } from './auth-forms/kubernetes-aws-auth-form/kubernetes-aws-auth-form.component';
 import {
   KubernetesCertsAuthFormComponent,
@@ -341,8 +344,18 @@ export class KubeEntityCatalog {
       getKubeCatalogEntity: (definition) => new StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>(
         definition, { actionBuilders: kubeNamespaceActionBuilders }
       ),
-      getIsValid: (favorite) =>
-        kubeEntityCatalog.namespace.api.get((favorite.metadata as { name: string }).name, favorite.endpointId).pipe(entityFetchedWithoutError()),
+      // Favorites validation: probe existence off the signal-native namespace
+      // read path (cnsi-scoped jetstream proxy via KubeNamespaceDataService)
+      // rather than the removed ngrx entity pipeline. Present in the cluster
+      // list => valid; absent or fetch error => deleted. NOTE: fetchDirect uses
+      // the same limit=500 the namespace list page uses, so validity is
+      // consistent with what the UI shows.
+      getIsValid: (favorite) => {
+        const name = (favorite.metadata as { name: string }).name;
+        return from(inject(KubeNamespaceDataService).fetchDirect(favorite.endpointId)).pipe(
+          map(list => list.some(ns => ns.metadata?.name === name)),
+        );
+      },
       listColumns: [
         {
           header: 'Status',
