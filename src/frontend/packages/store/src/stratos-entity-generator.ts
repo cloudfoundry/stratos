@@ -7,22 +7,17 @@ import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types'
 import {
   STRATOS_ENDPOINT_TYPE,
   systemInfoEntityType,
-  userFavouritesEntityType,
   userProfileEntityType,
 } from './helpers/stratos-entity-factory';
 import { stratosEntityFactory } from './public-api';
-import { addOrUpdateUserFavoriteMetadataReducer, deleteUserFavoriteMetadataReducer } from './reducers/favorite.reducer';
 import {
   SystemInfoActionBuilder,
   systemInfoActionBuilder,
-  UserFavoriteActionBuilder,
-  userFavoriteActionBuilder,
   UserProfileActionBuilder,
   userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
 import { SystemInfo } from './types/system.types';
-import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
 
 export function generateStratosEntities(): StratosBaseCatalogEntity[] {
@@ -37,7 +32,6 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
   };
   return [
     generateSystemInfo(stratosType),
-    generateUserFavorite(stratosType),
     generateUserProfile(stratosType),
     generateMetricsEndpoint(),
   ];
@@ -60,29 +54,6 @@ function generateSystemInfo(stratosType: any) {
     }
   );
   return stratosEntityCatalog.systemInfo;
-}
-
-function generateUserFavorite(stratosType: any) {
-  const definition: IStratosEntityDefinition = {
-    schema: stratosEntityFactory(userFavouritesEntityType),
-    type: userFavouritesEntityType,
-    endpoint: stratosType,
-  };
-  stratosEntityCatalog.userFavorite = new StratosCatalogEntity<
-    undefined,
-    UserFavorite,
-    UserFavoriteActionBuilder
-  >(
-    definition,
-    {
-      dataReducers: [
-        addOrUpdateUserFavoriteMetadataReducer,
-        deleteUserFavoriteMetadataReducer,
-      ],
-      actionBuilders: userFavoriteActionBuilder
-    }
-  );
-  return stratosEntityCatalog.userFavorite;
 }
 
 function generateUserProfile(stratosType: any) {

@@ -244,11 +244,11 @@ export class EndpointsSignalListComponent {
   }
 
   private toggleEndpointFavorite(ep: EndpointModel): void {
-    // Endpoints are top-level. The favorites-groups reducer determines
+    // Endpoints are top-level. The favorites-groups computation determines
     // "this favorite IS the endpoint itself" via `!favorite.entityId`
-    // (`user-favorites-groups.reducer.ts:135`) — so we MUST omit entityId
-    // here. Passing the endpoint's guid as entityId steers the reducer
-    // into the child-entity branch, which leaves `fg.endpoint` null and
+    // (`UserFavoritesDataService.addFavoriteToGroup`) — so we MUST omit
+    // entityId here. Passing the endpoint's guid as entityId steers it into
+    // the child-entity branch, which leaves `fg.endpoint` null and
     // `fg.ethereal` true; the keys signal then skips the group, the
     // star icon never updates, and the endpoint never shows up in the
     // home-page favorites tile.

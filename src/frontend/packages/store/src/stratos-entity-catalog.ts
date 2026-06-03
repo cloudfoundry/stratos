@@ -5,11 +5,9 @@ import {
 import { IEntityMetadata } from './entity-catalog/entity-catalog.types';
 import {
   SystemInfoActionBuilder,
-  UserFavoriteActionBuilder,
   UserProfileActionBuilder,
 } from './stratos-action-builders';
 import { SystemInfo } from './types/system.types';
-import { UserFavorite } from './types/user-favorites.types';
 import { UserProfileInfo } from './types/user-profile.types';
 
 export class StratosEntityCatalog {
@@ -17,12 +15,6 @@ export class StratosEntityCatalog {
     IEntityMetadata,
     SystemInfo,
     SystemInfoActionBuilder
-  >;
-
-  userFavorite!: StratosCatalogEntity<
-    IEntityMetadata,
-    UserFavorite,
-    UserFavoriteActionBuilder
   >;
 
   userProfile!: StratosCatalogEntity<
