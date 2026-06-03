@@ -1,22 +1,18 @@
-import { ChangeDetectionStrategy, Component, Injector, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
 import {
-  InternalEventMonitorFactory,
   EndpointModel,
   EndpointsDataService,
+  EndpointErrorEventsService,
   RoutingHistoryService,
   StratosStatus,
-  endpointEntityType,
   InternalEventState,
-  SendClearEndpointEventsAction,
-  AppState,
 } from '@stratosui/store';
-import { Observable, of } from 'rxjs';
-import { take, map, withLatestFrom } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { take, map } from 'rxjs/operators';
 
 import { eventReturnUrlParam } from '../../event-page/events-page/events-page.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -39,9 +35,8 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 })
 export class ErrorPageComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
-  private store = inject<Store<AppState>>(Store);
   private routingHistory = inject(RoutingHistoryService);
-  private internalEventMonitorFactory = inject(InternalEventMonitorFactory);
+  private errorEvents = inject(EndpointErrorEventsService);
   private sanitizer = inject(DomSanitizer);
   private endpointsData = inject(EndpointsDataService);
   private injector = inject(Injector);
@@ -53,7 +48,7 @@ export class ErrorPageComponent implements OnInit {
   public jsonDownloadHref$: Observable<SafeUrl>;
 
   public dismissEndpointErrors(endpointGuid: string) {
-    this.store.dispatch(new SendClearEndpointEventsAction(endpointGuid));
+    this.errorEvents.clearEndpoint(endpointGuid);
   }
 
   ngOnInit() {
@@ -65,15 +60,19 @@ export class ErrorPageComponent implements OnInit {
         this.endpointsData.endpointById(endpointId),
         { injector: this.injector },
       );
-      const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointEntityType, of([endpointId]));
-      this.errorDetails$ = cfEndpointEventMonitor.hasErroredOverTimeNoPoll(30).pipe(
-        withLatestFrom(endpoint$),
-        map(([errors, endpoint]: [any, EndpointModel]) => {
-          return {
-            endpoint,
-            errors: errors ? errors[endpointId] : null
-          };
-        })
+      // Read per-endpoint error history from the signal-native error bus,
+      // filtered to backend (5xx) errors in the last 30 minutes — preserving
+      // the old InternalEventMonitor.hasErroredOverTimeNoPoll(30) behaviour.
+      const errorsSig = this.errorEvents.errorsForEndpoint(endpointId);
+      const errors$ = toObservable(
+        computed(() => {
+          const cutoff = Date.now() - 30 * 60 * 1000;
+          return errorsSig().filter(e => e.eventCode?.[0] === '5' && (e.timestamp ?? 0) > cutoff);
+        }),
+        { injector: this.injector },
+      );
+      this.errorDetails$ = combineLatest([errors$, endpoint$]).pipe(
+        map(([errors, endpoint]: [InternalEventState[], EndpointModel]) => ({ endpoint, errors }))
       );
       this.jsonDownloadHref$ = this.errorDetails$.pipe(
         map((info: any) => {

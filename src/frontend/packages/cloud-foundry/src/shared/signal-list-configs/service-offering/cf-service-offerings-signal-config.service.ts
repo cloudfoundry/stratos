@@ -9,7 +9,7 @@ import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipe
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import type { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
-import { GlobalEventService, ListStateStore } from '@stratosui/core';
+import { ListStateStore } from '@stratosui/core';
 import type { SignalListDropdownOption } from '@stratosui/core';
 
 // Marketplace list config — multi-CNSI service offerings catalog. Mirrors
@@ -73,7 +73,6 @@ export class CfServiceOfferingsSignalConfigService {
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
-  private readonly eventService = inject(GlobalEventService);
   private readonly errorEvents = inject(EndpointErrorEventsService);
   // Optional so unit tests don't have to provide it; the real app always
   // does (providedIn: 'root'). When present, used to short-circuit the
@@ -174,12 +173,9 @@ export class CfServiceOfferingsSignalConfigService {
     );
     this._errorEffect?.destroy();
     this._errorEffect = effect(() => {
-      const errs = this.orchestrator.errorsByCnsi();
-      // Record into the signal-native error bus (banner + /errors page). The
-      // publishEndpointErrors call is the legacy banner path, removed in the
-      // next commit once GlobalEventService reads EndpointErrorEventsService.
-      this.errorEvents.recordEndpointErrors(errs);
-      this.eventService.publishEndpointErrors(errs);
+      // Record endpoint fetch errors into the signal-native error bus, which
+      // drives the page-header banner + /errors page via GlobalEventService.
+      this.errorEvents.recordEndpointErrors(this.orchestrator.errorsByCnsi());
     }, { injector: this.injector });
   }
 

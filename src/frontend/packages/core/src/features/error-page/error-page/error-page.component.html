@@ -38,8 +38,8 @@
                 @if (error.metadata?.url) {
                   <span class="text-xs text-content-muted mt-1 break-all font-mono">{{ error.metadata.url }}</span>
                 }
-                @if (error.metadata?.errorResponse?.errorResponse) {
-                  <pre class="text-xs mt-2 p-2 rounded-md overflow-x-auto bg-content-canvas border border-content-border text-content-text">{{ (error.metadata.errorResponse.errorResponse) | json }}</pre>
+                @if (error.metadata?.errorResponse) {
+                  <pre class="text-xs mt-2 p-2 rounded-md overflow-x-auto bg-content-canvas border border-content-border text-content-text">{{ (error.metadata.errorResponse) | json }}</pre>
                 }
               </div>
             </div>
