@@ -12,18 +12,13 @@ import {
 } from '@stratosui/core';
 import {
   APIResource,
-  AppState,
-  getPaginationObservables,
-  PaginatedAction,
   PaginationEntityState,
-  PaginationMonitorFactory,
   selectPaginationState,
   SetClientFilter
 } from '@stratosui/store';
 import { IServiceInstance, IUserProvidedServiceInstance } from '../../cf-api-svc.types';
 import { CFFeatureFlagTypes, IApp, IRoute, ISpace } from '../../cf-api.types';
 import { CFAppState } from '../../cf-app-state';
-import { cfEntityFactory } from '../../cf-entity-factory';
 import { getCFEntityKey } from '../../cf-entity-helpers';
 import { cfOsDebugLog } from '../../shared/data-services/cf-org-space-debug';
 import { applicationEntityType } from '../../cf-entity-types';
@@ -320,44 +315,6 @@ export function haveMultiConnectedCfs(cfRoles: CfCurrentUserRolesSignalService):
 
 export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
-}
-
-export function createFetchTotalResultsPagKey(standardActionKey: string): string {
-  return standardActionKey + '-totalResults';
-}
-
-export function fetchTotalResults(
-  action: PaginatedAction,
-  store: Store<AppState>,
-  paginationMonitorFactory: PaginationMonitorFactory
-): Observable<number> {
-  const newAction: any = {
-    ...action,
-    paginationKey: createFetchTotalResultsPagKey(action.paginationKey),
-    flattenPagination: false,
-    includeRelations: [] as string[]
-  };
-  newAction.initialParams['results-per-page'] = 1;
-
-  const pagObs = getPaginationObservables({
-    store,
-    action: newAction,
-    paginationMonitor: paginationMonitorFactory.create(
-      newAction.paginationKey,
-      cfEntityFactory(newAction.entityType),
-      newAction.flattenPagination
-    )
-  }, newAction.flattenPagination);
-
-  return combineLatest(
-    pagObs.entities$, // Ensure the request is made by sub'ing to the entities observable
-    pagObs.pagination$
-  ).pipe(
-    map(([, pagination]) => pagination),
-    filter(pagination => !!pagination && !!pagination.pageRequests && !!pagination.pageRequests[1] && !pagination.pageRequests[1].busy),
-    take(1),
-    map(pagination => pagination.totalResults)
-  );
 }
 
 type CfOrgSpaceFilterTypes = IApp | IRoute | IServiceInstance;
