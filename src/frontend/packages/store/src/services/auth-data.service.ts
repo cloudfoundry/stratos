@@ -42,13 +42,12 @@ const defaultAuthState: AuthState = {
  * lived in `auth.effects.ts` driven by the `auth` ngrx reducer. Downstream
  * consumers read the projected signals and never touch `Store`.
  *
- * Two ties to the legacy slice remain until the reducer is deleted:
+ * One tie to the legacy slice remains until the reducer is deleted:
  *  - a successful verify still dispatches `VerifiedSession` so the auth
  *    reducer keeps `state.auth.sessionData` populated for the entity-catalog
  *    framework readers (`selectSessionData`, helm `registeredLimit`) and so
- *    `cfRoleInfoFromSessionReducer` can propagate CF admin permissions; and
- *  - the `GET_SYSTEM_INFO_SUCCESS` endpoints fold still lands in the slice.
- * Both are retired when the reducer/effects are removed.
+ *    `cfRoleInfoFromSessionReducer` can propagate CF admin permissions.
+ * It is retired when the reducer/effects are removed.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthDataService {

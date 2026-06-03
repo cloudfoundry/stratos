@@ -10,7 +10,6 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -70,7 +69,6 @@ export class UserInviteConfigureService {
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
       map(_v => {
-        stratosEntityCatalog.systemInfo.api.getSystemInfo();
         return {
           error: false
         };
@@ -99,7 +97,6 @@ export class UserInviteConfigureService {
       const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
       this.http.delete(url).pipe(
         map(_v => {
-          stratosEntityCatalog.systemInfo.api.getSystemInfo();
           return {
             error: false,
             errorMessage: ''

@@ -7,7 +7,6 @@ import { EndpointApiError } from './effects/endpoint-api-errors.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RecursiveDeleteEffect } from './effects/recursive-entity-delete.effect';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
-import { SystemEffects } from './effects/system.effects';
 import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 import { PipelineHttpClient } from './entity-request-pipeline/pipline-http-client.service';
 import { AppReducersModule } from './reducers.module';
@@ -28,7 +27,6 @@ import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect
       APIEffect,
       EndpointApiError,
       PaginationEffects,
-      SystemEffects,
       SetClientFilterEffect,
       RecursiveDeleteEffect,
     ])
