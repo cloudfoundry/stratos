@@ -280,3 +280,4 @@ export { CurrentUserRolesDataService } from './services/current-user-roles-data.
 // delete paths (CF delete controller hook, kube resource delete) so they stay
 // @ngrx-free while the favorites/recents stores remain ngrx.
 export { EntityDeleteCleanupService } from './services/entity-delete-cleanup.service';
+export { EndpointErrorEventsService } from './services/endpoint-error-events.service';

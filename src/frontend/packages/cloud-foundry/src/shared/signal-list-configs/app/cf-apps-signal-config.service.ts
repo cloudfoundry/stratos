@@ -3,8 +3,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
+import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../services/data-sources/cnsi-apps-source';
 import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
+import { wireEndpointErrorReporting } from '../endpoint-error-reporting';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
@@ -165,6 +167,8 @@ export class CfAppsSignalConfigService {
 
   private readonly endpointRegistry = inject(EndpointDataRegistry);
   private readonly deleteController = inject(EntityDeleteController);
+  private readonly errorEvents = inject(EndpointErrorEventsService);
+  private _errorEffect?: EffectRef;
 
   constructor(private readonly http: HttpClient) {
     const cfService = inject(CloudFoundryService, { optional: true });
@@ -355,6 +359,10 @@ export class CfAppsSignalConfigService {
       return source;
     });
     this.orchestrator = new MergeOrchestrator<StApp>(sources);
+    // Surface endpoint fetch errors into the signal-native error bus (banner +
+    // /errors page). Re-wire per initialize() — the orchestrator is rebuilt.
+    this._errorEffect?.destroy();
+    this._errorEffect = wireEndpointErrorReporting(this.orchestrator.errorsByCnsi, this.errorEvents, this.injector);
     this.view = new ViewPipeline<StApp>(
       this.orchestrator.allItems,
       this.filter,
