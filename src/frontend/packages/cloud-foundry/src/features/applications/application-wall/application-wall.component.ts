@@ -3,7 +3,6 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { Observable, combineLatest, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
@@ -26,7 +25,6 @@ import {
   UserFavorite,
   UserFavoriteManager,
 } from '@stratosui/store';
-import { CFAppState } from '../../../cf-app-state';
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
@@ -69,7 +67,6 @@ import type { StApp } from '../../../services/endpoint-data/stratos-types';
 })
 export class ApplicationWallComponent implements OnInit {
   cloudFoundryService = inject(CloudFoundryService);
-  private store = inject<Store<CFAppState>>(Store);
   private appsConfig = inject(CfAppsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
@@ -209,7 +206,7 @@ export class ApplicationWallComponent implements OnInit {
     // If we have an endpoint ID, select it and redirect
     const { endpointId } = activatedRoute.snapshot.params;
     if (endpointId) {
-      goToAppWall(this.store, router, endpointId);
+      goToAppWall(this.appsConfig, router, endpointId);
       this.redirected = true;
       return;
     }
