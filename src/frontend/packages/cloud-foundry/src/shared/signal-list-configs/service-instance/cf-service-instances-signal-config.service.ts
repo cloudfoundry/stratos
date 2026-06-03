@@ -1,9 +1,11 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import type { EndpointModel } from '@stratosui/store';
+import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiServiceInstancesSource } from '../../../services/data-sources/cnsi-service-instances-source';
 import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
+import { wireEndpointErrorReporting } from '../endpoint-error-reporting';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
@@ -130,6 +132,17 @@ export class CfServiceInstancesSignalConfigService {
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
   private readonly deleteController = inject(EntityDeleteController);
+  private readonly errorEvents = inject(EndpointErrorEventsService);
+  private _errorEffect?: EffectRef;
+
+  // Surface endpoint fetch errors into the signal-native error bus (banner +
+  // /errors page). Re-wired after each orchestrator build — the three
+  // initialize* paths rebuild the orchestrator, so the effect must track the
+  // new instance's errorsByCnsi signal.
+  private rewireErrorReporting(): void {
+    this._errorEffect?.destroy();
+    this._errorEffect = wireEndpointErrorReporting(this.orchestrator.errorsByCnsi, this.errorEvents, this.injector);
+  }
   // Optional so unit tests don't have to provide it; the real app always
   // does (providedIn: 'root'). When present, used to short-circuit the
   // orchestrator's HTTP drain on revisit by pre-seeding each per-CNSI
@@ -346,6 +359,7 @@ export class CfServiceInstancesSignalConfigService {
     this.swapAcquiredEds(cnsiGuids);
     const sources = cnsiGuids.map(guid => this.makeSource(guid));
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
+    this.rewireErrorReporting();
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
       this.filter,
@@ -369,6 +383,7 @@ export class CfServiceInstancesSignalConfigService {
     this.swapAcquiredEds([cnsiGuid]);
     const sources = [this.makeSource(cnsiGuid)];
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
+    this.rewireErrorReporting();
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
       this.filter,
@@ -393,6 +408,7 @@ export class CfServiceInstancesSignalConfigService {
     this.swapAcquiredEds([cnsiGuid]);
     const sources = [this.makeSource(cnsiGuid)];
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
+    this.rewireErrorReporting();
     this.view = new ViewPipeline<StServiceInstance>(
       this.orchestrator.allItems,
       this.filter,

@@ -2,6 +2,7 @@ import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effe
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import type { EndpointModel } from '@stratosui/store';
+import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiServiceOfferingsSource } from '../../../services/data-sources/cnsi-service-offerings-source';
 import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
@@ -73,6 +74,7 @@ export class CfServiceOfferingsSignalConfigService {
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
   private readonly eventService = inject(GlobalEventService);
+  private readonly errorEvents = inject(EndpointErrorEventsService);
   // Optional so unit tests don't have to provide it; the real app always
   // does (providedIn: 'root'). When present, used to short-circuit the
   // orchestrator's HTTP drain on revisit by pre-seeding each per-CNSI
@@ -172,7 +174,12 @@ export class CfServiceOfferingsSignalConfigService {
     );
     this._errorEffect?.destroy();
     this._errorEffect = effect(() => {
-      this.eventService.publishEndpointErrors(this.orchestrator.errorsByCnsi());
+      const errs = this.orchestrator.errorsByCnsi();
+      // Record into the signal-native error bus (banner + /errors page). The
+      // publishEndpointErrors call is the legacy banner path, removed in the
+      // next commit once GlobalEventService reads EndpointErrorEventsService.
+      this.errorEvents.recordEndpointErrors(errs);
+      this.eventService.publishEndpointErrors(errs);
     }, { injector: this.injector });
   }
 
