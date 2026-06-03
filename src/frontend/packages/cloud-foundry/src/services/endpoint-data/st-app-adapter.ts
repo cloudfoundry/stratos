@@ -5,7 +5,7 @@ import { StApp } from './stratos-types';
 
 // Adapter from V3-native StApp (signal-native EndpointDataService shape) to
 // the legacy APIResource<IApp> envelope expected by V2-era consumers
-// (CardCfRecentAppsComponent template, OrgQuotaHelper, getMetricFromApps,
+// (CardCfRecentAppsComponent template, getMetricFromApps,
 // appDataSort, etc.). Keeps the v2 wire-shape contract alive at consumer
 // boundaries without round-tripping through the ngrx pagination cache —
 // the legacy /pp/v1/cf/apps?per_page=100 fetch dies, the v2-shape API
