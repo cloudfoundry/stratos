@@ -28,15 +28,13 @@ import { SystemInfo } from '../types/system.types';
  * Architectural notes:
  *   - Service does NOT dispatch wrapper actions
  *     (StartRequestAction / WrapperRequestActionSuccess etc). It owns
- *     lifecycle internally via per-guid signals. Legacy effects still
- *     fire from legacy dispatchers during the transition; both paths
- *     run in parallel until Wave 5 deletes the old one.
- *   - Service owns its own /pp/v1/info HTTP call. During Waves 1-4 the
- *     legacy `system.effects.ts` GET path also runs; two HTTP calls per
- *     hydration is intentional and gets cleaned up in Wave 5.
- *   - `getAll(login)` carries the `login` flag for Wave 5's auth wire
- *     (verifyAuth$ -> service.getAll(true) -> LoginSuccess). Wave 1
- *     stores it as a last-call flag only.
+ *     lifecycle internally via per-guid signals.
+ *   - Service owns its own /pp/v1/info HTTP call — the sole fetcher of
+ *     system info now that the legacy `system.effects.ts` GET path is
+ *     removed. The endpoints map carries the per-endpoint metadata that
+ *     fetch supplies.
+ *   - `getAll(login)` carries the `login` flag for the auth wire
+ *     (verifyAuth$ -> service.getAll(true) -> LoginSuccess).
  */
 
 const SYSTEM_INFO_URL = '/pp/v1/info';

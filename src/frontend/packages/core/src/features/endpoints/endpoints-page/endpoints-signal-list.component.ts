@@ -10,7 +10,6 @@ import {
   UserFavoriteManager,
   entityCatalog,
   getFullEndpointApiUrl,
-  stratosEntityCatalog,
 } from '@stratosui/store';
 
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
@@ -334,11 +333,6 @@ export class EndpointsSignalListComponent {
     this.confirmDialog.open(config, () => {
       void this.handleAction(this.endpointsConfig.disconnectEndpoint(ep.guid, ep.cnsi_type), () => {
         this.snackBar.show(`Disconnected endpoint '${ep.name}'`);
-        // System info also needs a refresh so menu / nav items that key off
-        // connection status update — same call the legacy path made.
-        if (stratosEntityCatalog?.systemInfo?.api?.getSystemInfo) {
-          stratosEntityCatalog.systemInfo.api.getSystemInfo();
-        }
       });
     });
   }

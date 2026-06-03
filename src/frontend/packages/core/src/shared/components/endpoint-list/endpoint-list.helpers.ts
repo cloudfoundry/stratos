@@ -1,6 +1,6 @@
 import { ComponentRef, EnvironmentInjector, Injectable, ViewContainerRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ActionState, EndpointModel, EndpointsDataService, entityCatalog, stratosEntityCatalog } from '@stratosui/store';
+import { ActionState, EndpointModel, EndpointsDataService, entityCatalog } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -96,12 +96,11 @@ export class EndpointListHelper {
             false
           );
           this.confirmDialog.open(confirmation, () => {
-            // W36-B Wave 3: dispatch via EndpointsDataService.
-            // Promise<ActionState>; the legacy pairwise dance over the
-            // Observable form collapses to a single await.
+            // Disconnect via the signal-native EndpointsDataService
+            // (Promise<ActionState>); it updates the endpoints signal so the
+            // list and nav reflect the change without a separate refresh.
             void this.handlePromiseAction(this.endpointsData.disconnect(item.guid), () => {
               this.snackBarService.show(`Disconnected endpoint '${item.name}'`);
-              stratosEntityCatalog.systemInfo.api.getSystemInfo();
             });
           });
         },
