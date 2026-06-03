@@ -1,15 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  EntityService,
-  stratosEntityCatalog,
   ActionState,
   getDefaultActionState,
+  UserProfileDataService,
   UserProfileInfo,
   UserProfileInfoEmail,
   UserProfileInfoUpdates } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { take, defaultIfEmpty, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
 
@@ -19,13 +18,12 @@ import { AuthSignalService } from './signals/auth-signal.service';
 })
 export class UserProfileService {
   private authSignals = inject(AuthSignalService);
+  private userProfileData = inject(UserProfileDataService);
 
 
   isError$: Observable<boolean>;
 
   isFetching$: Observable<boolean>;
-
-  entityService: Observable<EntityService<UserProfileInfo>>;
 
   userProfile$: Observable<UserProfileInfo>;
 
@@ -42,33 +40,29 @@ export class UserProfileService {
       map(data => data.user.guid)
     );
 
-    this.entityService = this.userGuid$.pipe(
-      take(1),
-      map(userGuid => stratosEntityCatalog.userProfile.store.getEntityService(userGuid)),
-      publishReplay(1),
-      refCount()
-    );
-
-    this.userProfile$ = this.entityService.pipe(
-      switchMap(service => service.waitForEntity$),
-      map(({ entity }) => entity),
+    // Read the profile off the signal-native UserProfileDataService (replaces
+    // the ngrx `userProfile` EntityService). Same emission shape as before:
+    // only emit a populated profile.
+    this.userProfile$ = this.userProfileData.profile$.pipe(
       filter(data => data && !!data.id)
     );
-    this.isFetching$ = this.entityService.pipe(
-      switchMap(service => service.isFetchingEntity$)
-    );
+    this.isFetching$ = this.userProfileData.fetching$;
 
-    this.isError$ = this.entityService.pipe(
-      switchMap(es => es.entityMonitor.entityRequest$),
-      filter(requestInfo => !!requestInfo && !requestInfo.fetching),
-      map(requestInfo => requestInfo.error)
+    // Mirror the legacy behaviour: only report the error once the fetch has
+    // settled (not while still fetching).
+    this.isError$ = combineLatest([
+      this.userProfileData.fetching$,
+      this.userProfileData.error$
+    ]).pipe(
+      filter(([fetching]) => !fetching),
+      map(([, error]) => error)
     );
   }
 
   fetchUserProfile() {
     // Once we have the user's guid, fetch their profile
-    this.userGuid$.pipe(take(1), defaultIfEmpty(null)).subscribe(userGuid => {
-      if (userGuid) { stratosEntityCatalog.userProfile.api.get(userGuid); }
+    this.userGuid$.pipe(take(1)).subscribe(userGuid => {
+      if (userGuid) { this.userProfileData.fetch(userGuid); }
     });
   }
 
@@ -124,7 +118,7 @@ export class UserProfileService {
       this.setPrimaryEmailAddress(updatedProfile, profileChanges.emailAddress);
     }
 
-    return stratosEntityCatalog.userProfile.api.updateProfile<ActionState>(updatedProfile, profileChanges.currentPassword).pipe(
+    return this.userProfileData.updateProfile(updatedProfile, profileChanges.currentPassword).pipe(
       filter(item => item && !item.busy)
     );
   }
@@ -134,7 +128,7 @@ export class UserProfileService {
       oldPassword: profileChanges.currentPassword,
       password: profileChanges.newPassword
     };
-    return stratosEntityCatalog.userProfile.api.updatePassword<ActionState>(profile.id, passwordUpdates).pipe(
+    return this.userProfileData.updatePassword(profile.id, passwordUpdates).pipe(
       filter(item => item && !item.busy)
     );
   }

@@ -7,18 +7,14 @@ import { IStratosEntityDefinition } from './entity-catalog/entity-catalog.types'
 import {
   STRATOS_ENDPOINT_TYPE,
   systemInfoEntityType,
-  userProfileEntityType,
 } from './helpers/stratos-entity-factory';
 import { stratosEntityFactory } from './public-api';
 import {
   SystemInfoActionBuilder,
   systemInfoActionBuilder,
-  UserProfileActionBuilder,
-  userProfileActionBuilder,
 } from './stratos-action-builders';
 import { stratosEntityCatalog } from './stratos-entity-catalog';
 import { SystemInfo } from './types/system.types';
-import { UserProfileInfo } from './types/user-profile.types';
 
 export function generateStratosEntities(): StratosBaseCatalogEntity[] {
   /**
@@ -32,7 +28,6 @@ export function generateStratosEntities(): StratosBaseCatalogEntity[] {
   };
   return [
     generateSystemInfo(stratosType),
-    generateUserProfile(stratosType),
     generateMetricsEndpoint(),
   ];
 }
@@ -54,25 +49,6 @@ function generateSystemInfo(stratosType: any) {
     }
   );
   return stratosEntityCatalog.systemInfo;
-}
-
-function generateUserProfile(stratosType: any) {
-  const definition: IStratosEntityDefinition = {
-    schema: stratosEntityFactory(userProfileEntityType),
-    type: userProfileEntityType,
-    endpoint: stratosType,
-  };
-  stratosEntityCatalog.userProfile = new StratosCatalogEntity<
-    undefined,
-    UserProfileInfo,
-    UserProfileActionBuilder
-  >(
-    definition,
-    {
-      actionBuilders: userProfileActionBuilder
-    }
-  );
-  return stratosEntityCatalog.userProfile;
 }
 
 function generateMetricsEndpoint() {

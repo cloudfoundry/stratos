@@ -142,6 +142,7 @@ export {
 } from './actions/pagination.actions';
 export { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 export type { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from './types/user-profile.types';
+export { UserProfileDataService } from './services/user-profile-data.service';
 export { BrowserStandardEncoder } from './browser-encoder';
 export type { IUserFavoritesGroups } from './types/favorite-groups.types';
 export { getEndpointIDFromFavorite } from './user-favorite-helpers';
