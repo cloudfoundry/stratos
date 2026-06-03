@@ -4,7 +4,6 @@ import { GitPackageModule } from '@stratosui/git';
 
 import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
-import { CfValidateEffects } from './effects/request.effects';
 import { ServiceInstanceEffects } from './effects/service-instance.effects';
 import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.service';
 
@@ -13,7 +12,6 @@ import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.serv
     CloudFoundryReducersModule,
     EffectsModule.forFeature([
       ServiceInstanceEffects,
-      CfValidateEffects,
     ]),
     // Brings in GitSCMService
     GitPackageModule,

@@ -12,7 +12,6 @@ import { ActiveRouteCfOrgSpace } from './features/cf/cf-page.types';
 import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryReducersModule } from './store/cloud-foundry.reducers.module';
 import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
-import { CfValidateEffects } from './store/effects/request.effects';
 import { ServiceInstanceEffects } from './store/effects/service-instance.effects';
 
 @NgModule({
@@ -22,7 +21,6 @@ import { ServiceInstanceEffects } from './store/effects/service-instance.effects
     EffectsModule.forRoot([]),
     EffectsModule.forFeature([
       ServiceInstanceEffects,
-      CfValidateEffects,
     ]),
     HttpClientTestingModule,
   ],
