@@ -1,14 +1,12 @@
-import { Injectable, signal, Injector, inject } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Injectable, computed, signal, Injector, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   StratosStatus, GeneralEntityAppState,
-  EndpointModel, endpointEntityType, STRATOS_ENDPOINT_TYPE,
-  selectEntity, EntityCatalogHelpers,
+  EndpointsDataService, EndpointErrorEventsService,
 } from '@stratosui/store';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith, take } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 
@@ -81,28 +79,42 @@ export class GlobalEventService {
   private _readEvents = signal<Map<string, IGlobalEvent>>(new Map<string, IGlobalEvent>());
   public readEvents = this._readEvents.asReadonly();
 
-  // Signal-native imperative event channel — wholesale-replaced on each
-  // publishEndpointErrors() call. Sits alongside the ngrx-driven event
-  // stream so signal-native callers (MergeOrchestrator-backed pages) can
-  // surface endpoint errors through the same page-header banner without
-  // round-tripping via ngrx state. Last-write-wins; per-source isolation
-  // is intentionally not implemented because Stratos tears down the
-  // previous page's signal-config service before mounting the next, so
-  // only one orchestrator publishes at any one time.
-  //
-  // Persisted to sessionStorage so a refresh or direct nav to
-  // /events/endpoints restores the last known endpoint-error events
-  // without needing the publishing orchestrator to re-mount and refire.
-  // Reads on construct (hydrate); writes on every publishEndpointErrors.
-  // Cleared by storage-tab close, not by sign-out — ngrx-derived events
-  // already clear with auth state.
-  private _signalEvents = signal<IGlobalEvent[]>(loadPersistedSignalEvents());
+  // Endpoint-error banner events, derived from the signal-native
+  // EndpointErrorEventsService (the single source for per-endpoint error
+  // history, fed centrally from the signal data layer). Replaces both the
+  // former imperative publishEndpointErrors/_signalEvents channel and the
+  // ngrx app.module addEventConfig that read internalEventStateSelector.
+  // One event per endpoint with ≥1 backend (5xx) error; links to the
+  // /errors/:id history page.
+  private readonly _endpointErrorEvents = computed<IGlobalEvent[]>(() => {
+    const byEndpoint = this.endpointErrorEvents.eventsByEndpoint();
+    const names = this.endpointsData.endpoints();
+    const events: IGlobalEvent[] = [];
+    byEndpoint.forEach((errs, guid) => {
+      const backendErrors = errs.filter(e => parseInt(e.eventCode, 10) >= 500);
+      if (!backendErrors.length) { return; }
+      const name = names.get(guid)?.name ?? guid;
+      events.push({
+        key: `${endpointEventKey}-${guid}`,
+        message: backendErrors.length > 1
+          ? `There are ${backendErrors.length} errors associated with the endpoint '${name}'`
+          : `There is an error associated with the endpoint '${name}'`,
+        endpointName: name,
+        endpointId: guid,
+        detail: backendErrors[0].message,
+        link: `/errors/${guid}`,
+        type: 'error',
+        stratosStatus: this.eventTypeToStratosStatus('error'),
+      });
+    });
+    return events;
+  });
 
   // Per-key static events published from signal-driven sources (e.g.
   // app.module's timeout-session / polling-disabled banners that used to
   // observe `state.dashboard.*` via ngrx). Each entry is keyed; setting
   // `null` removes that key. Merged into `events$` alongside the ngrx-
-  // driven and `_signalEvents` channels.
+  // driven and endpoint-error channels.
   private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
 
   public events$: Observable<IGlobalEvent[]>;
@@ -130,60 +142,6 @@ export class GlobalEventService {
         next.delete(key);
       }
       return next;
-    });
-  }
-
-  /**
-   * Publish endpoint-error events from signal-native callers. Each
-   * entry's value is whatever the source's error() signal holds —
-   * typically an HttpErrorResponse from an Angular HttpClient call.
-   * Endpoint name is resolved from the ngrx endpoint store; CAPI body
-   * detail is extracted when the error is an HttpErrorResponse with a
-   * v3 `{errors:[{detail}]}` payload.
-   *
-   * Wholesale-replace: each call REPLACES the prior set. Pass an empty
-   * map to clear all signal-published endpoint errors.
-   */
-  public publishEndpointErrors(errors: ReadonlyMap<string, unknown>): void {
-    const events: IGlobalEvent[] = [];
-    if (errors.size === 0) {
-      this._signalEvents.set(events);
-      persistSignalEvents(events);
-      return;
-    }
-    this.store.pipe(take(1)).subscribe((appState: GeneralEntityAppState) => {
-      // The `stratos/endpoint` catalog entry no longer exists (retired in
-      // W36-B/C Wave 5). Endpoints remain keyed under the deterministic
-      // entity key produced by `buildEntityKey`, so derive it directly
-      // instead of looking it up via the catalog.
-      const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
-      for (const [cnsiGuid, err] of errors) {
-        const endpoint = selectEntity<EndpointModel>(endpointEntityKey, cnsiGuid)(appState);
-        const name = endpoint?.name ?? cnsiGuid;
-        const detail = formatEndpointErrorDetail(err);
-        events.push({
-          key: `${endpointEventKey}-${cnsiGuid}`,
-          // `message` kept as a flat string for legacy renderers; the
-          // structured fields below let title/body templates render the
-          // endpoint identifier prominently above the error detail.
-          message: `${name} (${cnsiGuid}): ${detail}`,
-          endpointName: name,
-          endpointId: cnsiGuid,
-          detail,
-          // No link for signal-published events. The legacy /errors/:id
-          // page accumulated per-endpoint error history from the ngrx
-          // store and was useful when there were multiple historical
-          // errors per endpoint. Signal-published errors only carry the
-          // current latest error (no history), so the destination page
-          // would render empty. Omitting `link` hides the View button
-          // via the row template's `@if (event.link)` guard.
-          link: '',
-          type: 'error',
-          stratosStatus: this.eventTypeToStratosStatus('error'),
-        });
-      }
-      this._signalEvents.set(events);
-      persistSignalEvents(events);
     });
   }
 
@@ -352,21 +310,23 @@ export class GlobalEventService {
 
   private store = inject(Store<GeneralEntityAppState>);
   private injector = inject(Injector);
+  private endpointErrorEvents = inject(EndpointErrorEventsService);
+  private endpointsData = inject(EndpointsDataService);
 
   constructor() {
-    const signalEvents$ = toObservable(this._signalEvents, { injector: this.injector });
+    const endpointErrorEvents$ = toObservable(this._endpointErrorEvents, { injector: this.injector });
     const staticEvents$ = toObservable(this._staticEvents, { injector: this.injector });
     const eventsAndPriority$ = combineLatest([
       this.getEventsAndPriorityType(),
       toObservable(this._readEvents, { injector: this.injector }),
-      signalEvents$,
+      endpointErrorEvents$,
       staticEvents$,
     ]).pipe(
-      map(([[ngrxEvents, types], readEvents, signalEvents, staticEvents]) => {
-        // Merge ngrx-derived events with signal-published events. Apply
-        // read state to both so the page-header banner's dismiss control
-        // works the same regardless of source.
-        const events = [...ngrxEvents, ...signalEvents, ...Array.from(staticEvents.values())];
+      map(([[ngrxEvents, types], readEvents, endpointErrors, staticEvents]) => {
+        // Merge ngrx-derived events with the signal-native endpoint-error
+        // events. Apply read state to all so the page-header banner's
+        // dismiss control works the same regardless of source.
+        const events = [...ngrxEvents, ...endpointErrors, ...Array.from(staticEvents.values())];
         events.forEach(event => {
           event.read = !!readEvents.get(event.key);
         });
@@ -396,61 +356,4 @@ export class GlobalEventService {
       map(priorityEventType => this.eventTypeToStratosStatus(priorityEventType))
     );
   }
-}
-
-// CAPI v3 error response shape used by `/v3/...` endpoints.
-interface CapiErrorBody {
-  errors?: Array<{ detail?: string; title?: string; code?: number | string }>;
-  error?: string;
-}
-
-/**
- * Best-effort extraction of a human-readable error string from whatever
- * the source's error() signal holds. Tries (in order):
- *   1. CAPI v3 body shape: `{errors: [{detail}]}`
- *   2. Stratos backend wrapped error: `{error: "..."}`
- *   3. HttpErrorResponse status line
- *   4. Native Error.message
- *   5. String coercion fallback
- */
-// sessionStorage key for the signal-published endpoint-error events.
-// Scoped to the browser tab — survives reload, cleared on tab close.
-const SIGNAL_EVENTS_STORAGE_KEY = 'stratos.globalEvents.signalEndpointErrors';
-
-function loadPersistedSignalEvents(): IGlobalEvent[] {
-  try {
-    const raw = sessionStorage.getItem(SIGNAL_EVENTS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed as IGlobalEvent[] : [];
-  } catch {
-    return [];
-  }
-}
-
-function persistSignalEvents(events: IGlobalEvent[]): void {
-  try {
-    if (events.length === 0) {
-      sessionStorage.removeItem(SIGNAL_EVENTS_STORAGE_KEY);
-    } else {
-      sessionStorage.setItem(SIGNAL_EVENTS_STORAGE_KEY, JSON.stringify(events));
-    }
-  } catch {
-    // ignore — quota errors, disabled storage, etc. fall back to in-memory only
-  }
-}
-
-function formatEndpointErrorDetail(err: unknown): string {
-  if (err == null) return 'failed to load';
-  if (err instanceof HttpErrorResponse) {
-    const body = err.error as CapiErrorBody | string | null | undefined;
-    if (body && typeof body === 'object') {
-      if (body.errors?.[0]?.detail) return body.errors[0].detail;
-      if (typeof body.error === 'string') return body.error;
-    }
-    if (typeof body === 'string' && body.length > 0) return body;
-    return `${err.status} ${err.statusText || 'failed to load'}`.trim();
-  }
-  if (err instanceof Error) return err.message;
-  return String(err);
 }

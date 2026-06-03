@@ -17,11 +17,8 @@ import {
   endpointEntityType,
   STRATOS_ENDPOINT_TYPE,
   getAPIRequestDataState,
-  selectEntity,
-  internalEventStateSelector,
   AppStoreModule,
   generateStratosEntities,
-  EndpointModel,
   IFavoriteMetadata,
   UserFavorite,
   UserFavoriteManager,
@@ -48,7 +45,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { DashboardDataService } from './core/dashboard-data.service';
 import { LoggedInService } from './logged-in.service';
 import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { endpointEventKey, GlobalEventData, GlobalEventService } from './shared/global-events.service';
+import { GlobalEventService } from './shared/global-events.service';
 import { SidePanelService } from './shared/services/side-panel.service';
 import { SharedModule } from './shared/shared.module';
 import { TabNavService } from './tab-nav.service';
@@ -216,42 +213,10 @@ export class AppModule {
         }
       });
     });
-    eventService.addEventConfig<{
-      count: number,
-      endpoint: EndpointModel;
-    }>({
-      eventTriggered: (state: GeneralEntityAppState) => {
-        const eventState = internalEventStateSelector(state);
-        return Object.entries(eventState.types.endpoint).reduce((res, [eventId, value]) => {
-          const backendErrors = value.filter(error => {
-            const eventCode = parseInt(error.eventCode, 10);
-            return eventCode >= 500;
-          });
-          if (!backendErrors.length) {
-            return res;
-          }
-          // The `stratos/endpoint` catalog entry no longer exists (the
-          // legacy ngrx slice + schema-only catalog placeholder were
-          // retired in W36-B/C Wave 5). The store still keys endpoints
-          // under the same deterministic entity key, so compute it
-          // directly via `buildEntityKey` rather than catalog lookup.
-          const endpointEntityKey = EntityCatalogHelpers.buildEntityKey(endpointEntityType, STRATOS_ENDPOINT_TYPE);
-          res.push(new GlobalEventData(true, {
-            endpoint: selectEntity<EndpointModel>(endpointEntityKey, eventId)(state),
-            count: backendErrors.length
-          }));
-          return res;
-        }, []);
-      },
-      message: data => {
-        const part1 = data.count > 1 ? `There are ${data.count} errors` : `There is an error`;
-        const part2 = data.endpoint ? ` associated with the endpoint '${data.endpoint.name}'` : ` associated with multiple endpoints`;
-        return part1 + part2;
-      },
-      key: data => `${endpointEventKey}-${data.endpoint.guid}`,
-      link: data => `/errors/${data.endpoint.guid}`,
-      type: 'error'
-    });
+    // Endpoint backend-error banner events are now derived signal-natively
+    // inside GlobalEventService from EndpointErrorEventsService (fed by the
+    // signal data layer), replacing the ngrx internalEventStateSelector read
+    // that used to live here.
 
 
     // This should be brought back in in the future
