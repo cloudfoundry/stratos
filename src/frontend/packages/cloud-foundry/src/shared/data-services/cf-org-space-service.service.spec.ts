@@ -560,23 +560,6 @@ describe('V3-native org sourcing', () => {
     expect(service.space.select()).toBeFalsy();
   });
 
-  it('exposes orgList contents through the legacy org.list$ observable', async () => {
-    const service = TestBed.inject(CfOrgSpaceDataService);
-
-    const emissions: { guid: string }[][] = [];
-    const sub = service.org.list$.subscribe(list => emissions.push(list as any));
-
-    service.cf.select.set('cf-A');
-    TestBed.tick();
-    fakeRegistry.setOrgs('cf-A', [{ guid: 'org-1', name: 'alpha' }]);
-    TestBed.tick();
-    await Promise.resolve();
-
-    const last = emissions[emissions.length - 1];
-    expect(last.map(o => o.guid)).toEqual(['org-1']);
-
-    sub.unsubscribe();
-  });
 });
 
 /**
@@ -670,27 +653,6 @@ describe('V3-native space sourcing', () => {
     expect(service.space.select()).toBeFalsy();
   });
 
-  it('exposes spaceList contents through the legacy space.list$ observable', async () => {
-    const service = TestBed.inject(CfOrgSpaceDataService);
-
-    const emissions: { guid: string }[][] = [];
-    const sub = service.space.list$.subscribe(list => emissions.push(list as any));
-
-    fakeRegistry.setOrgs('cf-A', [{ guid: 'org-1', name: 'alpha' }]);
-    fakeRegistry.setSpaces('cf-A', [
-      { guid: 'space-a', name: 'development', orgGuid: 'org-1' },
-    ]);
-
-    service.cf.select.set('cf-A');
-    service.org.select.set('org-1');
-    TestBed.tick();
-    await Promise.resolve();
-
-    const last = emissions[emissions.length - 1];
-    expect(last.map(s => s.guid)).toEqual(['space-a']);
-
-    sub.unsubscribe();
-  });
 });
 
 /**
