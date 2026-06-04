@@ -16,6 +16,7 @@ import { filter, startWith } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
+  AppInputDirective,
   CustomFormFieldComponent,
   CustomSelectComponent,
   CustomOptionComponent,
@@ -92,6 +93,7 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,

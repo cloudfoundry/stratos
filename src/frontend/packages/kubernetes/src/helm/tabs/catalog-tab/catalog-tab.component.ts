@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
-import { CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
+import { AppInputDirective, CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
 import { SignalListComponent, SignalListConfig } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
 import { EndpointModel, EndpointsDataService } from '../../../../../store/src/public-api';
 import { MonocularChart } from '../../../services/endpoint-data/kube-types';
@@ -27,6 +27,7 @@ import { ChartItemComponent } from '../../monocular/chart-item/chart-item.compon
   imports: [
     CommonModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     SignalListComponent,
     ChartItemComponent,

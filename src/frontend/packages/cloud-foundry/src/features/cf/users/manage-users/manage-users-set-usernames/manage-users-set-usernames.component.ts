@@ -6,6 +6,7 @@ import { combineLatest, Observable, of } from 'rxjs';
 import { take, defaultIfEmpty, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import {
+  AppInputDirective,
   CustomFormFieldComponent,
   PermissionConfig,
   CurrentUserPermissionsService,
@@ -43,6 +44,7 @@ export class ManageUsersSetUsernamesHelper {
   imports: [
     CommonModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     StackedInputActionsComponent
   ]
