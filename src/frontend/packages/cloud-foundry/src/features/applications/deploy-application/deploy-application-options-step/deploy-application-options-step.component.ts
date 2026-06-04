@@ -107,10 +107,50 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     );
   }
 
+  // Guards the no_route / random_route mutual-exclusivity wiring against
+  // feedback loops: setValue/enable/disable on one control fires the
+  // other's valueChanges, which would otherwise recurse and undo the
+  // address-field state.
+  private syncingRoutes = false;
+
   private disableAddressFields() {
     this.deployOptionsForm.controls.host.disable();
     this.deployOptionsForm.controls.domain.disable();
     this.deployOptionsForm.controls.path.disable();
+  }
+
+  // no_route ("don't create a route") and random_route ("create a random
+  // route") are mutually exclusive — CF rejects `--no-route` together with
+  // `--random-route`. Checking either one CLEARS the other's value (so a
+  // stale flag isn't read out in formToObj and sent to cf push) and
+  // disables it; unchecking re-enables the other. random_route stays
+  // disabled on redeploy (appGuid present).
+  private syncRouteOptions(changed: 'no_route' | 'random_route', checked: boolean) {
+    if (this.syncingRoutes) {
+      return;
+    }
+    this.syncingRoutes = true;
+    try {
+      const controls = this.deployOptionsForm.controls;
+      const other = changed === 'no_route' ? controls.random_route : controls.no_route;
+      if (checked) {
+        // Clear the value FIRST so formToObj never reads a stale `true`,
+        // then lock the control.
+        if (other.value) {
+          other.setValue(false);
+        }
+        other.disable();
+        this.disableAddressFields();
+      } else {
+        const canEnable = other === controls.random_route ? !this.appGuid : true;
+        if (canEnable) {
+          other.enable();
+        }
+        this.enableAddressFields();
+      }
+    } finally {
+      this.syncingRoutes = false;
+    }
   }
 
   private enableAddressFields() {
@@ -163,31 +203,11 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
       share()
     );
 
-    // Ensure that when the no route + random route options are checked the host, domain and path fields are enabled/disabled
-    this.subs.push(noRouteChanged$.subscribe(value => {
-      if (value) {
-        this.disableAddressFields();
-        this.deployOptionsForm.controls.random_route.disable();
-      } else {
-        this.enableAddressFields();
-        if (!this.appGuid) {
-          // This can only be enabled if this is not a redeploy
-          this.deployOptionsForm.controls.random_route.enable();
-        }
-      }
-    }));
-    this.subs.push(combineLatest([
-      noRouteChanged$,
-      randomRouteChanged$
-    ]).subscribe(([noRoute, randomRoute]) => {
-      // control.valueChanges fires whenever the value ... or enabled/disabled state changes. This means whenever noRouteChanged$ changes
-      // randomRoute this also fires ... which undos the host+domain state
-      if (noRoute || randomRoute) {
-        this.disableAddressFields();
-      } else {
-        this.enableAddressFields();
-      }
-    }));
+    // Keep no_route / random_route mutually exclusive (two-way) and toggle
+    // the host/domain/path address fields. See syncRouteOptions for why the
+    // re-entrancy guard is needed.
+    this.subs.push(noRouteChanged$.subscribe(value => this.syncRouteOptions('no_route', !!value)));
+    this.subs.push(randomRouteChanged$.subscribe(value => this.syncRouteOptions('random_route', !!value)));
 
     // Extract any existing values from the app's env var and assign to form.
     // Redeploy path: the wizard was launched against an existing app and the
