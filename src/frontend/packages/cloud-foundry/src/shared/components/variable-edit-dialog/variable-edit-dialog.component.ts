@@ -114,8 +114,8 @@ export class VariableEditDialogComponent {
   /** Save is gated solely by hard name errors — warnings never block. */
   readonly canSave: Signal<boolean> = computed(() => !this.nameValidation().hardError);
 
-  /** Format is offered only in JSON mode and only when the text parses —
-   *  pretty-printing non-JSON makes no sense. */
+  /** Format/Minify is offered only in JSON mode and only when the text
+   *  parses — reformatting non-JSON makes no sense. */
   readonly canFormat: Signal<boolean> = computed(() => {
     if (!this.jsonMode()) {
       return false;
@@ -123,6 +123,16 @@ export class VariableEditDialogComponent {
     try {
       JSON.parse(this.value());
       return true;
+    } catch {
+      return false;
+    }
+  });
+
+  /** Whether the value is already canonical-minified JSON — drives the
+   *  Format ↔ Minify toggle's label and direction. */
+  readonly isMinified: Signal<boolean> = computed(() => {
+    try {
+      return this.value() === JSON.stringify(JSON.parse(this.value()));
     } catch {
       return false;
     }
@@ -161,13 +171,16 @@ export class VariableEditDialogComponent {
   }
 
   /**
-   * Pretty-print the editor text (jq-style, 2-space) for readability. This
-   * is a pure editing aid: because save() always re-minifies valid JSON, it
-   * never changes the value that gets stored. No-op on invalid JSON.
+   * Toggle the editor text between pretty-printed (jq-style, 2-space) and
+   * canonical minified JSON. Pure editing aid: because save() always
+   * re-minifies valid JSON, this never changes the stored value. No-op on
+   * invalid JSON.
    */
-  formatJson(): void {
+  toggleFormat(): void {
     try {
-      this.value.set(JSON.stringify(JSON.parse(this.value()), null, 2));
+      const parsed = JSON.parse(this.value());
+      const minified = JSON.stringify(parsed);
+      this.value.set(this.value() === minified ? JSON.stringify(parsed, null, 2) : minified);
     } catch {
       // Invalid JSON — leave the text as-is (the warning already shows).
     }

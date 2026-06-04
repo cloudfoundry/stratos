@@ -28,8 +28,8 @@
       <span class="text-sm text-content-muted">Value</span>
       <div class="flex items-center gap-2">
         @if (jsonMode()) {
-          <button type="button" class="btn btn-secondary btn-sm" (click)="formatJson()" [disabled]="!canFormat()">
-            Format
+          <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+            {{ isMinified() ? 'Format' : 'Minify' }}
           </button>
         }
         <button type="button" class="btn btn-secondary btn-sm" (click)="toggleJsonMode()">
