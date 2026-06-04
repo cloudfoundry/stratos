@@ -300,7 +300,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.isFetching$ = this.applicationService.isFetchingApp$;
+    // The full-page "Retrieving application" overlay is for the INITIAL load
+    // only. Lifecycle actions (restage/start/stop/restart) refresh the app
+    // entity on success, which flips isFetchingApp$ true again — but the app
+    // is already on screen and the Status card (stage-row progress) + the
+    // snackbar convey the action's progress/result in place. Gating on "app
+    // not yet present" stops those refreshes from blanking the whole page with
+    // the spinner (the restage repaint regression).
+    this.isFetching$ = observableCombineLatest(
+      this.applicationService.isFetchingApp$,
+      toObservable(this.detail.app, { injector: this.injector }),
+    ).pipe(
+      map(([isFetchingApp, app]) => isFetchingApp && !app),
+    );
 
     this.isBusyUpdating$ = toObservable(this.detail.updating, { injector: this.injector }).pipe(
       map(updating => ({ updating })),

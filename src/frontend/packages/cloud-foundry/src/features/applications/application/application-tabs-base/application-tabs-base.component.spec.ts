@@ -125,7 +125,7 @@ describe('ApplicationTabsBaseComponent', () => {
         // AppApplicationActionsService injects AppDetailDataService for
         // the post-op refresh fan-out. Provide a no-op stub so the test
         // doesn't need to thread the full HTTP-backed service.
-        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve() } },
+        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve(), app: signal(undefined), updating: signal(false) } },
         provideRouter([]),
         provideZonelessChangeDetection(),
       ]
