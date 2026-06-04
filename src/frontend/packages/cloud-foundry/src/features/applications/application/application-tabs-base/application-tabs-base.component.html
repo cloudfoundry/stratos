@@ -1,7 +1,7 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Application" [favorite]="favorite$ | async">
   <h1>{{ (applicationService.application$ | async)?.app?.entity?.name }} </h1>
 </app-page-header>
-<app-loading-page [isLoading]="isFetching$" text="Retrieving application" class="router-component">
+<app-loading-page [isLoading]="isFetching$" [text]="loadingText()" class="router-component">
   <app-application-action-bar></app-application-action-bar>
   <router-outlet></router-outlet>
 </app-loading-page>
