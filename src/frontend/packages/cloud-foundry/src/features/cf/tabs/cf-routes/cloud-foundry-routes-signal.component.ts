@@ -154,23 +154,9 @@ export class CloudFoundryRoutesSignalComponent {
     const typeColor = (r: StRoute): SignalListPillColor =>
       r.port != null ? 'warning' : 'neutral';
 
-    // CNSI is pre-chosen by the URL — show the dropdown but disable it so
-    // the scope is visible and can't drift. Parity with services + market-
-    // place tabs which also lead with a locked Cloud Foundry indicator.
-    const endpointName = computed(() =>
-      this.cfEndpointService.endpoint()?.entity?.name ?? cfGuid,
-    );
-    const cnsiOptions = computed(() => [{ label: endpointName(), value: cfGuid }]);
-    const selectedCnsi = signal<string | null>(cfGuid);
-    const cnsiLocked: Signal<boolean> = signal(true).asReadonly();
-
+    // CF is fixed by the URL (and named in the breadcrumb), so we don't show
+    // a locked Cloud Foundry dropdown — just the interactive Org/Space filters.
     const dropdowns: SignalListDropdown[] = [
-      {
-        label: 'Cloud Foundry',
-        options: cnsiOptions,
-        selected: selectedCnsi,
-        disabled: cnsiLocked,
-      },
       {
         label: 'Organization',
         options: this.routesConfig.orgOptions,
