@@ -55,8 +55,22 @@ func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error
 	}
 
 	perPage, page, present := parsePerPageAndPage(ctx)
-	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
-	raw, listErr := cfClient.AuditEvents().List(ctx.Request().Context(), params)
+	// Newest-first. Without this CF returns its default order and recent events
+	// land on the last page; the per-app tab (which filters this foundation-wide
+	// stream client-side) then never sees today's events unless it drains to the
+	// end. Mirrors the org/space audit-event handlers.
+	params := applyPagingParams(capi.NewQueryParams().WithOrderBy("-created_at"), perPage, page, present)
+	reqCtx := ctx.Request().Context()
+	raw, listErr := cfClient.AuditEvents().List(reqCtx, params)
+	// The per-CF endpoint token has a ~20-minute life; a request that fires while
+	// a token refresh is mid-flight loses the race and 401s (worst on this long
+	// foundation-wide drain). By retry time the refresh has landed, so rebuild the
+	// client to pick up the fresh token and retry the list once.
+	if listErr != nil && statusFromCapiError(listErr) == http.StatusUnauthorized {
+		if rc, rerr := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID); rerr == nil {
+			raw, listErr = rc.AuditEvents().List(reqCtx, params)
+		}
+	}
 	if listErr != nil {
 		return handleCapiError(ctx, listErr)
 	}
