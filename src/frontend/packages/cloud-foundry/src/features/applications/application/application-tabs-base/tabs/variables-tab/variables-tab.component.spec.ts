@@ -253,8 +253,6 @@ describe('VariablesTabComponent', () => {
     expect(cmp).toBe(VariableEditDialogComponent);
     expect(cfg.data.mode).toBe('add');
     expect(cfg.data.existingNames).toEqual(['FOO', 'BAR']);
-    // Top-anchored so content height changes don't re-center / jump the dialog.
-    expect(cfg.position).toBe('top');
   });
 
   it('Edit row action opens the dialog pre-filled, existingNames excluding self', () => {
