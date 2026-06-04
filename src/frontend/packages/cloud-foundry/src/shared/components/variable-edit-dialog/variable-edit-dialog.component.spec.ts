@@ -154,14 +154,25 @@ describe('VariableEditDialogComponent', () => {
   // Format button — pretty-print JSON in place (editing aid only)
   // -------------------------------------------------------------------------
 
-  it('formatJson() pretty-prints valid JSON to 2-space indentation', () => {
+  it('toggleFormat() pretty-prints minified JSON to 2-space indentation', () => {
     const { cmp } = make({ mode: 'edit', name: 'CFG', value: '{"a":1}' });
     expect(cmp.jsonMode()).toBe(true);
-    cmp.formatJson();
+    expect(cmp.isMinified()).toBe(true); // button reads "Format"
+    cmp.toggleFormat();
     expect(cmp.value()).toBe('{\n  "a": 1\n}');
   });
 
-  it('pretty-printing then saving stores the SAME minified value as saving directly', () => {
+  it('toggleFormat() minifies pretty-printed JSON (round-trips back)', () => {
+    const { cmp } = make({ mode: 'edit', name: 'CFG', value: '{\n  "a": 1\n}' });
+    expect(cmp.isMinified()).toBe(false); // button reads "Minify"
+    cmp.toggleFormat();
+    expect(cmp.value()).toBe('{"a":1}');
+    expect(cmp.isMinified()).toBe(true);
+    cmp.toggleFormat(); // and back to pretty
+    expect(cmp.value()).toBe('{\n  "a": 1\n}');
+  });
+
+  it('formatting then saving stores the SAME minified value as saving directly', () => {
     const direct = make({ mode: 'add' });
     direct.cmp.name.set('CFG');
     direct.cmp.value.set('{"a":1,"b":[2,3]}');
@@ -170,17 +181,17 @@ describe('VariableEditDialogComponent', () => {
     const formatted = make({ mode: 'add' });
     formatted.cmp.name.set('CFG');
     formatted.cmp.value.set('{"a":1,"b":[2,3]}');
-    formatted.cmp.formatJson(); // expand for readability
+    formatted.cmp.toggleFormat(); // expand for readability
     formatted.cmp.save();
 
-    // Format changed the editor text, but the persisted value is identical.
+    // Toggling changed the editor text, but the persisted value is identical.
     expect(formatted.close.mock.calls[0][0]).toEqual(direct.close.mock.calls[0][0]);
   });
 
-  it('formatJson() is a no-op on invalid JSON', () => {
+  it('toggleFormat() is a no-op on invalid JSON', () => {
     const { cmp } = make({ mode: 'edit', name: 'X', value: 'not json' });
     cmp.toggleJsonMode(); // into JSON mode
-    cmp.formatJson();
+    cmp.toggleFormat();
     expect(cmp.value()).toBe('not json');
   });
 
