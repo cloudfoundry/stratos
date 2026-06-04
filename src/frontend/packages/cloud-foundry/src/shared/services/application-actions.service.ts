@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal, Signal } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
+import { ConfirmationDialogConfig, ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
 
 import { ApplicationService } from '../../features/applications/application.service';
 import { AppDeleteSelectionService } from '../../features/applications/app-delete-selection.service';
@@ -56,6 +56,7 @@ export class AppApplicationActionsService {
   private apps = inject(CfAppsSignalConfigService);
   private deleteSelection = inject(AppDeleteSelectionService);
   private statsRegistry = inject(AppStatsDataRegistry);
+  private snackBar = inject(TailwindSnackBarService);
 
   // In-flight flag delegates to AppLifecycleStateService — the leaf
   // shared-state service used to break the construction cycle with
@@ -451,7 +452,16 @@ export class AppApplicationActionsService {
       orgName: this.dataService.org()?.name ?? '',
       spaceName: this.dataService.space()?.name ?? '',
     });
-    this.router.navigate(['/applications', cfGuid, appGuid, 'delete']);
+    // Remember where to return after the delete. If the app was opened from
+    // the CF-scoped Applications wall (the row link tags ?breadcrumbs=cf), send
+    // the user back there instead of the global wall. Threaded through the
+    // delete nav chain as ?returnUrl and read in deleteWithCleanup.
+    const cfScoped = this.router.parseUrl(this.router.url).queryParams['breadcrumbs'] === 'cf';
+    const returnUrl = cfScoped ? `/cloud-foundry/${cfGuid}/applications` : undefined;
+    this.router.navigate(
+      ['/applications', cfGuid, appGuid, 'delete'],
+      returnUrl ? { queryParams: { returnUrl } } : undefined,
+    );
   }
 
   /**
@@ -473,6 +483,7 @@ export class AppApplicationActionsService {
     preResolvedTarget?: { appName: string; endpointName: string; orgName: string; spaceName: string },
   ): Promise<void> {
     const { cfg, target } = this.buildDialog('Delete', 'Are you sure you want to delete', 'Delete', preResolvedTarget);
+    const appName = preResolvedTarget?.appName ?? this.parseTarget(target).app;
     this.confirmDialog.open(cfg, () => {
       this.runLifecycleAction(
         'delete',
@@ -508,9 +519,17 @@ export class AppApplicationActionsService {
           await this.apps.deleteApp(cfGuid, appGuid);
         },
         () => {
-          // App is gone — navigate to the app wall instead of staying on
-          // the now-orphaned detail page.
-          this.router.navigate(['/applications']);
+          // App is gone. The in-page lifecycle-progress overlay is
+          // component-scoped to this (about-to-be-destroyed) detail page, so
+          // its 10s linger can't survive the navigation — pop a root-level
+          // snackbar (mounted on document.body, providedIn:'root') that rides
+          // the navigation and auto-dismisses after 10s.
+          this.snackBar.open(`Application "${appName}" deleted`, 'Dismiss', { duration: 10000 });
+          // Return to where the delete was launched from — the CF-scoped wall
+          // if the user came from one (threaded via ?returnUrl), else the
+          // global app wall.
+          const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'] || '/applications';
+          this.router.navigateByUrl(returnUrl);
         },
       );
     });

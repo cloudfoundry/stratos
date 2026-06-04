@@ -10,9 +10,11 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
+import { RETURN_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
@@ -40,6 +42,11 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private appsConfig = inject(CfAppsSignalConfigService);
+  private route = inject(ActivatedRoute);
+
+  // Where Cancel returns to — the CF-scoped wall when this flow was launched
+  // from one (?returnUrl set by new-application-base-step), else the global wall.
+  readonly returnUrl: string = this.route.snapshot.queryParams[RETURN_URL_PARAM] || '/applications';
 
   // FWT-959 Part 2 (Partition B): SignalStepHandle wiring for the 3-step
   // create-application flow. Cross-step state (CF/org/space + new app

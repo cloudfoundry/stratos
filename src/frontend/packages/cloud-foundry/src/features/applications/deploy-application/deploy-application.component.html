@@ -2,7 +2,7 @@
   <h1>{{ getTitle() | async }}</h1>
 </app-page-header>
 
-<app-steppers cancel="/applications">
+<app-steppers [cancel]="returnUrl">
   <!-- Select the cf/org/space -->
   @if (!appGuid) {
     <app-step [title]="'Cloud Foundry'" [signalHandle]="step1Handle">

@@ -12,6 +12,11 @@ import {
 } from '../deploy-application/deploy-application-steps.types';
 
 export const AUTO_SELECT_CF_URL_PARAM = 'auto-select-endpoint';
+// Query param carrying where a create/deploy flow should return on cancel /
+// success — set to the CF-scoped wall when launched from one, else absent
+// (callers fall back to the global wall). Shared by the create, deploy and
+// add-service-instance flows.
+export const RETURN_URL_PARAM = 'returnUrl';
 
 
 export interface IAppTileData extends ITileData {
@@ -64,6 +69,9 @@ export class NewApplicationBaseStepComponent {
       if (endpoint) {
         query[AUTO_SELECT_CF_URL_PARAM] = endpoint;
         query[BASE_REDIRECT_QUERY] += `/${endpoint}`;
+        // Launched from a CF-scoped Applications wall — return there (cancel /
+        // success) instead of the global wall.
+        query[RETURN_URL_PARAM] = `/cloud-foundry/${endpoint}/applications`;
       }
 
       this.router.navigate(`${baseUrl}/${type}`.split('/'), { queryParams: query });

@@ -20,7 +20,7 @@ import { SourceType } from '../../../store/types/deploy-application.types';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { AUTO_SELECT_CF_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
+import { AUTO_SELECT_CF_URL_PARAM, RETURN_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
 import { ApplicationDeploySourceTypes } from './deploy-application-steps.types';
 import { PageHeaderComponent, SignalStepHandle, SteppersComponent, StepComponent } from '@stratosui/core';
 import { CreateApplicationStep1Component } from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
@@ -64,6 +64,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
 
   appGuid: string;
+  // Where Cancel returns to — the CF-scoped wall when launched from one
+  // (?returnUrl, set by new-application-base-step), else the global wall.
+  readonly returnUrl: string = this.activatedRoute.snapshot.queryParams[RETURN_URL_PARAM] || '/applications';
   initCfOrgSpaceService: Subscription[] = [];
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);

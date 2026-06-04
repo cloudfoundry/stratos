@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
@@ -39,6 +39,7 @@ interface DomainHostForm {
 export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   private createAppState = inject(CreateAppStateService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private endpointDataRegistry = inject(EndpointDataRegistry);
 
@@ -75,7 +76,15 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
         : observableOf(appGuid),
       ),
       map(appGuid => {
-        this.router.navigate(['applications', cloudFoundry, appGuid, 'summary']);
+        // When created from a CF-scoped wall, tag the new app's detail page
+        // with ?breadcrumbs=cf so its "Applications" breadcrumb returns to the
+        // CF-scoped wall rather than the global one.
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+        const cfScoped = typeof returnUrl === 'string' && returnUrl.startsWith('/cloud-foundry/');
+        this.router.navigate(
+          ['applications', cloudFoundry, appGuid, 'summary'],
+          cfScoped ? { queryParams: { breadcrumbs: 'cf' } } : undefined,
+        );
         return { success: true };
       }),
       catchError((err: Error | HttpErrorResponse) => {
