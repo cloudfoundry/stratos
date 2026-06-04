@@ -8,11 +8,15 @@
       placeholder="Name"
       [ngModel]="name()"
       (ngModelChange)="name.set($event)">
-    @if (nameError()) {
-      <div class="mt-1 text-sm text-danger-shade-500">{{ nameError() }}</div>
-    } @else if (nameWarning()) {
-      <div class="mt-1 text-sm text-warning-shade-500">{{ nameWarning() }}</div>
-    }
+    <!-- Always-present, fixed-height slot so showing/clearing the message
+         never changes the dialog height (no jump on the first keystroke). -->
+    <div class="mt-1 text-sm leading-5 min-h-[1.25rem]">
+      @if (nameError()) {
+        <span class="text-danger-shade-500">{{ nameError() }}</span>
+      } @else if (nameWarning()) {
+        <span class="text-warning-shade-500">{{ nameWarning() }}</span>
+      }
+    </div>
   </div>
 
   <!-- Value (multiline Monaco editor below, full width) -->
