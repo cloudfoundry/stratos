@@ -50,6 +50,13 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   @Input() isRedeploy = false;
 
+  // A deploy scoped to an endpoint arrives with an `endpointGuid` query
+  // param (e.g. from a CF's Applications tab). The CF is fixed for the
+  // whole flow, so we pre-select AND lock the Cloud Foundry dropdown —
+  // org / space stay selectable. Distinct from isRedeploy, which locks
+  // all three.
+  endpointScoped = false;
+
   validate!: Observable<boolean>;
 
   @Input()
@@ -127,6 +134,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   ngOnInit() {
     if (this.route.root.snapshot.queryParams.endpointGuid) {
       this.cfOrgSpaceService.cf.select.set(this.route.root.snapshot.queryParams.endpointGuid);
+      this.endpointScoped = true;
     }
     this.spaces$ = this.getSpacesFromPermissions();
     this.hasSpaces$ = this.spaces$.pipe(
