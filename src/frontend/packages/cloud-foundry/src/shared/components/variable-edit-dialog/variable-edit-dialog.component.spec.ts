@@ -71,6 +71,20 @@ describe('VariableEditDialogComponent', () => {
     expect(cmp.nameError()).toMatch(/in use/i);
   });
 
+  it('does not surface the name error on a fresh create dialog (untouched), but still blocks Save', () => {
+    const { cmp } = make({ mode: 'add' });
+    expect(cmp.nameTouched()).toBe(false);
+    expect(cmp.nameError()).toMatch(/required/i); // validation still fails internally
+    expect(cmp.visibleNameError()).toBeNull();    // ...but nothing is shown yet
+    expect(cmp.canSave()).toBe(false);            // ...and Save stays disabled
+  });
+
+  it('surfaces the name error once the field is touched', () => {
+    const { cmp } = make({ mode: 'add' });
+    cmp.nameTouched.set(true);
+    expect(cmp.visibleNameError()).toMatch(/required/i);
+  });
+
   it('allows Save (with a warning) on a shell-unsafe but CF-valid name', () => {
     const { cmp } = make({ mode: 'add' });
     cmp.name.set('my-var');

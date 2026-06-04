@@ -96,6 +96,16 @@ export class VariableEditDialogComponent {
   readonly nameError: Signal<string | null> = computed(() => this.nameValidation().hardError);
   readonly nameWarning: Signal<string | null> = computed(() => this.nameValidation().warning);
 
+  /** The name field starts untouched so a freshly-opened create dialog does
+   *  not show "Name is required" before the user has typed. Set on first
+   *  input / blur. */
+  readonly nameTouched: WritableSignal<boolean> = signal(false);
+
+  /** Validation messages are surfaced only once the field is touched; the
+   *  underlying nameError still gates canSave regardless of display. */
+  readonly visibleNameError: Signal<string | null> = computed(() => this.nameTouched() ? this.nameError() : null);
+  readonly visibleNameWarning: Signal<string | null> = computed(() => this.nameTouched() ? this.nameWarning() : null);
+
   /** JSON warning only applies while editing in JSON mode. */
   readonly jsonWarning: Signal<string | null> = computed(() =>
     this.jsonMode() ? jsonModeWarning(this.value()) : null,

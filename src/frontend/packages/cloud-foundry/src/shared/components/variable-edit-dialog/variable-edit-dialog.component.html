@@ -7,14 +7,17 @@
     <input id="variableName" name="variableName" class="input w-full"
       placeholder="Name"
       [ngModel]="name()"
-      (ngModelChange)="name.set($event)">
+      (ngModelChange)="name.set($event); nameTouched.set(true)"
+      (blur)="nameTouched.set(true)">
     <!-- Always-present, fixed-height slot so showing/clearing the message
-         never changes the dialog height (no jump on the first keystroke). -->
+         never changes the dialog height (no jump on the first keystroke).
+         Messages only appear once the field is touched, so a fresh create
+         dialog doesn't show "Name is required" before the user types. -->
     <div class="mt-1 text-sm leading-5 min-h-[1.25rem]">
-      @if (nameError()) {
-        <span class="text-danger-shade-500">{{ nameError() }}</span>
-      } @else if (nameWarning()) {
-        <span class="text-warning-shade-500">{{ nameWarning() }}</span>
+      @if (visibleNameError()) {
+        <span class="text-danger-shade-500">{{ visibleNameError() }}</span>
+      } @else if (visibleNameWarning()) {
+        <span class="text-warning-shade-500">{{ visibleNameWarning() }}</span>
       }
     </div>
   </div>
