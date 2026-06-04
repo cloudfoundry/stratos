@@ -111,12 +111,9 @@ export class CfAppVariablesSignalConfigService {
   }
 
   // Build the column set for the Variables tab. Mirrors the legacy
-  // shape minimally: Name + Value + actions kebab. The legacy list also
-  // had an inline "edit" affordance via TableCellEditVariableComponent;
-  // we keep the door open for that as a follow-up — for now, edit is
-  // exposed as an Edit row action that re-opens the inline add form
-  // pre-filled with the existing name+value (handled by the consuming
-  // component).
+  // shape minimally: Name + Value + actions kebab. Edit is exposed as an
+  // Edit row action that opens the popup VariableEditDialogComponent
+  // (stacked Name + Monaco value editor) — wired by the consuming component.
   buildColumns(): SignalListColumn<ListAppEnvVar>[] {
     const columns: SignalListColumn<ListAppEnvVar>[] = [
       {
