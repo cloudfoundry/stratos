@@ -101,18 +101,11 @@ export class CloudFoundryMarketplaceSignalComponent implements OnInit {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.offeringsConfig.initialize([cfGuid]);
     this.totalServiceOfferings = this.offeringsConfig.view.totalItems;
-    // CNSI is pre-chosen by the URL — show the dropdown but disable it so
-    // the scope is visible and can't drift.
+    // CNSI is pre-chosen by the URL and named in the breadcrumb. Pin the
+    // selection for scope, but show no (locked) Cloud Foundry dropdown — the
+    // Marketplace has no other filters, so the toolbar stays clean.
     this.offeringsConfig.selectedCnsi.set(cfGuid);
-    const cnsiLocked: Signal<boolean> = signal(true).asReadonly();
-    const dropdowns: SignalListDropdown[] = [
-      {
-        label: 'Cloud Foundry',
-        options: this.offeringsConfig.cnsiOptions,
-        selected: this.offeringsConfig.selectedCnsi,
-        disabled: cnsiLocked,
-      },
-    ];
+    const dropdowns: SignalListDropdown[] = [];
 
     const renderTags = (o: StServiceOffering): string =>
       (o.tags ?? []).join(', ');

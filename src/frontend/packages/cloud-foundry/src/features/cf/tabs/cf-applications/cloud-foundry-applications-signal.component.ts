@@ -103,18 +103,12 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
     this.appsConfig.clearLockedSpace();
     this.appsConfig.initialize([cfGuid]);
     this.totalApplications = this.appsConfig.view.totalItems;
-    // CNSI is pre-chosen by the URL — pin the dropdown's selection to this
-    // CF and disable it so the scope is visible (matching Org/Space framing
-    // on per-org / per-space pages) but the user can't drift off this CF.
+    // CNSI is pre-chosen by the URL. Pin the selection so the Org/Space
+    // options stay scoped to this CF, but don't show a (locked) Cloud Foundry
+    // dropdown — the CF is already named in the breadcrumb, and a disabled
+    // control only adds clutter. Show just the interactive Org/Space filters.
     this.appsConfig.selectedCnsi.set(cfGuid);
-    const cnsiLocked: Signal<boolean> = signal(true).asReadonly();
     const dropdowns: SignalListDropdown[] = [
-      {
-        label: 'Cloud Foundry',
-        options: this.appsConfig.cnsiOptions,
-        selected: this.appsConfig.selectedCnsi,
-        disabled: cnsiLocked,
-      },
       {
         label: 'Organization',
         options: this.appsConfig.orgOptions,

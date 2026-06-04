@@ -111,17 +111,12 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.instancesConfig.initialize([cfGuid]);
     this.totalServiceInstances = this.instancesConfig.view.totalItems;
-    // CNSI is pre-chosen by the URL — show the dropdown but disable it so
-    // the scope is visible and can't drift.
+    // CNSI is pre-chosen by the URL. Pin the selection so the Org/Space
+    // options stay scoped to this CF, but don't show a (locked) Cloud Foundry
+    // dropdown — the CF is already named in the breadcrumb. Show just the
+    // interactive Org/Space filters.
     this.instancesConfig.selectedCnsi.set(cfGuid);
-    const cnsiLocked: Signal<boolean> = signal(true).asReadonly();
     const dropdowns: SignalListDropdown[] = [
-      {
-        label: 'Cloud Foundry',
-        options: this.instancesConfig.cnsiOptions,
-        selected: this.instancesConfig.selectedCnsi,
-        disabled: cnsiLocked,
-      },
       {
         label: 'Organization',
         options: this.instancesConfig.orgOptions,
