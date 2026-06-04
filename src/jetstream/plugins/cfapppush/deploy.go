@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -232,6 +233,17 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	log.Debug("Sending message to front-end to indicate push completed")
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
+
+	// For a new app the GUID isn't known until the push has created it, so
+	// (unlike the redeploy path above, which notifies up-front) resolve it now
+	// by name in the target space and notify the client — otherwise the UI's
+	// applicationGuid$ stays null and "Go to App Summary" never enables.
+	// Best-effort: a lookup failure must not fail the deploy.
+	if len(appID) == 0 {
+		if guid := cfAppPush.resolvePushedAppGUID(cnsiGUID, userGUID, spaceGUID, overrides, manifest); guid != "" {
+			cfAppPush.SendEvent(clientWebSocket, APP_GUID_NOTIFY, guid)
+		}
+	}
 
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 
@@ -776,4 +788,37 @@ func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event Mes
 	if err := clientWebSocket.WriteMessage(websocket.TextMessage, msg); err != nil {
 		log.Warnf("Failed to write message to web socket: %s", err)
 	}
+}
+
+// resolvePushedAppGUID looks up the GUID of a just-pushed (new) app by its name
+// within the target space. The push name is the override name if supplied,
+// otherwise the manifest's app name. Returns "" on any failure — the caller
+// treats this as best-effort and must not fail the deploy over it.
+func (cfAppPush *CFAppPush) resolvePushedAppGUID(cnsiGUID, userGUID, spaceGUID string, overrides CFPushAppOverrides, manifest Applications) string {
+	appName := overrides.Name
+	if appName == "" && len(manifest.Applications) > 0 {
+		appName = manifest.Applications[0].Name
+	}
+	if appName == "" || spaceGUID == "" {
+		log.Warnf("Cannot resolve pushed app GUID: missing app name or space GUID")
+		return ""
+	}
+
+	requestURL := fmt.Sprintf("/v3/apps?names=%s&space_guids=%s", url.QueryEscape(appName), url.QueryEscape(spaceGUID))
+	res, err := cfAppPush.portalProxy.DoProxySingleRequest(cnsiGUID, userGUID, "GET", requestURL, nil, nil)
+	if err != nil || res == nil || res.StatusCode != http.StatusOK {
+		log.Warnf("Failed to resolve GUID for pushed app %q: %v", appName, err)
+		return ""
+	}
+
+	var list struct {
+		Resources []struct {
+			GUID string `json:"guid"`
+		} `json:"resources"`
+	}
+	if err := json.Unmarshal(res.Response, &list); err != nil || len(list.Resources) == 0 {
+		log.Warnf("Could not find pushed app %q in space %q to notify its GUID", appName, spaceGUID)
+		return ""
+	}
+	return list.Resources[0].GUID
 }
