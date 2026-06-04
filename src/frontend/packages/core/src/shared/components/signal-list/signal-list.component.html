@@ -474,7 +474,7 @@
                 [class]="'border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900 ' +
                   (rowLink(row) && !rowStateBlocksNav(row) ? 'cursor-pointer ' : '') + rowStateRowClass(row)">
               @if (favoriteColumn() || actionsColumn()) {
-                <td class="px-2 py-2 overflow-visible whitespace-nowrap">
+                <td class="px-2 py-2 align-top overflow-visible whitespace-nowrap">
                   <div class="flex items-center gap-0">
                     @if (favoriteColumn(); as fc) {
                       <button
@@ -528,7 +528,7 @@
                 @if (col.kind === 'favorite' || col.kind === 'actions') {
                   <!-- Suppressed: rendered in the leading controls cell -->
                 } @else {
-                <td class="px-3 py-2 text-sm text-content-text"
+                <td class="px-3 py-2 align-top text-sm text-content-text"
                     [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
                     [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
                     [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">

@@ -336,6 +336,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     }));
   }
 
+  // Loading-overlay text reflects the active tab — e.g. "Retrieving Events" on
+  // the Events tab — instead of always "Retrieving application". Falls back to
+  // the app text for the base route / unknown tabs.
+  loadingText(): string {
+    const last = this.router.url.split('?')[0].split('/').filter(Boolean).pop();
+    const tab = (this.tabLinks ?? []).find(t => t.link === last);
+    return tab ? `Retrieving ${tab.label}` : 'Retrieving application';
+  }
+
   ngOnDestroy() {
     this.lifecycleProgress.destroy();
     this.errorRedirectEffect?.destroy();
