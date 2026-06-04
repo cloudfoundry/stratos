@@ -800,8 +800,11 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     this.cSIHelperService = this.cSIHelperServiceFactory.create(endpointId, serviceGuid);
     void this.cSIHelperService.load();
     this.csiState.setServiceGuid(serviceGuid);
-    this.csiState.setServiceInstanceGuid(si.guid);
-    this.csiState.setAll(si.name, spaceGuid, si.tags ?? [], '');
+    // setAll's last arg IS the serviceInstanceGuid — it overwrites whatever was
+    // there (default null). Pass si.guid here so the edit-mode PATCH targets the
+    // real instance; a separate setServiceInstanceGuid() before setAll would be
+    // immediately clobbered back to null, sending PATCH .../null → CF 404 (#5412).
+    this.csiState.setAll(si.name, spaceGuid, si.tags ?? [], '', false, si.guid);
     if (si.servicePlan?.guid) {
       this.csiState.setServicePlan(si.servicePlan.guid);
     }
