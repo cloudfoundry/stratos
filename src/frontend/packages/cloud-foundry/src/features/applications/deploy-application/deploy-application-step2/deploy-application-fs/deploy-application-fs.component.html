@@ -11,7 +11,7 @@
     <div>
       <input #localPathSelectFile fileread="localPathFile" type="file" class="h-0 invisible w-0"
         name="localPathSelectFile" id="localPathSelectFile" (change)="onFileChange($event)" /> Choose an
-        <button (click)="localPathSelectFile.click()" class="btn btn-primary mx-px">Application Archive
+        <button type="button" (click)="localPathSelectFile.click()" class="btn btn-primary mx-px">Application Archive
         file</button>
       </div>
     }
@@ -19,7 +19,7 @@
       <div>
         <input #localPathSelectFolder webkitdirectory fileread="localPathFile" type="file" class="h-0 invisible w-0"
           name="localPathSelectFolder" id="localPathSelectFolder" (change)="onFileChange($event)" /> Choose an
-          <button (click)="localPathSelectFolder.click()" class="btn btn-primary mx-px">Application
+          <button type="button" (click)="localPathSelectFolder.click()" class="btn btn-primary mx-px">Application
           Folder</button>
         </div>
       }
