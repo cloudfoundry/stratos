@@ -157,10 +157,15 @@ describe('CardAppInstancesComponent', () => {
       expect(html).toContain('add_circle_outline');
     });
 
-    it('hides scale buttons when app is stopped', () => {
+    it('renders scale buttons when app is stopped (scaling is valid in any state)', () => {
+      // CF accepts scaling a stopped app — it sets the expected instance count,
+      // applied on next start. v4.9.2 wrongly gated these on the app running;
+      // show them whenever the user can edit, running or stopped.
       const { fixture } = setup({ showActions: true, appState: 'STOPPED' });
       const html: string = fixture.nativeElement.innerHTML;
-      expect(html).not.toContain('add_circle_outline');
+      expect(html).toContain('edit');
+      expect(html).toContain('remove_circle_outline');
+      expect(html).toContain('add_circle_outline');
     });
 
     it('hides actions when canEdit is false', () => {
