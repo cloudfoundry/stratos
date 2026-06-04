@@ -14,7 +14,7 @@ import {
 } from '@angular/forms';
 import { ApiKey } from '@stratosui/store';
 
-import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
+import { AppInputDirective, CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
@@ -31,6 +31,7 @@ interface AddApiKeyForm {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     AppProgressBarComponent,
     DialogErrorComponent,

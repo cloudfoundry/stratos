@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule,FormBuilder, FormControl, FormGroup } 
 import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StatefulIconComponent, StepOnNextFunction } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StatefulIconComponent, StepOnNextFunction } from '@stratosui/core';
 import { CreateAppStateService } from '../../../../shared/data-services/create-app-state.service';
 import { AppNameUniqueChecking, AppNameUniqueDirective } from '../../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 
@@ -23,6 +23,7 @@ selector: 'app-create-application-step2',
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     AppNameUniqueDirective,
     StatefulIconComponent

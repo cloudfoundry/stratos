@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { CustomFormFieldComponent } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { defer, firstValueFrom, from, Observable, of as observableOf, Subscription } from 'rxjs';
@@ -45,6 +45,7 @@ interface EditApplicationForm {
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSlideToggleComponent,
     PageHeaderComponent,

@@ -19,7 +19,7 @@
         <div class="add-route__form-fields">
           <div>
             <app-form-field>
-              <input appInput formControlName="host" placeholder="Host" required class="w-full">
+              <input appInput formControlName="host" placeholder="Host" required class="w-full placeholder:!text-transparent focus:outline-none">
               @if (addHTTPRoute.controls['host'].errors?.pattern) {
                 <app-error>Invalid Hostname</app-error>
               }
@@ -30,7 +30,7 @@
           </div>
           <div>
             <app-form-field>
-              <input appInput formControlName="path" placeholder="Path" class="w-full">
+              <input appInput formControlName="path" placeholder="Path" class="w-full placeholder:!text-transparent focus:outline-none">
               @if (addHTTPRoute.controls['path'].errors?.pattern) {
                 <app-error>Invalid Path</app-error>
               }
@@ -51,7 +51,7 @@
           <div>
             <app-checkbox formControlName="useRandomPort">Use a random port</app-checkbox>
             <app-form-field>
-              <input type="number" appInput formControlName="port" placeholder="Port" required class="w-full">
+              <input type="number" appInput formControlName="port" placeholder="Port" required class="w-full placeholder:!text-transparent focus:outline-none">
               @if (addTCPRoute.controls['port'].errors?.pattern) {
                 <app-error>Invalid Port</app-error>
               }

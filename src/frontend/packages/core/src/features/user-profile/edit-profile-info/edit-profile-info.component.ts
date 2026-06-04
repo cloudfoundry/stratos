@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, ValidatorFn, Validators } from '@angular/forms';
-import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
+import { AppInputDirective, CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { Router, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '../../../shared/services/tailwind-error-state-matcher';
@@ -40,6 +40,7 @@ interface EditProfileForm {
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomIconComponent,
     PageHeaderComponent,

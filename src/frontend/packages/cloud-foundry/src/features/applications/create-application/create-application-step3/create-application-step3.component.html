@@ -10,7 +10,7 @@
     </app-select>
   </app-form-field>
   <app-form-field>
-    <input required formControlName="host" appInput placeholder="Host" name="hostName">
+    <input class="w-full placeholder:!text-transparent focus:outline-none" required formControlName="host" appInput placeholder="Host" name="hostName">
     @if (setDomainHost.controls['host']?.errors?.maxlength) {
       <app-error>Host cannot exceed 63 characters</app-error>
     }

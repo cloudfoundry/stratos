@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
+import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
 import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
 import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
@@ -27,6 +27,7 @@ interface DomainHostForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent

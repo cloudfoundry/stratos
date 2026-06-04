@@ -4,7 +4,7 @@
       [ngClass]="{'mr-0 min-w-0 w-0': collapsed, 'mr-2.5 min-w-[200px] w-auto': !collapsed}">
       <h3 class="text-base my-1.5">Filter By Repository</h3>
       <app-form-field>
-        <input appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"
+        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue"
           (ngModelChange)="searchReposChange($event)">
       </app-form-field>
       <div class="max-h-full overflow-auto pr-2.5">

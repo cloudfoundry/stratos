@@ -6,12 +6,12 @@
         <form class="acme-login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
           @if (!ssoLogin) {
             <app-form-field>
-              <input appInput required [(ngModel)]="username" name="username" placeholder="Username" autocomplete="username">
+              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput required [(ngModel)]="username" name="username" placeholder="Username" autocomplete="username">
             </app-form-field>
           }
           @if (!ssoLogin) {
             <app-form-field>
-              <input appInput required type="password" [(ngModel)]="password" name="password" placeholder="Password" autocomplete="current-password">
+              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput required type="password" [(ngModel)]="password" name="password" placeholder="Password" autocomplete="current-password">
             </app-form-field>
           }
           @if (!loggedIn) {
