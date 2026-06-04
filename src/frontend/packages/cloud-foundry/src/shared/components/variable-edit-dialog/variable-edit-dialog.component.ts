@@ -104,6 +104,20 @@ export class VariableEditDialogComponent {
   /** Save is gated solely by hard name errors — warnings never block. */
   readonly canSave: Signal<boolean> = computed(() => !this.nameValidation().hardError);
 
+  /** Format is offered only in JSON mode and only when the text parses —
+   *  pretty-printing non-JSON makes no sense. */
+  readonly canFormat: Signal<boolean> = computed(() => {
+    if (!this.jsonMode()) {
+      return false;
+    }
+    try {
+      JSON.parse(this.value());
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
   /** Monaco model — initial language reflects the auto-detected mode. Live
    *  toggles are applied via setModelLanguage in the effect below. */
   readonly model: Signal<MonacoEditorModel> = computed(() => ({
@@ -136,14 +150,41 @@ export class VariableEditDialogComponent {
     this.jsonMode.update((v) => !v);
   }
 
+  /**
+   * Pretty-print the editor text (jq-style, 2-space) for readability. This
+   * is a pure editing aid: because save() always re-minifies valid JSON, it
+   * never changes the value that gets stored. No-op on invalid JSON.
+   */
+  formatJson(): void {
+    try {
+      this.value.set(JSON.stringify(JSON.parse(this.value()), null, 2));
+    } catch {
+      // Invalid JSON — leave the text as-is (the warning already shows).
+    }
+  }
+
   save(): void {
     if (!this.canSave()) {
       return;
     }
-    this.dialogRef.close({ name: this.name().trim(), value: this.value() });
+    this.dialogRef.close({ name: this.name().trim(), value: this.canonicalValue() });
   }
 
   cancel(): void {
     this.dialogRef.close();
+  }
+
+  /**
+   * Value as stored: valid JSON is always minified to its canonical compact
+   * form (independent of how it was displayed/edited); anything else — plain
+   * strings, empty string — is stored verbatim. Empty stays "" (never null).
+   */
+  private canonicalValue(): string {
+    const v = this.value();
+    try {
+      return JSON.stringify(JSON.parse(v));
+    } catch {
+      return v;
+    }
   }
 }

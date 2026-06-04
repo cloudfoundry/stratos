@@ -112,6 +112,71 @@ describe('VariableEditDialogComponent', () => {
     expect(close).toHaveBeenCalledWith({ name: 'NEW', value: '  spaced value  ' });
   });
 
+  it('minifies a valid-JSON value on save (always stored compact)', () => {
+    const { cmp, close } = make({ mode: 'add' });
+    cmp.name.set('CFG');
+    cmp.value.set('{\n  "a": 1,\n  "b": [2, 3]\n}');
+    cmp.save();
+    expect(close).toHaveBeenCalledWith({ name: 'CFG', value: '{"a":1,"b":[2,3]}' });
+  });
+
+  it('stores a non-JSON value verbatim (no minify attempt)', () => {
+    const { cmp, close } = make({ mode: 'add' });
+    cmp.name.set('MSG');
+    cmp.value.set('hello world');
+    cmp.save();
+    expect(close).toHaveBeenCalledWith({ name: 'MSG', value: 'hello world' });
+  });
+
+  it('stores an empty value as "" (never null, never minified away)', () => {
+    const { cmp, close } = make({ mode: 'add' });
+    cmp.name.set('EMPTY');
+    cmp.value.set('');
+    cmp.save();
+    expect(close).toHaveBeenCalledWith({ name: 'EMPTY', value: '' });
+  });
+
+  // -------------------------------------------------------------------------
+  // Format button — pretty-print JSON in place (editing aid only)
+  // -------------------------------------------------------------------------
+
+  it('formatJson() pretty-prints valid JSON to 2-space indentation', () => {
+    const { cmp } = make({ mode: 'edit', name: 'CFG', value: '{"a":1}' });
+    expect(cmp.jsonMode()).toBe(true);
+    cmp.formatJson();
+    expect(cmp.value()).toBe('{\n  "a": 1\n}');
+  });
+
+  it('pretty-printing then saving stores the SAME minified value as saving directly', () => {
+    const direct = make({ mode: 'add' });
+    direct.cmp.name.set('CFG');
+    direct.cmp.value.set('{"a":1,"b":[2,3]}');
+    direct.cmp.save();
+
+    const formatted = make({ mode: 'add' });
+    formatted.cmp.name.set('CFG');
+    formatted.cmp.value.set('{"a":1,"b":[2,3]}');
+    formatted.cmp.formatJson(); // expand for readability
+    formatted.cmp.save();
+
+    // Format changed the editor text, but the persisted value is identical.
+    expect(formatted.close.mock.calls[0][0]).toEqual(direct.close.mock.calls[0][0]);
+  });
+
+  it('formatJson() is a no-op on invalid JSON', () => {
+    const { cmp } = make({ mode: 'edit', name: 'X', value: 'not json' });
+    cmp.toggleJsonMode(); // into JSON mode
+    cmp.formatJson();
+    expect(cmp.value()).toBe('not json');
+  });
+
+  it('canFormat is true only in JSON mode with valid JSON', () => {
+    const { cmp } = make({ mode: 'edit', name: 'CFG', value: '{"a":1}' });
+    expect(cmp.canFormat()).toBe(true);
+    cmp.toggleJsonMode(); // -> plain mode
+    expect(cmp.canFormat()).toBe(false);
+  });
+
   it('save() is a no-op when Save is blocked', () => {
     const { cmp, close } = make({ mode: 'add' });
     cmp.name.set(''); // blocked

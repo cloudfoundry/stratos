@@ -19,11 +19,21 @@
   <div class="mb-2">
     <div class="flex items-center justify-between mb-1">
       <span class="text-sm text-content-muted">Value</span>
-      <button type="button" class="btn btn-secondary btn-sm" (click)="toggleJsonMode()">
-        {{ jsonMode() ? 'Edit as plain text' : 'Edit as JSON' }}
-      </button>
+      <div class="flex items-center gap-2">
+        @if (jsonMode()) {
+          <button type="button" class="btn btn-secondary btn-sm" (click)="formatJson()" [disabled]="!canFormat()">
+            Format
+          </button>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" (click)="toggleJsonMode()">
+          {{ jsonMode() ? 'Edit as plain text' : 'Edit as JSON' }}
+        </button>
+      </div>
     </div>
-    <div class="h-64 border border-content-border rounded-md overflow-hidden">
+    <!-- Resizable: drag the bottom-right handle to grow the editor (and the
+         dialog with it) in both directions. Monaco automaticLayout re-fits. -->
+    <div class="resize overflow-auto border border-content-border rounded-md
+                h-64 w-[36rem] min-h-[8rem] min-w-[20rem] max-w-[88vw]">
       <app-monaco-editor
         [model]="model()"
         [options]="editorOptions"
