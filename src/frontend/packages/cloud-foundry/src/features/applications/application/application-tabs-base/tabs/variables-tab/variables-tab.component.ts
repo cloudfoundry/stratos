@@ -9,7 +9,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { take } from 'rxjs/operators';
 
 import {
   ConfirmationDialogConfig,
@@ -20,6 +20,7 @@ import {
   SignalListComponent,
   SignalListConfig,
   SignalListRowAction,
+  TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 
@@ -30,6 +31,10 @@ import {
 import {
   CfAppVariablesSignalConfigService,
 } from '../../../../../../shared/signal-list-configs/app-variables/cf-app-variables-signal-config.service';
+import {
+  VariableEditDialogComponent,
+  VariableEditDialogResult,
+} from '../../../../../../shared/components/variable-edit-dialog/variable-edit-dialog.component';
 import { AppVariableActionsService } from '../../../../../../shared/services/app-variable-actions.service';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
 
@@ -40,26 +45,21 @@ export interface VariableTabAllEnvVarType {
 }
 
 /**
- * VariablesTabComponent — signal-native rewrite of the app-detail
- * Variables tab. Mirrors the slice-3 RoutesTabComponent shape:
+ * VariablesTabComponent — signal-native app-detail Variables tab.
  *
  * - Tab-scoped CfAppVariablesSignalConfigService and
  *   AppVariableActionsService so per-variable transition state and
  *   filter/sort/page reset cleanly between apps.
- * - Reads the env envelope from `AppDetailDataService.envVars()` (already
- *   prefetched as part of slice 1). Triggers a refresh on tab init in
- *   case the user navigated here without going through the app-detail
- *   shell first; subsequent action-service success callbacks also call
- *   refresh so the next read sees the canonical CF view.
- * - L5 sub-nav row above the list shows the count + an inline Add
- *   Variable form (Name/Value + ✓/✕ buttons) wired to the action
- *   service. Validation runs on submit (legacy behavior) so the row
- *   stays pixel-stable while the user types.
- * - Wraps the config service's no-confirm Delete with a confirmation
- *   dialog (legacy text style).
- * - "All Variables" code block at the bottom renders the full env
- *   envelope (system + user + app/running/staging) by walking the
- *   StEnvVars sections directly.
+ * - Reads the env envelope from `AppDetailDataService.envVars()`; refreshes
+ *   on tab init and after each successful mutation so the next read reflects
+ *   the canonical CF view.
+ * - Add / Edit / Rename all go through a single popup `VariableEditDialogComponent`
+ *   (stacked editable Name + multiline Monaco value editor). The L5 sub-nav's
+ *   Add button and the per-row Edit action both open it; the dialog returns
+ *   `{name, value}` and this component routes to add / update / rename.
+ * - Delete is wrapped in a confirmation dialog and uses the action service's
+ *   explicit-`null` merge-patch delete.
+ * - "All Variables" code block at the bottom renders the full env envelope.
  */
 @Component({
   selector: 'app-variables-tab',
@@ -72,7 +72,6 @@ export interface VariableTabAllEnvVarType {
   ],
   imports: [
     CommonModule,
-    FormsModule,
     SignalListComponent,
     ListSubNavComponent,
     CodeBlockComponent,
@@ -83,6 +82,7 @@ export class VariablesTabComponent implements OnInit {
   private variablesConfig = inject(CfAppVariablesSignalConfigService);
   private actionsService = inject(AppVariableActionsService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private dialog = inject(TailwindDialogService);
   private snackBar = inject(TailwindSnackBarService);
 
   /** Loading projection for the signal-list framework. */
@@ -94,67 +94,19 @@ export class VariablesTabComponent implements OnInit {
   /** Reactive total surfaced to the L5 sub-nav row above the list. */
   readonly totalVariables: Signal<number>;
 
-  // ---------------------------------------------------------------------------
-  // Inline add form state
-  // ---------------------------------------------------------------------------
-
-  /** True when the inline add form is open. The L5 sub-nav swaps the
-   *  +Add Variable button for the form when this is true. */
-  readonly isAdding: WritableSignal<boolean> = signal(false);
-
-  /** Bound to the Name/Value inputs in the inline add form. */
-  readonly addItem: WritableSignal<{ name: string; value: string }> = signal({ name: '', value: '' });
-
-  /**
-   * Name of the variable currently being edited, or null in add mode. The
-   * inline form is reused for edit: when set, the Name input is locked (the
-   * key is the variable's identity — only the value changes) and a save
-   * routes to updateVariable instead of addVariable. Restores the per-row
-   * Edit affordance dropped in the signal-native migration.
-   */
-  readonly editingName: WritableSignal<string | null> = signal(null);
-
-  /**
-   * Validation error for the Name input — populated by validateAndSave()
-   * when the user clicks the ✓ button with an invalid Name. Empty string
-   * = no error to display. Cleared on every keystroke so the user sees
-   * the error disappear as they correct the input.
-   *
-   * Validation runs on submit, not reactively per-keystroke, to keep the
-   * L5 row pixel-stable: error sits in the row's top padding via absolute
-   * positioning and only renders after the user attempts to save.
-   */
-  readonly nameError: WritableSignal<string> = signal('');
-
-  /** CF env var names follow shell-variable convention: must start with a
-   *  letter or underscore, and contain only letters, digits, and
-   *  underscores. */
-  private static readonly NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
-
-  /** Signal: names of user-defined environment variables surfaced via the
-   *  data service. Used by the duplicate-name validation in
-   *  validateAndSave() — it reads from the same canonical source the
-   *  list rows render from, so the check stays in sync with what the
-   *  user sees. */
+  /** Signal: names of user-defined environment variables. Used to seed the
+   *  editor dialog's duplicate-name check from the same canonical source the
+   *  list rows render from. */
   readonly envVarNames: Signal<string[]> = computed(() => {
     const env = this.dataService.envVars()?.environment;
     return env ? Object.keys(env) : [];
   });
 
-  /**
-   * L5 add action — opens the inline add-row form. Resets state so the
-   * user always starts with empty inputs and no leftover validation
-   * error from a previous attempt.
-   */
+  /** L5 add action — opens the editor dialog in add mode. */
   readonly addVariableAction: ListSubNavAddAction = {
     label: 'Add Variable',
     icon: 'add',
-    invoke: () => {
-      this.addItem.set({ name: '', value: '' });
-      this.nameError.set('');
-      this.editingName.set(null);
-      this.isAdding.set(true);
-    },
+    invoke: () => this.openEditor('add'),
   };
 
   // ---------------------------------------------------------------------------
@@ -164,10 +116,7 @@ export class VariablesTabComponent implements OnInit {
   /**
    * Flattened sections list for the "All Variables" code block: one
    * section per env source (USER PROVIDED / SYSTEM PROVIDED / APPLICATION /
-   * RUNNING / STAGING) followed by its keys. Mirrors the legacy
-   * `mapEnvVars` projection so the code block reads identically to the
-   * pre-migration UI; section keys read straight off the StEnvVars
-   * envelope rather than the legacy `*_env_json` field names.
+   * RUNNING / STAGING) followed by its keys.
    */
   readonly allEnvVars: Signal<VariableTabAllEnvVarType[]> = computed(() => {
     const env = this.dataService.envVars();
@@ -200,9 +149,8 @@ export class VariablesTabComponent implements OnInit {
 
   constructor() {
     // Build columns from the wave-2 config service, then replace the
-    // actions column's factory with our confirm-wrapped version. The
-    // service's default factory invokes the verbs directly (used by
-    // tests / future surfaces); the tab adds the legacy confirm dialogs.
+    // actions column's factory with our Edit-opens-dialog / confirm-delete
+    // version.
     const baseColumns = this.variablesConfig.buildColumns();
     const columns: SignalListColumn<ListAppEnvVar>[] = baseColumns.map(col => {
       if (col.key === 'actions' && col.kind === 'actions') {
@@ -239,115 +187,70 @@ export class VariablesTabComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // envVars are typically prefetched by the app-detail shell, but
-    // refresh on mount handles the case where the user navigates here
-    // directly (deep link / refresh) without the prefetch chain firing.
+    // envVars are typically prefetched by the app-detail shell; refresh on
+    // mount handles a direct deep link / refresh without the prefetch chain.
     void this.dataService.refresh('envVars');
   }
 
   // ---------------------------------------------------------------------------
-  // Inline add form handlers
+  // Editor dialog (Add / Edit / Rename)
   // ---------------------------------------------------------------------------
-
-  /** Validate the Add Variable form and either save or surface an error
-   *  in the absolute-positioned slot above the Name input. */
-  validateAndSave(): void {
-    const item = this.addItem();
-    const editing = this.editingName();
-    if (editing) {
-      // Edit mode: the key is fixed (Name input is locked), only the value
-      // changes, so the add-path name validation (required / pattern /
-      // duplicate) does not apply. Route straight to the update verb.
-      this.nameError.set('');
-      void this.saveEdit(editing, item.value ?? '');
-      return;
-    }
-    const name = (item.name ?? '').trim();
-    if (!name) {
-      this.nameError.set('Name is required');
-      return;
-    }
-    if (!VariablesTabComponent.NAME_PATTERN.test(name)) {
-      this.nameError.set('Use letters, digits, and underscores only; must start with a letter or underscore');
-      return;
-    }
-    if (this.envVarNames().includes(name)) {
-      this.nameError.set(`'${name}' is already in use`);
-      return;
-    }
-    this.nameError.set('');
-    void this.saveAdd(name, item.value ?? '');
-  }
-
-  /** Cancel the inline add/edit form. */
-  cancelAdd(): void {
-    this.nameError.set('');
-    this.editingName.set(null);
-    this.isAdding.set(false);
-  }
-
-  /** Clear any pending validation error so it doesn't linger as the user
-   *  edits. Bound to the Name input's (input) event. */
-  clearNameError(): void {
-    if (this.nameError()) {
-      this.nameError.set('');
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Internals
-  // ---------------------------------------------------------------------------
-
-  /** Submit the new variable to the action service; on success refresh
-   *  the env envelope so the next read picks up the new key and surface
-   *  any error via the snack bar (mirrors slice-3 routes pattern). */
-  private async saveAdd(name: string, value: string): Promise<void> {
-    try {
-      await this.actionsService.addVariable(name, value);
-      this.isAdding.set(false);
-      this.addItem.set({ name: '', value: '' });
-      await this.variablesConfig.refresh();
-    } catch (err: any) {
-      this.snackBar.error(`Add variable failed: ${err?.message ?? err}`);
-    }
-  }
-
-  /** Submit an edited variable's value via the update verb, then close the
-   *  form and refresh the env envelope so the next read reflects CF. */
-  private async saveEdit(name: string, value: string): Promise<void> {
-    try {
-      await this.actionsService.updateVariable(name, value);
-      this.isAdding.set(false);
-      this.editingName.set(null);
-      this.addItem.set({ name: '', value: '' });
-      await this.variablesConfig.refresh();
-    } catch (err: any) {
-      this.snackBar.error(`Update variable failed: ${err?.message ?? err}`);
-    }
-  }
 
   /**
-   * Per-row action factory. Wraps the wave-2 service's Delete verb with
-   * a confirmation dialog (legacy text style). On confirm we await the
-   * verb, then refresh the env envelope so the row vanishes synchronously
-   * (cf. routes / service-bindings tabs which evict via dataService —
-   * envVars has no eviction hook because it's a single envelope, not a
-   * list, so refresh is the eviction mechanism).
+   * Open the popup editor. Add mode forbids every existing name; edit mode
+   * forbids every name except the row's own (so an unchanged name passes,
+   * and a change to another existing key is blocked). On close the result
+   * `{name, value}` is routed to the matching verb.
    */
+  private openEditor(mode: 'add' | 'edit', row?: ListAppEnvVar): void {
+    const existingNames = mode === 'edit'
+      ? this.envVarNames().filter(n => n !== row!.name)
+      : this.envVarNames();
+
+    const ref = this.dialog.open(VariableEditDialogComponent, {
+      width: '640px',
+      data: { mode, name: row?.name, value: row?.value, existingNames },
+    });
+
+    ref.afterClosed().pipe(take(1)).subscribe((result?: VariableEditDialogResult) => {
+      if (!result) {
+        return; // cancelled
+      }
+      void this.applyEditorResult(mode, row, result);
+    });
+  }
+
+  /** Route a dialog result to add / update / rename, then refresh. */
+  private async applyEditorResult(
+    mode: 'add' | 'edit',
+    row: ListAppEnvVar | undefined,
+    result: VariableEditDialogResult,
+  ): Promise<void> {
+    try {
+      if (mode === 'add') {
+        await this.actionsService.addVariable(result.name, result.value);
+      } else if (row && result.name !== row.name) {
+        await this.actionsService.renameVariable(row.name, result.name, result.value);
+      } else {
+        await this.actionsService.updateVariable(result.name, result.value);
+      }
+      await this.variablesConfig.refresh();
+    } catch (err: any) {
+      this.snackBar.error(`Save variable failed: ${err?.message ?? err}`);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Per-row actions (Edit opens the dialog; Delete confirms + null-deletes)
+  // ---------------------------------------------------------------------------
+
   private readonly buildRowActions = (row: ListAppEnvVar): readonly SignalListRowAction<ListAppEnvVar>[] => {
     const disabled = this.actionsService.inFlight();
     return [
       {
         label: 'Edit', icon: 'edit',
         disabled,
-        invoke: () => {
-          // Reuse the inline form in edit mode: pre-fill name+value, lock
-          // the Name (the key is the variable's identity), save via update.
-          this.addItem.set({ name: row.name, value: row.value == null ? '' : String(row.value) });
-          this.nameError.set('');
-          this.editingName.set(row.name);
-          this.isAdding.set(true);
-        },
+        invoke: () => this.openEditor('edit', row),
       },
       {
         label: 'Delete', icon: 'delete', danger: true,

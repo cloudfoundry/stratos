@@ -18,6 +18,7 @@ import { ApplicationServiceMock } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 
@@ -26,6 +27,7 @@ import { AppVariableActionsService } from '../../../../../../shared/services/app
 import {
   CfAppVariablesSignalConfigService,
 } from '../../../../../../shared/signal-list-configs/app-variables/cf-app-variables-signal-config.service';
+import { VariableEditDialogComponent } from '../../../../../../shared/components/variable-edit-dialog/variable-edit-dialog.component';
 import { VariablesTabComponent } from './variables-tab.component';
 
 describe('VariablesTabComponent', () => {
@@ -38,28 +40,24 @@ describe('VariablesTabComponent', () => {
     pipe: vi.fn(() => of({})),
   };
 
-  const mockPmf = {
-    create: vi.fn(() => ({
-      currentPage$: of([]),
-      pagination$: of({}),
-      fetchingCurrentPage$: of(false),
-      isLoadingPage$: of(false),
-    })),
-  };
-
   // Spy holders, refreshed per test.
   let refreshScope: ReturnType<typeof vi.fn>;
+  let envVarsSig: WritableSignal<any>;
   let addVariable: ReturnType<typeof vi.fn>;
   let updateVariable: ReturnType<typeof vi.fn>;
+  let renameVariable: ReturnType<typeof vi.fn>;
   let deleteVariable: ReturnType<typeof vi.fn>;
   let confirmOpen: ReturnType<typeof vi.fn>;
   let configRefresh: ReturnType<typeof vi.fn>;
+  let dialogOpen: ReturnType<typeof vi.fn>;
+  let dialogResult: any; // value the stub dialog "closes" with
 
-  /** Minimal AppDetailDataService stub. */
+  /** Minimal AppDetailDataService stub with a settable envVars signal. */
   const makeDataStub = () => {
     refreshScope = vi.fn(async () => undefined);
+    envVarsSig = signal<any>(undefined);
     return {
-      envVars: signal<any>(undefined).asReadonly(),
+      envVars: envVarsSig.asReadonly(),
       loading: signal({ envVars: false } as any).asReadonly(),
       refresh: refreshScope,
     };
@@ -68,6 +66,7 @@ describe('VariablesTabComponent', () => {
   const makeVariableActionsStub = () => {
     addVariable = vi.fn(async () => undefined);
     updateVariable = vi.fn(async () => undefined);
+    renameVariable = vi.fn(async () => undefined);
     deleteVariable = vi.fn(async () => undefined);
     return {
       transitioningName: signal<string | null>(null).asReadonly(),
@@ -75,13 +74,10 @@ describe('VariablesTabComponent', () => {
       addVariable,
       deleteVariable,
       updateVariable,
+      renameVariable,
     };
   };
 
-  // Stub for the tab's signal-list config service. Mirrors the public
-  // surface the tab consumes (view pipeline, page/sort signals, columns,
-  // refresh/clear). The `actions` column carries an unwrapped invoke
-  // that the tab replaces with a confirm-wrapped factory.
   const makeVariablesConfigStub = () => {
     const variables: WritableSignal<any[]> = signal([]);
     const filtered = computed(() => variables());
@@ -127,10 +123,23 @@ describe('VariablesTabComponent', () => {
     return { open: confirmOpen };
   };
 
+  const makeDialogStub = () => {
+    dialogResult = undefined;
+    // of(dialogResult) captures the value set just before invoke().
+    dialogOpen = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
+    return { open: dialogOpen };
+  };
+
   const makeSnackStub = () => ({
     open: vi.fn(),
     error: vi.fn(),
   });
+
+  /** Pull the Edit/Delete row actions for a given row off the list config. */
+  const rowActionsFor = (row: any) => {
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    return actionsCol!.actions!(row);
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -145,14 +154,12 @@ describe('VariablesTabComponent', () => {
         { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },
         { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
+        { provide: TailwindDialogService, useFactory: makeDialogStub },
         { provide: TailwindSnackBarService, useFactory: makeSnackStub },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     })
       .overrideComponent(VariablesTabComponent, {
-        // Replace the heavy tab-scoped providers with stubs so we can
-        // observe lifecycle calls without booting the real services
-        // (which would pull in HttpClient, ListStateStore, etc.).
         remove: {
           providers: [AppVariableActionsService, CfAppVariablesSignalConfigService],
         },
@@ -197,19 +204,18 @@ describe('VariablesTabComponent', () => {
   it('builds a signal-list config from the wave-2 service', () => {
     fixture.detectChanges();
     expect(component.listConfig).toBeTruthy();
-    expect(component.listConfig.pagedItems).toBeTruthy();
-    // Actions column carries the tab's confirm-wrapped factory, not the
-    // service's no-confirm one.
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     expect(actionsCol).toBeTruthy();
     expect(actionsCol!.actions).toBeTruthy();
   });
 
+  // -------------------------------------------------------------------------
+  // Delete — unchanged: confirm dialog then explicit delete + refresh
+  // -------------------------------------------------------------------------
+
   it('opens a confirm dialog before deleting, refreshes on confirm', async () => {
     fixture.detectChanges();
-    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
-    const rowActions = actionsCol!.actions!({ name: 'FOO', value: 'bar' } as any);
-    const del = rowActions.find(a => a.label === 'Delete');
+    const del = rowActionsFor({ name: 'FOO', value: 'bar' }).find(a => a.label === 'Delete');
     expect(del).toBeTruthy();
 
     del!.invoke({ name: 'FOO', value: 'bar' } as any);
@@ -218,7 +224,6 @@ describe('VariablesTabComponent', () => {
     const [config, onConfirm] = confirmOpen.mock.calls[0];
     expect(config).toBeInstanceOf(ConfirmationDialogConfig);
     expect((config as ConfirmationDialogConfig).message).toContain('FOO');
-
     expect(deleteVariable).not.toHaveBeenCalled();
 
     await onConfirm();
@@ -226,101 +231,108 @@ describe('VariablesTabComponent', () => {
     expect(configRefresh).toHaveBeenCalled();
   });
 
-  describe('edit affordance (restored lost functionality)', () => {
-    it('exposes an Edit row action alongside Delete', () => {
-      fixture.detectChanges();
-      const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
-      const rowActions = actionsCol!.actions!({ name: 'FOO', value: 'bar' } as any);
-      expect(rowActions.find(a => a.label === 'Edit')).toBeTruthy();
-      expect(rowActions.find(a => a.label === 'Delete')).toBeTruthy();
-    });
+  // -------------------------------------------------------------------------
+  // Editor dialog — Add / Edit / Rename routing
+  // -------------------------------------------------------------------------
 
-    it('Edit opens the inline form pre-filled and enters edit mode', () => {
-      fixture.detectChanges();
-      const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
-      const edit = actionsCol!.actions!({ name: 'FOO', value: 'bar' } as any).find(a => a.label === 'Edit');
-
-      edit!.invoke({ name: 'FOO', value: 'bar' } as any);
-
-      expect(component.isAdding()).toBe(true);
-      expect(component.editingName()).toBe('FOO');
-      expect(component.addItem()).toEqual({ name: 'FOO', value: 'bar' });
-    });
-
-    it('validateAndSave in edit mode calls updateVariable (not addVariable), then closes + refreshes', async () => {
-      fixture.detectChanges();
-      component.editingName.set('FOO');
-      component.addItem.set({ name: 'FOO', value: 'new-value' });
-
-      component.validateAndSave();
-      await Promise.resolve();
-      await Promise.resolve();
-
-      expect(updateVariable).toHaveBeenCalledWith('FOO', 'new-value');
-      expect(addVariable).not.toHaveBeenCalled();
-      expect(configRefresh).toHaveBeenCalled();
-      expect(component.isAdding()).toBe(false);
-      expect(component.editingName()).toBeNull();
-    });
-
-    it('edit mode skips the duplicate-name validation (the key already exists)', () => {
-      fixture.detectChanges();
-      component.editingName.set('FOO');
-      component.addItem.set({ name: 'FOO', value: 'v' });
-
-      component.validateAndSave();
-
-      expect(component.nameError()).toBe('');
-      expect(updateVariable).toHaveBeenCalled();
-    });
-
-    it('cancel clears edit mode', () => {
-      component.editingName.set('FOO');
-      component.isAdding.set(true);
-      component.cancelAdd();
-      expect(component.editingName()).toBeNull();
-      expect(component.isAdding()).toBe(false);
-    });
+  it('exposes an Edit row action alongside Delete', () => {
+    fixture.detectChanges();
+    const actions = rowActionsFor({ name: 'FOO', value: 'bar' });
+    expect(actions.find(a => a.label === 'Edit')).toBeTruthy();
+    expect(actions.find(a => a.label === 'Delete')).toBeTruthy();
   });
 
-  describe('validateAndSave()', () => {
-    it('flags Name is required when the name is empty', () => {
-      component.addItem.set({ name: '', value: '' });
-      component.validateAndSave();
-      expect(component.nameError()).toBe('Name is required');
-    });
+  it('Add button opens the editor dialog in add mode with all existing names', () => {
+    envVarsSig.set({ environment: { FOO: 'a', BAR: 'b' } });
+    fixture.detectChanges();
 
-    it('flags Name is required when the name is whitespace-only', () => {
-      component.addItem.set({ name: '   ', value: '' });
-      component.validateAndSave();
-      expect(component.nameError()).toBe('Name is required');
-    });
+    component.addVariableAction.invoke();
 
-    it('flags an invalid pattern when the name contains spaces', () => {
-      component.addItem.set({ name: 'bad name', value: '' });
-      component.validateAndSave();
-      expect(component.nameError()).toMatch(/letters, digits, and underscores/i);
-    });
-
-    it('flags an invalid pattern when the name starts with a digit', () => {
-      component.addItem.set({ name: '1FOO', value: '' });
-      component.validateAndSave();
-      expect(component.nameError()).toMatch(/letters, digits, and underscores/i);
-    });
-
-    it('accepts a valid name and clears any prior error', () => {
-      component.nameError.set('Name is required');
-      component.addItem.set({ name: 'MY_VAR', value: 'val' });
-      component.validateAndSave();
-      expect(component.nameError()).toBe('');
-    });
+    expect(dialogOpen).toHaveBeenCalledTimes(1);
+    const [cmp, cfg] = dialogOpen.mock.calls[0];
+    expect(cmp).toBe(VariableEditDialogComponent);
+    expect(cfg.data.mode).toBe('add');
+    expect(cfg.data.existingNames).toEqual(['FOO', 'BAR']);
   });
 
-  describe('clearNameError()', () => {
-    it('resets the error signal when called', () => {
-      component.nameError.set('Name is required');
-      component.clearNameError();
-      expect(component.nameError()).toBe('');
-    });
+  it('Edit row action opens the dialog pre-filled, existingNames excluding self', () => {
+    envVarsSig.set({ environment: { FOO: 'a', BAR: 'b' } });
+    fixture.detectChanges();
+
+    const edit = rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit');
+    edit!.invoke({ name: 'FOO', value: 'a' } as any);
+
+    const [, cfg] = dialogOpen.mock.calls[0];
+    expect(cfg.data.mode).toBe('edit');
+    expect(cfg.data.name).toBe('FOO');
+    expect(cfg.data.value).toBe('a');
+    expect(cfg.data.existingNames).toEqual(['BAR']); // self excluded
+  });
+
+  it('add result routes to addVariable then refreshes', async () => {
+    fixture.detectChanges();
+    dialogResult = { name: 'NEW', value: 'v' };
+
+    component.addVariableAction.invoke();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(addVariable).toHaveBeenCalledWith('NEW', 'v');
+    expect(configRefresh).toHaveBeenCalled();
+  });
+
+  it('edit result with unchanged name routes to updateVariable', async () => {
+    envVarsSig.set({ environment: { FOO: 'a' } });
+    fixture.detectChanges();
+    dialogResult = { name: 'FOO', value: 'changed' };
+
+    rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit')!.invoke({ name: 'FOO', value: 'a' } as any);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(updateVariable).toHaveBeenCalledWith('FOO', 'changed');
+    expect(renameVariable).not.toHaveBeenCalled();
+    expect(configRefresh).toHaveBeenCalled();
+  });
+
+  it('edit result with a changed name routes to renameVariable (old -> new)', async () => {
+    envVarsSig.set({ environment: { FOO: 'a' } });
+    fixture.detectChanges();
+    dialogResult = { name: 'RENAMED', value: 'a' };
+
+    rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit')!.invoke({ name: 'FOO', value: 'a' } as any);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(renameVariable).toHaveBeenCalledWith('FOO', 'RENAMED', 'a');
+    expect(updateVariable).not.toHaveBeenCalled();
+    expect(configRefresh).toHaveBeenCalled();
+  });
+
+  it('cancelling the dialog (no result) performs no action service call', async () => {
+    fixture.detectChanges();
+    dialogResult = undefined; // cancelled
+
+    component.addVariableAction.invoke();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(addVariable).not.toHaveBeenCalled();
+    expect(updateVariable).not.toHaveBeenCalled();
+    expect(renameVariable).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a snackbar error when the action service rejects', async () => {
+    fixture.detectChanges();
+    dialogResult = { name: 'NEW', value: 'v' };
+    addVariable.mockRejectedValueOnce(new Error('CF-Boom'));
+    const snack = TestBed.inject(TailwindSnackBarService) as any;
+
+    component.addVariableAction.invoke();
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(snack.error).toHaveBeenCalled();
   });
 });
