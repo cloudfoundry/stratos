@@ -1,0 +1,44 @@
+<div class="p-6 w-full">
+  <h1 class="text-lg font-semibold mb-4 text-content-text">{{ title }}</h1>
+
+  <!-- Name (full width, on top — never truncated) -->
+  <div class="mb-4">
+    <label for="variableName" class="block mb-1 text-sm text-content-muted">Name</label>
+    <input id="variableName" name="variableName" class="input w-full"
+      placeholder="Name"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)">
+    @if (nameError()) {
+      <div class="mt-1 text-sm text-danger-shade-500">{{ nameError() }}</div>
+    } @else if (nameWarning()) {
+      <div class="mt-1 text-sm text-warning-shade-500">{{ nameWarning() }}</div>
+    }
+  </div>
+
+  <!-- Value (multiline Monaco editor below, full width) -->
+  <div class="mb-2">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-sm text-content-muted">Value</span>
+      <button type="button" class="btn btn-secondary btn-sm" (click)="toggleJsonMode()">
+        {{ jsonMode() ? 'Edit as plain text' : 'Edit as JSON' }}
+      </button>
+    </div>
+    <div class="h-64 border border-content-border rounded-md overflow-hidden">
+      <app-monaco-editor
+        [model]="model()"
+        [options]="editorOptions"
+        [ngModel]="value()"
+        (ngModelChange)="value.set($event)"
+        (onInit)="onEditorInit($event)">
+      </app-monaco-editor>
+    </div>
+    @if (jsonWarning()) {
+      <div class="mt-1 text-sm text-warning-shade-500">{{ jsonWarning() }}</div>
+    }
+  </div>
+
+  <div class="flex gap-2 justify-end mt-6">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!canSave()">Save</button>
+  </div>
+</div>
