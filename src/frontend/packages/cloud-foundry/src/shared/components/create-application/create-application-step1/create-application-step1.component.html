@@ -3,7 +3,7 @@
   @if (!isMarketplaceMode) {
     <app-form-field>
       <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
-        [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy"
+        [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy || endpointScoped"
         [ngModel]="cfOrgSpaceService.cf.select()"
         (selectionChange)="onCfChange($event.value)" required name="cf"
         [appFocus]="!cfOrgSpaceService.cf.loading()">
