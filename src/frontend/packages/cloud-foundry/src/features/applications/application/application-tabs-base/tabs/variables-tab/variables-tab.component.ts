@@ -211,6 +211,10 @@ export class VariablesTabComponent implements OnInit {
       // No fixed width: the dialog sizes to its (resizable) content so the
       // user can drag the editor wider/taller, capped at the viewport.
       maxWidth: '92vw',
+      // Anchor to the top so content height changes (validation message,
+      // resizing) grow downward instead of re-centering and jumping the
+      // fields under the cursor.
+      position: 'top',
       data: { mode, name: row?.name, value: row?.value, existingNames },
     });
 
