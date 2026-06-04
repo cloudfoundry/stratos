@@ -1,0 +1,9 @@
+<div class="flex flex-col gap-3 min-w-[24rem] max-w-[48rem]">
+  <h2 class="dialog-title break-all">{{ data.type }}</h2>
+  <div class="dialog-content max-h-[60vh] overflow-auto">
+    <pre class="text-xs whitespace-pre-wrap break-all bg-gray-50 dark:bg-gray-800 text-content-text p-3 rounded border border-content-border">{{ data.metadata | json }}</pre>
+  </div>
+  <div class="dialog-actions flex flex-row-reverse justify-self-start">
+    <button class="btn btn-primary" (click)="close()">Close</button>
+  </div>
+</div>
