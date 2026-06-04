@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 
-import { SignalListComponent, SignalListConfig, SignalListDropdown } from '@stratosui/core';
+import { SignalListCellTemplateDirective, SignalListComponent, SignalListConfig, SignalListDropdown, TailwindDialogService } from '@stratosui/core';
 
 import { CfAuditEventsSignalConfigService } from '../../signal-list-configs/cf-events/cf-audit-events-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../features/cf/services/cloud-foundry-endpoint.service';
 import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types';
+import { EventDetailComponent, hasEventMetadata, parseEventData } from './event-detail/event-detail.component';
 
 // Signal-native shared events list component. Used by four page
 // consumers — the foundation-wide CF Events tab plus the org / space /
@@ -28,6 +29,7 @@ import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types
   imports: [
     CommonModule,
     SignalListComponent,
+    SignalListCellTemplateDirective,
   ],
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
@@ -41,12 +43,86 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
 
   cfEndpointService = inject(CloudFoundryEndpointService);
   private eventsConfig = inject(CfAuditEventsSignalConfigService);
+  private dialog = inject(TailwindDialogService);
+
+  /** Whether the event carries metadata worth a details popup (data !== {}). */
+  hasDetails(e: StAuditEvent): boolean {
+    return hasEventMetadata(e.data);
+  }
+
+  /** Open the event-detail dialog, titled with the event type. */
+  openEventDetails(e: StAuditEvent): void {
+    this.dialog.open(EventDetailComponent, {
+      data: { type: e.type, metadata: parseEventData(e.data) },
+    });
+  }
+
+  /**
+   * Global expand/collapse of the inline metadata shown beneath each event type
+   * (the v4.9.2 key/value view) — all rows at once, never a per-row control. The
+   * Type cell template reads this signal, so flipping it re-renders every cell.
+   */
+  readonly detailsExpanded = signal(false);
+
+  toggleDetails(): void {
+    this.detailsExpanded.update(v => !v);
+    // The Type cell template lives in the signal-list's view, so flipping the
+    // signal alone won't re-render its cells. Re-set the config (same columns,
+    // new object) to force the list to re-render — the cell then re-reads
+    // detailsExpanded() and shows/hides the inline metadata for every row.
+    this.listConfig.set(this.buildListConfig());
+  }
+
+  /** Parsed metadata entries for the inline view under the event type. */
+  entriesFor(e: StAuditEvent): [string, unknown][] {
+    return Object.entries(parseEventData(e.data));
+  }
+
+  /** Inline value rendering — strings as-is, everything else as JSON. */
+  formatValue(value: unknown): string {
+    if (value == null) return '';
+    return typeof value === 'string' ? value : JSON.stringify(value);
+  }
+
+  // V3 audit events carry only the org/space GUID, not the name, so the
+  // backend's spaceName/organizationName come through empty. Resolve them
+  // against the org/space maps the toolbar already loads (endpointData), so
+  // the columns show names instead of "—". Computed → the cell re-renders
+  // when the maps finish loading.
+  private readonly orgNameByGuid = computed(() =>
+    new Map((this.eventsConfig.endpointData?.orgs() ?? []).map(o => [o.guid, o.name] as [string, string])),
+  );
+  private readonly spaceNameByGuid = computed(() =>
+    new Map((this.eventsConfig.endpointData?.spaces() ?? []).map(s => [s.guid, s.name] as [string, string])),
+  );
+
+  spaceName(e: StAuditEvent): string {
+    return e.spaceName || this.spaceNameByGuid().get(e.spaceGuid) || '—';
+  }
+
+  orgName(e: StAuditEvent): string {
+    return e.organizationName || this.orgNameByGuid().get(e.organizationGuid) || '—';
+  }
 
   public listConfig: WritableSignal<SignalListConfig<StAuditEvent> | undefined> = signal(undefined);
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.eventsConfig.initialize(cfGuid);
+
+    // Org/space names load asynchronously (and the orgs map lands after the
+    // first render). The Space/Org cell renders read those maps, but the
+    // signal-list doesn't re-render on external signals — so re-publish the
+    // config when the maps change to refresh the resolved names.
+    effect(() => {
+      this.orgNameByGuid();
+      this.spaceNameByGuid();
+      untracked(() => {
+        if (this.listConfig()) {
+          this.listConfig.set(this.buildListConfig());
+        }
+      });
+    });
   }
 
   // @Input() values are not bound at constructor time. Building the
@@ -95,8 +171,11 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
           widthHint: '12rem',
         },
         {
+          // The type is the event's identity and the drill-in: rendered as a
+          // link (when the event carries metadata) that opens the details
+          // dialog, titled with the type. See the `type` cell template.
           header: 'Type', key: 'type', sortField: 'type',
-          kind: 'text',
+          kind: 'template', templateName: 'type',
           render: (e: StAuditEvent) => e.type,
           widthHint: '20rem',
         },
@@ -115,13 +194,13 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
         {
           header: 'Space', key: 'spaceName', sortField: 'spaceName',
           kind: 'text',
-          render: (e: StAuditEvent) => e.spaceName || '—',
+          render: (e: StAuditEvent) => this.spaceName(e),
           widthHint: '10rem',
         },
         {
           header: 'Organization', key: 'organizationName', sortField: 'organizationName',
           kind: 'text',
-          render: (e: StAuditEvent) => e.organizationName || '—',
+          render: (e: StAuditEvent) => this.orgName(e),
           widthHint: '10rem',
         },
       ],
