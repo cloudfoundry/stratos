@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -32,6 +32,7 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
 })
 export class DeployApplicationStep3Component implements OnDestroy {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private deployData = inject(CfDeployAppDataService);
   private snackBarService = inject(SnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
@@ -257,7 +258,14 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // nothing reads anymore.
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      this.router.navigate(['applications', cfGuid, this.appGuid]);
+      // When deployed from a CF-scoped wall, tag the app detail with
+      // ?breadcrumbs=cf so its "Applications" breadcrumb returns to that wall.
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+      const cfScoped = typeof returnUrl === 'string' && returnUrl.startsWith('/cloud-foundry/');
+      this.router.navigate(
+        ['applications', cfGuid, this.appGuid],
+        cfScoped ? { queryParams: { breadcrumbs: 'cf' } } : undefined,
+      );
     }
   }
 }

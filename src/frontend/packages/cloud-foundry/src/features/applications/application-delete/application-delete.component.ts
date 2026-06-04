@@ -112,7 +112,10 @@ export class ApplicationDeleteComponent implements OnDestroy {
         this.selectedRoutes ?? [],
         this.selectedServiceBindings ?? [],
       );
-      this.router.navigate(['/applications', cfGuid, appGuid]);
+      // Preserve ?returnUrl so the detail page's orchestrated delete can send
+      // the user back to the CF-scoped wall they came from (see
+      // AppApplicationActionsService.deleteWithCleanup).
+      this.router.navigate(['/applications', cfGuid, appGuid], { queryParamsHandling: 'preserve' });
     },
   };
 
