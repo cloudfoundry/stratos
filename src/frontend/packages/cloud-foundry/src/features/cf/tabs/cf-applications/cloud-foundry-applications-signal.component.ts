@@ -10,6 +10,7 @@ import {
   CurrentUserPermissionsService,
   ListSubNavAddAction,
   ListSubNavComponent,
+  SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
@@ -192,6 +193,19 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
           widthHint: '7rem',
         },
         {
+          // Org/Space — the application wall's CF/Org/Space column minus the
+          // CF segment (CF is already implied by this scoped route).
+          header: 'Org/Space', key: 'orgSpace',
+          sortField: (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
+            app, this.appsConfig.orgNames(), this.appsConfig.spaceNames()),
+          kind: 'compound',
+          compound: (app: StApp) => CloudFoundryApplicationsSignalComponent.compoundOrgSpace(
+            app, this.appsConfig.orgNames(), this.appsConfig.spaceNames()),
+          render: (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
+            app, this.appsConfig.orgNames(), this.appsConfig.spaceNames()),
+          widthHint: '14rem',
+        },
+        {
           header: 'Created', key: 'createdAt', sortField: 'createdAt',
           render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatDate(app.createdAt),
           widthHint: '12rem',
@@ -223,6 +237,10 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         card: [6, 12, 24, 48, 96],
       },
       nameFilter: this.appsConfig.nameFilter,
+      // Filter-by-field parity with the wall: the text filter can target
+      // Name, Status, or the Org/Space column.
+      filterColumns: ['name', 'state', 'orgSpace'],
+      filterField: this.appsConfig.filterField,
       filterDropdowns: dropdowns,
       onRefresh: () => this.appsConfig.refresh(),
       onClear: () => this.appsConfig.clearFilters(),
@@ -230,6 +248,16 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       viewMode: this.appsConfig.viewMode,
       sort: this.appsConfig.sort,
     });
+
+    // Sort + filter extractors for the Org/Space column (composed from name
+    // maps rather than a direct StApp field), plus name/state so the
+    // filter-by-field dropdown can target each.
+    const orgSpaceText = (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
+      app, this.appsConfig.orgNames(), this.appsConfig.spaceNames());
+    this.appsConfig.registerSortExtractor('orgSpace', orgSpaceText);
+    this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
+    this.appsConfig.registerFilterExtractor('state', stateLabel);
+    this.appsConfig.registerFilterExtractor('orgSpace', orgSpaceText);
 
     // Default per-CF tab presentation matches per-space: card view at 6/page.
     this.appsConfig.viewMode.set('card');
@@ -270,6 +298,56 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       },
     ];
   };
+
+  /**
+   * Resolve an app's org + space display names. Prefers the names carried on
+   * the row from the server-side space→org / app→space join; falls back to
+   * the catalog name maps by guid, then to an em-dash placeholder (never a
+   * raw guid — guids stay in the URL/tooltip). Mirrors the application wall's
+   * resolution, minus the CF/endpoint segment (CF is implied by the route).
+   */
+  static resolveOrgSpace(
+    app: StApp,
+    orgNames: ReadonlyMap<string, string>,
+    spaceNames: ReadonlyMap<string, string>,
+  ): { orgName: string; spaceName: string } {
+    const orgName = app.orgName || (app.orgGuid ? (orgNames.get(app.orgGuid) ?? '—') : '—');
+    const spaceName = app.spaceName || (app.spaceGuid ? (spaceNames.get(app.spaceGuid) ?? '—') : '—');
+    return { orgName, spaceName };
+  }
+
+  /** Flatten org + space to a single string for sort/filter extractors. */
+  static renderOrgSpace(
+    app: StApp,
+    orgNames: ReadonlyMap<string, string>,
+    spaceNames: ReadonlyMap<string, string>,
+  ): string {
+    const { orgName, spaceName } = CloudFoundryApplicationsSignalComponent.resolveOrgSpace(app, orgNames, spaceNames);
+    return `${orgName} / ${spaceName}`;
+  }
+
+  /**
+   * Stacked Org/Space segments for the compound column. Each segment links
+   * to its CF detail page once the guid + name are both known; while a name
+   * is still '—' the segment renders as plain text (no dead anchors).
+   */
+  static compoundOrgSpace(
+    app: StApp,
+    orgNames: ReadonlyMap<string, string>,
+    spaceNames: ReadonlyMap<string, string>,
+  ): SignalListCompoundSegment[] {
+    const { orgName, spaceName } = CloudFoundryApplicationsSignalComponent.resolveOrgSpace(app, orgNames, spaceNames);
+    const orgLink = app.orgGuid && orgName !== '—'
+      ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid]
+      : undefined;
+    const spaceLink = app.orgGuid && app.spaceGuid && spaceName !== '—'
+      ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid, 'spaces', app.spaceGuid]
+      : undefined;
+    return [
+      { text: orgName, link: orgLink },
+      { text: spaceName, link: spaceLink },
+    ];
+  }
 
   static formatMb(mb: number | null | undefined): string {
     if (mb == null || typeof mb !== 'number' || Number.isNaN(mb)) return '—';
