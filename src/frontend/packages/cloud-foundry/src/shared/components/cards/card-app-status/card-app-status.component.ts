@@ -56,10 +56,15 @@ export class CardAppStatusComponent {
   });
 
   readonly instancesLabel = computed(() => {
-    const stats = this.data.stats();
     if (this.actions.inFlight() && this.staleSeconds() > 7) return 'updating…';
-    if (!stats?.length) return '0/0 running';
-    const running = stats.filter(s => s.state === 'RUNNING').length;
-    return `${running}/${stats.length} running`;
+    // Denominator is the EXPECTED instance count off the app entity — a
+    // persistent process property — not stats.length. A stopped app has no
+    // per-instance stats (stats fetch is skipped to avoid CF's stopped-stats
+    // error), so stats.length was 0 and the row read "0/0 running" even when
+    // the app expects 1. Mirror the Instances card: running / expected.
+    const expected = this.data.app()?.entity?.instances ?? 0;
+    const stats = this.data.stats();
+    const running = stats?.filter(s => s.state === 'RUNNING').length ?? 0;
+    return `${running}/${expected} running`;
   });
 }

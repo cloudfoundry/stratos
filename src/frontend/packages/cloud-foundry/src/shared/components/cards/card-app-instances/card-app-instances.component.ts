@@ -99,9 +99,6 @@ export class CardAppInstancesComponent implements OnDestroy {
   /** Disable scale buttons while an app-level update is in flight. */
   readonly isUpdating = computed(() => this.dataService.loading().app);
 
-  /** True when the app entity reports STARTED. */
-  readonly isRunning = computed(() => this.dataService.running());
-
   /**
    * Edit-permission gate. Wraps the perm-check Observable into a signal
    * so the template stays pipe-free. canEdit() is null while the perm

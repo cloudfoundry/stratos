@@ -29,7 +29,7 @@
     </div>
   }
   @if (canEdit()) {
-    @if (showActions && isRunning() && !isEditing) {
+    @if (showActions && !isEditing) {
       <div class="absolute top-4 right-4 flex gap-1 text-right">
         <button (click)="edit()" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">edit</span>

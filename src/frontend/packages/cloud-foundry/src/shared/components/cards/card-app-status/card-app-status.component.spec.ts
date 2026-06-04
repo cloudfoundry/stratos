@@ -14,6 +14,7 @@ function makeDataStub(overrides: Partial<{
   diskMb: number;
   statsRunning: number;
   statsTotal: number;
+  desiredInstances: number;
   lastPolledAt: Date | null;
 }> = {}) {
   const state = overrides.state ?? 'STARTED';
@@ -21,6 +22,10 @@ function makeDataStub(overrides: Partial<{
   const diskMb = overrides.diskMb ?? 1024;
   const runningCount = overrides.statsRunning ?? 2;
   const totalCount = overrides.statsTotal ?? 2;
+  // Desired (expected) instance count drives the denominator. Defaults to the
+  // stats total so running-app tests stay aligned; stopped-app tests override
+  // it independently (stats empty, but the expected count is still meaningful).
+  const desiredInstances = overrides.desiredInstances ?? totalCount;
   const lastPoll = overrides.lastPolledAt ?? null;
 
   const stats = Array.from({ length: totalCount }, (_, i) => ({
@@ -31,7 +36,7 @@ function makeDataStub(overrides: Partial<{
   }));
 
   return {
-    app: signal<any>({ entity: { state } }).asReadonly(),
+    app: signal<any>({ entity: { state, instances: desiredInstances } }).asReadonly(),
     summary: signal<any>({ memory: memoryMb, disk_quota: diskMb }).asReadonly(),
     stats: signal<any[]>(stats).asReadonly(),
     state: computed(() => ({ label: state, indicator: null, actions: {} })),
@@ -161,8 +166,17 @@ describe('CardAppStatusComponent', () => {
       expect(component.instancesLabel()).toBe('2/3 running');
     });
 
-    it('shows 0/0 when stats are empty', () => {
-      const { fixture } = setup({ statsRunning: 0, statsTotal: 0 });
+    it('uses the expected instance count as denominator when stopped (no stats)', () => {
+      // Regression: a stopped app has no per-instance stats, but its expected
+      // count is still 1 — the row must read "0/1 running", not "0/0 running"
+      // (which used stats.length as the denominator). Matches the Instances card.
+      const { fixture } = setup({ state: 'STOPPED', statsRunning: 0, statsTotal: 0, desiredInstances: 1 });
+      const component = fixture.componentInstance;
+      expect(component.instancesLabel()).toBe('0/1 running');
+    });
+
+    it('shows 0/0 when the app has no expected instances and no stats', () => {
+      const { fixture } = setup({ state: 'STOPPED', statsRunning: 0, statsTotal: 0, desiredInstances: 0 });
       const component = fixture.componentInstance;
       expect(component.instancesLabel()).toBe('0/0 running');
     });
