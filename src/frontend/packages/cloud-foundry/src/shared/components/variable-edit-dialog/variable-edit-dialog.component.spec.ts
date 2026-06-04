@@ -40,6 +40,11 @@ describe('VariableEditDialogComponent', () => {
     expect(cmp.value()).toBe('');
   });
 
+  it('uses an enlarged Monaco font size for readability', () => {
+    const { cmp } = make({ mode: 'add' });
+    expect(cmp.editorOptions.fontSize).toBeGreaterThanOrEqual(16);
+  });
+
   it('auto-detects JSON mode for an object value', () => {
     const { cmp } = make({ mode: 'edit', name: 'STRATOS_PROJECT', value: '{"deploy":true}' });
     expect(cmp.jsonMode()).toBe(true);

@@ -84,6 +84,8 @@ export class VariableEditDialogComponent {
     scrollBeyondLastLine: false,
     wordWrap: 'on',
     tabSize: 2,
+    // Larger than Monaco's compact default so values stay easy to read.
+    fontSize: 16,
   };
 
   /** Captured Monaco editor instance (undefined until onInit fires; never
