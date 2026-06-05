@@ -108,18 +108,29 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
     // dropdown — the CF is already named in the breadcrumb, and a disabled
     // control only adds clutter. Show just the interactive Org/Space filters.
     this.appsConfig.selectedCnsi.set(cfGuid);
+    // First open of either Org/Space dropdown lazily fetches this CF's
+    // org+space catalog. Unlike the other per-CF tabs (which read the shared
+    // EndpointDataService the parent CF page already hydrates), the apps
+    // config keeps its OWN lazy catalog so the multi-CF app wall doesn't
+    // saturate the network on mount — see CfAppsSignalConfigService.loadNames.
+    // That catalog is gated behind ensureNamesLoaded(); without this onOpen
+    // hook the dropdowns never populate beyond "All". Scope the fetch to the
+    // single CNSI in view (tighter than the wall's all-endpoints default).
+    const onDropdownOpen = () => { void this.appsConfig.ensureNamesLoaded([cfGuid]); };
     const dropdowns: SignalListDropdown[] = [
       {
         label: 'Organization',
         options: this.appsConfig.orgOptions,
         selected: this.appsConfig.selectedOrg,
         loading: this.appsConfig.isLoadingOrgs,
+        onOpen: onDropdownOpen,
       },
       {
         label: 'Space',
         options: this.appsConfig.spaceOptions,
         selected: this.appsConfig.selectedSpace,
         loading: this.appsConfig.isLoadingSpaces,
+        onOpen: onDropdownOpen,
       },
     ];
 
