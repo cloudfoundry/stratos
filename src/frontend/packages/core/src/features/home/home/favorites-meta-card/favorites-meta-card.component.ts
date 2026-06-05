@@ -1,12 +1,13 @@
 
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, inject, runInInjectionContext } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { take, defaultIfEmpty } from 'rxjs/operators';
-import { entityCatalog, FavoriteIconData, IFavoriteMetadata, UserFavorite, UserFavoriteManager } from '@stratosui/store';
+import { entityCatalog, FavoriteIconData, IFavoriteMetadata, UserFavorite, UserFavoriteManager, UserFavoritesDataService } from '@stratosui/store';
 
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { FreshEntityNameService } from '../../../../core/signals/fresh-entity-name.service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 
@@ -25,6 +26,8 @@ export class FavoritesMetaCardComponent {
   private router = inject(Router);
   private confirmDialog = inject(ConfirmationDialogService);
   private userFavoriteManager = inject(UserFavoriteManager);
+  private favoritesData = inject(UserFavoritesDataService);
+  private freshNames = inject(FreshEntityNameService);
   private injector = inject(Injector);
 
 
@@ -36,14 +39,52 @@ export class FavoritesMetaCardComponent {
   // Type of favorite - e.g. 'Application'
   public favoriteType: string;
 
-  // Favorite name
-  public name!: string;
-
   public routerLink!: string;
 
   public icon: FavoriteIconData;
 
   public valid = true;
+
+  // Reactive favorite, so the rendered name tracks freshly-fetched entity data.
+  private readonly favoriteSig = signal<UserFavorite<IFavoriteMetadata> | null>(null);
+
+  // The name to render: the freshly-fetched entity name when available, else
+  // the stored favorite metadata name (signal-native replacement for the old
+  // static `this.name = favorite.metadata.name`).
+  readonly displayName = computed(() => {
+    const fav = this.favoriteSig();
+    if (!fav) {
+      return '';
+    }
+    return this.freshNames.freshNameFor(fav) ?? fav.metadata.name;
+  });
+
+  // Last name persisted, so a refresh round-trip doesn't fire duplicate POSTs.
+  private lastPersisted: string | null = null;
+
+  constructor() {
+    // Persist a corrected name back to the favorites store when the fresh
+    // entity name diverges from the stored one (signal-native replacement for
+    // the deleted ngrx `syncFavorite`). The guard self-settles: updateMetadata
+    // updates the favorites signal, the parent re-passes the favorite, and the
+    // next run sees fresh === stored.
+    effect(() => {
+      const fav = this.favoriteSig();
+      if (!fav) {
+        return;
+      }
+      const fresh = this.freshNames.freshNameFor(fav);
+      if (fresh && fresh !== fav.metadata.name && fresh !== this.lastPersisted) {
+        const updated = this.userFavoriteManager.getUserFavoriteFromObject(fav);
+        if (!updated) {
+          return;
+        }
+        this.lastPersisted = fresh;
+        updated.metadata = { ...updated.metadata, name: fresh };
+        this.favoritesData.updateMetadata(updated);
+      }
+    });
+  }
 
   @Input()
   set favoriteEntity(favoriteEntity: UserFavorite<IFavoriteMetadata>) {
@@ -51,8 +92,9 @@ export class FavoritesMetaCardComponent {
       this.favorite = favoriteEntity;
       this.favoriteType = this.favorite.getPrettyTypeName();
       this.icon = this.favorite.getIcon();
-      this.name = this.favorite.metadata.name;
       this.routerLink = this.favorite.getLink();
+      this.lastPersisted = null;
+      this.favoriteSig.set(favoriteEntity);
     }
   }
 
