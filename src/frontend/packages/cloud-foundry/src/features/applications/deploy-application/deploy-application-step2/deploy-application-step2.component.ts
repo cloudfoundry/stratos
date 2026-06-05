@@ -51,6 +51,12 @@ import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-app
 
 
 
+// Access mode for the gitscm (GitHub / GitLab) source sub-form.
+//  public     — public host repo, no auth
+//  private    — host private repo, access token only (no base URL)
+//  enterprise — custom base URL (GitHub Enterprise / self-hosted GitLab) + token
+export type GitAccessMode = 'public' | 'private' | 'enterprise';
+
 @Component({
 selector: 'app-deploy-application-step2',
   templateUrl: './deploy-application-step2.component.html',
@@ -122,6 +128,13 @@ export class DeployApplicationStep2Component
   isInvalidGithubEnterpriseUrl = false;
   githubEnterpriseUrl: string;
   accessToken: string;
+
+  // Active git access mode for the gitscm sub-form, driven by the
+  // Public / Private / Enterprise tab strip. Held as local component state —
+  // the store still sees only githubEnterpriseUrl + accessToken. Switching
+  // tabs clears the fields that don't belong to the new mode so a stale base
+  // URL / token is never carried into the deploy.
+  gitMode: GitAccessMode = 'public';
   // --------------
 
   // Git URL
@@ -254,6 +267,8 @@ export class DeployApplicationStep2Component
 
   /* Git ------------------*/
   private setupForGit() {
+    // Land the tab strip on the mode that matches any restored auth values.
+    this.gitMode = DeployApplicationStep2Component.deriveGitMode(this.githubEnterpriseUrl, this.accessToken);
     this.projectInfo$ = this.projectExists$.pipe(
       filter(p => !!p),
       map(p => (!!p.exists && !!p.data) ? p.data : null),
@@ -415,5 +430,33 @@ export class DeployApplicationStep2Component
     this.deployData.setDeployBranch(branch.name);
   }
 
+  // Infer the opening access mode from restored values (redeploy / nav back),
+  // so the tab strip lands on the mode that matches what's already set. A base
+  // URL implies Enterprise even before its token is entered; a token alone
+  // (no URL) implies a Private host repo; neither implies Public.
+  static deriveGitMode(enterpriseUrl: string | undefined, accessToken: string | undefined): GitAccessMode {
+    if (enterpriseUrl) {
+      return 'enterprise';
+    }
+    if (accessToken) {
+      return 'private';
+    }
+    return 'public';
+  }
+
+  // Tab handler: switch the active access mode and clear the now-irrelevant
+  // auth fields (Public → drop URL + token; Private → drop URL, keep token;
+  // Enterprise → keep both), then re-sync the SCM so a cleared token/URL stops
+  // being applied to subsequent repo/branch lookups.
+  setGitMode(mode: GitAccessMode): void {
+    this.gitMode = mode;
+    if (mode === 'public') {
+      this.githubEnterpriseUrl = '';
+      this.accessToken = '';
+    } else if (mode === 'private') {
+      this.githubEnterpriseUrl = '';
+    }
+    this.applyGithubEnterpriseAndToken(this.githubEnterpriseUrl, this.accessToken);
+  }
 
 }

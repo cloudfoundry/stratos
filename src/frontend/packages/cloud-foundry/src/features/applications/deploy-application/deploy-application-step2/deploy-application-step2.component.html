@@ -16,26 +16,70 @@
               <div>
                 @if (sourceType.group === 'gitscm') {
                   <div>
+                    @if (!isRedeploy) {
+                      <!-- Access mode: Public / Private / Enterprise. Each tab
+                           reveals only the fields that path needs, in the order
+                           they're required (auth gates the repo lookup). -->
+                      <div class="flex border-b border-content-border mb-4" role="tablist" aria-label="Repository access">
+                        <button type="button" role="tab" [attr.aria-selected]="gitMode === 'public'"
+                          class="px-4 py-2 text-sm border-b-2 -mb-px"
+                          [class.border-content-text]="gitMode === 'public'"
+                          [class.text-content-text]="gitMode === 'public'"
+                          [class.font-medium]="gitMode === 'public'"
+                          [class.border-transparent]="gitMode !== 'public'"
+                          [class.text-content-muted]="gitMode !== 'public'"
+                          (click)="setGitMode('public')">Public</button>
+                        <button type="button" role="tab" [attr.aria-selected]="gitMode === 'private'"
+                          class="px-4 py-2 text-sm border-b-2 -mb-px"
+                          [class.border-content-text]="gitMode === 'private'"
+                          [class.text-content-text]="gitMode === 'private'"
+                          [class.font-medium]="gitMode === 'private'"
+                          [class.border-transparent]="gitMode !== 'private'"
+                          [class.text-content-muted]="gitMode !== 'private'"
+                          (click)="setGitMode('private')">Private</button>
+                        <button type="button" role="tab" [attr.aria-selected]="gitMode === 'enterprise'"
+                          class="px-4 py-2 text-sm border-b-2 -mb-px"
+                          [class.border-content-text]="gitMode === 'enterprise'"
+                          [class.text-content-text]="gitMode === 'enterprise'"
+                          [class.font-medium]="gitMode === 'enterprise'"
+                          [class.border-transparent]="gitMode !== 'enterprise'"
+                          [class.text-content-muted]="gitMode !== 'enterprise'"
+                          (click)="setGitMode('enterprise')">{{ sourceType.id === DEPLOY_TYPES_IDS.GITLAB ? 'Self-hosted GitLab' : 'GitHub Enterprise' }}</button>
+                      </div>
+                    }
                     <div class="github-project-details">
                       <div>
+                        @if (gitMode === 'enterprise') {
+                          <div class="form-field">
+                            <label class="block text-sm text-content-muted mb-1" for="githubEnterpriseUrl">
+                              {{ sourceType.id === DEPLOY_TYPES_IDS.GITLAB ? 'GitLab base URL' : 'GitHub Enterprise URL' }} <span class="text-red-500">*</span>
+                            </label>
+                            <input id="githubEnterpriseUrl" type="text" class="input" [(ngModel)]="githubEnterpriseUrl"
+                              placeholder="https://github.mycorp.com" name="githubEnterpriseUrl"
+                              [disabled]="isRedeploy" required>
+                            @if (isInvalidGithubEnterpriseUrl) {
+                              <div class="text-red-500 text-sm mt-1">
+                                The base URL is not valid
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (gitMode !== 'public') {
+                          <div class="form-field">
+                            <label class="block text-sm text-content-muted mb-1" for="githubAccessToken">
+                              Access token <span class="text-red-500">*</span>
+                            </label>
+                            <input id="githubAccessToken" type="password" class="input" [(ngModel)]="accessToken"
+                              placeholder="Personal access token" name="githubAccessToken"
+                              autocomplete="off" spellcheck="false" [disabled]="isRedeploy" required>
+                          </div>
+                        }
                         <div class="form-field">
-                          <input type="text" class="input" [(ngModel)]="githubEnterpriseUrl"
-                            placeholder="GitHub Enterprise URL (optional)" name="githubEnterpriseUrl"
-                            [disabled]="isRedeploy">
-                          @if (isInvalidGithubEnterpriseUrl) {
-                            <div class="text-red-500 text-sm mt-1">
-                              GitHub Enterprise deployment URL is not valid
-                            </div>
-                          }
-                        </div>
-                        <div class="form-field">
-                          <input type="password" class="input" [(ngModel)]="accessToken"
-                            placeholder="GitHub Access Token (optional)" name="githubAccessToken"
-                            autocomplete="off" spellcheck="false" [disabled]="isRedeploy">
-                        </div>
-                        <div class="form-field">
-                          <input type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
-                            placeholder="Project" name="projectName"
+                          <label class="block text-sm text-content-muted mb-1" for="projectName">
+                            Project <span class="text-red-500">*</span>
+                          </label>
+                          <input id="projectName" type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
+                            placeholder="owner/repo" name="projectName"
                             [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid + ',' + (accessToken || '')" required
                             list="repo-suggestions">
                           <!-- Repository suggestions datalist -->
@@ -76,53 +120,58 @@
                         </div>
                       </div>
                     }
-                  </div>
-                  <div class="form-field">
-                    <select class="input"
-                      [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
-                      [(ngModel)]="repositoryBranch" name="repositoryBranch"
-                      (change)="updateBranchName($event.target.value)" required>
-                      <option value="" disabled>Branch</option>
-                      @for (branch of repositoryBranches$ | async; track branch) {
-                        <option [value]="branch">
-                          {{ branch.name }}
-                        </option>
-                      }
-                    </select>
-                  </div>
-                  @if (isRedeploy && commitInfo) {
-                    <div
-                      class="deploy-step2-form__project-info-group deploy-step2-form__commit">
-                      <div>
-                        <img src="{{commitInfo.author.avatar_url}}" alt="">
-                      </div>
-                      <div src="description">
-                        <div>
-                          <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
-                        </div>
-                        <div>
-                          {{commitInfo.commit.message}}
-                        </div>
-                        <div class="author-info">
-                          <div>
-                            {{commitInfo.commit.author.name}}
-                          </div>
-                          <div>
-                            {{commitInfo.commit.author.date | date: 'medium'}}
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  }
-                </div>
-              }
+                    <div class="form-field">
+                      <label class="block text-sm text-content-muted mb-1" for="repositoryBranch">
+                        Branch <span class="text-red-500">*</span>
+                      </label>
+                      <select id="repositoryBranch" class="input"
+                        [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
+                        [(ngModel)]="repositoryBranch" name="repositoryBranch"
+                        (change)="updateBranchName($event.target.value)" required>
+                        <option value="" disabled>Select a branch</option>
+                        @for (branch of repositoryBranches$ | async; track branch) {
+                          <option [value]="branch">
+                            {{ branch.name }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                    @if (isRedeploy && commitInfo) {
+                      <div
+                        class="deploy-step2-form__project-info-group deploy-step2-form__commit">
+                        <div>
+                          <img src="{{commitInfo.author.avatar_url}}" alt="">
+                        </div>
+                        <div src="description">
+                          <div>
+                            <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
+                          </div>
+                          <div>
+                            {{commitInfo.commit.message}}
+                          </div>
+                          <div class="author-info">
+                            <div>
+                              {{commitInfo.commit.author.name}}
+                            </div>
+                            <div>
+                              {{commitInfo.commit.author.date | date: 'medium'}}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
               @if (sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
                 <div>
                   <div class="form-field">
-                    <input class="input" [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="Git URL" name="gitUrl" required>
+                    <label class="block text-sm text-content-muted mb-1" for="gitUrl">Git URL <span class="text-red-500">*</span></label>
+                    <input id="gitUrl" class="input" [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="https://github.com/owner/repo.git" name="gitUrl" required>
                   </div>
                   <div class="form-field">
-                    <input class="input" [(ngModel)]="gitUrlBranchName" placeholder="Branch or Tag" name="urlBranchName" required>
+                    <label class="block text-sm text-content-muted mb-1" for="urlBranchName">Branch or tag <span class="text-red-500">*</span></label>
+                    <input id="urlBranchName" class="input" [(ngModel)]="gitUrlBranchName" placeholder="main" name="urlBranchName" required>
                   </div>
                 </div>
               }
@@ -131,7 +180,8 @@
           @if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
             <div>
               <div class="form-field">
-                <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="Application Name"
+                <label class="block text-sm text-content-muted mb-1" for="dockerAppName">Application name <span class="text-red-500">*</span></label>
+                <input id="dockerAppName" class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="my-app"
                   name="dockerAppName" required>
                 @if (sourceSelectionForm.controls.dockerAppName?.errors?.required) {
                   <div class="text-red-500 text-sm mt-1">
@@ -140,7 +190,8 @@
                 }
               </div>
               <div class="form-field">
-                <input class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="Docker Image" name="dockerImg"
+                <label class="block text-sm text-content-muted mb-1" for="dockerImg">Docker image <span class="text-red-500">*</span></label>
+                <input id="dockerImg" class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="repo/image:tag" name="dockerImg"
                   required>
                 @if (sourceSelectionForm.controls.dockerImg?.errors?.required) {
                   <div class="text-red-500 text-sm mt-1">
@@ -154,7 +205,8 @@
                 }
               </div>
               <div class="form-field">
-                <input class="input" [(ngModel)]="dockerUsername" placeholder="Docker Username" name="dockerUsername">
+                <label class="block text-sm text-content-muted mb-1" for="dockerUsername">Docker username <span class="text-content-muted">(optional)</span></label>
+                <input id="dockerUsername" class="input" [(ngModel)]="dockerUsername" placeholder="Docker username" name="dockerUsername">
                 <p class="mt-1 text-sm text-content-muted">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
               </div>
             </div>
