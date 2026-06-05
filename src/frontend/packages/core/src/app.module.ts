@@ -220,10 +220,11 @@ export class AppModule {
     // Init Auth Types and Endpoint Types provided by extensions
     // Once the CF modules become an extension point, these should be moved to a CF specific module
 
-    // NOTE: The favorites/recents name-refresh that used to subscribe to the
-    // ngrx `requestData` store (via getAPIRequestDataState) has been removed
-    // with the request/pagination store engine. That refresh is already-broken
-    // lost functionality being restored signal-natively in a follow-up PR.
+    // The favorites/recents display-name refresh (formerly a debounced
+    // subscription to the ngrx `requestData` store) is now signal-native and
+    // lives in the cards themselves: FreshEntityNameService resolves the fresh
+    // name and FavoritesMetaCardComponent / RecentEntitiesComponent persist
+    // corrections via UserFavoritesDataService.updateMetadata / recents.set.
 
     // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
     customizationService.set({
