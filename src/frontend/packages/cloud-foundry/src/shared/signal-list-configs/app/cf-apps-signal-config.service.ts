@@ -249,21 +249,49 @@ export class CfAppsSignalConfigService {
     // Space options are scoped to the selected CF and, when set, the
     // selected org. StSpace carries orgGuid so we can filter from the
     // catalog without needing an app to exist in the space.
+    //
+    // - Org selected: the org is fixed, so the bare space name is
+    //   unambiguous. Label = space name, natural sort.
+    // - Org = All: spaces from different orgs commonly share a name
+    //   (space_1 in org_1, space_1 in org_2, …). A bare-name list would
+    //   render a wall of identical "space_1" entries, so disambiguate each
+    //   as "<space> - <org>" (mirrors the Routes/Services/Users tabs),
+    //   sorted by space name then org name. Falls back to the bare name
+    //   when the org name isn't resolved yet (catalog still draining).
     this.spaceOptions = computed(() => {
       const cnsi = this.selectedCnsi();
       const org = this.selectedOrg();
       const byCnsi = this._spacesByCnsi();
-      const seen = new Map<string, string>();
       const sources = cnsi ? [byCnsi.get(cnsi) ?? []] : Array.from(byCnsi.values());
+      // Dedup by guid, retaining the org guid so the All-orgs branch can
+      // append the org name.
+      const seen = new Map<string, { name: string; orgGuid: string }>();
       for (const spaces of sources) {
         for (const s of spaces) {
           if (org && s.orgGuid !== org) continue;
-          if (!seen.has(s.guid)) seen.set(s.guid, s.name);
+          if (!seen.has(s.guid)) seen.set(s.guid, { name: s.name, orgGuid: s.orgGuid });
         }
       }
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a, b));
-      for (const [guid, label] of sorted) opts.push({ label, value: guid });
+      if (org) {
+        const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a.name, b.name));
+        for (const [guid, s] of sorted) opts.push({ label: s.name, value: guid });
+        return opts;
+      }
+      const orgNames = this.orgNames();
+      const augmented = Array.from(seen.entries()).map(([guid, s]) => ({
+        guid,
+        spaceName: s.name,
+        orgName: orgNames.get(s.orgGuid) ?? '',
+      }));
+      augmented.sort((a, b) => {
+        const bySpace = naturalCompare(a.spaceName, b.spaceName);
+        if (bySpace !== 0) return bySpace;
+        return naturalCompare(a.orgName, b.orgName);
+      });
+      for (const s of augmented) {
+        opts.push({ label: s.orgName ? `${s.spaceName} - ${s.orgName}` : s.spaceName, value: s.guid });
+      }
       return opts;
     });
 
