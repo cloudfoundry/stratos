@@ -267,6 +267,54 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.spaceOptions().map(o => o.label)).toContain('e2e');
   });
 
+  it('disambiguates same-named spaces across orgs as "<space> - <org>" when no org is selected', async () => {
+    // space_1 exists in both org_a and org_b. With Org = All a bare-name
+    // list would render two identical "space_1" rows, so the dropdown must
+    // append the org name to tell them apart (parity with the Routes /
+    // Services / Users tabs). Selecting an org fixes the scope, so the
+    // label collapses back to the bare space name.
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url.startsWith('/pp/v1/cf/orgs/cnsi-1')) {
+          return of({
+            resources: [
+              { guid: 'org-a', name: 'org_a', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+              { guid: 'org-b', name: 'org_b', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        if (url.startsWith('/pp/v1/cf/spaces/cnsi-1')) {
+          return of({
+            resources: [
+              { guid: 'space-1a', name: 'space_1', orgGuid: 'org-a', createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+              { guid: 'space-1b', name: 'space_1', orgGuid: 'org-b', createdAt: '', updatedAt: '', cnsiGuid: 'cnsi-1' },
+            ],
+          });
+        }
+        return of({
+          resources: [],
+          pagination: { totalResults: 0, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
+        });
+      }),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.selectedCnsi.set('cnsi-1');
+    svc.initialize(['cnsi-1']);
+    // Await the catalog drain directly (orgs + priority spaces chunk) rather
+    // than counting microtasks.
+    await svc.ensureNamesLoaded(['cnsi-1']);
+    TestBed.tick();
+
+    // Org = All → disambiguated, sorted by space name then org name.
+    expect(svc.spaceOptions().map(o => o.label)).toEqual(['All', 'space_1 - org_a', 'space_1 - org_b']);
+
+    // Org selected → bare space name (the org is already fixed).
+    svc.selectedOrg.set('org-a');
+    TestBed.tick();
+    expect(svc.spaceOptions().map(o => o.label)).toEqual(['All', 'space_1']);
+  });
+
   it('preserves a valid selection across navigation (re-initialize)', async () => {
     // Regression: the singleton service's _hasLoadedOnce was latching true
     // forever after the first load. On re-navigation, a fresh initialize()
