@@ -47,6 +47,12 @@ export class FreshEntityNameService {
     }
     const svc = this.registry.peek(ref.endpointId);
     if (!svc) {
+      // Intentionally non-reactive: a peek-miss reads no signal, so a caller's
+      // computed/effect won't re-run purely because this endpoint's data later
+      // arrives — it re-resolves on its own trigger (favorite identity / recents
+      // state change). Do NOT read a signal here to "fix" that; it would couple
+      // every card to the registry's internal map. This is the accepted
+      // "refresh where endpoint data is loaded" boundary.
       return null;
     }
     const list =
