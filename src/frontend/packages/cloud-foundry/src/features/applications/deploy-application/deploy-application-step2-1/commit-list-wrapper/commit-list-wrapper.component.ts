@@ -44,12 +44,33 @@ export class CommitListWrapperComponent {
 
   public readonly listConfig: WritableSignal<SignalListConfig<GitCommit> | undefined> = signal(undefined);
 
+  // Branch the commits are listed from — shown in the deploy-latest-HEAD note.
+  public readonly branchName: WritableSignal<string> = signal('');
+
+  // "Deploy the latest commit on the branch" — when on, no specific commit is
+  // pinned; the deploy sends an empty SHA and CF deploys whatever HEAD points
+  // at. Off (default) preserves the pick-a-commit behaviour.
+  public readonly useLatestHead: WritableSignal<boolean> = signal(false);
+  readonly useLatestHead$: Observable<boolean> = toObservable(this.useLatestHead);
+
   // The chosen commit (or null) — derived from the radio selection signal.
   // deploy-application-step2-1 subscribes to this to drive step validity and
   // seed the deploy payload.
   readonly selectedCommit$: Observable<GitCommit | null> = toObservable(
     computed(() => this.signalConfig.selectedCommit() ?? null)
   );
+
+  // Toggle handler for the deploy-latest-HEAD checkbox. Clears the radio
+  // selection while on (so a stale pin isn't carried) and restores the
+  // newest-commit default when toggled back off.
+  setUseLatestHead(value: boolean): void {
+    this.useLatestHead.set(value);
+    if (value) {
+      this.signalConfig.selectedKey.set(null);
+    } else {
+      this.signalConfig.selectFirst();
+    }
+  }
 
   constructor() {
     // Resolve the git source (project + branch) from the deploy wizard's
@@ -66,6 +87,7 @@ export class CommitListWrapperComponent {
       take(1),
     ).subscribe(fetchDetails => {
       const scm = this.scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid, fetchDetails.accessToken);
+      this.branchName.set(fetchDetails.sha);
       this.signalConfig.initialize(scm, fetchDetails.projectName, fetchDetails.sha);
       this.listConfig.set(this.buildListConfig());
       // Auto-select the first (newest) commit once the list loads so the step
