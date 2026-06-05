@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -14,6 +14,7 @@ import { Observable, of as observableOf } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
+import { FreshEntityNameService } from '../../../core/signals/fresh-entity-name.service';
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
@@ -62,6 +63,11 @@ class RenderableRecent {
 export class RecentEntitiesComponent {
   private recents = inject(RecentlyVisitedDataService);
   private endpointsSignals = inject(EndpointsSignalService);
+  private freshNames = inject(FreshEntityNameService);
+
+  // Names already written back, keyed by recent guid — prevents the
+  // write-back effect from re-emitting the same correction.
+  private lastPersisted = new Map<string, string>();
 
   @Input()
   public history = false;
@@ -90,6 +96,25 @@ export class RecentEntitiesComponent {
     this.hasHits$ = this.recentEntities$.pipe(
       map(recentEntities => recentEntities && recentEntities.length > 0)
     );
+
+    // Signal-native name refresh (replaces the deleted ngrx requestData sync):
+    // when a recent's freshly-fetched entity name diverges from the stored one,
+    // write it back through the recents store. The update flows through state$
+    // to the rendered list, so no render-path change is needed. The guard +
+    // lastPersisted map make this converge after a single write per rename.
+    effect(() => {
+      const state = this.recents.state();
+      Object.values(state).forEach((recent: IRecentlyVisitedEntity) => {
+        if (!recent) {
+          return;
+        }
+        const fresh = this.freshNames.freshNameFor(recent);
+        if (fresh && fresh !== recent.name && this.lastPersisted.get(recent.guid) !== fresh) {
+          this.lastPersisted.set(recent.guid, fresh);
+          this.recents.set({ ...recent, name: fresh });
+        }
+      });
+    });
   }
 }
 
