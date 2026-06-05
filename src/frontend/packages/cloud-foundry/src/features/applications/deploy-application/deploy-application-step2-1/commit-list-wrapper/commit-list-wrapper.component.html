@@ -1,15 +1,30 @@
 @if (listConfig(); as cfg) {
-  <!-- Bounded height + internal scroll so the stepper's footer buttons stay on
-       screen; the signal-list host is h-full, so it must size to a parent with
-       a definite height rather than carry the height itself. -->
-  <div class="h-[24rem] min-h-0">
-    <app-signal-list [config]="cfg">
-      <ng-template appSignalListCell="sha" let-row>
-        <a [href]="row.html_url" target="_blank">{{ row.sha.substring(0, 8) }}</a>
-      </ng-template>
-      <ng-template appSignalListCell="author" let-row>
-        <app-github-commit-author [commit]="row"></app-github-commit-author>
-      </ng-template>
-    </app-signal-list>
-  </div>
+  <!-- Deploy the latest commit on the branch without pinning a specific SHA.
+       When on, the commit list is hidden and the deploy sends an empty commit
+       so CF builds whatever HEAD currently points at. -->
+  <label class="flex items-center gap-2 mb-3 text-sm text-content-text cursor-pointer">
+    <input type="checkbox" [checked]="useLatestHead()"
+      (change)="setUseLatestHead($any($event.target).checked)">
+    <span>Deploy the latest commit on <b>{{ branchName() || 'the branch' }}</b> (don't pin a commit)</span>
+  </label>
+
+  @if (useLatestHead()) {
+    <div class="text-sm text-content-muted">
+      The most recent commit on <b>{{ branchName() || 'the branch' }}</b> will be deployed. Every redeploy picks up new commits automatically.
+    </div>
+  } @else {
+    <!-- Bounded height + internal scroll so the stepper's footer buttons stay on
+         screen; the signal-list host is h-full, so it must size to a parent with
+         a definite height rather than carry the height itself. -->
+    <div class="h-[24rem] min-h-0">
+      <app-signal-list [config]="cfg">
+        <ng-template appSignalListCell="sha" let-row>
+          <a [href]="row.html_url" target="_blank">{{ row.sha.substring(0, 8) }}</a>
+        </ng-template>
+        <ng-template appSignalListCell="author" let-row>
+          <app-github-commit-author [commit]="row"></app-github-commit-author>
+        </ng-template>
+      </app-signal-list>
+    </div>
+  }
 }

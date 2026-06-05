@@ -1,6 +1,6 @@
 
 import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { StepOnNextFunction } from '@stratosui/core';
 import { GitCommit } from '@stratosui/git';
@@ -26,10 +26,17 @@ export class DeployApplicationStep21Component {
   // `validate`, which under OnPush + zoneless CD is not guaranteed to be
   // re-read after the parent has first bound it.
   private selectedCommitSubject = new BehaviorSubject<GitCommit | null>(null);
+  private useLatestHeadSubject = new BehaviorSubject<boolean>(false);
   private validateSubject = new BehaviorSubject<boolean>(false);
 
   readonly selectedCommit$: Observable<GitCommit | null> = this.selectedCommitSubject.asObservable();
   readonly validate: Observable<boolean> = this.validateSubject.asObservable();
+
+  // The step is valid when the user has picked a specific commit OR opted to
+  // deploy the latest commit on the branch (HEAD) without pinning one.
+  static isStepValid(useLatestHead: boolean, commit: GitCommit | null): boolean {
+    return useLatestHead || !!commit;
+  }
 
   @ViewChild('target', { read: ViewContainerRef, static: true })
   target!: ViewContainerRef;
@@ -41,6 +48,7 @@ export class DeployApplicationStep21Component {
     this.wrapperSub?.unsubscribe();
     this.wrapperSub = undefined;
     this.selectedCommitSubject.next(null);
+    this.useLatestHeadSubject.next(false);
     this.validateSubject.next(false);
     this.wrapperRef.destroy();
     this.target.clear();
@@ -51,16 +59,28 @@ export class DeployApplicationStep21Component {
     this.wrapperRef = this.target.createComponent(CommitListWrapperComponent);
     const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
     this.wrapperSub?.unsubscribe();
-    this.wrapperSub = wrapper.selectedCommit$.subscribe(commit => {
-      this.selectedCommitSubject.next(commit ?? null);
-      this.validateSubject.next(!!commit);
-    });
+    // Validity is driven by either a pinned commit OR the deploy-latest-HEAD
+    // toggle — combine both wrapper streams so the step settles correctly when
+    // the user flips the toggle on/off.
+    this.wrapperSub = combineLatest([wrapper.selectedCommit$, wrapper.useLatestHead$])
+      .subscribe(([commit, useLatestHead]) => {
+        this.selectedCommitSubject.next(commit ?? null);
+        this.useLatestHeadSubject.next(useLatestHead);
+        this.validateSubject.next(DeployApplicationStep21Component.isStepValid(useLatestHead, commit ?? null));
+      });
   };
 
   onNext: StepOnNextFunction = () => {
-    const commit = this.selectedCommitSubject.getValue();
-    if (commit) {
-      this.deployData.setDeployCommit(commit.sha);
+    // Latest-HEAD wins: send an empty commit so the backend deploys whatever
+    // the branch currently points at (it skips the `git reset` when Commit is
+    // empty). Otherwise pin the selected commit's SHA.
+    if (this.useLatestHeadSubject.getValue()) {
+      this.deployData.setDeployCommit('');
+    } else {
+      const commit = this.selectedCommitSubject.getValue();
+      if (commit) {
+        this.deployData.setDeployCommit(commit.sha);
+      }
     }
     return observableOf({ success: true });
   };
