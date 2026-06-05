@@ -110,6 +110,37 @@ func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID 
 	return client, nil
 }
 
+// callWithCapiRetry builds an authenticated capi client and runs op against it.
+// If op fails with a 401, it rebuilds the client once and replays op a single
+// time. This is the reactive companion to newCapiClient's proactive expiry
+// refresh: a token that is still valid when the client is built can be rejected
+// by CF anyway — the per-CF token has a ~20-minute life and a poll that fires in
+// the last moments before expiry travels to CF (≈700ms RTT) and is 401'd by the
+// time CF validates it. By retry time the stored token has genuinely expired, so
+// the rebuild's newCapiClient proactively refreshes it and the replay succeeds.
+// Without this, a long-lived read poll (app-stats, summary, env) 401s every
+// token cycle. Mirrors the inline pattern in native_audit_events_reads.go;
+// generic so any native read/write handler can wrap its CAPI call(s).
+func callWithCapiRetry[T any](
+	reqCtx context.Context,
+	proxy nativeCFProxy,
+	cnsiGUID, userGUID string,
+	op func(capi.Client) (T, error),
+) (T, error) {
+	var zero T
+	client, err := newCapiClient(reqCtx, proxy, cnsiGUID, userGUID)
+	if err != nil {
+		return zero, err
+	}
+	res, opErr := op(client)
+	if opErr != nil && statusFromCapiError(opErr) == http.StatusUnauthorized {
+		if rc, rerr := newCapiClient(reqCtx, proxy, cnsiGUID, userGUID); rerr == nil {
+			res, opErr = op(rc)
+		}
+	}
+	return res, opErr
+}
+
 // normaliseStringMap ensures nil maps are returned as empty maps (not null in JSON).
 func normaliseStringMap(m map[string]string) map[string]string {
 	if m == nil {
