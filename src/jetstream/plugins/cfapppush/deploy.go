@@ -212,6 +212,16 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig.OutputWriter = socketWriter
 	pushConfig.DialTimeout = dialTimeout
 
+	// Convert any host/domain route override into a `routes:` entry in the
+	// manifest before the push reads it. cf v8 push takes a specific route
+	// only from the manifest (there is no host/domain flag), so this is the
+	// only point at which the wizard's Route fields can take effect.
+	if err = applyRouteOverride(manifestFile, overrides); err != nil {
+		log.Warnf("Failed to apply route override: %s", err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
+		return err
+	}
+
 	// Initialise Push Command
 	cfPush := Constructor(pushConfig, cfAppPush.portalProxy)
 

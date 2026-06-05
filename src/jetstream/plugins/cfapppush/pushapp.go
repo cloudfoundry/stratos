@@ -189,10 +189,10 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 	// Random route
 	c.pushCommand.RandomRoute = overrides.RandomRoute
 
-	// Route path
-	if len(overrides.Path) > 0 {
-		c.pushCommand.AppPath = flag.PathWithExistenceCheck(overrides.Path)
-	}
+	// Note: the route path (overrides.Path) is folded into the manifest
+	// `routes:` entry by applyRouteOverride before the push reads the
+	// manifest — it is a route component (host.domain/path), not the app
+	// source path. AppPath is always the fetched source dir (set below).
 
 	// Stack
 	if len(overrides.Stack) > 0 {
