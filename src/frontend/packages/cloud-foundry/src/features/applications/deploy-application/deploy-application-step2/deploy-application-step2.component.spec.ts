@@ -137,6 +137,78 @@ describe('DeployApplicationStep2Component', () => {
       expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
     });
 
+  });
+
+  describe('git access mode (Public / Private / Enterprise tabs)', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+    });
+
+    it('derives Enterprise when a base URL is present', () => {
+      expect(DeployApplicationStep2Component.deriveGitMode('https://github.corp.com', 'tok')).toBe('enterprise');
+      // URL alone (token still to be entered) is still Enterprise.
+      expect(DeployApplicationStep2Component.deriveGitMode('https://github.corp.com', '')).toBe('enterprise');
+    });
+
+    it('derives Private when a token is present but no base URL', () => {
+      expect(DeployApplicationStep2Component.deriveGitMode('', 'tok')).toBe('private');
+      expect(DeployApplicationStep2Component.deriveGitMode(undefined, 'tok')).toBe('private');
+    });
+
+    it('derives Public when neither a base URL nor a token is present', () => {
+      expect(DeployApplicationStep2Component.deriveGitMode('', '')).toBe('public');
+      expect(DeployApplicationStep2Component.deriveGitMode(undefined, undefined)).toBe('public');
+    });
+
+    it('switching to Public clears both the base URL and the token', () => {
+      component.githubEnterpriseUrl = 'https://github.corp.com';
+      component.accessToken = 'tok';
+      component.setGitMode('public');
+      expect(component.gitMode).toBe('public');
+      expect(component.githubEnterpriseUrl).toBe('');
+      expect(component.accessToken).toBe('');
+    });
+
+    it('switching to Private clears the base URL but keeps the token', () => {
+      component.githubEnterpriseUrl = 'https://github.corp.com';
+      component.accessToken = 'tok';
+      component.setGitMode('private');
+      expect(component.gitMode).toBe('private');
+      expect(component.githubEnterpriseUrl).toBe('');
+      expect(component.accessToken).toBe('tok');
+    });
+
+    it('switching to Enterprise keeps both the base URL and the token', () => {
+      component.githubEnterpriseUrl = 'https://github.corp.com';
+      component.accessToken = 'tok';
+      component.setGitMode('enterprise');
+      expect(component.gitMode).toBe('enterprise');
+      expect(component.githubEnterpriseUrl).toBe('https://github.corp.com');
+      expect(component.accessToken).toBe('tok');
+    });
+  });
+
+  describe('applyGithubEnterpriseAndToken — form wiring', () => {
+    let scmSpy: {
+      setPublicApi: ReturnType<typeof vi.fn>;
+      setAccessToken: ReturnType<typeof vi.fn>;
+      clearAccessToken: ReturnType<typeof vi.fn>;
+      getType: ReturnType<typeof vi.fn>;
+    };
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      scmSpy = {
+        setPublicApi: vi.fn(),
+        setAccessToken: vi.fn(),
+        clearAccessToken: vi.fn(),
+        getType: vi.fn().mockReturnValue('github'),
+      };
+      component.scm = scmSpy as unknown as GitHubSCM;
+    });
+
     it('wires applyGithubEnterpriseAndToken to the sourceSelectionForm valueChanges stream', () => {
       // Mock the NgForm ViewChild with a Subject so we can emit form values
       // without standing up the full template-driven reactive form. Also mock
