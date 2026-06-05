@@ -69,23 +69,27 @@ func (c *CloudFoundrySpecification) getAppStats(ctx echo.Context) error {
 	}
 
 	reqCtx := ctx.Request().Context()
-	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
-	if err != nil {
-		return err
-	}
-
-	procGUID, lookupErr := lookupWebProcessGUID(reqCtx, cfClient, appGUID)
-	if lookupErr != nil {
-		return handleCapiError(ctx, lookupErr)
-	}
-
-	stats, statsErr := cfClient.Processes().GetStats(reqCtx, procGUID)
-	if statsErr != nil {
-		return handleCapiError(ctx, statsErr)
+	// Wrap the lookup + stats pair so a 401 at the token-expiry boundary
+	// rebuilds the client (refreshing the token) and replays both calls once,
+	// instead of surfacing a 401 to the polling app-detail page every ~20min.
+	resp, opErr := callWithCapiRetry(reqCtx, c.nativeProxy(), cnsiGUID, userGUID,
+		func(cfClient capi.Client) (StAppStatsResponse, error) {
+			procGUID, lookupErr := lookupWebProcessGUID(reqCtx, cfClient, appGUID)
+			if lookupErr != nil {
+				return StAppStatsResponse{}, lookupErr
+			}
+			stats, statsErr := cfClient.Processes().GetStats(reqCtx, procGUID)
+			if statsErr != nil {
+				return StAppStatsResponse{}, statsErr
+			}
+			return buildStatsResponse(stats), nil
+		})
+	if opErr != nil {
+		return handleCapiError(ctx, opErr)
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.JSON(http.StatusOK, buildStatsResponse(stats))
+	return ctx.JSON(http.StatusOK, resp)
 }
 
 // StAppStatsBatchResponse is the Stratos-shape JSON returned from the
@@ -136,40 +140,47 @@ func (c *CloudFoundrySpecification) getAppStatsBatch(ctx echo.Context) error {
 	}
 
 	reqCtx := ctx.Request().Context()
-	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
-	if err != nil {
-		return err
-	}
-
-	processes, lookupErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
-	if lookupErr != nil {
-		return handleCapiError(ctx, lookupErr)
-	}
-
-	out := StAppStatsBatchResponse{Apps: make(map[string]StAppStatsResponse, len(appGUIDs))}
-	var mu sync.Mutex
-	eg, egCtx := errgroup.WithContext(reqCtx)
-	eg.SetLimit(maxParallelStatsCalls)
-	for _, appGUID := range appGUIDs {
-		proc, ok := processes[appGUID]
-		if !ok || proc.GUID == "" {
-			continue
-		}
-		ag, pg := appGUID, proc.GUID
-		eg.Go(func() error {
-			stats, statsErr := cfClient.Processes().GetStats(egCtx, pg)
-			if statsErr != nil {
-				// Per-app failure: skip rather than fail the batch.
-				return nil
+	// Wrap the web-process lookup + stats fan-out so a 401 at the token-expiry
+	// boundary rebuilds the client (refreshing the token) and replays once.
+	// The retry triggers on the gating fetchWebProcessesForApps call — the
+	// first CAPI request, which catches an expired token before the fan-out
+	// runs — so the rebuilt client carries the fresh token into the fan-out.
+	out, opErr := callWithCapiRetry(reqCtx, c.nativeProxy(), cnsiGUID, userGUID,
+		func(cfClient capi.Client) (StAppStatsBatchResponse, error) {
+			processes, lookupErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
+			if lookupErr != nil {
+				return StAppStatsBatchResponse{}, lookupErr
 			}
-			resp := buildStatsResponse(stats)
-			mu.Lock()
-			out.Apps[ag] = resp
-			mu.Unlock()
-			return nil
+
+			res := StAppStatsBatchResponse{Apps: make(map[string]StAppStatsResponse, len(appGUIDs))}
+			var mu sync.Mutex
+			eg, egCtx := errgroup.WithContext(reqCtx)
+			eg.SetLimit(maxParallelStatsCalls)
+			for _, appGUID := range appGUIDs {
+				proc, ok := processes[appGUID]
+				if !ok || proc.GUID == "" {
+					continue
+				}
+				ag, pg := appGUID, proc.GUID
+				eg.Go(func() error {
+					stats, statsErr := cfClient.Processes().GetStats(egCtx, pg)
+					if statsErr != nil {
+						// Per-app failure: skip rather than fail the batch.
+						return nil
+					}
+					resp := buildStatsResponse(stats)
+					mu.Lock()
+					res.Apps[ag] = resp
+					mu.Unlock()
+					return nil
+				})
+			}
+			_ = eg.Wait()
+			return res, nil
 		})
+	if opErr != nil {
+		return handleCapiError(ctx, opErr)
 	}
-	_ = eg.Wait()
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, out)
