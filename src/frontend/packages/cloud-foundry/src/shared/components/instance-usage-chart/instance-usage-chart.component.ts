@@ -39,6 +39,9 @@ export class InstanceUsageChartComponent {
         pointRadius: 0,
       }));
     const maxLen = Math.max(0, ...datasets.map(d => d.data.length));
+    // x positions are sample-index, not wall-clock time: assumes instances are
+    // sampled in lockstep (they are — one poll feeds all instances). UsagePoint.t
+    // is carried for a future time-keyed x-axis but not used here.
     return { labels: Array.from({ length: maxLen }, (_, i) => `${i}`), datasets };
   });
 
