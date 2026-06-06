@@ -117,6 +117,9 @@ export class AppDetailDataService {
   private readonly _focusPriority = signal<Set<EntityKind>>(new Set());
   private readonly _focusRefCount = new Map<EntityKind, number>();
 
+  /** Cadence (ms) for the focus-driven stats poll. Adjustable from the UI. */
+  private readonly _statsPollMs = signal(5000);
+
   // ---------------------------------------------------------------------------
   // Public readonly views
   // ---------------------------------------------------------------------------
@@ -302,6 +305,11 @@ export class AppDetailDataService {
         this._focusRefCount.set(kind, cur - 1);
       }
     };
+  }
+
+  /** Set the focus-driven stats poll cadence (ms). Clamped to >= 1000ms. */
+  setStatsPollMs(ms: number): void {
+    this._statsPollMs.set(Math.max(1000, Math.floor(ms)));
   }
 
   // ---------------------------------------------------------------------------
@@ -690,7 +698,8 @@ export class AppDetailDataService {
   });
 
   /**
-   * Focus-driven continuous poll for `stats`. Runs at 5s while at least one
+   * Focus-driven continuous poll for `stats`. Runs at `_statsPollMs()`
+   * (default 5s, UI-settable via `setStatsPollMs`) while at least one
    * consumer has raised focus priority on `stats` (the slice-2 Instances
    * tab is the first such consumer). Independent of `_pollEffect` and
    * `prefs.enabled()` — focus means a consumer is actively watching, so we
@@ -704,12 +713,16 @@ export class AppDetailDataService {
     if (!this._focusPriority().has('stats')) {
       return;
     }
+    // Read the cadence signal inside the effect body so a UI change to the
+    // poll interval re-arms this effect (clears the old interval via the
+    // cleanup below, then schedules a fresh one at the new cadence).
+    const ms = this._statsPollMs();
     const id = setInterval(() => {
       if (this.fetching()) {
         return; // skip-if-still-fetching guard
       }
       void this.refresh('stats');
-    }, 5000);
+    }, ms);
     onCleanup(() => clearInterval(id));
   });
 
