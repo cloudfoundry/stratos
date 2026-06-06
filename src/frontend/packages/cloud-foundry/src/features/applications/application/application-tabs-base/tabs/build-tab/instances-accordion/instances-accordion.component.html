@@ -1,0 +1,100 @@
+<section class="border border-content-border rounded-md overflow-hidden">
+  <!-- Collapsed header — always visible, clickable. -->
+  <button
+    type="button"
+    class="w-full flex items-center gap-3 px-4 py-3 text-left bg-content-bg hover:bg-content-border/20 transition-colors"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()">
+    <!-- Chevron, rotates on open. -->
+    <svg
+      class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+      [class.rotate-90]="open()"
+      viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+    </svg>
+
+    <span class="font-medium text-content-text">Instances</span>
+
+    <!-- Proportion bar (running / desired). Amber when degraded. -->
+    <span class="flex items-center gap-2 grow min-w-0">
+      <span class="relative h-2 w-32 max-w-[40%] rounded-full bg-content-border overflow-hidden shrink-0">
+        <span
+          class="absolute inset-y-0 left-0 rounded-full transition-all duration-300"
+          [class.bg-warning]="degraded()"
+          [class.bg-success]="!degraded()"
+          [style.width.%]="fillPercent()"></span>
+      </span>
+      <span
+        class="text-sm tabular-nums shrink-0"
+        [class.text-warning]="degraded()"
+        [class.text-content-muted]="!degraded()">
+        {{ running() }} / {{ desired() }} running
+      </span>
+    </span>
+
+    <span class="text-xs text-content-muted shrink-0">
+      @if (fetchedAt(); as ts) {
+        updated {{ ts | date:'mediumTime' }}
+      } @else {
+        —
+      }
+    </span>
+  </button>
+
+  <!-- Expanded body — live polling, charts, interval control, instance table. -->
+  @if (open()) {
+    <div class="px-4 py-4 border-t border-content-border flex flex-col gap-4">
+      <!-- Live indicator + sample-interval control. -->
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <span class="flex items-center gap-1.5 text-sm text-success">
+          <span class="text-lg leading-none">&#9679;</span>
+          <span class="text-content-text">Live</span>
+          <span class="text-content-muted">·</span>
+          @if (fetchedAt(); as ts) {
+            <span class="text-content-muted">updated {{ ts | date:'mediumTime' }}</span>
+          } @else {
+            <span class="text-content-muted">updating…</span>
+          }
+        </span>
+
+        <label class="flex items-center gap-2 text-sm text-content-muted">
+          Sample every
+          <select
+            class="rounded border border-content-border bg-content-bg px-2 py-1 text-content-text"
+            [value]="intervalMs()"
+            (change)="setSampleInterval(+$any($event.target).value)">
+            <option [value]="5000">5s</option>
+            <option [value]="10000">10s</option>
+            <option [value]="30000">30s</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Live usage trend charts (CPU / Memory / Disk). Each wrapper has a
+           fixed height because the chart runs maintainAspectRatio:false. -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-medium text-content-muted">CPU</span>
+          <div class="h-40">
+            <app-instance-usage-chart [metric]="'cpu'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-medium text-content-muted">Memory</span>
+          <div class="h-40">
+            <app-instance-usage-chart [metric]="'mem'" [history]="usageHistory()" [unitLabel]="'bytes'"></app-instance-usage-chart>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <span class="text-xs font-medium text-content-muted">Disk</span>
+          <div class="h-40">
+            <app-instance-usage-chart [metric]="'disk'" [history]="usageHistory()" [unitLabel]="'bytes'"></app-instance-usage-chart>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-instance table. -->
+      <app-signal-list [config]="listConfig" class="flex-1 min-h-0"></app-signal-list>
+    </div>
+  }
+</section>
