@@ -18,7 +18,6 @@ import { ApplicationTabsBaseComponent } from './application/application-tabs-bas
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
 import { EventsTabComponent } from './application/application-tabs-base/tabs/events-tab/events-tab.component';
 import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
-import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
 import {
@@ -132,7 +131,9 @@ export const APPLICATIONS_ROUTES: Routes = [
                 pathMatch: 'full',
               },
               { path: 'summary', component: BuildTabComponent },
-              { path: 'instances', component: InstancesTabComponent },
+              // Instances content now lives in an accordion on the Summary tab;
+              // redirect legacy deep links/bookmarks so they don't 404.
+              { path: 'instances', redirectTo: 'summary', pathMatch: 'full' },
               { path: 'routes', component: RoutesTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
