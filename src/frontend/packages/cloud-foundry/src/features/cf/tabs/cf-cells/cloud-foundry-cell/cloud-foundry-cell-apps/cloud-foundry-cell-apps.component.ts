@@ -44,7 +44,7 @@ export class CloudFoundryCellAppsComponent {
         {
           header: 'App Instance', key: 'instance', sortField: 'instanceIndex',
           kind: 'link',
-          link: (r: CfCellAppRow) => ['/applications', r.cnsiGuid, r.appGuid, 'instances'],
+          link: (r: CfCellAppRow) => ['/applications', r.cnsiGuid, r.appGuid, 'summary'],
           render: (r: CfCellAppRow) => String(r.instanceIndex),
         },
         {
