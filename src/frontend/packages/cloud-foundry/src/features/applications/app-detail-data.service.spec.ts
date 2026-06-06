@@ -790,6 +790,56 @@ describe('AppDetailDataService', () => {
   // raiseFocusPriority — cadence: 5s continuous poll on stats while focused
   // -------------------------------------------------------------------------
 
+  // -------------------------------------------------------------------------
+  // setStatsPollMs — adjustable focus poll cadence
+  // -------------------------------------------------------------------------
+
+  it('defaults the focus stats poll cadence to 5000ms', () => {
+    expect(svc['_statsPollMs']()).toBe(5000);
+  });
+
+  it('setStatsPollMs changes the focus poll cadence', () => {
+    svc.setStatsPollMs(10000);
+    expect(svc['_statsPollMs']()).toBe(10000);
+  });
+
+  it('setStatsPollMs clamps below 1000ms', () => {
+    svc.setStatsPollMs(200);
+    expect(svc['_statsPollMs']()).toBe(1000);
+  });
+
+  it('focus stats poll re-arms at the new cadence when setStatsPollMs changes', async () => {
+    vi.useFakeTimers();
+    try {
+      svc['_appDetail'].set(MOCK_APP_DETAIL);
+
+      const release = svc.raiseFocusPriority('stats');
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Change cadence to 10s — the effect must re-arm with the new interval.
+      svc.setStatsPollMs(10000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // After 5s nothing fires (old 5s interval was cleared).
+      await vi.advanceTimersByTimeAsync(5000);
+      httpMock.expectNone(STATS_URL);
+
+      // After a further 5s (10s total) the re-armed interval fires.
+      await vi.advanceTimersByTimeAsync(5000);
+      httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+
+      release();
+      await Promise.resolve();
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(20000);
+      httpMock.expectNone(STATS_URL);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('focus on "stats" drives a 5s continuous poll; release stops it', async () => {
     vi.useFakeTimers();
     try {
