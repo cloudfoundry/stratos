@@ -110,7 +110,13 @@ export class CfAppInstancesSignalConfigService {
         kind: 'gauge',
         gauge: {
           value: (row) => this.usageFraction(row.usage?.mem, row.memQuota),
-          valueText: (row) => this.utils.usageBytes([row.usage?.mem ?? 0, row.memQuota ?? 0]),
+          valueText: (row) => {
+            const used = row.usage?.mem ?? 0;
+            const quota = row.memQuota ?? 0;
+            const base = this.utils.usageBytes([used, quota]);
+            // Append "(NN%)" only when the quota is known — matches v4.9.2.
+            return quota > 0 ? `${base} (${this.utils.percent(this.usageFraction(used, quota), 0)})` : base;
+          },
           warningAt: 0.8,
           errorAt: 0.9,
         },
@@ -124,7 +130,13 @@ export class CfAppInstancesSignalConfigService {
         kind: 'gauge',
         gauge: {
           value: (row) => this.usageFraction(row.usage?.disk, row.diskQuota),
-          valueText: (row) => this.utils.usageBytes([row.usage?.disk ?? 0, row.diskQuota ?? 0]),
+          valueText: (row) => {
+            const used = row.usage?.disk ?? 0;
+            const quota = row.diskQuota ?? 0;
+            const base = this.utils.usageBytes([used, quota]);
+            // Append "(NN%)" only when the quota is known — matches v4.9.2.
+            return quota > 0 ? `${base} (${this.utils.percent(this.usageFraction(used, quota), 0)})` : base;
+          },
           warningAt: 0.8,
           errorAt: 0.9,
         },
