@@ -60,7 +60,7 @@ export class SshApplicationComponent implements OnInit {
       {
         breadcrumbs: [
           { value: 'Applications', routerLink: '/applications' },
-          { value: application.name, routerLink: `/applications/${cfGuid}/${appGuid}/instances` }
+          { value: application.name, routerLink: `/applications/${cfGuid}/${appGuid}/summary` }
         ]
       },
     ];
@@ -73,7 +73,7 @@ export class SshApplicationComponent implements OnInit {
     this.instanceId = routeParams.index;
 
     this.appInstanceLink = (
-      `/applications/${cfGuid}/${appGuid}/instances`
+      `/applications/${cfGuid}/${appGuid}/summary`
     );
 
     if (!cfGuid || !appGuid || !this.instanceId) {

@@ -47,8 +47,9 @@ import { AppDetailDataService } from '../../../../../app-detail-data.service';
  *
  * Absorbs the slice-2 Instances-tab list logic: tab-scoped
  * `AppInstanceActionsService` + `CfAppInstancesSignalConfigService` providers
- * and the confirm-wrapped Terminate/SSH row actions. The instances-tab is
- * retained for now; this accordion is its Summary-page successor.
+ * and the confirm-wrapped Terminate/SSH row actions. Replaces the former
+ * standalone Instances tab; this accordion is the Summary-page home for
+ * per-instance telemetry and actions.
  */
 @Component({
   selector: 'app-instances-accordion',
