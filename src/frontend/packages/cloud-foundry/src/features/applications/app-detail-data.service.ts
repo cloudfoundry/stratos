@@ -33,6 +33,13 @@ interface StAppStatsResponse {
 }
 
 /**
+ * One per-instance usage sample captured at poll time. Accumulated into a
+ * capped ring buffer (`usageHistory`) while a consumer holds stats focus,
+ * to feed live trend charts without a Prometheus dependency.
+ */
+export interface UsagePoint { t: number; cpu: number; mem: number; disk: number; }
+
+/**
  * AppDetailDataService — component-scoped page data source for the app detail page.
  *
  * Stratos data model is the canonical wire contract. The primary signals
@@ -120,6 +127,13 @@ export class AppDetailDataService {
   /** Cadence (ms) for the focus-driven stats poll. Adjustable from the UI. */
   private readonly _statsPollMs = signal(5000);
 
+  /** Rolling cap (~30 min at 5s) so memory stays flat regardless of session length. */
+  private readonly USAGE_HISTORY_CAP = 360;
+  /** Per-instance usage samples accumulated while stats focus is raised. */
+  private readonly _usageHistory = signal<Map<number, UsagePoint[]>>(new Map());
+  /** Timestamp of the last successful stats fetch (drives the accordion "updated" label). */
+  private readonly _statsFetchedAt = signal<Date | null>(null);
+
   // ---------------------------------------------------------------------------
   // Public readonly views
   // ---------------------------------------------------------------------------
@@ -132,6 +146,12 @@ export class AppDetailDataService {
 
   /** Trimmed V3 stats — one row per running instance with `{ index, state }`. */
   readonly stats: Signal<StAppStat[]> = this._stats.asReadonly();
+
+  /** Per-instance usage history ring buffer — feeds live trend charts. Grows
+   *  only while stats focus is raised; frozen on accordion collapse. */
+  readonly usageHistory: Signal<ReadonlyMap<number, UsagePoint[]>> = this._usageHistory.asReadonly();
+  /** Timestamp of the last successful stats fetch — drives "updated Ns ago". */
+  readonly statsFetchedAt: Signal<Date | null> = this._statsFetchedAt.asReadonly();
 
   readonly space: Signal<StSpace | undefined> = this._space.asReadonly();
   readonly org: Signal<StOrg | undefined> = this._org.asReadonly();
@@ -263,6 +283,10 @@ export class AppDetailDataService {
   initialize(cnsi: string, appGuid: string): void {
     this.cnsiGuid = cnsi;
     this.appGuid = appGuid;
+    // Reset per-app live state so a new app doesn't inherit the prior app's
+    // usage samples or stale stats timestamp.
+    this._usageHistory.set(new Map());
+    this._statsFetchedAt.set(null);
     void this.refresh('all');
   }
 
@@ -487,6 +511,8 @@ export class AppDetailDataService {
     try {
       const raw = await firstValueFrom(this.http.get<StAppStatsResponse>(url));
       this._stats.set(raw?.instances ?? []);
+      this._statsFetchedAt.set(new Date());
+      this.appendUsageSample(raw?.instances ?? []);
       this.debugTrace('stats', url, 'ok', performance.now() - t0);
     } catch (err: unknown) {
       this._stats.set([]);
@@ -497,6 +523,30 @@ export class AppDetailDataService {
     } finally {
       this._loading.update(m => ({ ...m, stats: false }));
     }
+  }
+
+  /**
+   * Append one usage point per instance — only while a consumer holds stats
+   * focus (accordion open). A collapsed accordion releases focus, so the
+   * buffer stops growing and the last samples stay frozen for display. The
+   * ring buffer is capped at `USAGE_HISTORY_CAP`, evicting the oldest points
+   * so memory stays flat regardless of how long the tab stays open.
+   */
+  private appendUsageSample(stats: StAppStat[]): void {
+    if (!this._focusPriority().has('stats')) {
+      return;
+    }
+    const t = Date.now();
+    this._usageHistory.update(prev => {
+      const next = new Map(prev);
+      for (const s of stats) {
+        const buf = (next.get(s.index) ?? []).concat({
+          t, cpu: s.usage?.cpu ?? 0, mem: s.usage?.mem ?? 0, disk: s.usage?.disk ?? 0,
+        });
+        next.set(s.index, buf.length > this.USAGE_HISTORY_CAP ? buf.slice(-this.USAGE_HISTORY_CAP) : buf);
+      }
+      return next;
+    });
   }
 
   /**

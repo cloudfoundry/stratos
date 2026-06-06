@@ -880,4 +880,123 @@ describe('AppDetailDataService', () => {
       vi.useRealTimers();
     }
   });
+
+  // -------------------------------------------------------------------------
+  // Usage-history ring buffer + stats-fetch timestamp
+  // -------------------------------------------------------------------------
+
+  it('statsFetchedAt() is null initially', () => {
+    expect(svc.statsFetchedAt()).toBeNull();
+  });
+
+  it('usageHistory() is empty initially', () => {
+    expect(svc.usageHistory().size).toBe(0);
+  });
+
+  it('accumulates usage samples per instance while stats focus is raised', () => {
+    const release = svc.raiseFocusPriority('stats');
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0.02, mem: 100, disk: 50 } } as any]);
+    expect(svc.usageHistory().get(0)?.length).toBe(1);
+    const point = svc.usageHistory().get(0)![0];
+    expect(point.cpu).toBe(0.02);
+    expect(point.mem).toBe(100);
+    expect(point.disk).toBe(50);
+    expect(typeof point.t).toBe('number');
+    release();
+  });
+
+  it('does NOT accumulate while unfocused (collapsed = frozen)', () => {
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0.02, mem: 100, disk: 50 } } as any]);
+    expect(svc.usageHistory().get(0)).toBeUndefined();
+  });
+
+  it('frozen-on-collapse: samples stop growing once focus is released', () => {
+    const release = svc.raiseFocusPriority('stats');
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0, mem: 1, disk: 0 } } as any]);
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0, mem: 2, disk: 0 } } as any]);
+    expect(svc.usageHistory().get(0)?.length).toBe(2);
+
+    release();
+    // Collapsed — further samples must be ignored (frozen).
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0, mem: 3, disk: 0 } } as any]);
+    expect(svc.usageHistory().get(0)?.length).toBe(2);
+  });
+
+  it('caps the ring buffer at USAGE_HISTORY_CAP keeping the most-recent N', () => {
+    const release = svc.raiseFocusPriority('stats');
+    const cap = svc['USAGE_HISTORY_CAP'];
+    for (let i = 0; i < cap + 5; i++) {
+      svc['appendUsageSample']([{ index: 0, usage: { cpu: 0, mem: i, disk: 0 } } as any]);
+    }
+    const buf = svc.usageHistory().get(0)!;
+    expect(buf.length).toBe(cap);
+    // Eviction keeps the newest samples: last point is mem=cap+4, first is mem=5.
+    expect(buf[buf.length - 1].mem).toBe(cap + 4);
+    expect(buf[0].mem).toBe(5);
+    release();
+  });
+
+  it('accumulates independently per instance index', () => {
+    const release = svc.raiseFocusPriority('stats');
+    svc['appendUsageSample']([
+      { index: 0, usage: { cpu: 0, mem: 1, disk: 0 } } as any,
+      { index: 1, usage: { cpu: 0, mem: 2, disk: 0 } } as any,
+    ]);
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0, mem: 3, disk: 0 } } as any]);
+    expect(svc.usageHistory().get(0)?.length).toBe(2);
+    expect(svc.usageHistory().get(1)?.length).toBe(1);
+    release();
+  });
+
+  it('appendUsageSample tolerates a missing usage block (defaults to 0)', () => {
+    const release = svc.raiseFocusPriority('stats');
+    svc['appendUsageSample']([{ index: 0 } as any]);
+    const point = svc.usageHistory().get(0)![0];
+    expect(point.cpu).toBe(0);
+    expect(point.mem).toBe(0);
+    expect(point.disk).toBe(0);
+    release();
+  });
+
+  it('fetchStats success sets statsFetchedAt and appends a usage sample while focused', async () => {
+    svc['_appDetail'].set(MOCK_APP_DETAIL);
+    const release = svc.raiseFocusPriority('stats');
+    const before = Date.now();
+
+    const promise = svc.refresh('stats');
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await promise;
+
+    expect(svc.statsFetchedAt()?.getTime() ?? 0).toBeGreaterThanOrEqual(before);
+    expect(svc.usageHistory().get(0)?.length).toBe(1);
+    expect(svc.usageHistory().get(0)![0].cpu).toBe(0.05);
+    release();
+  });
+
+  it('initialize() resets the usage buffer and stats timestamp for the new app', async () => {
+    const release = svc.raiseFocusPriority('stats');
+    svc['appendUsageSample']([{ index: 0, usage: { cpu: 0, mem: 1, disk: 0 } } as any]);
+    svc['_statsFetchedAt'].set(new Date());
+    release();
+    expect(svc.usageHistory().size).toBe(1);
+
+    // initialize fires refresh('all'); drain phase 1a so httpMock.verify() stays clean.
+    svc.initialize(CNSI, APP_GUID);
+    expect(svc.usageHistory().size).toBe(0);
+    expect(svc.statsFetchedAt()).toBeNull();
+
+    await tick();
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    httpMock.expectOne(ENV_URL).flush(MOCK_ENV);
+    await tick();
+    httpMock.expectOne(STATS_URL).flush(MOCK_STATS_RESPONSE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/spaces/cnsi-1/sp-1`).flush(MOCK_SPACE);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1`).flush(MOCK_ORG);
+    await tick();
+    httpMock.expectOne(`/pp/v1/cf/org/cnsi-1/org-1/private_domains`).flush(MOCK_DOMAINS_RESPONSE);
+    await tick();
+  });
 });
