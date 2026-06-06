@@ -138,7 +138,7 @@ export class CardAppInstancesComponent implements OnDestroy {
   }
 
   scaleDown() {
-    this.setInstanceCount(this.desiredCount() - 1);
+    this.setInstanceCount(Math.max(0, this.desiredCount() - 1));
   }
 
   edit() {

@@ -109,10 +109,13 @@ describe('CardAppInstancesComponent', () => {
       expect(c.desiredCount()).toBe(3);
     });
 
-    it('renders "running / desired" when not editing', () => {
+    it('renders explicit Running and Desired labels with counts when not editing', () => {
       const { fixture } = setup({ desired: 3, running: 1, total: 3 });
-      const html: string = fixture.nativeElement.innerHTML;
-      expect(html).toContain('1 / 3');
+      const text: string = fixture.nativeElement.textContent;
+      expect(text).toContain('Running');
+      expect(text).toContain('Desired');
+      expect(text).toContain('1');
+      expect(text).toContain('3');
     });
 
     it('reactively updates when stats change', () => {
@@ -214,6 +217,24 @@ describe('CardAppInstancesComponent', () => {
       expect(confirmStub.open).toHaveBeenCalled();
       // confirm stub auto-confirms, so scaleApp also fires
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 0 });
+    });
+
+    it('scaleDown floors at 0 — never requests a negative instance count', () => {
+      const { fixture, appsStub, confirmStub } = setup({ showActions: true, desired: 0 });
+      fixture.componentInstance.scaleDown();
+      // 0 routes through the scale-to-zero confirmation (auto-confirmed by the stub).
+      expect(confirmStub.open).toHaveBeenCalled();
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 0 });
+      // Crucially, it must never request a negative count.
+      for (const call of appsStub.scaleApp.mock.calls) {
+        expect(call[2].instances).toBeGreaterThanOrEqual(0);
+      }
+    });
+
+    it('scaleUp from 0 requests 1', () => {
+      const { fixture, appsStub } = setup({ showActions: true, desired: 0 });
+      fixture.componentInstance.scaleUp();
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 1 });
     });
   });
 
