@@ -110,13 +110,7 @@ export class CfAppInstancesSignalConfigService {
         kind: 'gauge',
         gauge: {
           value: (row) => this.usageFraction(row.usage?.mem, row.memQuota),
-          valueText: (row) => {
-            const used = row.usage?.mem ?? 0;
-            const quota = row.memQuota ?? 0;
-            const base = this.utils.usageBytes([used, quota]);
-            // Append "(NN%)" only when the quota is known — matches v4.9.2.
-            return quota > 0 ? `${base} (${this.utils.percent(this.usageFraction(used, quota), 0)})` : base;
-          },
+          valueText: (row) => this.byteGaugeText(row.usage?.mem, row.memQuota),
           warningAt: 0.8,
           errorAt: 0.9,
         },
@@ -130,13 +124,7 @@ export class CfAppInstancesSignalConfigService {
         kind: 'gauge',
         gauge: {
           value: (row) => this.usageFraction(row.usage?.disk, row.diskQuota),
-          valueText: (row) => {
-            const used = row.usage?.disk ?? 0;
-            const quota = row.diskQuota ?? 0;
-            const base = this.utils.usageBytes([used, quota]);
-            // Append "(NN%)" only when the quota is known — matches v4.9.2.
-            return quota > 0 ? `${base} (${this.utils.percent(this.usageFraction(used, quota), 0)})` : base;
-          },
+          valueText: (row) => this.byteGaugeText(row.usage?.disk, row.diskQuota),
           warningAt: 0.8,
           errorAt: 0.9,
         },
@@ -231,5 +219,13 @@ export class CfAppInstancesSignalConfigService {
   private usageFraction(used: number | undefined, quota: number | undefined): number {
     if (!quota || quota <= 0) return 0;
     return Math.min(Math.max((used ?? 0) / quota, 0), 1);
+  }
+
+  // Gauge value-text for the byte-quota gauges (Memory/Disk). Renders the
+  // used/quota byte string and appends "(NN%)" only when the quota is
+  // known — matches v4.9.2. Shared by the mem and disk columns.
+  private byteGaugeText(used = 0, quota = 0): string {
+    const base = this.utils.usageBytes([used, quota]);
+    return quota > 0 ? `${base} (${this.utils.percent(this.usageFraction(used, quota), 0)})` : base;
   }
 }
