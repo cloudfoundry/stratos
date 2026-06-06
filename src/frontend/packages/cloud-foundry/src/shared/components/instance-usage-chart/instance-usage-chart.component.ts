@@ -33,7 +33,13 @@ export function formatBytes(n: number): string {
     unit++;
   }
   // At most one decimal, but drop a trailing `.0` so `256.0 MB` reads `256 MB`.
-  const rounded = Math.round(value * 10) / 10;
+  let rounded = Math.round(value * 10) / 10;
+  // Rounding can push a just-below-boundary value up to 1024 (e.g. 1048575
+  // -> 1023.999... -> 1024 KB). Promote to the next unit so it reads `1 MB`.
+  while (rounded >= 1024 && unit < units.length - 1) {
+    rounded = Math.round((rounded / 1024) * 10) / 10;
+    unit++;
+  }
   return `${sign}${rounded} ${units[unit]}`;
 }
 

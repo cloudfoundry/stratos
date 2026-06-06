@@ -213,6 +213,15 @@ describe('InstancesAccordionComponent', () => {
     expect(release).toHaveBeenCalled();
   });
 
+  it('collapse then destroy releases focus exactly once', () => {
+    const release = vi.fn();
+    vi.spyOn(dataService, 'raiseFocusPriority').mockReturnValue(release);
+    component.toggle();   // open (acquire)
+    component.toggle();   // close (release #1)
+    fixture.destroy();    // must NOT release again
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
   it('changing interval calls setStatsPollMs', () => {
     const spy = vi.spyOn(dataService, 'setStatsPollMs');
     component.setSampleInterval(10000);

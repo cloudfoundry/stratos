@@ -136,6 +136,13 @@ describe('formatBytes', () => {
     expect(formatBytes(1.5 * 1024 ** 3)).toBe('1.5 GB');
   });
 
+  it('promotes to the next unit when rounding hits the boundary', () => {
+    // 1048575 -> 1023.999... KB which rounds to 1024 KB -> promote to 1 MB.
+    expect(formatBytes(1048575)).toBe('1 MB');
+    // 1073741823 -> 1023.999... MB which rounds to 1024 MB -> promote to 1 GB.
+    expect(formatBytes(1073741823)).toBe('1 GB');
+  });
+
   it('treats NaN and non-finite values as 0', () => {
     expect(formatBytes(NaN)).toBe('0');
     expect(formatBytes(Infinity)).toBe('0');
