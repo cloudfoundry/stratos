@@ -77,4 +77,34 @@ describe('InstanceUsageChartComponent', () => {
     expect(component.chartData().datasets.length).toBe(0);
     expect(component.chartData().labels).toEqual([]);
   });
+
+  it('formats the cpu y-axis ticks as percentages', () => {
+    fixture.componentRef.setInput('metric', 'cpu');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.detectChanges();
+    const callback = (component.options()!.scales!.y as any).ticks.callback;
+    expect(callback(0.25)).toBe('25%');
+    expect(callback(0.5)).toBe('50%');
+  });
+
+  it('leaves the y-axis ticks unformatted for non-cpu metrics', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.detectChanges();
+    expect((component.options()!.scales!.y as any).ticks?.callback).toBeUndefined();
+  });
+
+  it('toggles the y-axis title from the unitLabel input', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.componentRef.setInput('unitLabel', 'MB');
+    fixture.detectChanges();
+    let title = (component.options()!.scales!.y as any).title;
+    expect(title.display).toBe(true);
+    expect(title.text).toBe('MB');
+
+    fixture.componentRef.setInput('unitLabel', '');
+    title = (component.options()!.scales!.y as any).title;
+    expect(title.display).toBe(false);
+  });
 });
