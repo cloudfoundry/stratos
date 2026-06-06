@@ -808,6 +808,11 @@ describe('AppDetailDataService', () => {
     expect(svc['_statsPollMs']()).toBe(1000);
   });
 
+  it('setStatsPollMs falls back to 5000ms on non-finite input', () => {
+    svc.setStatsPollMs(NaN);
+    expect(svc['_statsPollMs']()).toBe(5000);
+  });
+
   it('focus stats poll re-arms at the new cadence when setStatsPollMs changes', async () => {
     vi.useFakeTimers();
     try {

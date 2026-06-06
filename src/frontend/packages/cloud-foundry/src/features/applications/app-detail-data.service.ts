@@ -307,9 +307,13 @@ export class AppDetailDataService {
     };
   }
 
-  /** Set the focus-driven stats poll cadence (ms). Clamped to >= 1000ms. */
+  /**
+   * Set the focus-driven stats poll cadence (ms). Clamped to >= 1000ms.
+   * Non-finite input (NaN/Infinity) falls back to the 5000ms default so a
+   * bad value can't leave setInterval running with a misbehaving cadence.
+   */
   setStatsPollMs(ms: number): void {
-    this._statsPollMs.set(Math.max(1000, Math.floor(ms)));
+    this._statsPollMs.set(Number.isFinite(ms) ? Math.max(1000, Math.floor(ms)) : 5000);
   }
 
   // ---------------------------------------------------------------------------
