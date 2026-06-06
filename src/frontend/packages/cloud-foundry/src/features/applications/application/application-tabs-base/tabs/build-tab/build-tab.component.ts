@@ -25,6 +25,7 @@ import { CardAppStatusComponent } from '../../../../../../shared/components/card
 import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
 import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
+import { InstancesAccordionComponent } from './instances-accordion/instances-accordion.component';
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
@@ -51,6 +52,7 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
     CardAppUptimeComponent,
     MetadataItemComponent,
     ViewBuildpackComponent,
+    InstancesAccordionComponent,
     MbToHumanSizePipe,
     UptimePipe,
   ],

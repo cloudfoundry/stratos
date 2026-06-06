@@ -8,12 +8,22 @@
           </div>
         </app-tile>
         <app-tile>
-          <app-card-app-instances></app-card-app-instances>
+          <app-card-app-instances [showActions]="true"></app-card-app-instances>
         </app-tile>
         <app-tile>
           <app-card-app-uptime></app-card-app-uptime>
         </app-tile>
       </app-tile-group>
+
+      <!-- Live instances disclosure — full-width section directly below the
+           top card row. Collapsed by default, so the Summary page only starts
+           the 5s stats poll once the operator expands it. -->
+      <app-tile-group class="tile-group-1-cols">
+        <app-tile>
+          <app-instances-accordion></app-instances-accordion>
+        </app-tile>
+      </app-tile-group>
+
       @if (detail.build?.error; as errorMsg) {
         <app-tile-group class="tile-group-1-cols">
           <app-tile>
