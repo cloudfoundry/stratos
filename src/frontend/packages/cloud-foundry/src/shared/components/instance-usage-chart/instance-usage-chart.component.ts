@@ -7,6 +7,37 @@ import type { UsagePoint } from '../../../features/applications/app-detail-data.
 type Metric = 'cpu' | 'mem' | 'disk';
 
 /**
+ * Format a byte count as a short, human-readable string (1024-based), with at
+ * most one decimal place. Used for the mem/disk y-axis ticks so the chart shows
+ * `256 MB` / `1 GB` instead of raw bytes.
+ *
+ *   formatBytes(0)               -> '0'
+ *   formatBytes(512)             -> '512 B'
+ *   formatBytes(256*1024*1024)   -> '256 MB'
+ *   formatBytes(1024**3)         -> '1 GB'
+ *
+ * Pure and standalone — no service injection (keeps the chart component pure).
+ * Non-finite/NaN and zero collapse to '0'. Negative values are treated by
+ * magnitude with a leading '-'.
+ */
+export function formatBytes(n: number): string {
+  if (!Number.isFinite(n) || n === 0) {
+    return '0';
+  }
+  const sign = n < 0 ? '-' : '';
+  let value = Math.abs(n);
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  // At most one decimal, but drop a trailing `.0` so `256.0 MB` reads `256 MB`.
+  const rounded = Math.round(value * 10) / 10;
+  return `${sign}${rounded} ${units[unit]}`;
+}
+
+/**
  * Lightweight live-sampled trend chart. Plots ONE metric (cpu | mem | disk)
  * over time with one line per instance, fed by the `usageHistory()` signal
  * from AppDetailDataService.
@@ -46,8 +77,14 @@ export class InstanceUsageChartComponent {
   });
 
   readonly options = computed<ChartConfiguration<'line'>['options']>(() => {
-    const isCpu = this.metric() === 'cpu';
+    const metric = this.metric();
     const unit = this.unitLabel();
+    // CPU is a 0..1 fraction — render the axis as a percentage. Mem/disk are raw
+    // bytes — humanize the ticks (256 MB, 1 GB) so the axis is self-describing.
+    const callback =
+      metric === 'cpu'
+        ? (value: number | string) => `${Math.round(Number(value) * 100)}%`
+        : (value: number | string) => formatBytes(Number(value));
     return {
       animation: false,
       responsive: true,
@@ -58,10 +95,7 @@ export class InstanceUsageChartComponent {
         y: {
           beginAtZero: true,
           title: { display: !!unit, text: unit },
-          ticks: isCpu
-            // CPU is a 0..1 fraction — render the axis as a percentage.
-            ? { callback: (value: number | string) => `${Math.round(Number(value) * 100)}%` }
-            : undefined,
+          ticks: { callback },
         },
       },
     };
