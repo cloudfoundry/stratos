@@ -536,6 +536,9 @@ export class AppDetailDataService {
     if (!this._focusPriority().has('stats')) {
       return;
     }
+    // Client receipt time, not the CF-reported usage.time: gives uniform spacing
+    // aligned to the poll cadence and is present even when usage is omitted
+    // (e.g. CRASHED instances, where usage.time is absent).
     const t = Date.now();
     this._usageHistory.update(prev => {
       const next = new Map(prev);
