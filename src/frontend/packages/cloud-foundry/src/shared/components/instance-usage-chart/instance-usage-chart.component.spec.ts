@@ -5,7 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BaseChartDirective } from 'ng2-charts';
 
 import type { UsagePoint } from '../../../features/applications/app-detail-data.service';
-import { InstanceUsageChartComponent } from './instance-usage-chart.component';
+import { InstanceUsageChartComponent, formatBytes } from './instance-usage-chart.component';
 
 describe('InstanceUsageChartComponent', () => {
   let component: InstanceUsageChartComponent;
@@ -87,11 +87,21 @@ describe('InstanceUsageChartComponent', () => {
     expect(callback(0.5)).toBe('50%');
   });
 
-  it('leaves the y-axis ticks unformatted for non-cpu metrics', () => {
+  it('humanizes byte ticks for the mem metric', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
     fixture.detectChanges();
-    expect((component.options()!.scales!.y as any).ticks?.callback).toBeUndefined();
+    const callback = (component.options()!.scales!.y as any).ticks.callback;
+    expect(callback(256 * 1024 * 1024)).toBe('256 MB');
+    expect(callback(0)).toBe('0');
+  });
+
+  it('humanizes byte ticks for the disk metric', () => {
+    fixture.componentRef.setInput('metric', 'disk');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.detectChanges();
+    const callback = (component.options()!.scales!.y as any).ticks.callback;
+    expect(callback(1024 ** 3)).toBe('1 GB');
   });
 
   it('toggles the y-axis title from the unitLabel input', () => {
@@ -106,5 +116,32 @@ describe('InstanceUsageChartComponent', () => {
     fixture.componentRef.setInput('unitLabel', '');
     title = (component.options()!.scales!.y as any).title;
     expect(title.display).toBe(false);
+  });
+});
+
+describe('formatBytes', () => {
+  it('renders 0 as a bare "0"', () => {
+    expect(formatBytes(0)).toBe('0');
+  });
+
+  it('picks the right 1024-based unit', () => {
+    expect(formatBytes(512)).toBe('512 B');
+    expect(formatBytes(256 * 1024 * 1024)).toBe('256 MB');
+    expect(formatBytes(512 * 1024 * 1024)).toBe('512 MB');
+    expect(formatBytes(1024 ** 3)).toBe('1 GB');
+  });
+
+  it('keeps at most one decimal place', () => {
+    expect(formatBytes(1536)).toBe('1.5 KB');
+    expect(formatBytes(1.5 * 1024 ** 3)).toBe('1.5 GB');
+  });
+
+  it('treats NaN and non-finite values as 0', () => {
+    expect(formatBytes(NaN)).toBe('0');
+    expect(formatBytes(Infinity)).toBe('0');
+  });
+
+  it('handles negative values by magnitude', () => {
+    expect(formatBytes(-256 * 1024 * 1024)).toBe('-256 MB');
   });
 });
