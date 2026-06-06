@@ -6,8 +6,9 @@
         <h2 class="card-title">Instances</h2>
       </div>
       <div class="card-content">
-        <div class="text-base">
-          {{ runningCount() }} / {{ desiredCount() }}
+        <div class="text-base flex flex-col gap-0.5">
+          <div class="flex justify-between"><span class="text-content-muted">Running</span><span>{{ runningCount() }}</span></div>
+          <div class="flex justify-between"><span class="text-content-muted">Desired</span><span>{{ desiredCount() }}</span></div>
         </div>
       </div>
     </a>
@@ -17,11 +18,13 @@
     </div>
     <div class="card-content">
       @if (!isEditing) {
-        <div class="text-base">
-          {{ runningCount() }} / {{ desiredCount() }}
+        <div class="text-base flex flex-col gap-0.5">
+          <div class="flex justify-between"><span class="text-content-muted">Running</span><span>{{ runningCount() }}</span></div>
+          <div class="flex justify-between"><span class="text-content-muted">Desired</span><span>{{ desiredCount() }}</span></div>
         </div>
       }
       <form [hidden]="!isEditing" class="mt-1">
+        <label class="text-content-muted text-sm">Desired instances</label>
         <app-form-field>
           <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue">
         </app-form-field>
