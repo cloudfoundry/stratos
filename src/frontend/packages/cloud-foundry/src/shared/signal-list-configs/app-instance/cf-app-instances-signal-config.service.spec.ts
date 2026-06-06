@@ -206,6 +206,61 @@ describe('CfAppInstancesSignalConfigService', () => {
     expect(mem.gauge!.value(makeStat({ usage: u, memQuota: undefined }))).toBe(0);
   });
 
+  it('memory gauge valueText shows used/quota and percentage', () => {
+    const { svc } = configure();
+    const col = svc.buildColumns().find(c => c.key === 'memory')!;
+    const text = col.gauge!.valueText!(makeStat({
+      usage: { time: '2026-05-04T00:00:00Z', mem: 148 * 1024 * 1024, disk: 0, cpu: 0 },
+      memQuota: 256 * 1024 * 1024,
+    }));
+    expect(text).toMatch(/148/);
+    expect(text).toMatch(/256/);
+    expect(text).toContain('(58%)');
+  });
+
+  it('memory gauge valueText omits percentage when quota unknown', () => {
+    const { svc } = configure();
+    const col = svc.buildColumns().find(c => c.key === 'memory')!;
+    const text = col.gauge!.valueText!(makeStat({
+      usage: { time: '2026-05-04T00:00:00Z', mem: 0, disk: 0, cpu: 0 },
+      memQuota: 0,
+    }));
+    expect(text).not.toContain('%');
+  });
+
+  it('disk gauge valueText shows used/quota and percentage', () => {
+    const { svc } = configure();
+    const col = svc.buildColumns().find(c => c.key === 'disk')!;
+    const text = col.gauge!.valueText!(makeStat({
+      usage: { time: '2026-05-04T00:00:00Z', mem: 0, disk: 148 * 1024 * 1024, cpu: 0 },
+      diskQuota: 256 * 1024 * 1024,
+    }));
+    expect(text).toMatch(/148/);
+    expect(text).toMatch(/256/);
+    expect(text).toContain('(58%)');
+  });
+
+  it('disk gauge valueText omits percentage when quota unknown', () => {
+    const { svc } = configure();
+    const col = svc.buildColumns().find(c => c.key === 'disk')!;
+    const text = col.gauge!.valueText!(makeStat({
+      usage: { time: '2026-05-04T00:00:00Z', mem: 0, disk: 0, cpu: 0 },
+      diskQuota: 0,
+    }));
+    expect(text).not.toContain('%');
+  });
+
+  it('CPU gauge valueText still renders a bare percentage', () => {
+    const { svc } = configure();
+    const col = svc.buildColumns().find(c => c.key === 'cpu')!;
+    const text = col.gauge!.valueText!(makeStat({
+      usage: { time: '2026-05-04T00:00:00Z', mem: 0, disk: 0, cpu: 0.0183 },
+    }));
+    // CPU shows a plain percent with no "used / quota (NN%)" wrapper.
+    expect(text).toContain('%');
+    expect(text).not.toContain('(');
+  });
+
   // ---------------------------------------------------------------------------
   // Kill row action
   // ---------------------------------------------------------------------------
