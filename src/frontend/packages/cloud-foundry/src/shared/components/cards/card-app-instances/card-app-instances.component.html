@@ -24,9 +24,9 @@
         </div>
       }
       <form [hidden]="!isEditing" class="mt-1">
-        <label class="text-content-muted text-sm">Desired instances</label>
+        <label for="instances" class="text-content-muted text-sm">Desired instances</label>
         <app-form-field>
-          <input #instanceField appInput type="number" name="instances" [(ngModel)]="editValue">
+          <input #instanceField id="instances" appInput type="number" name="instances" [(ngModel)]="editValue">
         </app-form-field>
       </form>
     </div>
