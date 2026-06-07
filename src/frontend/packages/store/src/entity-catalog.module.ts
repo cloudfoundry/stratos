@@ -1,7 +1,5 @@
 import { ModuleWithProviders, NgModule, inject } from '@angular/core';
-import { ReducerManager, Store } from '@ngrx/store';
 
-import { InitCatalogEntitiesAction } from './entity-catalog.actions';
 import { entityCatalog } from './entity-catalog/entity-catalog';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 
@@ -19,16 +17,13 @@ export const CATALOGUE_ENTITIES = '__CATALOGUE_ENTITIES__';
  * 1. Angular processes module imports (in order defined in app.module.ts)
  * 2. This constructor executes synchronously for each EntityCatalogModule.forFeature() call
  * 3. Entities are registered to the global entityCatalog singleton via Map.set() (synchronous)
- * 4. Dynamic reducers are added to NgRx ReducerManager
- * 5. InitCatalogEntitiesAction dispatched to store
- * 6. ONLY THEN do component constructors begin execution
+ * 4. ONLY THEN do component constructors begin execution
  *
  * This ensures entities are always available when components need them.
  */
 @NgModule({})
 export class EntityCatalogFeatureModule {
   constructor() {
-    const store = inject<Store<any>>(Store);
     const entityGroups = inject<StratosBaseCatalogEntity[][]>(CATALOGUE_ENTITIES as any);
 
     // Flatten multi-provider arrays and register all entities synchronously
@@ -40,9 +35,6 @@ export class EntityCatalogFeatureModule {
     // NOTE: Validation has been moved to AppModule constructor to run once after ALL feature modules load.
     // This eliminates false-positive warnings from validation running in the first EntityCatalogFeatureModule
     // instance before subsequent instances (CF, K8s) complete their registrations.
-
-    // Notify store that entities are registered
-    store.dispatch(new InitCatalogEntitiesAction(entities));
   }
 }
 
@@ -55,8 +47,6 @@ export class EntityCatalogModule {
     return {
       ngModule: EntityCatalogFeatureModule,
       providers: [
-        ReducerManager,
-        Store,
         { provide: CATALOGUE_ENTITIES, useFactory: entityFactory, multi: true }
       ]
     };
