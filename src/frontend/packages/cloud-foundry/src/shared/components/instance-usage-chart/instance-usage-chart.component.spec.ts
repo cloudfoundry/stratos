@@ -158,6 +158,70 @@ describe('InstanceUsageChartComponent', () => {
     expect((ds[2] as any).hidden).toBe(false);
   });
 
+  // The headless harness can't render chart.js, so exercise the visibility
+  // plugin's afterUpdate directly with a fake chart. instanceIndex drives the
+  // mapping; getDatasetMeta returns a stable per-index meta object.
+  const makeFakeChartWithMeta = (instanceIndices: number[]) => {
+    const metas: Array<{ hidden?: boolean }> = [];
+    return {
+      chart: {
+        data: { datasets: instanceIndices.map(i => ({ instanceIndex: i })) },
+        getDatasetMeta: (i: number) => (metas[i] ??= {}),
+      },
+      metas,
+    };
+  };
+
+  it('plugin hides exactly the instances in the hiddenInstances set', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.componentRef.setInput('hiddenInstances', new Set([1]));
+    fixture.detectChanges();
+
+    const { chart, metas } = makeFakeChartWithMeta([0, 1, 2]);
+    (component as any).visibilityPlugin.afterUpdate(chart);
+
+    // The plugin only writes meta.hidden when it must change; an already-visible
+    // meta stays untouched (undefined). Assert on truthiness, not strict false.
+    expect(!!metas[0].hidden).toBe(false);
+    expect(metas[1].hidden).toBe(true);
+    expect(!!metas[2].hidden).toBe(false);
+  });
+
+  it('plugin shows everything when the hidden set is empty (toggle off)', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.componentRef.setInput('hiddenInstances', new Set<number>());
+    fixture.detectChanges();
+
+    const { chart, metas } = makeFakeChartWithMeta([0, 1, 2]);
+    // Pre-hide everything so the empty set forces the plugin to un-hide.
+    metas[0] = { hidden: true };
+    metas[1] = { hidden: true };
+    metas[2] = { hidden: true };
+    (component as any).visibilityPlugin.afterUpdate(chart);
+
+    expect(metas[0].hidden).toBe(false);
+    expect(metas[1].hidden).toBe(false);
+    expect(metas[2].hidden).toBe(false);
+  });
+
+  it('plugin maps by instanceIndex, not dataset position', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
+    fixture.componentRef.setInput('hiddenInstances', new Set([0]));
+    fixture.detectChanges();
+
+    // Datasets in non-identity order: positions [0,1,2] -> instanceIndex [2,0,1].
+    const { chart, metas } = makeFakeChartWithMeta([2, 0, 1]);
+    (component as any).visibilityPlugin.afterUpdate(chart);
+
+    // Instance 0 lives at position 1 — that meta must be the hidden one.
+    expect(!!metas[0].hidden).toBe(false);
+    expect(metas[1].hidden).toBe(true);
+    expect(!!metas[2].hidden).toBe(false);
+  });
+
   it('emits toggleInstance with the mapped instance index on legend click', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
