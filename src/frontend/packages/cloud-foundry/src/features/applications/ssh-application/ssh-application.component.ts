@@ -1,13 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { take, catchError, map, switchMap, tap } from 'rxjs/operators';
 import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
-import { CFAppState } from '@stratosui/cloud-foundry';
 import { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
 
@@ -27,7 +25,6 @@ import { ApplicationService } from '../application.service';
 })
 export class SshApplicationComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
-  private store = inject<Store<CFAppState>>(Store);
   private applicationService = inject(ApplicationService);
 
 

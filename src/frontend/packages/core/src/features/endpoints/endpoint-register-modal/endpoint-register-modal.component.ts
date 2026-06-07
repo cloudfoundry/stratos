@@ -5,8 +5,6 @@ import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router'
 import { of } from 'rxjs';
 import {
   EndpointsDataService,
-  GeneralEntityAppState,
-  Store,
   entityCatalog,
 } from '@stratosui/store';
 
@@ -27,7 +25,6 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
-  protected store: Store<GeneralEntityAppState>;
   // Note: `injector` field name shadows the protected one in
   // BaseEndpointTileManager — keep the same access level (protected)
   // so TS doesn't flag the shadowed field as an incompatible base.
@@ -45,7 +42,6 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   private cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    const store = inject<Store<GeneralEntityAppState>>(Store);
     const session = inject(SessionSignalService);
 
     // Tech-preview flag is sourced from the signal-native session projection;
@@ -54,8 +50,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     const types = toObservable(
       computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
-    super(types, store, inject(EndpointsDataService), inject(Injector));
-    this.store = store;
+    super(types, inject(EndpointsDataService), inject(Injector));
   }
 
   ngOnInit() {

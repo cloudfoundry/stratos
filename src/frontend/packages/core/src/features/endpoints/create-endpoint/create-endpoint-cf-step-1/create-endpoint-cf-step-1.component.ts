@@ -7,9 +7,7 @@ import { AppInputDirective, CustomFormFieldComponent, AppErrorComponent } from '
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
-  AppState,
   EndpointsDataService,
-  Store,
   StratosCatalogEndpointEntity,
   entityCatalog,
 } from '@stratosui/store';
@@ -62,7 +60,6 @@ interface CreateEndpointForm {
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
   private fb = inject(FormBuilder);
   private snackBarService = inject(SnackBarService);
-  private store = inject<Store<AppState>>(Store);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
   private endpointsSignals = inject(EndpointsSignalService);
 

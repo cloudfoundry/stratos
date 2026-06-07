@@ -7,12 +7,11 @@ import { KubeHelmDataService } from '../services/endpoint-data/kube-helm-data.se
 
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import { IListAction } from '../../../core/src/shared/components/signal-list/list-action.types';
-import { AppState } from '../../../store/src/app-state';
 import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { AuthDataService, EndpointModel, EndpointsDataService, Store } from '../../../store/src/public-api';
+import { AuthDataService, EndpointModel, EndpointsDataService } from '../../../store/src/public-api';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
   HELM_ENDPOINT_TYPE,
@@ -78,10 +77,9 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         logoUrl: '/kubernetes/assets/custom/helm.svg',
         renderPriority: helmRepoRenderPriority + 1,
         registrationComponent: HelmHubRegistrationComponent,
-        registeredLimit: (store: Store<AppState>): Observable<number> => {
+        registeredLimit: (injector: Injector): Observable<number> => {
           // session-data reads route through AuthDataService (signal-native
-          // facade) resolved off the framework-passed store's injector.
-          const injector = (store as unknown as { injector?: Injector }).injector;
+          // facade) resolved off the framework-passed injector.
           const authData = injector?.get(AuthDataService, null);
           if (!authData) {
             return of(1);

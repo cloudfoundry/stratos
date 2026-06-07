@@ -1,5 +1,4 @@
 import { Injectable, computed, signal, Injector, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import {
   StratosStatus, GeneralEntityAppState,
   EndpointsDataService, EndpointErrorEventsService,
@@ -282,14 +281,16 @@ export class GlobalEventService {
   }
 
   private getEventsAndPriorityType() {
-    return combineLatest(
-      this.eventConfigsSubject.asObservable().pipe(
-        startWith(this.eventConfigs)
-      ),
-      this.store
-    ).pipe(
+    // The legacy ngrx event-config channel: configs evaluated a `selector`
+    // against the root store state. The store is gone (#5413) and there are
+    // no live `addEventConfig` callers, so `appState` is null — configs (if
+    // ever registered) see what an empty store gave. Live banner events come
+    // from the signal channels (_endpointErrorEvents / _staticEvents).
+    return this.eventConfigsSubject.asObservable().pipe(
+      startWith(this.eventConfigs),
       debounceTime(100),
-      map(([configs, appState]) => {
+      map((configs) => {
+        const appState = null as unknown as GeneralEntityAppState;
         return configs.reduce((eventsAndPriority, config) => {
           const newEvents = this.getNewTriggeredEventsOrCached(config, appState);
           if (newEvents && newEvents.length) {
@@ -308,7 +309,6 @@ export class GlobalEventService {
     );
   }
 
-  private store = inject(Store<GeneralEntityAppState>);
   private injector = inject(Injector);
   private endpointErrorEvents = inject(EndpointErrorEventsService);
   private endpointsData = inject(EndpointsDataService);

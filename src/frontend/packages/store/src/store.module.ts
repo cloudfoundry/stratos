@@ -1,18 +1,14 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule, inject } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 
 import { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
-import { AppReducersModule } from './reducers.module';
 import { EndpointDisconnectCleanupService } from './services/endpoint-disconnect-cleanup.service';
 
 
 @NgModule({
   imports: [
-    AppReducersModule,
     EntityCatalogProvidersModule,
     HttpClientModule,
-    EffectsModule.forRoot([])
   ]
 })
 export class AppStoreModule {

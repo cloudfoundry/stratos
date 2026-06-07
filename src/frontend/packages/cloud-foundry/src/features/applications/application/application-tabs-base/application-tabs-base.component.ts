@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, EffectRef, Injector, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, Observable, Subscription } from 'rxjs';
 import { take, filter, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -27,7 +26,6 @@ import {
   UserFavoriteManager
 } from '@stratosui/store';
 import {
-  CFAppState,
   applicationEntityType,
   IApp,
   CF_ENDPOINT_TYPE,
@@ -63,7 +61,6 @@ import { AppDetailDataService } from '../../app-detail-data.service';
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
-  private store = inject<Store<CFAppState>>(Store);
   private router = inject(Router);
   private endpointsService = inject(EndpointsService);
   private ngZone = inject(NgZone);
@@ -83,7 +80,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   constructor() {
     const applicationService = this.applicationService;
-    const store = this.store;
     const scmService = inject(GitSCMService);
 
     // Initialize favorite$ after applicationService is available

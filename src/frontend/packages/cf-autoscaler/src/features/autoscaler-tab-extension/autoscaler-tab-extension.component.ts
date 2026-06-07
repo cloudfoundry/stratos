@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { combineLatest, Observable, of } from 'rxjs';
@@ -34,9 +33,6 @@ import {
   CardAppUsageComponent,
   StApp,
 } from '@stratosui/cloud-foundry';
-import {
-  AppState,
-} from '@stratosui/store';
 import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { buildMetricData } from '../../core/autoscaler-helpers/autoscaler-transform-metric';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
@@ -70,7 +66,6 @@ interface AutoscalerTabPaginationParams {
   icon: 'meter',
   iconFont: 'stratos-icons',
   hidden: (
-    _store: Store<AppState>,
     esf: unknown,
     activatedRoute: ActivatedRoute,
     cups: CurrentUserPermissionsService,

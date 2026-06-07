@@ -4,8 +4,6 @@ import { Router } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointsDataService,
-  GeneralEntityAppState,
-  Store,
   entityCatalog,
 } from '@stratosui/store';
 
@@ -52,7 +50,6 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
   }
 
   constructor() {
-    const store = inject<Store<GeneralEntityAppState>>(Store);
     const session = inject(SessionSignalService);
 
     // Tech-preview flag is sourced from the signal-native session projection;
@@ -61,7 +58,6 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
     const types = toObservable(
       computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
-    super(types, store, inject(EndpointsDataService), inject(Injector));
-    this.store = store;
+    super(types, inject(EndpointsDataService), inject(Injector));
   }
 }

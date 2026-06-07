@@ -1,11 +1,9 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import {
   ActionState,
-  AppState,
   EndpointModel,
   EndpointsDataService,
   EndpointType,
-  Store,
 } from '@stratosui/store';
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
@@ -115,7 +113,6 @@ export class ViewPipeline<T> {
 // visual / interaction language stays consistent across signal-list pages.
 @Injectable({ providedIn: 'root' })
 export class EndpointsSignalConfigService {
-  private readonly store = inject<Store<AppState>>(Store);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly endpointsSignals = inject(EndpointsSignalService);

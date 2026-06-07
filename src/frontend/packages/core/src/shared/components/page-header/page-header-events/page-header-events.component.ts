@@ -2,8 +2,6 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, map, publishReplay, refCount, share } from 'rxjs/operators';
 
@@ -37,7 +35,6 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class PageHeaderEventsComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
-  private store = inject<Store<AppState>>(Store);
   private eventService = inject(GlobalEventService);
 
   @Input()

@@ -3,7 +3,6 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import {
   EntityCatalogModule,
@@ -41,22 +40,6 @@ import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@an
 import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';
 import { cfApiInterceptor } from '@stratosui/cloud-foundry';
 
-const storeDebugImports = environment.production ? [] : [
-  StoreDevtoolsModule.instrument({
-    maxAge: 100,
-    logOnly: !environment.production,
-    connectInZone: true,
-    autoPause: true,
-    trace: false,
-    traceLimit: 75
-  })
-];
-
-@NgModule({
-  imports: storeDebugImports
-})
-class AppStoreDebugModule { }
-
 /**
  * AppModule - Main application module
  *
@@ -93,7 +76,6 @@ class AppStoreDebugModule { }
     EntityCatalogModule.forFeature(generateStratosEntities),
     RouteModule,
     AppStoreModule,
-    AppStoreDebugModule,
     BrowserModule,
     SharedModule,
     BrowserAnimationsModule,

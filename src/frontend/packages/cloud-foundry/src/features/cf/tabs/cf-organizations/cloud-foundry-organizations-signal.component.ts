@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
-import { Store } from '@stratosui/store';
 import { map } from 'rxjs/operators';
 
 import {
@@ -49,7 +48,6 @@ import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
 })
 export class CloudFoundryOrganizationsSignalComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
-  private store = inject<Store<any>>(Store);
   private orgsConfig = inject(CfOrgsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);

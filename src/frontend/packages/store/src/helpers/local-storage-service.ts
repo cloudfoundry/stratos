@@ -1,12 +1,8 @@
-import { ActionReducer } from '@ngrx/store';
-import { localStorageSync } from 'ngrx-store-localstorage';
-
 import { ConfirmationDialogConfig } from '../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../core/src/shared/components/confirmation-dialog.service';
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
 import { BUILD_INFO } from '../../../core/src/environments/build-info';
 import { SessionData } from '../types/auth.types';
-import { PaginationState } from '../types/pagination.types';
 
 
 export enum LocalStorageSyncTypes {
@@ -16,11 +12,6 @@ export enum LocalStorageSyncTypes {
 }
 
 export class LocalStorageService {
-
-  /**
-   * Convenience for dev
-   */
-  private static Encrypt = true;
 
   /**
    * Object used to access/update local storage
@@ -113,45 +104,6 @@ export class LocalStorageService {
   }
 
   /**
-   * This will ensure changes in the store are selectively pushed to local storage
-   */
-  public static storeToLocalStorageSyncReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-    // This is done to ensure we don't accidentally apply state from session storage from another user.
-    let globalUserId: string | null = null;
-    return localStorageSync({
-      // Decide the key to store each section by
-      storageKeySerializer: (storeKey: LocalStorageSyncTypes) => LocalStorageService.makeKey(globalUserId, storeKey),
-      syncCondition: () => {
-        if (globalUserId) {
-          return true;
-        }
-        const userId = LocalStorageService.getLocalStorageSessionId();
-        if (userId) {
-          globalUserId = userId;
-          return true;
-        }
-        return false;
-      },
-      keys: [
-        // DASHBOARD is signal-native (DashboardDataService) — it owns its
-        // own write path; the metaReducer no longer mirrors it. LISTS is
-        // signal-native too (ListStateStore owns per-list-key localStorage).
-        {
-          [LocalStorageSyncTypes.PAGINATION]: {
-            serialize: (pagination: PaginationState) => LocalStorageService.parseStorePartForLocalStorage<PaginationState>(
-              pagination,
-              LocalStorageSyncTypes.PAGINATION
-            ),
-          },
-        },
-      ],
-      // Don't push local storage state into store on start up... we need the logged in user's id before we can do that
-      rehydrate: false,
-
-    })(reducer);
-  }
-
-  /**
    * Get a unique identifier for the user
    */
   private static getLocalStorageSessionId(username?: string) {
@@ -164,45 +116,6 @@ export class LocalStorageService {
       return prefix + idElement.innerText;
     }
     return null;
-  }
-
-  /**
-   *  Allow for selective persistence of data. For pagination we only store params and clientPagination
-   */
-  private static parseStorePartForLocalStorage<T = any>(storePart: T, type: LocalStorageSyncTypes): object {
-    switch (type) {
-      case LocalStorageSyncTypes.PAGINATION: {
-        const pagination: PaginationState = storePart as unknown as PaginationState;
-        const paginationWithIndex = pagination as Record<string, any>;
-        // Convert each pagination section that we care about into an object with only the properties we care about
-        // For each entity type....
-        const abs = Object.keys(paginationWithIndex).reduce((res, entityTypes) => {
-          // For each pagination section of the entity type...
-          const perEntity = Object.keys(paginationWithIndex[entityTypes]).reduce((res2, paginationKeysOfEntityType) => {
-            const paginationSection = paginationWithIndex[entityTypes][paginationKeysOfEntityType];
-            // Only store pagination section for lists
-            if (!paginationSection.isListPagination) {
-              return res2;
-            }
-            res2[paginationKeysOfEntityType] = {
-              params: paginationSection.params,
-              clientPagination: paginationSection.clientPagination,
-              isListPagination: paginationSection.isListPagination, // We do not persist any that are false
-              forcedLocalPage: paginationSection.forcedLocalPage // Value of the multi-entity filter
-            };
-            return res2;
-          }, {} as Record<string, any>);
-
-          // If this entity type has pagination section that we've cared about store it, else ignore
-          if (Object.keys(perEntity).length > 0) {
-            res[entityTypes] = perEntity;
-          }
-          return res;
-        }, {} as Record<string, any>);
-        return LocalStorageService.encrypt(abs);
-      }
-    }
-    return LocalStorageService.encrypt(storePart);
   }
 
   public static localStorageSize(sessionData: SessionData): number {
@@ -280,13 +193,5 @@ export class LocalStorageService {
       storage.removeItem('stratos-company-config');
       storage.removeItem('stratos-show-all-menu-items');
     }
-  }
-
-  private static encrypt(obj: {}) {
-    if (LocalStorageService.Encrypt) {
-      const strObj = JSON.stringify(obj);
-      return btoa(strObj);
-    }
-    return obj;
   }
 }

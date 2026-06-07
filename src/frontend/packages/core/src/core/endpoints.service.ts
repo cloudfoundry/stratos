@@ -1,9 +1,7 @@
 import { ApplicationRef, inject, Injectable } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
-import { Store } from '@ngrx/store';
 import {
-  EndpointOnlyAppState,
   EndpointsDataService,
   EntityCatalogHelpers,
   IRequestEntityTypeState,
@@ -28,7 +26,6 @@ import { UserService } from './user.service';
   providedIn: 'root'
 })
 export class EndpointsService {
-  private store = inject<Store<EndpointOnlyAppState>>(Store);
   private endpointsService = inject(EndpointsDataService);
   private endpointsSignals = inject(EndpointsSignalService);
   private userService = inject(UserService);
