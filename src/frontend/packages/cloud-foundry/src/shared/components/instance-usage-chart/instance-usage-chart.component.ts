@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { ChartConfiguration, Plugin } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -77,7 +77,25 @@ export class InstanceUsageChartComponent {
   // also resets meta visibility. So the real lever is `visibilityPlugin` below,
   // which re-asserts meta.hidden from this set on every chart update. The legend
   // onClick flips this set via `toggleInstanceHidden`.
-  private readonly hiddenInstances = signal<ReadonlySet<number>>(new Set());
+  //
+  // PUBLIC for read-only access by the parent accordion (used to seed the
+  // shared "All metrics" overlay). Still only MUTATED internally via
+  // `toggleInstanceHidden` — the parent never writes it.
+  readonly hiddenInstances = signal<ReadonlySet<number>>(new Set());
+
+  // Shared "All metrics" overlay, driven by the parent. When non-null this set
+  // SHADOWS the internal per-metric set: the chart displays it and legend clicks
+  // emit `toggleLinked` (the parent owns the shared set). The internal set is
+  // left untouched, so clearing the overlay (back to null) reverts each chart to
+  // its own per-metric selection automatically.
+  readonly linkedHidden = input<ReadonlySet<number> | null>(null);
+  readonly toggleLinked = output<number>();
+
+  /** The set actually shown/enforced: the linked overlay when active, else the
+   *  chart's own per-metric set. */
+  readonly effectiveHidden = computed<ReadonlySet<number>>(
+    () => this.linkedHidden() ?? this.hiddenInstances(),
+  );
 
   /** Flip an instance's hidden state in this chart's internal set. A fresh Set
    *  makes the signal emit so `chartData()` recomputes and the plugin re-runs. */
@@ -93,7 +111,7 @@ export class InstanceUsageChartComponent {
   private readonly visibilityPlugin: Plugin<'line'> = {
     id: 'enforceInstanceVisibility',
     afterUpdate: (chart) => {
-      const hidden = this.hiddenInstances();
+      const hidden = this.effectiveHidden();
       chart.data.datasets.forEach((ds, i) => {
         const inst = (ds as { instanceIndex?: number }).instanceIndex ?? i;
         const meta = chart.getDatasetMeta(i);
@@ -106,7 +124,7 @@ export class InstanceUsageChartComponent {
 
   readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
     const m = this.metric();
-    const hidden = this.hiddenInstances();
+    const hidden = this.effectiveHidden();
     const datasets = [...this.history().entries()]
       .sort((a, b) => a[0] - b[0])
       .map(([index, points]) => ({
@@ -158,7 +176,14 @@ export class InstanceUsageChartComponent {
             const chart = legend.chart;
             const di = legendItem.datasetIndex ?? 0;
             const inst = (chart.data.datasets[di] as { instanceIndex?: number }).instanceIndex ?? di;
-            this.toggleInstanceHidden(inst);
+            // When the shared "All metrics" overlay is active, clicks drive the
+            // parent's shared set (applies to all three charts) and leave this
+            // chart's own per-metric set untouched. Otherwise toggle locally.
+            if (this.linkedHidden() != null) {
+              this.toggleLinked.emit(inst);
+            } else {
+              this.toggleInstanceHidden(inst);
+            }
           },
         },
       },
