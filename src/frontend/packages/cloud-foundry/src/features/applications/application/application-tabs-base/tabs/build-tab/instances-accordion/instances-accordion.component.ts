@@ -122,15 +122,6 @@ export class InstancesAccordionComponent implements OnDestroy {
   /** Per-instance usage history ring buffer — feeds the live trend charts. */
   readonly usageHistory = this.dataService.usageHistory;
 
-  /**
-   * Shared legend-hidden set across the three CPU/Memory/Disk charts — single
-   * source of truth. Each chart receives this via `[hiddenInstances]` and
-   * emits `(toggleInstance)` on a legend click; `onToggleInstance` flips the
-   * instance here so hiding "Instance 1" on any chart hides it on all three.
-   * The input-driven `dataset.hidden` also survives the live ~5s poll.
-   */
-  readonly hiddenInstances = signal<ReadonlySet<number>>(new Set());
-
   constructor() {
     // Build the columns from the config service, then replace the actions
     // column's factory with our confirm-wrapped version (moved verbatim
@@ -183,17 +174,6 @@ export class InstancesAccordionComponent implements OnDestroy {
       this._releaseFocus?.();
       this._releaseFocus = undefined;
     }
-  }
-
-  /**
-   * Flip an instance's hidden state in the shared set. A fresh Set instance
-   * makes the signal emit so every chart's `chartData()` recomputes with the
-   * updated visibility.
-   */
-  onToggleInstance(index: number): void {
-    const next = new Set(this.hiddenInstances());
-    next.has(index) ? next.delete(index) : next.add(index);
-    this.hiddenInstances.set(next);
   }
 
   /** Adjust the live sample cadence (5s / 10s / 30s). */
