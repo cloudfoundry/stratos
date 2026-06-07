@@ -103,8 +103,7 @@ export interface PaginationState {
 }
 
 // --- Relocated from the deleted pagination-reducer/pagination-reducer-reset-pagination.ts ---
-// Still consumed by list.actions.ts (default page size) and the test helper
-// (default pagination entity state seed).
+// Still consumed by the test helper (default pagination entity state seed).
 
 export const defaultClientPaginationPageSize = 6;
 

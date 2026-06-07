@@ -1,5 +1,4 @@
 import type { RequestInfoState } from './types/entity-pipeline.types';
-import type { ListsState } from './reducers/list.reducer';
 import type { BaseEntityValues, ExtendedRequestState } from './types/entity.types';
 import type { PaginationEntityTypeState } from './types/pagination.types';
 export interface IRequestTypeState {
@@ -18,7 +17,6 @@ export abstract class AppState<
   pagination!: ExtendedRequestState<keyof T, PaginationEntityTypeState>;
   request!: ExtendedRequestState<keyof T, IRequestEntityTypeState<RequestInfoState>>;
   requestData!: T;
-  lists!: ListsState;
 }
 
 export interface GeneralRequestDataState {
@@ -28,8 +26,6 @@ export interface GeneralRequestDataState {
 export interface GeneralAppRequestDataState extends BaseEntityValues, GeneralRequestDataState { }
 
 export type EndpointOnlyAppState = AppState<Pick<BaseEntityValues, 'stratosEndpoint'>>;
-
-export type ListsOnlyAppState = Pick<AppState, 'lists'>;
 
 export type DispatchOnlyAppState = unknown;
 
