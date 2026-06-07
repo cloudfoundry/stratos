@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
-import { EndpointsDataService, GeneralEntityAppState, Store, httpErrorResponseToSafeString } from '@stratosui/store';
+import { EndpointsDataService, httpErrorResponseToSafeString } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, defaultIfEmpty, map } from 'rxjs/operators';
 
@@ -39,7 +39,6 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RestoreEndpointsComponent {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
   service = inject(RestoreEndpointsService);
   private confirmDialog = inject(ConfirmationDialogService);
   private endpointsData = inject(EndpointsDataService);

@@ -1,29 +1,10 @@
-import { NgModule } from '@angular/core';
-import { ActionReducerMap, StoreModule } from '@ngrx/store';
-
-import { LocalStorageService } from './helpers/local-storage-service';
+import { ActionReducerMap } from '@ngrx/store';
 
 
-// The legacy `lists` view-state reducer was retired: the signal-native
-// `ListStateStore` (core, per-list-key localStorage) now owns list view /
-// page / sort. No root reducer slices remain; the store survives only as
-// vestigial scaffolding pending the final ngrx-removal slices.
+// The root ngrx store was removed in the final ngrx-removal closer — nothing
+// in the running app injects `Store` any more. `appReducers` (now empty) is
+// retained ONLY because component specs still spin up a throwaway test store
+// via `StoreModule.forRoot(appReducers)`; it goes when the specs migrate off
+// ngrx. The legacy `lists` view-state slice it once held is now owned by the
+// signal-native `ListStateStore` (per-list-key localStorage).
 export const appReducers: ActionReducerMap<Record<string, unknown>> = {};
-
-@NgModule({
-  imports: [
-    StoreModule.forRoot(
-      appReducers,
-      {
-        metaReducers: [
-          LocalStorageService.storeToLocalStorageSyncReducer
-        ],
-        runtimeChecks: {
-          strictStateImmutability: true,
-          strictActionImmutability: false
-        }
-      }
-    )
-  ]
-})
-export class AppReducersModule { }

@@ -4,9 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Injector } from '@angular/core';
 import {
   EndpointsDataService,
-  GeneralEntityAppState,
   IStratosEndpointDefinition,
-  Store,
   StratosCatalogEndpointEntity,
 } from '@stratosui/store';
 
@@ -30,7 +28,6 @@ type ExpandedEndpoints<T = number> = ExpandedEndpoint<T>[];
  * Handles sorting, hiding, filtering, etc
  */
 export abstract class BaseEndpointTileManager {
-  protected store: Store<GeneralEntityAppState>;
   // W36-B Wave 3: optional EndpointsDataService + Injector. When
   // supplied, the tile-population pipeline reads endpoints from the
   // signal-native service instead of the legacy ngrx pagination
@@ -92,11 +89,9 @@ export abstract class BaseEndpointTileManager {
 
   constructor(
     types$: Observable<StratosCatalogEndpointEntity[]>,
-    store: Store<GeneralEntityAppState>,
     endpointsData?: EndpointsDataService,
     injector?: Injector,
   ) {
-    this.store = store;
     this.endpointsData = endpointsData;
     this.injector = injector;
     this.tileManager = new TileConfigManager();
@@ -173,7 +168,9 @@ export abstract class BaseEndpointTileManager {
     if (typeof registeredLimit === 'number') {
       return of(registeredLimit);
     }
-    const res = registeredLimit(this.store);
+    // `injector` is guaranteed set here: expandEndpointTypes() throws
+    // without it before any tile (and thus any limit) is evaluated.
+    const res = registeredLimit(this.injector!);
     return typeof res === 'number' ? of(res) : res;
   }
 

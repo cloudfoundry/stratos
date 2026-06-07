@@ -1,14 +1,12 @@
 import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
-import { Store } from '@stratosui/store';
 import { format } from 'date-fns';
 import { EMPTY, NEVER, Observable, Subject, of, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, debounceTime, map, share, startWith, switchMap, tap, retryWhen, delayWhen, take } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
 import { ApplicationService } from '../../../../application.service';
 
 
@@ -38,7 +36,6 @@ interface ConnectionError {
 })
 export class LogStreamTabComponent implements OnInit, OnDestroy {
   private applicationService = inject(ApplicationService);
-  private store = inject<Store<CFAppState>>(Store);
   private cdr = inject(ChangeDetectorRef);
 
   public messages!: Observable<string>;

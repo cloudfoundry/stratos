@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal, Injector, inject } from '@angular/core';
-import { BrowserStandardEncoder, EndpointModel, GeneralEntityAppState, Store, entityCatalog } from '@stratosui/store';
+import { BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -22,7 +22,6 @@ interface BackupRequest {
   providedIn: 'root'
 })
 export class BackupEndpointsService {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
   private http = inject(HttpClient);
   private injector = inject(Injector);
 

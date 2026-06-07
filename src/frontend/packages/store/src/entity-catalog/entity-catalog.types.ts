@@ -1,4 +1,4 @@
-import type { EnvironmentInjector, Type } from '@angular/core';
+import type { EnvironmentInjector, Injector, Type } from '@angular/core';
 import type { Store } from '@ngrx/store';
 import type { Observable } from 'rxjs';
 
@@ -136,7 +136,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   /**
    * How many endpoints of this type can be registered, 0 - many
    */
-  readonly registeredLimit?: (store: Store<AppState>) => Observable<number> | number;
+  readonly registeredLimit?: (injector: Injector) => Observable<number> | number;
   /**
    * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
    */
