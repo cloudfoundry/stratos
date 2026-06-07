@@ -104,6 +104,88 @@ describe('InstanceUsageChartComponent', () => {
     expect(callback(1024 ** 3)).toBe('1 GB');
   });
 
+  // Build a minimal fake chart.js instance for exercising the legend onClick.
+  // Tracks per-dataset visibility so isDatasetVisible reflects setDatasetVisibility.
+  const makeFakeChart = (instanceIndices: number[]) => {
+    const visible = instanceIndices.map(() => true);
+    return {
+      data: { datasets: instanceIndices.map(i => ({ instanceIndex: i })) },
+      isDatasetVisible: (di: number) => visible[di],
+      setDatasetVisibility: (di: number, v: boolean) => { visible[di] = v; },
+      update: () => { /* noop */ },
+    };
+  };
+
+  it('preserves a hidden instance across a poll recompute (regression)', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
+      [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
+      [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
+      [2, [{ t: 1, cpu: 0, mem: 20, disk: 0 }]],
+    ]));
+    fixture.detectChanges();
+
+    // Initially every line is visible.
+    expect(component.chartData().datasets.map(d => (d as any).hidden)).toEqual([false, false, false]);
+
+    // Hide instance 0 via the real legend onClick path.
+    const chart = makeFakeChart([0, 1, 2]);
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 0 }, { chart });
+    expect(chart.isDatasetVisible(0)).toBe(false);
+
+    // Simulate a live poll delivering a fresh history Map. We read chartData()
+    // directly (the computed recomputes on read) rather than re-rendering the
+    // chart, which the headless harness cannot do.
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
+      [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }, { t: 2, cpu: 0, mem: 105, disk: 0 }]],
+      [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }, { t: 2, cpu: 0, mem: 55, disk: 0 }]],
+      [2, [{ t: 1, cpu: 0, mem: 20, disk: 0 }, { t: 2, cpu: 0, mem: 25, disk: 0 }]],
+    ]));
+
+    const ds = component.chartData().datasets;
+    expect((ds[0] as any).hidden).toBe(true);
+    expect((ds[1] as any).hidden).toBe(false);
+    expect((ds[2] as any).hidden).toBe(false);
+  });
+
+  it('toggling the same instance twice leaves it visible', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
+      [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
+      [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
+    ]));
+    fixture.detectChanges();
+
+    const chart = makeFakeChart([0, 1]);
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 0 }, { chart });
+    onClick({}, { datasetIndex: 0 }, { chart });
+
+    expect((component.chartData().datasets[0] as any).hidden).toBe(false);
+    expect(chart.isDatasetVisible(0)).toBe(true);
+  });
+
+  it('maps datasetIndex back to instanceIndex when datasets are sorted', () => {
+    // datasets are sorted by instance index, so datasetIndex === position, but
+    // the onClick must read instanceIndex off the dataset, not assume identity.
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
+      [2, [{ t: 1, cpu: 0, mem: 30, disk: 0 }]],
+      [5, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
+    ]));
+    fixture.detectChanges();
+
+    // datasets sorted -> [instance 2, instance 5]. Hide datasetIndex 1 (instance 5).
+    const chart = makeFakeChart([2, 5]);
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 1 }, { chart });
+
+    const ds = component.chartData().datasets;
+    expect((ds[0] as any).hidden).toBe(false); // instance 2
+    expect((ds[1] as any).hidden).toBe(true);  // instance 5
+  });
+
   it('toggles the y-axis title from the unitLabel input', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
