@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import { Action } from '../../../store/src/types/action.types';
 
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ApiRequestTypes, ICFAction, IStartRequestAction, StartAction } from '../../../store/src/types/request.types';

@@ -5,9 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideMockStore } from '@ngrx/store/testing';
 
-import { generateCfTopLevelStoreEntities } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step.component';
 
@@ -26,11 +24,6 @@ describe('DeployApplicationOptionsStepComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideMockStore({
-          initialState: {
-            ...generateCfTopLevelStoreEntities()
-          }
-        }),
         ApplicationEnvVarsHelper,
       ]
     }).compileComponents();

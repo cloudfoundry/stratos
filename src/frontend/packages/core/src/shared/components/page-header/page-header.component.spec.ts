@@ -5,10 +5,8 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 
-import { appReducers } from '@stratosui/store';
 import { CoreTestingModule } from '@test-framework';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
@@ -45,7 +43,6 @@ describe('PageHeaderComponent', () => {
         CoreTestingModule,
         CommonModule,
         RouterTestingModule,
-        StoreModule.forRoot(appReducers),
         PageHeaderComponent,
       ]
     }).compileComponents();

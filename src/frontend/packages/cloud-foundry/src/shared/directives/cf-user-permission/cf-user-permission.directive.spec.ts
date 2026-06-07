@@ -2,7 +2,6 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
@@ -37,7 +36,6 @@ describe('CfUserPermissionDirective', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
-        provideMockStore({}),
         ...cfCurrentUserPermissionsService,
       ]
     });

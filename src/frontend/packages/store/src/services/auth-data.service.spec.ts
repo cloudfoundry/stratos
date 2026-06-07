@@ -3,7 +3,6 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { StratosBrandingService } from '@stratosui/theme';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,7 +25,6 @@ function okEnvelope(overrides: Record<string, unknown> = {}) {
 
 describe('AuthDataService', () => {
   let httpMock: HttpTestingController;
-  let dispatch: ReturnType<typeof vi.fn>;
   let applySessionScopes: ReturnType<typeof vi.fn>;
   let navigate: ReturnType<typeof vi.fn>;
   let activateUserPreferences: ReturnType<typeof vi.fn>;
@@ -35,7 +33,6 @@ describe('AuthDataService', () => {
   let openSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    dispatch = vi.fn();
     applySessionScopes = vi.fn();
     navigate = vi.fn();
     activateUserPreferences = vi.fn();
@@ -49,7 +46,6 @@ describe('AuthDataService', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: Store, useValue: { dispatch, select: () => ({ subscribe: () => ({ unsubscribe() {} }) }) } },
         { provide: CurrentUserRolesDataService, useValue: { applySessionScopes } },
         { provide: Router, useValue: { navigate } },
         { provide: StratosBrandingService, useValue: { activateUserPreferences } },

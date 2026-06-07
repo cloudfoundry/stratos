@@ -2,8 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
-import { provideStore } from '@ngrx/store';
-import { appReducers } from '@stratosui/store';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiStateService } from '../csi-state.service';
@@ -21,9 +19,6 @@ describe('BindAppsStepComponent', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
-        provideStore(appReducers, {
-          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-        }),
         CsiGuidsService,
         CsiStateService,
       ]

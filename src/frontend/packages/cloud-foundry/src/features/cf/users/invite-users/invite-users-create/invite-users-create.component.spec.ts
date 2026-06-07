@@ -5,11 +5,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of, firstValueFrom } from 'rxjs';
 
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/cf';
 
@@ -37,10 +36,7 @@ describe('InviteUsersCreateComponent', () => {
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
           EntityCatalogTestModule,
-          CloudFoundryReducersModule,
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          })
+          CloudFoundryReducersModule
         ),
         {
           provide: TEST_CATALOGUE_ENTITIES,

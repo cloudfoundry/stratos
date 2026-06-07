@@ -5,10 +5,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
 
-import { EntityCatalogModule, appReducers, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EntityCatalogModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '@stratosui/cloud-foundry';
 import { RunningInstancesComponent } from './running-instances.component';
@@ -24,11 +22,6 @@ describe('RunningInstancesComponent', () => {
         NoopAnimationsModule,
         HttpClientTestingModule,
         EntityCatalogModule.forFeature(() => generateCFEntities()),
-        StoreModule.forRoot(
-          appReducers,
-          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
-        ),
-        EffectsModule.forRoot([]),
       ],
       providers: [
         ...STORE_TEST_PROVIDERS,

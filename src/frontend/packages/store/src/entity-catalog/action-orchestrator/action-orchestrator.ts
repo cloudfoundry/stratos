@@ -1,5 +1,5 @@
 import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
-import type { Action } from '@ngrx/store';
+import type { Action } from '../../types/action.types';
 
 import type { EntitySchema } from '../../helpers/entity-schema';
 import type { PaginatedAction } from '../../types/pagination.types';

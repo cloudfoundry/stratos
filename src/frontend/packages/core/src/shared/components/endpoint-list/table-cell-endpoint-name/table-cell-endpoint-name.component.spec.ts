@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { appReducers, EndpointModel, entityCatalog, EntityCatalogHelper, EntityCatalogHelpers, generateStratosEntities, StoreModule } from '@stratosui/store';
+import { EndpointModel, entityCatalog, EntityCatalogHelper, EntityCatalogHelpers, generateStratosEntities } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name.component';
 
@@ -25,12 +25,6 @@ describe('TableCellEndpointNameComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         TableCellEndpointNameComponent,
-        StoreModule.forRoot(appReducers, {
-          runtimeChecks: {
-            strictStateImmutability: false,
-            strictActionImmutability: false
-          }
-        }),
       ],
       providers: [
         ...STORE_TEST_PROVIDERS,

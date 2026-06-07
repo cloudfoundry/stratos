@@ -5,13 +5,12 @@ import { provideZonelessChangeDetection, importProvidersFrom, NO_ERRORS_SCHEMA }
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCFEntities, CfUserServiceTestProvider, generateCfTopLevelStoreEntities } from '@test-framework/cf';
+import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/cf';
 import { CloudFoundryReducersModule } from '../../../../../store/cloud-foundry.reducers.module';
 import { TabNavService } from '@stratosui/core';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
@@ -56,11 +55,7 @@ describe('UsersRolesModifyComponent', () => {
         importProvidersFrom(
           HttpClientTestingModule,
           EntityCatalogTestModule,
-          CloudFoundryReducersModule,
-          StoreModule.forRoot(appReducers, {
-            initialState: generateCfTopLevelStoreEntities() as any,
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          })
+          CloudFoundryReducersModule
         ),
         {
           provide: TEST_CATALOGUE_ENTITIES,

@@ -3,11 +3,9 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-  appReducers,
   TEST_CATALOGUE_ENTITIES,
   generateStratosEntities,
   EntityCatalogTestModule,
@@ -35,9 +33,6 @@ describe('CloudFoundryCellsSignalComponent', () => {
         provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule
         ),
         {

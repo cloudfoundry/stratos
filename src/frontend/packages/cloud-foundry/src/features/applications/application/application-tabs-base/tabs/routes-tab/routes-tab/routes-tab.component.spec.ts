@@ -9,7 +9,6 @@ import {
   signal,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -29,12 +28,6 @@ import { RoutesTabComponent } from './routes-tab.component';
 describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;
   let fixture: ComponentFixture<RoutesTabComponent>;
-
-  const mockStore = {
-    dispatch: vi.fn(),
-    select: vi.fn(() => of({})),
-    pipe: vi.fn(() => of({})),
-  };
 
   const mockPmf = {
     create: vi.fn(() => ({
@@ -134,7 +127,6 @@ describe('RoutesTabComponent', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideRouter([]),
-        { provide: Store, useValue: mockStore },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },

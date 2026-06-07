@@ -3,11 +3,10 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { ApplicationStateIconComponent } from '@stratosui/core';
-import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
 import { ApplicationStateService } from '../../../../shared/services/application-state.service';
@@ -31,9 +30,6 @@ describe('CompactAppCardComponent', () => {
         ApplicationStateService,
         importProvidersFrom(
           CloudFoundryTestingModule,
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule
         ),
         {

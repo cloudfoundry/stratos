@@ -1,5 +1,5 @@
 import { HttpRequest } from '@angular/common/http';
-import type { Action } from '@ngrx/store';
+import type { Action } from './action.types';
 
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';

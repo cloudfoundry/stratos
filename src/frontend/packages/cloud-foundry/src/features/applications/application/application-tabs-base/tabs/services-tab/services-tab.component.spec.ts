@@ -9,7 +9,6 @@ import {
   signal,
 } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -31,12 +30,6 @@ import { ServicesTabComponent } from './services-tab.component';
 describe('ServicesTabComponent', () => {
   let component: ServicesTabComponent;
   let fixture: ComponentFixture<ServicesTabComponent>;
-
-  const mockStore = {
-    dispatch: vi.fn(),
-    select: vi.fn(() => of({})),
-    pipe: vi.fn(() => of({})),
-  };
 
   // Spy holders, refreshed per test.
   let refreshScope: ReturnType<typeof vi.fn>;
@@ -123,7 +116,6 @@ describe('ServicesTabComponent', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideRouter([]),
-        { provide: Store, useValue: mockStore },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },

@@ -1,5 +1,5 @@
 import { HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import { Action } from './action.types';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';

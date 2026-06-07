@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import { Action } from '../types/action.types';
 
 import { EntityCatalogEntityConfig, extractEntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { PaginatedAction, PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';

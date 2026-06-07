@@ -5,10 +5,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { appReducers } from '@stratosui/store';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
 describe('CreateApplicationStep2Component', () => {
   let component: CreateApplicationStep2Component;
@@ -18,9 +16,6 @@ describe('CreateApplicationStep2Component', () => {
     await TestBed.configureTestingModule({
       imports: [
         CreateApplicationStep2Component,
-        StoreModule.forRoot(appReducers, {
-          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-        }),
       ],
       providers: [
         provideZonelessChangeDetection(),

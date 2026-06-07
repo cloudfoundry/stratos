@@ -1,17 +1,14 @@
 import { provideHttpClient, HttpClient, HttpHandler } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule, SharedModule } from '@stratosui/core';
-import { appReducers } from '@stratosui/store';
 import { testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { AppTestModule, generateBaseTestStoreModules } from '@test-framework';
 
 // Re-export test endpoint utilities for convenience
 export { testSCFEndpointGuid, populateStoreWithTestEndpoint };
 
-import { CFAppState } from '../src/cf-app-state';
 import { CloudFoundryTestingModule } from '../src/cloud-foundry-test.module';
 import { ActiveRouteCfOrgSpace } from '../src/features/cf/cf-page.types';
 import { CloudFoundryEndpointService } from '../src/features/cf/services/cloud-foundry-endpoint.service';
@@ -84,13 +81,7 @@ export function generateTestCfEndpointService() {
 export function generateTestCfServiceProvider() {
   return {
     provide: CloudFoundryService,
-    useFactory: (
-      _store: Store<CFAppState>,
-    ) => {
-      const appService = new CloudFoundryService();
-      return appService;
-    },
-    deps: [Store]
+    useFactory: () => new CloudFoundryService(),
   };
 }
 
@@ -146,9 +137,6 @@ export function generateCfStoreModules() {
 export function generateCfStoreProviders() {
   return [
     CloudFoundryTestingModule,
-    StoreModule.forRoot(
-      appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
-    ),
     AppTestModule
   ];
 }
