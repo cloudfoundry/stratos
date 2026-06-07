@@ -1,18 +1,13 @@
 import { NgModule, inject } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 import { GitPackageModule } from '@stratosui/git';
 
 import { ActiveRouteCfOrgSpace } from '../features/cf/cf-page.types';
 import { CloudFoundryReducersModule } from './cloud-foundry.reducers.module';
-import { ServiceInstanceEffects } from './effects/service-instance.effects';
 import { CfEndpointRoleSyncService } from './services/cf-endpoint-role-sync.service';
 
 @NgModule({
   imports: [
     CloudFoundryReducersModule,
-    EffectsModule.forFeature([
-      ServiceInstanceEffects,
-    ]),
     // Brings in GitSCMService
     GitPackageModule,
   ],
