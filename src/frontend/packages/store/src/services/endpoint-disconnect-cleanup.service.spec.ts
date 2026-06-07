@@ -2,11 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Action } from '@ngrx/store';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RESET_PAGINATION_OF_TYPE } from '../actions/pagination.actions';
 import { EndpointDisconnectCleanupService } from './endpoint-disconnect-cleanup.service';
 import { EndpointErrorEventsService } from './endpoint-error-events.service';
 import { EndpointConnectEvent, EndpointsDataService } from './endpoints-data.service';
@@ -17,9 +14,7 @@ const SYSTEM_INFO_URL = '/pp/v1/info';
 describe('EndpointDisconnectCleanupService', () => {
   let svc: EndpointsDataService;
   let cleanup: EndpointDisconnectCleanupService;
-  let store: MockStore;
   let httpMock: HttpTestingController;
-  let dispatched: Action[];
   let cleanForEndpoints: ReturnType<typeof vi.fn>;
   let pruneToConnected: ReturnType<typeof vi.fn>;
   let clearEndpoint: ReturnType<typeof vi.fn>;
@@ -34,7 +29,6 @@ describe('EndpointDisconnectCleanupService', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideMockStore({ initialState: {} }),
         EndpointsDataService,
         EndpointDisconnectCleanupService,
         { provide: RecentlyVisitedDataService, useValue: { cleanForEndpoints, pruneToConnected } },
@@ -42,12 +36,9 @@ describe('EndpointDisconnectCleanupService', () => {
       ],
     });
     svc = TestBed.inject(EndpointsDataService);
-    store = TestBed.inject(MockStore);
     httpMock = TestBed.inject(HttpTestingController);
-    dispatched = [];
-    store.scannedActions$.subscribe(a => dispatched.push(a));
-    // Inject AFTER mock store wiring is in place so the constructor's
-    // signal effects observe a clean baseline.
+    // Inject the service so its constructor's signal effects start
+    // observing a clean baseline.
     cleanup = TestBed.inject(EndpointDisconnectCleanupService);
     expect(cleanup).toBeTruthy();
   });
@@ -60,7 +51,7 @@ describe('EndpointDisconnectCleanupService', () => {
     await new Promise(r => setTimeout(r, 0));
   }
 
-  it('drains disconnectedSignal + dispatches generic cleanup actions', async () => {
+  it('drains disconnectedSignal + runs signal-native cleanup', async () => {
     // Seed the service with no endpoints so the disconnect event is the only emission.
     svc['_endpoints'].set(new Map([
       ['cf-1', { guid: 'cf-1', name: 'cf-one', cnsi_type: 'cf' } as any],
@@ -154,9 +145,5 @@ describe('EndpointDisconnectCleanupService', () => {
 
     expect(svc.disconnectedSignal()).toHaveLength(0);
     expect(cleanForEndpoints).toHaveBeenCalled();
-    // Pagination wipe is best-effort: the entity catalog under test may have
-    // no registered cf-typed entities, so only assert the action ran without
-    // error (count may be zero).
-    const _resets = dispatched.filter(a => a.type === RESET_PAGINATION_OF_TYPE);
   });
 });

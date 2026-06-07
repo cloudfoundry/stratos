@@ -1,12 +1,7 @@
 import { Injectable, OnDestroy, effect, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 
 import { EndpointModel } from '../types/endpoint.types';
 
-import { ResetPaginationOfType } from '../actions/pagination.actions';
-import { RemoveEntitiesForEndpoint } from '../actions/remove-entities-for-endpoint.actions';
-import { AppState } from '../app-state';
-import { entityCatalog } from '../entity-catalog/entity-catalog';
 import { EndpointErrorEventsService } from './endpoint-error-events.service';
 import {
   EndpointConnectEvent,
@@ -38,13 +33,10 @@ import { RecentlyVisitedDataService } from './recently-visited-data.service';
  *
  * Architectural notes:
  * - The signal effect runs on Angular's microtask queue, NOT
- *   synchronously inside the dispatch cycle. Legacy `*_ENDPOINTS_SUCCESS`
- *   listeners in the pagination reducer ran inside the same reducer cycle
- *   as the action that triggered them; the new path re-dispatches
- *   `ResetPaginationOfType` after a microtask. UI bindings could observe
- *   stale pagination for one frame post-disconnect. Acceptable: legacy
+ *   synchronously inside the dispatch cycle. The signal-native cleanup
+ *   (error-events clear, recents prune) runs after a microtask; legacy
  *   pagination consumers already saw async updates through the
- *   Observable/selector pipeline.
+ *   Observable/selector pipeline, so the timing change is immaterial.
  * - The cleanup service drains the disconnect/connect queues every cycle
  *   via `clearDisconnected()` / `clearConnected()`. If a Wave 4-part-2
  *   plugin handler throws, downstream handlers + the queue drain still
@@ -53,7 +45,6 @@ import { RecentlyVisitedDataService } from './recently-visited-data.service';
 @Injectable({ providedIn: 'root' })
 export class EndpointDisconnectCleanupService implements OnDestroy {
   private endpointsService = inject(EndpointsDataService);
-  private store = inject<Store<AppState>>(Store);
   private recents = inject(RecentlyVisitedDataService);
   private errorEvents = inject(EndpointErrorEventsService);
 
@@ -191,35 +182,19 @@ export class EndpointDisconnectCleanupService implements OnDestroy {
   // ---- internals ---------------------------------------------------------
 
   private runGenericDisconnectCleanup(event: EndpointDisconnectEvent): void {
-    // 1. Pagination wipe — replaces the legacy
-    //    `pagination.reducer.ts isEndpointAction` branch which called
-    //    `resetEndpointEntities(...)` walking
-    //    `entityCatalog.getAllEntitiesForEndpointType(action.endpointType)`.
-    const entityDefs = entityCatalog.getAllEntitiesForEndpointType(event.type);
-    for (const def of entityDefs) {
-      this.store.dispatch(
-        new ResetPaginationOfType({
-          endpointType: def.endpointType,
-          entityType: def.type,
-        }),
-      );
-    }
-    // 2. Endpoint error-log clear — replaces the legacy
-    //    `internal-events.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`
-    //    branches; now drops the endpoint's history from the signal-native
-    //    EndpointErrorEventsService.
+    // The legacy ngrx pagination wipe (`ResetPaginationOfType`) and
+    // per-entity-slice prune (`RemoveEntitiesForEndpoint`) are gone: the
+    // pagination/entity-data reducers they targeted were deleted with the
+    // ngrx engine (#5413), and signal data services own their own caches
+    // (cleared on read / TTL). What remains is the signal-native cleanup:
+    //
+    // 1. Endpoint error-log clear — drops the endpoint's history from the
+    //    signal-native EndpointErrorEventsService (was
+    //    `internal-events.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`).
     this.errorEvents.clearEndpoint(event.guid);
-    // 3. Recents cleanup — replaces the legacy
-    //    `recently-visited.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`
-    //    branch.
+    // 2. Recents cleanup — was
+    //    `recently-visited.reducer.ts DISCONNECT/UNREGISTER_ENDPOINTS_SUCCESS`.
     this.recents.cleanForEndpoints([event.guid]);
-    // 4. Per-entity-slice prune — replaces the legacy per-entity
-    //    `endpointDisconnectRemoveEntitiesReducer()` dataReducers (26 cf +
-    //    4 git inline registrations) and the
-    //    `endpoint-disconnect-application.reducer.ts` file. The reducer
-    //    walks `entityCatalog.getAllEntitiesForEndpointType(event.type)`
-    //    and prunes by `cfGuid` / `endpointGuid`.
-    this.store.dispatch(new RemoveEntitiesForEndpoint(event.type, event.guid));
   }
 
   private runGenericConnectCleanup(event: EndpointConnectEvent): void {
