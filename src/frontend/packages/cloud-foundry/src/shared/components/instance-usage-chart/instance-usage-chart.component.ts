@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { ChartConfiguration, Plugin } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -53,12 +53,10 @@ export function formatBytes(n: number): string {
  * parent, each with its own y-scale. This is independent of the Prometheus
  * metrics-chart (which still backs the Metrics tab).
  *
- * Legend visibility is SHARED across the three charts: the parent owns the
- * hidden set (single source of truth), feeds it via the `hiddenInstances`
- * input, and listens to `toggleInstance` to flip an instance on/off. Hiding
- * "Instance 1" on any chart hides it on all three, and a chart.js plugin
- * (`visibilityPlugin`) re-asserts the selection on every update so it survives
- * the ~5s live poll's data swap.
+ * Legend visibility is PER-CHART / INDEPENDENT: each chart owns its own hidden
+ * set internally. Hiding "Instance 1" on the Memory chart does NOT affect CPU
+ * or Disk. A chart.js plugin (`visibilityPlugin`) re-asserts the selection on
+ * every update so it survives the ~5s live poll's data swap.
  */
 @Component({
   selector: 'app-instance-usage-chart',
@@ -72,14 +70,22 @@ export class InstanceUsageChartComponent {
   readonly history = input.required<ReadonlyMap<number, UsagePoint[]>>();
   readonly unitLabel = input<string>('');
 
-  // Per-instance legend visibility, OWNED BY THE PARENT (the accordion) so the
-  // three CPU/Memory/Disk charts stay in sync. Chart.js stores legend toggle
-  // state in per-dataset meta and IGNORES `dataset.hidden` on update() after
-  // init; a data swap (every ~5s live poll) also resets meta visibility. So the
-  // real lever is `visibilityPlugin` below, which re-asserts meta.hidden from
-  // this set on every chart update. The input flows down from the parent's
-  // shared set; `toggleInstance` flows back up when the user clicks a legend.
-  readonly hiddenInstances = input<ReadonlySet<number>>(new Set());
+  // Per-instance legend visibility, OWNED INTERNALLY by this chart so each of
+  // the CPU/Memory/Disk charts manages its own hidden set independently.
+  // Chart.js stores legend toggle state in per-dataset meta and IGNORES
+  // `dataset.hidden` on update() after init; a data swap (every ~5s live poll)
+  // also resets meta visibility. So the real lever is `visibilityPlugin` below,
+  // which re-asserts meta.hidden from this set on every chart update. The legend
+  // onClick flips this set via `toggleInstanceHidden`.
+  private readonly hiddenInstances = signal<ReadonlySet<number>>(new Set());
+
+  /** Flip an instance's hidden state in this chart's internal set. A fresh Set
+   *  makes the signal emit so `chartData()` recomputes and the plugin re-runs. */
+  private toggleInstanceHidden(index: number): void {
+    const next = new Set(this.hiddenInstances());
+    next.has(index) ? next.delete(index) : next.add(index);
+    this.hiddenInstances.set(next);
+  }
 
   /** Re-assert per-instance legend visibility on every chart update. Chart.js
    *  ignores dataset.hidden after init and a data swap (each live poll) resets
@@ -97,11 +103,6 @@ export class InstanceUsageChartComponent {
     },
   };
   readonly plugins: Plugin<'line'>[] = [this.visibilityPlugin];
-
-  // Emitted when the user clicks a legend item. The parent flips the instance
-  // in its shared set, which flows back via `hiddenInstances` and recomputes
-  // `chartData()` on all three charts.
-  readonly toggleInstance = output<number>();
 
   readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
     const m = this.metric();
@@ -148,18 +149,16 @@ export class InstanceUsageChartComponent {
         legend: {
           display: true,
           position: 'bottom',
-          // Custom toggle: emit the instance index so the PARENT flips it in
-          // the shared hidden set. The updated set flows back through the
-          // `hiddenInstances` input and recomputes `chartData()` on all three
-          // charts (signal-driven + synchronous under zoneless CD), so the
-          // change reflects immediately and uniformly without local mutation.
-          // We don't touch chart.js dataset meta here — `visibilityPlugin`
-          // re-asserts it from the shared set on every update.
+          // Custom toggle: flip the instance in this chart's internal hidden
+          // set. The set change recomputes `chartData()` (signal-driven +
+          // synchronous under zoneless CD), which triggers an ng2-charts
+          // update() so `visibilityPlugin` re-asserts meta.hidden. We don't
+          // touch chart.js dataset meta directly here.
           onClick: (_e, legendItem, legend) => {
             const chart = legend.chart;
             const di = legendItem.datasetIndex ?? 0;
             const inst = (chart.data.datasets[di] as { instanceIndex?: number }).instanceIndex ?? di;
-            this.toggleInstance.emit(inst);
+            this.toggleInstanceHidden(inst);
           },
         },
       },

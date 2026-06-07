@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -105,13 +105,13 @@ describe('InstanceUsageChartComponent', () => {
   });
 
   // Build a minimal fake chart.js instance for exercising the legend onClick.
-  // The onClick is now emit-only: it just reads instanceIndex off the dataset
-  // and emits, so the fake only needs the datasets array.
+  // The onClick reads instanceIndex off the clicked dataset and flips the
+  // chart's internal hidden set, so the fake only needs the datasets array.
   const makeFakeChart = (instanceIndices: number[]) => ({
     data: { datasets: instanceIndices.map(i => ({ instanceIndex: i })) },
   });
 
-  it('applies the hiddenInstances input as dataset.hidden per instance', () => {
+  it('onClick toggles the internal hidden set, driving chartData and the plugin', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
       [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
@@ -123,29 +123,43 @@ describe('InstanceUsageChartComponent', () => {
     // Initially every line is visible.
     expect(component.chartData().datasets.map(d => (d as any).hidden)).toEqual([false, false, false]);
 
-    // Parent hides instance 0 by feeding the shared set down.
-    fixture.componentRef.setInput('hiddenInstances', new Set([0]));
-    const ds = component.chartData().datasets;
-    expect((ds[0] as any).hidden).toBe(true);
-    expect((ds[1] as any).hidden).toBe(false);
+    // Click the legend for instance 1.
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 1 }, { chart: makeFakeChart([0, 1, 2]) });
+
+    // chartData() reflects the internal set: instance 1 is now hidden.
+    let ds = component.chartData().datasets;
+    expect((ds[0] as any).hidden).toBe(false);
+    expect((ds[1] as any).hidden).toBe(true);
     expect((ds[2] as any).hidden).toBe(false);
+
+    // The plugin enforces the same selection onto chart meta.
+    const enforce = makeFakeChartWithMeta([0, 1, 2]);
+    (component as any).visibilityPlugin.afterUpdate(enforce.chart);
+    expect(enforce.metas[1].hidden).toBe(true);
+
+    // Toggling again clears instance 1.
+    onClick({}, { datasetIndex: 1 }, { chart: makeFakeChart([0, 1, 2]) });
+    ds = component.chartData().datasets;
+    expect((ds[1] as any).hidden).toBe(false);
   });
 
-  it('preserves a hidden instance across a poll recompute (regression)', () => {
+  it('persists a hidden instance across a history change (poll) (regression)', () => {
     fixture.componentRef.setInput('metric', 'mem');
-    fixture.componentRef.setInput('hiddenInstances', new Set([0]));
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
       [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
       [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
       [2, [{ t: 1, cpu: 0, mem: 20, disk: 0 }]],
     ]));
     fixture.detectChanges();
-    expect((component.chartData().datasets[0] as any).hidden).toBe(true);
 
-    // Simulate a live poll delivering a fresh history Map. We read chartData()
-    // directly (the computed recomputes on read) rather than re-rendering the
-    // chart, which the headless harness cannot do. The hidden input is
-    // unchanged, so the selection must survive.
+    // Hide instance 1 via a legend click.
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 1 }, { chart: makeFakeChart([0, 1, 2]) });
+    expect((component.chartData().datasets[1] as any).hidden).toBe(true);
+
+    // Simulate a live poll delivering a fresh history Map. The internal hidden
+    // set is unchanged, so the selection must survive.
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
       [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }, { t: 2, cpu: 0, mem: 105, disk: 0 }]],
       [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }, { t: 2, cpu: 0, mem: 55, disk: 0 }]],
@@ -153,8 +167,8 @@ describe('InstanceUsageChartComponent', () => {
     ]));
 
     const ds = component.chartData().datasets;
-    expect((ds[0] as any).hidden).toBe(true);
-    expect((ds[1] as any).hidden).toBe(false);
+    expect((ds[0] as any).hidden).toBe(false);
+    expect((ds[1] as any).hidden).toBe(true);
     expect((ds[2] as any).hidden).toBe(false);
   });
 
@@ -172,11 +186,13 @@ describe('InstanceUsageChartComponent', () => {
     };
   };
 
-  it('plugin hides exactly the instances in the hiddenInstances set', () => {
+  it('plugin hides exactly the instances in the internal hidden set', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
-    fixture.componentRef.setInput('hiddenInstances', new Set([1]));
     fixture.detectChanges();
+    // Hide instance 1 via a legend click on the internal set.
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 1 }, { chart: makeFakeChart([0, 1, 2]) });
 
     const { chart, metas } = makeFakeChartWithMeta([0, 1, 2]);
     (component as any).visibilityPlugin.afterUpdate(chart);
@@ -191,7 +207,6 @@ describe('InstanceUsageChartComponent', () => {
   it('plugin shows everything when the hidden set is empty (toggle off)', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
-    fixture.componentRef.setInput('hiddenInstances', new Set<number>());
     fixture.detectChanges();
 
     const { chart, metas } = makeFakeChartWithMeta([0, 1, 2]);
@@ -209,8 +224,10 @@ describe('InstanceUsageChartComponent', () => {
   it('plugin maps by instanceIndex, not dataset position', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());
-    fixture.componentRef.setInput('hiddenInstances', new Set([0]));
     fixture.detectChanges();
+    // Hide instance 0 via a legend click on the internal set.
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 0 }, { chart: makeFakeChart([0]) });
 
     // Datasets in non-identity order: positions [0,1,2] -> instanceIndex [2,0,1].
     const { chart, metas } = makeFakeChartWithMeta([2, 0, 1]);
@@ -220,24 +237,6 @@ describe('InstanceUsageChartComponent', () => {
     expect(!!metas[0].hidden).toBe(false);
     expect(metas[1].hidden).toBe(true);
     expect(!!metas[2].hidden).toBe(false);
-  });
-
-  it('emits toggleInstance with the mapped instance index on legend click', () => {
-    fixture.componentRef.setInput('metric', 'mem');
-    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
-      [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
-      [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
-    ]));
-    fixture.detectChanges();
-
-    const emitted: number[] = [];
-    component.toggleInstance.subscribe((i: number) => emitted.push(i));
-
-    const chart = makeFakeChart([0, 1]);
-    const onClick = (component.options() as any).plugins.legend.onClick;
-    onClick({}, { datasetIndex: 1 }, { chart });
-
-    expect(emitted).toEqual([1]);
   });
 
   it('maps datasetIndex back to instanceIndex when datasets are sorted', () => {
@@ -250,15 +249,14 @@ describe('InstanceUsageChartComponent', () => {
     ]));
     fixture.detectChanges();
 
-    const emit = vi.fn();
-    component.toggleInstance.subscribe(emit);
-
     // datasets sorted -> [instance 2, instance 5]. Click datasetIndex 1 (instance 5).
-    const chart = makeFakeChart([2, 5]);
     const onClick = (component.options() as any).plugins.legend.onClick;
-    onClick({}, { datasetIndex: 1 }, { chart });
+    onClick({}, { datasetIndex: 1 }, { chart: makeFakeChart([2, 5]) });
 
-    expect(emit).toHaveBeenCalledWith(5);
+    // Instance 5 (not its position) is the one hidden in chartData().
+    const ds = component.chartData().datasets;
+    expect((ds[0] as any).hidden).toBe(false); // instance 2
+    expect((ds[1] as any).hidden).toBe(true);  // instance 5
   });
 
   it('toggles the y-axis title from the unitLabel input', () => {

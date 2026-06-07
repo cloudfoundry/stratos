@@ -75,19 +75,19 @@
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-content-muted">CPU</span>
           <div class="h-40">
-            <app-instance-usage-chart [metric]="'cpu'" [history]="usageHistory()" [unitLabel]="''" [hiddenInstances]="hiddenInstances()" (toggleInstance)="onToggleInstance($event)"></app-instance-usage-chart>
+            <app-instance-usage-chart [metric]="'cpu'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
           </div>
         </div>
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-content-muted">Memory</span>
           <div class="h-40">
-            <app-instance-usage-chart [metric]="'mem'" [history]="usageHistory()" [unitLabel]="''" [hiddenInstances]="hiddenInstances()" (toggleInstance)="onToggleInstance($event)"></app-instance-usage-chart>
+            <app-instance-usage-chart [metric]="'mem'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
           </div>
         </div>
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-content-muted">Disk</span>
           <div class="h-40">
-            <app-instance-usage-chart [metric]="'disk'" [history]="usageHistory()" [unitLabel]="''" [hiddenInstances]="hiddenInstances()" (toggleInstance)="onToggleInstance($event)"></app-instance-usage-chart>
+            <app-instance-usage-chart [metric]="'disk'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
           </div>
         </div>
       </div>
