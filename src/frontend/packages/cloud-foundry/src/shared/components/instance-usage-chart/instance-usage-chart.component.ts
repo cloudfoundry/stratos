@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -52,6 +52,12 @@ export function formatBytes(n: number): string {
  * data service or poll — three of these (CPU/Memory/Disk) are wired by the
  * parent, each with its own y-scale. This is independent of the Prometheus
  * metrics-chart (which still backs the Metrics tab).
+ *
+ * Legend visibility is SHARED across the three charts: the parent owns the
+ * hidden set (single source of truth), feeds it via the `hiddenInstances`
+ * input, and listens to `toggleInstance` to flip an instance on/off. Hiding
+ * "Instance 1" on any chart hides it on all three, and the input-driven
+ * `dataset.hidden` survives the ~5s live poll's chartData() rebuild.
  */
 @Component({
   selector: 'app-instance-usage-chart',
@@ -65,12 +71,18 @@ export class InstanceUsageChartComponent {
   readonly history = input.required<ReadonlyMap<number, UsagePoint[]>>();
   readonly unitLabel = input<string>('');
 
-  // Per-instance legend visibility. Chart.js stores legend toggle state in
-  // per-dataset meta, but `chartData()` rebuilds fresh dataset objects on every
-  // live poll — wiping that meta and re-showing hidden lines. We track the
-  // hidden set here and re-apply it as `dataset.hidden` on every recompute so a
-  // user's toggle survives the ~5s refresh.
-  private readonly hiddenInstances = signal<ReadonlySet<number>>(new Set());
+  // Per-instance legend visibility, OWNED BY THE PARENT (the accordion) so the
+  // three CPU/Memory/Disk charts stay in sync. Chart.js stores legend toggle
+  // state in per-dataset meta, but `chartData()` rebuilds fresh dataset objects
+  // on every live poll — wiping that meta and re-showing hidden lines. We
+  // re-apply the shared set as `dataset.hidden` on every recompute so a user's
+  // toggle survives the ~5s refresh.
+  readonly hiddenInstances = input<ReadonlySet<number>>(new Set());
+
+  // Emitted when the user clicks a legend item. The parent flips the instance
+  // in its shared set, which flows back via `hiddenInstances` and recomputes
+  // `chartData()` on all three charts.
+  readonly toggleInstance = output<number>();
 
   readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
     const m = this.metric();
@@ -95,14 +107,6 @@ export class InstanceUsageChartComponent {
     return { labels: Array.from({ length: maxLen }, (_, i) => `${i}`), datasets };
   });
 
-  // Immutably flip an instance's hidden state. A new Set instance makes the
-  // signal emit so `chartData()` recomputes with the updated visibility.
-  private toggleInstanceHidden(index: number): void {
-    const next = new Set(this.hiddenInstances());
-    next.has(index) ? next.delete(index) : next.add(index);
-    this.hiddenInstances.set(next);
-  }
-
   readonly options = computed<ChartConfiguration<'line'>['options']>(() => {
     const metric = this.metric();
     const unit = this.unitLabel();
@@ -120,17 +124,18 @@ export class InstanceUsageChartComponent {
         legend: {
           display: true,
           position: 'bottom',
-          // Custom toggle: persist hidden state in our signal (so it survives
-          // the next poll's chartData() rebuild) AND reflect it on the live
-          // chart immediately. Default chart.js onClick only touches dataset
-          // meta, which we wipe on recompute.
+          // Custom toggle: emit the instance index so the PARENT flips it in
+          // the shared hidden set. The updated set flows back through the
+          // `hiddenInstances` input and recomputes `chartData()` on all three
+          // charts (signal-driven + synchronous under zoneless CD), so the
+          // change reflects immediately and uniformly without local mutation.
+          // We don't touch chart.js dataset meta here — `chartData()` rebuilds
+          // wipe it anyway; `dataset.hidden` is the durable source of truth.
           onClick: (_e, legendItem, legend) => {
             const chart = legend.chart;
             const di = legendItem.datasetIndex ?? 0;
             const inst = (chart.data.datasets[di] as { instanceIndex?: number }).instanceIndex ?? di;
-            this.toggleInstanceHidden(inst);
-            chart.setDatasetVisibility(di, !chart.isDatasetVisible(di));
-            chart.update();
+            this.toggleInstance.emit(inst);
           },
         },
       },

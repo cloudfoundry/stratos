@@ -8,6 +8,7 @@ import {
   provideZonelessChangeDetection,
   signal,
 } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -25,6 +26,7 @@ import { AppDetailDataService } from '../../../../../app-detail-data.service';
 import { AppApplicationActionsService } from '../../../../../../../shared/services/application-actions.service';
 import { AppInstanceActionsService } from '../../../../../../../shared/services/app-instance-actions.service';
 import { CfAppInstancesSignalConfigService } from '../../../../../../../shared/signal-list-configs/app-instance/cf-app-instances-signal-config.service';
+import { InstanceUsageChartComponent } from '../../../../../../../shared/components/instance-usage-chart/instance-usage-chart.component';
 import { InstancesAccordionComponent } from './instances-accordion.component';
 
 describe('InstancesAccordionComponent', () => {
@@ -220,6 +222,78 @@ describe('InstancesAccordionComponent', () => {
     component.toggle();   // close (release #1)
     fixture.destroy();    // must NOT release again
     expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  describe('shared hidden-instance set', () => {
+    it('onToggleInstance adds then removes an instance', () => {
+      expect([...component.hiddenInstances()]).toEqual([]);
+      component.onToggleInstance(1);
+      expect(component.hiddenInstances().has(1)).toBe(true);
+      component.onToggleInstance(1);
+      expect(component.hiddenInstances().has(1)).toBe(false);
+    });
+
+    it('toggles independent instances without disturbing the others', () => {
+      component.onToggleInstance(0);
+      component.onToggleInstance(2);
+      expect([...component.hiddenInstances()].sort()).toEqual([0, 2]);
+      component.onToggleInstance(0);
+      expect([...component.hiddenInstances()]).toEqual([2]);
+    });
+
+    it('feeds the same hiddenInstances set to all three usage charts', async () => {
+      // Replace the chart's <canvas baseChart> template with a no-op so chart.js
+      // is never asked to acquire a 2d context (jsdom has none). The component's
+      // inputs/outputs are untouched, so we can still read the bound signal.
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [InstancesAccordionComponent],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          provideZonelessChangeDetection(),
+          provideRouter([]),
+          { provide: Store, useValue: mockStore },
+          { provide: ApplicationService, useClass: ApplicationServiceMock },
+          { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+          { provide: AppDetailDataService, useFactory: makeDataStub },
+          { provide: AppApplicationActionsService, useFactory: makeActionsStub },
+          { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
+          { provide: TailwindSnackBarService, useFactory: makeSnackStub },
+        ],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      })
+        .overrideComponent(InstancesAccordionComponent, {
+          remove: {
+            providers: [AppInstanceActionsService, CfAppInstancesSignalConfigService],
+          },
+          add: {
+            providers: [
+              { provide: AppInstanceActionsService, useFactory: makeInstanceActionsStub },
+              { provide: CfAppInstancesSignalConfigService, useFactory: makeInstancesConfigStub },
+            ],
+          },
+        })
+        .overrideComponent(InstanceUsageChartComponent, {
+          set: { template: '' },
+        })
+        .compileComponents();
+
+      appSig.set({ entity: { instances: 1 } });
+      const localFixture = TestBed.createComponent(InstancesAccordionComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.toggle(); // expand so the charts render
+      localComponent.onToggleInstance(1);
+      localFixture.detectChanges();
+
+      const charts = localFixture.debugElement.queryAll(By.directive(InstanceUsageChartComponent));
+      expect(charts.length).toBe(3);
+      for (const chart of charts) {
+        const inst = chart.componentInstance as InstanceUsageChartComponent;
+        expect(inst.hiddenInstances().has(1)).toBe(true);
+      }
+      localFixture.destroy();
+    });
   });
 
   it('changing interval calls setStatsPollMs', () => {
