@@ -57,16 +57,28 @@
           }
         </span>
 
-        <label class="flex items-center gap-2 text-sm text-content-muted">
-          Sample every
-          <select
-            class="rounded border border-content-border bg-content-bg px-2 py-1 text-content-text"
-            (change)="setSampleInterval(+$any($event.target).value)">
-            <option [value]="5000" [selected]="intervalMs() === 5000">5s</option>
-            <option [value]="10000" [selected]="intervalMs() === 10000">10s</option>
-            <option [value]="30000" [selected]="intervalMs() === 30000">30s</option>
-          </select>
-        </label>
+        <div class="flex items-center gap-4 flex-wrap">
+          <!-- Momentary shared selection across all three usage charts. -->
+          <label class="flex items-center gap-2 text-sm text-content-muted">
+            <input
+              type="checkbox"
+              class="accent-primary"
+              [checked]="allActive()"
+              (change)="toggleAllMetrics()">
+            All metrics
+          </label>
+
+          <label class="flex items-center gap-2 text-sm text-content-muted">
+            Sample every
+            <select
+              class="rounded border border-content-border bg-content-bg px-2 py-1 text-content-text"
+              (change)="setSampleInterval(+$any($event.target).value)">
+              <option [value]="5000" [selected]="intervalMs() === 5000">5s</option>
+              <option [value]="10000" [selected]="intervalMs() === 10000">10s</option>
+              <option [value]="30000" [selected]="intervalMs() === 30000">30s</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <!-- Live usage trend charts (CPU / Memory / Disk). Each wrapper has a
@@ -75,19 +87,34 @@
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-content-muted">CPU</span>
           <div class="h-40">
-            <app-instance-usage-chart [metric]="'cpu'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
+            <app-instance-usage-chart
+              [metric]="'cpu'"
+              [history]="usageHistory()"
+              [unitLabel]="''"
+              [linkedHidden]="allActive() ? unifiedHidden() : null"
+              (toggleLinked)="onToggleLinked($event)"></app-instance-usage-chart>
           </div>
         </div>
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-content-muted">Memory</span>
           <div class="h-40">
-            <app-instance-usage-chart [metric]="'mem'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
+            <app-instance-usage-chart
+              [metric]="'mem'"
+              [history]="usageHistory()"
+              [unitLabel]="''"
+              [linkedHidden]="allActive() ? unifiedHidden() : null"
+              (toggleLinked)="onToggleLinked($event)"></app-instance-usage-chart>
           </div>
         </div>
         <div class="flex flex-col gap-1">
           <span class="text-xs font-medium text-content-muted">Disk</span>
           <div class="h-40">
-            <app-instance-usage-chart [metric]="'disk'" [history]="usageHistory()" [unitLabel]="''"></app-instance-usage-chart>
+            <app-instance-usage-chart
+              [metric]="'disk'"
+              [history]="usageHistory()"
+              [unitLabel]="''"
+              [linkedHidden]="allActive() ? unifiedHidden() : null"
+              (toggleLinked)="onToggleLinked($event)"></app-instance-usage-chart>
           </div>
         </div>
       </div>

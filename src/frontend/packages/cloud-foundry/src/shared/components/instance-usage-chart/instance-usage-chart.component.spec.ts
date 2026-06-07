@@ -259,6 +259,55 @@ describe('InstanceUsageChartComponent', () => {
     expect((ds[1] as any).hidden).toBe(true);  // instance 5
   });
 
+  it('linkedHidden (non-null) shadows the internal set in chartData and the plugin', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
+      [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
+      [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
+      [2, [{ t: 1, cpu: 0, mem: 20, disk: 0 }]],
+    ]));
+    fixture.detectChanges();
+
+    // Internal per-metric set hides instance 0 …
+    component.hiddenInstances.set(new Set([0]));
+    // … but the linked overlay hides instance 1 instead. The overlay wins.
+    // Set the signal input directly (no detectChanges → no real chart render in
+    // this headless harness; chartData()/plugin read the signals synchronously).
+    fixture.componentRef.setInput('linkedHidden', new Set([1]));
+
+    const ds = component.chartData().datasets;
+    expect((ds[1] as any).hidden).toBe(true);    // shown per the linked set
+    expect((ds[0] as any).hidden).toBeFalsy();   // internal 0 is shadowed away
+
+    // The plugin enforces the linked set, not the internal one.
+    const { chart, metas } = makeFakeChartWithMeta([0, 1, 2]);
+    (component as any).visibilityPlugin.afterUpdate(chart);
+    expect(!!metas[0].hidden).toBe(false);
+    expect(metas[1].hidden).toBe(true);
+    expect(!!metas[2].hidden).toBe(false);
+  });
+
+  it('onClick while linked emits toggleLinked and leaves the internal set untouched', () => {
+    fixture.componentRef.setInput('metric', 'mem');
+    fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>([
+      [0, [{ t: 1, cpu: 0, mem: 100, disk: 0 }]],
+      [1, [{ t: 1, cpu: 0, mem: 50, disk: 0 }]],
+    ]));
+    fixture.componentRef.setInput('linkedHidden', new Set<number>());
+    fixture.detectChanges();
+
+    const before = component.hiddenInstances();
+    const emitted: number[] = [];
+    component.toggleLinked.subscribe(i => emitted.push(i));
+
+    const onClick = (component.options() as any).plugins.legend.onClick;
+    onClick({}, { datasetIndex: 1 }, { chart: makeFakeChart([0, 1]) });
+
+    expect(emitted).toEqual([1]);
+    // Internal per-metric set unchanged (the parent owns the shared set).
+    expect(component.hiddenInstances()).toBe(before);
+  });
+
   it('toggles the y-axis title from the unitLabel input', () => {
     fixture.componentRef.setInput('metric', 'mem');
     fixture.componentRef.setInput('history', new Map<number, UsagePoint[]>());

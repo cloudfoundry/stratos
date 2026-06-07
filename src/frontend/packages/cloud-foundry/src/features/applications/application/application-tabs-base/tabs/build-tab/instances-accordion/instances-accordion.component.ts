@@ -3,7 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  QueryList,
   Signal,
+  ViewChildren,
   WritableSignal,
   computed,
   inject,
@@ -82,6 +84,19 @@ export class InstancesAccordionComponent implements OnDestroy {
 
   /** Currently-selected sample cadence (ms); mirrors the data service default. */
   readonly intervalMs = signal(5000);
+
+  /**
+   * Momentary "All metrics" overlay. When active, a single shared hidden set
+   * (`unifiedHidden`) shadows each chart's per-metric selection across CPU/Mem/
+   * Disk: every chart shows the shared set and a legend click on any chart
+   * toggles the instance there for all three. The per-metric sets underneath are
+   * never mutated while active, so deactivating reverts each chart automatically.
+   */
+  readonly allActive = signal(false);
+  readonly unifiedHidden = signal<ReadonlySet<number>>(new Set());
+
+  /** The three live usage charts (CPU/Mem/Disk); read to seed the shared set. */
+  @ViewChildren(InstanceUsageChartComponent) private charts!: QueryList<InstanceUsageChartComponent>;
 
   /** Loading map projected for the signal-list framework. */
   private readonly _isAnyLoading: Signal<boolean> = computed(() => this.dataService.loading().stats);
@@ -174,6 +189,33 @@ export class InstancesAccordionComponent implements OnDestroy {
       this._releaseFocus?.();
       this._releaseFocus = undefined;
     }
+  }
+
+  /**
+   * Toggle the momentary "All metrics" overlay. Activating seeds the shared
+   * hidden set with the AND (intersection) of the three charts' current
+   * per-metric sets — an instance starts hidden only if hidden on CPU AND Mem
+   * AND Disk. Deactivating just drops the overlay; each chart's per-metric set
+   * (never touched while active) is what it reverts to.
+   */
+  toggleAllMetrics(): void {
+    if (this.allActive()) {
+      this.allActive.set(false);
+      return;
+    }
+    const sets = this.charts ? this.charts.map(c => c.hiddenInstances()) : [];
+    const seed = sets.length
+      ? [...sets[0]].filter(i => sets.every(s => s.has(i)))
+      : [];
+    this.unifiedHidden.set(new Set(seed));
+    this.allActive.set(true);
+  }
+
+  /** Flip an instance in the shared overlay set (drives all three charts). */
+  onToggleLinked(index: number): void {
+    const next = new Set(this.unifiedHidden());
+    next.has(index) ? next.delete(index) : next.add(index);
+    this.unifiedHidden.set(next);
   }
 
   /** Adjust the live sample cadence (5s / 10s / 30s). */

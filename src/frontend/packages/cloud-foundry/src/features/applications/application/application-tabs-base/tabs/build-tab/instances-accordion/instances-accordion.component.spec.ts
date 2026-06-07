@@ -284,6 +284,114 @@ describe('InstancesAccordionComponent', () => {
     });
   });
 
+  describe('All metrics overlay', () => {
+    // Stub the chart template so no canvas renders, but the three
+    // <app-instance-usage-chart> still instantiate so ViewChildren resolves
+    // their component instances (whose internal hiddenInstances we drive).
+    const buildWithChartStub = async () => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [InstancesAccordionComponent],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          provideZonelessChangeDetection(),
+          provideRouter([]),
+          { provide: Store, useValue: mockStore },
+          { provide: ApplicationService, useClass: ApplicationServiceMock },
+          { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+          { provide: AppDetailDataService, useFactory: makeDataStub },
+          { provide: AppApplicationActionsService, useFactory: makeActionsStub },
+          { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
+          { provide: TailwindSnackBarService, useFactory: makeSnackStub },
+        ],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      })
+        .overrideComponent(InstancesAccordionComponent, {
+          remove: {
+            providers: [AppInstanceActionsService, CfAppInstancesSignalConfigService],
+          },
+          add: {
+            providers: [
+              { provide: AppInstanceActionsService, useFactory: makeInstanceActionsStub },
+              { provide: CfAppInstancesSignalConfigService, useFactory: makeInstancesConfigStub },
+            ],
+          },
+        })
+        .overrideComponent(InstanceUsageChartComponent, {
+          set: { template: '' },
+        })
+        .compileComponents();
+
+      appSig.set({ entity: { instances: 3 } });
+      const localFixture = TestBed.createComponent(InstancesAccordionComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.toggle();          // expand so the three charts render
+      localFixture.detectChanges();
+      return { localFixture, localComponent };
+    };
+
+    const queriedCharts = (component: InstancesAccordionComponent): InstanceUsageChartComponent[] =>
+      ((component as any).charts as { toArray(): InstanceUsageChartComponent[] }).toArray();
+
+    it('activating seeds the shared set with the AND of the per-metric sets', async () => {
+      const { localFixture, localComponent } = await buildWithChartStub();
+      const charts = queriedCharts(localComponent);
+      expect(charts.length).toBe(3);
+
+      // CPU={1,2}, Mem={1}, Disk={1} → intersection {1}.
+      charts[0].hiddenInstances.set(new Set([1, 2]));
+      charts[1].hiddenInstances.set(new Set([1]));
+      charts[2].hiddenInstances.set(new Set([1]));
+
+      localComponent.toggleAllMetrics();
+      expect(localComponent.allActive()).toBe(true);
+      expect([...localComponent.unifiedHidden()].sort()).toEqual([1]);
+
+      localFixture.destroy();
+    });
+
+    it('onToggleLinked adds then removes an instance in the shared set', async () => {
+      const { localFixture, localComponent } = await buildWithChartStub();
+      const charts = queriedCharts(localComponent);
+      charts.forEach(c => c.hiddenInstances.set(new Set([1])));
+
+      localComponent.toggleAllMetrics();
+      expect([...localComponent.unifiedHidden()].sort()).toEqual([1]);
+
+      localComponent.onToggleLinked(2);
+      expect([...localComponent.unifiedHidden()].sort()).toEqual([1, 2]);
+
+      localComponent.onToggleLinked(2);
+      expect([...localComponent.unifiedHidden()].sort()).toEqual([1]);
+
+      localFixture.destroy();
+    });
+
+    it('deactivating leaves each chart per-metric set untouched (auto-revert)', async () => {
+      const { localFixture, localComponent } = await buildWithChartStub();
+      const charts = queriedCharts(localComponent);
+      const cpu = new Set([1, 2]);
+      const mem = new Set([1]);
+      const disk = new Set([0, 1]);
+      charts[0].hiddenInstances.set(cpu);
+      charts[1].hiddenInstances.set(mem);
+      charts[2].hiddenInstances.set(disk);
+
+      localComponent.toggleAllMetrics();       // activate
+      localComponent.onToggleLinked(2);        // mutate the shared set only
+      localComponent.toggleAllMetrics();       // deactivate
+
+      expect(localComponent.allActive()).toBe(false);
+      // Per-metric sets are exactly what they were pre-activation.
+      expect([...charts[0].hiddenInstances()].sort()).toEqual([1, 2]);
+      expect([...charts[1].hiddenInstances()].sort()).toEqual([1]);
+      expect([...charts[2].hiddenInstances()].sort()).toEqual([0, 1]);
+
+      localFixture.destroy();
+    });
+  });
+
   it('changing interval calls setStatsPollMs', () => {
     const spy = vi.spyOn(dataService, 'setStatsPollMs');
     component.setSampleInterval(10000);
