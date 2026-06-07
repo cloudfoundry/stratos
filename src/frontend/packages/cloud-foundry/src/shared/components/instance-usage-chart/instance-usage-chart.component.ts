@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -65,8 +65,16 @@ export class InstanceUsageChartComponent {
   readonly history = input.required<ReadonlyMap<number, UsagePoint[]>>();
   readonly unitLabel = input<string>('');
 
+  // Per-instance legend visibility. Chart.js stores legend toggle state in
+  // per-dataset meta, but `chartData()` rebuilds fresh dataset objects on every
+  // live poll — wiping that meta and re-showing hidden lines. We track the
+  // hidden set here and re-apply it as `dataset.hidden` on every recompute so a
+  // user's toggle survives the ~5s refresh.
+  private readonly hiddenInstances = signal<ReadonlySet<number>>(new Set());
+
   readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
     const m = this.metric();
+    const hidden = this.hiddenInstances();
     const datasets = [...this.history().entries()]
       .sort((a, b) => a[0] - b[0])
       .map(([index, points]) => ({
@@ -74,13 +82,26 @@ export class InstanceUsageChartComponent {
         data: points.map(p => p[m]),
         tension: 0.3,
         pointRadius: 0,
-      }));
+        hidden: hidden.has(index),
+        // Stash the instance index so the legend onClick can map a chart.js
+        // datasetIndex back to our persistent set. chart.js ignores unknown
+        // dataset props; the cast keeps the typed dataset shape happy.
+        instanceIndex: index,
+      } as ChartConfiguration<'line'>['data']['datasets'][number] & { instanceIndex: number }));
     const maxLen = Math.max(0, ...datasets.map(d => d.data.length));
     // x positions are sample-index, not wall-clock time: assumes instances are
     // sampled in lockstep (they are — one poll feeds all instances). UsagePoint.t
     // is carried for a future time-keyed x-axis but not used here.
     return { labels: Array.from({ length: maxLen }, (_, i) => `${i}`), datasets };
   });
+
+  // Immutably flip an instance's hidden state. A new Set instance makes the
+  // signal emit so `chartData()` recomputes with the updated visibility.
+  private toggleInstanceHidden(index: number): void {
+    const next = new Set(this.hiddenInstances());
+    next.has(index) ? next.delete(index) : next.add(index);
+    this.hiddenInstances.set(next);
+  }
 
   readonly options = computed<ChartConfiguration<'line'>['options']>(() => {
     const metric = this.metric();
@@ -95,7 +116,24 @@ export class InstanceUsageChartComponent {
       animation: false,
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: true, position: 'bottom' } },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          // Custom toggle: persist hidden state in our signal (so it survives
+          // the next poll's chartData() rebuild) AND reflect it on the live
+          // chart immediately. Default chart.js onClick only touches dataset
+          // meta, which we wipe on recompute.
+          onClick: (_e, legendItem, legend) => {
+            const chart = legend.chart;
+            const di = legendItem.datasetIndex ?? 0;
+            const inst = (chart.data.datasets[di] as { instanceIndex?: number }).instanceIndex ?? di;
+            this.toggleInstanceHidden(inst);
+            chart.setDatasetVisibility(di, !chart.isDatasetVisible(di));
+            chart.update();
+          },
+        },
+      },
       scales: {
         x: { display: false },
         y: {
