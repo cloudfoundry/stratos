@@ -74,8 +74,6 @@ export { MetricQueryType } from './types/metric.types';
 export { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, EntityCatalogModule } from './entity-catalog.module';
 export { EntityCatalogProvidersModule } from './entity-catalog-providers.module';
 export type { MetricsAPITargets, MetricsStratosInfo } from './types/metrics-api.types';
-export type { ListView } from './actions/list.actions';
-export { ListFilter, ListPagination, ListSort, SetListViewAction } from './actions/list.actions';
 export { getActions } from './actions/action.helper';
 export { AppStoreModule } from './store.module';
 export type { AuthState } from './types/auth.types';
@@ -156,7 +154,6 @@ export type { PermissionValues } from './types/current-user-roles.types';
 export type { SessionData, SessionDataConfig } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './types/auth.types';
-export { getListStateObservables } from './reducers/list.reducer';
 export { EntitySchema } from './helpers/entity-schema';
 export type {
   ChartSeries,

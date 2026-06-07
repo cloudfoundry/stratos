@@ -5,7 +5,6 @@ import { ConfirmationDialogConfig } from '../../../core/src/shared/components/co
 import { ConfirmationDialogService } from '../../../core/src/shared/components/confirmation-dialog.service';
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
 import { BUILD_INFO } from '../../../core/src/environments/build-info';
-import { HydrateListsStateAction } from '../actions/list.actions';
 import { HydratePaginationStateAction } from '../actions/pagination.actions';
 import { DispatchOnlyAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
@@ -114,12 +113,6 @@ export class LocalStorageService {
           sessionId,
           true
         );
-        LocalStorageService.localStorageToStoreSection(
-          LocalStorageSyncTypes.LISTS,
-          dataForStore => store.dispatch(new HydrateListsStateAction(dataForStore)),
-          storage,
-          sessionId
-        );
       }
     }
   }
@@ -171,8 +164,8 @@ export class LocalStorageService {
       },
       keys: [
         // DASHBOARD is signal-native (DashboardDataService) — it owns its
-        // own write path; the metaReducer no longer mirrors it.
-        LocalStorageSyncTypes.LISTS,
+        // own write path; the metaReducer no longer mirrors it. LISTS is
+        // signal-native too (ListStateStore owns per-list-key localStorage).
         {
           [LocalStorageSyncTypes.PAGINATION]: {
             serialize: (pagination: PaginationState) => LocalStorageService.parseStorePartForLocalStorage<PaginationState>(

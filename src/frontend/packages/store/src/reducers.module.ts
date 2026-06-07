@@ -2,22 +2,13 @@ import { NgModule } from '@angular/core';
 import { ActionReducerMap, StoreModule } from '@ngrx/store';
 
 import { LocalStorageService } from './helpers/local-storage-service';
-import { listReducer } from './reducers/list.reducer';
 
 
-// NOTE: Revisit when ngrx-store-logger supports Angular 7 (https://github.com/btroncone/ngrx-store-logger)
-
-// import { storeLogger } from 'ngrx-store-logger';
-
-// https://github.com/btroncone/ngrx-store-logger/issues/34
-// export function logger(reducer) {
-//   // default, no options
-//   return storeLogger()(reducer);
-// }
-
-export const appReducers: ActionReducerMap<Record<string, unknown>> = {
-  lists: listReducer,
-};
+// The legacy `lists` view-state reducer was retired: the signal-native
+// `ListStateStore` (core, per-list-key localStorage) now owns list view /
+// page / sort. No root reducer slices remain; the store survives only as
+// vestigial scaffolding pending the final ngrx-removal slices.
+export const appReducers: ActionReducerMap<Record<string, unknown>> = {};
 
 @NgModule({
   imports: [
