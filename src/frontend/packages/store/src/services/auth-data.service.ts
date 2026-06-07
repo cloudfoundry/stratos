@@ -1,12 +1,10 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import { StratosBrandingService } from '@stratosui/theme';
 
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
-import { AppState, DispatchOnlyAppState } from '../app-state';
 import { BrowserStandardEncoder } from '../browser-encoder';
 import { LocalStorageService } from '../helpers/local-storage-service';
 import { AuthState, RouterRedirect, SessionData, SessionDataEnvelope } from '../types/auth.types';
@@ -40,18 +38,12 @@ const defaultAuthState: AuthState = {
  * the auth state as a writable signal and performs the HTTP itself (the
  * credential POST, the verify GET, the logout POST) — work that previously
  * lived in `auth.effects.ts` driven by the `auth` ngrx reducer. Downstream
- * consumers read the projected signals and never touch `Store`.
- *
- * One tie to the legacy slice remains until the reducer is deleted:
- *  - a successful verify still dispatches `VerifiedSession` so the auth
- *    reducer keeps `state.auth.sessionData` populated for the entity-catalog
- *    framework readers (`selectSessionData`, helm `registeredLimit`) and so
- *    `cfRoleInfoFromSessionReducer` can propagate CF admin permissions.
- * It is retired when the reducer/effects are removed.
+ * consumers read the projected signals and never touch `Store`. Session
+ * data is fully signal-native (SessionService / session-signal); the
+ * legacy `auth` ngrx slice and its `VerifiedSession` dispatch are gone.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthDataService {
-  private store = inject<Store<AppState & DispatchOnlyAppState>>(Store);
   private router = inject(Router);
   private http = inject(HttpClient);
   // Verify-only collaborators are resolved lazily (only when a verify cycle
@@ -196,7 +188,7 @@ export class AuthDataService {
       const dashboardData = this.injector.get(DashboardDataService);
       const branding = this.injector.get(StratosBrandingService);
       const endpointsService = this.injector.get(EndpointsDataService);
-      LocalStorageService.localStorageToStore(this.store, sessionData, dashboardData);
+      LocalStorageService.localStorageToStore(sessionData, dashboardData);
       branding.activateUserPreferences();
 
       try {

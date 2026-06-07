@@ -1,12 +1,10 @@
-import { ActionReducer, Store } from '@ngrx/store';
+import { ActionReducer } from '@ngrx/store';
 import { localStorageSync } from 'ngrx-store-localstorage';
 
 import { ConfirmationDialogConfig } from '../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../core/src/shared/components/confirmation-dialog.service';
 import { DashboardDataService } from '../../../core/src/core/dashboard-data.service';
 import { BUILD_INFO } from '../../../core/src/environments/build-info';
-import { HydratePaginationStateAction } from '../actions/pagination.actions';
-import { DispatchOnlyAppState } from '../app-state';
 import { SessionData } from '../types/auth.types';
 import { PaginationState } from '../types/pagination.types';
 
@@ -76,15 +74,19 @@ export class LocalStorageService {
   }
 
   /**
-   * Normally used on app init, move local storage data into the console's store.
+   * Normally used on app init, move local storage data into signal-native
+   * services.
    *
    * `dashboardData` is optional purely so the legacy callsite signature
    * doesn't break specs that don't bother instantiating the service.
    * Real callers pass it so the dashboard slice (signal-native, no
    * longer ngrx) can hydrate from its user-keyed localStorage entry.
+   *
+   * The legacy `pagination` hydration was retired with the ngrx pagination
+   * engine (#5413); list/page/sort state is now owned by the signal-native
+   * ListStateStore (its own `stratos.list-state.v1.*` keys).
    */
   public static localStorageToStore(
-    store: Store<DispatchOnlyAppState>,
     sessionData: SessionData,
     dashboardData?: DashboardDataService,
   ) {
@@ -106,39 +108,7 @@ export class LocalStorageService {
           const dashboardKey = LocalStorageService.makeKey(sessionId, LocalStorageSyncTypes.DASHBOARD);
           dashboardData.hydrateFromStorage(dashboardKey, storage.getItem(dashboardKey));
         }
-        LocalStorageService.localStorageToStoreSection(
-          LocalStorageSyncTypes.PAGINATION,
-          dataForStore => store.dispatch(new HydratePaginationStateAction(dataForStore)),
-          storage,
-          sessionId,
-          true
-        );
       }
-    }
-  }
-
-  /**
-   * For a given storage type fetch it's data for the given user from local storage and dispatch an action that will
-   * be handled by the reducers for that storage type (dashboard, pagination, etc)
-   */
-  private static localStorageToStoreSection(
-    type: LocalStorageSyncTypes,
-    dispatch: (dataForStore: any) => void,
-    storage: Storage,
-    sessionId: string,
-    encrypted = false,
-  ) {
-    const key = LocalStorageService.makeKey(sessionId, type);
-    try {
-      const fromStorage = storage.getItem(key);
-      if (!fromStorage) {
-        // Could be first load using the new local storage process... or content has been cleared
-        return;
-      }
-      const strValue = encrypted ? LocalStorageService.decrypt(fromStorage) : fromStorage;
-      dispatch(JSON.parse(strValue));
-    } catch (e) {
-      console.warn(`Failed to parse user settings with key '${key}' from session storage, consider clearing manually`, e);
     }
   }
 
@@ -318,12 +288,5 @@ export class LocalStorageService {
       return btoa(strObj);
     }
     return obj;
-  }
-
-  private static decrypt(strObj: string): string {
-    if (LocalStorageService.Encrypt) {
-      return atob(strObj);
-    }
-    return strObj;
   }
 }
