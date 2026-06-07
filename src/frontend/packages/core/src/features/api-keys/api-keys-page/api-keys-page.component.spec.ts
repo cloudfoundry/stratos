@@ -4,7 +4,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
@@ -27,7 +26,6 @@ describe('ApiKeysPageComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
-        provideMockStore({ initialState: {} }),
         { provide: TailwindDialogService, useValue: mockDialogService },
       ],
     }).compileComponents();

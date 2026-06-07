@@ -1,6 +1,5 @@
 import { ApplicationRef, provideZonelessChangeDetection, signal, computed } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideStore } from '@ngrx/store';
 import { firstValueFrom, take } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -163,7 +162,6 @@ describe('ApplicationService (facade shim)', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideStore({}),
         { provide: CF_GUID, useValue: CF },
         { provide: APP_GUID, useValue: APP },
         ApplicationService,

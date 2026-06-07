@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, ChangeDetectorRef, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of, Subject } from 'rxjs';
-import { Store } from '@ngrx/store';
 
 import { ApplicationDeploySourceTypes } from '../../applications/deploy-application/deploy-application-steps.types';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -13,12 +12,6 @@ describe('CFHomeCardComponent', () => {
   let fixture: ComponentFixture<CFHomeCardComponent>;
 
   // Mock services
-  const mockStore = {
-    dispatch: vi.fn(),
-    select: vi.fn(() => of({})),
-    pipe: vi.fn(() => of({}))
-  };
-
   const mockPmf = {
     create: vi.fn(() => ({
       currentPage$: of([]),
@@ -62,7 +55,6 @@ describe('CFHomeCardComponent', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: mockStore },
         { provide: ChangeDetectorRef, useValue: mockCdr },
         { provide: EndpointDataRegistry, useValue: mockEndpointDataRegistry },
       ],

@@ -3,10 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreModule } from '@stratosui/core';
-import { StoreModule } from '@ngrx/store';
 import { generateTestCfEndpointServiceProvider, generateCfActiveRouteMock, CloudFoundryTestingModule } from '@test-framework/cloud-foundry-endpoint-service.helper';
 import { CreateSpaceQuotaStepComponent } from './create-space-quota-step.component';
 
@@ -23,12 +22,6 @@ describe('CreateSpaceQuotaStepComponent', () => {
         provideZonelessChangeDetection(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: {
-              strictStateImmutability: false,
-              strictActionImmutability: false
-            }
-          }),
           CoreModule,
           NoopAnimationsModule,
           CloudFoundryTestingModule

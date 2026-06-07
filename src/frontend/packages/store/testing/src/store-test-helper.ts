@@ -1,25 +1,27 @@
-import { ModuleWithProviders } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store, StoreModule, StoreRootModule } from '@ngrx/store';
 import {
-  appReducers,
   AppState,
   BaseEntityValues,
   EndpointsDataService,
-  endpointEntityType,
   EndpointModel,
   entityCatalog,
   EntityCatalogEntityConfig,
   getDefaultPaginationEntityState,
   getDefaultRequestState,
   getDefaultRolesRequestState,
-  NormalizedResponse,
   rootUpdatingKey,
   SessionData,
   SessionDataEndpoint,
-  stratosEntityFactory,
-  WrapperRequestActionSuccess,
 } from '@stratosui/store';
+
+// The ngrx root store was removed in the final ngrx-removal closer. The
+// store-module factory functions below used to return `StoreModule.forRoot(...)`
+// modules; specs added them to `imports: []` but no spec injects/reads the
+// store any more (all data is signal-native). They now return this inert
+// module so the existing call sites keep compiling unchanged.
+@NgModule({})
+export class EmptyTestStoreModule { }
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {
@@ -258,21 +260,15 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- signature preserved for call sites; state is no longer consumed (no ngrx store)
 export function createBasicStoreModule(
   initialState: Partial<AppState<BaseEntityValues>> = getDefaultInitialTestStoreState()
-): ModuleWithProviders<StoreRootModule> {
-  return StoreModule.forRoot(
-    appReducers,
-    {
-      initialState, runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-    }
-  );
+): typeof EmptyTestStoreModule {
+  return EmptyTestStoreModule;
 }
 
-export function createEmptyStoreModule(): ModuleWithProviders<StoreRootModule> {
-  return StoreModule.forRoot(
-    appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
-  );
+export function createEmptyStoreModule(): typeof EmptyTestStoreModule {
+  return EmptyTestStoreModule;
 }
 
 function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOverride?: any): Record<string, any> {
@@ -318,48 +314,40 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig,
 
 export function createEntityStore(
   entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>
-): ModuleWithProviders<StoreRootModule> {
+): typeof EmptyTestStoreModule {
   const initialState = createEntityStoreState(entityMap);
   return createBasicStoreModule(initialState);
 }
 
-export function populateStoreWithTestEndpoint(): EndpointModel {
-  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
-  const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
-  const mappedData = {
-    entities: {
-      [stratosEndpointEntityKey]: {
-        [testSCFEndpoint.guid]: testSCFEndpoint
-      }
-    },
-    result: [testSCFEndpoint.guid]
-  } as NormalizedResponse;
-  const store = TestBed.inject(Store);
-  store.dispatch(new WrapperRequestActionSuccess(mappedData, {
-    type: 'POPULATE_TEST_DATA',
-    ...stratosEndpointEntityConfig
-  }, 'fetch'));
-
-  // Wave 2 (W36-B): mirror the seed into EndpointsDataService so that
-  // signal-native consumers (`EndpointsSignalService`, `CfEndpointsDataService`,
-  // `EndpointsService.endpoints$`) see the test endpoint too. Tolerates the
-  // service not being available in the test injector (e.g. tests that don't
-  // pull in the store package).
+/**
+ * Seed the signal-native EndpointsDataService with the given endpoints. For
+ * specs that previously dispatched endpoint data into the ngrx store so a
+ * (now signal-native) component could read it back. Tolerates the service not
+ * being available in the test injector (non-fatal).
+ */
+export function seedEndpointsDataService(endpoints: EndpointModel[]): void {
   try {
     const endpointsService = TestBed.inject(EndpointsDataService, null);
     if (endpointsService) {
       // Bypass private encapsulation via index access — the writable signal
       // is the source of truth that the public readonly `endpoints` signal
-      // mirrors. This is a test-only seam; production code dispatches via
+      // mirrors. This is a test-only seam; production code mutates via
       // `getAll()` / `register()` etc.
       const writable = (endpointsService as unknown as { ['_endpoints']?: { set: (m: Map<string, EndpointModel>) => void } })['_endpoints'];
       if (writable && typeof writable.set === 'function') {
-        writable.set(new Map([[testSCFEndpoint.guid, testSCFEndpoint]]));
+        writable.set(new Map(endpoints.map(e => [e.guid, e])));
       }
     }
   } catch {
     // Service not provided in this test — non-fatal.
   }
+}
 
+export function populateStoreWithTestEndpoint(): EndpointModel {
+  // The ngrx store is gone; seed the signal-native EndpointsDataService
+  // directly so signal consumers (`EndpointsSignalService`,
+  // `CfEndpointsDataService`, `EndpointsService.endpoints$`) see the test
+  // endpoint.
+  seedEndpointsDataService([testSCFEndpoint]);
   return testSCFEndpoint;
 }

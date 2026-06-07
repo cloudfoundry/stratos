@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
 
 import { GitCommit } from '@stratosui/git';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
@@ -13,13 +11,6 @@ describe('DeployApplicationStep21Component', () => {
   let fixture: ComponentFixture<DeployApplicationStep21Component>;
   let deployData: { setDeployCommit: ReturnType<typeof vi.fn> };
 
-  // Mock Store
-  const mockStore = {
-    dispatch: vi.fn(),
-    select: vi.fn(() => of({})),
-    pipe: vi.fn(() => of({}))
-  };
-
   beforeEach(async () => {
     deployData = { setDeployCommit: vi.fn() };
     await TestBed.configureTestingModule({
@@ -28,7 +19,6 @@ describe('DeployApplicationStep21Component', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: Store, useValue: mockStore },
         { provide: CfDeployAppDataService, useValue: deployData },
       ]
     }).compileComponents();

@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter, ActivatedRoute } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
@@ -11,7 +10,6 @@ import {
   TabNavService
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import { appReducers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { CloudFoundryTestingModule } from '../../../../cloud-foundry-test.module';
@@ -90,9 +88,6 @@ describe('RemoveUserComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RemoveUserComponent,
-        StoreModule.forRoot(appReducers, {
-          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-        }),
         CloudFoundryTestingModule,
         NoopAnimationsModule,
       ],

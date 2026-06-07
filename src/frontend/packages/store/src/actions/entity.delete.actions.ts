@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import { Action } from '../types/action.types';
 
 import { EntityRequestAction } from '../types/request.types';
 import { IFavoriteMetadata, UserFavorite } from '../types/user-favorites.types';

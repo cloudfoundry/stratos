@@ -1,5 +1,5 @@
 import type { EnvironmentInjector, Injector, Type } from '@angular/core';
-import type { Store } from '@ngrx/store';
+import type { Store } from '../types/action.types';
 import type { Observable } from 'rxjs';
 
 import type { HomePageEndpointCard } from '../../../core/src/features/home/home.types';

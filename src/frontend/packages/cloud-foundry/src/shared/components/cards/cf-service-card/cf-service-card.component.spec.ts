@@ -5,9 +5,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { StoreModule } from '@ngrx/store';
 
-import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, appReducers } from '@stratosui/store';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
 import { generateCFEntities } from '../../../../cf-entity-generator';
@@ -36,10 +35,6 @@ describe('CfServiceCardComponent', () => {
       imports: [
         CfServiceCardComponent,
         NoopAnimationsModule,
-        StoreModule.forRoot(
-          appReducers,
-          { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
-        ),
         {
           ngModule: EntityCatalogTestModule,
           providers: [

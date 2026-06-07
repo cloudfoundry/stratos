@@ -8,7 +8,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
-import { EntityCatalogHelper, EntityCatalogHelpers, Store, entityCatalog, generateStratosEntities } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers, entityCatalog, generateStratosEntities } from '@stratosui/store';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -87,16 +87,10 @@ describe('HomePageComponent', () => {
     expect(navigateSpy).not.toHaveBeenCalledWith(['applications'], expect.anything());
   });
 
-  it('does not dispatch a redundant endpoint getAll on construction (auth.effects loads endpoints on session verify)', async () => {
-    await configureTestBed(makeStubEndpointsService(false));
-    const store = TestBed.inject(Store);
-    const dispatchSpy = vi.spyOn(store, 'dispatch');
-
-    fixture = TestBed.createComponent(HomePageComponent);
-
-    const endpointGetAllDispatches = dispatchSpy.mock.calls
-      .map((args: unknown[]) => args[0] as { type?: string })
-      .filter(action => action?.type === '[Endpoints] Get all');
-    expect(endpointGetAllDispatches).toHaveLength(0);
-  });
+  // The former "does not dispatch a redundant endpoint getAll on construction"
+  // test guarded against an ngrx-dispatch regression. With the ngrx store
+  // removed, HomePageComponent is fully signal-native (reads EndpointsService
+  // observables via toSignal, never triggers endpoint loading on construction),
+  // so that non-behavior is now structurally guaranteed — the test had no
+  // mechanism left to assert against and was removed with the store.
 });

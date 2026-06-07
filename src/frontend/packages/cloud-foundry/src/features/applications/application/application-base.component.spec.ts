@@ -6,12 +6,9 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
-import { StoreModule } from '@ngrx/store';
 
-import { appReducers } from '@stratosui/store';
 import { ApplicationBaseComponent } from './application-base.component';
 import { ApplicationStateService } from '../../../shared/services/application-state.service';
 import { ApplicationEnvVarsHelper } from "./application-tabs-base/tabs/build-tab/application-env-vars.service";
@@ -46,14 +43,6 @@ describe('ApplicationBaseComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(), // captures initialize() HTTP calls so they don't error
         provideNoopAnimations(),
-        importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: {
-              strictStateImmutability: false,
-              strictActionImmutability: false
-            }
-          })
-        ),
         ApplicationStateService,
         ApplicationEnvVarsHelper,
         // Component overrides above strip the real providers; stub the

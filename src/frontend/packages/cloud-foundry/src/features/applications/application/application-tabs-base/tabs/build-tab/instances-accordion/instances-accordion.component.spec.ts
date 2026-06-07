@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Router, provideRouter } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -33,12 +32,6 @@ describe('InstancesAccordionComponent', () => {
   let component: InstancesAccordionComponent;
   let fixture: ComponentFixture<InstancesAccordionComponent>;
   let dataService: AppDetailDataService;
-
-  const mockStore = {
-    dispatch: vi.fn(),
-    select: vi.fn(() => of({})),
-    pipe: vi.fn(() => of({})),
-  };
 
   // Spy holders, refreshed per test.
   let killInstance: ReturnType<typeof vi.fn>;
@@ -135,7 +128,6 @@ describe('InstancesAccordionComponent', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideRouter([]),
-        { provide: Store, useValue: mockStore },
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
         { provide: AppDetailDataService, useFactory: makeDataStub },
@@ -237,7 +229,6 @@ describe('InstancesAccordionComponent', () => {
           provideHttpClientTesting(),
           provideZonelessChangeDetection(),
           provideRouter([]),
-          { provide: Store, useValue: mockStore },
           { provide: ApplicationService, useClass: ApplicationServiceMock },
           { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
           { provide: AppDetailDataService, useFactory: makeDataStub },
@@ -297,7 +288,6 @@ describe('InstancesAccordionComponent', () => {
           provideHttpClientTesting(),
           provideZonelessChangeDetection(),
           provideRouter([]),
-          { provide: Store, useValue: mockStore },
           { provide: ApplicationService, useClass: ApplicationServiceMock },
           { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
           { provide: AppDetailDataService, useFactory: makeDataStub },

@@ -9,7 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
-import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers, appReducers, provideStore } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
 import { generateHelmEntities } from '../../../helm/helm-entity-generator';
@@ -49,7 +49,6 @@ describe('UpgradeReleaseComponent', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideNoopAnimations(),
-        provideStore(appReducers),
         ...STORE_TEST_PROVIDERS,
         {
           provide: HTTP_INTERCEPTORS,

@@ -1,5 +1,5 @@
 import type { HttpRequest } from '@angular/common/http';
-import type { Action, Store } from '@ngrx/store';
+import type { Action, Store } from './action.types';
 import type { Observable } from 'rxjs';
 
 import type { AppState, GeneralEntityAppState, InternalAppState } from '../app-state';

@@ -4,11 +4,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { appReducers } from '../../store/reducers.module';
 import { AcmeLoginComponent } from './acme-login.component';
 
 describe('AcmeLoginComponent', () => {
@@ -25,7 +23,6 @@ describe('AcmeLoginComponent', () => {
         SharedModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        StoreModule.forRoot(appReducers),
       ]
     }),
       .compileComponents();

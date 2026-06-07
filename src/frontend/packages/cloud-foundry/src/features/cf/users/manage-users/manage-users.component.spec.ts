@@ -6,9 +6,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
 import { CloudFoundryTestingModule, generateCFEntities } from '@test-framework/cf';
@@ -38,9 +37,6 @@ describe('UsersRolesComponent', () => {
         importProvidersFrom(
           HttpClientTestingModule,
           CloudFoundryTestingModule,
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule,
           AppTestModule
         ),

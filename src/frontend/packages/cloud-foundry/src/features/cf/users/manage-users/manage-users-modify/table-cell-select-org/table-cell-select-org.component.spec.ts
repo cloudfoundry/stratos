@@ -4,9 +4,8 @@ import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/co
 import { describe, it, expect, beforeEach } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateASEntities } from '@stratosui/cf-autoscaler';
 import { AppTestModule } from '@test-framework';
@@ -36,9 +35,6 @@ describe('TableCellSelectOrgComponent', () => {
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
           CloudFoundryTestingModule,
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule,
           AppTestModule
         ),

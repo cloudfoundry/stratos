@@ -1,5 +1,3 @@
-import { compose } from '@ngrx/store';
-
 import { APIResource, APIResourceMetadata } from '../../../../store/src/types/api.types';
 
 const getValueOrNull = (object: any, key: string): any =>
@@ -11,10 +9,10 @@ export const getAPIResourceEntity = (resource: APIResource): any =>
   getValueOrNull(resource, 'entity');
 export const getMetadataGuid = (metadata: APIResourceMetadata): string =>
   getValueOrNull(metadata, 'guid');
-export const getAPIResourceGuid = compose(
-  getMetadataGuid,
-  getAPIResourceMetadata
-);
+// Was ngrx `compose(getMetadataGuid, getAPIResourceMetadata)` — right-to-left
+// function composition, inlined now that the ngrx dependency is gone.
+export const getAPIResourceGuid = (resource: APIResource): string =>
+  getMetadataGuid(getAPIResourceMetadata(resource));
 
 // FWT-934: composite entity ID for CF entities that carry cfGuid on their
 // `entity` slice. Returns `${cfGuid}:${guid}` when both are present, bare

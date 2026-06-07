@@ -1,4 +1,4 @@
-import type { ActionReducer } from '@ngrx/store';
+import type { ActionReducer } from '../../types/action.types';
 
 import type { IRequestEntityTypeState } from '../../app-state';
 import type {

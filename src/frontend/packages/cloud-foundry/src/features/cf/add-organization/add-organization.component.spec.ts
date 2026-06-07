@@ -3,13 +3,12 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {
   TabNavService
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import { appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { AddOrganizationComponent } from './add-organization.component';
@@ -32,9 +31,6 @@ describe('AddOrganizationComponent', () => {
         provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule
         ),
         {

@@ -4,7 +4,7 @@ import { NgModule, inject } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 /* eslint-disable @typescript-eslint/no-unused-vars -- barrel re-exports for downstream test consumers */
-import { EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import {
   createBasicStoreModule,
   createEmptyStoreModule,

@@ -1,6 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NgModule } from '@angular/core';
-import { EffectsModule } from '@ngrx/effects';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
 import { CATALOGUE_ENTITIES, EntityCatalogFeatureModule, entityCatalog, TestEntityCatalog, generateStratosEntities } from '@stratosui/store';
 import { testSCFEndpointGuid } from '@stratosui/store/testing';
@@ -17,7 +16,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
   imports: [
     EntityCatalogFeatureModule,
     CloudFoundryReducersModule,
-    EffectsModule.forRoot([]),
     HttpClientTestingModule,
   ],
   providers: [

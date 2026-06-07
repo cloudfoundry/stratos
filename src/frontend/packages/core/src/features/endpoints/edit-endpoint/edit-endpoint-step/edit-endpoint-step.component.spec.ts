@@ -2,15 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { AppState, BaseEntityValues, EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModuleManualStore, NormalizedResponse, Store, TEST_CATALOGUE_ENTITIES, WrapperRequestActionSuccess, endpointEntityType, entityCatalog, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { createBasicStoreModule, seedEndpointsDataService, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { EditEndpointStepComponent } from './edit-endpoint-step.component';
 
 describe('EditEndpointStepComponent', () => {
   let component: EditEndpointStepComponent;
   let fixture: ComponentFixture<EditEndpointStepComponent>;
   let activatedRoute: any;
-  let store: Store<AppState<BaseEntityValues>>;
 
   beforeEach(async () => {
     // Create mutable route object with test endpoint GUID
@@ -46,14 +45,12 @@ describe('EditEndpointStepComponent', () => {
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
-    // Get store and dispatch endpoint data to populate pagination
-    store = TestBed.inject(Store);
-    const stratosEndpointEntityConfig = stratosEntityFactory(endpointEntityType);
-    const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
-
-    // Create test endpoint with all required properties for the form
+    // Seed the signal-native EndpointsDataService with the endpoint under
+    // edit so the component (which reads `endpointsData.endpointsList`) finds
+    // it by route id. Replaces the legacy ngrx `store.dispatch` seeding.
     const testEndpointWithClientId = {
       ...testSCFEndpoint,
+      guid: testSCFEndpointGuid,
       client_id: '',  // Form expects a string value, not undefined
       skip_ssl_validation: false,
       api_endpoint: {
@@ -69,20 +66,7 @@ describe('EditEndpointStepComponent', () => {
       }
     };
 
-    const mappedData = {
-      entities: {
-        [stratosEndpointEntityKey]: {
-          [testSCFEndpointGuid]: testEndpointWithClientId
-        }
-      },
-      result: [testSCFEndpointGuid]
-    } as NormalizedResponse;
-
-    store.dispatch(new WrapperRequestActionSuccess(mappedData, {
-      type: 'GET_ALL',
-      paginationKey: 'endpoint-list',
-      ...stratosEndpointEntityConfig
-    }, 'fetch', 1, 1));
+    seedEndpointsDataService([testEndpointWithClientId]);
   });
 
   beforeEach(() => {
