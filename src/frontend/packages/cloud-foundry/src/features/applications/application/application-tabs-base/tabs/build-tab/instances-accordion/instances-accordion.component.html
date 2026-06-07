@@ -61,11 +61,10 @@
           Sample every
           <select
             class="rounded border border-content-border bg-content-bg px-2 py-1 text-content-text"
-            [value]="intervalMs()"
             (change)="setSampleInterval(+$any($event.target).value)">
-            <option [value]="5000">5s</option>
-            <option [value]="10000">10s</option>
-            <option [value]="30000">30s</option>
+            <option [value]="5000" [selected]="intervalMs() === 5000">5s</option>
+            <option [value]="10000" [selected]="intervalMs() === 10000">10s</option>
+            <option [value]="30000" [selected]="intervalMs() === 30000">30s</option>
           </select>
         </label>
       </div>

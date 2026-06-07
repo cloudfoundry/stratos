@@ -294,6 +294,64 @@ describe('InstancesAccordionComponent', () => {
       }
       localFixture.destroy();
     });
+
+    it('shows the current sample interval as the selected option', async () => {
+      // Regression: a `[value]` binding on a native <select> with Angular-bound
+      // <option>s does NOT select the matching option, so the control rendered
+      // blank. The fix uses [selected] per option.
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [InstancesAccordionComponent],
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          provideZonelessChangeDetection(),
+          provideRouter([]),
+          { provide: Store, useValue: mockStore },
+          { provide: ApplicationService, useClass: ApplicationServiceMock },
+          { provide: CloudFoundryService, useValue: { cFEndpoints$: of([]), connectedCFEndpoints$: of([]) } },
+          { provide: AppDetailDataService, useFactory: makeDataStub },
+          { provide: AppApplicationActionsService, useFactory: makeActionsStub },
+          { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
+          { provide: TailwindSnackBarService, useFactory: makeSnackStub },
+        ],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      })
+        .overrideComponent(InstancesAccordionComponent, {
+          remove: {
+            providers: [AppInstanceActionsService, CfAppInstancesSignalConfigService],
+          },
+          add: {
+            providers: [
+              { provide: AppInstanceActionsService, useFactory: makeInstanceActionsStub },
+              { provide: CfAppInstancesSignalConfigService, useFactory: makeInstancesConfigStub },
+            ],
+          },
+        })
+        .overrideComponent(InstanceUsageChartComponent, {
+          set: { template: '' },
+        })
+        .compileComponents();
+
+      appSig.set({ entity: { instances: 1 } });
+      const localFixture = TestBed.createComponent(InstancesAccordionComponent);
+      const localComponent = localFixture.componentInstance;
+      localComponent.toggle(); // expand so the interval control renders
+      localFixture.detectChanges();
+
+      const select: HTMLSelectElement = localFixture.debugElement.query(By.css('select')).nativeElement;
+      // default 5000 → "5s" is the displayed selection, not blank
+      expect(select.value).toBe('5000');
+      expect(select.options[select.selectedIndex]?.text).toBe('5s');
+
+      // changing the interval updates the displayed selection
+      localComponent.setSampleInterval(10000);
+      localFixture.detectChanges();
+      expect(select.value).toBe('10000');
+      expect(select.options[select.selectedIndex]?.text).toBe('10s');
+
+      localFixture.destroy();
+    });
   });
 
   it('changing interval calls setStatsPollMs', () => {
