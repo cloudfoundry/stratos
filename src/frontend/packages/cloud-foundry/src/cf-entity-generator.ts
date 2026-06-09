@@ -218,6 +218,16 @@ function isValidByExistenceProbe(url: string): Observable<boolean> {
   );
 }
 
+// Favourite builders receive the entity in either the V2 APIResource shape
+// ({ entity, metadata }) or the signal-native Stratos shape ({ guid, name }).
+// Read tolerantly (typed `any` — the input is genuinely heterogeneous) so a
+// favourite created from a V3 page still captures name + guid, rather than
+// persisting null metadata and rendering as a bare guid.
+const favName = (e: any): string | undefined => e?.entity?.name ?? e?.name;
+const favGuid = (e: any): string | undefined => e?.metadata?.guid ?? e?.guid;
+const favSpaceOrgGuid = (e: any): string | undefined =>
+  e?.entity?.organization_guid ?? e?.entity?.organization?.metadata?.guid ?? e?.orgGuid ?? e?.organization_guid;
+
 export function generateCFEntities(): StratosBaseCatalogEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
     urlValidationRegexString: urlValidationExpression,
@@ -1145,10 +1155,10 @@ function generateCfApplicationEntity(endpointDefinition: StratosEndpointExtensio
     {
       entityBuilder: {
         getMetadata: app => ({
-          name: app.entity.name,
+          name: favName(app),
         }),
         getLink: favorite => `/applications/${favorite.endpointId}/${favorite.entityId}/summary`,
-        getGuid: entity => entity.metadata.guid,
+        getGuid: entity => favGuid(entity),
         getIsValid: (fav) => isValidByExistenceProbe(`/pp/v1/cf/apps/${fav.endpointId}/${fav.entityId}`)
       },
       actionBuilders: applicationActionBuilder
@@ -1192,11 +1202,11 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
       ],
       entityBuilder: {
         getMetadata: space => ({
-          orgGuid: space.entity.organization_guid ? space.entity.organization_guid : space.entity.organization.metadata.guid,
-          name: space.entity.name,
+          orgGuid: favSpaceOrgGuid(space),
+          name: favName(space),
         }),
         getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.metadata.orgGuid}/spaces/${favorite.entityId}/summary`,
-        getGuid: entity => entity.metadata.guid,
+        getGuid: entity => favGuid(entity),
         getIsValid: (fav) => isValidByExistenceProbe(`/pp/v1/cf/spaces/${fav.endpointId}/${fav.entityId}`)
       }
     }
@@ -1240,10 +1250,10 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
       ],
       entityBuilder: {
         getMetadata: org => ({
-          name: org.entity.name,
+          name: favName(org),
         }),
         getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.entityId}`,
-        getGuid: entity => entity.metadata.guid,
+        getGuid: entity => favGuid(entity),
         getIsValid: (favorite) => isValidByExistenceProbe(`/pp/v1/cf/org/${favorite.endpointId}/${favorite.entityId}`)
       }
     }

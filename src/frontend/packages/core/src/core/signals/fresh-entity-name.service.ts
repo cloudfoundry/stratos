@@ -1,5 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { EndpointModel, endpointEntityType } from '@stratosui/store';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { EndpointDataRegistry } from '../../../../cloud-foundry/src/services/endpoint-data/endpoint-data.registry';
 import { EndpointsSignalService } from './endpoints-signal.service';
@@ -34,6 +37,16 @@ export interface EntityNameRef {
 export class FreshEntityNameService {
   private registry = inject(EndpointDataRegistry);
   private endpointsSignals = inject(EndpointsSignalService);
+  private http = inject(HttpClient);
+
+  // Single-resource native endpoint path segment per CF favorite type. These
+  // return the Stratos shape ({ guid, name }); used only by the on-demand
+  // `fetchNameFor` fallback below.
+  private static readonly CF_FETCH_SEGMENT: Record<string, string> = {
+    [CF_APPLICATION]: 'apps',
+    [CF_ORGANIZATION]: 'org',
+    [CF_SPACE]: 'spaces',
+  };
 
   freshNameFor(ref: EntityNameRef): string | null {
     if (!ref) {
@@ -70,5 +83,33 @@ export class FreshEntityNameService {
     }
     const match = list.find(entity => entity.guid === ref.entityId);
     return match?.name ?? null;
+  }
+
+  /**
+   * On-demand fallback for `freshNameFor`: when the entity is in no loaded
+   * signal (e.g. the home card fetched only counts) AND the favorite carries no
+   * stored name, fetch the single resource and return its name. Async, so the
+   * caller backfills the favorite's metadata with the result — both showing the
+   * real name now and healing a null-metadata favorite for good. Returns null
+   * on any failure (deleted entity, disconnected endpoint, network error).
+   */
+  fetchNameFor(ref: EntityNameRef): Observable<string | null> {
+    if (!ref) {
+      return of(null);
+    }
+    if (ref.entityType === endpointEntityType) {
+      return of(this.endpointsSignals.endpoints()[ref.endpointId]?.name ?? null);
+    }
+    if (ref.entityId == null) {
+      return of(null);
+    }
+    const segment = FreshEntityNameService.CF_FETCH_SEGMENT[ref.entityType];
+    if (!segment) {
+      return of(null);
+    }
+    return this.http.get<{ name?: string }>(`/pp/v1/cf/${segment}/${ref.endpointId}/${ref.entityId}`).pipe(
+      map(entity => entity?.name ?? null),
+      catchError(() => of(null)),
+    );
   }
 }

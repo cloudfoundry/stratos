@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 import { IFavoriteMetadata, UserFavorite, UserFavoritesDataService } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS } from "@test-framework/core-test.helper";
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -23,15 +24,17 @@ describe('FavoritesMetaCardComponent', () => {
   let component: FavoritesMetaCardComponent;
   let fixture: ComponentFixture<FavoritesMetaCardComponent>;
   let freshName: string | null;
+  let fetchedName: string | null;
 
   beforeEach(() => {
     freshName = null;
+    fetchedName = null;
     TestBed.configureTestingModule({
       providers: [
         ...(STORE_TEST_PROVIDERS || []),
         ConfirmationDialogService,
         SessionService,
-        { provide: FreshEntityNameService, useValue: { freshNameFor: () => freshName } },
+        { provide: FreshEntityNameService, useValue: { freshNameFor: () => freshName, fetchNameFor: () => of(fetchedName) } },
         provideZonelessChangeDetection(),
       ],
       imports: [
@@ -80,6 +83,48 @@ describe('FavoritesMetaCardComponent', () => {
     component.favoriteEntity = makeFavoriteStub('same name');
     fixture.detectChanges();
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  // Regression: a favorite whose entity hasn't resolved can arrive with null
+  // metadata. Reading displayName() during template render must not throw — a
+  // single nameless favorite was breaking change detection for the whole
+  // endpoint home card (the "kevin 3 didn't load" report).
+  function makeFavoriteStubNoMetadata(): UserFavorite<IFavoriteMetadata> {
+    return {
+      guid: 'app1', endpointId: 'ep1', endpointType: 'cf', entityType: 'application', entityId: 'app1',
+      metadata: null,
+      getPrettyTypeName: () => 'Application', getIcon: () => ({} as any), getLink: () => '/cf/ep1/applications/app1',
+    } as unknown as UserFavorite<IFavoriteMetadata>;
+  }
+
+  it('does not throw and falls back to entity id when metadata is null', () => {
+    freshName = null;
+    expect(() => {
+      component.favoriteEntity = makeFavoriteStubNoMetadata();
+      fixture.detectChanges();
+    }).not.toThrow();
+    expect(component.displayName()).toBe('app1');
+  });
+
+  it('still shows the fresh name when metadata is null', () => {
+    freshName = 'fresh name';
+    component.favoriteEntity = makeFavoriteStubNoMetadata();
+    fixture.detectChanges();
+    expect(component.displayName()).toBe('fresh name');
+  });
+
+  it('fetches the name on demand and backfills metadata when nothing else resolves', () => {
+    const favData = TestBed.inject(UserFavoritesDataService);
+    const spy = vi.spyOn(favData, 'updateMetadata').mockImplementation(() => undefined);
+    freshName = null;            // not in any loaded signal (home counts-only)
+    fetchedName = 'opensource';  // single-resource fetch resolves the real name
+    component.favoriteEntity = makeFavoriteStubNoMetadata();
+    fixture.detectChanges();
+    // Renders the fetched name (not the entity-id fallback)...
+    expect(component.displayName()).toBe('opensource');
+    // ...and heals the null-metadata favorite for good.
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0].metadata.name).toBe('opensource');
   });
 
   it('does not persist (and does not throw) when the favorite is malformed', () => {
