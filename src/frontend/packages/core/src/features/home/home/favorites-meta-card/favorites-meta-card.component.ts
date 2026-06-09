@@ -48,15 +48,26 @@ export class FavoritesMetaCardComponent {
   // Reactive favorite, so the rendered name tracks freshly-fetched entity data.
   private readonly favoriteSig = signal<UserFavorite<IFavoriteMetadata> | null>(null);
 
-  // The name to render: the freshly-fetched entity name when available, else
-  // the stored favorite metadata name (signal-native replacement for the old
-  // static `this.name = favorite.metadata.name`).
+  // Name fetched on demand (see recoverNameIfMissing) when the entity is in no
+  // loaded signal and the favorite carries no stored name.
+  private readonly fetchedName = signal<string | null>(null);
+  private nameFetchAttempted = false;
+
+  // Name precedence: live entity data → stored metadata → on-demand fetched
+  // name → entity id as a last resort. The metadata deref is guarded because a
+  // favourite whose entity hasn't resolved can carry null metadata, and an
+  // unguarded `.name` throw breaks the whole card's change detection (it took
+  // down the entire endpoint home card).
   readonly displayName = computed(() => {
     const fav = this.favoriteSig();
     if (!fav) {
       return '';
     }
-    return this.freshNames.freshNameFor(fav) ?? fav.metadata.name;
+    return this.freshNames.freshNameFor(fav)
+      ?? fav.metadata?.name
+      ?? this.fetchedName()
+      ?? fav.entityId
+      ?? '';
   });
 
   // Last name persisted, so a refresh round-trip doesn't fire duplicate POSTs.
@@ -74,16 +85,38 @@ export class FavoritesMetaCardComponent {
         return;
       }
       const fresh = this.freshNames.freshNameFor(fav);
-      if (fresh && fresh !== fav.metadata.name && fresh !== this.lastPersisted) {
-        const updated = this.userFavoriteManager.getUserFavoriteFromObject(fav);
-        if (!updated) {
-          return;
-        }
-        this.lastPersisted = fresh;
-        updated.metadata = { ...updated.metadata, name: fresh };
-        this.favoritesData.updateMetadata(updated);
+      if (fresh && fresh !== fav.metadata?.name && fresh !== this.lastPersisted) {
+        this.persistName(fav, fresh);
       }
     });
+  }
+
+  // Backup for the signal-only `freshNameFor`: when a favourite has no stored
+  // name and its entity is in no loaded signal (home cards fetch only counts),
+  // fetch the single resource once, render its name, and persist it so the
+  // null-metadata favourite is healed for good.
+  private recoverNameIfMissing(fav: UserFavorite<IFavoriteMetadata>) {
+    if (this.nameFetchAttempted || fav.metadata?.name || this.freshNames.freshNameFor(fav)) {
+      return;
+    }
+    this.nameFetchAttempted = true;
+    this.freshNames.fetchNameFor(fav).pipe(take(1)).subscribe(name => {
+      if (!name) {
+        return;
+      }
+      this.fetchedName.set(name);
+      this.persistName(fav, name);
+    });
+  }
+
+  private persistName(fav: UserFavorite<IFavoriteMetadata>, name: string) {
+    const updated = this.userFavoriteManager.getUserFavoriteFromObject(fav);
+    if (!updated) {
+      return;
+    }
+    this.lastPersisted = name;
+    updated.metadata = { ...updated.metadata, name };
+    this.favoritesData.updateMetadata(updated);
   }
 
   @Input()
@@ -94,7 +127,10 @@ export class FavoritesMetaCardComponent {
       this.icon = this.favorite.getIcon();
       this.routerLink = this.favorite.getLink();
       this.lastPersisted = null;
+      this.fetchedName.set(null);
+      this.nameFetchAttempted = false;
       this.favoriteSig.set(favoriteEntity);
+      this.recoverNameIfMissing(favoriteEntity);
     }
   }
 
