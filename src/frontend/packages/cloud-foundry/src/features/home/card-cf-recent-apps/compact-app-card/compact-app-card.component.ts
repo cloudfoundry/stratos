@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal } from '@angular/core';
-import { AsyncPipe, CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { BREADCRUMB_URL_PARAM, ApplicationStateIconComponent } from '@stratosui/core';
@@ -17,7 +17,6 @@ import { ActiveRouteCfOrgSpace } from '../../../cf/cf-page.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    AsyncPipe,
     DatePipe,
     RouterModule,
     ApplicationStateIconComponent
