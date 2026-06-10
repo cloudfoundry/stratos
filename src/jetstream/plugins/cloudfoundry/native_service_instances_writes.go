@@ -409,6 +409,70 @@ func recoverFromCreateParseError(
 	}
 }
 
+// recoverFromUpdateParseError determines the real outcome of a managed-SI
+// update after fw-capi errored on CF's empty 202 body. CF accepted the PATCH
+// (it returned 202), so the broker operation is under way — GET the SI and
+// read last_operation:
+//   - state "in progress"/"initial" → short-poll for the broker to settle,
+//     same window as the create recovery, so a quick broker rejection
+//     surfaces as a real failure instead of a false "updated" confirmation
+//   - type=update state=failed → 502 + broker description
+//   - settled otherwise (succeeded, or still in flight after the window) →
+//     200 fast-path COMPLETE envelope; the services list reflects terminal
+//     state once CF settles
+//   - GET fails / SI missing → (0, nil) so the caller falls through to the
+//     original fw-capi parse error
+func recoverFromUpdateParseError(
+	ctx context.Context,
+	cfClient capi.Client,
+	siGUID string,
+) (int, map[string]interface{}) {
+	si, err := cfClient.ServiceInstances().Get(ctx, siGUID)
+	if err != nil || si == nil {
+		return 0, nil
+	}
+	state, desc := readLastOpState(si.LastOperation)
+	for i := 0; i < 30 && (state == "in progress" || state == "initial"); i++ {
+		select {
+		case <-ctx.Done():
+			return 0, nil
+		case <-time.After(2 * time.Second):
+		}
+		refreshed, refreshErr := cfClient.ServiceInstances().Get(ctx, siGUID)
+		if refreshErr != nil || refreshed == nil {
+			break
+		}
+		si = refreshed
+		state, desc = readLastOpState(si.LastOperation)
+	}
+	opType := ""
+	if si.LastOperation != nil {
+		opType = si.LastOperation.Type
+	}
+	if opType == "update" && state == "failed" {
+		if desc == "" {
+			desc = "service broker rejected the update"
+		}
+		return http.StatusBadGateway, map[string]interface{}{
+			"state": stratosjobs.JobStateFailed,
+			"errors": []stratosjobs.StratosError{{
+				Code:    "cf.service_instance.last_operation.failed",
+				Message: "Service instance update failed",
+				Detail:  desc,
+			}},
+		}
+	}
+	return http.StatusOK, map[string]interface{}{
+		"state": stratosjobs.JobStateComplete,
+		"result": map[string]interface{}{
+			"last_operation": map[string]interface{}{
+				"state":       state,
+				"description": desc,
+			},
+		},
+	}
+}
+
 // updateManagedServiceInstance handles PATCH /pp/v1/cf/service_instances/{cnsiGuid}/{siGuid}
 // for managed (broker-backed) instances. V3 PATCH on a managed instance
 // returns 202 + job; we hand it off via RunFastPath.
@@ -440,6 +504,18 @@ func (cf *CloudFoundrySpecification) updateManagedServiceInstance(c echo.Context
 
 	out, updErr := cfClient.ServiceInstances().Update(reqCtx, siGUID, &req)
 	if updErr != nil {
+		// Same fw-capi empty-202-body bug as create/delete (#5431): CF
+		// returns 202 with an empty body and the job link in the Location
+		// header; fw-capi blindly unmarshals the body and errors with
+		// "parsing job response: unexpected end of JSON input". The update
+		// was accepted — recover via the SI's last_operation. Remove when
+		// upstream fw-capi reads the Location header on empty 202 bodies.
+		if strings.Contains(updErr.Error(), "parsing job response") {
+			if status, body := recoverFromUpdateParseError(reqCtx, cfClient, siGUID); body != nil {
+				c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+				return c.JSON(status, body)
+			}
+		}
 		return handleCapiError(c, updErr)
 	}
 	job, isJob := out.(*capi.Job)
