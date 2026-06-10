@@ -93,7 +93,23 @@ export class StepComponent {
   active = false;
   complete = false;
   error = false;
-  busy = false;
+
+  // busy gates the parent stepper's Next/Apply [disabled] binding, but the
+  // steppers component is OnPush and busy mutations happen outside its CD
+  // scope (the destructive-entry timer below, goNext teardown). Mirror the
+  // onValidChange pattern so the stepper can markForCheck — a bare property
+  // write is invisible to it (a step's markForCheck walks the declaration
+  // tree, which doesn't include the steppers view). Without this the
+  // destructive confirm step's Apply stayed disabled forever under zoneless.
+  @Output() onBusyChange = new EventEmitter<boolean>();
+  set busy(v: boolean) {
+    if (this._busy !== v) {
+      this._busy = v;
+      this.onBusyChange.emit(v);
+    }
+  }
+  get busy(): boolean { return this._busy; }
+  private _busy = false;
 
   pHidden = false;
 
