@@ -122,21 +122,26 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   // Favorite recomputes when the SpaceDataService signal lands. Synthesises
   // the minimal entity shape favorites expect: getMetadata reads name +
-  // organization_guid, getGuid reads metadata.guid, getEndpointIdFromEntity
-  // reads entity.cfGuid.
+  // organization_guid, getGuid reads metadata.guid. The endpoint id comes from
+  // the PAGE route (route.cfGuid) via getFavoriteFromEntity, NOT the row's
+  // stamped cfGuid: rows can be mis-stamped when Stratos endpoints share one
+  // CAPI, which would render the star on the wrong endpoint (the cross-endpoint
+  // favourite leak).
   public favorite: Signal<UserFavorite<ISpaceFavMetadata> | null>;
 
   constructor() {
     const userFavoriteManager = inject(UserFavoriteManager);
+    const route = inject(ActiveRouteCfOrgSpace);
 
     this.favorite = computed(() => {
       const space = this.spaceDataService.space();
       if (!space) return null;
       const favEntity = {
-        entity: { name: space.name, organization_guid: space.orgGuid, cfGuid: space.cnsiGuid },
+        entity: { name: space.name, organization_guid: space.orgGuid },
         metadata: { guid: space.guid },
       };
-      return userFavoriteManager.getFavorite<ISpaceFavMetadata>(favEntity, spaceEntityType, CF_ENDPOINT_TYPE);
+      return userFavoriteManager.getFavoriteFromEntity<ISpaceFavMetadata>(
+        spaceEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
     });
 
     this.setUpBreadcrumbs(this.cfEndpointService, this.cfOrgService);
