@@ -9,6 +9,7 @@ import (
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 // getNativeUsers handles GET /pp/v1/cf/users/{cnsiGuid}.
@@ -200,13 +201,19 @@ func buildUserRoleBuckets(
 	// Fall back to a bounded /v3/spaces lookup for any space role that
 	// arrived without an organization relationship attached. Bounded by
 	// the actual unresolved space GUIDs — never a foundation-wide drain.
-	missingSpaces := make([]string, 0)
+	// Deduped across users: shared spaces would otherwise repeat in the
+	// filter once per user holding a role there.
+	missingSet := make(map[string]struct{})
 	for _, byUser := range spaceScopeAcc {
 		for spaceGUID := range byUser {
 			if _, ok := spaceOrgFromRole[spaceGUID]; !ok {
-				missingSpaces = append(missingSpaces, spaceGUID)
+				missingSet[spaceGUID] = struct{}{}
 			}
 		}
+	}
+	missingSpaces := make([]string, 0, len(missingSet))
+	for spaceGUID := range missingSet {
+		missingSpaces = append(missingSpaces, spaceGUID)
 	}
 	spaceOrgFallback := make(map[string]string)
 	if len(missingSpaces) > 0 {
@@ -214,6 +221,10 @@ func buildUserRoleBuckets(
 			for _, s := range spaces {
 				spaceOrgFallback[s.GUID] = relationshipGUID(s.Relationships.Organization)
 			}
+		} else {
+			// Degrades to empty orgGuid on the affected space buckets —
+			// the Manage Roles wizard then can't key those baselines.
+			log.Warnf("Unable to resolve parent orgs for %d space roles: %v", len(missingSpaces), sErr)
 		}
 	}
 
@@ -321,23 +332,36 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 // listSpacesByGUIDs fetches /v3/spaces?guids=<csv>. Bounded fallback for
 // resolving space → org when a role's own organization relationship is
 // missing — never a foundation-wide drain.
+// A guids= filter join across thousands of spaces (e.g. an admin's role
+// list) exceeds the CF request-line limit and fails the whole lookup, so
+// the batch is chunked; 100 36-char guids keeps each query comfortably
+// under typical 8KB router limits.
+const spaceGUIDChunkSize = 100
+
 func listSpacesByGUIDs(ctx context.Context, cfClient capi.Client, spaceGUIDs []string) ([]capi.Space, error) {
-	all := make([]capi.Space, 0)
-	pageNum := 1
-	for {
-		params := capi.NewQueryParams().
-			WithFilter("guids", strings.Join(spaceGUIDs, ",")).
-			WithPerPage(500)
-		params.Page = pageNum
-		raw, err := cfClient.Spaces().List(ctx, params)
-		if err != nil {
-			return nil, err
+	all := make([]capi.Space, 0, len(spaceGUIDs))
+	for start := 0; start < len(spaceGUIDs); start += spaceGUIDChunkSize {
+		end := start + spaceGUIDChunkSize
+		if end > len(spaceGUIDs) {
+			end = len(spaceGUIDs)
 		}
-		all = append(all, raw.Resources...)
-		if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-			break
+		chunk := spaceGUIDs[start:end]
+		pageNum := 1
+		for {
+			params := capi.NewQueryParams().
+				WithFilter("guids", strings.Join(chunk, ",")).
+				WithPerPage(500)
+			params.Page = pageNum
+			raw, err := cfClient.Spaces().List(ctx, params)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, raw.Resources...)
+			if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
+				break
+			}
+			pageNum++
 		}
-		pageNum++
 	}
 	return all, nil
 }
