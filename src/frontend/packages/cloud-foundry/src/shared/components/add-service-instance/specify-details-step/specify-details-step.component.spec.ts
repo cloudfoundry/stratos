@@ -90,6 +90,26 @@ describe('SpecifyDetailsStepComponent', () => {
     expect(component.schemaFormConfig()?.schema).toEqual(schema);
   });
 
+  // The stepper only relays select-plan's data into the NEXT step's
+  // onEnter; with the bind-app step in between, this step enters with no
+  // arg and must derive the plan from wizard state.
+  it('onEnter falls back to wizard state for the details fetch when no plan is passed', async () => {
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+    csiState.setServicePlan('plan-1');
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    component.onEnter(undefined as any);
+
+    const schema = { type: 'object', properties: { size: { type: 'string' } } };
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_plans/cf-1/plan-1' && r.params.get('return') === 'details');
+    req.flush({ guid: 'plan-1', name: 'small', schemas: { serviceInstance: { create: { parameters: schema } } } });
+    await fixture.whenStable();
+
+    expect(component.schemaFormConfig()?.schema).toEqual(schema);
+  });
+
   it('onEnter skips the details fetch when the plan already carries a schema', () => {
     const csiState = TestBed.inject(CsiStateService);
     csiState.setCFDetails('cf-1', 'org-1', 'sp-1');

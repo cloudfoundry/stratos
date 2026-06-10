@@ -222,11 +222,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // The plan handed over by the select-plan step comes from the
     // summary-tier list cache, which omits `schemas` — fetch the
     // selected plan at details so a broker-advertised parameter schema
-    // can drive the form (the constructor effect grafts it on).
-    if (!schema && selectedServicePlan?.guid) {
-      const cnsiGuid = selectedServicePlan.cnsiGuid || this.csiState.state()?.cfGuid;
-      if (cnsiGuid) {
-        this.detailedPlanSource.set(this.serviceCatalog.servicePlan(cnsiGuid, selectedServicePlan.guid));
+    // can drive the form (the constructor effect grafts it on). The
+    // stepper only relays the plan into the *next* step's onEnter, so
+    // when the bind-app step sits in between this step enters with no
+    // arg — fall back to the wizard state for the plan/cnsi guids.
+    if (!schema) {
+      const state = this.csiState.state();
+      const planGuid = selectedServicePlan?.guid || state?.servicePlanGuid;
+      const cnsiGuid = selectedServicePlan?.cnsiGuid || state?.cfGuid;
+      if (planGuid && cnsiGuid) {
+        this.detailedPlanSource.set(this.serviceCatalog.servicePlan(cnsiGuid, planGuid));
       }
     }
 
