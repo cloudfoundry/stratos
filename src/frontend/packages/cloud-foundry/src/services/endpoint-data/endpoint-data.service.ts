@@ -638,7 +638,7 @@ export class EndpointDataService {
   // Bindings stay app-scoped on the wire — load them per-app where needed.
   async loadServicesDetails(): Promise<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadServicesDetails' });
-    if (this._servicesDetailsLastFetched() !== null && this._servicePlans().length > 0) {
+    if (this._servicesDetailsLastFetched() !== null && this._servicePlans().length > 0 && !this._serviceInstancesStale()) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadServicesDetails' });
       return;
     }
@@ -668,6 +668,7 @@ export class EndpointDataService {
       this._serviceOfferings.set(offerings.resources.map(o => ({ ...o, cnsiGuid: this.guid })));
       this._servicePlans.set(plans.resources.map(p => ({ ...p, cnsiGuid: this.guid })));
       this._serviceBrokers.set(brokers.resources.map(b => ({ ...b, cnsiGuid: this.guid })));
+      this._serviceInstancesStale.set(false);
       this._serviceInstancesCount.set(totalOf(insts));
       this._serviceOfferingsCount.set(totalOf(offerings));
       this._servicePlansCount.set(totalOf(plans));
@@ -694,7 +695,11 @@ export class EndpointDataService {
   // CnsiServiceInstancesSource from the registry's pre-warmed cache
   // instead of re-firing the instances HTTP call.
   serviceInstancesAndBrokers(): { instances: StServiceInstance[], brokers: StServiceBroker[] } | null {
-    if (this._servicesDetailsLastFetched() === null) return null;
+    // Stale counts as cold: a bind/unbind marked the slice via
+    // applyCascade/markStale, so pre-seeding from it would resurrect the
+    // pre-mutation rows (boundApps included). Forcing the null path makes
+    // the consumer refetch, whose setter below clears the flag.
+    if (this._servicesDetailsLastFetched() === null || this._serviceInstancesStale()) return null;
     return { instances: this._serviceInstances(), brokers: this._serviceBrokers() };
   }
 
@@ -715,6 +720,7 @@ export class EndpointDataService {
   setServiceInstancesAndBrokers(instances: StServiceInstance[], brokers: StServiceBroker[]): void {
     this._serviceInstances.set(instances);
     this._serviceBrokers.set(brokers);
+    this._serviceInstancesStale.set(false);
     this._servicesDetailsLastFetched.set(new Date());
   }
 
