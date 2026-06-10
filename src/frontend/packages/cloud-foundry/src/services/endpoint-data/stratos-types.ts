@@ -532,9 +532,11 @@ export interface StServiceOfferingsResponse {
 // UPS rows omit `servicePlan` (genuinely doesn't apply for `type=user-provided`).
 // `tags` is normalised to a non-null array.
 //
-// Cross-entity counts (e.g. bindingsCount) are NOT wire fields — the
-// frontend derives them from the loaded credential-bindings signal
-// filtered per instance.
+// `boundApps` IS a wire field at summary+ — one guid-batched
+// /v3/service_credential_bindings join per page on the backend. It
+// supersedes the earlier "derive from the loaded credential-bindings
+// signal" note: that loader never materialized, and a client-side
+// derivation would drain every binding on the endpoint per page.
 export interface StServiceInstance {
   guid: string;
   cnsiGuid: string;
@@ -553,6 +555,7 @@ export interface StServiceInstance {
 
   space: StSpaceRef;
   servicePlan?: StServicePlanRef; // managed only
+  boundApps?: StAppRef[];         // summary+ only
 
   createdAt: string;
   updatedAt?: string;

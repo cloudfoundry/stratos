@@ -27,6 +27,7 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { extractHttpErrorMessage } from '../../../../../../../services/extract-error-message';
+import { boundAppSegments, renderBoundApps } from '../../../../../../../shared/signal-list-configs/bound-apps-cell';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Scoped to one space under one org under one CF endpoint. Reuses the wall's
@@ -176,6 +177,13 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
           pillColor: lastOpColor,
           render: renderLastOp,
           widthHint: '10rem',
+        },
+        {
+          header: 'Attached Apps', key: 'boundApps', sortField: renderBoundApps,
+          kind: 'compound',
+          compound: boundAppSegments,
+          render: renderBoundApps,
+          widthHint: '14rem',
         },
         {
           header: 'Tags', key: 'tags', sortField: renderTags,

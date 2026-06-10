@@ -449,9 +449,14 @@ type StServiceInstance struct {
 	UpgradeAvailable *bool              `json:"upgradeAvailable,omitempty"`
 	Labels           map[string]string  `json:"labels,omitempty"`
 	Annotations      map[string]string  `json:"annotations,omitempty"`
-	CreatedAt        string             `json:"createdAt"`
-	UpdatedAt        string             `json:"updatedAt,omitempty"`
-	Meta             *StratosMeta       `json:"_meta,omitempty"`
+	// Apps bound to this instance (summary+ only). Joined from one
+	// /v3/service_credential_bindings?service_instance_guids= batch call
+	// per page so the SI lists render an "Attached Applications" cell
+	// without per-row bindings fetches.
+	BoundApps []StAppRef   `json:"boundApps,omitempty"`
+	CreatedAt string       `json:"createdAt"`
+	UpdatedAt string       `json:"updatedAt,omitempty"`
+	Meta      *StratosMeta `json:"_meta,omitempty"`
 }
 
 // StUserProvidedServiceRequest is the inbound write shape for both

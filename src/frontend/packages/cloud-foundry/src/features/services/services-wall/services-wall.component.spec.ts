@@ -115,7 +115,7 @@ describe('ServicesWallComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Service', 'Last Operation', 'Tags', 'Created', 'Type', 'CF', '', '',
+      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Tags', 'Created', 'Type', 'CF', '', '',
     ]);
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'redis', type: 'managed',

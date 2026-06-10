@@ -26,6 +26,7 @@ import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
+import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-configs/bound-apps-cell';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 
@@ -130,6 +131,13 @@ export class ServiceInstancesComponent implements OnInit {
         pillColor: lastOpColor,
         render: renderLastOp,
         widthHint: '10rem',
+      },
+      {
+        header: 'Attached Apps', key: 'boundApps', sortField: renderBoundApps,
+        kind: 'compound',
+        compound: boundAppSegments,
+        render: renderBoundApps,
+        widthHint: '14rem',
       },
       {
         header: 'Tags', key: 'tags', sortField: renderTags,

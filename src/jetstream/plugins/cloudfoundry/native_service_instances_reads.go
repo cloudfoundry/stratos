@@ -36,11 +36,13 @@ import (
 // label/colour them differently. UPS rows omit `servicePlan` (genuinely
 // doesn't apply for `type=user-provided`).
 //
-// Cross-entity counts (e.g. bound-app count) are NOT wire fields — the
-// frontend derives them from the loaded credential-bindings signal
-// filtered per instance. The pre-slice handler ran a paginated drain over
-// /v3/service_credential_bindings to populate boundAppCount; that drain
-// is retired here in favour of the contracted derivation.
+// Bound apps ARE a wire field at summary+ (`boundApps`): one
+// /v3/service_credential_bindings batch per page, filtered to the page's
+// instance GUIDs. This supersedes the earlier "frontend derives from the
+// loaded credential-bindings signal" contract note — that derivation never
+// materialized (no loader fills the bindings slice), and deriving it
+// client-side would mean draining every binding on the endpoint to render
+// one page. The join mirrors the org-spaces appCount batch.
 func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -91,11 +93,76 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 	for _, si := range raw.Resources {
 		out = append(out, toStServiceInstance(si, cnsiGUID, resolved, mode))
 	}
+	attachBoundApps(ctx, cfClient, out, mode)
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
 		Resources:  out,
 		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 	})
+}
+
+// attachBoundApps joins bound-app refs onto a page of instances (summary+
+// only) via one guid-batched /v3/service_credential_bindings call. Lazy
+// non-fatal: a join failure leaves BoundApps nil rather than failing the
+// list — same posture as the org-spaces appCount batch.
+func attachBoundApps(ctx echo.Context, cfClient capi.Client, instances []StServiceInstance, mode ReturnMode) {
+	if (mode != ReturnSummary && mode != ReturnDetails) || len(instances) == 0 {
+		return
+	}
+	guids := make([]string, 0, len(instances))
+	for _, si := range instances {
+		guids = append(guids, si.GUID)
+	}
+	bound, err := fetchBoundAppsForServiceInstances(ctx, cfClient, guids)
+	if err != nil {
+		return
+	}
+	for i := range instances {
+		instances[i].BoundApps = bound[instances[i].GUID]
+	}
+}
+
+// fetchBoundAppsForServiceInstances issues one /v3/service_credential_bindings
+// call filtered to the given service-instance GUIDs (type=app, include=app),
+// draining all pages, and buckets bound-app refs per service_instance guid.
+// Instances with no bindings are absent from the map. Same guid-batch +
+// pagination shape as fetchAppCountsForSpaces.
+func fetchBoundAppsForServiceInstances(ctx echo.Context, cfClient capi.Client, siGUIDs []string) (map[string][]StAppRef, error) {
+	bound := make(map[string][]StAppRef, len(siGUIDs))
+	if len(siGUIDs) == 0 {
+		return bound, nil
+	}
+	for page := 1; ; page++ {
+		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest).WithInclude("app")
+		params.Page = page
+		params.Filters["service_instance_guids"] = siGUIDs
+		params.Filters["type"] = []string{"app"}
+
+		raw, err := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
+		if err != nil {
+			return nil, err
+		}
+		appByGUID := appsFromIncluded(raw.Included)
+		for _, b := range raw.Resources {
+			siGUID := relationshipGUID(b.Relationships.ServiceInstance)
+			if siGUID == "" || b.Relationships.App == nil {
+				continue
+			}
+			appGUID := relationshipGUID(*b.Relationships.App)
+			if appGUID == "" {
+				continue
+			}
+			ref := StAppRef{GUID: appGUID}
+			if app, ok := appByGUID[appGUID]; ok {
+				ref.Name = app.Name
+			}
+			bound[siGUID] = append(bound[siGUID], ref)
+		}
+		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+			break
+		}
+	}
+	return bound, nil
 }
 
 // applyServiceInstanceFilters layers caller-provided list filters onto a
@@ -488,6 +555,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.C
 	for _, si := range raw.Resources {
 		out = append(out, toStServiceInstance(si, cnsiGUID, resolved, mode))
 	}
+	attachBoundApps(ctx, cfClient, out, mode)
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
 		Resources:  out,
@@ -589,6 +657,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx echo.
 	for _, si := range raw.Resources {
 		out = append(out, toStServiceInstance(si, cnsiGUID, resolved, mode))
 	}
+	attachBoundApps(ctx, cfClient, out, mode)
 
 	return ctx.JSON(http.StatusOK, StratosPagedResponse[StServiceInstance]{
 		Resources:  out,

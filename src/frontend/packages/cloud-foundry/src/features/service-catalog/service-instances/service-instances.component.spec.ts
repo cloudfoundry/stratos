@@ -86,7 +86,7 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig!.pagedItems).toBe(configStub.view.pagedItems);
     const keys = component.listConfig!.columns.map(c => c.key);
-    expect(keys).toEqual(['name', 'plan', 'lastOp', 'tags', 'createdAt', 'type', 'actions']);
+    expect(keys).toEqual(['name', 'plan', 'lastOp', 'boundApps', 'tags', 'createdAt', 'type', 'actions']);
   });
 
   it('Delete row action opens confirm and on confirm calls deleteServiceInstance', async () => {
