@@ -50,7 +50,7 @@
       </app-form-field>
       <div class="stepper-form__params">
         <div>Service Parameters</div>
-        <app-schema-form [config]="schemaFormConfig" (dataChange)="setServiceParams($event)"
+        <app-schema-form [config]="schemaFormConfig()" (dataChange)="setServiceParams($event)"
         (validChange)="setParamsValid($event)"></app-schema-form>
       </div>
     </form>
