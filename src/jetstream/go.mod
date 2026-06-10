@@ -36,7 +36,7 @@ require (
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular v0.0.0-00010101000000-000000000000
 	github.com/domodwyer/mailyak v3.1.1+incompatible
-	github.com/fivetwenty-io/capi/v3 v3.216.5
+	github.com/fivetwenty-io/capi/v3 v3.216.6-0.20260610115618-7dda10eeea00
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0

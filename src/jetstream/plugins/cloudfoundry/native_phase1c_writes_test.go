@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -462,30 +463,15 @@ func TestUpdateManagedServiceInstance_AsyncBareFallback(t *testing.T) {
 }
 
 // CF returns 202 with an EMPTY body (job link in the Location header) for
-// managed-SI updates; fw-capi blindly unmarshals the body and errors with
-// "parsing job response: unexpected end of JSON input" (#5431). The handler
-// must recover by reading the SI's last_operation instead of surfacing the
-// parse error.
-func TestUpdateManagedServiceInstance_Empty202_RecoversSucceeded(t *testing.T) {
+// managed-SI updates (#5431). capi ≥ v3.216.6 reads the job ref from the
+// Location header, so the handler flows through the normal async-job path —
+// no recovery shim. Without the tracker wired, that's the bare-202 fallback.
+func TestUpdateManagedServiceInstance_Empty202_ParsesJobFromLocation(t *testing.T) {
 	ts := newCaptureServer(map[string]capiHandler{
 		"PATCH /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Location", "/v3/jobs/job-1")
 			w.WriteHeader(http.StatusAccepted)
 			// Empty body — what real CF sends.
-		},
-		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"guid": "si-1",
-				"name": "my-si",
-				"type": "managed",
-				"last_operation": map[string]interface{}{
-					"type":        "update",
-					"state":       "succeeded",
-					"description": "update succeeded",
-				},
-				"created_at": "2024-01-01T00:00:00Z",
-				"updated_at": "2024-01-02T00:00:00Z",
-			})
 		},
 	})
 	defer ts.Close()
@@ -496,15 +482,26 @@ func TestUpdateManagedServiceInstance_Empty202_RecoversSucceeded(t *testing.T) {
 	ctx.SetParamValues("cnsi-1", "si-1")
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateManagedServiceInstance(ctx))
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Contains(t, rec.Body.String(), `"COMPLETE"`)
+	assert.Equal(t, http.StatusAccepted, rec.Code)
 }
 
+// The update job reaches COMPLETE regardless of broker outcome (same CF
+// quirk as create) — checkManagedSIUpdateOutcome must re-read the SI's
+// last_operation and surface a broker rejection as 502 instead of a false
+// "updated" confirmation. This preserves the GH#5431 UX coverage on the
+// native path now that the empty-202 recovery shim is gone.
 func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
 	ts := newCaptureServer(map[string]capiHandler{
 		"PATCH /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Location", "/v3/jobs/job-1")
 			w.WriteHeader(http.StatusAccepted)
+		},
+		"GET /v3/jobs/job-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":      "job-1",
+				"operation": "service_instance.update",
+				"state":     "COMPLETE",
+			})
 		},
 		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -523,15 +520,65 @@ func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
 	})
 	defer ts.Close()
 
+	plugin := newPhase1CPlugin(ts.URL)
+	plugin.asyncTracker = stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{})
+	plugin.asyncTranslator = NewCFJobTranslator(plugin)
+
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
 	ctx.SetParamNames("cnsiGuid", "siGuid")
 	ctx.SetParamValues("cnsi-1", "si-1")
 
-	require.NoError(t, newPhase1CPlugin(ts.URL).updateManagedServiceInstance(ctx))
+	require.NoError(t, plugin.updateManagedServiceInstance(ctx))
 	assert.Equal(t, http.StatusBadGateway, rec.Code)
 	assert.Contains(t, rec.Body.String(), `"FAILED"`)
 	assert.Contains(t, rec.Body.String(), "broker rejected the parameters")
+}
+
+// Happy-path sibling: job COMPLETE + last_operation update/succeeded must
+// stay a 200 COMPLETE envelope (outcome re-check passes through).
+func TestUpdateManagedServiceInstance_Empty202_Succeeded(t *testing.T) {
+	ts := newCaptureServer(map[string]capiHandler{
+		"PATCH /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Location", "/v3/jobs/job-1")
+			w.WriteHeader(http.StatusAccepted)
+		},
+		"GET /v3/jobs/job-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid":      "job-1",
+				"operation": "service_instance.update",
+				"state":     "COMPLETE",
+			})
+		},
+		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "si-1",
+				"name": "my-si",
+				"type": "managed",
+				"last_operation": map[string]interface{}{
+					"type":        "update",
+					"state":       "succeeded",
+					"description": "update succeeded",
+				},
+				"created_at": "2024-01-01T00:00:00Z",
+				"updated_at": "2024-01-02T00:00:00Z",
+			})
+		},
+	})
+	defer ts.Close()
+
+	plugin := newPhase1CPlugin(ts.URL)
+	plugin.asyncTracker = stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{})
+	plugin.asyncTranslator = NewCFJobTranslator(plugin)
+
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
+	ctx.SetParamNames("cnsiGuid", "siGuid")
+	ctx.SetParamValues("cnsi-1", "si-1")
+
+	require.NoError(t, plugin.updateManagedServiceInstance(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"COMPLETE"`)
 }
 
 // ---------------------------------------------------------------------------
