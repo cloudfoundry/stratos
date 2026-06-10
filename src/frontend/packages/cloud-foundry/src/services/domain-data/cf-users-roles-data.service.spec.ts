@@ -5,7 +5,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TailwindSnackBarService } from '@stratosui/core';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
+import { firstValueFrom } from 'rxjs';
+
 import { StUser } from '../endpoint-data/stratos-types';
+import { CnsiUsersSnapshotService } from '../endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 import { CfRoleChange } from '../../store/types/users-roles.types';
 import { CfUsersRolesDataService } from './cf-users-roles-data.service';
 
@@ -141,6 +145,89 @@ describe('CfUsersRolesDataService', () => {
     req.flush({ results: [{ index: 0, success: true }] });
 
     await expect(done).resolves.toBeUndefined();
+  });
+
+  describe('executeChanges user-cache sync (legacy cfUserReducer equivalent)', () => {
+    const PAGED_P1 = '/pp/v1/cf/users/cf-1?per_page=500&page=1';
+    const SNAPSHOT = '/pp/v1/cf/users/cf-1';
+    const cachedAlice = (): StUser => ({
+      guid: 'u-a', username: 'alice', cnsiGuid: 'cf-1',
+      orgRoles: [{ orgGuid: 'org-1', roles: ['auditor'] }],
+      spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'sp-1', roles: ['developer'] }],
+    });
+    let paged: CfUsersPagedDataService;
+
+    const seedPagedCache = async () => {
+      paged = TestBed.inject(CfUsersPagedDataService);
+      const p = firstValueFrom(paged.loadUsers('cf-1'));
+      httpMock.expectOne(PAGED_P1).flush({ resources: [cachedAlice()], pagination: { totalResults: 1, totalPages: 1 } });
+      await p;
+    };
+
+    it('patches cached role buckets, marks the cache stale, and refreshes a loaded snapshot', async () => {
+      await seedPagedCache();
+      const snapshot = TestBed.inject(CnsiUsersSnapshotService);
+      snapshot.users('cf-1');
+      httpMock.expectOne(SNAPSHOT).flush({ resources: [cachedAlice()], totalResults: 1 });
+      // Let the snapshot's promise chain settle so its in-flight guard clears.
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+
+      svc.setUsers('cf-1', [userA]);
+      svc.setChanges([
+        { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' },
+        { userGuid: 'u-a', orgGuid: 'org-1', spaceGuid: 'sp-1', add: false, role: 'developers' as any, orgName: 'Org 1', spaceName: 'Space 1' },
+      ]);
+      const done = svc.executeChanges();
+      httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes')
+        .flush({ results: [{ index: 0, success: true }, { index: 1, success: true }] });
+      await done;
+
+      // Inline patch: mounted lists + cache-first wizard baselines see the change now.
+      const alice = paged.usersSignal('cf-1')()[0];
+      expect(alice.orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor', 'manager'] }]);
+      expect(alice.spaceRoles).toEqual([]);
+
+      // Snapshot was already loaded, so the summary tiles re-fetch.
+      httpMock.expectOne(SNAPSHOT).flush({ resources: [cachedAlice()], totalResults: 1 });
+
+      // Stale flag: the next list visit re-fetches server truth.
+      const reload = firstValueFrom(paged.loadUsers('cf-1'));
+      httpMock.expectOne(PAGED_P1).flush({ resources: [cachedAlice()], pagination: { totalResults: 1, totalPages: 1 } });
+      await reload;
+    });
+
+    it('only marks the cache stale for set-by-username changes (synthetic guids are unknown to the cache)', async () => {
+      await seedPagedCache();
+      const synthetic = { guid: 'newbie/cf-1/org-1', username: 'newbie' } as unknown as StUser;
+      svc.setIsSetByUsername(true);
+      svc.setUsers('cf-1', [synthetic], 'uaa');
+      svc.setChanges([
+        { userGuid: 'newbie/cf-1/org-1', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' },
+      ]);
+      const done = svc.executeChanges();
+      httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush({ results: [{ index: 0, success: true }] });
+      await done;
+
+      expect(paged.usersSignal('cf-1')()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor'] }]);
+      const reload = firstValueFrom(paged.loadUsers('cf-1'));
+      httpMock.expectOne(PAGED_P1).flush({ resources: [cachedAlice()], pagination: { totalResults: 1, totalPages: 1 } });
+      await reload;
+    });
+
+    it('does not patch or invalidate anything when every change fails', async () => {
+      await seedPagedCache();
+      svc.setUsers('cf-1', [userA]);
+      svc.setChanges([
+        { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' },
+      ]);
+      const done = svc.executeChanges();
+      httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush({ results: [{ index: 0, success: false, error: 'boom' }] });
+      await done;
+
+      expect(paged.usersSignal('cf-1')()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor'] }]);
+      await firstValueFrom(paged.loadUsers('cf-1')); // cache hit — no request expected
+      httpMock.verify();
+    });
   });
 
   it('executeChanges records per-change applyStatus and surfaces failures via snackbar', async () => {

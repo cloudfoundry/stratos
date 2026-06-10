@@ -46,6 +46,48 @@ describe('CfUsersPagedDataService', () => {
     expect(svc.usersSignal(CNSI)()).toEqual([]);
   });
 
+  describe('applyRoleChange (inline role-bucket patch)', () => {
+    const seeded = () => ({
+      ...mkUser('a'),
+      orgRoles: [{ orgGuid: 'org-1', roles: ['auditor'] }],
+      spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'sp-1', roles: ['developer'] }],
+    });
+    const seed = async () => {
+      const p = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush({ resources: [seeded()], pagination: { totalResults: 1, totalPages: 1 } });
+      await p;
+    };
+
+    it('adds a role to an existing org bucket without duplicating', async () => {
+      await seed();
+      svc.applyRoleChange(CNSI, 'a', 'org-1', undefined, 'manager', true);
+      svc.applyRoleChange(CNSI, 'a', 'org-1', undefined, 'manager', true);
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor', 'manager'] }]);
+    });
+
+    it('creates a bucket when the user had no roles in that org', async () => {
+      await seed();
+      svc.applyRoleChange(CNSI, 'a', 'org-2', undefined, 'billing_manager', true);
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([
+        { orgGuid: 'org-1', roles: ['auditor'] },
+        { orgGuid: 'org-2', roles: ['billing_manager'] },
+      ]);
+    });
+
+    it('removes a space role and drops the bucket when it empties', async () => {
+      await seed();
+      svc.applyRoleChange(CNSI, 'a', 'org-1', 'sp-1', 'developer', false);
+      expect(svc.usersSignal(CNSI)()[0].spaceRoles).toEqual([]);
+    });
+
+    it('is a no-op for unknown users and unseeded endpoints', async () => {
+      await seed();
+      svc.applyRoleChange(CNSI, 'nope', 'org-1', undefined, 'manager', true);
+      svc.applyRoleChange('cf-other', 'a', 'org-1', undefined, 'manager', true);
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor'] }]);
+    });
+  });
+
   it('getUser resolves from cache when drained, else hits the detail endpoint', async () => {
     const load = firstValueFrom(svc.loadUsers(CNSI));
     http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
