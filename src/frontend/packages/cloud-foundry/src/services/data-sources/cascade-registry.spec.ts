@@ -11,6 +11,15 @@ describe('cascade-registry', () => {
     expect(cascadeFor('org.create')).toEqual([]);
   });
 
+  it('cascadeFor("space.create") cascades to orgs (parent spacesCount on org rows)', () => {
+    expect(cascadeFor('space.create')).toEqual(['orgs']);
+  });
+
+  it('update cascades reconcile their own slice (post-patch quota relationship calls)', () => {
+    expect(cascadeFor('org.update')).toEqual(['orgs']);
+    expect(cascadeFor('space.update')).toEqual(['spaces']);
+  });
+
   it('cascadeFor("route.delete") still cascades to apps (route unmap path)', () => {
     expect(cascadeFor('route.delete')).toEqual(['apps']);
   });

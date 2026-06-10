@@ -135,6 +135,10 @@ export class CfSpacesSignalConfigService {
       deleteName: spaceName,
       path: `/pp/v1/cf/spaces/${cnsiGuid}/${spaceGuid}`,
     });
+    // The controller's row removal targets the per-CNSI EDS spaces slice,
+    // which this org-scoped list doesn't read — evict the row here so an
+    // in-tab delete disappears without a refetch.
+    this._orgSpaces.update(spaces => spaces.filter(s => s.guid !== spaceGuid));
   }
 
   /**

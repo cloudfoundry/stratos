@@ -9,6 +9,7 @@ import { registerCfRelationDescriptors } from './entity-relations/signal/cf-rela
 import { SignalRelationFetcherService } from './entity-relations/signal/signal-relation-fetcher.service';
 import { EntityDeleteController } from './services/deletes/entity-delete.controller';
 import { CfRolesDeleteCleanup } from './services/deletes/cf-roles-cleanup.service';
+import { DetailCachesDeleteCleanup } from './services/deletes/detail-caches-cleanup.service';
 import { FavoritesRecentsDeleteCleanup } from './services/deletes/favorites-recents-cleanup.service';
 import { setCfInfoHelperInjector } from './services/endpoint-data/cf-info-helper';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
@@ -54,5 +55,10 @@ export class CloudFoundryPackageModule {
     // (the legacy DELETE_ORG/SPACE_SUCCESS reducer update went dead when CF
     // deletes moved off the ngrx pipeline) — favorites/roles island Wave 2.
     inject(EntityDeleteController).registerCleanup(inject(CfRolesDeleteCleanup).hook);
+
+    // Keep the sticky org/space detail caches consistent with deletes (org
+    // summary "Spaces" tile, deleted-entity detail eviction) — restores the
+    // legacy updateOrganizationSpaceReducer parent sync.
+    inject(EntityDeleteController).registerCleanup(inject(DetailCachesDeleteCleanup).hook);
   }
 }

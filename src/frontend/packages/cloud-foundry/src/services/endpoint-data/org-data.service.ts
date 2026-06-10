@@ -84,6 +84,21 @@ export class OrgDataService {
     this._org.update(curr => curr ? { ...curr, ...p } : curr);
   }
 
+  // Keep the cached spaces list (summary "Spaces" tile, spaceCount, the
+  // space-name-unique validator) in step with space create/delete — this
+  // cache is sticky-warm with no invalidation path, so without these the
+  // tile stayed stale until a hard reload. No-ops before the first load:
+  // an unloaded instance fetches fresh anyway.
+  applySpaceCreated(space: StSpace): void {
+    if (this._lastFetched() === null) { return; }
+    this._spaces.update(curr => curr.some(s => s.guid === space.guid) ? curr : [...curr, space]);
+  }
+
+  applySpaceDeleted(spaceGuid: string): void {
+    if (this._lastFetched() === null) { return; }
+    this._spaces.update(curr => curr.filter(s => s.guid !== spaceGuid));
+  }
+
   private addError(resource: string, err: unknown): void {
     this._errors.update(errors => [...errors, {
       resource,

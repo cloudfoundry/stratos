@@ -41,6 +41,21 @@ export class OrgDataRegistry {
     this.instances.delete(this.key(cnsiGuid, orgGuid));
   }
 
+  /** Cached instance lookup without creating one or bumping refCount. */
+  peek(cnsiGuid: string, orgGuid: string): OrgDataService | undefined {
+    return this.instances.get(this.key(cnsiGuid, orgGuid))?.service;
+  }
+
+  // Every cached instance for an endpoint — mutation cleanups that only
+  // know the deleted child's guid (not its parent org) walk these and let
+  // the per-instance patch no-op where the child isn't held.
+  peekByCnsi(cnsiGuid: string): OrgDataService[] {
+    const prefix = `${cnsiGuid}:`;
+    return [...this.instances.entries()]
+      .filter(([key]) => key.startsWith(prefix))
+      .map(([, entry]) => entry.service);
+  }
+
   private key(cnsiGuid: string, orgGuid: string): string {
     return `${cnsiGuid}:${orgGuid}`;
   }
