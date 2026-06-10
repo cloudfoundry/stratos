@@ -245,4 +245,26 @@ describe('CfUsersRolesDataService', () => {
     expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(bad)]).toBe('error');
     expect(snackBar.error).toHaveBeenCalled();
   });
+
+  it('changeKey distinguishes add from remove of the same role', () => {
+    const add: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' };
+    const remove: CfRoleChange = { ...add, add: false };
+
+    expect(CfUsersRolesDataService.changeKey(add)).not.toBe(CfUsersRolesDataService.changeKey(remove));
+  });
+
+  it('clear resets applyStatus so a new wizard run does not inherit "Done" rows', async () => {
+    svc.setUsers('cf-1', [userA]);
+    const change: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' };
+    svc.setChanges([change]);
+
+    const done = svc.executeChanges();
+    httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush({ results: [{ index: 0, success: true }] });
+    await done;
+    expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(change)]).toBe('done');
+
+    svc.clear();
+
+    expect(svc.applyStatus()).toEqual({});
+  });
 });
