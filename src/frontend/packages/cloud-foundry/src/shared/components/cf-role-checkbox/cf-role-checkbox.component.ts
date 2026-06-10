@@ -5,6 +5,7 @@ import {
   OnInit,
   computed,
   inject,
+  signal,
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
@@ -78,11 +79,15 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
 
   modes = CfRoleCheckboxMode;
 
-  checked = false;
-  tooltip = "";
+  // Signals (not plain fields): the existing-roles baseline lands from
+  // an RxJS subscription after first paint, and under zoneless+OnPush a
+  // plain-field mutation there never reaches the template — the
+  // checkboxes painted unchecked until something else triggered CD.
+  checked = signal<boolean | null>(false);
+  tooltip = signal("");
+  disabled = signal(false);
   sub!: Subscription;
   isOrgRole = false;
-  disabled = false;
 
   private static hasExistingRole(
     role: string,
@@ -399,9 +404,9 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
             this.orgGuid,
             this.spaceGuid,
           );
-          this.checked = checked;
-          this.tooltip = tooltip;
-          this.disabled =
+          this.checked.set(checked);
+          this.tooltip.set(tooltip);
+          this.disabled.set(
             !canEditRole ||
             CfRoleCheckboxComponent.isDisabled(
               this.isOrgRole,
@@ -412,7 +417,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
               this.orgGuid,
               checked,
               isSetByUsername,
-            );
+            ));
         },
       );
 
@@ -426,10 +431,10 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
   }
 
   public roleUpdated(checked: boolean) {
-    this.checked = checked;
+    this.checked.set(checked);
     this.cfRolesService.newRoles$.pipe(take(1)).subscribe((_newRoles) => {
       if (!checked) {
-        this.tooltip = "";
+        this.tooltip.set("");
       }
       if (this.isOrgRole) {
         this.rolesData.setOrgRole(this.orgGuid, this.orgName, this.role, checked);
