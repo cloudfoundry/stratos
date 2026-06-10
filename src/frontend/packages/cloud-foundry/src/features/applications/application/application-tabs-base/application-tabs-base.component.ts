@@ -82,15 +82,16 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const applicationService = this.applicationService;
     const scmService = inject(GitSCMService);
 
-    // Initialize favorite$ after applicationService is available
-    // Filter for fully-hydrated entity with cfGuid stamped — getFavorite
-    // resolves the endpoint id via cf-entity-generator's getEndpointIdFromEntity
-    // (entity.entity.cfGuid). Loose !!app emissions slip through with empty
-    // inner entity and trigger "endpointId is undefined" warnings on every
-    // ngrx state churn (4 on initial load, 14+ during a lifecycle action).
+    // Initialize favorite$ after applicationService is available.
+    // Filter for a fully-hydrated entity (inner entity present). The endpoint
+    // id comes from the PAGE context (applicationService.cfGuid), NOT the row's
+    // stamped cfGuid: rows can be mis-stamped when Stratos endpoints share one
+    // CAPI, which would render the star on the wrong endpoint (the cross-
+    // endpoint favourite leak). getFavoriteFromEntity takes the id explicitly.
     this.favorite$ = this.applicationService.app$.pipe(
       filter(info => !!info?.entity?.entity?.cfGuid),
-      map(info => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(info.entity, applicationEntityType, CF_ENDPOINT_TYPE))
+      map(info => this.userFavoriteManager.getFavoriteFromEntity<IFavoriteMetadata>(
+        applicationEntityType, CF_ENDPOINT_TYPE, this.applicationService.cfGuid, info.entity))
     );
     const endpoints$ = toObservable(this.cfEndpoints.all);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
