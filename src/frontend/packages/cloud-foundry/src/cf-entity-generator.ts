@@ -151,11 +151,6 @@ import {
 } from './entity-action-builders/user-provided-service.action-builders';
 import { UserActionBuilders, userActionBuilders } from './entity-action-builders/user.action-builders';
 import { CfEndpointDetailsComponent } from './shared/components/cf-endpoint-details/cf-endpoint-details.component';
-import { cfUserReducer, userSpaceOrgReducer } from './store/reducers/cf-users.reducer';
-import { updateOrganizationQuotaReducer } from './store/reducers/organization-quota.reducer';
-import { updateOrganizationSpaceReducer } from './store/reducers/organization-space.reducer';
-import { serviceInstanceReducer } from './store/reducers/service-instance.reducer';
-import { updateSpaceQuotaReducer } from './store/reducers/space-quota.reducer';
 import { AppStat } from './store/types/app-metadata.types';
 import { CfAPIResource, CFResponse } from './store/types/cf-api.types';
 import { CfUser } from './store/types/cf-user.types';
@@ -499,9 +494,6 @@ function generateCFUserProvidedServiceInstanceEntity(endpointDefinition: Stratos
     definition,
     {
       actionBuilders: userProvidedServiceActionBuilder,
-      dataReducers: [
-        serviceInstanceReducer,
-      ],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.name,
@@ -812,9 +804,6 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
   >(
     definition,
     {
-      dataReducers: [
-        serviceInstanceReducer,
-      ],
       actionBuilders: serviceInstanceActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
@@ -839,7 +828,6 @@ function generateCFUserEntity(endpointDefinition: StratosEndpointExtensionDefini
     definition,
     {
       actionBuilders: userActionBuilders,
-      dataReducers: [cfUserReducer],
       entityBuilder: {
         getMetadata: ent => ({
           name: ent.entity.username || ent.entity.guid || ent.metadata.guid,
@@ -1196,10 +1184,6 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
     spaceDefinition,
     {
       actionBuilders: spaceActionBuilders,
-      dataReducers: [
-        updateSpaceQuotaReducer,
-        userSpaceOrgReducer(true)
-      ],
       entityBuilder: {
         getMetadata: space => ({
           orgGuid: favSpaceOrgGuid(space),
@@ -1243,11 +1227,6 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     orgDefinition,
     {
       actionBuilders: organizationActionBuilders,
-      dataReducers: [
-        updateOrganizationQuotaReducer,
-        updateOrganizationSpaceReducer(),
-        userSpaceOrgReducer(false)
-      ],
       entityBuilder: {
         getMetadata: org => ({
           name: favName(org),
