@@ -20,14 +20,49 @@ import (
 // service_plan.service_offering.service_broker,space,space.organization`)
 // the server emits a top-level `included` block populated for plans,
 // offerings, brokers, spaces, and organizations.
-func instancesTestServer(t *testing.T) (*httptest.Server, *int) {
+func instancesTestServer(t *testing.T) (*httptest.Server, *int, *int) {
 	t.Helper()
 	siHits := 0
+	bindingHits := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/service_credential_bindings":
+			// Bound-apps join (summary+ only): two bindings on si-1, none on
+			// si-2. Emits included.apps when the join asks for include=app.
+			bindingHits++
+			payload := map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "b-1", "type": "app",
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z",
+						"relationships": map[string]interface{}{
+							"service_instance": map[string]interface{}{"data": map[string]interface{}{"guid": "si-1"}},
+							"app":              map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}},
+						},
+					},
+					{
+						"guid": "b-2", "type": "app",
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-01T00:00:00Z",
+						"relationships": map[string]interface{}{
+							"service_instance": map[string]interface{}{"data": map[string]interface{}{"guid": "si-1"}},
+							"app":              map[string]interface{}{"data": map[string]interface{}{"guid": "app-2"}},
+						},
+					},
+				},
+			}
+			if strings.Contains(r.URL.Query().Get("include"), "app") {
+				payload["included"] = map[string]interface{}{
+					"apps": []map[string]interface{}{
+						{"guid": "app-1", "name": "billing-app"},
+						{"guid": "app-2", "name": "orders-app"},
+					},
+				}
+			}
+			_ = json.NewEncoder(w).Encode(payload)
 		case "/v3/service_instances":
 			siHits++
 			perPage := r.URL.Query().Get("per_page")
@@ -133,7 +168,7 @@ func instancesTestServer(t *testing.T) (*httptest.Server, *int) {
 			http.NotFound(w, r)
 		}
 	}))
-	return srv, &siHits
+	return srv, &siHits, &bindingHits
 }
 
 type upsBlock struct {
@@ -194,7 +229,7 @@ func newServiceInstancesPlugin(serverURL string) *CloudFoundrySpecification {
 }
 
 func TestGetNativeServiceInstances_Base(t *testing.T) {
-	srv, siHits := instancesTestServer(t)
+	srv, siHits, bindingHits := instancesTestServer(t)
 	defer srv.Close()
 
 	e := echo.New()
@@ -204,6 +239,7 @@ func TestGetNativeServiceInstances_Base(t *testing.T) {
 	require.NoError(t, plugin.getNativeServiceInstances(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, 1, *siHits, "base mode is one CAPI call (no include drain)")
+	assert.Equal(t, 0, *bindingHits, "base mode skips the bound-apps join")
 
 	var resp StratosPagedResponse[StServiceInstance]
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
@@ -232,7 +268,7 @@ func TestGetNativeServiceInstances_Base(t *testing.T) {
 }
 
 func TestGetNativeServiceInstances_Summary(t *testing.T) {
-	srv, _ := instancesTestServer(t)
+	srv, _, _ := instancesTestServer(t)
 	defer srv.Close()
 
 	e := echo.New()
@@ -268,6 +304,31 @@ func TestGetNativeServiceInstances_Summary(t *testing.T) {
 	assert.Equal(t, "https://drain.example", ups.SyslogDrainURL)
 	assert.Equal(t, "https://route.example", ups.RouteServiceURL)
 	assert.Empty(t, ups.DashboardURL, "UPS rows have no broker dashboard")
+}
+
+func TestGetNativeServiceInstances_Summary_BoundApps(t *testing.T) {
+	srv, _, bindingHits := instancesTestServer(t)
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e, "/pp/v1/cf/service_instances/cnsi-1?return=summary")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, 1, *bindingHits, "summary joins bound apps in one batch call")
+
+	var resp StratosPagedResponse[StServiceInstance]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	require.Len(t, resp.Resources, 2)
+	first := resp.Resources[0]
+	require.Len(t, first.BoundApps, 2, "managed SI carries its bound apps")
+	assert.Equal(t, StAppRef{GUID: "app-1", Name: "billing-app"}, first.BoundApps[0])
+	assert.Equal(t, StAppRef{GUID: "app-2", Name: "orders-app"}, first.BoundApps[1])
+
+	ups := resp.Resources[1]
+	assert.Empty(t, ups.BoundApps, "unbound SI has no boundApps")
 }
 
 func TestGetNativeServiceInstances_SoftFallbackWhenIncludedMissing(t *testing.T) {
@@ -312,7 +373,7 @@ func TestGetNativeServiceInstances_SoftFallbackWhenIncludedMissing(t *testing.T)
 }
 
 func TestGetNativeServiceInstances_CountsFastPath(t *testing.T) {
-	srv, _ := instancesTestServer(t)
+	srv, _, _ := instancesTestServer(t)
 	defer srv.Close()
 
 	e := echo.New()
@@ -373,7 +434,7 @@ func TestGetNativeServiceInstances_OmitsPagingWhenAbsent(t *testing.T) {
 }
 
 func TestGetNativeServiceInstanceDetail_Details(t *testing.T) {
-	srv, _ := instancesTestServer(t)
+	srv, _, _ := instancesTestServer(t)
 	defer srv.Close()
 
 	e := echo.New()

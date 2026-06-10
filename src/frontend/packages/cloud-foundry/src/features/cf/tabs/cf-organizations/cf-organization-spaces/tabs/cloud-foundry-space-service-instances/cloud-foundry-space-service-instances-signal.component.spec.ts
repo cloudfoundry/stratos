@@ -97,7 +97,7 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Service', 'Last Operation', 'Tags', 'Created', '', '',
+      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Tags', 'Created', '', '',
     ]);
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed',
