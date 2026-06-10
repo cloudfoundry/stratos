@@ -461,6 +461,79 @@ func TestUpdateManagedServiceInstance_AsyncBareFallback(t *testing.T) {
 	assert.Equal(t, http.MethodPatch, ts.lastMethod)
 }
 
+// CF returns 202 with an EMPTY body (job link in the Location header) for
+// managed-SI updates; fw-capi blindly unmarshals the body and errors with
+// "parsing job response: unexpected end of JSON input" (#5431). The handler
+// must recover by reading the SI's last_operation instead of surfacing the
+// parse error.
+func TestUpdateManagedServiceInstance_Empty202_RecoversSucceeded(t *testing.T) {
+	ts := newCaptureServer(map[string]capiHandler{
+		"PATCH /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Location", "/v3/jobs/job-1")
+			w.WriteHeader(http.StatusAccepted)
+			// Empty body — what real CF sends.
+		},
+		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "si-1",
+				"name": "my-si",
+				"type": "managed",
+				"last_operation": map[string]interface{}{
+					"type":        "update",
+					"state":       "succeeded",
+					"description": "update succeeded",
+				},
+				"created_at": "2024-01-01T00:00:00Z",
+				"updated_at": "2024-01-02T00:00:00Z",
+			})
+		},
+	})
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
+	ctx.SetParamNames("cnsiGuid", "siGuid")
+	ctx.SetParamValues("cnsi-1", "si-1")
+
+	require.NoError(t, newPhase1CPlugin(ts.URL).updateManagedServiceInstance(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"COMPLETE"`)
+}
+
+func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
+	ts := newCaptureServer(map[string]capiHandler{
+		"PATCH /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Location", "/v3/jobs/job-1")
+			w.WriteHeader(http.StatusAccepted)
+		},
+		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "si-1",
+				"name": "my-si",
+				"type": "managed",
+				"last_operation": map[string]interface{}{
+					"type":        "update",
+					"state":       "failed",
+					"description": "broker rejected the parameters",
+				},
+				"created_at": "2024-01-01T00:00:00Z",
+				"updated_at": "2024-01-02T00:00:00Z",
+			})
+		},
+	})
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
+	ctx.SetParamNames("cnsiGuid", "siGuid")
+	ctx.SetParamValues("cnsi-1", "si-1")
+
+	require.NoError(t, newPhase1CPlugin(ts.URL).updateManagedServiceInstance(ctx))
+	assert.Equal(t, http.StatusBadGateway, rec.Code)
+	assert.Contains(t, rec.Body.String(), `"FAILED"`)
+	assert.Contains(t, rec.Body.String(), "broker rejected the parameters")
+}
+
 // ---------------------------------------------------------------------------
 // Roles (Slice 2)
 
