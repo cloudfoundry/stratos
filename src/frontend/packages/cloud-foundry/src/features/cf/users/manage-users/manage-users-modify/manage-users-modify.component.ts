@@ -170,13 +170,17 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     this.orgSubs.push(orgConnect$.subscribe(rows => this.orgRows.set(rows ?? [])));
     this.orgSubs.push(isTableLoading$.subscribe(loading => this.orgLoading.set(loading)));
 
-    // Set the starting state of the org table
+    // Set the starting state of the org table. fetchOrgEntity (not fetchOrg):
+    // fetchOrg always emits its `entity: null` fetching placeholder first, so
+    // a take(1) over it grabbed the placeholder and the unguarded
+    // `org.entity.entity.name` threw — setOrg never ran and the org-scoped
+    // wizard sat on "Loading…" forever.
     if (this.activeRouteCfOrgSpace.orgGuid) {
-      this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
+      this.cfRolesService.fetchOrgEntity(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid).pipe(
         take(1),
         defaultIfEmpty(null)
       ).subscribe(org => {
-        if (org) { this.rolesData.setOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.entity.name); }
+        if (org) { this.rolesData.setOrg(this.activeRouteCfOrgSpace.orgGuid, org.entity.name); }
       });
     } else {
       this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid).pipe(

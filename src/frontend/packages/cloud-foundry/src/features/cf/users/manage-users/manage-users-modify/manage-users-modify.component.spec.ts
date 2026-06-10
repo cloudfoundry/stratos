@@ -14,6 +14,7 @@ import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/c
 import { CloudFoundryReducersModule } from '../../../../../store/cloud-foundry.reducers.module';
 import { TabNavService } from '@stratosui/core';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesModifyComponent } from './manage-users-modify.component';
 
@@ -35,7 +36,13 @@ describe('UsersRolesModifyComponent', () => {
       loading$: new BehaviorSubject<boolean>(false).asObservable(),
       existingRoles$: new BehaviorSubject<any>({}).asObservable(),
       newRoles$: new BehaviorSubject<any>({}).asObservable(),
-      fetchOrg: vi.fn().mockReturnValue(of(mockOrgEntity)),
+      // Mirrors production: fetchOrg always emits its `entity: null` fetching
+      // placeholder before the real entity. The org-scoped starting-state
+      // seeding crashed on this (take(1) grabbed the placeholder).
+      fetchOrg: vi.fn().mockReturnValue(of(
+        { entity: null, entityRequestInfo: { fetching: true } },
+        mockOrgEntity,
+      )),
       fetchOrgEntity: vi.fn().mockReturnValue(of(mockOrgEntity.entity)),
       fetchOrgs: vi.fn().mockReturnValue(of([mockOrgEntity.entity])),
       createRolesDiff: vi.fn().mockReturnValue(of([]))
@@ -102,5 +109,11 @@ describe('UsersRolesModifyComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('seeds the org context on org-scoped entry despite fetchOrg emitting its placeholder first', () => {
+    const rolesData = TestBed.inject(CfUsersRolesDataService);
+    expect(rolesData.newRoles().orgGuid).toBe('orgGuid');
+    expect(rolesData.newRoles().name).toBe('Test Org');
   });
 });

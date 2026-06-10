@@ -123,6 +123,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.hiddenSubs.push(step.onValidChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
+      // busy gates the Next/Apply [disabled] binding; its mutations (e.g.
+      // the destructive-entry delay timer in StepComponent.pOnEnter) happen
+      // outside this component's CD scope. See StepComponent.busy.
+      this.hiddenSubs.push(step.onBusyChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
       this.hiddenSubs.push(step.onCanCloseChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
