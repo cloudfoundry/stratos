@@ -152,6 +152,10 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       name: this.spaceName.value,
       relationships: { organization: { data: { guid: this.orgGuid } } },
     })).pipe(
+      // The org's sticky detail cache (summary "Spaces" tile, the
+      // name-unique validator) has no staleness mechanism — patch it
+      // directly so the new space shows without a hard reload.
+      tap(space => this.orgRegistry.peek(this.cfGuid, this.orgGuid)?.applySpaceCreated(space)),
       switchMap(space => {
         if (!quotaGuid) {
           return [space];

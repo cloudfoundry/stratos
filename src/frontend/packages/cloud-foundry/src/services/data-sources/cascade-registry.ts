@@ -44,10 +44,17 @@ export type CascadeKey =
 
 export const CASCADE_RULES: Readonly<Record<CascadeKey, readonly EntityKind[]>> = {
   'org.create': [],
-  'org.update': [],
+  // See space.update — quota assignment lands after the inline row patch.
+  'org.update': ['orgs'],
 
-  'space.create': [],
-  'space.update': [],
+  // A new space changes the parent org's spacesCount on the org list rows
+  // (delete-side parity comes from referencingSlices in the delete
+  // controller; creates only flow through here).
+  'space.create': ['orgs'],
+  // Updates patch the row inline from the PATCH response, but follow-up
+  // relationship calls (quota assignment) happen after the patch — mark the
+  // slice so the next visit reconciles fields the response didn't carry.
+  'space.update': ['spaces'],
 
   'app.create': [],
   'app.update': [],

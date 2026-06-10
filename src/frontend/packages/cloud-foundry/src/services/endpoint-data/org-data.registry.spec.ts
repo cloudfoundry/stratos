@@ -53,4 +53,18 @@ describe('OrgDataRegistry', () => {
     const svcAfter = registry.acquire('cnsi-1', 'org-a');
     expect(svc).not.toBe(svcAfter);
   });
+
+  it('peek() returns the cached instance without creating one', () => {
+    expect(registry.peek('cnsi-1', 'org-a')).toBeUndefined();
+    const svc = registry.acquire('cnsi-1', 'org-a');
+    expect(registry.peek('cnsi-1', 'org-a')).toBe(svc);
+  });
+
+  it('peekByCnsi() returns every cached instance for the endpoint only', () => {
+    const a = registry.acquire('cnsi-1', 'org-a');
+    const b = registry.acquire('cnsi-1', 'org-b');
+    registry.acquire('cnsi-2', 'org-a');
+    expect(registry.peekByCnsi('cnsi-1')).toEqual([a, b]);
+    expect(registry.peekByCnsi('cnsi-3')).toEqual([]);
+  });
 });

@@ -111,4 +111,43 @@ describe('OrgDataService', () => {
     service.patch({ name: 'X' });
     expect(service.org()).toBeNull();
   });
+
+  describe('space patches (parent-view sync on space create/delete)', () => {
+    const mockOrg = { guid: 'org-1', name: 'My Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] };
+    const sp = (guid: string) => ({ guid, name: guid, orgGuid: 'org-1', cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' } as any);
+
+    const loadWarm = async () => {
+      service.load().subscribe();
+      httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
+      httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [sp('sp-1')], totalResults: 1 });
+      await Promise.resolve();
+    };
+
+    it('applySpaceCreated appends to the cached spaces and bumps spaceCount', async () => {
+      await loadWarm();
+      service.applySpaceCreated(sp('sp-2'));
+      expect(service.spaces().map(s => s.guid)).toEqual(['sp-1', 'sp-2']);
+      expect(service.spaceCount()).toBe(2);
+    });
+
+    it('applySpaceCreated does not duplicate an already-cached space', async () => {
+      await loadWarm();
+      service.applySpaceCreated(sp('sp-1'));
+      expect(service.spaces().map(s => s.guid)).toEqual(['sp-1']);
+    });
+
+    it('applySpaceDeleted removes the cached space', async () => {
+      await loadWarm();
+      service.applySpaceDeleted('sp-1');
+      expect(service.spaces()).toEqual([]);
+      expect(service.spaceCount()).toBe(0);
+    });
+
+    it('space patches are no-ops before the first load (fresh load wins)', () => {
+      service.applySpaceCreated(sp('sp-2'));
+      service.applySpaceDeleted('sp-2');
+      expect(service.spaces()).toEqual([]);
+      expect(service.lastFetched()).toBeNull();
+    });
+  });
 });
