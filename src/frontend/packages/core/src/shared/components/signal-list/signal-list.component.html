@@ -211,9 +211,9 @@
   <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto">
     @if ((config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() === 0) {
       <div data-test="loading" class="flex items-center justify-center p-8 h-full">
-        <div class="flex items-center space-x-3 text-content-muted">
-          <div class="spinner spinner-primary"></div>
-          <span>{{ config.loadingMessage ?? 'Loading…' }}</span>
+        <div class="flex items-center space-x-4 text-content-muted">
+          <div class="spinner spinner-primary !h-7 !w-7 !border-[3px]"></div>
+          <span class="text-lg">{{ config.loadingMessage ?? 'Loading…' }}</span>
         </div>
       </div>
     } @else if (config.totalFilteredResults() === 0) {
