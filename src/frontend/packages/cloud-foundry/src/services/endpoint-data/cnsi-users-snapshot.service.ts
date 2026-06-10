@@ -43,6 +43,16 @@ export class CnsiUsersSnapshotService {
     return this.fetch(cnsiGuid);
   }
 
+  // Re-fetch only when a snapshot was already taken. Mutation flows (role
+  // changes, invites) call this so Summary tiles don't go stale, without
+  // paying for the users+roles join on endpoints where no tile ever
+  // rendered.
+  refreshIfLoaded(cnsiGuid: string): void {
+    if (this.snapshots.has(cnsiGuid)) {
+      void this.fetch(cnsiGuid);
+    }
+  }
+
   private fetch(cnsiGuid: string): Promise<void> {
     const existing = this.inflight.get(cnsiGuid);
     if (existing) return existing;

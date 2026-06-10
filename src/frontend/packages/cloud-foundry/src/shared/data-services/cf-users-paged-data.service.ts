@@ -2,7 +2,7 @@ import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/cor
 import { HttpClient } from '@angular/common/http';
 import { Observable, from, of } from 'rxjs';
 import { catchError, finalize, map, mergeMap, reduce, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { StUser } from '../../services/endpoint-data/stratos-types';
+import { StUser, StUserOrgRole, StUserSpaceRole } from '../../services/endpoint-data/stratos-types';
 
 interface CfUsersCnsiState {
   allUsers: WritableSignal<StUser[]>;
@@ -49,6 +49,19 @@ export class CfUsersPagedDataService {
   lastFetched(cnsi: string): Signal<Date | null> { return this.ensure(cnsi).lastFetched.asReadonly(); }
 
   markStale(cnsi: string): void { this.ensure(cnsi).stale.set(true); }
+
+  // Inline-patch a cached user's role buckets after a role mutation — the
+  // signal-native equivalent of the legacy cfUserReducer ADD/REMOVE_CF_ROLE
+  // update. Mounted user lists and cache-first reads (getUser seeds the
+  // Manage Roles wizard baseline) reflect the change immediately; callers
+  // still markStale so the next full load reconciles with server truth.
+  // `role` is the prefix-stripped V3 name (e.g. 'manager', 'billing_manager',
+  // 'developer') matching the StUser bucket vocabulary.
+  applyRoleChange(cnsi: string, userGuid: string, orgGuid: string, spaceGuid: string | undefined, role: string, add: boolean): void {
+    const s = this.states.get(cnsi);
+    if (!s) { return; }
+    s.allUsers.update(users => users.map(u => (u.guid === userGuid ? patchUserRoles(u, orgGuid, spaceGuid, role, add) : u)));
+  }
 
   loadUsers(cnsi: string): Observable<void> {
     const s = this.ensure(cnsi);
@@ -114,4 +127,39 @@ export class CfUsersPagedDataService {
       }),
     );
   }
+}
+
+function patchUserRoles(user: StUser, orgGuid: string, spaceGuid: string | undefined, role: string, add: boolean): StUser {
+  if (spaceGuid) {
+    return { ...user, spaceRoles: patchSpaceBuckets(user.spaceRoles, orgGuid, spaceGuid, role, add) };
+  }
+  return { ...user, orgRoles: patchOrgBuckets(user.orgRoles, orgGuid, role, add) };
+}
+
+function patchOrgBuckets(buckets: StUserOrgRole[], orgGuid: string, role: string, add: boolean): StUserOrgRole[] {
+  const existing = buckets.find(b => b.orgGuid === orgGuid);
+  if (add) {
+    if (!existing) { return [...buckets, { orgGuid, roles: [role] }]; }
+    if (existing.roles.includes(role)) { return buckets; }
+    return buckets.map(b => (b === existing ? { ...b, roles: [...b.roles, role] } : b));
+  }
+  if (!existing || !existing.roles.includes(role)) { return buckets; }
+  const roles = existing.roles.filter(r => r !== role);
+  return roles.length
+    ? buckets.map(b => (b === existing ? { ...b, roles } : b))
+    : buckets.filter(b => b !== existing);
+}
+
+function patchSpaceBuckets(buckets: StUserSpaceRole[], orgGuid: string, spaceGuid: string, role: string, add: boolean): StUserSpaceRole[] {
+  const existing = buckets.find(b => b.spaceGuid === spaceGuid);
+  if (add) {
+    if (!existing) { return [...buckets, { orgGuid, spaceGuid, roles: [role] }]; }
+    if (existing.roles.includes(role)) { return buckets; }
+    return buckets.map(b => (b === existing ? { ...b, roles: [...b.roles, role] } : b));
+  }
+  if (!existing || !existing.roles.includes(role)) { return buckets; }
+  const roles = existing.roles.filter(r => r !== role);
+  return roles.length
+    ? buckets.map(b => (b === existing ? { ...b, roles } : b))
+    : buckets.filter(b => b !== existing);
 }

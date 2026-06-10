@@ -5,6 +5,8 @@ import { EndpointsDataService } from '@stratosui/store';
 import { firstValueFrom } from 'rxjs';
 
 import { CfCurrentUserRolesDataService } from '../cf-current-user-roles-data.service';
+import { CnsiUsersSnapshotService } from '../endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 
 import {
   IUserPermissionInOrg,
@@ -35,6 +37,8 @@ export class CfUsersRolesDataService {
   private readonly snackBar = inject(TailwindSnackBarService);
   private readonly cfRoles = inject(CfCurrentUserRolesDataService);
   private readonly endpoints = inject(EndpointsDataService);
+  private readonly pagedUsers = inject(CfUsersPagedDataService);
+  private readonly usersSnapshot = inject(CnsiUsersSnapshotService);
 
   private readonly _cfGuid = signal<string>('');
   private readonly _users = signal<StUser[]>([]);
@@ -193,6 +197,27 @@ export class CfUsersRolesDataService {
     }
     this._applyStatus.set(status);
 
+    // Keep the shared user caches in step with the mutation — the signal-
+    // native replacement for the legacy cfUserReducer/userSpaceOrgReducer
+    // cross-entity updates that kept role chips, list membership, and the
+    // wizard's cache-first baseline correct after a change. Real-guid
+    // changes are patched inline so mounted views update immediately;
+    // markStale additionally forces the next full load to reconcile with
+    // server truth (the backend can apply implied changes the diff doesn't
+    // carry, e.g. org-user membership ordering). Set-by-username changes
+    // carry synthetic guids the cache can't address (the legacy reducer
+    // skipped them too), so they rely on staleness alone.
+    const succeeded = results.filter(r => r.success && changes[r.index]).map(r => changes[r.index]);
+    if (succeeded.length) {
+      if (!byUsername) {
+        for (const c of succeeded) {
+          this.pagedUsers.applyRoleChange(cfGuid, c.userGuid, c.orgGuid, c.spaceGuid, bucketRoleName(c), c.add);
+        }
+      }
+      this.pagedUsers.markStale(cfGuid);
+      this.usersSnapshot.refreshIfLoaded(cfGuid);
+    }
+
     // Keep the connected user's own role cache in step with the mutation
     // (restores the legacy ADD/REMOVE_CF_ROLE_SUCCESS reducer update, which
     // went dead when role changes moved off the ngrx pipeline). Only the
@@ -263,6 +288,13 @@ function toNativeRoleChange(c: CfRoleChange, username?: string, origin?: string)
   return c.spaceGuid
     ? { ...user, spaceGuid: c.spaceGuid, type, add: c.add }
     : { ...user, orgGuid: c.orgGuid, type, add: c.add };
+}
+
+// StUser role buckets carry the prefix-stripped V3 role names ('manager',
+// 'billing_manager', …) while wizard changes use the plural legacy params
+// ('managers', …) — route through the V3 type and strip the scope prefix.
+function bucketRoleName(c: CfRoleChange): string {
+  return nativeRoleType(c.role, !!c.spaceGuid).replace(/^(organization|space)_/, '');
 }
 
 function nativeRoleType(role: string, isSpace: boolean): string {
