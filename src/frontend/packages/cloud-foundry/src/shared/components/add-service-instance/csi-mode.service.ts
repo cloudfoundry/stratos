@@ -9,6 +9,7 @@ import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -64,6 +65,7 @@ export class CsiModeService {
   private activatedRoute = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
 
 
   private mode!: string;
@@ -197,10 +199,19 @@ export class CsiModeService {
     if (params && Object.keys(params).length > 0) {
       body['parameters'] = params;
     }
-    const fireBind = () => firstValueFrom(from(writeWithJob<unknown>(
-      this.http,
-      this.http.post(`/pp/v1/cf/service_bindings/${cfGuid}`, body, { observe: 'response' }),
-    )));
+    const fireBind = async () => {
+      await writeWithJob<unknown>(
+        this.http,
+        this.http.post(`/pp/v1/cf/service_bindings/${cfGuid}`, body, { observe: 'response' }),
+      );
+      // A new binding changes the app's services and the SI's boundApps —
+      // fire the serviceBinding.create cascade (apps + serviceInstances) so
+      // sticky readers like the services-wall pre-seed refetch instead of
+      // resurrecting pre-bind rows. Restores the legacy
+      // serviceInstanceReducer cross-entity update as cache invalidation;
+      // covers both the inline and the background-retry bind paths.
+      this.endpointDataRegistry.peek(cfGuid)?.applyCascade('serviceBinding.create');
+    };
 
     try {
       await fireBind();
