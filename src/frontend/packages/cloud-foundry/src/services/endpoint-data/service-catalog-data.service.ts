@@ -98,6 +98,21 @@ export class ServiceCatalogDataService {
     );
   }
 
+  // Single plan at details tier. The services-domain list caches are
+  // summary-tier, and plan `schemas` only ship at details — so the
+  // create/edit-service-instance parameter step fetches the selected
+  // plan here or its schema-driven form silently degrades to the raw
+  // JSON textbox.
+  servicePlan(cnsiGuid: string, planGuid: string): SignalSource<StServicePlan | null> {
+    return this.signalize(
+      this.http.get<StServicePlan>(
+        `/pp/v1/cf/service_plans/${cnsiGuid}/${planGuid}`,
+        { params: new HttpParams().set('return', 'details') },
+      ).pipe(this.catchAs404Null()),
+      null,
+    );
+  }
+
   planVisibility(cnsiGuid: string, planGuid: string): SignalSource<StServicePlanVisibility | null> {
     return this.signalize(
       this.http.get<StServicePlanVisibility>(

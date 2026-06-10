@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -29,6 +29,7 @@ import {
 import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult, StratosJobError } from '../../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
@@ -61,6 +62,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private csiGuidsService = inject(CsiGuidsService);
   private csiState = inject(CsiStateService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
   modeService = inject(CsiModeService);
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
@@ -118,7 +120,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private _serviceParamsValid = signal<boolean>(false);
   serviceParamsValid = toObservable(this._serviceParamsValid);
   serviceParams: object = {};
-  schemaFormConfig!: SchemaFormConfig;
+  // Signal (not a plain field): the schema arrives async from the
+  // details-tier plan fetch below, and under zoneless+OnPush a plain
+  // field reassignment would never reach the <app-schema-form> input.
+  schemaFormConfig = signal<SchemaFormConfig | undefined>(undefined);
+  // The selected plan's details-tier fetch. The wizard's plan list is
+  // summary-tier, which omits `schemas` — without this second fetch the
+  // schema-driven parameter form always degraded to the JSON textbox.
+  private detailedPlanSource = signal<SignalSource<StServicePlan | null> | null>(null);
 
 
   nameTakenValidator = (): ValidatorFn => {
@@ -162,36 +171,86 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // already bound. Re-introduce the annotation when this stepper
     // integrates with the bindings-per-app signal.
     this.bindableServiceInstances$ = this.serviceInstances$;
+
+    // Graft the details-tier schema onto the form config once the plan
+    // fetch kicked off in onEnter lands. Preserves any initialData the
+    // edit-mode seeding set in the meantime.
+    effect(() => {
+      const src = this.detailedPlanSource();
+      if (!src || src.isLoading()) {
+        return;
+      }
+      const schema = this.planSchema(src.value() ?? undefined);
+      if (!schema) {
+        return;
+      }
+      this.schemaFormConfig.update(cfg => ({ ...(cfg ?? {}), schema }));
+    });
+  }
+
+  // The schema driving the parameter form — create or update flavor
+  // depending on the wizard mode.
+  private planSchema(plan?: StServicePlan): object | undefined {
+    return this.modeService.isEditServiceInstanceMode() ?
+      plan?.schemas?.serviceInstance?.update?.parameters :
+      plan?.schemas?.serviceInstance?.create?.parameters;
+  }
+
+  // onEnter can run before the serviceInstances$ chain above (whose
+  // switchMap lazily constructs the helper on first subscription) has
+  // emitted — entering the step then dereferenced an undefined helper
+  // and threw. Build it deterministically from the wizard state instead.
+  private ensureHelper(): CreateServiceInstanceHelper | undefined {
+    if (!this.cSIHelperService) {
+      const state = this.csiState.state();
+      if (state?.cfGuid && state?.serviceGuid) {
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
+      }
+    }
+    return this.cSIHelperService;
   }
 
   onEnter = (selectedServicePlan: StServicePlan) => {
-    const schema = this.modeService.isEditServiceInstanceMode() ?
-      selectedServicePlan?.schemas?.serviceInstance?.update?.parameters :
-      selectedServicePlan?.schemas?.serviceInstance?.create?.parameters;
+    const schema = this.planSchema(selectedServicePlan);
 
-    if (!this.schemaFormConfig) {
-      // Create new config
-      this.schemaFormConfig = {
-        schema
-      };
-    } else {
+    const current = this.schemaFormConfig();
+    this.schemaFormConfig.set(current
       // Update existing config (retaining any existing config)
-      this.schemaFormConfig = {
-        ...this.schemaFormConfig,
-        initialData: this.serviceParams,
-        schema
-      };
+      ? { ...current, initialData: this.serviceParams, schema }
+      : { schema });
+
+    // The plan handed over by the select-plan step comes from the
+    // summary-tier list cache, which omits `schemas` — fetch the
+    // selected plan at details so a broker-advertised parameter schema
+    // can drive the form (the constructor effect grafts it on). The
+    // stepper only relays the plan into the *next* step's onEnter, so
+    // when the bind-app step sits in between this step enters with no
+    // arg — fall back to the wizard state for the plan/cnsi guids.
+    if (!schema) {
+      const state = this.csiState.state();
+      const planGuid = selectedServicePlan?.guid || state?.servicePlanGuid;
+      const cnsiGuid = selectedServicePlan?.cnsiGuid || state?.cfGuid;
+      if (planGuid && cnsiGuid) {
+        this.detailedPlanSource.set(this.serviceCatalog.servicePlan(cnsiGuid, planGuid));
+      }
     }
 
     this.formMode = CreateServiceFormMode.CreateServiceInstance;
-    this.allServiceInstances$ = this.cSIHelperService.serviceInstances$();
+    const helper = this.ensureHelper();
+    if (helper) {
+      this.allServiceInstances$ = helper.serviceInstances$();
+      this.subscriptions.push(this.setupFormValidatorData());
+    }
     if (this.modeService.isEditServiceInstanceMode()) {
       this.csiState$.pipe(
         take(1),
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.schemaFormConfig.initialData = safeStringToObj(state.parameters) || this.serviceParams;
+          this.schemaFormConfig.update(cfg => ({
+            ...(cfg ?? { schema }),
+            initialData: safeStringToObj(state.parameters) || this.serviceParams,
+          }));
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
@@ -202,7 +261,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         })
       ).subscribe();
     }
-    this.subscriptions.push(this.setupFormValidatorData());
   };
 
   setServiceParams(data: any) {
@@ -219,7 +277,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // at false and only flips true on a real value change, which never
     // fires for an empty/no-schema editor. Without this guard the Create
     // button stays disabled even though the user has nothing to enter.
-    if (!valid && !this.schemaFormConfig?.schema) {
+    if (!valid && !this.schemaFormConfig()?.schema) {
       this._serviceParamsValid.set(true);
       return;
     }

@@ -52,9 +52,14 @@ export class CfUsersRolesDataService {
   /** Per-change apply state, keyed by {@link changeKey}, populated by executeChanges. */
   readonly applyStatus: Signal<Record<string, RoleChangeApplyState>> = this._applyStatus.asReadonly();
 
-  /** Stable identity for a role change — used to key applyStatus per row. */
+  /**
+   * Stable identity for a role change — used to key applyStatus per row.
+   * Includes the add/remove direction: without it, a later change that
+   * inverts an already-applied one (add after remove, or vice versa)
+   * collides with the completed entry and shows its stale status.
+   */
   static changeKey(c: CfRoleChange): string {
-    return `${c.userGuid}/${c.orgGuid}/${c.spaceGuid ?? ''}/${c.role}`;
+    return `${c.userGuid}/${c.orgGuid}/${c.spaceGuid ?? ''}/${c.role}/${c.add ? 'add' : 'remove'}`;
   }
 
   readonly cfGuid: Signal<string> = this._cfGuid.asReadonly();
@@ -92,6 +97,10 @@ export class CfUsersRolesDataService {
     this._usernameOrigin.set(undefined);
     this._isRemove.set(undefined);
     this._isSetByUsername.set(undefined);
+    // Without this, a fresh wizard run whose changes collide with a
+    // previous run's keys paints them as already "Done" on the confirm
+    // step before Apply is pressed.
+    this._applyStatus.set({});
   }
 
   /** Switch the org context, resetting the role matrix. */

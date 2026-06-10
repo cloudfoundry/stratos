@@ -54,6 +54,77 @@ describe('SpecifyDetailsStepComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // Regression: onEnter used to dereference cSIHelperService, which is only
+  // constructed as a side-effect of the serviceInstances$ chain's first
+  // emission — entering the step before that threw a TypeError (GH#5438).
+  it('onEnter builds the CSI helper from wizard state instead of throwing', () => {
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+
+    expect(component.cSIHelperService).toBeUndefined();
+    expect(() => component.onEnter({ guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small' } as any)).not.toThrow();
+    expect(component.cSIHelperService).toBeDefined();
+    expect(component.allServiceInstances$).toBeDefined();
+  });
+
+  // Regression: the wizard's plan list is summary-tier (no `schemas`), so
+  // the schema-driven param form always degraded to the raw JSON textbox
+  // (GH#5437). onEnter now fetches the selected plan at details and grafts
+  // the schema onto the form config when it lands.
+  it('onEnter fetches the selected plan at details and adopts its schema', async () => {
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    component.onEnter({ guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small' } as any);
+    expect(component.schemaFormConfig()?.schema).toBeUndefined();
+
+    const schema = { type: 'object', properties: { size: { type: 'string' } } };
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_plans/cf-1/plan-1' && r.params.get('return') === 'details');
+    req.flush({ guid: 'plan-1', name: 'small', schemas: { serviceInstance: { create: { parameters: schema } } } });
+    await fixture.whenStable();
+
+    expect(component.schemaFormConfig()?.schema).toEqual(schema);
+  });
+
+  // The stepper only relays select-plan's data into the NEXT step's
+  // onEnter; with the bind-app step in between, this step enters with no
+  // arg and must derive the plan from wizard state.
+  it('onEnter falls back to wizard state for the details fetch when no plan is passed', async () => {
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+    csiState.setServicePlan('plan-1');
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    component.onEnter(undefined as any);
+
+    const schema = { type: 'object', properties: { size: { type: 'string' } } };
+    const req = httpMock.expectOne(r => r.url === '/pp/v1/cf/service_plans/cf-1/plan-1' && r.params.get('return') === 'details');
+    req.flush({ guid: 'plan-1', name: 'small', schemas: { serviceInstance: { create: { parameters: schema } } } });
+    await fixture.whenStable();
+
+    expect(component.schemaFormConfig()?.schema).toEqual(schema);
+  });
+
+  it('onEnter skips the details fetch when the plan already carries a schema', () => {
+    const csiState = TestBed.inject(CsiStateService);
+    csiState.setCFDetails('cf-1', 'org-1', 'sp-1');
+    csiState.setServiceGuid('svc-1');
+    const httpMock = TestBed.inject(HttpTestingController);
+    const schema = { type: 'object' };
+
+    component.onEnter({
+      guid: 'plan-1', cnsiGuid: 'cf-1', name: 'small',
+      schemas: { serviceInstance: { create: { parameters: schema } } },
+    } as any);
+
+    httpMock.expectNone(r => r.url.startsWith('/pp/v1/cf/service_plans/'));
+    expect(component.schemaFormConfig()?.schema).toEqual(schema);
+  });
 });
 
 // Stage 5 of the services-domain signal+V3 slice: managed service instance
