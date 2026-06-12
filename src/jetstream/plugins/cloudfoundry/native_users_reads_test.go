@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -281,18 +280,19 @@ func TestGetNativeUsers_CountsFastPath(t *testing.T) {
 	assert.Empty(t, resp.Resources)
 }
 
-// TestGetNativeUsers_SpaceOrgFallbackChunks locks the chunked /v3/spaces
-// fallback. Real CF space roles carry NO organization relationship (the
-// inline-org shape in TestGetNativeUsers_BoundedRoleJoin is the lucky
-// path), so every space must resolve through /v3/spaces?guids=. With an
-// admin-grade role list (hundreds of spaces) a single guids= join blew
-// the CF request-line limit, the lookup failed silently, and every space
-// bucket shipped with an empty orgGuid — breaking the Manage Roles
-// baseline (GH#5439). The fallback must batch guids ≤ spaceGUIDChunkSize
-// per request and still resolve every bucket.
-func TestGetNativeUsers_SpaceOrgFallbackChunks(t *testing.T) {
+// TestGetNativeUsers_SpaceOrgFromIncludedSpaces locks the include=space
+// space→org resolution. Real CF space roles carry NO organization
+// relationship (the inline-org shape in TestGetNativeUsers_BoundedRoleJoin
+// is the lucky path), so every space must resolve through the roles
+// response's included.spaces block. This replaced the chunked
+// /v3/spaces?guids= fan-out (GH#5439 lineage: 25+ extra requests at
+// admin scale, request-line-limit fragility) with zero extra requests —
+// /v3/roles must carry include=space on the wire and /v3/spaces must
+// never be hit.
+func TestGetNativeUsers_SpaceOrgFromIncludedSpaces(t *testing.T) {
 	const spaceCount = 250
-	var spacesRequests [][]string
+	var rolesIncludeParam string
+	spacesHits := 0
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
@@ -306,7 +306,9 @@ func TestGetNativeUsers_SpaceOrgFallbackChunks(t *testing.T) {
 				},
 			})
 		case "/v3/roles":
+			rolesIncludeParam = r.URL.Query().Get("include")
 			roles := make([]map[string]interface{}, 0, spaceCount)
+			spaces := make([]map[string]interface{}, 0, spaceCount)
 			for i := 0; i < spaceCount; i++ {
 				roles = append(roles, map[string]interface{}{
 					"guid": fmt.Sprintf("role-%d", i), "type": "space_developer",
@@ -316,27 +318,21 @@ func TestGetNativeUsers_SpaceOrgFallbackChunks(t *testing.T) {
 						"space":        map[string]interface{}{"data": map[string]interface{}{"guid": fmt.Sprintf("space-%d", i)}},
 					},
 				})
-			}
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_results": spaceCount, "total_pages": 1, "next": nil},
-				"resources":  roles,
-			})
-		case "/v3/spaces":
-			guids := strings.Split(r.URL.Query().Get("guids"), ",")
-			spacesRequests = append(spacesRequests, guids)
-			spaces := make([]map[string]interface{}, 0, len(guids))
-			for _, g := range guids {
 				spaces = append(spaces, map[string]interface{}{
-					"guid": g, "name": g,
+					"guid": fmt.Sprintf("space-%d", i), "name": fmt.Sprintf("space-%d", i),
 					"relationships": map[string]interface{}{
 						"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
 					},
 				})
 			}
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_results": len(spaces), "total_pages": 1, "next": nil},
-				"resources":  spaces,
+				"pagination": map[string]interface{}{"total_results": spaceCount, "total_pages": 1, "next": nil},
+				"resources":  roles,
+				"included":   map[string]interface{}{"spaces": spaces},
 			})
+		case "/v3/spaces":
+			spacesHits++
+			http.NotFound(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -359,19 +355,14 @@ func TestGetNativeUsers_SpaceOrgFallbackChunks(t *testing.T) {
 	c.SetParamValues("cnsi-1")
 	require.NoError(t, plugin.getNativeUsers(c))
 
-	require.NotEmpty(t, spacesRequests, "space-org fallback must run when roles carry no org relationship")
-	seen := 0
-	for _, guids := range spacesRequests {
-		assert.LessOrEqual(t, len(guids), spaceGUIDChunkSize, "each /v3/spaces lookup must stay within the guid chunk size")
-		seen += len(guids)
-	}
-	assert.Equal(t, spaceCount, seen, "every unresolved space must be looked up exactly once (deduped)")
+	assert.Equal(t, "space", rolesIncludeParam, "/v3/roles must request include=space on the wire")
+	assert.Zero(t, spacesHits, "space→org must resolve from included.spaces — no /v3/spaces fan-out")
 
 	var resp StratosPagedResponse[StUser]
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Resources, 1)
 	require.Len(t, resp.Resources[0].SpaceRoles, spaceCount)
 	for _, sr := range resp.Resources[0].SpaceRoles {
-		assert.Equal(t, "org-1", sr.OrgGuid, "space bucket %s must carry the fallback-resolved parent org", sr.SpaceGuid)
+		assert.Equal(t, "org-1", sr.OrgGuid, "space bucket %s must carry the include-resolved parent org", sr.SpaceGuid)
 	}
 }

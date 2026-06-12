@@ -76,9 +76,9 @@ var spaceBucketKeys = []string{
 //   - Admin (no explicit grants): 1 (returns 0 rows quickly)
 //   - Heavy (admin with thousands of explicit grants): 2 wall-clock RTTs
 //     (page 1 sequential, pages 2..N fanned out with maxConcurrency=6)
-//   - Pathological (space role row missing org relationship): +1 paginated
-//     /v3/spaces?guids= to recover space→org. Bounded by the missing-space
-//     set; rare in practice since V3 role rows for spaces carry the org.
+//   - Pathological (space role row missing org relationship): zero extra
+//     requests — space→org recovers from the include=space block riding
+//     along on the /v3/roles response.
 func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) (err error) {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	rows := 0
@@ -102,7 +102,7 @@ func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) 
 	}
 
 	rStart := time.Now()
-	roles, rerr := listRolesForUsers(ctx.Request().Context(), cfClient, []string{cfUserGUID})
+	roles, includedSpaceOrg, rerr := listRolesForUsers(ctx.Request().Context(), cfClient, []string{cfUserGUID})
 	rRows := -1
 	if rerr == nil {
 		rRows = len(roles)
@@ -116,27 +116,13 @@ func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) 
 	buckets, missingSpaces := projectRolesToBuckets(roles)
 
 	// Backfill space→org for any space role row that arrived without an
-	// organization relationship. Bounded by the missing-space set; same
-	// pattern as buildUserRoleBuckets. Logged separately so a production
-	// trace can attribute slow requests to the fallback vs the main fetch.
+	// organization relationship, using the include=space block that rode
+	// along on the /v3/roles response — no follow-up /v3/spaces request.
 	if len(missingSpaces) > 0 {
-		sStart := time.Now()
-		spaces, sErr := listSpacesByGUIDs(ctx.Request().Context(), cfClient, missingSpaces)
-		sRows := -1
-		if sErr == nil {
-			sRows = len(spaces)
-		}
-		logCapiTiming("getNativeCurrentUserRoles.spaces_fallback", -1, -1, len(missingSpaces), sStart, sErr, sRows, -1)
-		if sErr == nil {
-			spaceOrg := make(map[string]string, len(spaces))
-			for _, s := range spaces {
-				spaceOrg[s.GUID] = relationshipGUID(s.Relationships.Organization)
-			}
-			for _, key := range spaceBucketKeys {
-				for i := range buckets[key] {
-					if buckets[key][i].Entity.OrganizationGUID == "" {
-						buckets[key][i].Entity.OrganizationGUID = spaceOrg[buckets[key][i].Metadata.GUID]
-					}
+		for _, key := range spaceBucketKeys {
+			for i := range buckets[key] {
+				if buckets[key][i].Entity.OrganizationGUID == "" {
+					buckets[key][i].Entity.OrganizationGUID = includedSpaceOrg[buckets[key][i].Metadata.GUID]
 				}
 			}
 		}
@@ -163,7 +149,7 @@ func bucketKeysAll() []string {
 // buckets the frontend reducer expects. Returns the bucket map (every
 // canonical key present, possibly empty) plus the unique space GUIDs
 // whose role rows lacked an organization relationship — the caller
-// backfills with listSpacesByGUIDs.
+// backfills from the roles response's include=space block.
 //
 // Duplicates within a bucket are collapsed: if the same (user, org)
 // receives e.g. organization_user twice (shouldn't happen but cheap to
