@@ -126,7 +126,9 @@ func (c *CloudFoundrySpecification) deleteNativeOrgQuota(ctx echo.Context) error
 		return err
 	}
 
-	if delErr := cfClient.OrganizationQuotas().Delete(ctx.Request().Context(), quotaGUID); delErr != nil {
+	// fw-capi >= v3.217 returns the async job ref; the UI contract here
+	// stays 204-on-accepted, so the job is not yet surfaced.
+	if _, delErr := cfClient.OrganizationQuotas().Delete(ctx.Request().Context(), quotaGUID); delErr != nil {
 		return handleCapiError(ctx, delErr)
 	}
 

@@ -22,9 +22,9 @@ export interface OrgQuotaWriteBody {
   name?: string;
   apps?: {
     total_memory_in_mb?: number | null;
-    total_instance_memory_in_mb?: number | null;
+    per_process_memory_in_mb?: number | null;
     total_instances?: number | null;
-    total_app_tasks?: number | null;
+    per_app_tasks?: number | null;
   };
   services?: {
     paid_services_allowed?: boolean;

@@ -32,9 +32,9 @@ export function formToOrgQuotaWriteBody(values: OrgQuotaFormValues): OrgQuotaWri
     name: values.name,
     apps: {
       total_memory_in_mb: limitToWire(values.memoryLimit),
-      total_instance_memory_in_mb: limitToWire(values.instanceMemoryLimit),
+      per_process_memory_in_mb: limitToWire(values.instanceMemoryLimit),
       total_instances: limitToWire(values.appInstanceLimit),
-      total_app_tasks: limitToWire(values.appTasksLimit),
+      per_app_tasks: limitToWire(values.appTasksLimit),
     },
     services: {
       paid_services_allowed: !!values.nonBasicServicesAllowed,
@@ -63,9 +63,9 @@ export function formToSpaceQuotaUpdateBody(values: SpaceQuotaFormValues): SpaceQ
     name: values.name,
     apps: {
       total_memory_in_mb: limitToWire(values.memoryLimit),
-      total_instance_memory_in_mb: limitToWire(values.instanceMemoryLimit),
+      per_process_memory_in_mb: limitToWire(values.instanceMemoryLimit),
       total_instances: limitToWire(values.appInstanceLimit),
-      total_app_tasks: limitToWire(values.appTasksLimit),
+      per_app_tasks: limitToWire(values.appTasksLimit),
     },
     services: {
       paid_services_allowed: !!values.nonBasicServicesAllowed,
