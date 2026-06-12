@@ -2,9 +2,10 @@
 package cloudfoundry
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -87,7 +88,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 		return handleCapiError(ctx, lerr)
 	}
 
-	resolved := resolveInstanceIncludes(raw.Included, mode)
+	resolved := resolveInstanceIncludes(raw, mode)
 
 	out := make([]StServiceInstance, 0, len(raw.Resources))
 	for _, si := range raw.Resources {
@@ -142,7 +143,7 @@ func fetchBoundAppsForServiceInstances(ctx echo.Context, cfClient capi.Client, s
 		if err != nil {
 			return nil, err
 		}
-		appByGUID := appsFromIncluded(raw.Included)
+		_, appByGUID := bindingJoinsFromIncluded(raw)
 		for _, b := range raw.Resources {
 			siGUID := relationshipGUID(b.Relationships.ServiceInstance)
 			if siGUID == "" || b.Relationships.App == nil {
@@ -223,11 +224,10 @@ func applyServiceInstanceIncludeFields(params *capi.QueryParams) *capi.QueryPara
 		WithFields("space.organization", "guid", "name")
 }
 
-// instanceIncludes bundles the four guid-keyed maps decoded from the
-// v3 `included` block on a service-instances list response. Empty
-// maps when the include chain is absent (base mode) or when the
-// upstream returns nothing — toStServiceInstance falls back to
-// guid-only refs.
+// instanceIncludes bundles the guid-keyed maps decoded from the v3
+// `included` block on a service-instances list response. Empty maps
+// when the include chain is absent (base mode) or when the upstream
+// returns nothing — toStServiceInstance falls back to guid-only refs.
 type instanceIncludes struct {
 	plans     map[string]capi.ServicePlan
 	offerings map[string]capi.ServiceOffering
@@ -236,7 +236,7 @@ type instanceIncludes struct {
 	orgs      map[string]capi.Organization
 }
 
-func resolveInstanceIncludes(included map[string][]json.RawMessage, mode ReturnMode) instanceIncludes {
+func resolveInstanceIncludes(list *capi.ListResponse[capi.ServiceInstance], mode ReturnMode) instanceIncludes {
 	out := instanceIncludes{
 		plans:     map[string]capi.ServicePlan{},
 		offerings: map[string]capi.ServiceOffering{},
@@ -244,14 +244,21 @@ func resolveInstanceIncludes(included map[string][]json.RawMessage, mode ReturnM
 		spaces:    map[string]capi.Space{},
 		orgs:      map[string]capi.Organization{},
 	}
-	if mode == ReturnBase || included == nil {
+	if mode == ReturnBase {
 		return out
 	}
-	out.plans = plansFromIncluded(included)
-	out.offerings = offeringsFromIncluded(included)
-	out.brokers = brokersFromIncluded(included)
-	out.spaces = spacesFromIncluded(included)
-	out.orgs = orgsFromIncluded(included)
+	inc, err := capi.ServiceInstanceIncludedFrom(list)
+	if err != nil {
+		// Soft-fail: a malformed included block degrades rows to guid-only
+		// refs rather than 502'ing the whole list.
+		log.Warnf("service_instances: could not decode included block: %v", err)
+		return out
+	}
+	out.plans = keyByGUID(inc.ServicePlans, func(p capi.ServicePlan) string { return p.GUID })
+	out.offerings = keyByGUID(inc.ServiceOfferings, func(o capi.ServiceOffering) string { return o.GUID })
+	out.brokers = keyByGUID(inc.ServiceBrokers, func(b capi.ServiceBroker) string { return b.GUID })
+	out.spaces = keyByGUID(inc.Spaces, func(s capi.Space) string { return s.GUID })
+	out.orgs = keyByGUID(inc.Organizations, func(o capi.Organization) string { return o.GUID })
 	return out
 }
 
@@ -330,44 +337,6 @@ func (c *CloudFoundrySpecification) getNativeServiceInstanceDetail(ctx echo.Cont
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, toStServiceInstance(*si, cnsiGUID, resolved, mode))
-}
-
-// plansFromIncluded decodes v3's `included.service_plans` block.
-func plansFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServicePlan {
-	out := map[string]capi.ServicePlan{}
-	if included == nil {
-		return out
-	}
-	rawPlans, ok := included["service_plans"]
-	if !ok {
-		return out
-	}
-	for _, raw := range rawPlans {
-		var p capi.ServicePlan
-		if err := json.Unmarshal(raw, &p); err == nil && p.GUID != "" {
-			out[p.GUID] = p
-		}
-	}
-	return out
-}
-
-// orgsFromIncluded decodes v3's `included.organizations` block.
-func orgsFromIncluded(included map[string][]json.RawMessage) map[string]capi.Organization {
-	out := map[string]capi.Organization{}
-	if included == nil {
-		return out
-	}
-	rawOrgs, ok := included["organizations"]
-	if !ok {
-		return out
-	}
-	for _, raw := range rawOrgs {
-		var o capi.Organization
-		if err := json.Unmarshal(raw, &o); err == nil && o.GUID != "" {
-			out[o.GUID] = o
-		}
-	}
-	return out
 }
 
 // toStServiceInstance maps a capi.ServiceInstance onto the Stratos-shape
@@ -549,7 +518,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.C
 		return handleCapiError(ctx, lerr)
 	}
 
-	resolved := resolveInstanceIncludes(raw.Included, mode)
+	resolved := resolveInstanceIncludes(raw, mode)
 
 	out := make([]StServiceInstance, 0, len(raw.Resources))
 	for _, si := range raw.Resources {
@@ -651,7 +620,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx echo.
 		return handleCapiError(ctx, lerr)
 	}
 
-	resolved := resolveInstanceIncludes(raw.Included, mode)
+	resolved := resolveInstanceIncludes(raw, mode)
 
 	out := make([]StServiceInstance, 0, len(raw.Resources))
 	for _, si := range raw.Resources {

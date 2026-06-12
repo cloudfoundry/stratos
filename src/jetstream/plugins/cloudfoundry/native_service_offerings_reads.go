@@ -2,9 +2,10 @@
 package cloudfoundry
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -19,29 +20,16 @@ import (
 //     Existing legacy shape preserved verbatim — counts probes
 //     already wired across the frontend rely on it.
 //   - base     — entity fields only; no broker ref. One CAPI call.
-//   - summary  — base + broker.{guid,name}. Today: one /v3/service_offerings
-//     call plus one batched /v3/service_brokers?guids=… draw
-//     because the capi/v3 client doesn't surface the v3
-//     response's `included` block (TODO below). When that's
-//     fixed the broker join collapses into the same single call
-//     via ?include=service_broker.
+//   - summary  — base + broker.{guid,name}. One CAPI call: the
+//     `fields[service_broker]` sparse fieldset brings the broker
+//     rows back in the v3 `included` block.
 //   - details  — summary + offering extended fields (description, tags,
 //     requires, documentationUrl, brokerCatalogMetadata,
 //     shareable) and broker ref expanded with URL. Same
-//     two-call shape as summary today.
+//     single-call shape as summary.
 //
-// Per-page broker join: the unique broker GUIDs referenced by THIS page's
-// offerings are resolved with one batched /v3/service_brokers?guids=… call
-// (bounded by the page's broker-set size). Soft-fail: a broker-list error
-// leaves Broker nil rather than 502'ing the whole marketplace.
-//
-// TODO(capi-fork): the upstream capi/v3 ListResponse[T] type drops the
-// `included` block from v3 responses, so ?include=service_broker can't
-// substitute for the per-page batch broker fetch yet. See KS memory
-// project_capi_fork_reference.md and reference_capi_openapi_spec_include.md
-// for the fork plan; once the spec/types model `included`, the broker
-// drain here collapses into a single CAPI call and the broker batch goes
-// away.
+// Broker join soft-fail: a missing or malformed `included` block leaves
+// Broker refs guid-only rather than 502'ing the whole marketplace.
 func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -110,7 +98,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 	// Broker join only applies for summary+ — base ships without refs.
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		brokerByGUID = brokersFromIncluded(rawOfferings.Included)
+		brokerByGUID = brokersFromIncluded(rawOfferings)
 	}
 
 	out := make([]StServiceOffering, 0, len(offerings))
@@ -242,7 +230,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx echo.
 
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		brokerByGUID = brokersFromIncluded(raw.Included)
+		brokerByGUID = brokersFromIncluded(raw)
 	}
 
 	out := make([]StServiceOffering, 0, len(raw.Resources))
@@ -256,27 +244,18 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx echo.
 	})
 }
 
-// brokersFromIncluded decodes v3's `included.service_brokers` block (set
-// by `?include=service_broker` on the offerings list) into a guid-keyed
-// map. Soft-fail: malformed entries are skipped silently rather than
-// 502'ing the whole response — same defensive posture as the broker
-// drain it replaced.
-func brokersFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServiceBroker {
-	out := map[string]capi.ServiceBroker{}
-	if included == nil {
-		return out
+// brokersFromIncluded extracts v3's `included.service_brokers` block (set
+// by the `fields[service_broker]` join on the offerings list) into a
+// guid-keyed map. Soft-fail: a malformed included block logs a warning
+// and returns an empty map rather than 502'ing the whole response — same
+// defensive posture as the broker drain it replaced.
+func brokersFromIncluded(list *capi.ListResponse[capi.ServiceOffering]) map[string]capi.ServiceBroker {
+	inc, err := capi.ServiceOfferingIncludedFrom(list)
+	if err != nil {
+		log.Warnf("service_offerings: could not decode included block: %v", err)
+		return map[string]capi.ServiceBroker{}
 	}
-	rawBrokers, ok := included["service_brokers"]
-	if !ok {
-		return out
-	}
-	for _, raw := range rawBrokers {
-		var b capi.ServiceBroker
-		if err := json.Unmarshal(raw, &b); err == nil && b.GUID != "" {
-			out[b.GUID] = b
-		}
-	}
-	return out
+	return keyByGUID(inc.ServiceBrokers, func(b capi.ServiceBroker) string { return b.GUID })
 }
 
 // drainBrokersForOfferings batch-fetches the unique brokers referenced by

@@ -18,8 +18,8 @@ import (
 // ?return= modes plus the guids-batch, service_offering filter, and
 // counts fast paths. When the request carries
 // `include=service_offering` (or ...service_broker), the server emits a
-// top-level `included` block so the handler's offeringsFromIncluded /
-// brokersFromIncluded decoders can resolve refs in one round-trip.
+// top-level `included` block so the handler's offeringsFromIncluded
+// decoder can resolve refs in one round-trip.
 func servicePlansTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

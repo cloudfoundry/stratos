@@ -2,8 +2,9 @@
 package cloudfoundry
 
 import (
-	"encoding/json"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -102,8 +103,7 @@ func (c *CloudFoundrySpecification) getAppServiceBindings(ctx echo.Context) erro
 	siByGUID := map[string]capi.ServiceInstance{}
 	appByGUID := map[string]capi.App{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		siByGUID = serviceInstancesFromIncluded(rawBindings.Included)
-		appByGUID = appsFromIncluded(rawBindings.Included)
+		siByGUID, appByGUID = bindingJoinsFromIncluded(rawBindings)
 	}
 
 	out := make([]StServiceCredentialBinding, 0, len(bindings))
@@ -193,8 +193,7 @@ func (c *CloudFoundrySpecification) getServiceInstanceServiceBindings(ctx echo.C
 	siByGUID := map[string]capi.ServiceInstance{}
 	appByGUID := map[string]capi.App{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		siByGUID = serviceInstancesFromIncluded(rawBindings.Included)
-		appByGUID = appsFromIncluded(rawBindings.Included)
+		siByGUID, appByGUID = bindingJoinsFromIncluded(rawBindings)
 	}
 
 	out := make([]StServiceCredentialBinding, 0, len(bindings))
@@ -208,46 +207,19 @@ func (c *CloudFoundrySpecification) getServiceInstanceServiceBindings(ctx echo.C
 	})
 }
 
-// serviceInstancesFromIncluded decodes v3's `included.service_instances`
-// block into a guid-keyed map. Set on summary+ requests via
-// ?include=service_instance. Soft-fail on malformed entries.
-func serviceInstancesFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServiceInstance {
-	out := map[string]capi.ServiceInstance{}
-	if included == nil {
-		return out
+// bindingJoinsFromIncluded extracts the `included` block of a
+// credential-bindings list (set on summary+ requests via
+// ?include=app,service_instance) into guid-keyed service-instance and
+// app maps. Soft-fail: a malformed included block logs a warning and
+// returns empty maps — rows fall back to the binding's own fields.
+func bindingJoinsFromIncluded(list *capi.ListResponse[capi.ServiceCredentialBinding]) (map[string]capi.ServiceInstance, map[string]capi.App) {
+	inc, err := capi.ServiceCredentialBindingIncludedFrom(list)
+	if err != nil {
+		log.Warnf("service_credential_bindings: could not decode included block: %v", err)
+		return map[string]capi.ServiceInstance{}, map[string]capi.App{}
 	}
-	raws, ok := included["service_instances"]
-	if !ok {
-		return out
-	}
-	for _, raw := range raws {
-		var si capi.ServiceInstance
-		if err := json.Unmarshal(raw, &si); err == nil && si.GUID != "" {
-			out[si.GUID] = si
-		}
-	}
-	return out
-}
-
-// appsFromIncluded decodes v3's `included.apps` block into a guid-keyed
-// map. Set on summary+ requests via ?include=app. Soft-fail on malformed
-// entries.
-func appsFromIncluded(included map[string][]json.RawMessage) map[string]capi.App {
-	out := map[string]capi.App{}
-	if included == nil {
-		return out
-	}
-	raws, ok := included["apps"]
-	if !ok {
-		return out
-	}
-	for _, raw := range raws {
-		var app capi.App
-		if err := json.Unmarshal(raw, &app); err == nil && app.GUID != "" {
-			out[app.GUID] = app
-		}
-	}
-	return out
+	return keyByGUID(inc.ServiceInstances, func(si capi.ServiceInstance) string { return si.GUID }),
+		keyByGUID(inc.Apps, func(a capi.App) string { return a.GUID })
 }
 
 // toStServiceCredentialBinding maps a capi.ServiceCredentialBinding onto
