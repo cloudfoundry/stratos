@@ -117,7 +117,13 @@ func (c *CloudFoundrySpecification) createNativeSpace(ctx echo.Context) error {
 // Stratos-shape wrapper around CF V3 PATCH /v3/spaces/{guid}.
 //
 // Sync write: V3 returns 200 with the updated space. Body shape is
-// capi.SpaceUpdateRequest = {name?, metadata?}.
+// capi.SpaceUpdateRequest = {name?, metadata?} plus an optional Stratos
+// extension `isolation_segment_guid`. V3 moved a space's isolation
+// segment off the space attributes onto a relationship endpoint
+// (PATCH /v3/spaces/{guid}/relationships/isolation_segment), so when
+// the field is present the handler chains that call: a non-empty GUID
+// assigns the segment, "" unassigns it (reverting the space to the
+// org's default). Absent field leaves the relationship untouched.
 func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
@@ -125,7 +131,10 @@ func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and spaceGuid are required")
 	}
 
-	var req capi.SpaceUpdateRequest
+	var req struct {
+		capi.SpaceUpdateRequest
+		IsolationSegmentGUID *string `json:"isolation_segment_guid"`
+	}
 	if err := json.NewDecoder(ctx.Request().Body).Decode(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))
 	}
@@ -140,9 +149,17 @@ func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 		return err
 	}
 
-	space, updErr := cfClient.Spaces().Update(ctx.Request().Context(), spaceGUID, &req)
+	space, updErr := cfClient.Spaces().Update(ctx.Request().Context(), spaceGUID, &req.SpaceUpdateRequest)
 	if updErr != nil {
 		return handleCapiError(ctx, updErr)
+	}
+
+	if req.IsolationSegmentGUID != nil {
+		if _, isoErr := cfClient.Spaces().SetIsolationSegment(ctx.Request().Context(), spaceGUID, *req.IsolationSegmentGUID); isoErr != nil {
+			// The attribute PATCH already landed; surface the relationship
+			// failure rather than masking the partial update.
+			return handleCapiError(ctx, isoErr)
+		}
 	}
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
