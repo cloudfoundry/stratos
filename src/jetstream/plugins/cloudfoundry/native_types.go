@@ -712,6 +712,24 @@ type StSpaceQuotasResponse struct {
 	TotalResults int            `json:"totalResults"`
 }
 
+// StIsolationSegment is the Stratos-shaped DTO for a CF isolation
+// segment. Isolation segments pin orgs/spaces to dedicated Diego cells;
+// the v3 resource itself is just {guid, name, metadata}. Read-only at
+// this tier — create/update/delete and org entitlement management are
+// platform-operator concerns not yet surfaced in the UI.
+type StIsolationSegment struct {
+	GUID      string `json:"guid"`
+	Name      string `json:"name"`
+	CnsiGUID  string `json:"cnsiGuid"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type StIsolationSegmentsResponse struct {
+	Resources    []StIsolationSegment `json:"resources"`
+	TotalResults int                  `json:"totalResults"`
+}
+
 // StAuditEvent is the Stratos-shaped DTO for a CF audit event. Audit
 // events are CF's foundation-wide activity log: every successful API
 // call leaves a record with actor, target, type, optional space/org

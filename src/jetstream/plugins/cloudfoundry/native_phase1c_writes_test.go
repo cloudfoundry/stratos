@@ -207,6 +207,79 @@ func TestUpdateNativeSpace_PatchAndReturnsMapped(t *testing.T) {
 	assert.Equal(t, "/v3/spaces/sp-1", ts.lastPath)
 }
 
+// TestUpdateNativeSpace_ForwardsIsolationSegment verifies the Stratos
+// body extension: an `isolation_segment_guid` field chains a PATCH to
+// /v3/spaces/{guid}/relationships/isolation_segment after the attribute
+// update, carrying the segment GUID in the relationship data.
+func TestUpdateNativeSpace_ForwardsIsolationSegment(t *testing.T) {
+	ts := newCaptureServer(map[string]capiHandler{
+		"PATCH /v3/spaces/sp-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "sp-1",
+				"name": "renamed",
+				"relationships": map[string]interface{}{
+					"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z",
+				"updated_at": "2024-01-02T00:00:00Z",
+			})
+		},
+		"PATCH /v3/spaces/sp-1/relationships/isolation_segment": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(`{"data":{"guid":"iso-1"}}`))
+		},
+	})
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/spaces/cnsi-1/sp-1",
+		`{"name":"renamed","isolation_segment_guid":"iso-1"}`)
+	ctx.SetParamNames("cnsiGuid", "spaceGuid")
+	ctx.SetParamValues("cnsi-1", "sp-1")
+
+	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeSpace(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	// The relationship PATCH is the final upstream call; the capture
+	// server's last* fields therefore reflect it.
+	assert.Equal(t, "/v3/spaces/sp-1/relationships/isolation_segment", ts.lastPath)
+	assert.Contains(t, ts.lastBody, `"iso-1"`)
+}
+
+// TestUpdateNativeSpace_UnassignsIsolationSegment verifies "" unassigns:
+// the relationship PATCH carries data:null, reverting the space to the
+// org's default segment. An absent field must NOT touch the
+// relationship endpoint (covered by TestUpdateNativeSpace_PatchAndReturnsMapped,
+// whose capture server would 404 the extra call).
+func TestUpdateNativeSpace_UnassignsIsolationSegment(t *testing.T) {
+	ts := newCaptureServer(map[string]capiHandler{
+		"PATCH /v3/spaces/sp-1": func(w http.ResponseWriter, _ *http.Request) {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"guid": "sp-1",
+				"name": "sp",
+				"relationships": map[string]interface{}{
+					"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+				},
+				"created_at": "2024-01-01T00:00:00Z",
+				"updated_at": "2024-01-02T00:00:00Z",
+			})
+		},
+		"PATCH /v3/spaces/sp-1/relationships/isolation_segment": func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(`{"data":null}`))
+		},
+	})
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/spaces/cnsi-1/sp-1",
+		`{"isolation_segment_guid":""}`)
+	ctx.SetParamNames("cnsiGuid", "spaceGuid")
+	ctx.SetParamValues("cnsi-1", "sp-1")
+
+	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeSpace(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "/v3/spaces/sp-1/relationships/isolation_segment", ts.lastPath)
+	assert.Contains(t, ts.lastBody, `"data":null`)
+}
+
 // ---------------------------------------------------------------------------
 // createNativeRoute
 
