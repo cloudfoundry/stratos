@@ -9,7 +9,6 @@ import (
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
 )
 
 // getNativeUsers handles GET /pp/v1/cf/users/{cnsiGuid}.
@@ -25,12 +24,12 @@ import (
 //
 // Role-join strategy (bounded, post-retrofit):
 //   - Fetch roles only for the user GUIDs on the current /v3/users page
-//     via /v3/roles?user_guids=<csv>. Page size ~50 users → ~5 roles
-//     per user → ~250 roles, typically a single CAPI page; we paginate
-//     defensively if not.
+//     via /v3/roles?user_guids=<csv>&include=space. Page size ~50 users
+//     → ~5 roles per user → ~250 roles, typically a single CAPI page;
+//     we paginate defensively if not.
 //   - For space roles whose organization relationship arrives unset
-//     (rare but defensive), resolve space→org via /v3/spaces?guids=<csv>
-//     scoped to just those space GUIDs.
+//     (rare but defensive), resolve space→org through the response's
+//     include=space block — no follow-up /v3/spaces request.
 //   - Soft-fail on the role drain: if /v3/roles errors, every user on
 //     the page renders with empty role buckets rather than 502'ing the
 //     whole page.
@@ -38,8 +37,8 @@ import (
 // V3 role-relationship contract: every space_* role carries both a
 // space and an organization relationship (since spaces nest under
 // orgs). The bucketing trusts the role's organization relationship
-// when present and falls back to the bounded /v3/spaces lookup when
-// it isn't.
+// when present and falls back to the included space's org when it
+// isn't.
 func (c *CloudFoundrySpecification) getNativeUsers(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -150,7 +149,7 @@ func buildUserRoleBuckets(
 		return orgRolesByUser, spaceRolesByUser
 	}
 
-	roles, rolesErr := listRolesForUsers(ctx, cfClient, userGUIDs)
+	roles, includedSpaceOrg, rolesErr := listRolesForUsers(ctx, cfClient, userGUIDs)
 	if rolesErr != nil {
 		return orgRolesByUser, spaceRolesByUser
 	}
@@ -198,36 +197,6 @@ func buildUserRoleBuckets(
 		}
 	}
 
-	// Fall back to a bounded /v3/spaces lookup for any space role that
-	// arrived without an organization relationship attached. Bounded by
-	// the actual unresolved space GUIDs — never a foundation-wide drain.
-	// Deduped across users: shared spaces would otherwise repeat in the
-	// filter once per user holding a role there.
-	missingSet := make(map[string]struct{})
-	for _, byUser := range spaceScopeAcc {
-		for spaceGUID := range byUser {
-			if _, ok := spaceOrgFromRole[spaceGUID]; !ok {
-				missingSet[spaceGUID] = struct{}{}
-			}
-		}
-	}
-	missingSpaces := make([]string, 0, len(missingSet))
-	for spaceGUID := range missingSet {
-		missingSpaces = append(missingSpaces, spaceGUID)
-	}
-	spaceOrgFallback := make(map[string]string)
-	if len(missingSpaces) > 0 {
-		if spaces, sErr := listSpacesByGUIDs(ctx, cfClient, missingSpaces); sErr == nil {
-			for _, s := range spaces {
-				spaceOrgFallback[s.GUID] = relationshipGUID(s.Relationships.Organization)
-			}
-		} else {
-			// Degrades to empty orgGuid on the affected space buckets —
-			// the Manage Roles wizard then can't key those baselines.
-			log.Warnf("Unable to resolve parent orgs for %d space roles: %v", len(missingSpaces), sErr)
-		}
-	}
-
 	for uGUID, byOrg := range orgScopeAcc {
 		for orgGUID, rolesList := range byOrg {
 			orgRolesByUser[uGUID] = append(orgRolesByUser[uGUID], StUserOrgRole{
@@ -240,7 +209,11 @@ func buildUserRoleBuckets(
 		for spaceGUID, rolesList := range bySpace {
 			orgGUID := spaceOrgFromRole[spaceGUID]
 			if orgGUID == "" {
-				orgGUID = spaceOrgFallback[spaceGUID]
+				// Role row arrived without an organization relationship
+				// (rare but defensive) — resolve through the include=space
+				// block that rode along on the /v3/roles response. Still
+				// degrades to empty orgGuid if the space wasn't included.
+				orgGUID = includedSpaceOrg[spaceGUID]
 			}
 			spaceRolesByUser[uGUID] = append(spaceRolesByUser[uGUID], StUserSpaceRole{
 				OrgGuid:   orgGUID,
@@ -253,52 +226,66 @@ func buildUserRoleBuckets(
 	return orgRolesByUser, spaceRolesByUser
 }
 
-// listRolesForUsers fetches /v3/roles?user_guids=<csv> for the given
-// user GUIDs. Bounded by the input set: at typical page size (~50 users
-// × ~5 roles each = ~250 roles) this is a single CAPI page; admin-class
-// users with thousands of grants paginate.
+// listRolesForUsers fetches /v3/roles?user_guids=<csv>&include=space for
+// the given user GUIDs. Bounded by the input set: at typical page size
+// (~50 users × ~5 roles each = ~250 roles) this is a single CAPI page;
+// admin-class users with thousands of grants paginate.
+//
+// The include=space block resolves space→org in-band: each space role's
+// parent org arrives in the response's included.spaces, so no follow-up
+// /v3/spaces?guids= fan-out is ever needed. The returned map carries
+// spaceGUID → orgGUID for every included space across all pages.
 //
 // Pagination strategy: fetch page 1 to learn total_pages, then fan out
 // pages 2..N concurrently with bounded parallelism. Sequential drain on
 // admin (5K+ grants over ~11 pages) dominated wall time at ~8s; parallel
 // fan-out collapses that to ~max(page latency).
-func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, error) {
+func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, map[string]string, error) {
 	if len(userGUIDs) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	const perPage = 500
 	const maxConcurrency = 6
 
 	filter := strings.Join(userGUIDs, ",")
-	fetchPage := func(page int) ([]capi.Role, capi.Pagination, error) {
+	fetchPage := func(page int) ([]capi.Role, map[string]string, capi.Pagination, error) {
 		params := capi.NewQueryParams().
 			WithFilter("user_guids", filter).
 			WithPerPage(perPage)
 		params.Page = page
-		raw, err := cfClient.Roles().List(ctx, params)
+		raw, err := cfClient.Roles().List(ctx, params, capi.RoleIncludeSpace)
 		if err != nil {
-			return nil, capi.Pagination{}, err
+			return nil, nil, capi.Pagination{}, err
 		}
-		return raw.Resources, raw.Pagination, nil
+		included, derr := capi.RoleIncludedFrom(raw)
+		if derr != nil {
+			return nil, nil, capi.Pagination{}, derr
+		}
+		spaceOrg := make(map[string]string, len(included.Spaces))
+		for _, s := range included.Spaces {
+			spaceOrg[s.GUID] = relationshipGUID(s.Relationships.Organization)
+		}
+		return raw.Resources, spaceOrg, raw.Pagination, nil
 	}
 
-	firstResources, pagination, err := fetchPage(1)
+	firstResources, spaceOrg, pagination, err := fetchPage(1)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	totalPages := pagination.TotalPages
 	if totalPages <= 1 {
-		return firstResources, nil
+		return firstResources, spaceOrg, nil
 	}
 
 	pageRoles := make([][]capi.Role, totalPages)
 	pageRoles[0] = firstResources
 
 	type pageResult struct {
-		page  int
-		roles []capi.Role
-		err   error
+		page     int
+		roles    []capi.Role
+		spaceOrg map[string]string
+		err      error
 	}
 	sem := make(chan struct{}, maxConcurrency)
 	results := make(chan pageResult, totalPages-1)
@@ -306,16 +293,19 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 		sem <- struct{}{}
 		go func(pn int) {
 			defer func() { <-sem }()
-			res, _, perr := fetchPage(pn)
-			results <- pageResult{page: pn, roles: res, err: perr}
+			res, pso, _, perr := fetchPage(pn)
+			results <- pageResult{page: pn, roles: res, spaceOrg: pso, err: perr}
 		}(p)
 	}
 	for i := 0; i < totalPages-1; i++ {
 		r := <-results
 		if r.err != nil {
-			return nil, r.err
+			return nil, nil, r.err
 		}
 		pageRoles[r.page-1] = r.roles
+		for k, v := range r.spaceOrg {
+			spaceOrg[k] = v
+		}
 	}
 
 	totalLen := 0
@@ -326,44 +316,7 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 	for _, p := range pageRoles {
 		all = append(all, p...)
 	}
-	return all, nil
-}
-
-// listSpacesByGUIDs fetches /v3/spaces?guids=<csv>. Bounded fallback for
-// resolving space → org when a role's own organization relationship is
-// missing — never a foundation-wide drain.
-// A guids= filter join across thousands of spaces (e.g. an admin's role
-// list) exceeds the CF request-line limit and fails the whole lookup, so
-// the batch is chunked; 100 36-char guids keeps each query comfortably
-// under typical 8KB router limits.
-const spaceGUIDChunkSize = 100
-
-func listSpacesByGUIDs(ctx context.Context, cfClient capi.Client, spaceGUIDs []string) ([]capi.Space, error) {
-	all := make([]capi.Space, 0, len(spaceGUIDs))
-	for start := 0; start < len(spaceGUIDs); start += spaceGUIDChunkSize {
-		end := start + spaceGUIDChunkSize
-		if end > len(spaceGUIDs) {
-			end = len(spaceGUIDs)
-		}
-		chunk := spaceGUIDs[start:end]
-		pageNum := 1
-		for {
-			params := capi.NewQueryParams().
-				WithFilter("guids", strings.Join(chunk, ",")).
-				WithPerPage(500)
-			params.Page = pageNum
-			raw, err := cfClient.Spaces().List(ctx, params)
-			if err != nil {
-				return nil, err
-			}
-			all = append(all, raw.Resources...)
-			if raw.Pagination.Next == nil || raw.Pagination.Next.Href == "" {
-				break
-			}
-			pageNum++
-		}
-	}
-	return all, nil
+	return all, spaceOrg, nil
 }
 
 // stripRolePrefix converts V3 role types (organization_manager,

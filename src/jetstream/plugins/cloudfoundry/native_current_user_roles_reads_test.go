@@ -137,16 +137,18 @@ func TestGetNativeCurrentUserRoles_HappyPath(t *testing.T) {
 
 // TestGetNativeCurrentUserRoles_SpaceOrgFallback verifies the back-fill
 // path: a space role row that lacks the organization relationship
-// triggers a bounded /v3/spaces?guids= lookup to recover space→org.
+// recovers space→org from the include=space block riding along on the
+// /v3/roles response — no follow-up /v3/spaces request.
 func TestGetNativeCurrentUserRoles_SpaceOrgFallback(t *testing.T) {
 	var spacesCalls int
-	var spacesGuids string
+	var rolesIncludeParam string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
 		case "/v3/roles":
+			rolesIncludeParam = r.URL.Query().Get("include")
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
 				"resources": []map[string]interface{}{
@@ -159,22 +161,21 @@ func TestGetNativeCurrentUserRoles_SpaceOrgFallback(t *testing.T) {
 						},
 					},
 				},
-			})
-		case "/v3/spaces":
-			spacesCalls++
-			spacesGuids = r.URL.Query().Get("guids")
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
-				"resources": []map[string]interface{}{
-					{
-						"guid": "sp-orphan", "name": "rescued",
-						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
-						"relationships": map[string]interface{}{
-							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-rescued"}},
+				"included": map[string]interface{}{
+					"spaces": []map[string]interface{}{
+						{
+							"guid": "sp-orphan", "name": "rescued",
+							"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+							"relationships": map[string]interface{}{
+								"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-rescued"}},
+							},
 						},
 					},
 				},
 			})
+		case "/v3/spaces":
+			spacesCalls++
+			http.NotFound(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -199,8 +200,8 @@ func TestGetNativeCurrentUserRoles_SpaceOrgFallback(t *testing.T) {
 
 	require.NoError(t, plugin.getNativeCurrentUserRoles(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, 1, spacesCalls, "fallback /v3/spaces must fire exactly once for the orphan space set")
-	assert.Equal(t, "sp-orphan", spacesGuids, "fallback must filter to the unresolved space GUIDs")
+	assert.Equal(t, "space", rolesIncludeParam, "/v3/roles must request include=space on the wire")
+	assert.Zero(t, spacesCalls, "space→org must resolve from included.spaces — no /v3/spaces fallback")
 
 	var resp CfCurrentUserRolesResponse
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
