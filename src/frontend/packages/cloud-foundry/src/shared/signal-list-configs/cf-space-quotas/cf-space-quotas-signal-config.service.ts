@@ -3,9 +3,8 @@ import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
 
-import { firstValueFrom } from 'rxjs';
-
 import { CnsiSpaceQuotasSource } from '../../../services/data-sources/cnsi-space-quotas-source';
+import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import type { StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
@@ -109,9 +108,12 @@ export class CfSpaceQuotasSignalConfigService {
 
   // Per-row delete from the Org Space Quotas tab kebab. CF returns 422
   // if any spaces still reference the quota — the consumer side surfaces
-  // the error to the snackbar without doing a pre-check here.
+  // the error to the snackbar without doing a pre-check here. CF v3
+  // quota deletes are async (202 + job): writeWithJob rides the backend's
+  // fast-path 200 or polls the handed-off job to terminal, so the
+  // refresh below never races a still-running delete.
   async deleteQuota(cnsiGuid: string, quotaGuid: string): Promise<void> {
-    await firstValueFrom(this.quotaData.deleteSpaceQuota(cnsiGuid, quotaGuid));
+    await writeWithJob(this.http, this.quotaData.deleteSpaceQuota(cnsiGuid, quotaGuid));
     await this.refresh();
   }
 

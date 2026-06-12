@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Injectable, Signal, inject, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -120,8 +120,10 @@ export class QuotaDataService {
     return this.http.patch<StOrgQuota>(`/pp/v1/cf/organization_quotas/${cnsiGuid}/${quotaGuid}`, body);
   }
 
-  deleteOrgQuota(cnsiGuid: string, quotaGuid: string): Observable<void> {
-    return this.http.delete<void>(`/pp/v1/cf/organization_quotas/${cnsiGuid}/${quotaGuid}`);
+  // observe: 'response' so writeWithJob can discriminate the backend's
+  // fast-path 200 from a 202 job handoff at the status code.
+  deleteOrgQuota(cnsiGuid: string, quotaGuid: string): Observable<HttpResponse<unknown>> {
+    return this.http.delete(`/pp/v1/cf/organization_quotas/${cnsiGuid}/${quotaGuid}`, { observe: 'response' });
   }
 
   createSpaceQuota(cnsiGuid: string, body: SpaceQuotaWriteBody): Observable<StSpaceQuota> {
@@ -132,8 +134,9 @@ export class QuotaDataService {
     return this.http.patch<StSpaceQuota>(`/pp/v1/cf/space_quotas/${cnsiGuid}/${quotaGuid}`, body);
   }
 
-  deleteSpaceQuota(cnsiGuid: string, quotaGuid: string): Observable<void> {
-    return this.http.delete<void>(`/pp/v1/cf/space_quotas/${cnsiGuid}/${quotaGuid}`);
+  // observe: 'response' — same writeWithJob contract as deleteOrgQuota.
+  deleteSpaceQuota(cnsiGuid: string, quotaGuid: string): Observable<HttpResponse<unknown>> {
+    return this.http.delete(`/pp/v1/cf/space_quotas/${cnsiGuid}/${quotaGuid}`, { observe: 'response' });
   }
 
   // Apply an org quota to one or more orgs. Used by the create/edit-org

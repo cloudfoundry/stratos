@@ -8,6 +8,8 @@ import (
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
+
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
 
 // createNativeSpaceQuota handles POST /pp/v1/cf/space_quotas/{cnsiGuid} —
@@ -94,6 +96,12 @@ func (c *CloudFoundrySpecification) updateNativeSpaceQuota(ctx echo.Context) err
 // listActionDelete that the signal-native migration dropped. CF
 // refuses with 422 if any spaces are still assigned the quota; the
 // consumer surfaces that error via snackbar without a pre-check.
+//
+// CF v3 returns 202 + a job reference; we hand it to the stratosjobs
+// fast-path wrapper identically to deleteNativeRoute: 200 on fast resolve,
+// 202 with {id, state, startedAt} when the job outlives the window.
+// Falls back to bare 202 if the async-job contract isn't wired (plugin
+// ordering / tests).
 func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
@@ -106,19 +114,45 @@ func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx echo.Context) err
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
 	}
 
-	cfClient, err := newCapiClient(ctx.Request().Context(), c.nativeProxy(), cnsiGUID, userGUID)
+	reqCtx := ctx.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
 	if err != nil {
 		return err
 	}
 
-	// fw-capi >= v3.217 returns the async job ref; the UI contract here
-	// stays 204-on-accepted, so the job is not yet surfaced.
-	if _, delErr := cfClient.SpaceQuotas().Delete(ctx.Request().Context(), quotaGUID); delErr != nil {
+	job, delErr := cfClient.SpaceQuotas().Delete(reqCtx, quotaGUID)
+	if delErr != nil {
 		return handleCapiError(ctx, delErr)
 	}
+	if job == nil || job.GUID == "" {
+		return echo.NewHTTPError(http.StatusBadGateway, "space quota delete: no job id returned from CF")
+	}
+
+	if c.asyncTracker == nil || c.asyncTranslator == nil {
+		ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+		ctx.Response().WriteHeader(http.StatusAccepted)
+		return nil
+	}
+
+	ref := CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: job.GUID}
+	res := stratosjobs.RunFastPath(reqCtx, c.asyncTracker, c.asyncTranslator, ref, stratosjobs.FastPathOptions{
+		Kind: "cf.space_quota.delete",
+	})
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return ctx.NoContent(http.StatusNoContent)
+	if res.Resolved {
+		if res.State == stratosjobs.JobStateFailed {
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"state":  res.State,
+				"errors": res.Errors,
+			})
+		}
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"state":  res.State,
+			"result": res.Result,
+		})
+	}
+	return ctx.JSON(http.StatusAccepted, res.HandoffJob)
 }
 
 // applySpaceQuotaToSpaces handles
