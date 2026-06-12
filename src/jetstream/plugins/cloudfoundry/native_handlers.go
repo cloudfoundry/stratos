@@ -172,6 +172,18 @@ func relationshipGUID(rel capi.Relationship) string {
 	return rel.Data.GUID
 }
 
+// keyByGUID folds a slice of resources into a guid-keyed map, dropping
+// entries whose key resolves empty.
+func keyByGUID[T any](items []T, guid func(T) string) map[string]T {
+	out := make(map[string]T, len(items))
+	for _, item := range items {
+		if g := guid(item); g != "" {
+			out[g] = item
+		}
+	}
+	return out
+}
+
 // ---- handlers ----
 
 // fullPagePerRequest is the page size used when draining every page of a CF

@@ -2,7 +2,6 @@
 package cloudfoundry
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -18,9 +17,9 @@ import (
 //   - counts   — per_page=1 + flat {totalResults} envelope (no resources).
 //     Existing legacy shape preserved verbatim.
 //   - base     — guid + cnsiGuid + name + url + createdAt. No include chain.
-//   - summary  — base + space.{guid,name} + updatedAt. One CAPI call with
-//     ?include=space; the included spaces are decoded from the
-//     v3 `included` block (no second round-trip).
+//   - summary  — base + space.{guid,name} + updatedAt. Space refs resolve
+//     via one follow-up Spaces().List(?guids=…) batch
+//     (/v3/service_brokers rejects ?include=).
 //   - details  — summary + labels + annotations.
 //
 // All non-counts modes emit `_meta.unavailable: ['authUsername']` per row
@@ -103,8 +102,8 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 // Single-resource sibling for detail views and guid-keyed lazy fetches.
 //
 // Single-resource Get can't carry ?include= via the typed CAPI API, so
-// summary+ resolves the space ref via a follow-up Spaces.Get rather than
-// the included-block decode the list path uses. One extra round trip,
+// summary+ resolves the space ref via a follow-up Spaces.Get — same
+// posture as the list path's space batch. One extra round trip,
 // soft-fails to a guid-only space ref if the spaces fetch errors.
 func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
@@ -179,27 +178,6 @@ func batchFetchBrokerSpaces(ctx echo.Context, cfClient capi.Client, brokers []ca
 	}
 	for _, s := range raw.Resources {
 		if s.GUID != "" {
-			out[s.GUID] = s
-		}
-	}
-	return out
-}
-
-// spacesFromIncluded decodes v3's `included.spaces` block into a guid-keyed
-// map. Soft-fail: malformed entries are skipped silently rather than 502'ing
-// the whole response — mirrors brokersFromIncluded.
-func spacesFromIncluded(included map[string][]json.RawMessage) map[string]capi.Space {
-	out := map[string]capi.Space{}
-	if included == nil {
-		return out
-	}
-	rawSpaces, ok := included["spaces"]
-	if !ok {
-		return out
-	}
-	for _, raw := range rawSpaces {
-		var s capi.Space
-		if err := json.Unmarshal(raw, &s); err == nil && s.GUID != "" {
 			out[s.GUID] = s
 		}
 	}

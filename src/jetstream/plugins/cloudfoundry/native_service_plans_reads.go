@@ -2,10 +2,11 @@
 package cloudfoundry
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -99,7 +100,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlans(ctx echo.Context) erro
 	offeringByGUID := map[string]capi.ServiceOffering{}
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		offeringByGUID = offeringsFromIncluded(raw.Included)
+		offeringByGUID = offeringsFromIncluded(raw)
 		brokerByGUID = batchFetchBrokersForOfferings(ctx, cfClient, offeringByGUID)
 	}
 
@@ -167,25 +168,17 @@ func (c *CloudFoundrySpecification) getNativeServicePlanDetail(ctx echo.Context)
 	return ctx.JSON(http.StatusOK, toStServicePlan(*plan, cnsiGUID, offeringByGUID, brokerByGUID, mode))
 }
 
-// offeringsFromIncluded decodes v3's `included.service_offerings` block
-// (set by `?include=service_offering[, service_offering.service_broker]`)
-// into a guid-keyed map. Soft-fail: malformed entries are skipped silently.
-func offeringsFromIncluded(included map[string][]json.RawMessage) map[string]capi.ServiceOffering {
-	out := map[string]capi.ServiceOffering{}
-	if included == nil {
-		return out
+// offeringsFromIncluded extracts v3's `included.service_offerings` block
+// (set by `?include=service_offering`) into a guid-keyed map. Soft-fail:
+// a malformed included block logs a warning and returns an empty map —
+// plans then ship guid-only offering refs.
+func offeringsFromIncluded(list *capi.ListResponse[capi.ServicePlan]) map[string]capi.ServiceOffering {
+	inc, err := capi.ServicePlanIncludedFrom(list)
+	if err != nil {
+		log.Warnf("service_plans: could not decode included block: %v", err)
+		return map[string]capi.ServiceOffering{}
 	}
-	rawOfferings, ok := included["service_offerings"]
-	if !ok {
-		return out
-	}
-	for _, raw := range rawOfferings {
-		var o capi.ServiceOffering
-		if err := json.Unmarshal(raw, &o); err == nil && o.GUID != "" {
-			out[o.GUID] = o
-		}
-	}
-	return out
+	return keyByGUID(inc.ServiceOfferings, func(o capi.ServiceOffering) string { return o.GUID })
 }
 
 // toStServicePlan maps a capi.ServicePlan onto the Stratos-shape DTO at
@@ -378,7 +371,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Cont
 	offeringByGUID := map[string]capi.ServiceOffering{}
 	brokerByGUID := map[string]capi.ServiceBroker{}
 	if mode == ReturnSummary || mode == ReturnDetails {
-		offeringByGUID = offeringsFromIncluded(raw.Included)
+		offeringByGUID = offeringsFromIncluded(raw)
 		brokerByGUID = batchFetchBrokersForOfferings(ctx, cfClient, offeringByGUID)
 	}
 
