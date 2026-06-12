@@ -41,7 +41,7 @@ func TestGetNativeSpaceQuotas_ReturnsMappedQuotas(t *testing.T) {
 						"created_at":"2026-04-22T12:00:00Z",
 						"updated_at":"2026-04-22T12:00:00Z",
 						"name":"small",
-						"apps":{"total_memory_in_mb":2048,"total_instance_memory_in_mb":1024,"total_instances":50,"total_app_tasks":25},
+						"apps":{"total_memory_in_mb":2048,"per_process_memory_in_mb":1024,"total_instances":50,"per_app_tasks":25},
 						"services":{"paid_services_allowed":true,"total_service_instances":10,"total_service_keys":10},
 						"routes":{"total_routes":50,"total_reserved_ports":5},
 						"relationships":{
@@ -287,7 +287,7 @@ func TestGetNativeSpaceQuotaDetail_ReturnsMappedQuota(t *testing.T) {
 				"created_at":"2026-04-22T12:00:00Z",
 				"updated_at":"2026-04-22T12:00:00Z",
 				"name":"small",
-				"apps":{"total_memory_in_mb":2048,"total_instance_memory_in_mb":1024,"total_instances":50,"total_app_tasks":25},
+				"apps":{"total_memory_in_mb":2048,"per_process_memory_in_mb":1024,"total_instances":50,"per_app_tasks":25},
 				"services":{"paid_services_allowed":true,"total_service_instances":10,"total_service_keys":10},
 				"routes":{"total_routes":50,"total_reserved_ports":5},
 				"relationships":{

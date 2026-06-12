@@ -135,9 +135,9 @@ func toStOrgQuota(q capi.OrganizationQuota, cnsiGUID string) StOrgQuota {
 	}
 	if q.Apps != nil {
 		out.TotalMemoryInMB = nilIntToUnlimited(q.Apps.TotalMemoryInMB)
-		out.TotalInstanceMemoryInMB = nilIntToUnlimited(q.Apps.TotalInstanceMemoryInMB)
+		out.TotalInstanceMemoryInMB = nilIntToUnlimited(q.Apps.PerProcessMemoryInMB)
 		out.TotalInstances = nilIntToUnlimited(q.Apps.TotalInstances)
-		out.TotalAppTasks = nilIntToUnlimited(q.Apps.TotalAppTasks)
+		out.TotalAppTasks = nilIntToUnlimited(q.Apps.PerAppTasks)
 	}
 	if q.Services != nil {
 		if q.Services.PaidServicesAllowed != nil {

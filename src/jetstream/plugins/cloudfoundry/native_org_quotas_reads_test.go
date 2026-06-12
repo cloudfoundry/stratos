@@ -42,7 +42,7 @@ func TestGetNativeOrgQuotas_ReturnsMappedQuotas(t *testing.T) {
 						"created_at":"2026-04-22T12:00:00Z",
 						"updated_at":"2026-04-22T12:00:00Z",
 						"name":"default",
-						"apps":{"total_memory_in_mb":102400,"total_instance_memory_in_mb":2048,"total_instances":1000,"total_app_tasks":500},
+						"apps":{"total_memory_in_mb":102400,"per_process_memory_in_mb":2048,"total_instances":1000,"per_app_tasks":500},
 						"services":{"paid_services_allowed":true,"total_service_instances":250,"total_service_keys":250},
 						"routes":{"total_routes":1000,"total_reserved_ports":100},
 						"domains":{"total_domains":10},
