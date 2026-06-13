@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 
 import {
   ListSubNavComponent,
+  SignalListBulkAction,
+  SignalListColumn,
   SignalListComponent,
   SignalListConfig,
   SignalListRowAction,
@@ -53,6 +55,12 @@ export class CloudFoundryOrganizationUsersComponent {
   private router = inject(Router);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
+
+  // Bulk-selection state for the checkbox column. Holds the set of selected
+  // row keys (`${cnsiGuid}:${guid}`, per getRowKey). The "Manage Roles" bulk
+  // action resolves keys → user GUIDs and navigates to the org-scoped
+  // manage-users wizard with ?users=g1,g2,… then clears the set.
+  private readonly selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
 
   /** Reactive count for the L5 sub-nav. Wired in the constructor — the
    *  underlying `usersConfig.view` is built by initializeForOrg() and
@@ -114,6 +122,7 @@ export class CloudFoundryOrganizationUsersComponent {
       isAnyLoading: computed(() => !this.usersConfig.hasLoadedOnce()),
       errorsByCnsi: signal(new Map()),
       columns: [
+        this.buildSelectColumn(),
         {
           header: 'Username', key: 'username', sortField: 'username',
           kind: 'text',
@@ -164,11 +173,56 @@ export class CloudFoundryOrganizationUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
+      bulkActions: [
+        {
+          label: 'Manage Roles', icon: 'group',
+          dataTest: 'cf-org-users-bulk-manage-roles',
+          run: (keys) => this.bulkManageRoles(
+            keys, ['/cloud-foundry', cfGuid, 'organizations', orgGuid, 'users', 'manage'],
+          ),
+        },
+      ] as SignalListBulkAction<StUser>[],
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);
     this.usersConfig.registerSortExtractor('orgRoles', renderOrgRoles);
     this.usersConfig.registerSortExtractor('spaceRoles', renderSpaceRoles);
+  }
+
+  // Leading checkbox column for bulk selection. selectAll selects every
+  // FILTERED row (across pages, not just the current page) when not all are
+  // already selected, else clears.
+  private buildSelectColumn(): SignalListColumn<StUser> {
+    return {
+      header: '', key: 'select', kind: 'checkbox',
+      render: () => '',
+      widthHint: '3rem',
+      checkbox: {
+        selectedKeys: this.selectedUserKeys,
+        selectAll: {
+          selectableCount: () => this.usersConfig.view.totalFilteredResults(),
+          onToggle: () => this.toggleSelectAllFiltered(),
+        },
+      },
+    };
+  }
+
+  private toggleSelectAllFiltered(): void {
+    const filtered = this.usersConfig.view.filteredItems();
+    const allKeys = filtered.map(u => `${u.cnsiGuid}:${u.guid}`);
+    const current = this.selectedUserKeys();
+    const allSelected = allKeys.length > 0 && allKeys.every(k => current.has(k));
+    this.selectedUserKeys.set(allSelected ? new Set<string>() : new Set(allKeys));
+  }
+
+  // Bulk Manage Roles: resolve selected row keys (`${cnsiGuid}:${guid}`) to
+  // user GUIDs and navigate to the org-scoped manage-users wizard with
+  // ?users=g1,g2,… (the wizard parses the list itself — no ngrx dispatch).
+  private bulkManageRoles(keys: ReadonlySet<string>, manageUrl: readonly string[]): void {
+    const guids = Array.from(keys).map(k => k.split(':')[1]).filter(Boolean);
+    if (guids.length === 0) return;
+    void this.router.navigate([...manageUrl], { queryParams: { users: guids.join(',') } });
+    this.selectedUserKeys.set(new Set<string>());
   }
 
   // Per-row Manage Roles + Remove (2 variants). Mirrors the CF Users
