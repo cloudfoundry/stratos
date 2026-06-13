@@ -9,6 +9,7 @@ import {
   ConfirmationDialogService,
   SignalListCompoundSegment,
   SignalListComponent,
+  SignalListBulkAction,
   SignalListConfig,
   SignalListDropdown,
   SignalListPillColor,
@@ -20,7 +21,7 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
-import { CfRoutesSignalConfigService } from '../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
+import { BulkResult, CfRoutesSignalConfigService } from '../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
@@ -80,6 +81,11 @@ export class CloudFoundryRoutesSignalComponent {
     for (const a of all) m.set(a.guid, a.name);
     return m;
   });
+
+  // Selected row keys for bulk operations — key is `${cnsiGuid}:${guid}`,
+  // matching getRowKey. Owned here; the checkbox column reads/writes it and
+  // the bulk-action disabled signals derive from it.
+  private readonly selectedRouteKeys: WritableSignal<ReadonlySet<string>> = signal(new Set());
 
   public listConfig: WritableSignal<SignalListConfig<StRoute> | undefined> = signal(undefined);
 
@@ -181,6 +187,21 @@ export class CloudFoundryRoutesSignalComponent {
       errorsByCnsi: signal(new Map()),
       columns: [
         {
+          header: '', key: 'select',
+          kind: 'checkbox',
+          checkbox: {
+            selectedKeys: this.selectedRouteKeys,
+            selectAll: {
+              // Filtered set size, not just the current page — matches the
+              // tri-state header's "all selectable rows" semantics.
+              selectableCount: () => this.routesConfig.view.totalFilteredResults(),
+              onToggle: () => this.toggleSelectAll(),
+            },
+          },
+          render: () => '',
+          widthHint: '3rem',
+        },
+        {
           header: 'Route', key: 'url', sortField: 'url',
           kind: 'text',
           render: displayUrl,
@@ -244,6 +265,7 @@ export class CloudFoundryRoutesSignalComponent {
       onClear: () => this.routesConfig.clearFilters(),
       viewMode: this.routesConfig.viewMode,
       sort: this.routesConfig.sort,
+      bulkActions: this.buildBulkActions(),
     });
 
     this.routesConfig.registerSortExtractor('url', displayUrl);
@@ -255,6 +277,100 @@ export class CloudFoundryRoutesSignalComponent {
   private toggleRouteFavorite(route: StRoute): void {
     const fav = new UserFavorite(route.cnsiGuid, 'cf', 'route', route.guid);
     this.userFavoriteManager.toggleFavorite(fav);
+  }
+
+  // Select-all flips between "every filtered row selected" and cleared,
+  // keyed off the full filtered set (not just the current page).
+  private toggleSelectAll(): void {
+    const filtered = this.routesConfig.view.filteredItems();
+    const selected = this.selectedRouteKeys();
+    if (selected.size >= filtered.length && filtered.length > 0) {
+      this.selectedRouteKeys.set(new Set());
+    } else {
+      this.selectedRouteKeys.set(new Set(filtered.map(r => `${r.cnsiGuid}:${r.guid}`)));
+    }
+  }
+
+  // Resolve the selected row keys back to the StRoute objects from the
+  // current filtered set, so callers get appGuids for the unmap check.
+  // Keys are `${cnsiGuid}:${guid}`; intersecting with live rows drops any
+  // stale keys for rows that have since left the view.
+  private resolveSelectedRoutes(keys: ReadonlySet<string>): StRoute[] {
+    return this.routesConfig.view.filteredItems()
+      .filter(r => keys.has(`${r.cnsiGuid}:${r.guid}`));
+  }
+
+  // Run a bulk op, report partial failures, and clear selection on success.
+  // succeeded+pending counts as non-error (pending items have an async CF
+  // job tracking completion); only `failed` drives an error snackbar.
+  private async runBulk(
+    verb: string,
+    total: number,
+    op: () => Promise<BulkResult>,
+  ): Promise<void> {
+    try {
+      const result = await op();
+      if (result.failed > 0) {
+        this.snackBar.error(`${result.failed} of ${total} routes failed to ${verb}`);
+      } else {
+        this.snackBar.open(`${total} ${total === 1 ? 'route' : 'routes'} ${verb} requested`);
+      }
+    } catch (err: unknown) {
+      this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
+    } finally {
+      this.selectedRouteKeys.set(new Set());
+    }
+  }
+
+  // Bulk Unmap + Bulk Delete, rendered in the selection bar above the list
+  // when 1+ rows are selected. Unmap is disabled unless at least one selected
+  // route has a binding to remove.
+  private buildBulkActions(): SignalListBulkAction<StRoute>[] {
+    const cnsi = this.cfEndpointService.cfGuid;
+    const unmapDisabled = computed(() => {
+      const routes = this.resolveSelectedRoutes(this.selectedRouteKeys());
+      return !routes.some(r => (r.appGuids ?? []).length > 0);
+    });
+    return [
+      {
+        label: 'Unmap', icon: 'link_off',
+        disabled: unmapDisabled,
+        run: (keys: ReadonlySet<string>) => {
+          // Only routes with bindings carry work; a no-binding selection
+          // can't reach here (action disabled), but filter anyway so the
+          // backend call and the count reflect the real targets.
+          const targets = this.resolveSelectedRoutes(keys).filter(r => (r.appGuids ?? []).length > 0);
+          if (targets.length === 0) return;
+          const confirm = new ConfirmationDialogConfig(
+            'Unmap Routes',
+            `Unmap ${targets.length} ${targets.length === 1 ? 'route' : 'routes'} from their bound apps? The routes will remain available to map again later.`,
+            'Unmap',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            await this.runBulk('unmap', targets.length, () =>
+              this.routesConfig.bulkUnmapRoutes(cnsi, targets.map(r => r.guid)));
+          });
+        },
+      },
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        run: (keys: ReadonlySet<string>) => {
+          const targets = this.resolveSelectedRoutes(keys);
+          if (targets.length === 0) return;
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Routes',
+            `Delete ${targets.length} ${targets.length === 1 ? 'route' : 'routes'}? This cannot be undone and will unmap any bound apps.`,
+            'Delete',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            await this.runBulk('delete', targets.length, () =>
+              this.routesConfig.bulkDeleteRoutes(cnsi, targets.map(r => r.guid)));
+          });
+        },
+      },
+    ];
   }
 
   // Per-row Unmap + Delete. Restores the V2-era listActionUnmap /
