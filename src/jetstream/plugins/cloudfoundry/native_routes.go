@@ -31,6 +31,12 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	nativeGroup.GET("/cf/apps/:cnsiGuid/:appGuid/routes", c.getAppRoutes)
 	nativeGroup.DELETE("/cf/routes/:cnsiGuid/:routeGuid/apps/:appGuid", c.unmapRouteFromApp)
 	nativeGroup.DELETE("/cf/routes/:cnsiGuid/:routeGuid", c.deleteNativeRoute)
+	// Bulk actions: backend-controlled fan-out (CF v3 has no batch
+	// endpoints). One Jetstream request → N bounded-parallel CF calls,
+	// per-item outcomes in a BulkResult envelope.
+	nativeGroup.POST("/cf/routes/:cnsiGuid/bulk/delete", c.bulkDeleteNativeRoutes)
+	nativeGroup.POST("/cf/routes/:cnsiGuid/bulk/unmap", c.bulkUnmapNativeRoutes)
+	nativeGroup.POST("/cf/routes/:cnsiGuid/:routeGuid/unmap_all", c.unmapAllRouteDestinations)
 	nativeGroup.POST("/cf/service_bindings/:cnsiGuid", c.createServiceBinding)
 	nativeGroup.DELETE("/cf/service_bindings/:cnsiGuid/:bindingGuid", c.deleteServiceBinding)
 	nativeGroup.GET("/cf/apps/:cnsiGuid/:appGuid/service_bindings", c.getAppServiceBindings)
