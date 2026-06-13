@@ -11,6 +11,24 @@ import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../../cf-entity-types';
 import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
 
+// Shape of the backend bulk endpoints' JSON response
+// (POST /pp/v1/cf/routes/:cnsi/bulk/{delete,unmap}). Per-guid outcome plus
+// roll-up counts. `pending` items have an async CF job tracking completion,
+// so the UI treats succeeded+pending as the non-error count.
+export interface BulkItemResult {
+  readonly guid: string;
+  readonly state: 'succeeded' | 'failed' | 'pending';
+  readonly errors?: readonly { code: number; message: string }[];
+  readonly job?: string;
+}
+
+export interface BulkResult {
+  readonly results: readonly BulkItemResult[];
+  readonly succeeded: number;
+  readonly failed: number;
+  readonly pending: number;
+}
+
 // Routes list config service — single-CNSI, single-space. Analog of
 // CfSpacesSignalConfigService, but routes are not carried on
 // EndpointDataService (home-page only caches route COUNT, not the full
@@ -288,28 +306,50 @@ export class CfRoutesSignalConfigService {
     await this.fetchRoutes();
   }
 
-  // Per-row Unmap on a route entry. CAPI v3 has no "remove all
-  // destinations" endpoint, so we fan out N DELETEs against the
-  // unmapRouteFromApp handler — one per appGuid. The handler itself
-  // performs the destinations-list lookup then deletes the matching
-  // destination, so each leg is a single Stratos call. Caller passes
-  // the appGuids it already has on the row (StRoute.appGuids), avoiding
-  // a re-fetch.
+  // Per-row Unmap on a route entry. Hits the single unmap_all endpoint,
+  // which atomically PATCHes the route's destinations list to [] in one
+  // CAPI call (replacing the old fan-out of N DELETEs, one per appGuid).
+  // Backend returns 204. Caller still passes the appGuids it has on the
+  // row so a route with no bindings short-circuits to a no-op without a
+  // network round-trip.
   //
   // Refreshes the routes list on completion so the affected rows lose
-  // their app pills. Errors from any leg propagate to the caller.
+  // their app pills. Errors propagate to the caller.
   async unmapAllAppsFromRoute(
     cnsiGuid: string,
     routeGuid: string,
     appGuids: readonly string[],
   ): Promise<void> {
     if (!appGuids.length) return;
-    const ops = appGuids.map(appGuid =>
-      firstValueFrom(this.http.delete<void>(
-        `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}/apps/${appGuid}`,
-      )),
-    );
-    await Promise.all(ops);
+    await firstValueFrom(this.http.post<void>(
+      `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}/unmap_all`,
+      {},
+    ));
     await this.fetchRoutes();
+  }
+
+  // Bulk delete: destroys each route entity (which also unmaps any bound
+  // apps). Backend returns a BulkResult with per-guid outcomes; pending
+  // items carry an async CF job. Refreshes the list so deleted rows leave
+  // the view.
+  async bulkDeleteRoutes(cnsiGuid: string, routeGuids: string[]): Promise<BulkResult> {
+    const result = await firstValueFrom(this.http.post<BulkResult>(
+      `/pp/v1/cf/routes/${cnsiGuid}/bulk/delete`,
+      { guids: routeGuids },
+    ));
+    await this.fetchRoutes();
+    return result;
+  }
+
+  // Bulk unmap: atomically clears each route's destinations list (PATCH
+  // destinations:[] per route), leaving the route entities in place.
+  // Refreshes so the affected rows lose their app pills.
+  async bulkUnmapRoutes(cnsiGuid: string, routeGuids: string[]): Promise<BulkResult> {
+    const result = await firstValueFrom(this.http.post<BulkResult>(
+      `/pp/v1/cf/routes/${cnsiGuid}/bulk/unmap`,
+      { guids: routeGuids },
+    ));
+    await this.fetchRoutes();
+    return result;
   }
 }

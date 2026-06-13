@@ -149,7 +149,7 @@ export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-
 export { DotContentComponent } from './core/dot-content/dot-content.component';
 
 // List Components
-export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction, SignalListCheckboxBinding, SignalListRadioBinding, SignalListGaugeBinding } from './shared/components/signal-list/signal-list.component';
+export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction, SignalListBulkAction, SignalListCheckboxBinding, SignalListRadioBinding, SignalListGaugeBinding } from './shared/components/signal-list/signal-list.component';
 export { SignalListCellTemplateDirective } from './shared/components/signal-list/signal-list-cell-template.directive';
 export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } from './shared/components/signal-list/list-state-store.service';
 export { ListFilterStore, BoundListFilterState, ListFilterDefaults } from './shared/components/signal-list/list-filter-store.service';
