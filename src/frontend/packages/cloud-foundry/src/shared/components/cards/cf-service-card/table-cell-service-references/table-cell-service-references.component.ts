@@ -1,19 +1,20 @@
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 
-import { ClickStopPropagationDirective, TableCellCustom } from '@stratosui/core';
-import { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
+import {
+  ClickStopPropagationDirective,
+  TableCellCustom,
+} from "@stratosui/core";
+import { StServiceOffering } from "../../../../../services/endpoint-data/stratos-types";
 
 @Component({
-  selector: 'app-table-cell-service-references',
-  templateUrl: './table-cell-service-references.component.html',
-  styleUrls: ['./table-cell-service-references.component.scss'],
+  selector: "app-table-cell-service-references",
+  templateUrl: "./table-cell-service-references.component.html",
+  styleUrls: ["./table-cell-service-references.component.scss"],
   standalone: true,
-  imports: [
-    ClickStopPropagationDirective
-]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [ClickStopPropagationDirective],
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<StServiceOffering> {
-
   @Input()
   set row(offering: StServiceOffering) {
     super.row = offering;
@@ -32,7 +33,9 @@ export class TableCellServiceReferencesComponent extends TableCellCustom<StServi
     return !!this.getDocumentationUrl();
   }
   getDocumentationUrl(): string | undefined {
-    return this.row?.brokerCatalogMetadata?.documentationUrl as string | undefined;
+    return this.row?.brokerCatalogMetadata?.documentationUrl as
+      | string
+      | undefined;
   }
 
   hasSupportUrl(): boolean {

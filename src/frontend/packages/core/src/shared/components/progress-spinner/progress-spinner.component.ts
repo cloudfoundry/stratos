@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges  } from '@angular/core';
-
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from "@angular/core";
 
 /**
  * Custom progress spinner component using Tailwind CSS animations
@@ -10,13 +16,17 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleCha
  * - determinate: Shows progress as a percentage (0-100)
  */
 @Component({
-  selector: 'app-progress-spinner',
+  selector: "app-progress-spinner",
   standalone: true,
   imports: [],
   template: `
-    <div class="inline-flex items-center justify-center" [style.width.px]="diameter" [style.height.px]="diameter">
+    <div
+      class="inline-flex items-center justify-center"
+      [style.width.px]="diameter"
+      [style.height.px]="diameter"
+    >
       <!-- Indeterminate spinner (continuous rotation) -->
-      @if (mode === 'indeterminate') {
+      @if (mode === "indeterminate") {
         <div
           class="rounded-full border-solid border-current border-r-transparent animate-spin"
           [style.width.px]="diameter"
@@ -25,13 +35,14 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleCha
           [attr.aria-label]="'Loading...'"
           role="progressbar"
           aria-valuemin="0"
-          aria-valuemax="100">
-        </div>,
-  changeDetection: ChangeDetectionStrategy.OnPush
-})
-    
+          aria-valuemax="100"
+        ></div>
+        , changeDetection: ChangeDetectionStrategy.OnPush
+      }
+      )
+
       <!-- Determinate spinner (arc showing progress) -->
-      @if (mode === 'determinate') {
+      @if (mode === "determinate") {
         <svg
           class="transform -rotate-90"
           [attr.width]="diameter"
@@ -40,7 +51,8 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleCha
           role="progressbar"
           [attr.aria-valuenow]="value"
           aria-valuemin="0"
-          aria-valuemax="100">
+          aria-valuemax="100"
+        >
           <!-- Background circle -->
           <circle
             [attr.cx]="diameter / 2"
@@ -48,8 +60,8 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleCha
             [attr.r]="radius"
             fill="none"
             class="stroke-gray-200"
-            [attr.stroke-width]="strokeWidth">
-          </circle>
+            [attr.stroke-width]="strokeWidth"
+          ></circle>
           <!-- Progress arc -->
           <circle
             [attr.cx]="diameter / 2"
@@ -60,18 +72,21 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleCha
             [attr.stroke-width]="strokeWidth"
             [attr.stroke-dasharray]="circumference"
             [attr.stroke-dashoffset]="dashOffset"
-            stroke-linecap="round">
-          </circle>
+            stroke-linecap="round"
+          ></circle>
         </svg>
       }
     </div>
+  `,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styles: [
+    `
+      :host {
+        display: inline-block;
+        color: var(--color-primary, #2196f3);
+      }
     `,
-  styles: [`
-    :host {
-      display: inline-block;
-      color: var(--color-primary, #2196f3);
-    }
-  `]
+  ],
 })
 export class ProgressSpinnerComponent implements OnInit, OnChanges {
   /**
@@ -79,7 +94,7 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
    * - indeterminate: Continuous spinning (default)
    * - determinate: Shows progress percentage
    */
-  @Input() mode: 'indeterminate' | 'determinate' = 'indeterminate';
+  @Input() mode: "indeterminate" | "determinate" = "indeterminate";
 
   /**
    * Diameter of the spinner in pixels
@@ -95,7 +110,7 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
   /**
    * Color of the spinner (optional, uses currentColor by default)
    */
-  @Input() color?: 'primary' | 'accent' | 'warn';
+  @Input() color?: "primary" | "accent" | "warn";
 
   /**
    * Stroke width of the spinner circle
@@ -134,7 +149,7 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['value'] || changes['mode']) {
+    if (changes["value"] || changes["mode"]) {
       this.updateDashOffset();
     }
   }
@@ -144,7 +159,7 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
    * dashOffset = circumference * (1 - value / 100)
    */
   private updateDashOffset(): void {
-    if (this.mode === 'determinate') {
+    if (this.mode === "determinate") {
       const progress = Math.max(0, Math.min(100, this.value));
       this.dashOffset = this.circumference * (1 - progress / 100);
     }
@@ -157,13 +172,17 @@ export class ProgressSpinnerComponent implements OnInit, OnChanges {
  * for mat-progress-spinner with mode="indeterminate"
  */
 @Component({
-  selector: 'mat-spinner',
+  selector: "mat-spinner",
   standalone: true,
   imports: [ProgressSpinnerComponent],
-  template: `<app-progress-spinner [diameter]="diameter" [color]="color" mode="indeterminate"></app-progress-spinner>`,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  template: `<app-progress-spinner
+    [diameter]="diameter"
+    [color]="color"
+    mode="indeterminate"
+  ></app-progress-spinner>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatSpinnerComponent {
   @Input() diameter: number = 40;
-  @Input() color?: 'primary' | 'accent' | 'warn';
+  @Input() color?: "primary" | "accent" | "warn";
 }

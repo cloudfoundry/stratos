@@ -1,10 +1,13 @@
 {
   "extends": "../../../tsconfig.lib.json",
   "compilerOptions": {
-    "outDir": "../../../../out-tsc/lib",
+    "outDir": "../../../../out-tsc/lib"
   },
   "exclude": [
     "./src/test.ts",
-    "**/*.spec.ts",
-  ]
+    "**/*.spec.ts"
+  ],
+  "angularCompilerOptions": {
+    "strictTemplates": false
+  }
 }

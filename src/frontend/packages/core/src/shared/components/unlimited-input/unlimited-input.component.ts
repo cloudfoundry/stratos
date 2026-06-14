@@ -1,28 +1,46 @@
-
-import { Component, Input, OnInit, inject } from '@angular/core';
-import { AbstractControl, ControlContainer, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CustomCheckboxComponent, MatCheckboxChange } from '../custom-checkbox/custom-checkbox.component';
-import { AppInputDirective, CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import {
+  Component,
+  Input,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import {
+  AbstractControl,
+  ControlContainer,
+  FormGroupDirective,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
+import {
+  CustomCheckboxComponent,
+  MatCheckboxChange,
+} from "../custom-checkbox/custom-checkbox.component";
+import {
+  AppInputDirective,
+  CustomFormFieldComponent,
+} from "../custom-form-field/custom-form-field.component";
 
 const UNLIMITED = -1;
 
 @Component({
-  selector: 'app-unlimited-input',
-  templateUrl: './unlimited-input.component.html',
+  selector: "app-unlimited-input",
+  templateUrl: "./unlimited-input.component.html",
   viewProviders: [
     {
       provide: ControlContainer,
-      useExisting: FormGroupDirective
-    }
+      useExisting: FormGroupDirective,
+    },
   ],
   standalone: true,
-  host: { class: 'block' },
+  host: { class: "block" },
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ReactiveFormsModule,
     AppInputDirective,
     CustomFormFieldComponent,
-    CustomCheckboxComponent
-]
+    CustomCheckboxComponent,
+  ],
 })
 export class UnlimitedInputComponent implements OnInit {
   public ctrlContainer = inject(FormGroupDirective);
@@ -47,14 +65,14 @@ export class UnlimitedInputComponent implements OnInit {
   onChange() {
     if (this.unlimited) {
       this.initialValue = this.formControl.value;
-      this.formControl.setValue('');
+      this.formControl.setValue("");
       this.formControl.disable();
     } else {
       this.formControl.enable();
       if (this.initialValue !== UNLIMITED && this.initialValue != null) {
         this.formControl.patchValue(this.initialValue);
       } else {
-        this.formControl.setValue('');
+        this.formControl.setValue("");
       }
     }
   }

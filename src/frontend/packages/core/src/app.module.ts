@@ -1,9 +1,17 @@
-import { ApplicationRef, EnvironmentInjector, NgModule, effect, provideZonelessChangeDetection, inject, runInInjectionContext } from '@angular/core';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { RouteReuseStrategy } from '@angular/router';
-import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
+import {
+  ApplicationRef,
+  EnvironmentInjector,
+  NgModule,
+  effect,
+  provideZonelessChangeDetection,
+  inject,
+  runInInjectionContext,
+} from "@angular/core";
+import { provideCharts, withDefaultRegisterables } from "ng2-charts";
+import { BrowserModule } from "@angular/platform-browser";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { RouteReuseStrategy } from "@angular/router";
+import { getGitHubAPIURL, GITHUB_API_URL } from "@stratosui/git";
 import {
   EntityCatalogModule,
   entityCatalog,
@@ -11,34 +19,39 @@ import {
   EntityCatalogHelpers,
   AppStoreModule,
   generateStratosEntities,
-} from '@stratosui/store';
-import { StratosThemeModule } from '../../theme/theme.module';
-import { filter, take } from 'rxjs/operators';
+} from "@stratosui/store";
+import { StratosThemeModule } from "../../theme/theme.module";
+import { filter, take } from "rxjs/operators";
 
-import { AppComponent } from './app.component';
-import { RouteModule } from './app.routing';
-import { CoreModule } from './core/core.module';
-import { CustomizationService } from './core/customizations.types';
-import { DynamicExtensionRoutes } from './core/extension/dynamic-extension-routes';
-import { ExtensionService } from './core/extension/extension-service';
-import { CurrentUserPermissionsService } from './core/permissions/current-user-permissions.service';
-import { CustomImportModule } from './custom-import.module';
-import { environment } from './environments/environment';
-import { DashboardModule } from './features/dashboard/dashboard.module';
-import { HomeModule } from './features/home/home.module';
-import { LoginModule } from './features/login/login.module';
-import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
-import { SetupModule } from './features/setup/setup.module';
-import { DashboardDataService } from './core/dashboard-data.service';
-import { LoggedInService } from './logged-in.service';
-import { CustomReuseStrategy } from './route-reuse-stragegy';
-import { GlobalEventService } from './shared/global-events.service';
-import { SidePanelService } from './shared/services/side-panel.service';
-import { SharedModule } from './shared/shared.module';
-import { TabNavService } from './tab-nav.service';
-import { provideHttpClient, withInterceptors, HttpXsrfTokenExtractor } from '@angular/common/http';
-import { xsrfInterceptor, HttpXsrfHeaderExtractor } from './xsrf.module';
-import { cfApiInterceptor } from '@stratosui/cloud-foundry';
+import { AppComponent } from "./app.component";
+import { RouteModule } from "./app.routing";
+import { CoreModule } from "./core/core.module";
+import { CustomizationService } from "./core/customizations.types";
+import { DynamicExtensionRoutes } from "./core/extension/dynamic-extension-routes";
+import { ExtensionService } from "./core/extension/extension-service";
+import { CurrentUserPermissionsService } from "./core/permissions/current-user-permissions.service";
+import { CustomImportModule } from "./custom-import.module";
+import { environment } from "./environments/environment";
+import { DashboardModule } from "./features/dashboard/dashboard.module";
+import { HomeModule } from "./features/home/home.module";
+import { LoginModule } from "./features/login/login.module";
+import { NoEndpointsNonAdminComponent } from "./features/no-endpoints-non-admin/no-endpoints-non-admin.component";
+import { SetupModule } from "./features/setup/setup.module";
+import { DashboardDataService } from "./core/dashboard-data.service";
+import { LoggedInService } from "./logged-in.service";
+import { CustomReuseStrategy } from "./route-reuse-stragegy";
+import { GlobalEventService } from "./shared/global-events.service";
+import { SidePanelService } from "./shared/services/side-panel.service";
+import { SharedModule } from "./shared/shared.module";
+import { TabNavService } from "./tab-nav.service";
+import {
+  provideHttpClient,
+  withInterceptors,
+  HttpXsrfTokenExtractor,
+  withXhr,
+} from "@angular/common/http";
+import { xsrfInterceptor, HttpXsrfHeaderExtractor } from "./xsrf.module";
+import { cfApiInterceptor } from "@stratosui/cloud-foundry";
 
 /**
  * AppModule - Main application module
@@ -65,9 +78,7 @@ import { cfApiInterceptor } from '@stratosui/cloud-foundry';
  * DO NOT REORDER imports without understanding entity registration dependencies.
  */
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
     // Standalone Components
     NoEndpointsNonAdminComponent,
@@ -103,11 +114,12 @@ import { cfApiInterceptor } from '@stratosui/cloud-foundry';
     provideCharts(withDefaultRegisterables()),
     // HTTP Client with functional interceptors (Angular 20 pattern)
     provideHttpClient(
-      withInterceptors([xsrfInterceptor, cfApiInterceptor])
+      withXhr(),
+      withInterceptors([xsrfInterceptor, cfApiInterceptor]),
     ),
-    { provide: HttpXsrfTokenExtractor, useClass: HttpXsrfHeaderExtractor }
+    { provide: HttpXsrfTokenExtractor, useClass: HttpXsrfHeaderExtractor },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {
   private appRef = inject(ApplicationRef);
@@ -122,24 +134,32 @@ export class AppModule {
 
     // Validate entity catalog after all modules have loaded and registered their entities
     // This ensures CF, K8s, and other feature modules have completed registration before validation
-    this.appRef.isStable.pipe(
-      filter(stable => stable),
-      take(1)
-    ).subscribe(() => {
-      try {
-        const validation = entityCatalog.validateCatalog();
+    this.appRef.isStable
+      .pipe(
+        filter((stable) => stable),
+        take(1),
+      )
+      .subscribe(() => {
+        try {
+          const validation = entityCatalog.validateCatalog();
 
-        if (!validation.valid) {
-          console.error('[EntityCatalog] Validation errors:', validation.errors);
-        }
+          if (!validation.valid) {
+            console.error(
+              "[EntityCatalog] Validation errors:",
+              validation.errors,
+            );
+          }
 
-        if (validation.warnings.length > 0) {
-          console.warn('[EntityCatalog] Validation warnings:', validation.warnings);
+          if (validation.warnings.length > 0) {
+            console.warn(
+              "[EntityCatalog] Validation warnings:",
+              validation.warnings,
+            );
+          }
+        } catch (error) {
+          console.error("[EntityCatalog] Error during validation:", error);
         }
-      } catch (error) {
-        console.error('[EntityCatalog] Error during validation:', error);
-      }
-    });
+      });
 
     // Signal-driven static warnings — replace the legacy ngrx
     // `state.dashboard.{timeoutSession,pollingEnabled}` event configs.
@@ -149,28 +169,30 @@ export class AppModule {
     runInInjectionContext(envInjector, () => {
       effect(() => {
         if (!dashboardData.timeoutSession()) {
-          eventService.setStaticEvent('timeoutSessionWarning', {
-            key: 'timeoutSessionWarning',
-            message: 'Timeout session is disabled - this is considered a security risk.',
-            link: '/user-profile',
-            type: 'warning',
-            stratosStatus: eventService.eventTypeToStratosStatus('warning'),
+          eventService.setStaticEvent("timeoutSessionWarning", {
+            key: "timeoutSessionWarning",
+            message:
+              "Timeout session is disabled - this is considered a security risk.",
+            link: "/user-profile",
+            type: "warning",
+            stratosStatus: eventService.eventTypeToStratosStatus("warning"),
           });
         } else {
-          eventService.setStaticEvent('timeoutSessionWarning', null);
+          eventService.setStaticEvent("timeoutSessionWarning", null);
         }
       });
       effect(() => {
         if (!dashboardData.pollingEnabled()) {
-          eventService.setStaticEvent('pollingEnabledWarning', {
-            key: 'pollingEnabledWarning',
-            message: 'Data polling is disabled - you may be seeing out-of-date data throughout the application.',
-            link: '/user-profile',
-            type: 'warning',
-            stratosStatus: eventService.eventTypeToStratosStatus('warning'),
+          eventService.setStaticEvent("pollingEnabledWarning", {
+            key: "pollingEnabledWarning",
+            message:
+              "Data polling is disabled - you may be seeing out-of-date data throughout the application.",
+            link: "/user-profile",
+            type: "warning",
+            stratosStatus: eventService.eventTypeToStratosStatus("warning"),
           });
         } else {
-          eventService.setStaticEvent('pollingEnabledWarning', null);
+          eventService.setStaticEvent("pollingEnabledWarning", null);
         }
       });
     });
@@ -178,7 +200,6 @@ export class AppModule {
     // inside GlobalEventService from EndpointErrorEventsService (fed by the
     // signal data layer), replacing the ngrx internalEventStateSelector read
     // that used to live here.
-
 
     // This should be brought back in in the future
     // eventService.addEventConfig<IRequestEntityTypeState<EndpointModel>, EndpointModel>(
@@ -211,8 +232,7 @@ export class AppModule {
     // Configure navigation behavior - hide CF-specific menu items when no CF endpoints are connected
     customizationService.set({
       ...customizationService.get(),
-      alwaysShowNavForEndpointTypes: (_epType) => false
+      alwaysShowNavForEndpointTypes: (_epType) => false,
     });
   }
-
 }

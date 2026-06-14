@@ -2,45 +2,71 @@
   <div>
     <div class="flex flex-col gap-3 mb-4">
       @for (mode of formModes; track mode) {
-        <label class="inline-flex items-center cursor-pointer" [attr.for]="'ups-mode-' + mode.key" [class.opacity-50]="(serviceBindingForApplication$ | async)?.length === 0" [class.pointer-events-none]="(serviceBindingForApplication$ | async)?.length === 0">
-          <input [attr.id]="'ups-mode-' + mode.key" type="radio" [(ngModel)]="formMode" [value]="mode.key" (click)="resetForms(mode.key)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" [disabled]="(serviceBindingForApplication$ | async)?.length === 0">
+        <label
+          class="inline-flex items-center cursor-pointer"
+          [attr.for]="'ups-mode-' + mode.key"
+          [class.opacity-50]="(serviceBindingForApplication$ | async)?.length === 0"
+          [class.pointer-events-none]="(serviceBindingForApplication$ | async)?.length === 0"
+        >
+          <input
+            [attr.id]="'ups-mode-' + mode.key"
+            type="radio"
+            [(ngModel)]="formMode"
+            [value]="mode.key"
+            (click)="resetForms(mode.key)"
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+            [disabled]="(serviceBindingForApplication$ | async)?.length === 0"
+          />
           <span class="ml-2 text-sm font-medium text-content-text">{{ mode.label }}</span>
         </label>
       }
     </div>
   </div>
 }
-@if (formMode === 'create-service-instance') {
-  <form class="stepper-form" [formGroup]="createEditServiceInstance"
-    >
+@if (formMode === "create-service-instance") {
+  <form class="stepper-form" [formGroup]="createEditServiceInstance">
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="name" placeholder="Name" [appApplicationNameUnique]="appNameChecking"
-        [appApplicationNameUniqueRequest]="getUniqueRequest" required>
-      @if (createEditServiceInstance.controls.name?.hasError('appNameTaken')) {
-        <app-error>
-          A service instance with this name already exists. Please enter a different one.
-        </app-error>
+      <input
+        class="w-full placeholder:!text-transparent focus:outline-none"
+        appInput
+        formControlName="name"
+        placeholder="Name"
+        [appApplicationNameUnique]="appNameChecking"
+        [appApplicationNameUniqueRequest]="getUniqueRequest"
+        required
+      />
+      @if (createEditServiceInstance.controls.name?.hasError("appNameTaken")) {
+        <app-error> A service instance with this name already exists. Please enter a different one. </app-error>
       }
-      @if (createEditServiceInstance.controls.name?.hasError('maxlength')) {
-        <app-error>
-          A service instance name cannot exceed 50 characters.
-        </app-error>
+      @if (createEditServiceInstance.controls.name?.hasError("maxlength")) {
+        <app-error> A service instance name cannot exceed 50 characters. </app-error>
       }
-      @if (!createEditServiceInstance.controls.name?.hasError('maxlength')) {
+      @if (!createEditServiceInstance.controls.name?.hasError("maxlength")) {
         <div class="inline-icon inline-icon__form">
-          <app-stateful-icon [state]="appNameChecking?.status"></app-stateful-icon>
+          <app-stateful-icon [state]="$safeNavigationMigration(appNameChecking?.status)"></app-stateful-icon>
         </div>
       }
     </app-form-field>
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="route_service_url" type="url" placeholder="Route Service URL">
-      @if (createEditServiceInstance.controls.route_service_url?.hasError('pattern')) {
+      <input
+        class="w-full placeholder:!text-transparent focus:outline-none"
+        appInput
+        formControlName="route_service_url"
+        type="url"
+        placeholder="Route Service URL"
+      />
+      @if (createEditServiceInstance.controls.route_service_url?.hasError("pattern")) {
         <app-error>Invalid URL</app-error>
       }
     </app-form-field>
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="syslog_drain_url" placeholder="Syslog Drain URL">
-      @if (createEditServiceInstance.controls.syslog_drain_url?.hasError('pattern')) {
+      <input
+        class="w-full placeholder:!text-transparent focus:outline-none"
+        appInput
+        formControlName="syslog_drain_url"
+        placeholder="Syslog Drain URL"
+      />
+      @if (createEditServiceInstance.controls.syslog_drain_url?.hasError("pattern")) {
         <app-error>Invalid URL</app-error>
       }
     </app-form-field>
@@ -48,44 +74,57 @@
       <app-label>Tags</app-label>
       <div class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md min-h-[42px] bg-white">
         @for (tag of tags; track tag) {
-          <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-content-text bg-gray-100 rounded-full hover:bg-gray-200">
-            {{tag.label}}
-            <button type="button" (click)="removeTag(tag)" class="ml-2 text-content-muted hover:text-content-text focus:outline-none">
+          <span
+            class="inline-flex items-center px-3 py-1 text-sm font-medium text-content-text bg-gray-100 rounded-full hover:bg-gray-200"
+          >
+            {{ tag.label }}
+            <button
+              type="button"
+              (click)="removeTag(tag)"
+              class="ml-2 text-content-muted hover:text-content-text focus:outline-none"
+            >
               <span class="material-icons text-sm">cancel</span>
             </button>
           </span>
         }
-        <input type="text"
+        <input
+          type="text"
           (keydown.enter)="addTagFromInput($event)"
           (keydown.comma)="addTagFromInput($event)"
           (keydown.space)="addTagFromInput($event)"
           class="flex-1 min-w-[120px] outline-none bg-transparent text-sm"
-          placeholder="Add tag..." />
+          placeholder="Add tag..."
+        />
       </div>
     </app-form-field>
     <app-form-field class="">
-      <textarea appInput placeholder="Credentials (JSON)" rows="10"
+      <textarea
+        appInput
+        placeholder="Credentials (JSON)"
+        rows="10"
         class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
-        formControlName="credentials"></textarea>
-      @if (createEditServiceInstance.controls.credentials.hasError('notValidJson')) {
-        <app-error>
-          Not valid JSON.
-        </app-error>
+        formControlName="credentials"
+      ></textarea>
+      @if (createEditServiceInstance.controls.credentials.hasError("notValidJson")) {
+        <app-error> Not valid JSON. </app-error>
       }
     </app-form-field>
   </form>
 } @else {
   <form class="stepper-form" [formGroup]="bindExistingInstance">
     <app-form-field>
-      <app-select class="form-control" required placeholder="User Provided Service Instance"
-        formControlName="serviceInstances" [autoSelectSingleOption]="false">
+      <app-select
+        class="form-control"
+        required
+        placeholder="User Provided Service Instance"
+        formControlName="serviceInstances"
+        [autoSelectSingleOption]="false"
+      >
         <app-option [value]="null">None</app-option>
         @for (sI of serviceBindingForApplication$ | async; track sI) {
-          <app-option [disabled]="!sI.guid"
-          [value]="sI.guid">{{ sI.name }}</app-option>
+          <app-option [disabled]="!sI.guid" [value]="sI.guid">{{ sI.name }}</app-option>
         }
       </app-select>
     </app-form-field>
   </form>
 }
-

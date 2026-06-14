@@ -5,6 +5,15 @@
     "declarationMap": true,
     "outDir": "../../../../out-tsc"
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": ["./src/test.ts", "**/*.spec.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "./src/test.ts",
+    "**/*.spec.ts"
+  ],
+  "angularCompilerOptions": {
+    "strictTemplates": false
+  }
 }

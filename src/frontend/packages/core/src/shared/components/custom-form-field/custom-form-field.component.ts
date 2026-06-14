@@ -1,8 +1,21 @@
-import { Component, Input, ContentChild, ElementRef, AfterContentInit, Directive, ChangeDetectorRef, OnDestroy, AfterViewInit, inject, ChangeDetectionStrategy, forwardRef } from '@angular/core';
-import { FormControl, NgControl } from '@angular/forms';
+import {
+  Component,
+  Input,
+  ContentChild,
+  ElementRef,
+  AfterContentInit,
+  Directive,
+  ChangeDetectorRef,
+  OnDestroy,
+  AfterViewInit,
+  inject,
+  ChangeDetectionStrategy,
+  forwardRef,
+} from "@angular/core";
+import { FormControl, NgControl } from "@angular/forms";
 
-import { Subject, takeUntil } from 'rxjs';
-import { CustomSelectComponent } from '../custom-select/custom-select.component';
+import { Subject, takeUntil } from "rxjs";
+import { CustomSelectComponent } from "../custom-select/custom-select.component";
 
 /*
  * FormControl + signal bridge pattern (FWT-956)
@@ -50,20 +63,22 @@ import { CustomSelectComponent } from '../custom-select/custom-select.component'
  */
 
 @Component({
-  selector: 'app-form-field',
-  templateUrl: './custom-form-field.component.html',
-  styleUrls: ['./custom-form-field.component.scss'],
+  selector: "app-form-field",
+  templateUrl: "./custom-form-field.component.html",
+  styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],
-  host: { class: 'block' }
+  host: { class: "block" },
 })
-export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit, OnDestroy {
-  @Input() appearance: 'legacy' | 'standard' | 'fill' | 'outline' = 'standard';
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
-  @Input() floatLabel: 'always' | 'never' | 'auto' = 'always';
+export class CustomFormFieldComponent
+  implements AfterContentInit, AfterViewInit, OnDestroy
+{
+  @Input() appearance: "legacy" | "standard" | "fill" | "outline" = "standard";
+  @Input() color: "primary" | "accent" | "warn" = "primary";
+  @Input() floatLabel: "always" | "never" | "auto" = "always";
   @Input() hideRequiredMarker = false;
-  @Input() hintLabel = '';
+  @Input() hintLabel = "";
 
   /**
    * When true, the prefix/infix/suffix flex row shrinks to its content
@@ -74,16 +89,21 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
    */
   @Input() fitContent = false;
 
-  @ContentChild(forwardRef(() => AppInputDirective), { read: ElementRef, static: false }) inputElement!: ElementRef;
-  @ContentChild(CustomSelectComponent, { static: false }) selectComponent!: CustomSelectComponent;
+  @ContentChild(forwardRef(() => AppInputDirective), {
+    read: ElementRef,
+    static: false,
+  })
+  inputElement!: ElementRef;
+  @ContentChild(CustomSelectComponent, { static: false })
+  selectComponent!: CustomSelectComponent;
   @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
 
   public focused = false;
   public hasValue = false;
-  public placeholder = '';
-  public errorMessage = '';
+  public placeholder = "";
+  public errorMessage = "";
   public isRequired = false;
-  public inputId = '';
+  public inputId = "";
 
   private destroy$ = new Subject<void>();
   private isInitialized = false;
@@ -93,9 +113,12 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   ngAfterContentInit() {
     // Handle app-select components
     if (this.selectComponent) {
-      this.placeholder = this.selectComponent.placeholder || '';
+      this.placeholder = this.selectComponent.placeholder || "";
       this.isRequired = this.selectComponent.required;
-      this.inputId = this.selectComponent.id || this.selectComponent.name || `form-field-${Math.random().toString(36).substr(2, 9)}`;
+      this.inputId =
+        this.selectComponent.id ||
+        this.selectComponent.name ||
+        `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set select id if not present
       if (!this.selectComponent.id) {
@@ -103,22 +126,31 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
       }
 
       // Monitor select value changes
-      this.selectComponent.valueChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        this.hasValue = this.selectComponent.value != null &&
-                       (Array.isArray(this.selectComponent.value) ? this.selectComponent.value.length > 0 : true);
-        this.cdr.detectChanges();
-      });
+      this.selectComponent.valueChange
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.hasValue =
+            this.selectComponent.value != null &&
+            (Array.isArray(this.selectComponent.value)
+              ? this.selectComponent.value.length > 0
+              : true);
+          this.cdr.detectChanges();
+        });
 
       // Initial value check
-      this.hasValue = this.selectComponent.value != null &&
-                     (Array.isArray(this.selectComponent.value) ? this.selectComponent.value.length > 0 : true);
+      this.hasValue =
+        this.selectComponent.value != null &&
+        (Array.isArray(this.selectComponent.value)
+          ? this.selectComponent.value.length > 0
+          : true);
     }
     // Handle native input/textarea/select elements
     else if (this.inputElement) {
       const input = this.inputElement.nativeElement;
-      this.placeholder = input.placeholder || '';
+      this.placeholder = input.placeholder || "";
       this.isRequired = input.required;
-      this.inputId = input.id || `form-field-${Math.random().toString(36).substr(2, 9)}`;
+      this.inputId =
+        input.id || `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set input id if not present for label association
       if (!input.id) {
@@ -126,25 +158,25 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
       }
 
       // Add ARIA attributes for accessibility
-      input.setAttribute('aria-describedby', `${this.inputId}-hint`);
+      input.setAttribute("aria-describedby", `${this.inputId}-hint`);
       if (this.isRequired) {
-        input.setAttribute('aria-required', 'true');
+        input.setAttribute("aria-required", "true");
       }
 
       // Listen for focus/blur events
-      input.addEventListener('focus', () => {
+      input.addEventListener("focus", () => {
         this.focused = true;
         this.cdr.detectChanges();
       });
 
-      input.addEventListener('blur', () => {
+      input.addEventListener("blur", () => {
         this.focused = false;
         this.updateErrorMessage();
         this.cdr.detectChanges();
       });
 
       // Listen for value changes
-      input.addEventListener('input', () => {
+      input.addEventListener("input", () => {
         this.hasValue = input.value.length > 0;
         this.updateErrorMessage();
         this.cdr.detectChanges();
@@ -156,11 +188,13 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
 
     // Listen to form control status changes if available
     if (this.ngControl && this.ngControl.statusChanges) {
-      this.ngControl.statusChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-        this.updateErrorMessage();
-        this.updateAriaAttributes();
-        this.cdr.detectChanges();
-      });
+      this.ngControl.statusChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.updateErrorMessage();
+          this.updateAriaAttributes();
+          this.cdr.detectChanges();
+        });
     }
 
     this.isInitialized = true;
@@ -186,8 +220,10 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
   }
 
   get shouldFloatLabel(): boolean {
-    return this.floatLabel === 'always' ||
-           (this.floatLabel === 'auto' && (this.focused || this.hasValue));
+    return (
+      this.floatLabel === "always" ||
+      (this.floatLabel === "auto" && (this.focused || this.hasValue))
+    );
   }
 
   get isInvalid(): boolean {
@@ -218,10 +254,10 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
    * class list.
    */
   get prefixSuffixColorClasses(): string {
-    if (this.isInvalid) return 'text-danger';
-    if (this.isValid)   return 'text-success';
-    if (this.focused)   return 'text-input-focus-border';
-    return 'text-content-muted';
+    if (this.isInvalid) return "text-danger";
+    if (this.isValid) return "text-success";
+    if (this.focused) return "text-input-focus-border";
+    return "text-content-muted";
   }
 
   /**
@@ -229,10 +265,10 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
    * appearances). Replaces the SCSS `.form-field-underline` rules.
    */
   get underlineColorClasses(): string {
-    if (this.isInvalid) return 'bg-danger';
-    if (this.isValid)   return 'bg-success';
-    if (this.focused)   return 'bg-transparent';
-    return 'bg-input-border';
+    if (this.isInvalid) return "bg-danger";
+    if (this.isValid) return "bg-success";
+    if (this.focused) return "bg-transparent";
+    return "bg-input-border";
   }
 
   /**
@@ -240,12 +276,12 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
    * `.form-field-ripple` color + scale-on-focus rules.
    */
   get rippleColorClasses(): string {
-    const transform = this.focused ? 'scale-x-100' : 'scale-x-0';
+    const transform = this.focused ? "scale-x-100" : "scale-x-0";
     let bg: string;
-    if (this.isInvalid || this.color === 'warn') bg = 'bg-danger';
-    else if (this.isValid)                       bg = 'bg-success';
-    else if (this.color === 'accent')            bg = 'bg-accent';
-    else                                         bg = 'bg-input-focus-border';
+    if (this.isInvalid || this.color === "warn") bg = "bg-danger";
+    else if (this.isValid) bg = "bg-success";
+    else if (this.color === "accent") bg = "bg-accent";
+    else bg = "bg-input-focus-border";
     return `${bg} ${transform}`;
   }
 
@@ -255,51 +291,52 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
    * rules for the label anymore.
    */
   get labelClasses(): string {
-    const base = 'absolute left-0 top-1 pointer-events-none select-none origin-top-left';
+    const base =
+      "absolute left-0 top-1 pointer-events-none select-none origin-top-left";
     const sizing = this.shouldFloatLabel
-      ? '-translate-y-[1.8em] text-xs font-medium'
-      : 'text-base leading-tight';
+      ? "-translate-y-[1.8em] text-xs font-medium"
+      : "text-base leading-tight";
     let color: string;
     if (this.isInvalid) {
-      color = 'text-danger';
+      color = "text-danger";
     } else if (this.isValid) {
-      color = 'text-success';
+      color = "text-success";
     } else if (this.focused) {
-      color = 'text-input-focus-border';
+      color = "text-input-focus-border";
     } else if (this.shouldFloatLabel) {
-      color = 'text-primary';
+      color = "text-primary";
     } else {
-      color = 'text-input-placeholder';
+      color = "text-input-placeholder";
     }
     return `${base} ${sizing} ${color}`;
   }
 
   private updateErrorMessage(): void {
     if (!this.ngControl || !this.ngControl.errors) {
-      this.errorMessage = '';
+      this.errorMessage = "";
       return;
     }
 
     const errors = this.ngControl.errors;
 
-    if (errors['required']) {
-      this.errorMessage = 'This field is required';
-    } else if (errors['email']) {
-      this.errorMessage = 'Please enter a valid email address';
-    } else if (errors['minlength']) {
-      this.errorMessage = `Minimum length is ${errors['minlength'].requiredLength} characters`;
-    } else if (errors['maxlength']) {
-      this.errorMessage = `Maximum length is ${errors['maxlength'].requiredLength} characters`;
-    } else if (errors['min']) {
-      this.errorMessage = `Minimum value is ${errors['min'].min}`;
-    } else if (errors['max']) {
-      this.errorMessage = `Maximum value is ${errors['max'].max}`;
-    } else if (errors['pattern']) {
-      this.errorMessage = 'Please enter a valid format';
+    if (errors["required"]) {
+      this.errorMessage = "This field is required";
+    } else if (errors["email"]) {
+      this.errorMessage = "Please enter a valid email address";
+    } else if (errors["minlength"]) {
+      this.errorMessage = `Minimum length is ${errors["minlength"].requiredLength} characters`;
+    } else if (errors["maxlength"]) {
+      this.errorMessage = `Maximum length is ${errors["maxlength"].requiredLength} characters`;
+    } else if (errors["min"]) {
+      this.errorMessage = `Minimum value is ${errors["min"].min}`;
+    } else if (errors["max"]) {
+      this.errorMessage = `Maximum value is ${errors["max"].max}`;
+    } else if (errors["pattern"]) {
+      this.errorMessage = "Please enter a valid format";
     } else {
       // Generic error message for custom validators
       const firstError = Object.keys(errors)[0];
-      this.errorMessage = errors[firstError]?.message || 'Invalid value';
+      this.errorMessage = errors[firstError]?.message || "Invalid value";
     }
   }
 
@@ -311,65 +348,68 @@ export class CustomFormFieldComponent implements AfterContentInit, AfterViewInit
     const input = this.inputElement.nativeElement;
 
     if (this.isInvalid) {
-      input.setAttribute('aria-invalid', 'true');
-      input.setAttribute('aria-errormessage', `${this.inputId}-error`);
+      input.setAttribute("aria-invalid", "true");
+      input.setAttribute("aria-errormessage", `${this.inputId}-error`);
     } else {
-      input.removeAttribute('aria-invalid');
-      input.removeAttribute('aria-errormessage');
+      input.removeAttribute("aria-invalid");
+      input.removeAttribute("aria-errormessage");
     }
   }
 }
 
 @Component({
-  selector: 'mat-icon',
+  selector: "mat-icon",
   template: '<i class="material-icons"><ng-content></ng-content></i>',
-  styleUrls: ['./custom-form-field.component.scss'],
-  standalone: true
+  styleUrls: ["./custom-form-field.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
 })
 export class CustomFormFieldIconComponent {
-  @Input() fontSet = 'material-icons';
+  @Input() fontSet = "material-icons";
   @Input() fontIcon!: string;
   @Input() svgIcon!: string;
 }
 
 @Component({
-  selector: '[mat-icon-button]',
-  template: '<ng-content></ng-content>',
-  styleUrls: ['./custom-form-field.component.scss'],
+  selector: "[mat-icon-button]",
+  template: "<ng-content></ng-content>",
+  styleUrls: ["./custom-form-field.component.scss"],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
-    'class': 'mat-icon-button',
-    '[class.mat-button-disabled]': 'disabled',
-    '[attr.disabled]': 'disabled || null'
-  }
+    class: "mat-icon-button",
+    "[class.mat-button-disabled]": "disabled",
+    "[attr.disabled]": "disabled || null",
+  },
 })
 export class CustomIconButtonDirective {
   @Input() disabled = false;
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  @Input() color: "primary" | "accent" | "warn" = "primary";
 }
 
 @Component({
-  selector: '[mat-button]',
-  template: '<ng-content></ng-content>',
-  styleUrls: ['./custom-form-field.component.scss'],
+  selector: "[mat-button]",
+  template: "<ng-content></ng-content>",
+  styleUrls: ["./custom-form-field.component.scss"],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
-    'class': 'mat-button',
-    '[class.mat-button-disabled]': 'disabled',
-    '[attr.disabled]': 'disabled || null'
-  }
+    class: "mat-button",
+    "[class.mat-button-disabled]": "disabled",
+    "[attr.disabled]": "disabled || null",
+  },
 })
 export class CustomButtonDirective {
   @Input() disabled = false;
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  @Input() color: "primary" | "accent" | "warn" = "primary";
 }
 
 @Directive({
-  selector: '[matInput]',
+  selector: "[matInput]",
   standalone: true,
   host: {
-    'class': 'mat-input-element'
-  }
+    class: "mat-input-element",
+  },
 })
 export class MatInputDirective {
   @Input() formControl!: FormControl<any>;
@@ -377,11 +417,11 @@ export class MatInputDirective {
 }
 
 @Directive({
-  selector: '[appInput]',
+  selector: "[appInput]",
   standalone: true,
   host: {
-    'class': 'mat-input-element app-input-element'
-  }
+    class: "mat-input-element app-input-element",
+  },
 })
 export class AppInputDirective {
   @Input() formControl!: FormControl<any>;
@@ -389,40 +429,44 @@ export class AppInputDirective {
 }
 
 @Component({
-  selector: '[matSuffix]',
-  template: '',
+  selector: "[matSuffix]",
+  template: "",
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
-    'class': 'mat-form-field-suffix'
-  }
+    class: "mat-form-field-suffix",
+  },
 })
-export class MatSuffixDirective {
-}
+export class MatSuffixDirective {}
 
 @Component({
-  selector: 'app-label',
-  template: '<label class="mat-form-field-label" [attr.for]="labelFor"><ng-content></ng-content></label>',
-  styleUrls: ['./custom-form-field.component.scss'],
-  standalone: true
+  selector: "app-label",
+  template:
+    '<label class="mat-form-field-label" [attr.for]="labelFor"><ng-content></ng-content></label>',
+  styleUrls: ["./custom-form-field.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
 })
 export class MatLabelComponent {
-  @Input() labelFor = '';
+  @Input() labelFor = "";
 }
 
 @Component({
-  selector: 'app-error',
-  template: '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
-  styleUrls: ['./custom-form-field.component.scss'],
-  standalone: true
+  selector: "app-error",
+  template:
+    '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
+  styleUrls: ["./custom-form-field.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
 })
-export class AppErrorComponent {
-}
+export class AppErrorComponent {}
 
 @Component({
-  selector: 'mat-error',
-  template: '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
-  styleUrls: ['./custom-form-field.component.scss'],
-  standalone: true
+  selector: "mat-error",
+  template:
+    '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
+  styleUrls: ["./custom-form-field.component.scss"],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: true,
 })
-export class MatErrorComponent {
-}
+export class MatErrorComponent {}

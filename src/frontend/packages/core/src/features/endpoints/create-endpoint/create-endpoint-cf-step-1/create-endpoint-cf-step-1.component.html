@@ -2,10 +2,23 @@
   <div class="create-endpoint__grid">
     <!-- Left column: Cloud Foundry Information -->
     <div class="create-endpoint__info-column">
-      <h1 class="create-endpoint__section-title" style="color: var(--content-text);">{{endpoint.definition.label}} Information</h1>
+      <h1 class="create-endpoint__section-title" style="color: var(--content-text)">
+        {{ endpoint.definition.label }} Information
+      </h1>
       <app-form-field class="block w-full">
-        <input appInput id="name" name="name" formControlName="nameField" placeholder="Name" class="w-full placeholder:!text-transparent focus:outline-none"
-          [appUnique]="registerForm.value.createSystemEndpointField ? (customEndpoints | async)?.names : (existingPersonalEndpoints | async)?.names">
+        <input
+          appInput
+          id="name"
+          name="name"
+          formControlName="nameField"
+          placeholder="Name"
+          class="w-full placeholder:!text-transparent focus:outline-none"
+          [appUnique]="
+            registerForm.value.createSystemEndpointField
+              ? $safeNavigationMigration((customEndpoints | async)?.names)
+              : $safeNavigationMigration((existingPersonalEndpoints | async)?.names)
+          "
+        />
         @if (registerForm.controls.nameField.errors?.required) {
           <app-error>Name is required</app-error>
         }
@@ -14,78 +27,141 @@
         }
       </app-form-field>
       <app-form-field class="block w-full">
-        <input appInput id="url" name="url" formControlName="urlField" type="text" required placeholder="Endpoint Address" class="w-full placeholder:!text-transparent focus:outline-none">
+        <input
+          appInput
+          id="url"
+          name="url"
+          formControlName="urlField"
+          type="text"
+          required
+          placeholder="Endpoint Address"
+          class="w-full placeholder:!text-transparent focus:outline-none"
+        />
         @if (registerForm.controls.urlField.errors?.required) {
           <app-error>URL is required</app-error>
         }
         @if (registerForm.controls.urlField.errors?.invalidUrl) {
-          <app-error>Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)</app-error>
+          <app-error
+            >Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or
+            https://api.example.com)</app-error
+          >
         }
-        @if (registerForm.value.urlField && (
-               (registerForm.value.createSystemEndpointField && (customEndpoints | async)?.urls?.includes(registerForm.value.urlField))
-               || (!registerForm.value.createSystemEndpointField && (existingPersonalEndpoints | async)?.urls?.includes(registerForm.value.urlField))
-             )) {
+        @if (
+          registerForm.value.urlField &&
+          ((registerForm.value.createSystemEndpointField &&
+            (customEndpoints | async)?.urls?.includes(registerForm.value.urlField)) ||
+            (!registerForm.value.createSystemEndpointField &&
+              (existingPersonalEndpoints | async)?.urls?.includes(registerForm.value.urlField)))
+        ) {
           <div class="text-yellow-600 dark:text-yellow-400 text-sm mt-1" role="status">
             An endpoint at this URL is already registered. Registration may still succeed in another scope.
           </div>
         }
       </app-form-field>
       @if (userEndpointsAndIsAdmin | async) {
-        <app-checkbox appInput name="createSystemEndpoint"
-          formControlName="createSystemEndpointField" (change)="toggleCreateSystemEndpoint()"
-          [ngClass]="{'hide': fixedUrl, 'show': !fixedUrl}">Create a system endpoint (visible to all users)
+        <app-checkbox
+          appInput
+          name="createSystemEndpoint"
+          formControlName="createSystemEndpointField"
+          (change)="toggleCreateSystemEndpoint()"
+          [ngClass]="{ hide: fixedUrl, show: !fixedUrl }"
+          >Create a system endpoint (visible to all users)
         </app-checkbox>
       }
     </div>
 
     <!-- Right column: Checkbox options -->
     <div class="create-endpoint__options-column">
-      <h1 class="create-endpoint__section-title" style="color: var(--content-text);">Options</h1>
-      <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField">Skip SSL validation for the endpoint</app-checkbox>
-      <app-checkbox appInput id="useCACert" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
+      <h1 class="create-endpoint__section-title" style="color: var(--content-text)">Options</h1>
+      <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField"
+        >Skip SSL validation for the endpoint</app-checkbox
+      >
+      <app-checkbox appInput id="useCACert" (change)="toggleCACertField()"
+        >Use a CA Certificate for the endpoint</app-checkbox
+      >
       @if (showAdvancedFields) {
         <app-checkbox appInput id="showAdvanced" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
       }
       @if (endpointTypeSupportsSSO) {
-        <app-checkbox appInput id="ssoAllowed" name="ssoAllowed" formControlName="ssoAllowedField">Allow SSO login to this endpoint</app-checkbox>
+        <app-checkbox appInput id="ssoAllowed" name="ssoAllowed" formControlName="ssoAllowedField"
+          >Allow SSO login to this endpoint</app-checkbox
+        >
       }
     </div>
   </div>
 
   <!-- Full-width sections below grid -->
-  <div [ngClass]="{'create-endpoint__shown': showCACertField}" class="create-endpoint__advanced" spellcheck=false>
-    <span class="create-endpoint__cacert-title text-sm mb-2 block" style="color: var(--content-text);">Specify CA Certificate:</span>
-    <textarea rows="10" appInput formControlName="caCertField" name="caCertField"
-      class="w-full focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+  <div [ngClass]="{ 'create-endpoint__shown': showCACertField }" class="create-endpoint__advanced" spellcheck="false">
+    <span class="create-endpoint__cacert-title text-sm mb-2 block" style="color: var(--content-text)"
+      >Specify CA Certificate:</span
+    >
+    <textarea
+      rows="10"
+      appInput
+      formControlName="caCertField"
+      name="caCertField"
+      class="w-full focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
+    ></textarea>
   </div>
 
-  <div [ngClass]="{'hide': !showAdvancedFields, 'show': showAdvancedFields}" class="create-endpoint__section">
-    <div [ngClass]="{'create-endpoint__shown': showAdvancedOptions}" class="create-endpoint__advanced">
-      <h1 style="color: var(--content-text);">Advanced Options</h1>
-      <p style="color: var(--content-text);">Client ID and Client Secret do not normally need to be specified.</p>
-      <p style="color: var(--content-text);">Note that these are not administrator credentials and only need to be specified if your endpoint uses
-      non-standard configuration.</p>
+  <div [ngClass]="{ hide: !showAdvancedFields, show: showAdvancedFields }" class="create-endpoint__section">
+    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions }" class="create-endpoint__advanced">
+      <h1 style="color: var(--content-text)">Advanced Options</h1>
+      <p style="color: var(--content-text)">Client ID and Client Secret do not normally need to be specified.</p>
+      <p style="color: var(--content-text)">
+        Note that these are not administrator credentials and only need to be specified if your endpoint uses
+        non-standard configuration.
+      </p>
       <app-form-field>
-        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientIDField" placeholder="Client ID">
+        <input
+          class="w-full placeholder:!text-transparent focus:outline-none"
+          appInput
+          id="client_id"
+          name="client_id"
+          formControlName="clientIDField"
+          placeholder="Client ID"
+        />
       </app-form-field>
       <app-form-field>
-        <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_secret" name="client_secret" formControlName="clientSecretField"
-          placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
-        <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
-          [attr.aria-pressed]="!show">
-          <app-custom-icon>{{!show ? 'visibility_off' : 'visibility'}}</app-custom-icon>
+        <input
+          class="w-full placeholder:!text-transparent focus:outline-none"
+          appInput
+          id="client_secret"
+          name="client_secret"
+          formControlName="clientSecretField"
+          placeholder="Client Secret"
+          [type]="!show ? 'password' : 'text'"
+        />
+        <button
+          class="btn btn-icon"
+          type="button"
+          matSuffix
+          (click)="show = !show"
+          [attr.aria-label]="'Hide Secret'"
+          [attr.aria-pressed]="!show"
+        >
+          <app-custom-icon>{{ !show ? "visibility_off" : "visibility" }}</app-custom-icon>
         </button>
       </app-form-field>
     </div>
   </div>
 
-  <div [ngClass]="{'hide': !endpointTypeSupportsSSO, 'show': endpointTypeSupportsSSO}" class="create-endpoint__sso">
+  <div [ngClass]="{ hide: !endpointTypeSupportsSSO, show: endpointTypeSupportsSSO }" class="create-endpoint__sso">
     @if (!!registerForm.controls.ssoAllowedField.value) {
       <div>
-        <p style="color: var(--content-text);">
-          Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to the client's 'redirect_uri'.
+        <p style="color: var(--content-text)">
+          Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to
+          the client's 'redirect_uri'.
         </p>
-        <pre class="border" style="background-color: var(--code-block-bg); color: var(--code-block-text); border-color: var(--code-block-border);">{{clientRedirectURI}}</pre>
+        <pre
+          class="border"
+          style="
+            background-color: var(--code-block-bg);
+            color: var(--code-block-text);
+            border-color: var(--code-block-border);
+          "
+          >{{ clientRedirectURI }}</pre
+        >
       </div>
     }
   </div>

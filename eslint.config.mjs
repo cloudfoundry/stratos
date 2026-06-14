@@ -42,6 +42,10 @@ export default tseslint.config(
       "@typescript-eslint/no-empty-object-type": "warn",
       "@angular-eslint/prefer-inject": "warn",
       "@angular-eslint/prefer-standalone": "warn",
+      // Angular 22 promoted this to error by default; keep as warn to preserve
+      // behavior. Components explicitly using ChangeDetectionStrategy.Default
+      // are intentional — adopting OnPush is tracked as a separate ticket.
+      "@angular-eslint/prefer-on-push-component-change-detection": "warn",
       "@angular-eslint/no-input-rename": "warn",
       "@angular-eslint/no-output-native": "warn",
       "@angular-eslint/no-output-on-prefix": "warn",

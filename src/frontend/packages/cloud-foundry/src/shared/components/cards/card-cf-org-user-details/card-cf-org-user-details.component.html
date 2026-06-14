@@ -7,7 +7,7 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="User Org Role">
-            {{ (cfOrgService.userOrgRole$ | async) }}
+            {{ cfOrgService.userOrgRole$ | async }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
             <a [routerLink]="cfOrgService.quotaLink$ | async">
@@ -15,20 +15,23 @@
             </a>
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
-            <app-boolean-indicator [isTrue]="(cfOrgService.quotaDefinition$ | async)?.paidServicesAllowed" type="yes-no">
+            <app-boolean-indicator
+              [isTrue]="$safeNavigationMigration((cfOrgService.quotaDefinition$ | async)?.paidServicesAllowed)"
+              type="yes-no"
+            >
             </app-boolean-indicator>
           </app-metadata-item>
         </div>
 
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="Org Status">
-            {{ cfOrgService.orgDataService.org()?.status | capitalizeFirst }}
+            {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.status) | capitalizeFirst }}
           </app-metadata-item>
           <app-metadata-item label="Created At">
-            {{ cfOrgService.orgDataService.org()?.createdAt | date:'medium' }}
+            {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.createdAt) | date: "medium" }}
           </app-metadata-item>
           <app-metadata-item label="Updated At">
-            {{ cfOrgService.orgDataService.org()?.updatedAt | date:'medium' }}
+            {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.updatedAt) | date: "medium" }}
           </app-metadata-item>
         </div>
       </div>

@@ -12,20 +12,24 @@
                 <div class="card-body">
                   <div>
                     <app-metadata-item label="Repository">
-                      <a href="{{(gitSCMRepo$ | async)?.html_url}}"
-                      target="_blank">{{stratosProject.deploySource.project }}</a>
+                      <a href="{{ (gitSCMRepo$ | async)?.html_url }}" target="_blank">{{
+                        stratosProject.deploySource.project
+                      }}</a>
                     </app-metadata-item>
                     <app-metadata-item label="Branch">
-                      <a href="{{(gitSCMRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}"
-                        target="_blank">
-                        {{ stratosProject.deploySource.branch}}
+                      <a
+                        href="{{ (gitSCMRepo$ | async)?.html_url }}/tree/{{ stratosProject.deploySource.branch }}"
+                        target="_blank"
+                      >
+                        {{ stratosProject.deploySource.branch }}
                       </a>
                     </app-metadata-item>
                     <div>
                       <div>
                         <app-metadata-item label="Commit">
-                          <a href="{{(commit$ | async)?.html_url}}"
-                          target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
+                          <a href="{{ (commit$ | async)?.html_url }}" target="_blank">{{
+                            stratosProject.deploySource.commit | limitTo: 8
+                          }}</a>
                         </app-metadata-item>
                       </div>
                       @if ((isHead$ | async) === false) {
@@ -33,13 +37,16 @@
                           <div>
                             <span class="material-icons text-yellow-500">warning</span>
                           </div>
-                          <div class="pl-6">The
+                          <div class="pl-6">
+                            The
                             {{ stratosProject.deploySource.branch }}
-                          branch has been updated since this app was deployed. Redeploy to update</div>
+                            branch has been updated since this app was deployed. Redeploy to update
+                          </div>
                         </div>
                       }
                     </div>
-                    <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}
+                    <app-metadata-item label="Deployed:"
+                      >{{ stratosProject.deploySource.timestamp * 1000 | date: "medium" }}
                     </app-metadata-item>
                   </div>
                 </div>
@@ -52,32 +59,44 @@
                 <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Repository Details</h3>
                   <div>
-                    <img src={{gitSCMRepo.owner.avatar_url}} alt="Repository owner avatar" class="h-12 w-12 rounded-full">
+                    <img
+                      src="{{ gitSCMRepo.owner.avatar_url }}"
+                      alt="Repository owner avatar"
+                      class="h-12 w-12 rounded-full"
+                    />
                   </div>
                 </div>
                 <div class="card-body">
                   <div>
                     <app-metadata-item label="Full Name">
                       <div class="flex items-center break-all">
-                        <a class="flex-1" href="{{ gitSCMRepo.html_url }}" target="_blank">{{ gitSCMRepo.full_name }}</a>
+                        <a class="flex-1" href="{{ gitSCMRepo.html_url }}" target="_blank">{{
+                          gitSCMRepo.full_name
+                        }}</a>
                         @if (gitSCMRepo.private) {
-                          <span class="material-icons text-[18px] h-[18px] leading-[18px] ml-[5px] mr-0 w-[18px]"
-                            title="Private Repo">
-                          lock</span>
+                          <span
+                            class="material-icons text-[18px] h-[18px] leading-[18px] ml-[5px] mr-0 w-[18px]"
+                            title="Private Repo"
+                          >
+                            lock</span
+                          >
                         }
                       </div>
                     </app-metadata-item>
-                    <app-metadata-item label="Owner">{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}
+                    <app-metadata-item label="Owner"
+                      >{{ gitSCMRepo.owner.login || gitSCMRepo.owner.name }}
                     </app-metadata-item>
-                    <app-metadata-item label="Description">{{ gitSCMRepo.description || '-' }}</app-metadata-item>
-                    <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date:'medium' }}</app-metadata-item>
+                    <app-metadata-item label="Description">{{ gitSCMRepo.description || "-" }}</app-metadata-item>
+                    <app-metadata-item label="Created:">{{ gitSCMRepo.created_at | date: "medium" }}</app-metadata-item>
                     @if (gitSCMRepo.pushed_at) {
                       <app-metadata-item label="Last Pushed:">
-                      {{ gitSCMRepo.pushed_at | date:'medium' }}</app-metadata-item>
+                        {{ gitSCMRepo.pushed_at | date: "medium" }}</app-metadata-item
+                      >
                     }
                     @if (gitSCMRepo.last_activity_at) {
                       <app-metadata-item label="Last Actvity:">
-                      {{ gitSCMRepo.last_activity_at | date:'medium' }}</app-metadata-item>
+                        {{ gitSCMRepo.last_activity_at | date: "medium" }}</app-metadata-item
+                      >
                     }
                   </div>
                 </div>
@@ -90,19 +109,24 @@
                 <div class="card-header flex items-center justify-between">
                   <h3 class="text-lg font-semibold">Commit Details</h3>
                   <div>
-                    <img src={{commitInfo.author.avatar_url}} alt="Commit author avatar" class="h-12 w-12 rounded-full">
+                    <img
+                      src="{{ commitInfo.author.avatar_url }}"
+                      alt="Commit author avatar"
+                      class="h-12 w-12 rounded-full"
+                    />
                   </div>
                 </div>
                 <div class="card-body">
                   <div>
                     <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
                     <app-metadata-item label="SHA">
-                      <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
+                      <a href="{{ commitInfo.html_url }}" target="_blank">{{ commitInfo.sha | limitTo: 8 }}</a>
                     </app-metadata-item>
                     <app-metadata-item label="Author">
                       <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
                     </app-metadata-item>
-                    <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}
+                    <app-metadata-item label="Date:"
+                      >{{ commitInfo.commit.author.date | date: "medium" }}
                     </app-metadata-item>
                   </div>
                 </div>
@@ -128,9 +152,13 @@
       </app-tile-grid>
     }
     @if ((hasRepo$ | async) === false) {
-      <app-no-content-message [iconFont]="(icon$ | async)?.fontName"
-        [icon]="(icon$ | async)?.iconName" [firstLine]="noContentFirstLine" [secondLine]="noContentSecondLine"
-        [otherLines]="noContentOtherLines">
+      <app-no-content-message
+        [iconFont]="$safeNavigationMigration((icon$ | async)?.fontName)"
+        [icon]="$safeNavigationMigration((icon$ | async)?.iconName)"
+        [firstLine]="noContentFirstLine"
+        [secondLine]="noContentSecondLine"
+        [otherLines]="noContentOtherLines"
+      >
       </app-no-content-message>
     }
   </div>

@@ -7,40 +7,40 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="User Space Role/s">
-            {{ (cfSpaceService.userRole$ | async) }}
+            {{ cfSpaceService.userRole$ | async }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
-            @if ((cfSpaceService.spaceQuotaDefinition$ | async); as spaceQuotaDefinition) {
+            @if (cfSpaceService.spaceQuotaDefinition$ | async; as spaceQuotaDefinition) {
               <a [routerLink]="cfSpaceService.quotaLink$ | async">
                 {{ spaceQuotaDefinition.name }}
               </a>
             } @else {
               None assigned
               @if (cfSpaceService.quotaDefinition$ | async; as quotaDefinition) {
-                <span> - <a
-                [routerLink]="[]" (click)="goToOrgQuota($event)">view organization's quota</a>
-              </span>
+                <span> - <a [routerLink]="[]" (click)="goToOrgQuota($event)">view organization's quota</a> </span>
+              }
             }
-          }
-        </app-metadata-item>
-        <app-metadata-item label="Provision Paid Services">
-          <app-boolean-indicator [isTrue]="(cfSpaceService.quotaDefinition$ | async)?.paidServicesAllowed"
-            type="yes-no">
-          </app-boolean-indicator>
-        </app-metadata-item>
-      </div>
-      <div class="flex-1">
-        <app-metadata-item class="mt-0" label="SSH Access">
-          {{ allowSshStatus$ | async }}
-        </app-metadata-item>
-        <app-metadata-item label="Created At">
-          {{ cfSpaceService.spaceDataService.space()?.createdAt | date: 'medium' }}
-        </app-metadata-item>
-        <app-metadata-item label="Updated At">
-          {{ cfSpaceService.spaceDataService.space()?.updatedAt | date: 'medium' }}
-        </app-metadata-item>
+          </app-metadata-item>
+          <app-metadata-item label="Provision Paid Services">
+            <app-boolean-indicator
+              [isTrue]="$safeNavigationMigration((cfSpaceService.quotaDefinition$ | async)?.paidServicesAllowed)"
+              type="yes-no"
+            >
+            </app-boolean-indicator>
+          </app-metadata-item>
+        </div>
+        <div class="flex-1">
+          <app-metadata-item class="mt-0" label="SSH Access">
+            {{ allowSshStatus$ | async }}
+          </app-metadata-item>
+          <app-metadata-item label="Created At">
+            {{ $safeNavigationMigration(cfSpaceService.spaceDataService.space()?.createdAt) | date: "medium" }}
+          </app-metadata-item>
+          <app-metadata-item label="Updated At">
+            {{ $safeNavigationMigration(cfSpaceService.spaceDataService.space()?.updatedAt) | date: "medium" }}
+          </app-metadata-item>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </div>
