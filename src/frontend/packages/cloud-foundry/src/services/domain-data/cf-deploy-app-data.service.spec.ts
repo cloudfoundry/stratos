@@ -26,8 +26,9 @@ describe('CfDeployAppDataService', () => {
 
   it('starts with the default empty wizard state', () => {
     expect(svc.cfDetails()).toBeNull();
-    expect(svc.sourceType()).toBeNull();
-    expect(svc.applicationSource()).toEqual({ type: null });
+    // Optional wizard fields start unset (undefined) until the user picks a source.
+    expect(svc.sourceType()).toBeUndefined();
+    expect(svc.applicationSource()).toBeUndefined();
     expect(svc.projectExists()).toEqual({ checking: false, exists: false, error: false, name: '' });
   });
 
@@ -52,7 +53,7 @@ describe('CfDeployAppDataService', () => {
     svc.setCfDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
     svc.resetState();
     expect(svc.cfDetails()).toBeNull();
-    expect(svc.sourceType()).toBeNull();
+    expect(svc.sourceType()).toBeUndefined();
   });
 
   // The legacy CheckProjectExists action + DeployAppEffects pipeline is
