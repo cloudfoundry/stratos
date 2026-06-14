@@ -59,7 +59,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
 
 
   parentUrl: string;
-  applicationName$!: Observable<string>;
+  applicationName$!: Observable<string | null>;
   isCreate = false;
 
   // FWT-959 Part 2 (Partition C): SignalStepHandle wiring for the 4-step

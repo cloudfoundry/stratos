@@ -108,7 +108,7 @@ export class PodMetricsComponent {
             return !!metadata.container && metadata.container !== 'POD';
           });
         },
-        null,
+        undefined,
         (value: string) => value + ' MB'
       ),
       cpuChartConfigBuilder(
@@ -136,8 +136,8 @@ export class PodMetricsComponent {
         ),
         'Cumulative Data transmitted (MB)',
         ChartDataTypes.BYTES,
-        null,
-        null,
+        undefined,
+        undefined,
         (value: string) => value + ' MB'
       ),
       networkChartConfigBuilder(
@@ -148,8 +148,8 @@ export class PodMetricsComponent {
         ),
         'Cumulative Data received (MB)',
         ChartDataTypes.BYTES,
-        null,
-        null,
+        undefined,
+        undefined,
         (value: string) => value + ' MB'
       )
     ];

@@ -175,7 +175,7 @@ export function getAdjustmentType(adjustment: string): string {
 
 export function buildLegendData(trigger: AppScalingTrigger): AppAutoscalerMetricLegend[] {
   const legendData: AppAutoscalerMetricLegend[] = [];
-  let latestUl: AppScalingRule = null;
+  let latestUl: AppScalingRule | null = null;
   if (trigger.upper && trigger.upper.length > 0) {
     const noLowerRule = !trigger.lower || trigger.lower.length === 0;
     latestUl = buildUpperLegendData(legendData, trigger.upper, noLowerRule);
@@ -186,8 +186,10 @@ export function buildLegendData(trigger: AppScalingTrigger): AppAutoscalerMetric
   return legendData;
 }
 
-function getLegendName(currentRule: AppScalingRule, latestRule: AppScalingRule, singleRange: boolean, isLowerRule: boolean) {
-  if (singleRange) {
+function getLegendName(currentRule: AppScalingRule, latestRule: AppScalingRule | null, singleRange: boolean, isLowerRule: boolean) {
+  // strict: when singleRange is false the caller always provides a non-null
+  // latestRule (the prior rule in the iteration); guard for the type-checker.
+  if (singleRange || !latestRule) {
     const operator = isLowerRule ? getOppositeOperator(currentRule.operator) : currentRule.operator;
     return `${currentRule.metric_type} ${operator} ${currentRule.threshold}`;
   } else {
@@ -197,7 +199,7 @@ function getLegendName(currentRule: AppScalingRule, latestRule: AppScalingRule, 
 }
 
 function buildUpperLegendData(legendData: any, upper: AppScalingRule[], noLower: boolean): AppScalingRule {
-  let latestUl: AppScalingRule;
+  let latestUl: AppScalingRule | null = null;
   upper.forEach((item, index) => {
     const name = getLegendName(item, latestUl, index === 0, false);
     legendData.push({
@@ -206,34 +208,42 @@ function buildUpperLegendData(legendData: any, upper: AppScalingRule[], noLower:
     });
     latestUl = item;
   });
+  // strict: caller invokes this only when upper.length > 0, so the forEach above
+  // runs at least once and the last element is the final latestUl.
+  const lastUpper = upper[upper.length - 1];
   if (noLower) {
     legendData.push({
-      name: `${upper[0].metric_type} ${getOppositeOperator(latestUl.operator)} ${latestUl.threshold}`,
+      name: `${upper[0].metric_type} ${getOppositeOperator(lastUpper.operator)} ${lastUpper.threshold}`,
       value: AutoscalerConstants.normalColor
     });
   }
-  return latestUl;
+  return lastUpper;
 }
 
 function buildLowerLegendData(
   legendData: AppAutoscalerMetricDataPoint[],
   lower: AppScalingRule[],
-  latestUl: AppScalingRule
+  latestUl: AppScalingRule | null
 ): AppScalingRule {
   lower.forEach((item, index) => {
     const isSingleRange = !latestUl || !latestUl.threshold;
     const name = getLegendName(item, latestUl, isSingleRange, true);
     legendData.push({
       name,
-      value: index === 0 ? AutoscalerConstants.normalColor : latestUl.color
+      // strict: for index > 0 latestUl was assigned a prior rule below, and rule
+      // colors are populated by autoscaler-transform-policy before legends build.
+      value: index === 0 ? AutoscalerConstants.normalColor : latestUl!.color!
     });
     latestUl = item;
   });
+  // strict: caller invokes this only when lower.length > 0, so the forEach above
+  // ran and latestUl is the last rule; its color is set by transform-policy.
+  const lastLower = lower[lower.length - 1];
   legendData.push({
-    name: `${lower[0].metric_type} ${latestUl.operator} ${latestUl.threshold}`,
-    value: latestUl.color
+    name: `${lower[0].metric_type} ${lastLower.operator} ${lastLower.threshold}`,
+    value: lastLower.color!
   });
-  return latestUl;
+  return lastLower;
 }
 
 function getOppositeOperator(operator: string): string {

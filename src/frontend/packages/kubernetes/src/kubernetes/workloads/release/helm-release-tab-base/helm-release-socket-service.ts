@@ -40,7 +40,7 @@ export class HelmReleaseSocketService implements OnDestroy {
   private serviceAccountData = inject(KubeServiceAccountDataService);
 
 
-  private sub: Subscription;
+  private sub?: Subscription;
   private sendToSocket = new Subject<any>();
   public isPaused = false;
 
@@ -67,9 +67,10 @@ export class HelmReleaseSocketService implements OnDestroy {
 
     const messages = socket$.pipe(
       switchMap((getResponses: GetWebSocketResponses) => {
+        // getResponses emits the raw WebSocket payload (string | ArrayBuffer
+        // | Blob); the JSON.parse path below only handles string frames.
         return getResponses(this.sendToSocket);
       }),
-      map((message: string) => message),
       catchError((e: any): import('rxjs').Observable<never> => {
         console.error('Workload WS error: ', e);
         return of([]) as unknown as import('rxjs').Observable<never>;
@@ -77,11 +78,12 @@ export class HelmReleaseSocketService implements OnDestroy {
     );
 
     let prefix = '';
-    this.sub = messages.subscribe((jsonString: string) => {
+    this.sub = messages.subscribe((message) => {
       // Guard against empty, invalid, or non-string data
-      if (!jsonString || typeof jsonString !== 'string' || jsonString.trim() === '') {
+      if (!message || typeof message !== 'string' || message.trim() === '') {
         return;
       }
+      const jsonString: string = message;
       let messageObj;
       try {
         messageObj = JSON.parse(jsonString);
@@ -156,7 +158,7 @@ export class HelmReleaseSocketService implements OnDestroy {
   public stop() {
     if (this.sub) {
       this.sub.unsubscribe();
-      this.sub = null;
+      this.sub = undefined;
     }
   }
 

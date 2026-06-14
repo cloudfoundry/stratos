@@ -26,8 +26,10 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     icon: 'cloud_foundry',
     iconFont: 'stratos-icons',
     // No logoUrl for virtual endpoints - they don't appear in endpoint listings
-    // and don't need image-based branding. Use icon/iconFont instead.
-    logoUrl: null,
+    // and don't need image-based branding. logoUrl is a required string on the
+    // endpoint definition, so use an empty string sentinel; rendering is driven
+    // by icon/iconFont instead.
+    logoUrl: '',
     authTypes: [],
     // Autoscaler is a virtual endpoint type - it doesn't appear in the endpoints list
     // as it's a feature running on CF endpoints, not a separate connectable endpoint

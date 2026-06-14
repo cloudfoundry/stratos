@@ -59,9 +59,11 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   deleteReleaseConfirmation: ConfirmationDialogConfig;
 
   private busyDeleting = signal<boolean>(false);
-  public isBusy$: Observable<boolean>;
-  public hasResources$: Observable<boolean>;
-  public hasAllResources$: Observable<boolean>;
+  // strict: the following observables are assigned in the constructor inside
+  // runInInjectionContext, which TS can't see through the closure.
+  public isBusy$!: Observable<boolean>;
+  public hasResources$!: Observable<boolean>;
+  public hasAllResources$!: Observable<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
   public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
@@ -71,12 +73,12 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private successChartColor = '#4DD3A7';
   private completedChartColour = '#7aa3e5';
 
-  public path: string;
+  public path!: string; // strict: assigned in the constructor inside runInInjectionContext
 
-  public hasUpgrade$: Observable<string>;
+  public hasUpgrade$!: Observable<string>; // strict: assigned in the constructor inside runInInjectionContext
 
   // Can we upgrade? Yes as long as the Helm Chart can be found
-  public canUpgrade$: Observable<boolean>;
+  public canUpgrade$!: Observable<boolean>; // strict: assigned in the constructor inside runInInjectionContext
 
   public podChartColors = [
     {
@@ -104,8 +106,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Yellow: #FFC107
 
   private deleted = false;
-  public chartData$: Observable<HelmReleaseChartData>;
-  public resources$: Observable<any[]>;
+  // strict: assigned in the constructor inside runInInjectionContext.
+  public chartData$!: Observable<HelmReleaseChartData>;
+  public resources$!: Observable<any[]>;
 
   // Cached analysis report
   private analysisReport: any;
@@ -313,7 +316,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     Object.values(resources).forEach((resource: any) => resource.alerts = []);
 
     if (report && Object.keys(resources).length > 0) {
-      Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
+      Object.values<ResourceAlert[]>(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
           // Can we find a corresponding group in the resources?
           const res = Object.keys(resources).find((i) => i.toLowerCase() === alert.kind);

@@ -18,12 +18,13 @@ export class KubernetesNodeConditionComponent implements OnInit {
 
 
   @Input()
-  condition: ConditionType;
-  condition$: Observable<boolean>;
-  hasCondition$: Observable<boolean>;
+  condition!: ConditionType; // strict: required @Input, always bound by the template
+  // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
+  condition$!: Observable<boolean | undefined>; // strict: assigned in ngOnInit before the template reads it
+  hasCondition$!: Observable<boolean>; // strict: assigned in ngOnInit before the template reads it
 
   @Input()
-  overrideCondition$: Observable<boolean>;
+  overrideCondition$?: Observable<boolean>;
 
   @Input()
   type = 'yes-no';
@@ -65,7 +66,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
     );
   }
 
-  shouldBeGreen(condition: KubernetesCondition) {
+  shouldBeGreen(condition: KubernetesCondition): boolean | undefined {
     if (condition.status === 'True') {
       if (condition.type === ConditionType.Ready) {
         return true;

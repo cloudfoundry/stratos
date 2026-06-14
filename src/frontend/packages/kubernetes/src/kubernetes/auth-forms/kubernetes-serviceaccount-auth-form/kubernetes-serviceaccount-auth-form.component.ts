@@ -15,5 +15,5 @@ interface ServiceAccountAuthForm {
   imports: [ReactiveFormsModule]
 })
 export class KubernetesSATokenAuthFormComponent implements IAuthForm {
-  @Input() formGroup: FormGroup<ServiceAccountAuthForm>;
+  @Input() formGroup!: FormGroup<ServiceAccountAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 }

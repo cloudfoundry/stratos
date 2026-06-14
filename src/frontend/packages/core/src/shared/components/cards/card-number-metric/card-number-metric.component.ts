@@ -39,7 +39,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() showUsage = false;
   @Input() textOnly = false;
   @Input() labelAtTop = false;
-  @Input() link!: () => void | string;
+  @Input() link?: () => void | string;
   @Output() showAlerts = new EventEmitter<any>();
   @Input() mode!: string;
 
@@ -126,7 +126,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     if (typeof (this.link) === 'string') {
       this.router.navigate([this.link]);
     } else {
-      this.link();
+      this.link?.();
     }
   }
 

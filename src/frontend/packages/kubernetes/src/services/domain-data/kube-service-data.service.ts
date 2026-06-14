@@ -104,10 +104,11 @@ export class KubeServiceDataService {
   // sit on the same route family.
   async refresh(scope: { kubeGuid: string; namespace?: string }): Promise<void> {
     if (scope.namespace) {
-      const items = await this.fetchNamespacedServices(scope.kubeGuid, scope.namespace);
+      const namespace = scope.namespace;
+      const items = await this.fetchNamespacedServices(scope.kubeGuid, namespace);
       this._namespaceServices.update(curr => {
         const next = new Map(curr);
-        next.set(nsKey(scope.kubeGuid, scope.namespace), items);
+        next.set(nsKey(scope.kubeGuid, namespace), items);
         return next;
       });
       return;

@@ -19,7 +19,9 @@ export interface GitApiRequest {
 
 export abstract class BaseSCM {
 
-  public endpointGuid: string;
+  // strict: assigned by every concrete subclass constructor (GitHubSCM,
+  // GitLabSCM) immediately after super().
+  public endpointGuid!: string;
 
   // W36-B Wave 3: optional EndpointsDataService + Injector. When set
   // (via the GitSCMService factory) the getEndpoint() bridge reads
@@ -64,9 +66,9 @@ export abstract class BaseSCM {
     );
   }
 
-  protected getEndpoint(endpointGuid: string): Observable<EndpointModel> {
+  protected getEndpoint(endpointGuid: string): Observable<EndpointModel | undefined> {
     if (!endpointGuid) {
-      return of(null);
+      return of(undefined);
     }
     // W36-B Wave 3: source endpoints from EndpointsDataService when
     // available. Same lookup semantics as the legacy

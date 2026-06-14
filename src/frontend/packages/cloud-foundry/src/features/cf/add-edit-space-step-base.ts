@@ -1,4 +1,4 @@
-import { AbstractControl, ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Signal, computed } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -43,7 +43,7 @@ export class AddEditSpaceStepBase {
   }
 
   spaceNameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): ValidationErrors | null => {
       const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { spaceNameTaken: { value: formField.value } } : null;
     };

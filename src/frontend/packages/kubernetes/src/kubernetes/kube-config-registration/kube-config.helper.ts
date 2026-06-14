@@ -151,14 +151,14 @@ export class KubeConfigHelper {
     );
   }
 
-  private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[]) {
+  private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[] | null) {
     cluster._invalid = false;
     let reset = true;
 
     const found = endpoints.find(item => item.name === cluster.name);
     if (found) {
       // If the URL is the same, then we will just connect to the existing endpoint
-      if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user) {
+      if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user && !!found.guid) {
         cluster._guid = found.guid;
         cluster._state.next({
           message: 'This endpoint will be connected and not registered (endpoint is already registered)',
@@ -185,7 +185,7 @@ export class KubeConfigHelper {
         const newState = this.authHelper.parseAuth(cluster, user);
         if (!!newState && !!newState.message) {
           reset = false;
-          cluster._invalid = newState.error || newState.warning;
+          cluster._invalid = !!(newState.error || newState.warning);
           cluster._state.next(newState);
         }
       }

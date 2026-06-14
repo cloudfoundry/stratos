@@ -16,7 +16,10 @@ export class KubernetesService {
   private endpointsData = inject(EndpointsDataService);
 
   kubeEndpoints$: Observable<EndpointModel[]>;
-  waitForAppEntity$: Observable<EntityInfo<APIResource>>;
+  // strict: structural-shape field mirroring the sibling endpoint services
+  // (metrics-service / cloud-foundry.service); populated by consumers, never
+  // initialized here. Matches the existing definite-assignment convention.
+  waitForAppEntity$!: Observable<EntityInfo<APIResource>>;
 
   constructor() {
     this.kubeEndpoints$ = toObservable(this.endpointsData.endpointsList).pipe(

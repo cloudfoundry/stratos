@@ -63,22 +63,22 @@ import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-
 })
 export class UpgradeReleaseComponent {
 
-  @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
+  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
 
   public cancelUrl;
   // Signal-native list config for the version picker; undefined until the
   // upgrade target chart resolves (hasUpgrade emits).
   public readonly listConfig: WritableSignal<SignalListConfig<MonocularVersion> | undefined> = signal(undefined);
-  private version: MonocularVersion;
+  private version!: MonocularVersion; // strict: set by the version step's submit() before the overrides step reads it
 
-  public config: ChartValuesConfig;
+  public config!: ChartValuesConfig; // strict: assigned by fetchVersionDetails$ before the editor renders
 
-  private monocularEndpointId: string;
+  private monocularEndpointId!: string; // strict: assigned in the hasUpgrade subscription before submit reads it
 
   // Future
   public showAdvancedOptions = false;
 
-  private chartUrl: string;
+  private chartUrl!: string; // strict: assigned by fetchVersionDetails$ before doUpgrade$ reads it
   public helper = inject(HelmReleaseHelperService);
   private chartsService = inject(ChartsService);
   private router = inject(Router);

@@ -51,7 +51,7 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
 
 
   parentUrl: string;
-  applicationName$!: Observable<string>;
+  applicationName$!: Observable<string | null>;
 
   public editCredentialForm: FormGroup<AutoscalerCredentialForm>;
 

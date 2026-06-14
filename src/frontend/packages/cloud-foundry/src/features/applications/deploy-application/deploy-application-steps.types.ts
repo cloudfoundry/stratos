@@ -93,8 +93,11 @@ export class ApplicationDeploySourceTypes {
 
   constructor() {
     const scms: { [deployId: string]: GitSCM; } = {
-      [DEPLOY_TYPES_IDS.GITHUB]: this.scmService.getSCM('github', null),
-      [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', null)
+      // No endpoint guid for the public github.com/gitlab.com SCM; getSCM's
+      // getEndpoint() treats falsy guid as "no endpoint", and the empty-string
+      // sentinel matches the existing convention used elsewhere (step2 line ~354).
+      [DEPLOY_TYPES_IDS.GITHUB]: this.scmService.getSCM('github', ''),
+      [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', '')
     };
 
     // W36-B Wave 3: source endpoints from EndpointsDataService signal

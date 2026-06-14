@@ -20,7 +20,7 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 })
 export class ChartDetailsUsageComponent implements OnInit {
   @Input() chart!: Chart;
-  @Input() currentVersion: string;
+  @Input() currentVersion!: string; // strict: required @Input, only rendered inside @if (currentVersion) with a bound string
   installing!: boolean;
   private mdIconRegistry = inject(MatIconRegistry);
   private sanitizer = inject(DomSanitizer);

@@ -115,7 +115,7 @@ export class GithubFlattenerForArrayPaginationConfig<T>
     const trimmedLast = last.trim();
     const lastUrl = trimmedLast.slice(1, trimmedLast.indexOf('>'));
     const lastPageNumber = GITHUB_LINK_PAGE_REGEX.exec(lastUrl);
-    if (lastPageNumber.length < 2) {
+    if (!lastPageNumber || lastPageNumber.length < 2) {
       throw new Error(`Unable to depagination github request (could not find page number in ${lastUrl})`);
     }
 

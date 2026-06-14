@@ -37,7 +37,8 @@ export class KubernetesHomeCardComponent implements OnInit {
 
   @Input() endpoint!: EndpointModel;
 
-  pLayout: HomePageCardLayout;
+  // strict: backing field for the @Input() layout setter; assigned before the getter is read in the template
+  pLayout!: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
     return this.pLayout;
@@ -86,7 +87,8 @@ export class KubernetesHomeCardComponent implements OnInit {
   private readonly loaded$ = toObservable(this.loaded);
 
   ngOnInit() {
-    const guid = this.endpoint.guid;
+    // strict: home cards only render for registered endpoints, which always have a guid
+    const guid = this.endpoint.guid!;
     this.shortcuts = [
       {
         title: 'View Nodes',
@@ -105,7 +107,8 @@ export class KubernetesHomeCardComponent implements OnInit {
 
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
-    const guid = this.endpoint.guid;
+    // strict: home cards only render for registered endpoints, which always have a guid
+    const guid = this.endpoint.guid!;
     // Drives the count computeds; pods auto-load on read, node/namespace
     // need an explicit refresh to populate their cluster caches.
     this.guidSig.set(guid);

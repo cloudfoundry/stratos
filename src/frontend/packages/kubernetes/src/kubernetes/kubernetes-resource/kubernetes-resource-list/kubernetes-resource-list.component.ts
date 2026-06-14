@@ -63,9 +63,12 @@ export class KubernetesResourceListComponent implements OnDestroy {
 
   public entityCatalogKey: string;
 
-  public namespaces$: Observable<string[]>;
+  // Only populated in the namespaced (non-workload) branch; the workload
+  // view leaves it unset. Template guards with @if (namespaces$).
+  public namespaces$?: Observable<string[]>;
 
-  selectedNamespace: string;
+  // undefined represents the "All namespaces" (cluster-wide) selection.
+  selectedNamespace?: string;
 
   public isNamespacedView = true;
   public isWorkloadView = false;
@@ -82,10 +85,14 @@ export class KubernetesResourceListComponent implements OnDestroy {
   private readonly _selectedNamespaceSignal: WritableSignal<string | undefined> = signal(undefined);
   public readonly selectedNamespaceSignal = this._selectedNamespaceSignal.asReadonly();
 
-  private sub: Subscription;
-  private kubeId: string;
-  private workloadTitle: string;
-  private workloadNamespace: string;
+  private sub?: Subscription;
+  // strict: assigned in both constructor branches (workload + namespaced),
+  // which run after the catalogEntity guard's early return.
+  private kubeId!: string;
+  // Only set in the workload branch; the signal-config factory params type
+  // these as optional.
+  private workloadTitle?: string;
+  private workloadNamespace?: string;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private baseKubeGuid = inject(BaseKubeGuid);
@@ -116,7 +123,12 @@ export class KubernetesResourceListComponent implements OnDestroy {
     // Workload
     if (this.route.snapshot.data?.isWorkload) {
       this.isWorkloadView = true;
-      const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(this.route.snapshot.parent.parent.params.guid);
+      const workloadGuid = this.route.snapshot.parent?.parent?.params.guid;
+      if (!workloadGuid) {
+        console.error('Can not resolve workload guid from route for Kubernetes resource list');
+        return;
+      }
+      const { endpointId, namespace, releaseTitle } = getHelmReleaseDetailsFromGuid(workloadGuid);
       this.kubeId = endpointId;
       this.workloadNamespace = namespace;
       this.workloadTitle = releaseTitle;

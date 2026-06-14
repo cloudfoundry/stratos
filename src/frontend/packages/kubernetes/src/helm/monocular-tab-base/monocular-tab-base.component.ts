@@ -30,7 +30,8 @@ export class MonocularTabBaseComponent {
   private readonly helmEndpointIds = computed(() =>
     Object.values(this.endpointsSignals.endpoints())
       .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
-      .map(ep => ep.guid),
+      .map(ep => ep.guid)
+      .filter((guid): guid is string => !!guid),
   );
 
   public readonly endpointIds$: Observable<string[]> = toObservable(this.helmEndpointIds);

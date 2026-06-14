@@ -47,8 +47,9 @@ function buildKubeChartRequest(nodeName: string, endpointGuid: string, metric: s
 export class KubernetesNodeMetricsComponent implements OnInit {
   memoryMetric: KubeNodeMetric;
   cpuMetric: KubeNodeMetric;
-  memoryUnit: string;
-  cpuUnit: string;
+  // Never assigned by this component; the stats-card derives its own unit
+  memoryUnit?: string;
+  cpuUnit?: string;
 
   public instanceMetricConfigs: [
     MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
@@ -103,7 +104,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
             return s.name.indexOf('/') !== 0 && !!metadata.container && metadata.container !== 'POD';
           });
         },
-        null,
+        undefined,
         (value: string) => value + ' MB'
       ),
       chartConfigBuilder(

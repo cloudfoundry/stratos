@@ -17,11 +17,11 @@ export class SassHandler {
   //  Set options on the Webpack sass-loader plugin to use us as a custom importer
   public apply(webpackConfig: any, config: StratosConfig) {
     // Find the node-saas plugin and add a custom import resolver
-    webpackConfig.module.rules.forEach(rule => {
+    webpackConfig.module.rules.forEach((rule: any) => {
       if (rule.rules !== undefined) {
-        rule.rules.forEach(innerRule => {
+        rule.rules.forEach((innerRule: any) => {
           if (innerRule.use !== undefined) {
-            innerRule.use.forEach(p => {
+            innerRule.use.forEach((p: any) => {
               if (p.loader && p.loader.indexOf('sass-loader') > 0) {
                 // Ensure options exists
                 if (!p.options) p.options = {};
@@ -45,7 +45,7 @@ export class SassHandler {
 
   private customSassImport(config: StratosConfig) {
     const that = this;
-    return (url, _resourcePath) => {
+    return (url: string, _resourcePath: string) => {
       if (url === '~@stratosui/theme/extensions') {
         // Generate SCSS to appy theming to the packages that need to be themed
         return {
@@ -64,7 +64,8 @@ export class SassHandler {
           // Package name has a scope
           pkgName = pkgParts.shift() + '/' + pkgParts.shift();
         } else {
-          pkgName = pkgParts.shift();
+          // strict: pkg starts with '~' so split('/') yields a non-empty array; first shift() is defined
+          pkgName = pkgParts.shift()!;
         }
         const pkgPath = pkgParts.join(path.sep);
         // See if we can resolve the package name

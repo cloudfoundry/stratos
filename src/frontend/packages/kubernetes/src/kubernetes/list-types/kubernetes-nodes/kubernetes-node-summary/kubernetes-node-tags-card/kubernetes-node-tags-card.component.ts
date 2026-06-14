@@ -26,12 +26,12 @@ export class KubernetesNodeTagsCardComponent implements OnInit {
 
 
   @Input()
-  mode: string;
+  mode!: string; // strict: required @Input, always bound by the parent template
 
   @Input()
-  title: string;
+  title!: string; // strict: required @Input, always bound by the parent template
 
-  chipTags$: Observable<AppChip[]>;  public kubeNodeService = inject(KubernetesNodeService);
+  chipTags$!: Observable<AppChip[]>;  public kubeNodeService = inject(KubernetesNodeService); // strict: assigned in ngOnInit before the template reads it
 
   ngOnInit(): void {
     this.chipTags$ = this.kubeNodeService.nodeEntity$.pipe(

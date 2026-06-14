@@ -31,16 +31,19 @@ export const getGuidFromResource = (entity: BasicKubeAPIResource): string => {
 
   // Resource with namespace
   if (entity.metadata.namespace) {
-    return deliminate(entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
+    // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+    return deliminate(entity.metadata.kubeId!, entity.metadata.namespace, entity.metadata.name);
   }
 
   // Named resource (no namespace)
   if (entity.metadata.name) {
-    return deliminate(entity.metadata.kubeId, entity.metadata.name);
+    // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+    return deliminate(entity.metadata.kubeId!, entity.metadata.name);
   }
 
   // Cluster-level resource (e.g. Kubernetes dashboard)
-  return entity.metadata.kubeId;
+  // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+  return entity.metadata.kubeId!;
 };
 
 // ======================================================================================================================================
@@ -51,22 +54,27 @@ export const getGuidFromKubeNodeObj = (entity: KubernetesNode): string => getGui
 
 export const getGuidFromKubeNamespace = (kubeGuid: string, name: string): string => deliminate(name, kubeGuid);
 export const getGuidFromKubeNamespaceObj = (entity: KubernetesNamespace): string =>
-  debugMissingKubeId(entity, getGuidFromKubeNamespace, entity.metadata.kubeId, entity.metadata.name);
+  // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+  debugMissingKubeId(entity, getGuidFromKubeNamespace, entity.metadata.kubeId!, entity.metadata.name);
 
 export const getGuidFromKubeService = (kubeGuid: string, namespace: string, name: string): string => deliminate(name, namespace, kubeGuid);
 export const getGuidFromKubeServiceObj = (entity: KubeService): string =>
-  debugMissingKubeId(entity, getGuidFromKubeService, entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
+  // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+  debugMissingKubeId(entity, getGuidFromKubeService, entity.metadata.kubeId!, entity.metadata.namespace, entity.metadata.name);
 
 export const getGuidFromKubeStatefulSet = (kubeGuid: string, namespace: string, name: string): string =>
   deliminate(name, namespace, kubeGuid);
 export const getGuidFromKubeStatefulSetObj = (entity: KubernetesStatefulSet): string =>
-  debugMissingKubeId(entity, getGuidFromKubeStatefulSet, entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
+  // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+  debugMissingKubeId(entity, getGuidFromKubeStatefulSet, entity.metadata.kubeId!, entity.metadata.namespace, entity.metadata.name);
 
 export const getGuidFromKubeDeployment = (kubeGuid: string, namespace: string, name: string): string =>
   deliminate(name, namespace, kubeGuid);
 export const getGuidFromKubeDeploymentObj = (entity: KubernetesDeployment): string =>
-  debugMissingKubeId(entity, getGuidFromKubeDeployment, entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
+  // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+  debugMissingKubeId(entity, getGuidFromKubeDeployment, entity.metadata.kubeId!, entity.metadata.namespace, entity.metadata.name);
 
 export const getGuidFromKubePod = (kubeGuid: string, namespace: string, name: string): string => deliminate(name, namespace, kubeGuid);
 export const getGuidFromKubePodObj = (entity: KubernetesPod): string =>
-  debugMissingKubeId(entity, getGuidFromKubePod, entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
+  // strict: kubeId is populated by Stratos before id generation; absence is a bug flagged via debugMissingKubeId
+  debugMissingKubeId(entity, getGuidFromKubePod, entity.metadata.kubeId!, entity.metadata.namespace, entity.metadata.name);

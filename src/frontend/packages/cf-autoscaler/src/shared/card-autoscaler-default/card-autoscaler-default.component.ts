@@ -41,7 +41,7 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   @ViewChild('instanceField', { static: false }) instanceField!: ElementRef;
 
   appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | false | null>;
-  applicationInstances$!: Observable<number>;
+  applicationInstances$!: Observable<number | null | undefined>;
 
   @Input()
   onUpdate: () => void = () => { }

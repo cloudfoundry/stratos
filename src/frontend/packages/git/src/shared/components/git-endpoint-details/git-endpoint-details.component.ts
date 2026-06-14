@@ -17,8 +17,10 @@ import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 })
 export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
 
-  name: string;
-  avatar: string;
+  // strict: populated by the `row` setter, which the endpoint-list detail
+  // host invokes before this view renders.
+  name!: string;
+  avatar?: string;
 
   set row(row: EndpointModel) {
     if (row && row.user) {

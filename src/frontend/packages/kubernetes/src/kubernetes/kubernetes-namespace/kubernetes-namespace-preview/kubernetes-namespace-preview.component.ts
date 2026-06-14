@@ -36,7 +36,7 @@ import { KubernetesService } from "../../services/kubernetes.service";
 export class KubernetesNamespacePreviewComponent implements PreviewableComponent {
   showAnalysis$: Observable<boolean>;
 
-  link: string;
+  link!: string; // strict: assigned via setProps (PreviewableComponent contract) before the view reads it
   private session = inject(SessionService);
 
   constructor() {

@@ -18,7 +18,7 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   @Input() label!: string;
   @Input() value!: string;
   @Input() textOnly = false;
-  @Input() link!: () => void | string;
+  @Input() link?: () => void | string;
 
   formattedValue!: string;
 
@@ -56,7 +56,7 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
     if (typeof (this.link) === 'string') {
       this.router.navigate([this.link]);
     } else {
-      this.link();
+      this.link?.();
     }
   }
 }

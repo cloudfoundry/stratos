@@ -122,6 +122,9 @@ export class KubernetesSetupModule {
         // unavailable state. Replaces the legacy
         // `kubeEntityCatalog.node.api.healthCheck(guid)` ngrx dispatch.
         new EndpointHealthCheck(KUBERNETES_ENDPOINT_TYPE, (endpoint) => {
+          if (!endpoint.guid) {
+            return;
+          }
           kubeEndpointData.acquire(endpoint.guid).refresh().catch(() => { /* errors land in the service tristate */ });
         })
       );

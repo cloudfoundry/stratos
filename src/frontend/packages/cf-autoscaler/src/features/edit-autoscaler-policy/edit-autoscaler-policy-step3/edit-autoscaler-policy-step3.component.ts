@@ -95,21 +95,29 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     });
   }
 
+  // strict: autoscalerTransformArrayToMap (run in step1 ngOnInit, sharing one
+  // policy via the service) always sets schedules + recurring_schedule before
+  // any step3 interaction, so both are guaranteed present at runtime even though
+  // the shared AppAutoscalerPolicy type marks them optional.
+  private get recurringSchedules(): AppRecurringSchedule[] {
+    return this.currentPolicy.schedules!.recurring_schedule!;
+  }
+
   addRecurringSchedule = () => {
     const { ...newSchedule } = AutoscalerConstants.PolicyDefaultRecurringSchedule;
-    this.currentPolicy.schedules.recurring_schedule.push(newSchedule);
-    this.editRecurringSchedule(this.currentPolicy.schedules.recurring_schedule.length - 1);
+    this.recurringSchedules.push(newSchedule);
+    this.editRecurringSchedule(this.recurringSchedules.length - 1);
   };
 
   removeRecurringSchedule(index: number) {
     if (this.editIndex === index) {
       this.editIndex = -1;
     }
-    this.currentPolicy.schedules.recurring_schedule.splice(index, 1);
+    this.recurringSchedules.splice(index, 1);
   }
 
   editRecurringSchedule(index: number) {
-    const editSchedule = this.currentPolicy.schedules.recurring_schedule[index];
+    const editSchedule = this.recurringSchedules[index];
     this.editIndex = index;
     this.editEffectiveType = editSchedule.start_date ? 'custom' : 'always';
     this.editRepeatType = editSchedule.days_of_week ? 'week' : 'month';
@@ -135,7 +143,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
     this.editRecurringScheduleForm.controls['instance_max_count'].setValidators([Validators.required,
     validateRecurringSpecificMax(this.editRecurringScheduleForm, this.editMutualValidation)]);
     if (this.editEffectiveType === 'custom') {
-      if (!this.currentPolicy.schedules.recurring_schedule[this.editIndex].start_date &&
+      if (!this.recurringSchedules[this.editIndex].start_date &&
         !this.editRecurringScheduleForm.get('start_date')?.value) {
         this.editRecurringScheduleForm.controls['start_date'].setValue(format(addDays(new Date(), 1), AutoscalerConstants.MomentFormateDate));
         this.editRecurringScheduleForm.controls['end_date'].setValue(format(addDays(new Date(), 1), AutoscalerConstants.MomentFormateDate));
@@ -163,7 +171,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
   }
 
   finishRecurringSchedule() {
-    const currentSchedule = this.currentPolicy.schedules.recurring_schedule[this.editIndex];
+    const currentSchedule = this.recurringSchedules[this.editIndex];
     const repeatOn = ('days_of_' + this.editRepeatType) as 'days_of_week' | 'days_of_month';
     if (this.editRecurringScheduleForm.get('effective_type')?.value === 'custom') {
       currentSchedule.start_date = this.editRecurringScheduleForm.get('start_date')?.value ?? '';
@@ -259,7 +267,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
         newSchedule.end_date = this.editRecurringScheduleForm.get('end_date')?.value ?? '';
       }
       const invalid = recurringSchedulesOverlapping(newSchedule as AppRecurringSchedule, this.editIndex,
-        this.currentPolicy.schedules.recurring_schedule, repeatProperty);
+        this.recurringSchedules, repeatProperty);
       return invalid ? { alertInvalidPolicyScheduleRecurringConflict: { value: control.value } } : null;
     };
   }

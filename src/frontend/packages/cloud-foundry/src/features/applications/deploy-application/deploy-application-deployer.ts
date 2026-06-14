@@ -197,7 +197,8 @@ export class DeployApplicationDeployer {
     const deployData = this.injector.get(CfDeployAppDataService);
     const deployState$ = toObservable(deployData.state, { injector: this.injector });
     this.connectSub = deployState$.pipe(
-      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+      filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
+        !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       take(1),
       tap((appDetail) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;

@@ -22,13 +22,14 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   public selection = { title: 'None' };
 
   public canShow$: Observable<boolean>;
-  public analyzers$: Observable<AnalysisReport[]>;
+  // strict: assigned in ngOnInit before the template's async pipe reads it
+  public analyzers$!: Observable<AnalysisReport[]>;
 
   @Input() endpoint!: string;
   @Input() path!: string;
   @Input() prompt = 'Overlay';
   @Input() allowNone = true;
-  @Input() autoSelect: boolean;
+  @Input() autoSelect = false;
 
   @Output() selected = new EventEmitter<AnalysisReport | null>();
   @Output() reportCount = new EventEmitter<number>();

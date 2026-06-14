@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -99,7 +99,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
     this.metricUnit$ = this.metricUnitSubject.asObservable();
 
-    this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
+    this.subs.push(this.editTriggerForm.controls.metric_type.valueChanges.pipe(
       map((value: string) => this.getMetricUnit(value)),
     ).subscribe((unit: string) => {
       this.metricUnitSubject.next(unit);
@@ -170,7 +170,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerMetricType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -185,7 +185,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerOperator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (this.editTriggerForm) {
         this.editScaleType = getScaleType(control.value);
         this.editTriggerForm.controls.threshold.updateValueAndValidity();
@@ -195,7 +195,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerThreshold(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -215,7 +215,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustment(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -229,7 +229,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustmentType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (this.editTriggerForm) {
         this.editAdjustmentType = control.value;
         this.editTriggerForm.controls.adjustment.updateValueAndValidity();

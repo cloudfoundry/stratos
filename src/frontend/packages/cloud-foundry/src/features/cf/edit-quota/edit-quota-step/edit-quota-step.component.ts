@@ -51,13 +51,16 @@ export class EditQuotaStepComponent implements OnDestroy {
       );
     }
   }
-  get form(): QuotaDefinitionFormComponent {
+  get form(): QuotaDefinitionFormComponent | undefined {
     return this._form;
   }
 
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
+      if (!this.form) {
+        throw new Error('Quota definition form is not available');
+      }
       const formValues = this.form.formGroup.getRawValue();
       const body = formToOrgQuotaWriteBody(formValues);
       try {

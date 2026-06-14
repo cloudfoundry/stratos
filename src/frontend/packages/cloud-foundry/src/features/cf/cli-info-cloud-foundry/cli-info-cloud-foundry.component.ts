@@ -145,8 +145,11 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     this.context$ = this.endpointOrgSpace$.pipe(
       map(([cf, org, space]) => {
         return {
-          orgName: org ? org.name : null,
-          spaceName: space ? space.name : null,
+          // CFAppCLIInfoContext requires string org/space names; templates render
+          // falsy values as a '[...]' placeholder, so the empty-string "absent"
+          // marker is behaviourally identical to the prior null.
+          orgName: org ? org.name : '',
+          spaceName: space ? space.name : '',
           apiEndpoint: getFullEndpointApiUrl(cf.entity),
           username: cf.entity.user ? cf.entity.user.name : ''
         };

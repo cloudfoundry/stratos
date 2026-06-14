@@ -74,23 +74,23 @@ interface CreateReleaseForm {
 export class CreateReleaseComponent implements OnInit, OnDestroy {
 
   // isLoading$ = observableOf(false);
-  paginationStateSub: Subscription;
+  paginationStateSub?: Subscription;
 
   public cancelUrl: string;
-  kubeEndpoints$: Observable<any>;
-  validate$: Observable<boolean>;
+  kubeEndpoints$!: Observable<any>; // strict: assigned in setupDetailsStep() from the constructor
+  validate$!: Observable<boolean>; // strict: assigned in setupDetailsStep() from the constructor
 
-  details: FormGroup<CreateReleaseForm>;
-  namespaces$: Observable<string[]>;
+  details!: FormGroup<CreateReleaseForm>; // strict: assigned in setupDetailsStep() from the constructor
+  namespaces$!: Observable<string[]>; // strict: assigned in setupDetailsStep() from the constructor
 
-  @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField: ElementRef;
-  @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
+  @ViewChild('releaseNameInputField', { static: true }) releaseNameInputField!: ElementRef; // strict: @ViewChild populated by Angular
+  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
 
   private subs: Subscription[] = [];
   private createdNamespace = false;
 
   private chart: HelmChartReference;
-  public config: ChartValuesConfig;
+  public config!: ChartValuesConfig; // strict: assigned from the chart-version fetch in the constructor before the editor renders
   private route = inject(ActivatedRoute);
   public endpointsService = inject(EndpointsService);
   private chartsService = inject(ChartsService);
@@ -147,7 +147,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     const allNamespaces$ = this.kubeEndpoints$.pipe(
       take(1),
       switchMap(async (endpoints: EndpointModel[]) => {
-        const guids = endpoints.map(e => e.guid);
+        const guids = endpoints.map(e => e.guid).filter((g): g is string => !!g);
         await Promise.all(guids.map((g: string) => this.namespaceData.refresh({ kubeGuid: g })));
         return this.namespaceData.allNamespacesAcrossEndpoints(guids)();
       }),
@@ -158,12 +158,12 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       this.details.controls.releaseNamespace.valueChanges.pipe(startWith(''), distinctUntilChanged())
     ]).pipe(
       // Filter out namespaces from other kubes
-      map(([namespaces, kubeId, namespace]: [KubeNamespace[], string, string]) => ([
+      map(([namespaces, kubeId, namespace]: [KubeNamespace[], string, string]): [KubeNamespace[], string] => ([
         namespaces.filter(ns => ns.metadata.kubeId === kubeId),
         namespace
       ])),
       // Map to endpoint names
-      map(([namespaces, namespace]: [KubeNamespace[], string]) => [
+      map(([namespaces, namespace]: [KubeNamespace[], string]): [string[], string] => [
         namespaces.map(ns => ns.metadata.name),
         namespace
       ]),

@@ -80,17 +80,21 @@ export class KubernetesEndpointService {
   private http = inject(HttpClient);
   private endpointsService = inject(EndpointsDataService);
 
-  info$: Observable<EntityInfo<any>>;
-  endpoint$: Observable<EntityInfo<EndpointModel>>;
-  connected$: Observable<boolean>;
-  currentUser$: Observable<EndpointUser>;
+  // Currently never populated within this package (no assigner, no reader); kept
+  // as optional rather than asserted so the type reflects reality.
+  info$?: Observable<EntityInfo<any>>;
+  kubeDashboardVersion$?: Observable<string>;
+  // strict: assigned by initialize()/constructCoreObservables() during the
+  // endpoint lifecycle (constructor calls initialize when a kubeGuid exists).
+  endpoint$!: Observable<EntityInfo<EndpointModel>>;
+  connected$!: Observable<boolean>;
+  currentUser$!: Observable<EndpointUser | undefined>;
   kubeGuid!: string;
-  kubeDashboardEnabled$: Observable<boolean>;
-  kubeDashboardVersion$: Observable<string>;
-  kubeDashboardStatus$: Observable<KubeDashboardStatus | null>;
-  kubeDashboardLabel$: Observable<string>;
-  kubeDashboardConfigured$: Observable<boolean>;
-  kubeTerminalEnabled$: Observable<boolean>;
+  kubeDashboardEnabled$!: Observable<boolean>;
+  kubeDashboardStatus$!: Observable<KubeDashboardStatus | null>;
+  kubeDashboardLabel$!: Observable<string>;
+  kubeDashboardConfigured$!: Observable<boolean>;
+  kubeTerminalEnabled$!: Observable<boolean>;
 
   private injector = inject(Injector);
 
@@ -137,7 +141,7 @@ export class KubernetesEndpointService {
     this.constructCoreObservables();
   }
 
-  getCaaspNodesData(nodes$: Observable<KubernetesNode[]>): Observable<CaaspNodesData> {
+  getCaaspNodesData(nodes$: Observable<KubernetesNode[]>): Observable<CaaspNodesData | null> {
     return nodes$.pipe(
       map(nodes => {
         const info: CaaspNodesData = {
@@ -201,8 +205,8 @@ export class KubernetesEndpointService {
       map(nodes => {
         const versions: Record<string, string> = {};
         nodes.forEach(node => {
-          const v = node.status.nodeInfo.kubeletVersion;
-          if (!versions[v]) {
+          const v = node.status.nodeInfo?.kubeletVersion;
+          if (v && !versions[v]) {
             versions[v] = v;
           }
         });
@@ -230,7 +234,8 @@ export class KubernetesEndpointService {
         const pods = podsSignal();
         return {
           total: nodes.reduce((cap, node) => {
-            return cap + parseInt(node.status.capacity.pods, 10);
+            const pods = node.status.capacity?.pods;
+            return cap + (pods ? parseInt(pods, 10) : 0);
           }, 0),
           used: pods.length
         };

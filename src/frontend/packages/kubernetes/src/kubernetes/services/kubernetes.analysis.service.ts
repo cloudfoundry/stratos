@@ -34,7 +34,9 @@ export class KubernetesAnalysisService {
   kubeGuid: string;
 
   public analyzers$: Observable<KubernetesAnalysisType[]>;
-  public namespaceAnalyzers$: Observable<KubernetesAnalysisType[]>;
+  // strict: assigned inside the constructor's runInInjectionContext callback;
+  // emits null when analysis is disabled (template guards with @if/async).
+  public namespaceAnalyzers$!: Observable<KubernetesAnalysisType[] | null>;
 
   public enabled$: Observable<boolean>;
   public hideAnalysis$: Observable<boolean>;
