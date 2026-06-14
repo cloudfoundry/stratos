@@ -24,7 +24,7 @@ describe('AcmeLoginComponent', () => {
         RouterTestingModule,
         NoopAnimationsModule,
       ]
-    }),
+    })
       .compileComponents();
   });
 
