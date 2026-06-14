@@ -3,11 +3,13 @@ import { EntitySchema } from '../helpers/entity-schema';
 import { endpointEntityType, stratosEntityFactory } from '../helpers/stratos-entity-factory';
 import { TestEntityCatalog } from './entity-catalog';
 import { StratosCatalogEndpointEntity, StratosCatalogEntity } from './entity-catalog-entity/entity-catalog-entity';
-import { EntityCatalogSchemas, IStratosEndpointDefinition } from './entity-catalog.types';
+import { EntityCatalogSchemas, IStratosEndpointDefinition, StratosEndpointExtensionDefinition } from './entity-catalog.types';
 
 describe('EntityCatalogService', () => {
   let entityCatalog: TestEntityCatalog;
-  function getEndpointDefinition() {
+  // The catalog injects the default schema during registration, so this fixture is an
+  // endpoint definition without a schema; `type` is always supplied so it stays a concrete string.
+  function getEndpointDefinition(): Omit<StratosEndpointExtensionDefinition, 'type'> & { type: string } {
     return {
       type: 'endpointType',
       label: 'Cloud Foundry',
@@ -17,12 +19,12 @@ describe('EntityCatalogService', () => {
       logoUrl: '/core/assets/endpoint-icons/cloudfoundry.png',
       authTypes: [],
       listDetailsComponent: 'Test Component',
-    } as IStratosEndpointDefinition;
+    };
   }
   function getDefaultSchema() {
     return new EntitySchema('entitySchema1', 'endpoint1');
   }
-  function getSchema(modifier: string, schemaKey: string = null) {
+  function getSchema(modifier: string, schemaKey?: string) {
     return new EntitySchema('entitySchema1' + modifier, 'endpoint1', undefined, undefined, undefined, schemaKey);
   }
   beforeEach(() => entityCatalog = new TestEntityCatalog());

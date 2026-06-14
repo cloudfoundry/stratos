@@ -111,7 +111,9 @@ describe('InviteUsersCreateComponent', () => {
     } as any);
 
     // Drive the same code path the wizard uses on submit.
-    await firstValueFrom(component.onNext());
+    // strict: onNext's impl ignores the stepper's (index, step) contract
+    // args; call it via its real runtime shape.
+    await firstValueFrom((component.onNext as () => ReturnType<typeof component.onNext>)());
 
     expect(markStale).toHaveBeenCalledWith(testSCFEndpointGuid);
   });

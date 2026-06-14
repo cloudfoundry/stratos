@@ -5,8 +5,8 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { ApplicationStateService } from './application-state.service';
 describe('ApplicationStateService', () => {
 
-  const $translate = { instant: (label) => label };
-  let cfAppStateService;
+  const $translate = { instant: (label: string | undefined) => label };
+  let cfAppStateService: ApplicationStateService;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -25,25 +25,34 @@ describe('ApplicationStateService', () => {
     expect(cfAppStateService).toBeTruthy();
   });
 
+  // strict: every app state exercised below resolves to a defined action string in
+  // ApplicationStateService, so res.actions is always non-null on these paths
+  // (it is only null for the unmapped/tentative state, which these cases never hit).
   describe('check friendly names and indicators', () => {
 
-    function makeTestData(appState, packageState, instanceStates?) {
-      const summary = {
+    function makeTestData(appState: string, packageState: string | undefined, instanceStates?: string[]) {
+      const summary: {
+        state: string,
+        package_state: string | undefined,
+        package_updated_at: string | undefined,
+        running_instances: number,
+        instances: number | undefined,
+      } = {
         state: appState,
         package_state: packageState,
         package_updated_at: undefined,
         running_instances: 0,
         instances: instanceStates ? instanceStates.length : undefined,
       };
-      let instances = [];
+      let instances: { state: string }[] | null = [];
       let running = 0;
       if (instanceStates) {
         instanceStates.forEach(s => {
-          instances.push({ state: s });
+          instances!.push({ state: s }); // strict: instances is the [] literal in this branch (only set to null in else)
           if (s === 'RUNNING') { running++; }
         });
       } else {
-        instances = undefined;
+        instances = null;
       }
       summary.running_instances = running;
       return {
@@ -58,8 +67,8 @@ describe('ApplicationStateService', () => {
 
       expect(res.indicator).toBe('error');
       expect($translate.instant(res.label)).toBe('Staging Failed');
-      expect(Object.keys(res.actions).length).toBe(2);
-      expect(res.actions.delete).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(2);
+      expect(res.actions?.delete).toBe(true);
     });
 
     it('Updating app', () => {
@@ -68,9 +77,9 @@ describe('ApplicationStateService', () => {
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Offline while Updating');
-      expect(Object.keys(res.actions).length).toBe(2);
-      expect(res.actions.delete).toBe(true);
-      expect(res.actions.start).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(2);
+      expect(res.actions?.delete).toBe(true);
+      expect(res.actions?.start).toBe(true);
     });
 
     it('Incomplete app', () => {
@@ -78,9 +87,9 @@ describe('ApplicationStateService', () => {
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('incomplete');
       expect($translate.instant(res.label)).toBe('Incomplete');
-      expect(Object.keys(res.actions).length).toBe(3);
-      expect(res.actions.delete).toBe(true);
-      expect(res.actions.cli).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(3);
+      expect(res.actions?.delete).toBe(true);
+      expect(res.actions?.cli).toBe(true);
     });
 
     it('User stopped app', () => {
@@ -88,9 +97,9 @@ describe('ApplicationStateService', () => {
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Offline');
-      expect(Object.keys(res.actions).length).toBe(4);
-      expect(res.actions.start).toBe(true);
-      expect(res.actions.delete).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(4);
+      expect(res.actions?.start).toBe(true);
+      expect(res.actions?.delete).toBe(true);
     });
 
     it('Incomplete', () => {
@@ -98,9 +107,9 @@ describe('ApplicationStateService', () => {
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('incomplete');
       expect($translate.instant(res.label)).toBe('Incomplete');
-      expect(Object.keys(res.actions).length).toBe(3);
-      expect(res.actions.delete).toBe(true);
-      expect(res.actions.cli).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(3);
+      expect(res.actions?.delete).toBe(true);
+      expect(res.actions?.cli).toBe(true);
     });
 
     it('During push', () => {
@@ -108,8 +117,8 @@ describe('ApplicationStateService', () => {
       const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('busy');
       expect($translate.instant(res.label)).toBe('Staging App');
-      expect(Object.keys(res.actions).length).toBe(1);
-      expect(res.actions.delete).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(1);
+      expect(res.actions?.delete).toBe(true);
     });
 
     it('After successful push', () => {
@@ -118,9 +127,9 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('busy');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Starting App');
-      expect(Object.keys(res.actions).length).toBe(3);
-      expect(res.actions.stop).toBe(true);
-      expect(res.actions.restart).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(3);
+      expect(res.actions?.stop).toBe(true);
+      expect(res.actions?.restart).toBe(true);
     });
 
     it('Starting', () => {
@@ -130,9 +139,9 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('ok');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Scaling App');
-      expect(Object.keys(res.actions).length).toBe(4);
-      expect(res.actions.stop).toBe(true);
-      expect(res.actions.restart).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(4);
+      expect(res.actions?.stop).toBe(true);
+      expect(res.actions?.restart).toBe(true);
     });
 
     it('Running!', () => {
@@ -147,10 +156,10 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('ok');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Online');
-      expect(Object.keys(res.actions).length).toBe(5);
-      expect(res.actions.restart).toBe(true);
-      expect(res.actions.stop).toBe(true);
-      expect(res.actions.launch).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(5);
+      expect(res.actions?.restart).toBe(true);
+      expect(res.actions?.stop).toBe(true);
+      expect(res.actions?.launch).toBe(true);
     });
 
     it('Borked, usually due to app code', () => {
@@ -165,9 +174,9 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('error');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Crashed');
-      expect(Object.keys(res.actions).length).toBe(4);
-      expect(res.actions.restart).toBe(true);
-      expect(res.actions.stop).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(4);
+      expect(res.actions?.restart).toBe(true);
+      expect(res.actions?.stop).toBe(true);
     });
 
     it('Borked, usually due to starting timeouts', () => {
@@ -182,9 +191,9 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Starting App');
-      expect(Object.keys(res.actions).length).toBe(3);
-      expect(res.actions.restart).toBe(true);
-      expect(res.actions.stop).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(3);
+      expect(res.actions?.restart).toBe(true);
+      expect(res.actions?.stop).toBe(true);
     });
 
     it('Borked, usually due to starting timeouts (1)', () => {
@@ -199,9 +208,9 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('error');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Crashed');
-      expect(Object.keys(res.actions).length).toBe(4);
-      expect(res.actions.restart).toBe(true);
-      expect(res.actions.stop).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(4);
+      expect(res.actions?.restart).toBe(true);
+      expect(res.actions?.stop).toBe(true);
     });
 
     it('Borked, usually due to platform issues', () => {
@@ -216,10 +225,10 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Crashing');
-      expect(Object.keys(res.actions).length).toBe(5);
-      expect(res.actions.restart).toBe(true);
-      expect(res.actions.stop).toBe(true);
-      expect(res.actions.launch).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(5);
+      expect(res.actions?.restart).toBe(true);
+      expect(res.actions?.stop).toBe(true);
+      expect(res.actions?.launch).toBe(true);
     });
 
     it('Borked, usually due to platform issues (2)', () => {
@@ -234,10 +243,10 @@ describe('ApplicationStateService', () => {
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Partially Online');
-      expect(Object.keys(res.actions).length).toBe(5);
-      expect(res.actions.restart).toBe(true);
-      expect(res.actions.stop).toBe(true);
-      expect(res.actions.launch).toBe(true);
+      expect(Object.keys(res.actions!).length).toBe(5);
+      expect(res.actions?.restart).toBe(true);
+      expect(res.actions?.stop).toBe(true);
+      expect(res.actions?.launch).toBe(true);
     });
 
     it('Borked, one crashed, one running, one stating', () => {
@@ -250,7 +259,7 @@ describe('ApplicationStateService', () => {
 
     it('Started, but no stats available', () => {
       const testData = makeTestData('STARTED', 'STAGED');
-      const res = cfAppStateService.get(testData.summary, undefined);
+      const res = cfAppStateService.get(testData.summary, null);
       expect(res.indicator).toBe('tentative');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect(res.subLabel).not.toBeDefined();

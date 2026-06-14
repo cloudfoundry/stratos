@@ -90,8 +90,9 @@ describe('CfRolesService', () => {
     expect(first.entityRequestInfo.fetching).toBe(true);
     expect(first.entity).toBeNull();
     expect(second.entityRequestInfo.fetching).toBe(false);
-    expect(second.entity.metadata.guid).toBe('org-1');
-    expect(second.entity.entity.name).toBe('My Org');
+    // strict: the loaded emission (fetching=false) always carries a non-null entity
+    expect(second.entity!.metadata.guid).toBe('org-1');
+    expect(second.entity!.entity.name).toBe('My Org');
   });
 
   it('fetchOrgs hits the native list endpoint with per_page paging', () => {
@@ -147,7 +148,8 @@ describe('CfRolesService', () => {
     expect(org.permissions.users).toBe(true);
     expect(org.permissions.auditors).toBe(false);
 
-    const space = org.spaces['space-1'];
+    // strict: this user has a space-1 role under org-1, so spaces is populated
+    const space = org.spaces!['space-1'];
     expect(space.spaceGuid).toBe('space-1');
     expect(space.name).toBe('My Space');
     expect(space.permissions.developers).toBe(true);
@@ -173,8 +175,9 @@ describe('CfRolesService', () => {
     expect(Object.keys(roles)).toEqual(['user-9']);
     const org = roles['user-9']['org-2'];
     expect(org).toBeTruthy();
-    expect(org.spaces['space-2'].permissions.auditors).toBe(true);
-    expect(org.spaces['space-2'].name).toBe('Space Two');
+    // strict: the space-only role auto-creates org-2 with a populated spaces map
+    expect(org.spaces!['space-2'].permissions.auditors).toBe(true);
+    expect(org.spaces!['space-2'].name).toBe('Space Two');
   });
 
   it('populateRoles drains all org pages so names beyond the first page still resolve', async () => {

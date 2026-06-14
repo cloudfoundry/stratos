@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
-import { AppState, BaseEntityValues, CurrentUserRolesDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
+import { AppState, BaseEntityValues, CurrentUserRolesDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationEntityState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
 import {
   createBasicStoreModule,
   createEntityStoreState,
@@ -15,11 +15,52 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';
 
 
+/**
+ * Roles fixture shape. Roles no longer live on the ngrx `AppState` slice — they
+ * were relocated to the signal-native `CurrentUserRolesDataService` (favorites/
+ * roles island Wave 2). This local type mirrors the fixture that seeds that
+ * service, keeping it out of the store-state object that `createBasicStoreModule`
+ * consumes.
+ */
+interface TestUserRolesFixture {
+  internal: {
+    isAdmin: boolean;
+    scopes: StratosScopeStrings[];
+  };
+  endpoints: {
+    cf: Record<string, any>;
+  };
+  state: {
+    initialised: boolean;
+    fetching: boolean;
+    error: null;
+  };
+}
+
+type TestStoreStateFixture = Partial<Omit<AppState<BaseEntityValues>, 'pagination'>> & {
+  // The fixture only seeds a subset of pagination sections; the production
+  // `AppState.pagination` requires every BaseEntityValues key, so model it as a
+  // partial record of pagination entity-type states here.
+  pagination?: Record<string, Record<string, PaginationEntityState>>;
+  currentUserRoles: TestUserRolesFixture;
+};
+
+/**
+ * Strip the (signal-native) roles fixture, leaving the ngrx store-state slice
+ * that `createBasicStoreModule` consumes.
+ */
+function toStoreState(fixture: TestStoreStateFixture): Partial<AppState<BaseEntityValues>> {
+  const { currentUserRoles, ...storeState } = fixture;
+  // The fixture's pagination is intentionally a partial record of the production
+  // ExtendedRequestState (only the sections the test seeds); reconcile the shapes.
+  return storeState as Partial<AppState<BaseEntityValues>>;
+}
+
 describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
 
 
-  function createStoreState(): Partial<AppState<BaseEntityValues>> {
+  function createStoreState(): TestStoreStateFixture {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -101,14 +142,15 @@ describe('CurrentUserPermissionsService', () => {
 
 
     // Pagination
-    const pagination: PaginationState = {
+    const pagination = {
       stratosEndpoint: {
         'endpoint-list': {
           currentPage: 1,
           totalResults: 2,
           pageCount: 1,
           ids: {
-            1: endpoints.map(endpoint => endpoint.guid),
+            // strict: every endpoint fixture above declares a literal guid
+            1: endpoints.map(endpoint => endpoint.guid!),
           },
           pageRequests: {
             1: {
@@ -149,8 +191,9 @@ describe('CurrentUserPermissionsService', () => {
     const entityMap = new Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>([
       [
         stratosEntityFactory(endpointEntityType),
-        endpoints.map(endpoint => ({
-          guid: endpoint.guid,
+        endpoints.map((endpoint): TestStoreEntity => ({
+          // strict: every endpoint fixture above declares a literal guid
+          guid: endpoint.guid!,
           data: endpoint,
         })),
       ],
@@ -474,7 +517,9 @@ describe('CurrentUserPermissionsService', () => {
         provideZonelessChangeDetection(),
       ],
       imports: [
-        createBasicStoreModule(createStoreState()),
+        // `currentUserRoles` is seeded into the signal-native data service below,
+        // not the ngrx store, so only the store-state slice goes to the module.
+        createBasicStoreModule(toStoreState(createStoreState())),
         EntityCatalogTestModule,
         AppTestModule,
       ],

@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { getDefaultRowState, RowState } from './row-state.types';
 
 describe('row-state.types', () => {

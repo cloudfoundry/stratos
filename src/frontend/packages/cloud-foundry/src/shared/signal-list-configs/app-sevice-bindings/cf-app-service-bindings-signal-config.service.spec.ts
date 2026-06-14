@@ -170,7 +170,7 @@ describe('CfAppServiceBindingsSignalConfigService', () => {
     const row = makeBinding({ guid: 'b-7' });
     const acts = svc.buildRowActions(row);
     const unbind = acts.find(a => a.label === 'Unbind')!;
-    unbind.invoke();
+    unbind.invoke(row);
     expect(actions.unbindService).toHaveBeenCalledWith('b-7');
   });
 });

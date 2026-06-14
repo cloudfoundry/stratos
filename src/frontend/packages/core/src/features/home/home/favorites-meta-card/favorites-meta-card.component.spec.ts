@@ -73,7 +73,10 @@ describe('FavoritesMetaCardComponent', () => {
     component.favoriteEntity = makeFavoriteStub('old app');
     fixture.detectChanges();
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0][0].metadata.name).toBe('renamed app');
+    const persisted = spy.mock.calls[0][0];
+    expect(persisted.metadata).toBeDefined();
+    // strict: asserted defined above; the corrected name is persisted in metadata
+    expect(persisted.metadata!.name).toBe('renamed app');
   });
 
   it('does not persist when fresh equals stored', () => {
@@ -124,7 +127,10 @@ describe('FavoritesMetaCardComponent', () => {
     expect(component.displayName()).toBe('opensource');
     // ...and heals the null-metadata favorite for good.
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0][0].metadata.name).toBe('opensource');
+    const persisted = spy.mock.calls[0][0];
+    expect(persisted.metadata).toBeDefined();
+    // strict: asserted defined above; the fetched name is backfilled into metadata
+    expect(persisted.metadata!.name).toBe('opensource');
   });
 
   it('does not persist (and does not throw) when the favorite is malformed', () => {

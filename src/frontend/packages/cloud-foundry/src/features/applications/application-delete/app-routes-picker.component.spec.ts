@@ -25,6 +25,7 @@ const routeA: StRoute = {
   path: '',
   domainGuid: 'd-1',
   spaceGuid: 's-1',
+  cnsiGuid: 'cnsi-1',
   createdAt: '',
   updatedAt: '',
 };
@@ -36,6 +37,7 @@ const routeB: StRoute = {
   path: '/api',
   domainGuid: 'd-1',
   spaceGuid: 's-1',
+  cnsiGuid: 'cnsi-1',
   createdAt: '',
   updatedAt: '',
 };

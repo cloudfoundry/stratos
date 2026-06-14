@@ -84,7 +84,8 @@ describe('PageHeaderComponent', () => {
     ];
     const breadcrumbDefinitions = component.breadcrumbDefinitions;
     expect(breadcrumbDefinitions).toBeDefined();
-    expect(breadcrumbDefinitions.length).toEqual(3);
+    // strict: asserted defined above; setting breadcrumbs populates breadcrumbDefinitions
+    expect(breadcrumbDefinitions!.length).toEqual(3);
   });
 
   it('should have 2 breadcrumb', () => {
@@ -116,7 +117,8 @@ describe('PageHeaderComponent', () => {
     ];
     const breadcrumbDefinitions = component.breadcrumbDefinitions;
     expect(breadcrumbDefinitions).toBeDefined();
-    expect(breadcrumbDefinitions.length).toEqual(2);
+    // strict: asserted defined above; setting breadcrumbs populates breadcrumbDefinitions
+    expect(breadcrumbDefinitions!.length).toEqual(2);
   });
 
   describe('copyToken (UAA token menu)', () => {

@@ -177,7 +177,8 @@ describe('KubePodDataService', () => {
       expect(pods.length).toBe(1);
       expect(pods[0].kubeGuid).toBe('cnsi-1');
       expect(pods[0].metadata.kubeId).toBe('cnsi-1');
-      expect(pods[0].expandedStatus.status).toBe('Running'); // normalizePod ran
+      // strict: setWorkloadPods runs normalizePod, which always computes expandedStatus.
+      expect(pods[0].expandedStatus!.status).toBe('Running'); // normalizePod ran
     });
 
     it('keys workload pods by kubeGuid:namespace:release (no cross-release leak)', () => {

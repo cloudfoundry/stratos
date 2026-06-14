@@ -69,8 +69,7 @@ describe('ApplicationTabsBaseComponent', () => {
         RawPath: '',
         ForceQuery: false,
         RawQuery: '',
-        Fragment: '',
-        RawFragment: ''
+        Fragment: ''
       },
       authorization_endpoint: '',
       token_endpoint: '',
@@ -86,7 +85,8 @@ describe('ApplicationTabsBaseComponent', () => {
       sso_allowed: false,
       sub_type: '',
       metadata: {},
-      logged_in_as_admin: false
+      metricsAvailable: false,
+      creator: { name: 'test-user', admin: false, system: false }
     };
 
     const endpointsMap: WritableSignal<Map<string, EndpointModel>> = signal(

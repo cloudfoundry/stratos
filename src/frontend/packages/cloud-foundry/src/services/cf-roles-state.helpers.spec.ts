@@ -49,7 +49,8 @@ function getState(
     if (orgOrSpace === RoleEntities.ORGS) {
       guid = testOrgGuid;
     }
-    allRoles.push({ guid, roles });
+    // strict: callers that leave allRoles empty always supply the `roles` arg
+    allRoles.push({ guid, roles: roles! });
   }
   const orgSpaceRoles: any = { [orgOrSpace]: {} };
   if (orgOrSpace === RoleEntities.SPACES) {

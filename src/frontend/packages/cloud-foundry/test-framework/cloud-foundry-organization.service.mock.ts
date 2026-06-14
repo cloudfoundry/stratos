@@ -10,7 +10,7 @@ export class CloudFoundryOrganizationServiceMock {
           spaces: [],
           status: ''
         },
-        metadata: null
+        metadata: { created_at: '', guid: '', updated_at: '', url: '' }
       },
       entityRequestInfo: getDefaultRequestState()
     });

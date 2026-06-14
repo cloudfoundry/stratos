@@ -22,9 +22,6 @@
     "strict": true,
     "skipLibCheck": true,
     "types": [
-      "jasmine",
-      "jasminewd2",
-      "karma",
       "vite"
     ],
     "typeRoots": [
@@ -52,8 +49,15 @@
       "@stratosui/desktop-extensions": ["frontend/packages/desktop-extensions/src/public-api.ts"],
       "@stratosui/git": ["frontend/packages/git/src/public_api.ts"],
       "@stratosui/material-replacements": ["frontend/packages/core/src/shared/services/tailwind-material-replacements.ts"],
+      "@stratosui/core/*": ["frontend/packages/core/src/*"],
+      "@stratosui/store/*": ["frontend/packages/store/src/*"],
       "@test-framework": ["frontend/packages/core/test-framework/index.ts"],
       "@test-framework/cf": ["frontend/packages/cloud-foundry/test-framework/index.ts"],
+      "@test-framework/*": [
+        "frontend/packages/core/test-framework/*",
+        "frontend/packages/cloud-foundry/test-framework/*",
+        "frontend/packages/store/testing/src/*"
+      ],
       "@core/sass/*": ["frontend/packages/core/sass/*"]
     }
   }

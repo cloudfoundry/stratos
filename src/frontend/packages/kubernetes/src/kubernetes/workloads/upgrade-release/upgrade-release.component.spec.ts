@@ -6,7 +6,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
 import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
@@ -33,7 +33,9 @@ describe('UpgradeReleaseComponent', () => {
     mockHelmReleaseHelper = {
       guid: 'test-endpoint:test-namespace:test-release',
       hasUpgrade: vi.fn().mockReturnValue(of(null)),
-      release$: of(null),
+      // Real release$ filters out null, so it never emits a value until a
+      // release resolves; EMPTY models "no release resolved" without fabricating one.
+      release$: EMPTY,
       releaseTitle: 'test-release',
       endpointGuid: 'test-endpoint',
       namespace: 'test-namespace'

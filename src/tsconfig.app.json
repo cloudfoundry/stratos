@@ -2,5 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc"
-  }
+  },
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.config.ts",
+    "**/*.config.mts"
+  ]
 }

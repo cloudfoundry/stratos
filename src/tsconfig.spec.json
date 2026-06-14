@@ -3,8 +3,13 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": [
-      "vitest/globals",
       "node"
     ]
-  }
+  },
+  "exclude": [
+    "**/*.config.ts",
+    "**/*.config.mts",
+    "frontend/packages/example-extensions/**",
+    "frontend/packages/desktop-extensions/**"
+  ]
 }

@@ -159,7 +159,9 @@ describe('KubernetesResourceListComponent', () => {
 
     expect(namespaceRefresh).toHaveBeenCalledWith({ kubeGuid: 'test-guid' });
     let emitted: string[] | undefined;
-    component.namespaces$.subscribe(v => emitted = v);
+    // strict: this is the namespaced (non-workload) path; ngOnInit (run by the
+    // detectChanges above) always assigns namespaces$ here.
+    component.namespaces$!.subscribe(v => emitted = v);
     expect(emitted).toEqual(['alpha', 'beta']);
   });
 

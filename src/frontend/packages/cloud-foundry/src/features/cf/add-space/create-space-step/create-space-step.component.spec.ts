@@ -13,7 +13,8 @@ import {
   EntityCatalogHelpers,
 } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
-import { generateTestCfEndpointServiceProvider, ActiveRouteCfOrgSpace } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { generateTestCfEndpointServiceProvider } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { ActiveRouteCfOrgSpace } from "../../cf-page.types";
 import { generateCFEntities } from '@stratosui/cloud-foundry';
 import { CreateSpaceStepComponent } from "./create-space-step.component";
 

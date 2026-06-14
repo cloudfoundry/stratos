@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
+import { APIResource } from '@stratosui/store';
+
 import { CfUserRelationTypes } from '../actions/permissions.actions';
 import { CfCurrentUserRolesResponse, fetchCfCurrentUserRoles } from './cf-user-roles-fetch';
 
@@ -30,8 +32,12 @@ describe('fetchCfCurrentUserRoles', () => {
   });
 
   it('applies one relation bucket per CfUserRelationTypes value, carrying the bucket data', async () => {
-    const orgEntry = { metadata: { guid: 'org-1' }, entity: {} };
-    const spaceEntry = { metadata: { guid: 'sp-1' }, entity: { organization_guid: 'org-1' } };
+    const orgEntry: APIResource<{ organization_guid?: string }> = {
+      metadata: { guid: 'org-1', created_at: '1', updated_at: '1', url: '1' }, entity: {},
+    };
+    const spaceEntry: APIResource<{ organization_guid?: string }> = {
+      metadata: { guid: 'sp-1', created_at: '1', updated_at: '1', url: '1' }, entity: { organization_guid: 'org-1' },
+    };
     const response: CfCurrentUserRolesResponse = {
       buckets: {
         organizations: [orgEntry],

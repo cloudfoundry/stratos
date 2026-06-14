@@ -33,7 +33,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
  * });
  * ```
  */
-export function configureZonelessTestBed(config: TestModuleMetadata): typeof TestBed {
+export function configureZonelessTestBed(config: TestModuleMetadata): TestBed {
   // Ensure providers array exists
   const providers = config.providers || [];
 

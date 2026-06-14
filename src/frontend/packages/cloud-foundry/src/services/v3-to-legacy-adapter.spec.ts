@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { stToLegacy } from './v3-to-legacy-adapter';
+import { IAppSummaryRoute } from '../cf-api.types';
 import {
   StAppDetail,
   StAppStat,
@@ -181,7 +182,9 @@ describe('stToLegacy.appSummary', () => {
     expect(summary!.disk_quota).toBe(1024);
     expect(summary!.instances).toBe(3);
     expect(summary!.routes).toHaveLength(1);
-    expect(summary!.routes[0].url).toBe('my-app.example.com');
+    // The adapter stamps a runtime `url` onto each summary route (not on the
+    // IAppSummaryRoute interface); read it through the actual emitted shape.
+    expect((summary!.routes[0] as IAppSummaryRoute & { url: string }).url).toBe('my-app.example.com');
     expect(summary!.buildpack).toBe('ruby_buildpack');
     expect(summary!.detected_buildpack).toBe('ruby');
     // V3 droplet.state "STAGED" maps to V2 package_state "STAGED"
@@ -202,14 +205,22 @@ describe('stToLegacy.appSummary', () => {
 
 describe('stToLegacy.envVars', () => {
   it('renames v3-camelCase fields to v2-snake_case shape', () => {
-    const env: StEnvVars = {
+    // applicationProvided carries CF's VCAP_APPLICATION, a nested JSON object on
+    // the wire, but StEnvVars declares applicationProvided as Record<string,
+    // string> — narrower than reality. The adapter passes the value straight
+    // through, so the realistic nested fixture exercises the true passthrough
+    // path. Type the fixture by its actual wire shape; the cast to StEnvVars
+    // bridges the (overly-narrow) declared param, not a silencing widen.
+    const env: Omit<StEnvVars, 'applicationProvided'> & {
+      applicationProvided: Record<string, unknown>;
+    } = {
       environment: { FOO: 'bar' },
       systemProvided: { VCAP_SERVICES: { db: [{ name: 'pg' }] } },
       applicationProvided: { VCAP_APPLICATION: { name: 'my-app' } },
       runningProvided: { RUN: 'yes' },
       stagingProvided: { STAGE: 'true' },
     };
-    const legacy = stToLegacy.envVars(env);
+    const legacy = stToLegacy.envVars(env as StEnvVars);
     expect(legacy).not.toBeNull();
     expect(legacy!.environment_json).toEqual({ FOO: 'bar' });
     expect(legacy!.system_env_json).toEqual({ VCAP_SERVICES: { db: [{ name: 'pg' }] } });

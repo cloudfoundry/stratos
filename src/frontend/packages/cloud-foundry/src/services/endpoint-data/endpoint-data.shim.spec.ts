@@ -9,6 +9,7 @@ const org: StOrg = {
   guid: 'org-1',
   name: 'Org One',
   status: 'active',
+  quotaGuid: 'quota-1',
   labels: {},
   annotations: {},
   createdAt: '2026-04-01T00:00:00Z',
@@ -34,6 +35,9 @@ const space: StSpace = {
   createdAt: '2026-04-01T00:00:00Z',
   updatedAt: '2026-04-01T00:00:00Z',
   cnsiGuid: 'cnsi-1',
+  appCount: 0,
+  routeCount: 0,
+  allowSsh: false,
 };
 
 function empty(): StEndpointData {

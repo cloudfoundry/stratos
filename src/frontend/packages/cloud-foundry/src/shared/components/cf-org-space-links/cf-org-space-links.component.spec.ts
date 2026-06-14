@@ -6,11 +6,20 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
 import { CfOrgSpaceLinksComponent } from "./cf-org-space-links.component";
+import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.service';
+
+// The component only reads the name/URL getters and multipleConnectedEndpoints$
+// off its injected label service; the test double implements exactly that
+// surface. Pick the consumed members so the mock stays faithful to the type.
+type CfOrgSpaceLabelServiceMock = Pick<
+  CfOrgSpaceLabelService,
+  'getCfName' | 'getCfURL' | 'getOrgName' | 'getOrgURL' | 'getSpaceName' | 'getSpaceURL' | 'multipleConnectedEndpoints$'
+>;
 
 describe('CfOrgSpaceLinksComponent', () => {
   let component: CfOrgSpaceLinksComponent;
   let fixture: ComponentFixture<CfOrgSpaceLinksComponent>;
-  let service;
+  let service: CfOrgSpaceLabelServiceMock;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -37,7 +46,9 @@ describe('CfOrgSpaceLinksComponent', () => {
     };
     fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
     component = fixture.componentInstance;
-    component.service = service;
+    // strict: assign the consumed-surface test double; the component only
+    // touches the members CfOrgSpaceLabelServiceMock implements.
+    component.service = service as CfOrgSpaceLabelService;
     fixture.detectChanges();
   });
 
@@ -65,7 +76,9 @@ describe('CfOrgSpaceLinksComponent', () => {
       // Recreate the component with the new service
       fixture = TestBed.createComponent(CfOrgSpaceLinksComponent);
       component = fixture.componentInstance;
-      component.service = service;
+      // strict: assign the consumed-surface test double; the component only
+    // touches the members CfOrgSpaceLabelServiceMock implements.
+    component.service = service as CfOrgSpaceLabelService;
       fixture.detectChanges();
     });
 
