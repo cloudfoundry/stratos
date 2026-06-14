@@ -21,7 +21,7 @@ import { KubernetesNodeSimpleMetricComponent } from "../kubernetes-node-simple-m
   selector: "app-kubernetes-node-metric-stats-card",
   templateUrl: "./kubernetes-node-metric-stats-card.component.html",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
     DecimalPipe,
@@ -36,16 +36,16 @@ export class KubernetesNodeMetricStatsCardComponent
   title = "Memory";
 
   @Input()
-  metric: KubeNodeMetric;
+  metric!: KubeNodeMetric;
 
   @Input()
   period = "Hour";
 
   @Input()
-  unit: string;
+  unit!: string;
 
-  max$: Observable<number>;
-  mean$: Observable<number>;
+  max$!: Observable<number>;
+  mean$!: Observable<number>;
   subscriptions: Subscription[] = [];
   public kubeNodeService = inject(KubernetesNodeService);
 

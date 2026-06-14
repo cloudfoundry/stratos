@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterModule } from "@angular/router";
   selector: "app-revision-detail",
   templateUrl: "./revision-detail.component.html",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterModule],
 })
 export class RevisionDetailComponent {

@@ -11,7 +11,7 @@ import { StServiceOffering } from "../../../../../services/endpoint-data/stratos
   templateUrl: "./table-cell-service-references.component.html",
   styleUrls: ["./table-cell-service-references.component.scss"],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ClickStopPropagationDirective],
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<StServiceOffering> {

@@ -361,7 +361,7 @@ export class CustomFormFieldComponent
   selector: "mat-icon",
   template: '<i class="material-icons"><ng-content></ng-content></i>',
   styleUrls: ["./custom-form-field.component.scss"],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class CustomFormFieldIconComponent {
@@ -375,7 +375,7 @@ export class CustomFormFieldIconComponent {
   template: "<ng-content></ng-content>",
   styleUrls: ["./custom-form-field.component.scss"],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-icon-button",
     "[class.mat-button-disabled]": "disabled",
@@ -392,7 +392,7 @@ export class CustomIconButtonDirective {
   template: "<ng-content></ng-content>",
   styleUrls: ["./custom-form-field.component.scss"],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-button",
     "[class.mat-button-disabled]": "disabled",
@@ -432,7 +432,7 @@ export class AppInputDirective {
   selector: "[matSuffix]",
   template: "",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-form-field-suffix",
   },
@@ -444,7 +444,7 @@ export class MatSuffixDirective {}
   template:
     '<label class="mat-form-field-label" [attr.for]="labelFor"><ng-content></ng-content></label>',
   styleUrls: ["./custom-form-field.component.scss"],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class MatLabelComponent {
@@ -456,7 +456,7 @@ export class MatLabelComponent {
   template:
     '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
   styleUrls: ["./custom-form-field.component.scss"],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class AppErrorComponent {}
@@ -466,7 +466,7 @@ export class AppErrorComponent {}
   template:
     '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
   styleUrls: ["./custom-form-field.component.scss"],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class MatErrorComponent {}
