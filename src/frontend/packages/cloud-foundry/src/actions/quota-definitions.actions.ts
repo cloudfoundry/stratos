@@ -97,7 +97,7 @@ function orgSpaceQuotaFormValuesToApiObject(formValues: QuotaFormValues, isOrg =
 export class GetQuotaDefinitions extends CFStartAction implements PaginatedAction {
   constructor(
     public paginationKey: string,
-    public endpointGuid: string = null,
+    public endpointGuid?: string,
     public includeRelations: string[] = [],
     public populateMissing = false
   ) {

@@ -66,10 +66,14 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   }
 
   @Input() set endpoint(value: EndpointModel) {
-    this.guid = value.guid;
+    // strict: a registered endpoint always carries a guid; it is only
+    // optional on the shared EndpointModel shape.
+    this.guid = value.guid!;
   }
 
-  guid: string;
+  // strict: populated by the @Input endpoint setter the home framework
+  // always supplies before load()/template read.
+  guid!: string;
   recentAppsRows = 10;
   hasNoApps$!: Observable<boolean>;
   allApps$!: Observable<APIResource<IApp>[]>;
@@ -82,24 +86,28 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     this.pLayout = new HomePageCardLayout(1, 1);
     this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
       map(types => types.map(type =>
-        new ITileConfig<IAppTileData>(type.name, type.graphic, {
+        // strict: every SourceType emitted by types$ defines a graphic (the
+        // base types and the SCM-derived entries all set one); the field is
+        // only optional on the shared SourceType interface.
+        new ITileConfig<IAppTileData>(type.name, type.graphic!, {
           type: 'deploy',
           subType: type.id,
-          endpointGuid: type.endpointGuid,
+          ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}),
         })
       ))
     );
   }
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
-    if (tile) {
+    if (tile && tile.data) {
+      const data = tile.data;
       const query: Record<string, string> = {
         [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
         [AUTO_SELECT_CF_URL_PARAM]: this.guid,
       };
-      if (tile.data.subType) { query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType; }
-      if (tile.data.endpointGuid) { query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid; }
-      this.router.navigate(`applications/${tile.data.type}`.split('/'), { queryParams: query });
+      if (data.subType) { query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = data.subType; }
+      if (data.endpointGuid) { query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = data.endpointGuid; }
+      this.router.navigate(`applications/${data.type}`.split('/'), { queryParams: query });
     }
   }
 

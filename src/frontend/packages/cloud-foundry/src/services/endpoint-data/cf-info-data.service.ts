@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
 import { EMPTY, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, shareReplay, tap, timeout } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 
 import { ICfV2Info } from '../../cf-api.types';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
@@ -64,6 +64,7 @@ export class CfInfoDataService {
       tap(info => this._info.set(info)),
       catchError(err => { this.addError('info', err); return EMPTY; }),
       timeout(60_000),
+      map(() => undefined),
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
@@ -71,7 +72,7 @@ export class CfInfoDataService {
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
-    ) as Observable<void>;
+    );
     return this._inFlightLoad;
   }
 

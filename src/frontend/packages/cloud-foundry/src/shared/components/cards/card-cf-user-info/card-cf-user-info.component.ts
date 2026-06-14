@@ -7,6 +7,8 @@ import {
   CardTitleComponent,
   CardContentComponent
 } from '@stratosui/core';
+import { EndpointUser } from '@stratosui/store';
+
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
@@ -28,7 +30,7 @@ export class CardCfUserInfoComponent implements OnInit {
 
   ngOnInit() { }
 
-  isAdmin(user) {
+  isAdmin(user: EndpointUser | undefined) {
     return user && user.admin ? 'Yes' : 'No';
   }
 }

@@ -22,7 +22,7 @@ export interface ServiceInstanceActionBuilders extends OrchestratedActionBuilder
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServiceInstance;
   remove: (
     guid: string,
@@ -41,20 +41,20 @@ export interface ServiceInstanceActionBuilders extends OrchestratedActionBuilder
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServiceInstances;
   getAllInServicePlan: (
     servicePlanGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServicePlanServiceInstances;
   getAllInSpace: (
     spaceGuid: string,
     endpointGuid: string,
     paginationKey: string,
     qParams: string[],
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServiceInstancesForSpace;
 }
 

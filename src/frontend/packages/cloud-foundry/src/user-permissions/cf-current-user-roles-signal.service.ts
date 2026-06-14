@@ -51,7 +51,8 @@ export class CfCurrentUserRolesSignalService {
     return defer(() => from(this.endpointsService.whenReady())).pipe(
       map(() =>
         Array.from(this.endpointsService.endpoints().values())
-          .filter(e => e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected')
+          .filter((e): e is typeof e & { guid: string } =>
+            e.cnsi_type === CF_ENDPOINT_TYPE && e.connectionStatus === 'connected' && !!e.guid)
           .map(endpoint => endpoint.guid)
       )
     );

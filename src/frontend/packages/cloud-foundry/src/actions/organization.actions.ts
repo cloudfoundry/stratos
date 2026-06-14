@@ -107,7 +107,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
   constructor(
     public orgGuid: string,
     public endpointGuid: string,
-    public paginationKey: string = null,
+    public paginationKey: string = '',
     public includeRelations: string[] = [],
     public populateMissing = true
   ) {
@@ -138,7 +138,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
 export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
-    public endpointGuid: string = null,
+    public endpointGuid?: string,
     public includeRelations: string[] = [],
     public populateMissing = true
   ) {
@@ -197,7 +197,8 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
       'organizations',
       createOrg
     );
-    this.guid = createOrg.name;
+    // strict: create-org payload always carries a name (form validation requires it)
+    this.guid = createOrg.name!;
   }
   actions = getActions('Organizations', 'Create Org');
   entity = [cfEntityFactory(organizationEntityType)];

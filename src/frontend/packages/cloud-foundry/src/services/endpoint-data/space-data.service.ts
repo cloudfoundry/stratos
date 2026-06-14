@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
 import { EMPTY, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, shareReplay, tap, timeout } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError, StSpace } from './stratos-types';
 
@@ -51,6 +51,7 @@ export class SpaceDataService {
       tap(space => this._space.set(space)),
       catchError(err => { this.addError('space', err); return EMPTY; }),
       timeout(60_000),
+      map(() => undefined),
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
@@ -58,7 +59,7 @@ export class SpaceDataService {
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
-    ) as Observable<void>;
+    );
     return this._inFlightLoad;
   }
 

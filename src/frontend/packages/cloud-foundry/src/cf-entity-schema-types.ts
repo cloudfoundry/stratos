@@ -35,7 +35,7 @@ export class CFEntitySchema extends EntitySchema {
     relationKey?: string,
     excludeFromRecursiveDelete?: string[]
   ) {
-    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey, null, excludeFromRecursiveDelete);
+    super(entityKey, CF_ENDPOINT_TYPE, definition, options, relationKey, undefined, excludeFromRecursiveDelete);
   }
 }
 

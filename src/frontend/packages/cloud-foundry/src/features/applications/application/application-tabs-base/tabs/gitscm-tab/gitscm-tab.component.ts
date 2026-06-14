@@ -87,7 +87,8 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   private readonly signalConfig = inject(GithubCommitsSignalConfigService);
 
 
-  public hasRepo$!: Observable<boolean>;
+  // undefined while the repo state is still resolving (before value/error).
+  public hasRepo$!: Observable<boolean | undefined>;
   public isLoading$!: Observable<boolean>;
 
   public gitSCMRepo$!: Observable<GitRepo>;
@@ -99,7 +100,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   public readonly listConfig: WritableSignal<SignalListConfig<GitCommit> | undefined> = signal(undefined);
 
   private gitSCMRepoErrorSub!: Subscription;
-  private snackBarRef: TailwindSnackBarRef<any>;
+  private snackBarRef?: TailwindSnackBarRef<any>;
 
   // Context needed by the per-row Deploy / Compare actions, captured as the
   // observables resolve so the action callbacks can read them synchronously.
@@ -140,7 +141,10 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
     const scmType = stProject.deploySource.scm || stProject.deploySource.type;
     const scm = this.scmService.getSCM(scmType as GitSCMType, stProject.deploySource.endpointGuid);
 
-    return { projectName: stProject.deploySource.project, scm };
+    // strict: this tab only renders for git-deployed apps, whose STRATOS_PROJECT
+    // deploySource always carries project/branch/commit (optional on the shared
+    // source type because docker/other deploy kinds omit them).
+    return { projectName: stProject.deploySource.project!, scm };
   }
 
   ngOnInit() {
@@ -154,9 +158,13 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
     combineLatest([this.appService.waitForAppEntity$, this.appService.appSpace$]).pipe(
       take(1),
     ).subscribe(([app, space]) => {
-      this.cfGuid = app.entity.entity.cfGuid;
+      // strict: cfGuid is stamped on every loaded app entity (optional on IApp
+      // only because the raw CF payload omits it before Stratos decorates it).
+      this.cfGuid = app.entity.entity.cfGuid!;
       this.spaceGuid = app.entity.entity.space_guid;
-      this.orgGuid = space.orgGuid;
+      // strict: appSpace$ has resolved by the time waitForAppEntity$ emits an
+      // app on a detail page; the legacy code read space.orgGuid unguarded.
+      this.orgGuid = space!.orgGuid;
       this.appGuid = app.entity.metadata.guid;
     });
 
@@ -171,9 +179,11 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       );
 
       this.scm = baseGitMeta.scm;
-      this.projectName = stProject.deploySource.project;
-      this.branchName = stProject.deploySource.branch;
-      this.deployedCommitSha = stProject.deploySource.commit.trim();
+      // strict: git-deploy STRATOS_PROJECT always carries project/branch/commit
+      // (optional on the shared source type for docker/other deploy kinds).
+      this.projectName = stProject.deploySource.project!;
+      this.branchName = stProject.deploySource.branch!;
+      this.deployedCommitSha = stProject.deploySource.commit!.trim();
       this.icon$ = of(baseGitMeta.scm.getIcon());
 
       this.hasRepo$ = this.gitData.getRepository(baseGitMeta.scm, baseGitMeta.projectName).state$.pipe(
@@ -190,7 +200,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       );
 
       const blockedOnRepo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
-        filter(hasRepo => hasRepo),
+        filter(hasRepo => !!hasRepo),
         switchMap(() => coreInfo$)
       );
 
@@ -222,22 +232,27 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       });
 
       this.commit$ = blockedOnRepo$.pipe(
+        // strict: git-deploy deploySource always carries commit/branch.
         switchMap(([project, meta]) =>
-          this.gitData.getCommit(meta.scm, meta.projectName, project.deploySource.commit.trim()).waitForValue$
+          this.gitData.getCommit(meta.scm, meta.projectName, project.deploySource.commit!.trim()).waitForValue$
         )
       );
       // Capture the deployed commit's timestamp — the Compare action is only
       // offered for commits newer than the deployed one (see the legacy
       // createEnabled gating).
       this.commit$.pipe(take(1)).subscribe(deployedCommit => {
-        this.deployedTime = getUnixTime(new Date(deployedCommit.commit.author.date));
+        // strict: getCommit resolves the full commit detail before emitting.
+        this.deployedTime = getUnixTime(new Date(deployedCommit.commit!.author.date));
       });
       this.isHead$ = blockedOnRepo$.pipe(
+        // strict: git-deploy deploySource always carries branch.
         switchMap(([project, meta]) =>
-          this.gitData.getBranch(meta.scm, meta.projectName, project.deploySource.branch).waitForValue$
+          this.gitData.getBranch(meta.scm, meta.projectName, project.deploySource.branch!).waitForValue$
         ),
         withLatestFrom(blockedOnRepo$),
-        map(([branch, [project]]) => branch.commit.sha === project.deploySource.commit.trim()),
+        // strict: a resolved branch carries its head commit; deploySource.commit
+        // is present for git-deployed apps.
+        map(([branch, [project]]) => branch.commit!.sha === project.deploySource.commit!.trim()),
       );
     });
   }

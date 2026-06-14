@@ -96,7 +96,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   space$: Observable<any>;
   spaceGuid: string;
   editSpaceForm: FormGroup<EditSpaceForm>;
-  originalSpaceQuotaGuid!: string;
+  originalSpaceQuotaGuid?: string;
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
@@ -141,7 +141,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   }
 
   /** Name uniqueness check used by the base class's spaceNameTakenValidator. */
-  isNameUnique = (spaceName: string = null): boolean => {
+  isNameUnique = (spaceName: string | null = null): boolean => {
     const names = this.allSpacesInOrg();
     // Signal returns [] before the org-data load completes — treat as
     // "no known siblings yet, name is OK" so the form validator doesn't
@@ -241,7 +241,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
     const oldGuid = this.originalSpaceQuotaGuid || null;
     const eds = this.endpointDataRegistry.acquire(this.cfGuid);
 
-    const detach$ = oldGuid
+    const detach$: Observable<unknown> = oldGuid
       ? this.http.delete(`/pp/v1/cf/space_quotas/${this.cfGuid}/${oldGuid}/relationships/spaces/${this.spaceGuid}`)
       : of(null);
 

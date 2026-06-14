@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, signal, Signal } from '@angular/core';
 import { EMPTY, merge, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, shareReplay, tap, timeout } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError, StOrgDetail, StSpace } from './stratos-types';
 
@@ -64,6 +64,7 @@ export class OrgDataService {
       ),
     ).pipe(
       timeout(60_000),
+      map(() => undefined),
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
@@ -71,7 +72,7 @@ export class OrgDataService {
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
-    ) as Observable<void>;
+    );
     return this._inFlightLoad;
   }
 

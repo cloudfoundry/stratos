@@ -66,7 +66,7 @@ export class ApplicationInstanceChartComponent implements OnInit {
   private mapSeriesItemValue() {
     switch (this.seriesTranslation) {
       case 'mb':
-        return (bytes) => (bytes / 1000000).toFixed(2);
+        return (bytes: number) => (bytes / 1000000).toFixed(2);
       default:
         return undefined;
     }

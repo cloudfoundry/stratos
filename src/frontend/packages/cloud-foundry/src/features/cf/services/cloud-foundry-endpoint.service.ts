@@ -209,7 +209,10 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), take(1), publishReplay(1), refCount());
+    this.currentUser$ = this.endpoint$.pipe(
+      map(e => e.entity.user),
+      filter((user): user is EndpointUser => !!user),
+      take(1), publishReplay(1), refCount());
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {
@@ -235,7 +238,7 @@ export class CloudFoundryEndpointService {
   public getMetricFromApps(apps: APIResource<IApp>[], statMetric: string): number {
     return apps ? apps
       .filter(a => a.entity && a.entity.state !== CfApplicationState.STOPPED)
-      .map(a => (a.entity as Record<string, any>)[statMetric] * a.entity.instances)
+      .map(a => (a.entity as Record<string, any>)[statMetric] * (a.entity.instances ?? 0))
       .reduce((a, t) => a + t, 0) : 0;
   }
 

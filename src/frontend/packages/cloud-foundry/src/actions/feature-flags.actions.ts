@@ -9,7 +9,7 @@ import { createEntityRelationPaginationKey } from '../entity-relations/entity-re
 import { CFStartAction } from './cf-action.types';
 
 export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string, public paginationKey: string = null) {
+  constructor(public endpointGuid: string, public paginationKey: string = '') {
     super();
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, this.endpointGuid);
     this.options = new HttpRequest(

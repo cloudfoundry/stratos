@@ -271,8 +271,12 @@ export class StratosCatalogEntity<
   T extends IEntityMetadata = IEntityMetadata,
   Y = any,
   AB extends OrchestratedActionBuilderConfig = OrchestratedActionBuilders,
+  // Mirror the base class' ABC resolution exactly so that an instance's `ABC` is the same
+  // (resolved) type the base would compute for the same `AB`. Re-declaring a fresh
+  // conditional here left the subclass' `ABC` deferred while the base field type resolved
+  // it, making otherwise-identical types non-assignable under strict mode.
   ABC extends OrchestratedActionBuilders = AB extends OrchestratedActionBuilders ? AB : OrchestratedActionBuilders,
-  > extends StratosBaseCatalogEntity<T, Y, AB, ABC> {
+  > extends StratosBaseCatalogEntity<T, Y, AB> {
   public declare definition: IStratosEntityDefinition<EntityCatalogSchemas, Y, ABC>;
   constructor(
     entity: IStratosEntityDefinition,

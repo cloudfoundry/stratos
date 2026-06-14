@@ -125,8 +125,8 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   @ViewChild('spaceRolesTable', { read: ViewContainerRef, static: true })
   spaceRolesTable!: ViewContainerRef;
 
-  private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
-  private snackBarRef: TailwindSnackBarRef<any>;
+  private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent> | null = null;
+  private snackBarRef: TailwindSnackBarRef<any> | null = null;
 
   usersNames$!: Observable<string[]>;
   blocked = signal<boolean>(true);
@@ -156,8 +156,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     );
 
     const orgConnect$ = orgEntity$.pipe(
-      filter(entityInfo => !!entityInfo.entity),
-      map(entityInfo => [entityInfo.entity]),
+      map(entityInfo => entityInfo.entity),
+      filter((entity): entity is APIResource<IOrganization> => !!entity),
+      map(entity => [entity]),
       share()
     );
 

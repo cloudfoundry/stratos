@@ -170,7 +170,7 @@ export class CsiModeService {
     serviceInstanceGuid: string,
     cfGuid: string,
     appGuid: string,
-    params: object,
+    params: object | undefined,
   ): Observable<{ success: boolean; message?: string }> {
     return defer(() => from(this.bindWithProvisioningWait(serviceInstanceGuid, cfGuid, appGuid, params)));
   }
@@ -184,7 +184,7 @@ export class CsiModeService {
     serviceInstanceGuid: string,
     cfGuid: string,
     appGuid: string,
-    params: object,
+    params: object | undefined,
     inlineWaitMs = 15_000,
     backgroundWaitMs = 600_000,
   ): Promise<{ success: boolean; message?: string }> {

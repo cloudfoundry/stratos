@@ -159,10 +159,10 @@ export class ApplicationDeploySourceTypes {
     );
   }
 
-  getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
+  getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType | undefined> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
     if (!typeId) {
-      return of(null);
+      return of(undefined);
     }
     const endpointGuid = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM];
     return this.types$.pipe(map(types => types.find(source => source.id === typeId && source.endpointGuid === endpointGuid)));

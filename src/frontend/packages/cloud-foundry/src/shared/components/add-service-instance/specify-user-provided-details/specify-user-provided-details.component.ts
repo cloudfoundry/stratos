@@ -30,7 +30,7 @@ import { AppDetailDataService } from '../../../../features/applications/app-deta
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
-import { CsiStateService } from './../csi-state.service';
+import { CsiState, CsiStateService } from './../csi-state.service';
 
 // Picker row: a UPS instance plus a flag indicating whether this instance is
 // already bound to the current app. Bound instances render disabled in the
@@ -204,7 +204,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     // appDetailData injector is null and there is no app to bind to, so
     // every row stays selectable.
     return this.csiState$.pipe(
-      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
+      filter((p): p is CsiState & { cfGuid: string; spaceGuid: string } =>
+        !!p && !!p.spaceGuid && !!p.cfGuid),
       take(1),
       switchMap(p => this.upsService.getUserProvidedServices(p.cfGuid, p.spaceGuid)),
       map(upsis => {

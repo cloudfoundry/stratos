@@ -31,7 +31,8 @@ export class CloudFoundryFirehoseFormatter {
 
   // Enable or disable all filters
   public showAll(all: boolean) {
-    Object.keys(this.hoseFilters).forEach((filter: keyof typeof this.hoseFilters) => this.hoseFilters[filter] = all);
+    (Object.keys(this.hoseFilters) as Array<keyof typeof this.hoseFilters>)
+      .forEach((filter) => this.hoseFilters[filter] = all);
   }
 
   /**
@@ -104,10 +105,13 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const httpStartStop = cfEvent.httpStartStop;
+    if (!httpStartStop) {
+      return '';
+    }
     const method = HTTP_METHODS[httpStartStop.method - 1];
     const peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
     const httpEventString = peerType + ' ' + this.colorizer.colorize(method, 'magenta', true) + ' ' +
-      this.colorizer.colorize(httpStartStop.uri, null, true) +
+      this.colorizer.colorize(httpStartStop.uri, '', true) +
       ', Status-Code: ' + this.colorizer.colorize(httpStartStop.statusCode.toString(), 'green') +
       ', Content-Length: ' + this.colorizer.colorize(this.utils.bytesToHumanSize(httpStartStop.contentLength.toString()), 'green') +
       ', User-Agent: ' + this.colorizer.colorize(httpStartStop.userAgent, 'green') +
@@ -120,7 +124,10 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const message = cfEvent.logMessage;
-    let colour;
+    if (!message) {
+      return '';
+    }
+    let colour = '';
     if (message.message_type === 2) {
       colour = 'red';
     }
@@ -134,6 +141,9 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const valueMetric = cfEvent.valueMetric;
+    if (!valueMetric) {
+      return '';
+    }
     const valueMetricString = this.emphasizeName(valueMetric.name, 'blue') + ': ' +
       this.colorizer.colorize(valueMetric.value + ' ' + valueMetric.unit, 'green', true) + '\n';
     return this.buildOriginString(cfEvent, 'blue') + ' ' + valueMetricString;
@@ -144,6 +154,9 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const counterEvent = cfEvent.counterEvent;
+    if (!counterEvent) {
+      return '';
+    }
     const delta: string = counterEvent.name.indexOf('ByteCount') !== -1
       ? this.utils.bytesToHumanSize(counterEvent.delta.toString())
       : counterEvent.delta.toString();
@@ -162,6 +175,9 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const containerMetric = cfEvent.containerMetric;
+    if (!containerMetric) {
+      return '';
+    }
     const metricString = 'App: ' + containerMetric.applicationId + '/' + containerMetric.instanceIndex +
       ' ' + this.colorizer.colorize('[', 'cyan', true) + this.colorizer.colorize('CPU: ', 'cyan', true) +
       this.colorizer.colorize(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
@@ -178,6 +194,9 @@ export class CloudFoundryFirehoseFormatter {
       return '';
     }
     const errorObj = cfEvent.error;
+    if (!errorObj) {
+      return '';
+    }
     const errorString = 'ERROR: Source: ' + this.colorizer.colorize(errorObj.source, 'red', true) +
       ', Code: ' + this.colorizer.colorize(errorObj.code.toString(), 'red', true) +
       ', Message: ' + this.colorizer.colorize(errorObj.message, 'red', true);

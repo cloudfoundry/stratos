@@ -35,7 +35,7 @@ export class CompactAppCardComponent implements OnInit {
   @Input() showDate = true;
   @Input() dateMode!: string;
 
-  applicationState: Signal<ApplicationStateData> = signal({ label: '', indicator: StratosStatus.NONE, actions: null });
+  applicationState: Signal<ApplicationStateData> = signal<ApplicationStateData>({ label: '', indicator: StratosStatus.NONE, actions: null });
 
   appStatus: Signal<StratosStatus> = computed(() => this.applicationState().indicator);
 

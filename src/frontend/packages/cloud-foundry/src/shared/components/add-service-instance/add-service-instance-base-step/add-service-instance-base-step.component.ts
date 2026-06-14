@@ -34,7 +34,7 @@ export class AddServiceInstanceBaseStepComponent {
   private router = inject(Router);
 
   private tileManager = new TileConfigManager();
-  public serviceType: string;
+  public serviceType?: string;
   public cancelUrl = '/services';
 
   public tileSelectorConfig = [
@@ -50,13 +50,13 @@ export class AddServiceInstanceBaseStepComponent {
     )
   ];
 
-  private pSelectedTile: ITileConfig<ICreateServiceTilesData>;
+  private pSelectedTile: ITileConfig<ICreateServiceTilesData> | null = null;
   public bindApp: boolean;
   get selectedTile() {
     return this.pSelectedTile;
   }
-  set selectedTile(tile: ITileConfig<ICreateServiceTilesData>) {
-    this.serviceType = tile ? tile.data.type : null;
+  set selectedTile(tile: ITileConfig<ICreateServiceTilesData> | null) {
+    this.serviceType = tile?.data?.type;
     this.pSelectedTile = tile;
     if (tile) {
       const baseUrl = this.createServiceTileUrl();
@@ -76,8 +76,8 @@ export class AddServiceInstanceBaseStepComponent {
     }
   }
 
-  private cfId: string;
-  private appId: string;
+  private cfId?: string;
+  private appId?: string;
 
   constructor() {
     this.bindApp = !!this.route.snapshot.data.bind;

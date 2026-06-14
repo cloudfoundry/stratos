@@ -119,7 +119,8 @@ export class ServiceCatalogPageComponent implements OnInit {
     this.cfIds$ = this.cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints
         .filter(endpoint => endpoint.connectionStatus === 'connected')
-        .map(endpoint => endpoint.guid),
+        .map(endpoint => endpoint.guid)
+        .filter((guid): guid is string => !!guid),
       ),
     );
     this.haveConnectedCf$ = this.cloudFoundryService.connectedCFEndpoints$.pipe(
@@ -134,7 +135,7 @@ export class ServiceCatalogPageComponent implements OnInit {
         take(1),
       ),
     );
-    const cnsiGuids = (connected ?? []).map(ep => ep.guid);
+    const cnsiGuids = (connected ?? []).map(ep => ep.guid).filter((guid): guid is string => !!guid);
     this.offeringsConfig.initialize(cnsiGuids);
     // Bind the L5 sub-nav count — view exists only after initialize().
     this.totalServiceOfferings = this.offeringsConfig.view.totalItems;

@@ -139,6 +139,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       return this.roles.cfEndpointHasScope$(endpointGuid, permission as CfScopeStrings);
     }
 
+    if (!endpointGuid) {
+      return of(false);
+    }
     if (type === CfPermissionTypes.ENDPOINT) {
       return this.roles.cfGlobalState$(endpointGuid, permission);
     }
@@ -177,6 +180,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
         return this.getCfCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
       case (CfPermissionTypes.ENDPOINT_SCOPE):
         return this.getEndpointScopesCheck(permissionConfig.permission as CfScopeStrings, endpointGuid);
+      default:
+        // Unknown permission type — deny rather than emit an undefined stream.
+        return of(false);
     }
   }
 
@@ -378,14 +384,16 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     spaceGuid?: string
   ): IPermissionCheckCombiner[] {
     const groupedChecks = this.groupConfigs(permissionConfigs);
-    return Object.keys(groupedChecks).map((permission: PermissionTypes) => {
-      const configGroup = groupedChecks[permission];
-      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
-      if (checkCombiner) {
-        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
-      }
-      return checkCombiner;
-    });
+    return Object.keys(groupedChecks)
+      .map((permission: PermissionTypes) => {
+        const configGroup = groupedChecks[permission];
+        const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
+        if (checkCombiner) {
+          checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
+        }
+        return checkCombiner;
+      })
+      .filter((checkCombiner): checkCombiner is IPermissionCheckCombiner => !!checkCombiner);
   }
 
 
@@ -416,7 +424,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): IPermissionCheckCombiner {
+  ): IPermissionCheckCombiner | undefined {
     switch (permission) {
       case CfPermissionTypes.ENDPOINT_SCOPE:
         return {

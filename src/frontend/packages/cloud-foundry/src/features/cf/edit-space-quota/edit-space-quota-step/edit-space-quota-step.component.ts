@@ -53,7 +53,9 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
     }
   }
   get form(): SpaceQuotaDefinitionFormComponent {
-    return this._form;
+    // strict: @ViewChild setter populates _form after view init; the only
+    // reader (submit) runs post-render when the form element exists.
+    return this._form!;
   }
 
   signalHandle: SignalStepHandle = {

@@ -30,7 +30,7 @@ export class FetchDomain extends CFStartAction implements ICFAction {
   options: HttpRequest<any>;
 }
 export class FetchAllDomains extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string, public paginationKey: string = null, public flattenPagination = true) {
+  constructor(public endpointGuid: string, public paginationKey: string = '', public flattenPagination = true) {
     super();
     this.options = new HttpRequest(
       'GET',

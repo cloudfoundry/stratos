@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -40,6 +40,12 @@ import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
 
+// Local view of the schema-form config while it is being assembled: the
+// broker schema may not have arrived (or may not exist for the plan), so
+// `schema` is optional here even though SchemaFormConfig declares it
+// required. SchemaFormComponent.config tolerates an absent schema.
+type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: object };
+
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
@@ -73,8 +79,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
   serviceInstanceName!: string;
-  serviceInstanceGuid!: string;
-  selectCreateInstance$: Observable<CsiState>;
+  // Only populated in edit mode (from the wizard state, which may carry a
+  // null/undefined guid until the SI is resolved).
+  serviceInstanceGuid?: string | null;
+  selectCreateInstance$: Observable<CsiState & {
+    servicePlanGuid: string; spaceGuid: string; cfGuid: string; serviceGuid: string;
+  }>;
   formModes = [
     {
       label: 'Create and Bind to a new Service Instance',
@@ -123,7 +133,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   // Signal (not a plain field): the schema arrives async from the
   // details-tier plan fetch below, and under zoneless+OnPush a plain
   // field reassignment would never reach the <app-schema-form> input.
-  schemaFormConfig = signal<SchemaFormConfig | undefined>(undefined);
+  // schema is optional at this layer: a plan with no broker-advertised
+  // parameter schema degrades the form to the JSON textbox, and
+  // SchemaFormComponent.config already treats `schema` as absent-tolerant.
+  schemaFormConfig = signal<SchemaFormConfigState | undefined>(undefined);
   // The selected plan's details-tier fetch. The wizard's plan list is
   // summary-tier, which omits `schemas` — without this second fetch the
   // schema-driven parameter form always degraded to the JSON textbox.
@@ -131,7 +144,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): ValidationErrors | null =>
       !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
@@ -139,7 +152,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupForms();
 
     this.selectCreateInstance$ = this.csiState$.pipe(
-      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
+      filter((p): p is CsiState & {
+        servicePlanGuid: string; spaceGuid: string; cfGuid: string; serviceGuid: string;
+      } => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
       share(),
     );
     this.serviceInstances$ = this.selectCreateInstance$.pipe(
@@ -249,14 +264,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
           this.schemaFormConfig.update(cfg => ({
             ...(cfg ?? { schema }),
-            initialData: safeStringToObj(state.parameters) || this.serviceParams,
+            initialData: (state.parameters ? safeStringToObj(state.parameters) : null) || this.serviceParams,
           }));
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
           if (state.tags) {
-            this.tags = [].concat(state.tags);
+            this.tags = [...state.tags];
           }
         })
       ).subscribe();
@@ -415,7 +430,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
     const bindResult = await this.modeService.createApplicationServiceBinding(
       siGuid,
-      state.cfGuid,
+      // strict: a service instance can only be created/bound within a CF
+      // context, so cfGuid is always set by the time a bind is requested.
+      state.cfGuid!,
       state.bindAppGuid,
       state.bindAppParams,
     ).pipe(take(1)).toPromise() as { success: boolean; message?: string };
@@ -503,7 +520,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.createNewInstanceForm.controls.tags.markAsTouched();
   }
 
-  checkName = (value: string = null) => {
+  checkName = (value: string | null = null) => {
     if (this.allServiceInstanceNames) {
       const specifiedName = value || this.createNewInstanceForm.controls.name.value;
       if (this.modeService.isEditServiceInstanceMode() && specifiedName === this.serviceInstanceName) {

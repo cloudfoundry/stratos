@@ -408,8 +408,12 @@ export class KubeEntityCatalog {
           sort: true
         },
         {
+          // The secrets entity is registered as KubeAPIResource (no `data` member); a
+          // secret nonetheless carries a `data` map at runtime, so read it through a
+          // precise optional-`data` shape rather than widening the entity type.
           header: 'Data Keys',
-          field: (row: KubernetesConfigMap) => `${Object.keys(row.data || {}).length}`
+          field: (row: KubeAPIResource & { data?: Record<string, unknown> }) =>
+            `${Object.keys(row.data || {}).length}`
         },
       ],
     });

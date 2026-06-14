@@ -16,19 +16,23 @@ export type OrchestratedActionBuilder<
   > = (...args: T) => Y;
 
 
+// The leading guid/endpointGuid args are the fixed contract; the trailing args are
+// builder-specific. They are typed as a rest of `any[]` so that concrete builders may
+// narrow (and add/require) extra args while remaining contravariantly assignable to this
+// base under strict mode. The `T` param is retained for documentation/compatibility.
 export type KnownEntityActionBuilder<
-  T extends Record<any, any> = Record<any, any>
-  > = (guid: string, endpointGuid: string, extraArgs?: T) => EntityRequestAction;
+  T extends Record<any, any> = Record<any, any> // eslint-disable-line @typescript-eslint/no-unused-vars
+  > = (guid: string, endpointGuid: string, ...extraArgs: any[]) => EntityRequestAction;
 // createTrackingId should be unique to the thing that's being created.
 // It is used to track the status of the entity creation.
 export type CreateActionBuilder<
-  T extends Record<any, any> = Record<any, any>
-  > = (createTrackingId: string, endpointGuid: string, extraArgs?: T) => EntityRequestAction;
+  T extends Record<any, any> = Record<any, any> // eslint-disable-line @typescript-eslint/no-unused-vars
+  > = (createTrackingId: string, endpointGuid: string, ...extraArgs: any[]) => EntityRequestAction;
 // paginationKey could be optional, we could give it a default value.
-export type GetMultipleActionBuilder<T extends Record<any, any> = Record<any, any>> = (
+export type GetMultipleActionBuilder<T extends Record<any, any> = Record<any, any>> = ( // eslint-disable-line @typescript-eslint/no-unused-vars
   endpointGuid: string,
   paginationKey: string,
-  extraArgs?: T
+  ...extraArgs: any[]
 ) => PaginatedAction;
 
 export interface EntityRequestInfo {

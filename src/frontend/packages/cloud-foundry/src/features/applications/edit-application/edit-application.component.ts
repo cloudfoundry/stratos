@@ -144,7 +144,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     entity: {}
   };
 
-  private sub: Subscription;
+  private sub?: Subscription;
 
   private error = false;
 

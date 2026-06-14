@@ -166,7 +166,12 @@ export class CloudFoundrySpaceService {
           ];
         }
 
-        return quota && [
+        // quotaDefinition$ resolves to the space-specific quota whenever
+        // spaceQuota is present (see quotaDefinition$ above), so reaching
+        // here always means a space quota exists — link to it directly.
+        // strict: the prior `quota && [...]` guard's null branch was
+        // unreachable; dropping it keeps the emitted shape as string[].
+        return [
           '/cloud-foundry',
           this.cfGuid,
           'organizations',

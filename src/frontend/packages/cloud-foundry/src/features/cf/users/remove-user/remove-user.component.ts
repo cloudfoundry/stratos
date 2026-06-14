@@ -271,8 +271,11 @@ export class RemoveUserComponent implements AfterViewInit, OnDestroy {
     return changes;
   }
 
-  getSpacesRolesChanges(user: StUser, spaces: { [spaceGuid: string]: IUserPermissionInSpace }): CfRoleChange[] {
+  getSpacesRolesChanges(user: StUser, spaces?: { [spaceGuid: string]: IUserPermissionInSpace }): CfRoleChange[] {
     const changes: CfRoleChange[] = [];
+    if (!spaces) {
+      return changes;
+    }
     const spaceGuids = this.spaceGuid ? [this.spaceGuid] : Object.keys(spaces);
 
     for (const spaceGuid of spaceGuids) {

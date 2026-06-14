@@ -180,7 +180,7 @@ export class CfAppsSignalConfigService {
     this.cnsiOptions = computed(() => {
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
       for (const ep of this.connectedEndpoints() ?? []) {
-        opts.push({ label: ep.name ?? ep.guid, value: ep.guid });
+        opts.push({ label: ep.name ?? ep.guid, value: ep.guid ?? null });
       }
       return opts;
     });
@@ -190,7 +190,7 @@ export class CfAppsSignalConfigService {
     this.endpointNames = computed(() => {
       const m = new Map<string, string>();
       for (const ep of this.connectedEndpoints() ?? []) {
-        if (ep.name) m.set(ep.guid, ep.name);
+        if (ep.guid && ep.name) m.set(ep.guid, ep.name);
       }
       return m;
     });
@@ -477,7 +477,7 @@ export class CfAppsSignalConfigService {
     // onOpen handler doesn't have to forward the guids list.
     const guids = cnsiGuids.length > 0
       ? cnsiGuids
-      : this.connectedEndpoints().map(ep => ep.guid);
+      : this.connectedEndpoints().map(ep => ep.guid).filter((g): g is string => !!g);
     if (!guids.length) return Promise.resolve();
     this._namesLoadingPromise = this.loadNames(guids);
     return this._namesLoadingPromise;

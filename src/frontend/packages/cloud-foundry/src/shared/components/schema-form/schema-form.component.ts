@@ -34,7 +34,8 @@ export interface SchemaFormValidationError {
 }
 
 export class SchemaFormConfig {
-  schema: object;
+  // strict: always supplied by callers building a config
+  schema!: object;
   initialData?: object;
 }
 
@@ -81,8 +82,8 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   }
 
   @Output()
-  dataChange = new EventEmitter<object>();
-  pDataChange = new BehaviorSubject<object>(null);
+  dataChange = new EventEmitter<object | null>();
+  pDataChange = new BehaviorSubject<object | null>(null);
 
   @Input()
   valid = false;
@@ -91,15 +92,15 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
   pValidChange = new BehaviorSubject<boolean>(false);
 
 
-  cleanSchema: object;
+  cleanSchema: object | null | undefined;
 
   jsonData: object | null = null;
   jsonForm!: FormGroup<SchemaJsonForm>;
 
   formData: object = {};
-  formInitialData: object;
-  formValidationErrors: SchemaFormValidationError[];
-  formValidationErrorsStr: string;
+  formInitialData: object | null | undefined;
+  formValidationErrors: SchemaFormValidationError[] = [];
+  formValidationErrorsStr: string | null = null;
 
   subs: Subscription[] = [];
 
@@ -134,7 +135,7 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     }
   }
 
-  setJsonFormData(data: object) {
+  setJsonFormData(data: object | null | undefined) {
     if (this.jsonForm) {
       const jsonString = data ? JSON.stringify(data) : '';
       this.jsonForm.controls.json.setValue(jsonString);

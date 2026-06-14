@@ -90,7 +90,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     this.subscriptions.push(
       status$.pipe(filter(status => status.error))
-        .subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'))
+        .subscribe(status => this.snackBarService.show(status.errorMsg ?? 'Application deployment failed', 'Dismiss'))
     );
 
     const appGuid$ = this.deployer.applicationGuid$.asObservable().pipe(
@@ -195,7 +195,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       take(1)
     ).subscribe(status => {
       if (status.error) {
-        this.snackBarService.show(status.errorMsg, 'Dismiss');
+        this.snackBarService.show(status.errorMsg ?? 'Application deployment failed', 'Dismiss');
       } else {
         const ref = this.snackBarService.show('Application deployment complete', 'View', 10000, true);
         ref.onAction().subscribe(() => { this.goToAppSummary(); });

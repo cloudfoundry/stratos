@@ -75,7 +75,7 @@ export class GetAllCfUsersAsAdmin extends CFStartAction implements PaginatedActi
 }
 
 interface HttpParamsPayload {
-  [param: string]: string;
+  [param: string]: string | undefined;
 }
 interface ChangeUserRoleByUsernameParams extends HttpParamsPayload {
   username: string;
@@ -146,7 +146,7 @@ export class ChangeCfUserRole extends CFStartAction implements EntityRequestActi
     }
   }
 
-  createParams(): object {
+  createParams(): object | null {
     if (this.username) {
       const payload: ChangeUserRoleByUsernameParams = {
         username: this.username,

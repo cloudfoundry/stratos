@@ -83,10 +83,15 @@ export class CommitListWrapperComponent {
         sha: appSource.gitDetails?.branch?.name,
         endpointGuid: appSource.gitDetails?.endpointGuid,
       } : null),
-      filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
+      filter((fetchDetails): fetchDetails is NonNullable<typeof fetchDetails> & { projectName: string; sha: string } =>
+        !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
       take(1),
     ).subscribe(fetchDetails => {
-      const scm = this.scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid, fetchDetails.accessToken);
+      // strict: deploy-application-step2 always writes endpointGuid (real guid
+      // or '') alongside projectName when saving a github/gitlab gitDetails, so
+      // a source that has passed the projectName/sha guard above carries a
+      // string endpointGuid; the `?.` in the map only widens it to undefined.
+      const scm = this.scmService.getSCM(fetchDetails.scm, fetchDetails.endpointGuid!, fetchDetails.accessToken);
       this.branchName.set(fetchDetails.sha);
       this.signalConfig.initialize(scm, fetchDetails.projectName, fetchDetails.sha);
       this.listConfig.set(this.buildListConfig());

@@ -46,7 +46,9 @@ export class SshApplicationComponent implements OnInit {
 
   public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
-  @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
+  // strict: populated by Angular's @ViewChild query (static query resolves
+  // before ngOnInit).
+  @ViewChild('sshViewer', { static: true }) sshViewer!: SshViewerComponent;
 
   private getBreadcrumbs(
     application: IApp,

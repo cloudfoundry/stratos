@@ -37,10 +37,10 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
   /**
    * Observable which is populated if only a single org is to be used
    */
-  singleOrg$: Observable<APIResource<IOrganization>>;
-  organizations$: Observable<APIResource<IOrganization>[]>;
-  selectedOrgGuid: string;
-  orgGuidChangedSub: Subscription;
+  singleOrg$!: Observable<APIResource<IOrganization> | null>; // strict: assigned in ngOnInit
+  organizations$!: Observable<APIResource<IOrganization>[]>; // strict: assigned in ngOnInit
+  selectedOrgGuid!: string; // strict: assigned via orgGuid$ subscription in ngOnInit
+  orgGuidChangedSub!: Subscription; // strict: assigned in ngOnInit
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {
@@ -69,6 +69,9 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     }
     this.organizations$.pipe(take(1)).subscribe(orgs => {
       const org = orgs.find(o => o.metadata.guid === orgGuid);
+      if (!org) {
+        return;
+      }
       this.rolesData.setOrg(org.metadata.guid, org.entity.name);
     });
 

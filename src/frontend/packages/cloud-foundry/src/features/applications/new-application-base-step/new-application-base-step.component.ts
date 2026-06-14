@@ -19,11 +19,17 @@ export const AUTO_SELECT_CF_URL_PARAM = 'auto-select-endpoint';
 export const RETURN_URL_PARAM = 'returnUrl';
 
 
-export interface IAppTileData extends ITileData {
+// Intersection rather than `interface extends` so the optional deploy-only
+// fields are allowed: ITileData's index is `string | number` (no undefined),
+// which an `interface` member of type `string | undefined` would violate
+// (TS2411). The intersection keeps IAppTileData assignable to ITileData for
+// the ITileConfig<T extends ITileData> consumers while modelling the create
+// tile (which omits subType/endpointGuid).
+export type IAppTileData = ITileData & {
   type: string;
   subType?: string;
   endpointGuid?: string;
-}
+};
 
 @Component({
   selector: 'app-new-application-base-step',
@@ -55,7 +61,7 @@ export class NewApplicationBaseStepComponent {
   signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
-    if (tile) {
+    if (tile && tile.data) {
       const baseUrl = 'applications';
       const type = tile.data.type;
       const query: { [key: string]: string } = {
@@ -63,7 +69,12 @@ export class NewApplicationBaseStepComponent {
       };
       if (tile.data.subType) {
         query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
-        query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
+        // endpointGuid is only present for deploy tiles auto-selected from a
+        // specific CF; when absent the param is omitted (router drops undefined
+        // params anyway, so this matches the prior behavior).
+        if (tile.data.endpointGuid) {
+          query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
+        }
       }
       const endpoint = this.activatedRoute.snapshot.params.endpointId;
       if (endpoint) {
@@ -87,8 +98,10 @@ export class NewApplicationBaseStepComponent {
           ...types.map(type =>
             new ITileConfig<IAppTileData>(
               type.name,
-              type.graphic,
-              { type: 'deploy', subType: type.id, endpointGuid: type.endpointGuid },
+              // strict: every deploy SourceType in the catalog defines a graphic
+              // (optional on the shared SourceType type only).
+              type.graphic!,
+              { type: 'deploy', subType: type.id, ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}) },
             ),
           ),
           new ITileConfig<IAppTileData>(

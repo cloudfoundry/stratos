@@ -78,23 +78,29 @@ export interface GitAppDetails {
 }
 
 export interface OverrideAppDetails {
-  name: string;
-  buildpack: string;
-  instances: number;
-  diskQuota: string;
-  memQuota: string;
+  // The deploy-options form leaves every field optional (no required
+  // validators), so each value is genuinely null when the user clears /
+  // never touches it. diskQuota/memQuota are additionally computed as
+  // null when the numeric input is empty. The override object is only
+  // JSON-serialised onto the deploy socket, where null is a valid
+  // "not supplied" marker, so reflect that nullability in the type.
+  name: string | null;
+  buildpack: string | null;
+  instances: number | null;
+  diskQuota: string | null;
+  memQuota: string | null;
   doNotStart: boolean;
   noRoute: boolean;
   randomRoute: boolean;
-  host: string;
-  domain: string;
-  path: string;
-  startCmd: string;
-  healthCheckType: string;
-  stack: string;
-  time: number;
-  dockerImage: string;
-  dockerUsername: string;
+  host: string | null;
+  domain: string | null;
+  path: string | null;
+  startCmd: string | null;
+  healthCheckType: string | null;
+  stack: string | null;
+  time: number | null;
+  dockerImage: string | null;
+  dockerUsername: string | null;
 }
 
 export interface ProjectExists {
@@ -105,7 +111,8 @@ export interface ProjectExists {
   data?: any;
 }
 export interface DeployApplicationState {
-  cloudFoundryDetails: NewAppCFDetails;
+  // Null until the user completes the CF target step of the wizard.
+  cloudFoundryDetails: NewAppCFDetails | null;
   applicationSource?: DeployApplicationSource;
   applicationOverrides?: OverrideAppDetails;
   projectExists?: ProjectExists;
