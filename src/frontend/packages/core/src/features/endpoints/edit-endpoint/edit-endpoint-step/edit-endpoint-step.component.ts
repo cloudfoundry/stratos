@@ -66,7 +66,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   endpointTypeSupportsSSO = false;
   validate: Observable<boolean>;
   existingEndpoints: Observable<EndpointModelMap>;
-  endpoint$: Observable<EndpointModel>;
+  endpoint$: Observable<EndpointModel | undefined>;
   definition$: Observable<IStratosEndpointDefinition<EntityCatalogSchemas>>;
   existingEndpointNames$: Observable<string[]>;
   formChangeSub: Subscription;
@@ -122,7 +122,9 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     // same set of records.
     this.existingEndpoints = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       map(endpoints => endpoints.reduce((res: EndpointModelMap, endpoint) => {
-        res[endpoint.guid] = endpoint;
+        if (endpoint.guid) {
+          res[endpoint.guid] = endpoint;
+        }
         return res;
       }, {} as EndpointModelMap))
     );
@@ -137,25 +139,27 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     );
 
     this.definition$ = this.endpoint$.pipe(
-      map(entity => entityCatalog.getEndpoint(entity.cnsi_type, entity.sub_type)),
+      filter((entity): entity is EndpointModel => !!entity && !!entity.cnsi_type),
+      // strict: the filter above guarantees cnsi_type is set on every emission.
+      map(entity => entityCatalog.getEndpoint(entity.cnsi_type!, entity.sub_type)),
       map(d => d.definition)
     );
 
     // Fill the form in with the endpoint data
     this.endpoint$.pipe(
-      filter(ep => !!ep),
+      filter((ep): ep is EndpointModel => !!ep),
       take(1)
     ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
-      this.lastSkipSSLValue = endpoint.skip_ssl_validation;
+      this.lastSkipSSLValue = endpoint.skip_ssl_validation ?? false;
       this.showCACertField = !!endpoint.caCert;
       this.updateSSLFieldCheckbox();
       this.editEndpoint.setValue({
         name: endpoint.name,
         url: getFullEndpointApiUrl(endpoint),
-        skipSSL: endpoint.skip_ssl_validation,
+        skipSSL: endpoint.skip_ssl_validation ?? false,
         setClientInfo: false,
-        clientID: endpoint.client_id,
+        clientID: endpoint.client_id ?? '',
         clientSecret: '',
         allowSSO: endpoint.sso_allowed,
         caCert: endpoint.caCert || '' });
@@ -199,7 +203,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
         // final state — the previous pairwise+busy-edge dance over the
         // legacy ngrx update Observable collapses to a single await.
         return from(this.endpointsData.update(this.endpointID, {
-          endpointType: endpoint.cnsi_type,
+          endpointType: endpoint.cnsi_type ?? '',
           name: this.editEndpoint.value.name ?? '',
           skipSSL,
           setClientInfo: this.editEndpoint.value.setClientInfo ?? false,

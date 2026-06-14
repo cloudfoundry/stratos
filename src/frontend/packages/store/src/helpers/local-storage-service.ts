@@ -84,7 +84,7 @@ export class LocalStorageService {
     const storage = LocalStorageService.getStorage();
     // We use the username to key the session storage. We could replace this with the users id?
     if (storage && sessionData.user) {
-      const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
+      const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user?.name);
       if (sessionId) {
         // Check version — clear stale preferences if version changed
         if (!LocalStorageService.checkVersionAndClear(storage, sessionId)) {
@@ -120,7 +120,7 @@ export class LocalStorageService {
 
   public static localStorageSize(sessionData: SessionData): number {
     const storage = LocalStorageService.getStorage();
-    const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
+    const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user?.name);
     if (storage && sessionId) {
       return Object.values(LocalStorageSyncTypes).reduce((total, type) => {
         const key = LocalStorageService.makeKey(sessionId, type);
@@ -150,7 +150,7 @@ export class LocalStorageService {
       }
 
       const storage = LocalStorageService.getStorage();
-      const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
+      const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user?.name);
       if (storage && sessionId) {
         Object.values(LocalStorageSyncTypes).forEach(type => {
           const key = LocalStorageService.makeKey(sessionId, type);
@@ -173,7 +173,7 @@ export class LocalStorageService {
    */
   public static clearSections(sessionData: SessionData, sections: LocalStorageSyncTypes[]) {
     const storage = LocalStorageService.getStorage();
-    const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user.name);
+    const sessionId = LocalStorageService.getLocalStorageSessionId(sessionData.user?.name);
     if (storage && sessionId) {
       sections.forEach(type => {
         const key = LocalStorageService.makeKey(sessionId, type);

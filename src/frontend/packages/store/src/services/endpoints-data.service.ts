@@ -244,6 +244,11 @@ export class EndpointsDataService {
               ...endpointInfo,
               connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
             };
+            // A keyless endpoint can't be tracked by guid — skip malformed
+            // entries rather than collapse them under an `undefined` key.
+            if (!merged.guid) {
+              return;
+            }
             next.set(merged.guid, merged);
           });
         });
@@ -349,7 +354,10 @@ export class EndpointsDataService {
         if (after) {
           this.emitConnect({
             guid,
-            type: after.cnsi_type,
+            // strict: endpoints in the live map come from SystemInfo, which
+            // always carries cnsi_type; the field is only optional on the
+            // shared EndpointModel for pre-fetch/partial shapes.
+            type: after.cnsi_type!,
             name: after.name,
             subType: after.sub_type,
             user: after.user,
@@ -376,7 +384,8 @@ export class EndpointsDataService {
           this._endpoints.set(next);
         }
         if (before) {
-          this.emitDisconnect({ guid, type: before.cnsi_type, name: before.name });
+          // strict: see emitConnect — live-map endpoints always carry cnsi_type.
+          this.emitDisconnect({ guid, type: before.cnsi_type!, name: before.name });
         }
       }
       return state;
@@ -393,7 +402,8 @@ export class EndpointsDataService {
         next.delete(guid);
         this._endpoints.set(next);
         if (before) {
-          this.emitDisconnect({ guid, type: before.cnsi_type, name: before.name });
+          // strict: see emitConnect — live-map endpoints always carry cnsi_type.
+          this.emitDisconnect({ guid, type: before.cnsi_type!, name: before.name });
         }
       }
       return state;

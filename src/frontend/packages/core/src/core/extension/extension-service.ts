@@ -18,7 +18,11 @@ export enum StratosTabType {
 
 export interface StratosTabMetadata {
   label: string;
-  link: string;
+  // null is the no-link sentinel (TabNavService.TabsNoLinkValue) assigned to
+  // tabs declared with '-' as their link; such tabs are filtered out before
+  // any router navigation reads the link. Decorator-registered extension tabs
+  // always supply a real string link (see StratosTabMetadataConfig).
+  link: string | null;
   icon?: string;
   iconFont?: string;
   hidden?: (
@@ -29,6 +33,8 @@ export interface StratosTabMetadata {
 }
 
 export interface StratosTabMetadataConfig extends StratosTabMetadata {
+  // Decorator-registered tabs always carry a concrete route path.
+  link: string;
   type: StratosTabType;
 }
 
@@ -171,9 +177,11 @@ export class ExtensionService {
     if (extensionMetadata.loginComponent) {
       // Override the component used for the login route
       const loginRouteRoot = routeConfig.find(r => r.path === 'login') || { children: [] };
-      const loginRoute = loginRouteRoot.children.find(c => c.path === '');
-      loginRoute.component = extensionMetadata.loginComponent;
-      needsReset = true;
+      const loginRoute = (loginRouteRoot.children || []).find(c => c.path === '');
+      if (loginRoute) {
+        loginRoute.component = extensionMetadata.loginComponent;
+        needsReset = true;
+      }
     }
 
     if (needsReset) {
@@ -185,7 +193,7 @@ export class ExtensionService {
     const index = routeConfig.findIndex(r => !!r.data && (!!r.data.stratosNavigation || r.data.stratosNavigationPage));
     if (index >= 0) {
       const removed = routeConfig.splice(index, 1);
-      dashboardRoute.children = dashboardRoute.children.concat(removed);
+      dashboardRoute.children = (dashboardRoute.children || []).concat(removed);
     }
     return index >= 0;
   }

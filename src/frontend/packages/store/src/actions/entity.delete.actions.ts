@@ -17,7 +17,7 @@ export class EntityDeleteCompleteAction implements Action {
   ) {}
 
   // Create an entity delete action if we have all of the properties we need
-  public static parse(action: EntityRequestAction): EntityDeleteCompleteAction {
+  public static parse(action: EntityRequestAction): EntityDeleteCompleteAction | null {
     if (action.guid && action.entityType && action.endpointType && action.endpointGuid) {
       return new EntityDeleteCompleteAction(action.guid, action.entityType, action.endpointGuid, action.endpointType, action);
     }

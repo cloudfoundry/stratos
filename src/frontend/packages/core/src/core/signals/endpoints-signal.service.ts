@@ -66,7 +66,7 @@ export class EndpointsSignalService {
 }
 
 function isConnected(endpoint: EndpointModel): boolean {
-  if (!endpoint) {
+  if (!endpoint || !endpoint.cnsi_type) {
     return false;
   }
   try {

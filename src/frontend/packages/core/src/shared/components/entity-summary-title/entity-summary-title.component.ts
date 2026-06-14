@@ -14,20 +14,20 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntitySummaryTitleComponent {
-  @Input() title: string;
-  @Input() subTitle: string;
-  @Input() info: string;
-  @Input() subText: string;
+  @Input() title?: string;
+  @Input() subTitle?: string;
+  @Input() info?: string;
+  @Input() subText?: string;
   @Input()
-  get imagePath(): string {
+  get imagePath(): string | null {
     return this.image;
   }
-  set imagePath(image: string) {
+  set imagePath(image: string | null) {
     this.image = image;
   }
-  @Input() fallBackIcon: string;
-  @Input() fallBackIconFont: string;
-  public image: string;
+  @Input() fallBackIcon?: string;
+  @Input() fallBackIconFont?: string;
+  public image: string | null = null;
 
   public failedImageLoad() {
     if (this.fallBackIcon) {

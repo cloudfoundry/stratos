@@ -199,7 +199,7 @@ export class LoginPageComponent implements OnInit {
     this.auth$.pipe(
       filter(auth => {
         // Only auto-redirect if already logged in (existing session)
-        return !auth.loggingIn && !auth.verifying && auth.loggedIn && auth.sessionData?.valid;
+        return !auth.loggingIn && !auth.verifying && auth.loggedIn && !!auth.sessionData?.valid;
       }),
       take(1),  // Only check once on init
       switchMap(() => this.appReady$)  // Wait for app to be stable before navigating
@@ -208,6 +208,10 @@ export class LoginPageComponent implements OnInit {
       try {
         // Get current auth state
         const auth = await this.auth$.pipe(take(1)).toPromise();
+        if (!auth) {
+          // auth$ only completes without a value if the page is torn down mid-redirect
+          return;
+        }
 
         // Check for special redirects first
         if (auth.sessionData?.upgradeInProgress) {
@@ -267,7 +271,7 @@ export class LoginPageComponent implements OnInit {
       take(1),
       switchMap(() => this.appReady$),  // Wait for app to be stable
       switchMap(() => this.auth$.pipe(
-        filter(a => a.loggedIn && a.sessionData?.valid),
+        filter(a => a.loggedIn && !!a.sessionData?.valid),
         take(1)
       ))
     ).subscribe(async auth => {
@@ -288,7 +292,7 @@ export class LoginPageComponent implements OnInit {
       return null;
     }
 
-    const redirect: RouterRedirect = auth.redirect;
+    const redirect: RouterRedirect | undefined = auth.redirect;
     const targetPath = redirect ? decodeURI(redirect.path) : '/home';
     const queryParams = redirect?.queryParams || {};
 
@@ -317,7 +321,7 @@ export class LoginPageComponent implements OnInit {
     return this.auth$.pipe(
       take(1),
       tap((auth): void => {
-        const redirect: RouterRedirect = auth.redirect;
+        const redirect: RouterRedirect | undefined = auth.redirect;
         const returnUrl = this.formSSOredirectURL(redirect);
         window.open('/pp/v1/auth/sso_login?state=' + encodeURIComponent(returnUrl), '_self');
       }),
@@ -325,13 +329,15 @@ export class LoginPageComponent implements OnInit {
     );
   }
 
-  private formSSOredirectURL(redirect: RouterRedirect): string {
-    const queryKeys = redirect ? Object.keys(redirect.queryParams) : undefined;
+  private formSSOredirectURL(redirect: RouterRedirect | undefined): string {
+    const queryParams = redirect?.queryParams;
+    const queryKeys = queryParams ? Object.keys(queryParams) : undefined;
     return window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') +
       (redirect ?
         redirect.path +
-        (queryKeys && queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + redirect.queryParams[k]).join('&') : '') : '/');
+        (queryParams && queryKeys && queryKeys.length > 0
+          ? '?' + queryKeys.map(k => k + '=' + queryParams[k]).join('&') : '') : '/');
   }
 
   private getErrorMessage(auth: AuthState): string {

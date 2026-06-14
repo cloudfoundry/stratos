@@ -115,7 +115,8 @@ export interface ICFAction extends EntityRequestAction {
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {
-  constructor(public type: string, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
+  // apiAction is optional: a result derived from a bare string request key has no originating action
+  constructor(public type: string, public apiAction?: EntityRequestAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartRequestAction extends RequestAction {

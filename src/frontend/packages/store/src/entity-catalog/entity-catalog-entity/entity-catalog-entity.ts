@@ -67,16 +67,21 @@ export class StratosBaseCatalogEntity<
     public readonly builders: EntityCatalogBuilders<T, Y, AB> = {}
   ) {
     this.definition = this.populateEntity(definition);
+    // populateEntity always sets `type` (falls back to schema.default.entityType), so it is present here
     this.type = this.definition.type || this.definition.schema.default.entityType;
     const baseEntity = definition as IStratosEntityDefinition;
     this.isEndpoint = !baseEntity.endpoint;
     this.endpointType = this.getEndpointType(baseEntity);
+    // strict: definitions registered with the catalog always declare a `type`; resolve from the
+    // populated definition (which backfills from schema.default.entityType) to keep the key stable
+    const baseEntityType = baseEntity.type ?? this.type;
     // Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
     this.entityKey = this.isEndpoint ?
-      EntityCatalogHelpers.buildEntityKey(EntityCatalogHelpers.endpointType, baseEntity.type) :
-      EntityCatalogHelpers.buildEntityKey(baseEntity.type, baseEntity.endpoint.type);
+      EntityCatalogHelpers.buildEntityKey(EntityCatalogHelpers.endpointType, baseEntityType) :
+      // strict: non-endpoint entities always have an endpoint with a type set
+      EntityCatalogHelpers.buildEntityKey(baseEntityType, baseEntity.endpoint.type ?? this.endpointType);
     const actionBuilders = ActionBuilderConfigMapper.getActionBuilders(
-      this.builders.actionBuilders,
+      this.builders.actionBuilders ?? {},
       this.endpointType,
       this.type,
       (schemaKey: string) => this.getSchema(schemaKey)
@@ -113,9 +118,10 @@ export class StratosBaseCatalogEntity<
     } as EntityCatalogSchemas);
   }
 
-  private getEndpointType(definition: IStratosBaseEntityDefinition) {
+  private getEndpointType(definition: IStratosBaseEntityDefinition): string {
     const entityDef = definition as IStratosEntityDefinition;
-    return entityDef.endpoint ? entityDef.endpoint.type : STRATOS_ENDPOINT_TYPE;
+    // strict: a non-endpoint entity always has an endpoint with a declared type; fall back defensively
+    return entityDef.endpoint ? (entityDef.endpoint.type ?? STRATOS_ENDPOINT_TYPE) : STRATOS_ENDPOINT_TYPE;
   }
 
   private populateEntity(entity: IStratosEntityDefinition | IStratosEndpointDefinition | IStratosBaseEntityDefinition)
@@ -144,7 +150,8 @@ export class StratosBaseCatalogEntity<
     }
     const entityDefinition = this.definition as IStratosEntityDefinition;
     // Note - Replacing `buildEntityKey` with `entityCatalog.getEntityKey` will cause circular dependency
-    const tempId = EntityCatalogHelpers.buildEntityKey(schemaKey, entityDefinition.endpoint.type);
+    // strict: an entity definition (non-endpoint) always has an endpoint with a declared type
+    const tempId = EntityCatalogHelpers.buildEntityKey(schemaKey, entityDefinition.endpoint.type ?? this.endpointType);
     if (!catalogSchema[schemaKey] && tempId === this.entityKey) {
       // We've requested the default by passing the schema key that matches the entity type
       return catalogSchema.default;
@@ -183,7 +190,7 @@ export class StratosBaseCatalogEntity<
   // Backward compatibility with the old actions.
   // This should be removed after everything is based on the new flow
   private getLegacyTypeFromAction(
-    action: EntityRequestAction,
+    action: EntityRequestAction | undefined,
     actionString: 'start' | 'success' | 'failure' | 'complete'
   ) {
     if (action && action.actions) {
@@ -225,34 +232,37 @@ export class StratosBaseCatalogEntity<
     response?: any
   ): APISuccessOrFailedAction {
     if (typeof actionOrActionBuilderKey === 'string') {
-      return new APISuccessOrFailedAction(this.getRequestType(actionString, actionOrActionBuilderKey), null, response);
+      // The string-key path has no originating action object; apiAction is left undefined
+      return new APISuccessOrFailedAction(this.getRequestType(actionString, actionOrActionBuilderKey), undefined, response);
     }
     const type =
       this.getLegacyTypeFromAction(actionOrActionBuilderKey, actionString) ||
       this.getRequestType(actionString, actionOrActionBuilderKey, requestType);
+    // apiAction is optional; the non-string branch passes the action object (or undefined
+    // if the optional arg was omitted), mirroring the string-key path above.
     return new APISuccessOrFailedAction(type, actionOrActionBuilderKey, response);
 
   }
 
-  public getPaginationConfig(): PaginationPageIteratorConfig {
+  public getPaginationConfig(): PaginationPageIteratorConfig | null {
     return this.definition.paginationConfig ?
       this.definition.paginationConfig :
       null;
   }
 
-  public getEntityEmitHandler(): EntityInfoHandler {
+  public getEntityEmitHandler(): EntityInfoHandler | undefined {
     return this.definition.entityEmitHandler;
   }
 
-  public getEntitiesEmitHandler(): EntitiesInfoHandler {
+  public getEntitiesEmitHandler(): EntitiesInfoHandler | undefined {
     return this.definition.entitiesEmitHandler;
   }
 
-  public getEntityFetchHandler(): EntityFetchHandler {
+  public getEntityFetchHandler(): EntityFetchHandler | undefined {
     return this.definition.entityFetchHandler;
   }
 
-  public getEntitiesFetchHandler(): EntitiesFetchHandler {
+  public getEntitiesFetchHandler(): EntitiesFetchHandler | undefined {
     return this.definition.entitiesFetchHandler;
   }
 }
@@ -271,30 +281,30 @@ export class StratosCatalogEntity<
     super(entity, config);
   }
 
-  public getPaginationConfig(): PaginationPageIteratorConfig {
+  public getPaginationConfig(): PaginationPageIteratorConfig | null {
     return this.definition.paginationConfig ?
       this.definition.paginationConfig :
-      this.definition.endpoint ? this.definition.endpoint.paginationConfig : null;
+      this.definition.endpoint ? this.definition.endpoint.paginationConfig ?? null : null;
   }
 
-  public getEntityEmitHandler(): EntityInfoHandler {
+  public getEntityEmitHandler(): EntityInfoHandler | undefined {
     return this.definition.entityEmitHandler ||
-      this.definition.endpoint ? this.definition.endpoint.entityEmitHandler : null;
+      this.definition.endpoint ? this.definition.endpoint.entityEmitHandler : undefined;
   }
 
-  public getEntitiesEmitHandler(): EntitiesInfoHandler {
+  public getEntitiesEmitHandler(): EntitiesInfoHandler | undefined {
     return this.definition.entitiesEmitHandler ||
-      this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : null;
+      this.definition.endpoint ? this.definition.endpoint.entitiesEmitHandler : undefined;
   }
 
-  public getEntityFetchHandler(): EntityFetchHandler {
+  public getEntityFetchHandler(): EntityFetchHandler | undefined {
     return this.definition.entityFetchHandler ||
-      this.definition.endpoint ? this.definition.endpoint.entityFetchHandler : null;
+      this.definition.endpoint ? this.definition.endpoint.entityFetchHandler : undefined;
   }
 
-  public getEntitiesFetchHandler(): EntitiesFetchHandler {
+  public getEntitiesFetchHandler(): EntitiesFetchHandler | undefined {
     return this.definition.entitiesFetchHandler ||
-      this.definition.endpoint ? this.definition.endpoint.entitiesFetchHandler : null;
+      this.definition.endpoint ? this.definition.endpoint.entitiesFetchHandler : undefined;
   }
 }
 
@@ -302,10 +312,13 @@ export class StratosCatalogEndpointEntity extends StratosBaseCatalogEntity<IEndp
   static readonly baseEndpointRender: IStratosEntityBuilder<IEndpointFavMetadata, EndpointModel> = {
     getMetadata: endpoint => ({
       name: endpoint.name,
-      subType: endpoint.sub_type,
+      // sub_type is optional on EndpointModel; an absent sub-type maps to no sub-type
+      subType: endpoint.sub_type ?? '',
     }),
     getLink: () => null,
-    getGuid: metadata => metadata.guid,
+    // strict: getGuid receives the EndpointModel (Y); guid is optional on the model but a
+    // registered endpoint entity always has one by the time a favorite/builder runs.
+    getGuid: endpoint => endpoint.guid!,
   };
   // This is needed here for typing
   public declare definition: IStratosEndpointDefinition<EntityCatalogSchemas>;

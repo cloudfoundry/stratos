@@ -3,6 +3,8 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import {
   ActionState,
   getDefaultActionState,
+  SessionData,
+  SessionUser,
   UserProfileDataService,
   UserProfileInfo,
   UserProfileInfoEmail,
@@ -35,7 +37,7 @@ export class UserProfileService {
     // populated sessionData, then a populated `user`, then take the first
     // GUID and complete.
     this.userGuid$ = toObservable(this.authSignals.sessionData).pipe(
-      filter(sessionData => !!sessionData?.user),
+      filter((sessionData): sessionData is SessionData & { user: SessionUser } => !!sessionData?.user),
       take(1),
       map(data => data.user.guid)
     );
@@ -44,7 +46,7 @@ export class UserProfileService {
     // the ngrx `userProfile` EntityService). Same emission shape as before:
     // only emit a populated profile.
     this.userProfile$ = this.userProfileData.profile$.pipe(
-      filter(data => data && !!data.id)
+      filter((data): data is UserProfileInfo => !!data && !!data.id)
     );
     this.isFetching$ = this.userProfileData.fetching$;
 
@@ -124,9 +126,15 @@ export class UserProfileService {
   }
 
   private updatePassword(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<ActionState> {
+    const { currentPassword, newPassword } = profileChanges;
+    if (currentPassword === undefined || newPassword === undefined) {
+      // updateProfile only routes here when both passwords are present
+      // (didChangePassword); guard so the typed payload is honest.
+      return observableOf<ActionState>({ busy: false, error: true, message: 'Missing password change details' });
+    }
     const passwordUpdates = {
-      oldPassword: profileChanges.currentPassword,
-      password: profileChanges.newPassword
+      oldPassword: currentPassword,
+      password: newPassword
     };
     return this.userProfileData.updatePassword(profile.id, passwordUpdates).pipe(
       filter(item => item && !item.busy)

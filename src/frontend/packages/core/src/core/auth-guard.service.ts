@@ -44,7 +44,7 @@ export const authGuard: CanActivateFn = (_route, state): Observable<boolean> => 
     // This prevents redirecting to /login during transient state updates
     filter(authState => !!authState && !authState.verifying),
     map((authState) => {
-      if (!authState.sessionData || !authState.sessionData.valid) {
+      if (!authState || !authState.sessionData || !authState.sessionData.valid) {
         const [pathOnly] = state.url ? state.url.split('?') : ['/'];
         const targetPath = pathOnly && pathOnly !== '/' && pathOnly.length > 0 ? pathOnly : '/home';
         authSignals.navigateAndRememberRedirect(['/login'], {

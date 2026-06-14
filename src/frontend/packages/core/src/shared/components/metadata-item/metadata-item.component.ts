@@ -20,17 +20,17 @@ export class MetadataItemComponent {
 
   @Input() icon!: string;
 
-  @Input() public iconFont: string;
+  @Input() public iconFont?: string;
 
-  @Input() public label: string;
+  @Input() public label?: string;
 
-  @Input() public tooltip: string;
+  @Input() public tooltip?: string;
 
   // Are we editing?
-  @Input() public edit: boolean;
+  @Input() public edit?: boolean;
 
   // Does the item have a value to copy to the clipboard? = show the copy glyph
-  @Input() public clipboardValue: string;
+  @Input() public clipboardValue?: string;
 
   // Briefly swaps the copy glyph to a check_circle after a successful write.
   readonly copied = signal(false);

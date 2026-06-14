@@ -237,7 +237,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     return navItems;
   }
 
-  private collectNavigationRoutes(path: string, routes: Route[]): SideNavItem[] {
+  private collectNavigationRoutes(path: string | undefined, routes: Route[] | undefined): SideNavItem[] {
     if (!routes) {
       return [];
     }
@@ -249,8 +249,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
         };
         if (item.requiresEndpointType) {
           // Upstream always likes to show Cloud Foundry related endpoints - other distributions can change this behaviour
-          const alwaysShow = this.cs.get().alwaysShowNavForEndpointTypes ?
-            this.cs.get().alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
+          const alwaysShowNavFor = this.cs.get().alwaysShowNavForEndpointTypes;
+          const alwaysShow = alwaysShowNavFor ?
+            alwaysShowNavFor(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
           item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
           item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));

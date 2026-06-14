@@ -31,10 +31,10 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
 
   data$: Observable<MetricsDetailsInfo>;
 
-  // The guid of the metrics endpoint that this row shows
-  private _guid = signal<string>(null);
+  // The guid of the metrics endpoint that this row shows; unset until the row Input arrives
+  private _guid = signal<string | undefined>(undefined);
   public guid = this._guid.asReadonly();
-  public guid$: Observable<string>;
+  public guid$: Observable<string | undefined>;
 
   private metricsService = inject(MetricsService);
 

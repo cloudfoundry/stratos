@@ -91,7 +91,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Output() selectionChange = new EventEmitter<MatSelectChange>();
   @Output() valueChange = new EventEmitter<any>();
 
-  @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
+  // strict: @ContentChildren is populated by Angular before ngAfterContentInit
+  @ContentChildren(CustomOptionComponent) options!: QueryList<CustomOptionComponent>;
   @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
   @ViewChild('selectOptions', { static: true }) selectOptions!: ElementRef;
 

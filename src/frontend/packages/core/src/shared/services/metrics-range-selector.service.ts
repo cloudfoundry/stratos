@@ -11,7 +11,9 @@ export class MetricsRangeSelectorService {
 
   constructor() { }
 
-  public defaultTimeValue: string;
+  // Optionally set from the metrics-range-selector `selectedTimeValue`
+  // @Input; reads guard on truthiness, so it is genuinely sometimes-absent.
+  public defaultTimeValue?: string;
   public times: ITimeRange[] = [
     {
       value: '5:minute',

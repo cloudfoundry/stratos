@@ -2,9 +2,16 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { UrlValidatorConfig, ValidationErrorKey } from './validation.types';
 
 /**
+ * Fully-resolved URL validator configuration. Every option has a default
+ * applied via DEFAULT_URL_CONFIG, so each field is guaranteed present after
+ * the merge in createUrlValidator.
+ */
+type ResolvedUrlValidatorConfig = Required<UrlValidatorConfig>;
+
+/**
  * Default URL validator configuration
  */
-const DEFAULT_URL_CONFIG: UrlValidatorConfig = {
+const DEFAULT_URL_CONFIG: ResolvedUrlValidatorConfig = {
   requireHttps: false,
   allowHttp: true,
   allowCustomProtocols: [],
@@ -48,7 +55,7 @@ const URL_PATTERNS = {
  * ```
  */
 export function createUrlValidator(config: UrlValidatorConfig = {}): ValidatorFn {
-  const cfg = { ...DEFAULT_URL_CONFIG, ...config };
+  const cfg: ResolvedUrlValidatorConfig = { ...DEFAULT_URL_CONFIG, ...config };
 
   return (control: AbstractControl): ValidationErrors | null => {
     // Allow empty values (use Validators.required separately)

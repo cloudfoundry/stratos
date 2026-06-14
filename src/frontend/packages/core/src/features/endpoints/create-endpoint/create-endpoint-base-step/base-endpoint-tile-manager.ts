@@ -39,7 +39,9 @@ export abstract class BaseEndpointTileManager {
 
   public tileSelectorConfig$: Observable<ITileConfig<ICreateEndpointTilesData>[]>;
 
-  protected pSelectedTile: ITileConfig<ICreateEndpointTilesData>;
+  // strict: write-only selection model — only ever assigned via the
+  // selectedTile setter (which navigates) and never read back before that.
+  protected pSelectedTile!: ITileConfig<ICreateEndpointTilesData>;
 
   get selectedTile() {
     return this.pSelectedTile;
@@ -49,8 +51,8 @@ export abstract class BaseEndpointTileManager {
   }
 
   protected sortEndpointTiles(
-    { label: aLabel, renderPriority: aRenderPriority }: IStratosEndpointDefinition,
-    { label: bLabel, renderPriority: bRenderPriority }: IStratosEndpointDefinition
+    { label: aLabel = '', renderPriority: aRenderPriority }: IStratosEndpointDefinition,
+    { label: bLabel = '', renderPriority: bRenderPriority }: IStratosEndpointDefinition
   ) {
     // We're going to do a little more work than just to compare the render priority to ensure
     // the tile order is as consistent and sensible as possible across browsers in order to provide the best UX.
@@ -111,16 +113,16 @@ export abstract class BaseEndpointTileManager {
           .map(expandedEndpointType => {
             const endpoint = expandedEndpointType.definition;
             return this.tileManager.getNextTileConfig<ICreateEndpointTilesData>(
-              endpoint.label,
+              endpoint.label ?? endpoint.type ?? '',
               endpoint.logoUrl ? {
                 location: endpoint.logoUrl
               } : {
-                  matIcon: endpoint.icon,
+                  matIcon: endpoint.icon ?? '',
                   matIconFont: endpoint.iconFont
                 },
               {
-                type: endpoint.type,
-                parentType: endpoint.parentType,
+                type: endpoint.type ?? '',
+                parentType: endpoint.parentType ?? '',
                 component: endpoint.registrationComponent }
             );
           });
@@ -165,11 +167,10 @@ export abstract class BaseEndpointTileManager {
     if (!registeredLimit) {
       return of(Number.MAX_SAFE_INTEGER);
     }
-    if (typeof registeredLimit === 'number') {
-      return of(registeredLimit);
-    }
     // `injector` is guaranteed set here: expandEndpointTypes() throws
     // without it before any tile (and thus any limit) is evaluated.
+    // registeredLimit is typed as a factory function; it returns either a
+    // raw number or an Observable<number>, both handled below.
     const res = registeredLimit(this.injector!);
     return typeof res === 'number' ? of(res) : res;
   }

@@ -41,7 +41,7 @@ export class EndpointsService {
   connectedEndpoints$: Observable<EndpointModel[]>;
 
   static getLinkForEndpoint(endpoint: EndpointModel): string {
-    if (!endpoint) {
+    if (!endpoint || !endpoint.cnsi_type || !endpoint.guid) {
       return '';
     }
     try {
@@ -69,13 +69,16 @@ export class EndpointsService {
         endpoint.guid,
         endpoint.cnsi_type,
         EntityCatalogHelpers.endpointType,
-        null,
+        undefined, // endpoint favorites have no entity-level id
         metadata
       );
-      return fav.getLink();
+      // getLink() yields null when the entity builder has no link resolver;
+      // mirror the other no-link paths in this method by returning ''.
+      return fav.getLink() ?? '';
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       console.warn(
-        `Error getting link for endpoint ${endpoint.cnsi_type}: ${error.message}. ` +
+        `Error getting link for endpoint ${endpoint.cnsi_type}: ${message}. ` +
         `This is non-fatal but may indicate a catalog initialization issue.`
       );
       return '';
@@ -229,8 +232,9 @@ export class EndpointsService {
 
               return epType.definition.unConnectable || endpoint.connectionStatus === 'connected';
             } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
               console.warn(
-                `Error checking endpoint type ${endpoint.cnsi_type}: ${error.message}. ` +
+                `Error checking endpoint type ${endpoint.cnsi_type}: ${message}. ` +
                 `Excluding from results.`
               );
               return false;
@@ -281,7 +285,7 @@ export const endpointsGuard: CanActivateFn = (
 
       if (authState.sessionData.valid) {
         // Redirect to endpoints if there's no connected endpoints
-        let redirect: string;
+        let redirect: string | undefined;
         if (!disablePersistenceFeatures) {
           if (!haveRegistered) {
             redirect = isAdmin || (userEndpointsEnabled && isEndpointAdmin) ? '/endpoints' : '/noendpoints';

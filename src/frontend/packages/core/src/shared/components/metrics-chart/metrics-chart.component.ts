@@ -48,12 +48,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   @Input()
   public metricsConfig!: MetricsConfig;
   @Input()
-  public chartConfig: MetricsLineChartConfig;
+  public chartConfig?: MetricsLineChartConfig;
   @Input()
   public title!: string;
 
   @ContentChild(MetricsRangeSelectorComponent, { static: true })
-  public timeRangeSelector: MetricsRangeSelectorComponent;
+  public timeRangeSelector?: MetricsRangeSelectorComponent;
 
   public hasMultipleInstances = false;
 
@@ -66,7 +66,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   // Read-only accessor for the parent range selector — used to merge
   // new query params into each child chart's current request.
   public get currentRequest(): MetricsRequest {
-    return this.requestSignal();
+    // strict: ngOnInit seeds requestSignal from metricsConfig.request before
+    // any consumer (range selector, content children) can read it.
+    return this.requestSignal()!;
   }
 
   public applyRequest(req: MetricsRequest) {

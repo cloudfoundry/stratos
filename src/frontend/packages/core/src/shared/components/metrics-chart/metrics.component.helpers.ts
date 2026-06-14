@@ -71,7 +71,7 @@ export function buildMetricsChartConfig<T = any>(
   ];
 }
 
-function getServiceItemValueMapper(chartDataType: ChartDataTypes | null): ((value: any) => string) | null {
+function getServiceItemValueMapper(chartDataType: ChartDataTypes | null): ((value: any) => string) | undefined {
   switch (chartDataType) {
     case ChartDataTypes.BYTES:
       return (bytes: number) => (bytes / 1024 / 1024).toFixed(2);
@@ -80,6 +80,6 @@ function getServiceItemValueMapper(chartDataType: ChartDataTypes | null): ((valu
     case ChartDataTypes.CPU_TIME:
       return (time: string | number) => parseFloat(time.toString()).toFixed(2);
     default:
-      return null;
+      return undefined;
   }
 }

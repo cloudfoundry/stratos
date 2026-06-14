@@ -9,7 +9,7 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
   shouldDetach(_route: ActivatedRouteSnapshot): boolean { return false; }
   store(_route: ActivatedRouteSnapshot, _detachedTree: DetachedRouteHandle): void { }
   shouldAttach(_route: ActivatedRouteSnapshot): boolean { return false; }
-  retrieve(_route: ActivatedRouteSnapshot): DetachedRouteHandle { return null; }
+  retrieve(_route: ActivatedRouteSnapshot): DetachedRouteHandle | null { return null; }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;

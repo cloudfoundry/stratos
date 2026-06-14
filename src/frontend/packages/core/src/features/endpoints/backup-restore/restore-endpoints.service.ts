@@ -45,7 +45,7 @@ export class RestoreEndpointsService {
   public validDb = computed(() => {
     const fileValue = this._file();
     const currentDbVersion = this.currentDbVersionSignal();
-    return fileValue && fileValue.content && fileValue.content.dbVersion === currentDbVersion;
+    return !!fileValue && !!fileValue.content && fileValue.content.dbVersion === currentDbVersion;
   });
 
   public validFileContent = computed(() => {

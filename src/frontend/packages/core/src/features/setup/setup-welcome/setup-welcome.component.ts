@@ -58,7 +58,7 @@ export class SetupWelcomeComponent {
   public title = inject(APP_TITLE);
 
   public selectionChange(tile: ITileConfig<ITileData>) {
-    if (tile) {
+    if (tile && tile.data) {
       this.router.navigate(`setup/${tile.data.type}`.split('/'), { queryParams: { [BASE_REDIRECT_QUERY]: 'setup' } });
     }
   }

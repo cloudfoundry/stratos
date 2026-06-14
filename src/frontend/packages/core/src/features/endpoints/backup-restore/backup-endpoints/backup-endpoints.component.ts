@@ -152,7 +152,8 @@ export class BackupEndpointsComponent implements OnDestroy {
       hidePagerWhenSingle: true,
       isAnyLoading: this.loading,
       errorsByCnsi: signal(new Map()),
-      getRowKey: (row: EndpointModel) => row.guid,
+      // strict: registered endpoints always carry a guid (the row identity)
+      getRowKey: (row: EndpointModel) => row.guid!,
       columns: this.buildColumns(),
     };
 
@@ -282,6 +283,9 @@ export class BackupEndpointsComponent implements OnDestroy {
 
 
   private getEndpointTypeString(endpoint: EndpointModel): string {
-    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label;
+    if (!endpoint.cnsi_type) {
+      return '';
+    }
+    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label ?? endpoint.cnsi_type;
   }
 }

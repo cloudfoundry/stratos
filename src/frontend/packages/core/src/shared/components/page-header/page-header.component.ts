@@ -1,7 +1,7 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -69,13 +69,14 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private snackBarService = inject(SnackBarService);
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
+  private viewContainerRef = inject(ViewContainerRef);
 
   public canAPIKeys$: Observable<boolean>;
-  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
-  private breadcrumbKey: string;
+  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] | null = null;
+  private breadcrumbKey: string | null;
   // Last [breadcrumbs] input value, retained so the queryParamMap
   // subscription can re-resolve the active breadcrumb after a key change.
-  private latestBreadcrumbs: IHeaderBreadcrumb[] = null;
+  private latestBreadcrumbs: IHeaderBreadcrumb[] | null = null;
   public eventSeverity = InternalEventSeverity;
   public pFavorite!: UserFavorite<IFavoriteMetadata>;
   private pTabs!: IPageSideNavTab[];
@@ -143,24 +144,29 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public events$: Observable<IGlobalEvent[]>;
   public unreadEventCount$: Observable<number>;
-  public eventPriorityStatus$: Observable<StratosStatus>;
+  public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
         this.pFavorite = favorite;
-        this.recents.add({
-          guid: favorite.guid,
-          date: getTime(new Date()),
-          entityType: favorite.entityType,
-          endpointType: favorite.endpointType,
-          entityId: favorite.entityId,
-          name: favorite.metadata.name,
-          routerLink: favorite.getLink(),
-          prettyType: favorite.getPrettyTypeName(),
-          endpointId: favorite.endpointId,
-          metadata: { name: favorite.metadata.name },
-        });
+        // A recently-visited record genuinely requires an entityId, name and
+        // router link; only record entity favorites that carry all three.
+        if (favorite.entityId && favorite.metadata) {
+          const routerLink = favorite.getLink();
+          this.recents.add({
+            guid: favorite.guid,
+            date: getTime(new Date()),
+            entityType: favorite.entityType,
+            endpointType: favorite.endpointType,
+            entityId: favorite.entityId,
+            name: favorite.metadata.name,
+            routerLink: routerLink ?? undefined,
+            prettyType: favorite.getPrettyTypeName(),
+            endpointId: favorite.endpointId,
+            metadata: { name: favorite.metadata.name },
+          });
+        }
       }
     }
   }
@@ -173,7 +179,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public refreshToken$!: Observable<string>;
   public tokenExpiry$!: Observable<Date | null>;
 
-  public actionsKey: string;
+  public actionsKey: string | null;
 
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
@@ -318,7 +324,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     // Remember the current portal so we can hand it back in ngOnDestroy.
     this.previousPortal = this.tabNavService.pageHeader();
-    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
+    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, this.viewContainerRef, {});
     this.tabNavService.setPageHeader(this.myPortal);
   }
 

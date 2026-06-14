@@ -38,11 +38,12 @@ export class EventsPageComponent implements OnInit {
   private routingHistory = inject(RoutingHistoryService);
   private activatedRoute = inject(ActivatedRoute);
 
-  public unreadEvents$: Observable<IGlobalEvent[]>;
-  public readEvents$: Observable<IGlobalEvent[]>;
-  public events$: Observable<IGlobalEvent[]>;
+  // strict: assigned in ngOnInit before any template/async access; matches hasReadEvents$ below
+  public unreadEvents$!: Observable<IGlobalEvent[]>;
+  public readEvents$!: Observable<IGlobalEvent[]>;
+  public events$!: Observable<IGlobalEvent[]>;
   public hasReadEvents$!: Observable<boolean>;
-  public back$: Observable<string>;
+  public back$!: Observable<string>;
   public filterValues = EventFilterValues;
   public selectedFilter = EventFilterValues.UNREAD;
   public endpointOnly: boolean;

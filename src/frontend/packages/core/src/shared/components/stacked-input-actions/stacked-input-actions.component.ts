@@ -51,10 +51,10 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   private components: {
     [key: string]: {
-      stateInSignal: Signal<StackedInputActionsState>,
-      stateInUpdate: (state: StackedInputActionsState) => void,
+      stateInSignal: Signal<StackedInputActionsState | null>,
+      stateInUpdate: (state: StackedInputActionsState | null) => void,
       stackedAction: StackedInputActionComponent,
-      update: StackedInputActionUpdate
+      update: StackedInputActionUpdate | null
     }
   } = {};
   private subs: Subscription[] = [];
@@ -83,13 +83,13 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     }));
 
     // Track how we push state into the component using signals
-    const stateInSignal = signal<StackedInputActionsState>(null);
+    const stateInSignal = signal<StackedInputActionsState | null>(null);
     stackedAction.stateIn$ = toObservable(stateInSignal, { injector: this.injector });
 
     // Track them all together in one pot
     this.components[stackedAction.key] = {
       stateInSignal: stateInSignal.asReadonly(),
-      stateInUpdate: (state: StackedInputActionsState) => stateInSignal.set(state),
+      stateInUpdate: (state: StackedInputActionsState | null) => stateInSignal.set(state),
       stackedAction,
       update: null
     };
@@ -104,14 +104,14 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     const components = Object.values(this.components);
     // Emit a list of values for all components that should be processed. This does not include succeeded components
     const valuesToSubmit = components ? components.reduce((values: Record<string, string>, component) => {
-      if (!component.stackedAction.state || component.stackedAction.state.result !== StackedInputActionResult.SUCCEEDED) {
+      if ((!component.stackedAction.state || component.stackedAction.state.result !== StackedInputActionResult.SUCCEEDED) && component.update) {
         values[component.stackedAction.key] = component.update.value;
       }
       return values;
     }, {} as Record<string, string>) : {};
     // Values can be submitted if there's values and those values are valid
     const valid = components && Object.keys(valuesToSubmit).length && components.length > 0 ?
-      !components.find(component => !component.update.valid) : false;
+      !components.find(component => !component.update || !component.update.valid) : false;
     this.stateOut.emit({ values: valuesToSubmit, valid });
     this.updateOtherValues();
   }
@@ -142,7 +142,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
         result: StackedInputActionResult.OTHER_VALUES_UPDATED,
         otherValues: Object.values(this.components)
           .filter(fComponent => component.stackedAction.key !== fComponent.stackedAction.key)
-          .map(mComponent => mComponent.update.value)
+          .map(mComponent => mComponent.update?.value)
           .filter(value => !!value && value.length)
       });
     });

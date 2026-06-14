@@ -15,6 +15,11 @@ export class DisableRouterLinkDirective {
 
 
     const link = routerLink || routerLinkWithHref;
+    if (!link) {
+      // The selector requires [routerLink], so a RouterLink directive is
+      // present in practice; bail out defensively if neither resolved.
+      return;
+    }
 
     // Save original method
     const onClick = link.onClick;

@@ -59,10 +59,9 @@ export class EntityCatalog {
     const entitiesByEndpoint = new Map<string, string[]>();
     this.entities.forEach((entity, _key) => {
       const endpointType = entity.definition.endpoint?.type || 'unknown';
-      if (!entitiesByEndpoint.has(endpointType)) {
-        entitiesByEndpoint.set(endpointType, []);
-      }
-      entitiesByEndpoint.get(endpointType).push(entity.definition.type);
+      const group = entitiesByEndpoint.get(endpointType) ?? [];
+      group.push(entity.definition.type ?? 'unknown');
+      entitiesByEndpoint.set(endpointType, group);
     });
 
     return {
@@ -106,10 +105,9 @@ export class EntityCatalog {
     this.entities.forEach((entity, _key) => {
       const endpointType = entity.definition.endpoint?.type;
       if (endpointType && endpointType !== STRATOS_ENDPOINT_TYPE && !endpointTypeSet.has(endpointType)) {
-        if (!entitiesByEndpoint.has(endpointType)) {
-          entitiesByEndpoint.set(endpointType, []);
-        }
-        entitiesByEndpoint.get(endpointType).push(entity.definition.type);
+        const group = entitiesByEndpoint.get(endpointType) ?? [];
+        group.push(entity.definition.type ?? 'unknown');
+        entitiesByEndpoint.set(endpointType, group);
       }
     });
 
@@ -143,7 +141,7 @@ export class EntityCatalog {
     const entities: string[] = [];
     this.entities.forEach((entity) => {
       if (entity.definition.endpoint?.type === endpointType) {
-        entities.push(entity.definition.type);
+        entities.push(entity.definition.type ?? 'unknown');
       }
     });
     return entities;
@@ -199,7 +197,9 @@ export class EntityCatalog {
       }
 
       // Check for similar entity types across all endpoints
-      const allEntityTypes = Array.from(this.entities.values()).map(e => e.definition.type);
+      const allEntityTypes = Array.from(this.entities.values())
+        .map(e => e.definition.type)
+        .filter((ent): ent is string => ent !== undefined);
       const similarEntities = allEntityTypes.filter(ent =>
         ent.includes(entityType) || entityType.includes(ent) ||
         this.levenshteinDistance(ent, entityType) <= 2
@@ -354,10 +354,11 @@ export class EntityCatalog {
   ): EntityCatalogEntityConfig {
     const config = endpointTypeOrConfig as EntityCatalogEntityConfig;
     if (!config) {
+      // No config supplied: empty type fields signal "unspecified" to downstream truthiness checks
       return {
-        endpointType: null,
-        entityType: null,
-        subType: null
+        endpointType: '',
+        entityType: '',
+        subType: undefined
       };
     }
     if (config && config.entityType) {
@@ -365,7 +366,7 @@ export class EntityCatalog {
     }
     return {
       endpointType: endpointTypeOrConfig as string,
-      entityType,
+      entityType: entityType ?? '',
       subType
     };
   }
@@ -414,7 +415,9 @@ export class EntityCatalog {
       endpointTypeOrConfig: string | EntityCatalogEntityConfig,
       entityType?: string,
       subType?: string
-    ): StratosBaseCatalogEntity<T, Y, AB, AB> {
+      // Implementation signature only: the public overloads above keep the non-null contract;
+      // the body returns null in the defensive catch path below
+    ): StratosBaseCatalogEntity<T, Y, AB, AB> | null {
     try {
       const config = this.getConfig(endpointTypeOrConfig, entityType, subType);
 
@@ -504,7 +507,9 @@ export class EntityCatalog {
     if (config && config.entityType) {
       return EntityCatalogHelpers.buildEntityKey(config.entityType, config.endpointType);
     }
-    return EntityCatalogHelpers.buildEntityKey(entityType, endpointTypeOrConfig as string);
+    // strict: this fallback is only reached via the (endpointType, entityType) string overload,
+    // where entityType is always supplied; default defensively to keep the key well-formed
+    return EntityCatalogHelpers.buildEntityKey(entityType ?? '', endpointTypeOrConfig as string);
   }
 
   public getEndpoint(endpointType: string, subType?: string) {
@@ -536,7 +541,8 @@ export class EntityCatalog {
         if (baseEndpoint.definition.subTypes) {
           baseEndpoint.definition.subTypes.forEach(subType => {
             try {
-              const endpoint = this.getEndpoint(baseEndpoint.definition.type, subType.type);
+              // strict: a registered endpoint always has a populated type; default keeps the lookup well-formed
+              const endpoint = this.getEndpoint(baseEndpoint.definition.type ?? '', subType.type);
               if (endpoint) {
                 allEndpoints.push(endpoint);
               }

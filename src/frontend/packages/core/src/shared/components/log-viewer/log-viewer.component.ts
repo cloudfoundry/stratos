@@ -53,7 +53,7 @@ interface ConnectionErrorInfo {
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
 
-  @Input() filter: (a: any) => void;
+  @Input() filter?: (a: any) => void;
 
   @Input() status!: Observable<number>;
 

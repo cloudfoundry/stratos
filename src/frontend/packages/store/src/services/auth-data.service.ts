@@ -171,7 +171,7 @@ export class AuthDataService {
       );
 
       const envelope = response.body;
-      if (envelope.status === 'error') {
+      if (!envelope || envelope.status === 'error') {
         const ssoOptions = response.headers.get(SSO_HEADER);
         const isDomainMismatch = this.isDomainMismatch(response.headers);
         if (login) {
@@ -183,8 +183,20 @@ export class AuthDataService {
       }
 
       const sessionData = envelope.data;
-      sessionData.sessionExpiresOn =
-        parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
+      if (!sessionData) {
+        // A non-error envelope with no data is malformed; treat it as an
+        // invalid/failed session rather than dereferencing absent data.
+        if (login) {
+          this.setInvalidSession(false, false, false, response.headers.get(SSO_HEADER));
+        } else {
+          this.resetAuth();
+        }
+        return;
+      }
+      // Empty-string fallback preserves the prior runtime: a missing header
+      // yields parseInt('') === NaN (was parseInt(null)), i.e. NaN * 1000.
+      const expiresOnHeader = response.headers.get('x-cap-session-expires-on') ?? '';
+      sessionData.sessionExpiresOn = parseInt(expiresOnHeader, 10) * 1000;
       const dashboardData = this.injector.get(DashboardDataService);
       const branding = this.injector.get(StratosBrandingService);
       const endpointsService = this.injector.get(EndpointsDataService);
@@ -235,7 +247,11 @@ export class AuthDataService {
     // signal source of truth (replaces the former SESSION_VERIFIED reducer
     // case). CF endpoint admin scopes are propagated separately by
     // CfEndpointRoleSyncService observing the sessionData signal.
-    this.rolesData.applySessionScopes(sessionData.user);
+    // applySessionScopes no-ops on an absent user; guard here so the optional
+    // sessionData.user matches the collaborator's required param.
+    if (sessionData.user) {
+      this.rolesData.applySessionScopes(sessionData.user);
+    }
     this.patch({
       error: false,
       errorResponse: '',
@@ -250,7 +266,7 @@ export class AuthDataService {
     uaaError: boolean,
     upgradeInProgress: boolean,
     domainMismatch: boolean,
-    ssoOptions: string,
+    ssoOptions: string | null | undefined,
   ): void {
     this.patch({
       sessionData: {
@@ -258,7 +274,9 @@ export class AuthDataService {
         uaaError,
         upgradeInProgress,
         domainMismatch,
-        ssoOptions,
+        // SessionData.ssoOptions is `string | undefined`; a missing header
+        // (null) normalizes to absent.
+        ssoOptions: ssoOptions ?? undefined,
         sessionExpiresOn: null,
         plugins: { demo: false },
         config: {},
@@ -278,10 +296,12 @@ export class AuthDataService {
     this._auth.set(defaultAuthState);
   }
 
-  private isDomainMismatch(headers: { has: (h: string) => boolean; get: (h: string) => string } | undefined): boolean {
+  private isDomainMismatch(headers: { has: (h: string) => boolean; get: (h: string) => string | null } | undefined): boolean {
     if (headers && headers.has(DOMAIN_HEADER)) {
       const expectedDomain = headers.get(DOMAIN_HEADER);
-      return !window.location.hostname.endsWith(expectedDomain);
+      // has() guards presence, but get() is still typed nullable; only
+      // compare when a value actually came back.
+      return expectedDomain ? !window.location.hostname.endsWith(expectedDomain) : false;
     }
     return false;
   }

@@ -26,7 +26,8 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
 
   markdownHtml!: string;
   documentUrl!: string;
-  title: string = '';
+  // null is a sentinel meaning "title not yet derived from the document"
+  title: string | null = '';
 
   @Input('documentUrl')
   set setDocumentUrl(value: string) {
@@ -37,7 +38,8 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
     }
   }
 
-  @ViewChild('markdown', { static: true }) public markdown: ElementRef;
+  // strict: static @ViewChild is available from ngOnInit onward
+  @ViewChild('markdown', { static: true }) public markdown!: ElementRef;
 
   private parseInline(tokens: any[]): string {
     return tokens.map((token: any) => {

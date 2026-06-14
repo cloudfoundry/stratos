@@ -44,10 +44,10 @@ export class TableCellEndpointNameComponent extends TableCellCustom<EndpointMode
     this.endpoint$ = toObservable(this.endpointsData.endpointById(id), { injector: this.injector }).pipe(
       filter((data): data is EndpointModel => !!data),
       map(data => {
-        const ep = entityCatalog.getEndpoint(data.cnsi_type, data.sub_type).definition;
+        const ep = data.cnsi_type ? entityCatalog.getEndpoint(data.cnsi_type, data.sub_type)?.definition : undefined;
         return {
           ...data,
-          canShowLink: data.connectionStatus === 'connected' || ep.unConnectable,
+          canShowLink: data.connectionStatus === 'connected' || !!ep?.unConnectable,
           link: EndpointsService.getLinkForEndpoint(data)
         };
       })

@@ -213,9 +213,9 @@ export class UtilsService {
     return (value / Math.pow(1024, Math.floor(multiplier)));
   }
 
-  private getDefaultPrecision(precision: number): number {
+  private getDefaultPrecision(precision?: number): number {
     if (precision === undefined || precision === null) {
-      precision = 0;
+      return 0;
     }
     return precision;
   }
@@ -271,7 +271,7 @@ export function pathSet(path: string, object: any, value: any) {
   }
 }
 
-export function safeStringToObj<T = object>(value: string): T {
+export function safeStringToObj<T = object>(value: string): T | null {
   try {
     if (value) {
       const jsonObj = JSON.parse(value);
@@ -296,7 +296,7 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 };
 
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
-export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
+export const truthyIncludingZeroString = (obj: any): string | null => truthyIncludingZero(obj) ? obj.toString() : null;
 
 /**
  * Real basic, shallow check

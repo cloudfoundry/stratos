@@ -64,7 +64,8 @@ export interface SessionData {
   uaaError?: boolean;
   upgradeInProgress?: boolean;
   ssoOptions?: string;
-  sessionExpiresOn: number;
+  // Null for an invalid session (no session-expiry header was returned).
+  sessionExpiresOn: number | null;
   domainMismatch?: boolean;
   diagnostics?: Diagnostics;
   ['plugin-config']?: PluginConfig;
@@ -106,10 +107,12 @@ export interface AuthUser {
 export interface AuthState {
   loggedIn: boolean;
   loggingIn: boolean;
-  user: AuthUser;
+  // Null until/unless a logged-in user is hydrated (default + reset states).
+  user: AuthUser | null;
   error: boolean;
   errorResponse: any;
-  sessionData: SessionData;
+  // Null in the default/reset state, before any verify cycle resolves.
+  sessionData: SessionData | null;
   verifying: boolean;
   redirect?: RouterRedirect;
   keepAlive?: boolean;

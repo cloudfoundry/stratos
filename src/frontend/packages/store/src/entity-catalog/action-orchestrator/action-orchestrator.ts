@@ -46,7 +46,8 @@ export class EntityRequestActionConfig<T extends OrchestratedActionBuilder> {
     public getUrl: (...args: Parameters<T>) => string,
     {
       requestConfig = {},
-      schemaKey = null,
+      // empty schemaKey denotes the default schema (getSchema treats falsy as default)
+      schemaKey = '',
       externalRequest = false
     }: EntityRequestInfo
   ) {
@@ -66,7 +67,8 @@ export class PaginationRequestActionConfig<T extends OrchestratedActionBuilder> 
     public getUrl: (...args: Parameters<T>) => string,
     {
       requestConfig = {},
-      schemaKey = null,
+      // empty schemaKey denotes the default schema (getSchema treats falsy as default)
+      schemaKey = '',
       externalRequest = false
     }: EntityRequestInfo
   ) {
@@ -116,7 +118,8 @@ export class BasePipelineRequestAction<M extends Array<any> = any[]> extends Sta
 // This action will be created by the entity catalog from single request entity builder configs.
 export class BaseEntityRequestAction extends BasePipelineRequestAction implements EntityRequestAction {
   public options: HttpRequest<any>;
-  public updatingKey: string | null = null;
+  // Matches EntityRequestAction.updatingKey (optional string); left unset for base requests
+  public updatingKey?: string;
   constructor(
     entity: EntitySchema | EntitySchema[],
     public guid: string,
@@ -170,7 +173,9 @@ export interface OrchestratedActionCoreBuilders {
  * Generic interface for functions that create actions for an entity
  */
 export interface OrchestratedActionBuilders extends OrchestratedActionCoreBuilders {
-  [actionType: string]: OrchestratedActionBuilder;
+  // Arbitrary keys may be absent; the core builders above are optional, so the index
+  // signature must permit undefined to stay compatible with them under strict mode.
+  [actionType: string]: OrchestratedActionBuilder | undefined;
 }
 
 export interface OrchestratedActionBuilderConfig {
@@ -179,9 +184,12 @@ export interface OrchestratedActionBuilderConfig {
   update?: KnownEntityActionBuilder | EntityRequestActionConfig<KnownEntityActionBuilder>;
   create?: CreateActionBuilder | EntityRequestActionConfig<CreateActionBuilder>;
   getMultiple?: GetMultipleActionBuilder | PaginationRequestActionConfig<GetMultipleActionBuilder>;
+  // Arbitrary keys may be absent; the named entries above are optional, so the index
+  // signature must permit undefined to stay compatible with them under strict mode.
   [actionType: string]: OrchestratedActionBuilder |
   EntityRequestActionConfig<KnownEntityActionBuilder> |
-  PaginationRequestActionConfig<GetMultipleActionBuilder>;
+  PaginationRequestActionConfig<GetMultipleActionBuilder> |
+  undefined;
 }
 
 export class ActionOrchestrator<T extends OrchestratedActionBuilders = OrchestratedActionBuilders> {
@@ -191,12 +199,12 @@ export class ActionOrchestrator<T extends OrchestratedActionBuilders = Orchestra
     if (!actionBuilderForType) {
       return null;
     }
-    return (...args: Parameters<T[Y]>): ReturnType<T[Y]> => {
+    return (...args: Parameters<NonNullable<T[Y]>>): ReturnType<NonNullable<T[Y]>> => {
       const action = actionBuilderForType(...args) as ActionBuilderAction;
       if (action) {
         action.actionBuilderActionType = actionType as string;
       }
-      return action as ReturnType<T[Y]>;
+      return action as ReturnType<NonNullable<T[Y]>>;
     };
   }
 

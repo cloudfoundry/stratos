@@ -33,11 +33,12 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   @Output() closeModalEvent = new EventEmitter<void>();
   @Output() endpointRegistered = new EventEmitter<any>();
 
-  @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false }) 
-  endpointFormContainer: ViewContainerRef;
+  @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
+  // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
+  endpointFormContainer!: ViewContainerRef;
 
   selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
-  componentRef: ComponentRef<any>;
+  componentRef: ComponentRef<any> | null = null;
 
   private cdr = inject(ChangeDetectorRef);
 
@@ -89,6 +90,9 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   private loadEndpointRegistrationComponent(tile: ITileConfig<ICreateEndpointTilesData>) {
     if (!this.endpointFormContainer) {
       console.error('endpointFormContainer not available');
+      return;
+    }
+    if (!tile.data) {
       return;
     }
 

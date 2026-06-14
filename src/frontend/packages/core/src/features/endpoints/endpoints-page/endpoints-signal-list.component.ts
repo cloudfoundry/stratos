@@ -116,7 +116,7 @@ export class EndpointsSignalListComponent {
     (this as { totalEndpoints: Signal<number> }).totalEndpoints = this.endpointsConfig.view.totalItems;
 
     const typeLabel = (ep: EndpointModel): string => {
-      const def = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      const def = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
       return def?.definition?.label ?? ep.cnsi_type ?? '';
     };
 
@@ -243,6 +243,9 @@ export class EndpointsSignalListComponent {
   }
 
   private toggleEndpointFavorite(ep: EndpointModel): void {
+    if (!ep.guid || !ep.cnsi_type) {
+      return;
+    }
     // Endpoints are top-level. The favorites-groups computation determines
     // "this favorite IS the endpoint itself" via `!favorite.entityId`
     // (`UserFavoritesDataService.addFavoriteToGroup`) — so we MUST omit
@@ -267,7 +270,7 @@ export class EndpointsSignalListComponent {
   private buildEndpointActions = (ep: EndpointModel): readonly SignalListRowAction<EndpointModel>[] => {
     const isConnected = ep.connectionStatus === 'connected';
     const isDisconnected = ep.connectionStatus === 'disconnected';
-    const def = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+    const def = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
     const connectable = !(def?.definition?.unConnectable);
 
     const out: SignalListRowAction<EndpointModel>[] = [];
@@ -322,6 +325,10 @@ export class EndpointsSignalListComponent {
   }
 
   private openDisconnectConfirm(ep: EndpointModel): void {
+    const { guid, cnsi_type } = ep;
+    if (!guid || !cnsi_type) {
+      return;
+    }
     const message1 = `Are you sure you want to disconnect endpoint '${ep.name}'?`;
     const message2 = ep.local ? `This will also update your local configuration.` : '';
     const config = new ConfirmationDialogConfig(
@@ -331,13 +338,17 @@ export class EndpointsSignalListComponent {
       false,
     );
     this.confirmDialog.open(config, () => {
-      void this.handleAction(this.endpointsConfig.disconnectEndpoint(ep.guid, ep.cnsi_type), () => {
+      void this.handleAction(this.endpointsConfig.disconnectEndpoint(guid, cnsi_type), () => {
         this.snackBar.show(`Disconnected endpoint '${ep.name}'`);
       });
     });
   }
 
   private openUnregisterConfirm(ep: EndpointModel): void {
+    const { guid, cnsi_type } = ep;
+    if (!guid || !cnsi_type) {
+      return;
+    }
     const config = new ConfirmationDialogConfig(
       'Unregister Endpoint',
       `Are you sure you want to unregister endpoint '${ep.name}'?`,
@@ -345,7 +356,7 @@ export class EndpointsSignalListComponent {
       true,
     );
     this.confirmDialog.open(config, () => {
-      void this.handleAction(this.endpointsConfig.unregisterEndpoint(ep.guid, ep.cnsi_type), () => {
+      void this.handleAction(this.endpointsConfig.unregisterEndpoint(guid, cnsi_type), () => {
         this.snackBar.show(`Unregistered ${ep.name}`);
       });
     });

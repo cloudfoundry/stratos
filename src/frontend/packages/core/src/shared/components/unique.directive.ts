@@ -20,7 +20,7 @@ export class UniqueDirective implements Validator, OnChanges {
     }
   }
 
-  validate(c: AbstractControl): { [key: string]: any, } {
+  validate(c: AbstractControl): { [key: string]: any, } | null {
     // Store reference to control so we can trigger re-validation in ngOnChanges
     this._control = c;
 

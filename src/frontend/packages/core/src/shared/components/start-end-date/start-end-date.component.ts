@@ -67,7 +67,7 @@ export class StartEndDateComponent {
   public isValid = new EventEmitter<boolean>();
 
   public validValue = true;
-  public validMessage!: string;
+  public validMessage: string | null = null;
 
   private startValue!: Date;
   private endValue!: Date;
@@ -87,7 +87,7 @@ export class StartEndDateComponent {
   }
 
   @Input()
-  public validate: (start: Date, end: Date) => string = (start: Date, end: Date): string => {
+  public validate: (start: Date, end: Date) => string | null = (start: Date, end: Date): string | null => {
     if (!end || !start) {
       return null;
     }

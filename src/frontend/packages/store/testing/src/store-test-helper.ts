@@ -226,6 +226,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
           api_endpoint: {
             Scheme: 'https',
             Opaque: '',
+            // Go's url.Userinfo pointer serializes to JSON null when absent;
+            // this fixture reproduces that real wire shape (User: object | null).
             User: null,
             Host: 'api.127.0.0.1.xip.io:8443',
             Path: '',
@@ -293,7 +295,9 @@ export interface TestStoreEntity {
  */
 export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>) {
   return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
-    const entities = entityMap.get(entityConfig);
+    // strict: key comes from entityMap.keys(), so get() always resolves; ?? []
+    // here is an unreachable type-narrowing fallback, not fabricated data.
+    const entities = entityMap.get(entityConfig) ?? [];
     const entityKey = entityCatalog.getEntityKey(entityConfig);
     return {
       request: {
@@ -335,7 +339,13 @@ export function seedEndpointsDataService(endpoints: EndpointModel[]): void {
       // `getAll()` / `register()` etc.
       const writable = (endpointsService as unknown as { ['_endpoints']?: { set: (m: Map<string, EndpointModel>) => void } })['_endpoints'];
       if (writable && typeof writable.set === 'function') {
-        writable.set(new Map(endpoints.map(e => [e.guid, e])));
+        // EndpointModel.guid is optional in the source type, but the signal map
+        // is keyed by guid; drop any guid-less endpoint (it could never be keyed)
+        // so the entry tuples are genuinely [string, EndpointModel].
+        const entries = endpoints
+          .filter((e): e is EndpointModel & { guid: string } => e.guid !== undefined)
+          .map(e => [e.guid, e] as const);
+        writable.set(new Map(entries));
       }
     }
   } catch {

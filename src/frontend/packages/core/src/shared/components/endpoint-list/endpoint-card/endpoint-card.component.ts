@@ -74,19 +74,21 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
 
 
   public rowObs = new ReplaySubject<EndpointModel>();
-  public favorite?: UserFavoriteEndpoint;
+  public favorite: UserFavoriteEndpoint | null = null;
   public address!: string;
   public isDuplicate$!: Observable<boolean>;
   public cardMenu!: MenuItem[];
-  public endpointCatalogEntity!: StratosCatalogEndpointEntity;
+  public endpointCatalogEntity?: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string | null = null;
   public endpointParentType!: string;
   private endpointIds = new ReplaySubject<string[]>();
   public endpointIds$: Observable<string[]>;
-  public cardStatus$: Observable<StratosStatus>;
+  // strict: never assigned in this component; the meta-card consumes it via
+  // an async pipe and tolerates an absent stream.
+  public cardStatus$?: Observable<StratosStatus>;
   private subs: Subscription[] = [];
-  public connectionStatus!: string;
+  public connectionStatus?: string;
   public viewCreator$!: Observable<boolean>;
 
   private componentRef!: ComponentRef<EndpointListDetailsComponent>;
@@ -107,7 +109,7 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       console.log('Row set to null/undefined');
       return;
     }
-    this.endpointCatalogEntity = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
+    this.endpointCatalogEntity = row.cnsi_type ? entityCatalog.getEndpoint(row.cnsi_type, row.sub_type) : undefined;
     this.address = getFullEndpointApiUrl(row);
     this.isDuplicate$ = this.endpoints$.pipe(
       map(entities => Object.values(entities).filter(e => getFullEndpointApiUrl(e) === this.address).length > 1)
@@ -179,9 +181,9 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     if (this.component) {
       this.component.row = this.row;
       this.component.isTable = false;
+      this.component.row = this.row;
+      this.componentRef.changeDetectorRef.detectChanges();
     }
-    this.component.row = this.row;
-    this.componentRef.changeDetectorRef.detectChanges();
   }
 
   editEndpoint() {

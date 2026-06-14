@@ -19,5 +19,5 @@ export const getDefaultRowState = (): RowState => ({
   error: false,
   blocked: false,
   deleting: false,
-  message: null
+  message: undefined
 });

@@ -45,7 +45,8 @@ export const xsrfInterceptor: HttpInterceptorFn = (
       if (ev instanceof HttpResponse) {
         // Look for the XSRF-Token Header
         if (ev.headers.has(STRATOS_XSRF_HEADER_NAME)) {
-          HttpXsrfHeaderExtractor.stratosXSRFToken = ev.headers.get(STRATOS_XSRF_HEADER_NAME);
+          // strict: has() guarantees the header is present, so get() is non-null here.
+          HttpXsrfHeaderExtractor.stratosXSRFToken = ev.headers.get(STRATOS_XSRF_HEADER_NAME)!;
         }
       }
     })

@@ -34,14 +34,19 @@ export class FavoritesMetaCardComponent {
   @Input()
   public endpoint: any;
 
-  public favorite: UserFavorite<IFavoriteMetadata>;
+  // strict: assigned in the @Input set favoriteEntity setter before any read
+  public favorite!: UserFavorite<IFavoriteMetadata>;
 
   // Type of favorite - e.g. 'Application'
-  public favoriteType: string;
+  // strict: assigned in the @Input set favoriteEntity setter
+  public favoriteType!: string;
 
-  public routerLink!: string;
+  // getLink() returns null when the entity defines no link; the template
+  // guards every use with !!routerLink, and openFavorite early-returns.
+  public routerLink: string | null = null;
 
-  public icon: FavoriteIconData;
+  // strict: assigned in the @Input set favoriteEntity setter
+  public icon!: FavoriteIconData;
 
   public valid = true;
 
@@ -142,8 +147,10 @@ export class FavoritesMetaCardComponent {
     // getIsValid hooks now use inject(HttpClient) for a direct existence
     // probe (signal-native; no ngrx pipeline), so the call must run inside
     // an injection context.
-    const isValidObs = (entityDef.builders.entityBuilder && entityDef.builders.entityBuilder.getIsValid) ?
-    runInInjectionContext(this.injector, () => entityDef.builders.entityBuilder.getIsValid(this.favorite)) : of(true);
+    const entityBuilder = entityDef.builders.entityBuilder;
+    const getIsValid = entityBuilder?.getIsValid;
+    const isValidObs = getIsValid ?
+    runInInjectionContext(this.injector, () => getIsValid(this.favorite)) : of(true);
     isValidObs.pipe(take(1), defaultIfEmpty(false)).subscribe(isValid => {
       this.valid = isValid;
       if (!isValid) {

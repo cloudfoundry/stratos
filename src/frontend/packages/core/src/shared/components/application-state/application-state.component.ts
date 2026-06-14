@@ -21,11 +21,14 @@ export class ApplicationStateComponent implements OnInit {
   @Input()
   public state!: Observable<StratosStatusMetadata>;
 
-  public status$: Observable<StratosStatus>;
+  // strict: assigned in ngOnInit when the required `state` @Input is present
+  public status$!: Observable<StratosStatus>;
 
-  public subLabel$: Observable<string>;
+  // strict: assigned in ngOnInit; subLabel is optional + startWith(null)
+  public subLabel$!: Observable<string | undefined | null>;
 
-  public label$: Observable<string>;
+  // strict: assigned in ngOnInit; startWith(null) makes the first emission null
+  public label$!: Observable<string | null>;
 
   @Input()
   public hideIcon = false;

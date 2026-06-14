@@ -43,9 +43,12 @@ export class ErrorPageComponent implements OnInit {
 
   public back$: Observable<string>;
   public backParams$: Observable<object>;
-  public errorDetails$: Observable<{ endpoint: EndpointModel; errors: InternalEventState[], }>;
+  // strict: only assigned in ngOnInit when an endpointId route param is present; left
+  // undefined otherwise. The template guards via `@if (errorDetails$ | async; as ...)`
+  // and the async pipe tolerates an undefined source.
+  public errorDetails$?: Observable<{ endpoint: EndpointModel | null; errors: InternalEventState[], }>;
   public icon = StratosStatus.ERROR;
-  public jsonDownloadHref$: Observable<SafeUrl>;
+  public jsonDownloadHref$?: Observable<SafeUrl>;
 
   public dismissEndpointErrors(endpointGuid: string) {
     this.errorEvents.clearEndpoint(endpointGuid);
@@ -72,7 +75,7 @@ export class ErrorPageComponent implements OnInit {
         { injector: this.injector },
       );
       this.errorDetails$ = combineLatest([errors$, endpoint$]).pipe(
-        map(([errors, endpoint]: [InternalEventState[], EndpointModel]) => ({ endpoint, errors }))
+        map(([errors, endpoint]: [InternalEventState[], EndpointModel | null]) => ({ endpoint, errors }))
       );
       this.jsonDownloadHref$ = this.errorDetails$.pipe(
         map((info: any) => {
