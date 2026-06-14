@@ -14,12 +14,11 @@ import { KubernetesNodeService } from "../../../../services/kubernetes-node.serv
   selector: "app-kubernetes-node-summary-card",
   templateUrl: "./kubernetes-node-summary-card.component.html",
   imports: [AsyncPipe, DatePipe, MetadataItemComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class KubernetesNodeSummaryCardComponent {
-  public caaspVersion$: Observable<string>;
-  public caaspNode$: Observable<CaaspNodeData>;
+  public caaspNode$: Observable<CaaspNodeData | null>;
   public caaspNodeUpdates$: Observable<boolean>;
   public caaspNodeDisruptive$: Observable<boolean>;
   public caaspNodeSecurity$: Observable<boolean>;
@@ -30,18 +29,20 @@ export class KubernetesNodeSummaryCardComponent {
     this.caaspNode$ = this.kubeNodeService.nodeEntity$.pipe(
       map((node) => {
         const nodeData = this.kubeEndpointService.getCaaspNodeData(node);
-        return nodeData.version ? nodeData : null;
+        return nodeData?.version ? nodeData : null;
       }),
     );
 
-    this.caaspNodeUpdates$ = this.caaspNode$.pipe(map((node) => node.updates));
+    this.caaspNodeUpdates$ = this.caaspNode$.pipe(
+      map((node) => node?.updates ?? false),
+    );
 
     this.caaspNodeDisruptive$ = this.caaspNode$.pipe(
-      map((node) => node.disruptiveUpdates),
+      map((node) => node?.disruptiveUpdates ?? false),
     );
 
     this.caaspNodeSecurity$ = this.caaspNode$.pipe(
-      map((node) => node.securityUpdates),
+      map((node) => node?.securityUpdates ?? false),
     );
   }
 }

@@ -34,7 +34,7 @@ const UNLIMITED = -1;
   ],
   standalone: true,
   host: { class: "block" },
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     AppInputDirective,
@@ -78,7 +78,7 @@ export class UnlimitedInputComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.formControl = this.ctrlContainer.form.get(this.name);
+    this.formControl = this.ctrlContainer.form.get(this.name)!;
     this.formControl.setValidators(Validators.min(0));
 
     if (this.formControl.value) {

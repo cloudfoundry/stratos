@@ -13,13 +13,13 @@ import { ChartsService } from "../../shared/services/charts.service";
 @Component({
   selector: "app-chart-details-versions",
   templateUrl: "./chart-details-versions.component.html",
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class ChartDetailsVersionsComponent {
   @Input() versions!: ChartVersion[];
   @Input() currentVersion!: ChartVersion;
-  showAllVersions: boolean;
+  showAllVersions = false;
   private route = inject(ActivatedRoute);
   private chartService = inject(ChartsService);
 

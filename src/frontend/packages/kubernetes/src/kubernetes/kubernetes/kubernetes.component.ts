@@ -24,7 +24,7 @@ import { KubernetesService } from "../services/kubernetes.service";
 
   providers: [EndpointListHelper, KubernetesService],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     PageHeaderComponent,

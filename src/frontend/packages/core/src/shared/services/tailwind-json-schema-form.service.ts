@@ -24,7 +24,7 @@ export interface JsonSchemaFormConfig {
 
 @Component({
   selector: "json-schema-form",
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="json-schema-form">
       <div

@@ -11,7 +11,7 @@ import { StratosBrandingService } from "../../../../theme/stratos-branding.servi
   selector: "app-product-name",
   template: "{{ name() }}",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
 })
 export class ProductNameComponent {
