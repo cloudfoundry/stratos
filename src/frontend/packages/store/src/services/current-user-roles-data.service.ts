@@ -70,7 +70,7 @@ export class CurrentUserRolesDataService {
    * the reducer's `CURRENT_USER_ROLES_SESSION_VERIFIED` case
    * (`applyInternalScopes`). No-op on internal roles when `user` is absent.
    */
-  applySessionScopes(user: SessionUser): void {
+  applySessionScopes(user: SessionUser | undefined): void {
     if (!user) {
       return;
     }

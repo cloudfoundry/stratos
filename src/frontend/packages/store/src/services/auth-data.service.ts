@@ -247,11 +247,9 @@ export class AuthDataService {
     // signal source of truth (replaces the former SESSION_VERIFIED reducer
     // case). CF endpoint admin scopes are propagated separately by
     // CfEndpointRoleSyncService observing the sessionData signal.
-    // applySessionScopes no-ops on an absent user; guard here so the optional
-    // sessionData.user matches the collaborator's required param.
-    if (sessionData.user) {
-      this.rolesData.applySessionScopes(sessionData.user);
-    }
+    // applySessionScopes accepts an absent user (it no-ops internally); call
+    // it unconditionally so verification always feeds the roles slice.
+    this.rolesData.applySessionScopes(sessionData.user);
     this.patch({
       error: false,
       errorResponse: '',

@@ -5,7 +5,7 @@ export interface RowsState {
 export interface RowState {
   busy?: boolean;
   error?: boolean;
-  message?: string;
+  message?: string | null;
   blocked?: boolean;
   highlighted?: boolean;
   deleting?: boolean;
@@ -19,5 +19,5 @@ export const getDefaultRowState = (): RowState => ({
   error: false,
   blocked: false,
   deleting: false,
-  message: undefined
+  message: null
 });
