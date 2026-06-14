@@ -43,28 +43,36 @@
             <div class="card-body">
               <div class="flex flex-row">
                 <div class="flex-1">
-                  <app-metadata-item class="mt-0" icon="memory" label="Memory Quota">{{ detail.process?.memoryMb | mbToHumanSize }}
+                  <app-metadata-item class="mt-0" icon="memory" label="Memory Quota"
+                    >{{ $safeNavigationMigration(detail.process?.memoryMb) | mbToHumanSize }}
                   </app-metadata-item>
-                  <app-metadata-item icon="storage" label="Disk Quota">{{ detail.process?.diskMb | mbToHumanSize }}
+                  <app-metadata-item icon="storage" label="Disk Quota"
+                    >{{ $safeNavigationMigration(detail.process?.diskMb) | mbToHumanSize }}
                   </app-metadata-item>
                   <app-metadata-item icon="date_range" label="Created">
-                    {{ detail.app.createdAt | date:'medium' }}</app-metadata-item>
+                    {{ detail.app.createdAt | date: "medium" }}</app-metadata-item
+                  >
                   <app-metadata-item icon="access_time" label="Modified">
-                    {{ detail.pkg?.updatedAt ? (detail.pkg?.updatedAt | date:'medium') : '-' }}
+                    {{
+                      detail.pkg?.updatedAt ? ($safeNavigationMigration(detail.pkg?.updatedAt) | date: "medium") : "-"
+                    }}
                   </app-metadata-item>
                   <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">
                     {{ sshStatus$ | async }}
                   </app-metadata-item>
                 </div>
                 <div class="flex-1">
-                  <app-metadata-item class="mt-0" icon="touch_app" label="App State">{{ detail.app.state }}</app-metadata-item>
-                  <app-metadata-item icon="card_travel" label="Package State">{{ detail.pkg?.state ?? '-' }}
+                  <app-metadata-item class="mt-0" icon="touch_app" label="App State">{{
+                    detail.app.state
+                  }}</app-metadata-item>
+                  <app-metadata-item icon="card_travel" label="Package State"
+                    >{{ detail.pkg?.state ?? "-" }}
                   </app-metadata-item>
                   <app-metadata-item icon="service" iconFont="stratos-icons" label="Services">
-                    {{ data.serviceBindingsCount() || '0' }}
+                    {{ data.serviceBindingsCount() || "0" }}
                   </app-metadata-item>
                   <app-metadata-item icon="route" iconFont="stratos-icons" label="Routes">
-                    {{ detail.app.routes?.length || '0' }}
+                    {{ detail.app.routes?.length || "0" }}
                   </app-metadata-item>
                 </div>
               </div>
@@ -78,8 +86,9 @@
             </div>
             <div class="card-body">
               <app-metadata-item icon="title" label="Name">
-                <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid]"
-                  title="CF Endpoint">{{ (applicationService.application$ | async)?.cf?.name || applicationService.cfGuid }}</a>
+                <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid]" title="CF Endpoint">{{
+                  (applicationService.application$ | async)?.cf?.name || applicationService.cfGuid
+                }}</a>
               </app-metadata-item>
               <!-- Organization and Space rows render unconditionally so the
                    Cloud Foundry card always disambiguates which (cnsi, org,
@@ -89,7 +98,9 @@
                    org/space signals haven't emitted yet. -->
               <app-metadata-item iconFont="stratos-icons" icon="organization" label="Organization">
                 @if (data.org(); as appOrg) {
-                  <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.guid]">{{ appOrg.name }}</a>
+                  <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.guid]">{{
+                    appOrg.name
+                  }}</a>
                 } @else {
                   —
                 }
@@ -97,7 +108,17 @@
               <app-metadata-item iconFont="stratos-icons" icon="virtual_space" label="Space">
                 @if (data.org(); as appOrg) {
                   @if (data.space(); as appSpace) {
-                    <a [routerLink]="['/cloud-foundry/' + applicationService.cfGuid + '/organizations/' + appOrg.guid + '/spaces/' + appSpace.guid]">{{ appSpace.name }}</a>
+                    <a
+                      [routerLink]="[
+                        '/cloud-foundry/' +
+                          applicationService.cfGuid +
+                          '/organizations/' +
+                          appOrg.guid +
+                          '/spaces/' +
+                          appSpace.guid,
+                      ]"
+                      >{{ appSpace.name }}</a
+                    >
                   } @else {
                     —
                   }
@@ -109,7 +130,9 @@
               </app-metadata-item>
               @if (data.org()) {
                 <app-metadata-item icon="keyboard" label="CLI Info" class="mt-6">
-                  <a [routerLink]="['/applications/' + applicationService.cfGuid + '/' + detail.app.guid + '/cli']">View</a>
+                  <a [routerLink]="['/applications/' + applicationService.cfGuid + '/' + detail.app.guid + '/cli']"
+                    >View</a
+                  >
                 </app-metadata-item>
               }
             </div>
@@ -126,15 +149,18 @@
             </div>
             <div class="card-body">
               <app-metadata-item icon="build" label="Buildpack">
-                <app-view-buildpack [buildPack]="detail.droplet?.buildpacks?.[0]?.name || detail.droplet?.buildpacks?.[0]?.detectOutput">
+                <app-view-buildpack
+                  [buildPack]="detail.droplet?.buildpacks?.[0]?.name || detail.droplet?.buildpacks?.[0]?.detectOutput"
+                >
                 </app-view-buildpack>
               </app-metadata-item>
-              <app-metadata-item icon="code" label="Stack">{{ detail.droplet?.stack || detail.app.stackName || '-' }}
+              <app-metadata-item icon="code" label="Stack"
+                >{{ detail.droplet?.stack || detail.app.stackName || "-" }}
               </app-metadata-item>
             </div>
           </div>
         </app-tile>
-        @if ((deploySource$ | async); as deploySource) {
+        @if (deploySource$ | async; as deploySource) {
           <app-tile id="app-build-tab-deployment-info">
             <div class="card">
               <div class="card-header">
@@ -142,24 +168,27 @@
               </div>
               <div class="card-body">
                 @switch (deploySource.type) {
-                  @case ('giturl') {
+                  @case ("giturl") {
                     <app-metadata-item icon="code" label="Git Url">
-                      <div title="{{ deploySource.branch + ' ' + (deploySource.commit | slice:0:8)}}">
+                      <div title="{{ deploySource.branch + ' ' + (deploySource.commit | slice: 0 : 8) }}">
                         {{ data.stratosProject()?.deploySource?.url }}
                       </div>
                     </app-metadata-item>
                   }
-                  @case ('gitscm') {
+                  @case ("gitscm") {
                     <div class="flex">
                       <div class="flex-1">
-                        <app-metadata-item class="mt-0" [iconFont]="deploySource.icon.fontName" [icon]="deploySource.icon.iconName"
-                          label="SCM">
-                          {{deploySource.label}}
+                        <app-metadata-item
+                          class="mt-0"
+                          [iconFont]="deploySource.icon.fontName"
+                          [icon]="deploySource.icon.iconName"
+                          label="SCM"
+                        >
+                          {{ deploySource.label }}
                         </app-metadata-item>
                         <app-metadata-item iconFont="stratos-icons" icon="repositories" label="Repository">
                           @if (!!(gitRepo$ | async)) {
-                            <a href="{{ (gitRepo$ | async)?.html_url }}"
-                              rel="noopener noreferrer" target="_blank">
+                            <a href="{{ (gitRepo$ | async)?.html_url }}" rel="noopener noreferrer" target="_blank">
                               {{ deploySource.project }}
                             </a>
                           } @else {
@@ -170,47 +199,45 @@
                       <div class="flex-1">
                         <app-metadata-item class="mt-0" icon="call_split" label="Branch">
                           @if (!!(gitRepo$ | async)) {
-                            <a href="{{ (gitRepo$ | async)?.html_url }}/tree/{{ deploySource.branch }}" rel="noopener noreferrer"
-                              target="_blank">
-                              {{ deploySource.branch}}
+                            <a
+                              href="{{ (gitRepo$ | async)?.html_url }}/tree/{{ deploySource.branch }}"
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              {{ deploySource.branch }}
                             </a>
                           } @else {
-                            {{ deploySource.branch}}
+                            {{ deploySource.branch }}
                           }
                         </app-metadata-item>
                         <app-metadata-item icon="show_chart" label="Commit">
                           @if (!!deploySource.commitURL) {
-                            <a href="{{ deploySource.commitURL }}"
-                              rel="noopener noreferrer" target="_blank">
-                              {{ deploySource.commit | slice:0:8 }}
+                            <a href="{{ deploySource.commitURL }}" rel="noopener noreferrer" target="_blank">
+                              {{ deploySource.commit | slice: 0 : 8 }}
                             </a>
                           } @else {
-                            {{ deploySource.commit | slice:0:8 }}
+                            {{ deploySource.commit | slice: 0 : 8 }}
                           }
                         </app-metadata-item>
                       </div>
                     </div>
                   }
-                  @case ('filefolder') {
-                    <app-metadata-item icon="folder" label="Folder">
-                      Deployed from local folder
-                    </app-metadata-item>
+                  @case ("filefolder") {
+                    <app-metadata-item icon="folder" label="Folder"> Deployed from local folder </app-metadata-item>
                   }
-                  @case ('archive') {
+                  @case ("archive") {
                     <app-metadata-item icon="insert_drive_file" label="File">
                       Deployed from local file
                     </app-metadata-item>
                   }
-                  @case ('docker') {
-                    <app-metadata-item iconFont="stratos-icons" icon="container"
-                      label="Docker Image">
+                  @case ("docker") {
+                    <app-metadata-item iconFont="stratos-icons" icon="container" label="Docker Image">
                       @if (deploySource.dockerUrl) {
-                        <a href="{{ deploySource.dockerUrl }}"
-                          rel="noopener noreferrer" target="_blank">
-                          {{deploySource.dockerImage}}
+                        <a href="{{ deploySource.dockerUrl }}" rel="noopener noreferrer" target="_blank">
+                          {{ deploySource.dockerImage }}
                         </a>
                       } @else {
-                        {{deploySource.dockerImage}}
+                        {{ deploySource.dockerImage }}
                       }
                     </app-metadata-item>
                   }
@@ -230,10 +257,14 @@
             </div>
             <div class="card-body">
               <app-metadata-item icon="fingerprint" label="Application GUID" [clipboardValue]="detail.app.guid">
-                {{ detail.app.guid }}</app-metadata-item>
+                {{ detail.app.guid }}</app-metadata-item
+              >
               <app-metadata-item icon="chevron_right" label="Command">
-                {{ detail.process?.command || '-' }}</app-metadata-item>
-              <app-metadata-item icon="power" label="Ports">{{ detail.process?.ports?.length ? detail.process?.ports?.join(', ') : '-' }}</app-metadata-item>
+                {{ detail.process?.command || "-" }}</app-metadata-item
+              >
+              <app-metadata-item icon="power" label="Ports">{{
+                detail.process?.ports?.length ? detail.process?.ports?.join(", ") : "-"
+              }}</app-metadata-item>
             </div>
           </div>
         </app-tile>
@@ -244,12 +275,15 @@
             </div>
             <div class="card-body">
               <app-metadata-item icon="favorite_border" label="Health Check Type">
-                {{ detail.process?.healthCheckType ?? '-' }}</app-metadata-item>
+                {{ detail.process?.healthCheckType ?? "-" }}</app-metadata-item
+              >
               <app-metadata-item icon="schedule" label="Health Check Timeout">
-                {{ detail.process?.healthCheckTimeoutSeconds | uptime }}</app-metadata-item>
-              @if (detail.process?.healthCheckType === 'http') {
-                <app-metadata-item icon="http"
-                  label="Health Check HTTP Endpoint">{{ detail.process?.healthCheckEndpoint }}</app-metadata-item>
+                {{ $safeNavigationMigration(detail.process?.healthCheckTimeoutSeconds) | uptime }}</app-metadata-item
+              >
+              @if (detail.process?.healthCheckType === "http") {
+                <app-metadata-item icon="http" label="Health Check HTTP Endpoint">{{
+                  detail.process?.healthCheckEndpoint
+                }}</app-metadata-item>
               }
             </div>
           </div>

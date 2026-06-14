@@ -1,4 +1,12 @@
-import { Injectable, Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import {
+  Injectable,
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  ChangeDetectionStrategy,
+} from "@angular/core";
 
 export interface JsonSchemaFormData {
   schema?: any;
@@ -15,23 +23,29 @@ export interface JsonSchemaFormConfig {
 }
 
 @Component({
-  selector: 'json-schema-form',
+  selector: "json-schema-form",
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="json-schema-form">
-      <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+      <div
+        class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4"
+      >
         <p class="font-bold">Notice:</p>
-        <p>JSON Schema Form component has been temporarily replaced. Please implement form fields manually or use Angular Reactive Forms.</p>
+        <p>
+          JSON Schema Form component has been temporarily replaced. Please
+          implement form fields manually or use Angular Reactive Forms.
+        </p>
       </div>
       <ng-content></ng-content>
     </div>
-  `
+  `,
 })
 export class TailwindJsonSchemaFormComponent implements OnInit {
   @Input() schema: any;
   @Input() data: any;
   @Input() layout!: any[];
   @Input() options: any;
-  @Input() framework: string = 'tailwind';
+  @Input() framework: string = "tailwind";
 
   @Output() onChanges = new EventEmitter<any>();
   @Output() onSubmit = new EventEmitter<any>();
@@ -61,21 +75,20 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class TailwindJsonSchemaFormService {
-
   buildFormData(schema: any, data?: any, layout?: any[]): JsonSchemaFormData {
     return {
       schema,
       data: data || {},
       layout: layout || [],
-      options: {}
+      options: {},
     };
   }
 
   validateSchema(schema: any): boolean {
-    return schema && typeof schema === 'object';
+    return schema && typeof schema === "object";
   }
 
   validateData(_data: any, _schema: any): boolean {

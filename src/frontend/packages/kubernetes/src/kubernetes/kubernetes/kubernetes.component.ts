@@ -1,28 +1,30 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
-
-import { SignalListComponent } from '@stratosui/core';
-
-import { EndpointCardComponent } from '../../../../core/src/shared/components/endpoint-list/endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from '../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers';
-import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
+import { CommonModule } from "@angular/common";
 import {
-  KubernetesEndpointsSignalConfigService,
-} from '../list-types/kubernetes-endpoints/kubernetes-endpoints-signal-config.service';
-import { KubernetesService } from '../services/kubernetes.service';
+  Component,
+  OnDestroy,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import { Router } from "@angular/router";
+import { Observable } from "rxjs";
+import { take, filter, map } from "rxjs/operators";
+
+import { SignalListComponent } from "@stratosui/core";
+
+import { EndpointCardComponent } from "../../../../core/src/shared/components/endpoint-list/endpoint-card/endpoint-card.component";
+import { EndpointListHelper } from "../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers";
+import { PageHeaderComponent } from "../../../../core/src/shared/components/page-header/page-header.component";
+import { KubernetesEndpointsSignalConfigService } from "../list-types/kubernetes-endpoints/kubernetes-endpoints-signal-config.service";
+import { KubernetesService } from "../services/kubernetes.service";
 
 @Component({
-  selector: 'app-kubernetes',
-  templateUrl: './kubernetes.component.html',
+  selector: "app-kubernetes",
+  templateUrl: "./kubernetes.component.html",
 
-  providers: [
-    EndpointListHelper,
-    KubernetesService,
-  ],
+  providers: [EndpointListHelper, KubernetesService],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     PageHeaderComponent,
@@ -31,7 +33,6 @@ import { KubernetesService } from '../services/kubernetes.service';
   ],
 })
 export class KubernetesComponent implements OnInit, OnDestroy {
-
   connectedEndpoints$: Observable<number>;
   private kubeService = inject(KubernetesService);
   private router = inject(Router);
@@ -42,15 +43,15 @@ export class KubernetesComponent implements OnInit, OnDestroy {
   // which keeps the kebab menu suppressed (matching the legacy
   // `dsEndpointType: 'k8s'` flag) and leaves cardStatus$ unset
   // (matching the legacy "no per-row error indicator" behaviour).
-  readonly endpointsSignalConfig = inject(KubernetesEndpointsSignalConfigService);
-
+  readonly endpointsSignalConfig = inject(
+    KubernetesEndpointsSignalConfigService,
+  );
 
   constructor() {
-
     this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
-      map(kubeEndpoints => {
+      map((kubeEndpoints) => {
         const connectedEndpoints = kubeEndpoints.filter(
-          c => c.connectionStatus === 'connected'
+          (c) => c.connectionStatus === "connected",
         );
         const hasOne = connectedEndpoints.length === 1;
         if (hasOne) {
@@ -58,14 +59,13 @@ export class KubernetesComponent implements OnInit, OnDestroy {
           // page. Was previously a `RouterNav` ngrx action — flipped to
           // the Angular Router directly so this component sheds its
           // last ngrx/store import alongside the list config migration.
-          void this.router.navigate(['kubernetes', connectedEndpoints[0].guid]);
+          void this.router.navigate(["kubernetes", connectedEndpoints[0].guid]);
         }
         return connectedEndpoints.length;
       }),
-      filter(connectedEndpointsCount => connectedEndpointsCount > 1),
-      take(1)
+      filter((connectedEndpointsCount) => connectedEndpointsCount > 1),
+      take(1),
     );
-
   }
 
   ngOnInit(): void {

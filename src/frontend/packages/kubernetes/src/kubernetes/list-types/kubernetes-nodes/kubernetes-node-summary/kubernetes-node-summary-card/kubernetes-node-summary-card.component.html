@@ -5,28 +5,47 @@
     </div>
     <div class="card-content">
       <div class="kubernetes-node-summary-card__content">
-        <app-metadata-item icon="title" label="Name">{{ (kubeNodeService.nodeEntity$ | async)?.metadata.name }}
+        <app-metadata-item icon="title" label="Name"
+          >{{ (kubeNodeService.nodeEntity$ | async)?.metadata.name }}
         </app-metadata-item>
         <app-metadata-item icon="today" label="Created">
-        {{ (kubeNodeService.nodeEntity$ | async)?.metadata.creationTimestamp | date:'medium' }}</app-metadata-item>
+          {{
+            $safeNavigationMigration((kubeNodeService.nodeEntity$ | async)?.metadata.creationTimestamp) | date: "medium"
+          }}</app-metadata-item
+        >
         @if (caaspNode$ | async; as caaspNode) {
           @if (caaspNode.version) {
-            <app-metadata-item icon="info_outline" label="CaaSP Version">
-            {{ caaspNode.version }}</app-metadata-item>
+            <app-metadata-item icon="info_outline" label="CaaSP Version"> {{ caaspNode.version }}</app-metadata-item>
           }
-          <app-kubernetes-node-condition [inverse]="true" [subtle]="false" type="no-yes" condition="CaaspUpdates"
-            [overrideCondition$]="caaspNodeUpdates$" [paddingTop]="'0'">
+          <app-kubernetes-node-condition
+            [inverse]="true"
+            [subtle]="false"
+            type="no-yes"
+            condition="CaaspUpdates"
+            [overrideCondition$]="caaspNodeUpdates$"
+            [paddingTop]="'0'"
+          >
           </app-kubernetes-node-condition>
-          <app-kubernetes-node-condition [inverse]="true" [subtle]="false" type="no-yes" condition="CaaspDisruptive"
-            [overrideCondition$]="caaspNodeDisruptive$" [paddingTop]="'12px'">
+          <app-kubernetes-node-condition
+            [inverse]="true"
+            [subtle]="false"
+            type="no-yes"
+            condition="CaaspDisruptive"
+            [overrideCondition$]="caaspNodeDisruptive$"
+            [paddingTop]="'12px'"
+          >
           </app-kubernetes-node-condition>
-          <app-kubernetes-node-condition [inverse]="true" [subtle]="false" type="no-yes" condition="CaaspSecurity"
-            [overrideCondition$]="caaspNodeSecurity$" [paddingTop]="'12px'">
+          <app-kubernetes-node-condition
+            [inverse]="true"
+            [subtle]="false"
+            type="no-yes"
+            condition="CaaspSecurity"
+            [overrideCondition$]="caaspNodeSecurity$"
+            [paddingTop]="'12px'"
+          >
           </app-kubernetes-node-condition>
         }
-
       </div>
     </div>
   </div>
-
 </div>

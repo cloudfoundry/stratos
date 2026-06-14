@@ -5,8 +5,12 @@
     </app-card-header>
     <app-card-content>
       <div class="app-metadata">
-        <app-metadata-item icon="person" label="Account Username">{{ cfEndpointService.endpoint()?.entity.user.name }}</app-metadata-item>
-        <app-metadata-item icon="person" label="Administrator">{{ isAdmin(cfEndpointService.endpoint()?.entity.user) }}</app-metadata-item>
+        <app-metadata-item icon="person" label="Account Username">{{
+          cfEndpointService.endpoint()?.entity.user.name
+        }}</app-metadata-item>
+        <app-metadata-item icon="person" label="Administrator">{{
+          isAdmin($safeNavigationMigration(cfEndpointService.endpoint()?.entity.user))
+        }}</app-metadata-item>
       </div>
     </app-card-content>
   </app-card>
