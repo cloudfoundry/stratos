@@ -110,7 +110,7 @@ export class LocalAccountWizardComponent implements OnInit {
 
   next = () => {
     const data: LocalAdminSetupData = {
-      local_admin_password: this.passwordForm.get('adminPassword').value,
+      local_admin_password: this.passwordForm.controls.adminPassword.value,
     };
 
     this.applyingSetup.set(true);

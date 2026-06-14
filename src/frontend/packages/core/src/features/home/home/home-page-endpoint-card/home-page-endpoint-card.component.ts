@@ -59,14 +59,16 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   @Input() endpoint!: EndpointModel;
 
-  pLayout: HomePageCardLayout;
+  // strict: assigned by computeEffectiveLayout via the @Input set layout accessor
+  pLayout!: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
     return this.pLayout;
   }
 
   // Raw grid layout before columnSpan adjustment
-  private rawLayout: HomePageCardLayout;
+  // strict: assigned by the @Input set layout accessor; reads are guarded with if (this.rawLayout)
+  private rawLayout!: HomePageCardLayout;
 
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
@@ -76,30 +78,35 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
     this.updateLayout();
   }
 
-  @Output() loaded = new EventEmitter<HomePageEndpointCardComponent>();
+  @Output() loaded = new EventEmitter<void>();
 
-  favorites$: Observable<any>;
+  // strict: assigned in ngOnInit before the template subscribes
+  favorites$!: Observable<any>;
 
-  private _layout = signal<HomePageCardLayout>(null);
+  private _layout = signal<HomePageCardLayout | null>(null);
   public layoutSignal = this._layout.asReadonly();
-  public layout$: Observable<HomePageCardLayout>;
+  public layout$: Observable<HomePageCardLayout | null>;
 
-  links$: Observable<LinkMetadata>;
+  // strict: assigned in ngOnInit before the template subscribes
+  links$!: Observable<LinkMetadata>;
 
   entity: any;
 
-  definition: IStratosEndpointDefinition<EntityCatalogSchemas>;
+  // strict: assigned in ngOnInit when the endpoint entity resolves; template gates on it via @if (definition)
+  definition!: IStratosEndpointDefinition<EntityCatalogSchemas>;
 
-  favorite: UserFavoriteEndpoint;
+  // getFavoriteEndpointFromEntity returns null when the endpoint has no cnsi_type/guid
+  favorite: UserFavoriteEndpoint | null = null;
 
-  public link!: string;
+  public link: string | null = null;
 
   // Status = 0 OK, 1 Loading, 2 Error
   private _status = signal<Status>(Status.OK);
   public statusSignal = this._status.asReadonly();
   public status$: Observable<Status>;
 
-  private ref: ComponentRef<HomePageEndpointCard>;
+  // strict: assigned by createCard (ngAfterViewInit) before any card-instance read; reads are guarded with if (this.ref)
+  private ref!: ComponentRef<HomePageEndpointCard>;
   private sub!: Subscription;
 
   private canLoad = false;
@@ -122,7 +129,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
 
   ngAfterViewInit() {
     // Dynamically load the component for the Home Card for this endopoint
-    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type);
+    // strict: cnsi_type is populated on every bound endpoint; '' default keeps the lookup well-formed
+    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type ?? '', this.endpoint.sub_type);
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
@@ -131,26 +139,28 @@ export class HomePageEndpointCardComponent implements OnInit, OnDestroy, AfterVi
   }
 
   ngOnInit() {
-    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type);
+    // strict: cnsi_type/guid are populated on every bound endpoint; '' default keeps the lookups well-formed
+    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type ?? '');
     // Favorites for this endpoint
-    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid);
-    this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type, this.endpoint.sub_type);
+    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid ?? '');
+    this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type ?? '', this.endpoint.sub_type);
     if (this.entity) {
       this.definition = this.entity.definition;
       this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
-      this.fullView = this.definition?.homeCard?.fullView;
-      this.link = this.favorite.getLink();
+      this.fullView = this.definition?.homeCard?.fullView ?? false;
+      this.link = this.favorite ? this.favorite.getLink() : null;
       // Recompute effective layout now that definition is available
       this.computeEffectiveLayout();
       this.updateLayout();
     }
 
     this.links$ = combineLatest([this.favorites$, this.layout$]).pipe(
-      filter(([_favs, layout]) => !!layout),
+      filter((pair): pair is [any, HomePageCardLayout] => !!pair[1]),
       map(([favs, layout]) => {
         // Get the list of shortcuts for the endpoint for the given endpoint ID
         const shortcutsFn = this.definition?.homeCard?.shortcuts;
-        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid) || [] : [];
+        // strict: guid is populated on every bound endpoint; '' default keeps the lookup well-formed
+        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid ?? '') || [] : [];
         let shortcuts = allShortcuts;
         const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
         const totalShortcuts = allShortcuts.length;

@@ -37,8 +37,11 @@ export interface ConnectEndpointData {
 
 // Why is this here instead of somewhere more common? Answer - Because it'd create circulate dependencies due to reliance on entityCatalog
 export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
+  if (!endpoint.cnsi_type) {
+    return endpoint.connectionStatus === 'connected';
+  }
   const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
-  return endpoint.connectionStatus === 'connected' || epType.unConnectable;
+  return endpoint.connectionStatus === 'connected' || !!epType.unConnectable;
 };
 
 export class ConnectEndpointService {

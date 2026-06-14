@@ -15,23 +15,23 @@ import { MD5 } from './md5';
 })
 export class UserAvatarComponent {
 
-  public initials: string;
-  public gravatar: string;
+  public initials: string | null = null;
+  public gravatar: string | null = null;
 
   private canUseGravatar = false;
-  private userInfo: UserProfileInfo = null;
+  private userInfo: UserProfileInfo | null = null;
 
   @Input() size = 'small';
   @Input() color = 'normal';
 
   @Input()
-  set allowGravatar(allowed: boolean) {
-    this.canUseGravatar = allowed;
+  set allowGravatar(allowed: boolean | null) {
+    this.canUseGravatar = !!allowed;
     this.update();
   }
 
   @Input()
-  set user(user: UserProfileInfo) {
+  set user(user: UserProfileInfo | null) {
     this.userInfo = user;
     this.update();
   }

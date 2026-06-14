@@ -18,7 +18,7 @@ export class MultiActionListEntity {
     }
     return entity;
   }
-  static getEntityKey(entity: MultiActionListEntity | any, defaultEntityKey: string = null) {
+  static getEntityKey(entity: MultiActionListEntity | any, defaultEntityKey: string | null = null) {
     if (entity instanceof MultiActionListEntity) {
       return entity.entityKey;
     }

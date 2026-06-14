@@ -20,8 +20,8 @@ import { NoContentMessageComponent } from '../no-content-message/no-content-mess
 class RenderableRecent {
   public mostRecentHit?: Date;
   public subText$: Observable<string>;
-  public icon: string;
-  public iconFont: string;
+  public icon?: string;
+  public iconFont?: string;
   constructor(
     readonly entity: IRecentlyVisitedEntity,
     endpointEntities$: Observable<Record<string, { name?: string }>>,

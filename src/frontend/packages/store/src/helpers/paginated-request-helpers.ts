@@ -110,9 +110,11 @@ export function flattenPagination<T, C>(
       const allResults = flattener.getTotalResults(firstResData);
       if (maxCount) {
         // Note - This isn't ever being used, maxCount is always undefined. See #4208
-        actionDispatcher(
-          new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey)
-        );
+        if (entityType && endpointType && paginationKey) {
+          actionDispatcher(
+            new UpdatePaginationMaxedState(maxCount, allResults, entityType, endpointType, paginationKey, forcedEntityKey)
+          );
+        }
         if (allResults > maxCount) {
           // If we have too many results only return basic first page information
           return forkJoin([flattener.clearResults(firstResData, allResults)]);

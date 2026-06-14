@@ -37,9 +37,11 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   angularVersion = VERSION.full;
 
   // VCS URLs (GitHub only — derived from stratos meta tags)
-  gitHubRepository: string;
-  gitCommitLink: string;
-  gitBranchLink: string;
+  // gitHubRepository is always assigned by initVcsLinks() in ngOnInit; the
+  // commit/branch links are only set when the corresponding info is present.
+  gitHubRepository!: string; // strict: assigned in initVcsLinks() during ngOnInit
+  gitCommitLink?: string;
+  gitBranchLink?: string;
 
   @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
   @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;
@@ -63,12 +65,12 @@ export class AboutPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => session.user && session.user.admin)
+      map(session => !!(session.user && session.user.admin))
     );
 
     this.versionNumber$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const versionNumber = sessionData.version.proxy_version;
+        const versionNumber = sessionData.version?.proxy_version ?? '';
         return versionNumber.split('-')[0];
       })
     );
@@ -103,12 +105,12 @@ export class AboutPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  backendCommitLink(commit: string): string {
+  backendCommitLink(commit: string | undefined): string | null {
     if (!this.gitHubRepository || !commit) { return null; }
     return `https://github.com/${this.gitHubRepository}/commit/${commit}`;
   }
 
-  backendBranchLink(branch: string): string {
+  backendBranchLink(branch: string | undefined): string | null {
     if (!this.gitHubRepository || !branch || branch === 'HEAD') { return null; }
     return `https://github.com/${this.gitHubRepository}/tree/${branch}`;
   }

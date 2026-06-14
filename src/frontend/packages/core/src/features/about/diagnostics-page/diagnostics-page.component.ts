@@ -50,34 +50,36 @@ export class DiagnosticsPageComponent implements OnInit {
   angularVersion = VERSION.full;
   buildInfo = BUILD_INFO;
 
-  public gitProject: string;
-  public gitBranch: string;
-  public gitCommit: string;
-  public buildDate: string;
-  public gitHubRepository: string;
-  public gitHubRepositoryLink: string;
-  public gitBranchLink: string;
-  public gitCommitLink: string;
+  // These are populated by ngOnInit before the template reads them.
+  public gitProject!: string; // strict: assigned in ngOnInit
+  public gitBranch: string | null = null; // may be cleared when branch is 'HEAD'
+  public gitCommit!: string; // strict: assigned in ngOnInit
+  public buildDate!: string; // strict: assigned in ngOnInit
+  public gitHubRepository!: string; // strict: assigned in ngOnInit
+  // Links are only built when the corresponding info is present.
+  public gitHubRepositoryLink?: string;
+  public gitBranchLink?: string;
+  public gitCommitLink?: string;
 
   ngOnInit() {
 
     const helmLastModifiedRegEx = /seconds:([0-9]*)/;
 
     this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => session.user && session.user.admin)
+      map(session => !!(session.user && session.user.admin))
     );
 
     this.versionNumber$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const versionNumber = sessionData.version.proxy_version;
+        const versionNumber = sessionData.version?.proxy_version ?? '';
         return versionNumber.split('-')[0];
       })
     );
 
     this.helmLastModified$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const lastModified = sessionData.diagnostics.helmLastModified;
-        const match = helmLastModifiedRegEx.exec(lastModified);
+        const lastModified = sessionData.diagnostics?.helmLastModified;
+        const match = lastModified ? helmLastModifiedRegEx.exec(lastModified) : null;
         if (match && match.length === 2) {
           return new Date(parseInt(match[1], 10) * 1000);
         }

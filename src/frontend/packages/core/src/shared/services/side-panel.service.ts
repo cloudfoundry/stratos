@@ -33,7 +33,9 @@ export class SidePanelService {
   private _previewMode = signal<SidePanelMode>(SidePanelMode.Normal);
   public previewMode = this._previewMode.asReadonly();
 
-  private container: ViewContainerRef;
+  // Absent until a host component registers via setContainer, and cleared
+  // again by unsetContainer; methods guard before use.
+  private container: ViewContainerRef | undefined;
 
   constructor() {
     this.setupRouterListener();
@@ -102,8 +104,12 @@ export class SidePanelService {
 
   render(
     component: object,
-    props: { [key: string]: any },
+    props?: { [key: string]: any },
   ) {
+    if (!this.container) {
+      throw new Error('SidePanelService: container must be set');
+    }
+
     if (this.container.length) {
       this.container.remove(0);
     }
@@ -116,6 +122,10 @@ export class SidePanelService {
   }
 
   public clear() {
+    if (!this.container) {
+      throw new Error('SidePanelService: container must be set');
+    }
+
     this.container.clear();
     this._opened.set(false);
   }

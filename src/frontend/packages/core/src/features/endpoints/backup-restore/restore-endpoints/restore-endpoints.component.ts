@@ -80,7 +80,7 @@ export class RestoreEndpointsComponent {
 
   onFileChange(event: Event) {
     const files = getEventFiles(event);
-    if (!files.length) {
+    if (!files || !files.length) {
       return;
     }
     const file = files[0];

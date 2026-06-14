@@ -37,7 +37,7 @@ export class BackupRestoreEndpointsComponent {
   signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
   set selectedTile(tile: ITileConfig<IAppTileData>) {
-    if (tile) {
+    if (tile && tile.data) {
       const url = 'endpoints/backup-restore/' + tile.data.type;
       this.router.navigate(url.split('/'));
     }

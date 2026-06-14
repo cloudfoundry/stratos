@@ -1,3 +1,5 @@
+import { expect } from 'vitest';
+
 import { ActionOrchestrator } from './action-orchestrator';
 import { EntityRequestAction } from '../../types/request.types';
 import { PaginatedAction } from '../../types/pagination.types';

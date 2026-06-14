@@ -97,13 +97,13 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
     valid: this.uaaFormValid.asReadonly(),
     submit: async () => {
       void this.uaaSetupData.checkScopes({
-        uaa_endpoint: this.uaaForm.get('apiUrl').value,
-        console_client: this.uaaForm.get('clientId').value,
-        password: this.uaaForm.get('adminPassword').value,
-        skip_ssl_validation: this.uaaForm.get('skipSSL').value,
-        username: this.uaaForm.get('adminUsername').value,
-        console_client_secret: this.uaaForm.get('clientSecret').value,
-        use_sso: this.uaaForm.get('useSSO').value,
+        uaa_endpoint: this.uaaForm.controls.apiUrl.value,
+        console_client: this.uaaForm.controls.clientId.value,
+        password: this.uaaForm.controls.adminPassword.value,
+        skip_ssl_validation: this.uaaForm.controls.skipSSL.value,
+        username: this.uaaForm.controls.adminUsername.value,
+        console_client_secret: this.uaaForm.controls.clientSecret.value,
+        use_sso: this.uaaForm.controls.useSSO.value,
         console_admin_scope: ''
       });
       const state = await firstValueFrom(
@@ -133,13 +133,13 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
     valid: signal(true).asReadonly(),
     submit: async () => {
       void this.uaaSetupData.saveConfig({
-        uaa_endpoint: this.uaaForm.get('apiUrl').value,
-        console_client: this.uaaForm.get('clientId').value,
-        password: this.uaaForm.get('adminPassword').value,
-        skip_ssl_validation: this.uaaForm.get('skipSSL').value,
-        username: this.uaaForm.get('adminUsername').value,
-        console_client_secret: this.uaaForm.get('clientSecret').value,
-        use_sso: this.uaaForm.get('useSSO').value,
+        uaa_endpoint: this.uaaForm.controls.apiUrl.value,
+        console_client: this.uaaForm.controls.clientId.value,
+        password: this.uaaForm.controls.adminPassword.value,
+        skip_ssl_validation: this.uaaForm.controls.skipSSL.value,
+        username: this.uaaForm.controls.adminUsername.value,
+        console_client_secret: this.uaaForm.controls.clientSecret.value,
+        use_sso: this.uaaForm.controls.useSSO.value,
         console_admin_scope: this.selectedScope
       });
 

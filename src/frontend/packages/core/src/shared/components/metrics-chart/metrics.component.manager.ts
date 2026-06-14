@@ -41,7 +41,7 @@ export class MetricsChartManager {
     if (!timeOrdered || !timeOrdered.length) {
       return timeOrdered;
     }
-    return timeOrdered.reduce((allSeries, series) => {
+    return timeOrdered.reduce<ChartSeries[]>((allSeries, series) => {
       let pos = 0;
       const newSeries = [];
       for (let t = start; t <= end; t += step) {
@@ -61,6 +61,7 @@ export class MetricsChartManager {
       }
       allSeries.push({
         name: series.name,
+        metadata: series.metadata,
         series: newSeries
       });
       return allSeries;

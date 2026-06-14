@@ -41,6 +41,10 @@ export type EntityActionBuilderEntityConfig = EntityCatalogEntityConfig & Action
 
 export const extractEntityCatalogEntityConfig = (ecec: Partial<EntityCatalogEntityConfig>): EntityCatalogEntityConfig => {
   const { entityType, endpointType, subType, schemaKey } = ecec;
+  // strict: callers always supply a config with entityType + endpointType; an absent one is a programming error
+  if (entityType === undefined || endpointType === undefined) {
+    throw new Error('extractEntityCatalogEntityConfig requires both entityType and endpointType');
+  }
   return { entityType, endpointType, subType, schemaKey };
 };
 
@@ -226,7 +230,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   // TODO This should be used in the entities schema.
   getGuid(entity: Y): string;
-  getLink?(favorite: UserFavorite<T>): string;
+  getLink?(favorite: UserFavorite<T>): string | null;
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string,

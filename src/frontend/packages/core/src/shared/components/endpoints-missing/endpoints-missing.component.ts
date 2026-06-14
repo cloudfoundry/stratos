@@ -36,7 +36,6 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
 
   protected noneRegisteredText: EndpointMissingMessageParts = {
     firstLine: 'There are no registered endpoints',
-    toolbarLink: null,
     secondLine: {
       text: 'Use the Endpoints view to register'
     },
@@ -67,13 +66,13 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
     }
   }
   ngAfterViewInit() {
-    this.noContent$ = observableCombineLatest(
+    this.noContent$ = observableCombineLatest([
       this.haveRegistered$,
       this.haveConnected$,
       this.endpointsService.disablePersistenceFeatures$
-    ).pipe(
+    ]).pipe(
       delay(1),
-      map(([hasRegistered, hasConnected, disablePersistenceFeatures]) => {
+      map(([hasRegistered, hasConnected, disablePersistenceFeatures]): EndpointMissingMessageParts | null => {
         if (!hasRegistered) {
           return this.removeAdvice(this.noneRegisteredText, disablePersistenceFeatures);
         }
@@ -81,8 +80,9 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
           return this.removeAdvice(this.noneConnectedText, disablePersistenceFeatures);
         }
         return null;
-      })
-    ).pipe(startWith(null));
+      }),
+      startWith<EndpointMissingMessageParts | null>(null)
+    );
   }
 
   private removeAdvice(messageParts: EndpointMissingMessageParts, disablePersistenceFeatures: boolean) {

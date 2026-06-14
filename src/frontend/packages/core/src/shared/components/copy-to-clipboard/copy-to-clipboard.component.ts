@@ -33,7 +33,7 @@ export class CopyToClipboardComponent implements OnInit {
     } finally { /* intentionally empty */ }
   }
 
-  copyToClipboard(event: MouseEvent = null) {
+  copyToClipboard(event: MouseEvent | null = null) {
     if (event) {
       event.stopPropagation();
     }

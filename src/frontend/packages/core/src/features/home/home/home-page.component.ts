@@ -91,7 +91,8 @@ export class HomePageComponent implements OnInit {
     const favGroups: IUserFavoritesGroups = fav ? fav[0] : ({} as IUserFavoritesGroups);
     const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
     return ordered.filter(ep => {
-      const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
+      const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
       const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
       return connected;
     });
@@ -99,10 +100,10 @@ export class HomePageComponent implements OnInit {
 
   public haveThingsToShow: Signal<boolean> = computed(() => this.endpoints().length > 0);
 
-  private _layout = signal<HomePageCardLayout>(null);
+  private _layout = signal<HomePageCardLayout | null>(null);
   public layout = this._layout.asReadonly();
 
-  private _showMode = signal<boolean>(null);
+  private _showMode = signal<boolean | null>(null);
   public showAllEndpoints = false;
 
   public columns = 1;
@@ -130,7 +131,9 @@ export class HomePageComponent implements OnInit {
       filter(haveRegistered => haveRegistered),
       take(1),
       switchMap(() => this.endpointsService.connectedEndpoints$),
-      map(endpoints => Object.values(endpoints).map(endpoint => endpoint.guid))
+      map(endpoints => Object.values(endpoints)
+        .map(endpoint => endpoint.guid)
+        .filter((guid): guid is string => !!guid))
     );
 
     // Redirect to /applications when persistence features are disabled
@@ -222,7 +225,11 @@ export class HomePageComponent implements OnInit {
     const childFavs: EndpointModel[] = [];
     const rest: EndpointModel[] = [];
     const epMap: Record<string, EndpointModel> = {};
-    endpoints.forEach(ep => epMap[ep.guid] = ep);
+    endpoints.forEach(ep => {
+      if (ep.guid) {
+        epMap[ep.guid] = ep;
+      }
+    });
 
     Object.keys(favorites).forEach(fav => {
       if (!favorites[fav].ethereal) {
@@ -246,7 +253,7 @@ export class HomePageComponent implements OnInit {
 
     if (showMode) {
       endpoints.forEach(ep => {
-        if (!processed[ep.guid]) {
+        if (ep.guid && !processed[ep.guid]) {
           processed[ep.guid] = true;
           rest.push(ep);
         }
@@ -254,8 +261,9 @@ export class HomePageComponent implements OnInit {
     }
 
     const byPriority = (a: EndpointModel, b: EndpointModel) => {
-      const pa = entityCatalog.getEndpoint(a.cnsi_type, a.sub_type)?.definition?.renderPriority ?? 1000;
-      const pb = entityCatalog.getEndpoint(b.cnsi_type, b.sub_type)?.definition?.renderPriority ?? 1000;
+      // strict: cnsi_type is populated on every endpoint; '' default keeps the lookup well-formed
+      const pa = entityCatalog.getEndpoint(a.cnsi_type ?? '', a.sub_type)?.definition?.renderPriority ?? 1000;
+      const pb = entityCatalog.getEndpoint(b.cnsi_type ?? '', b.sub_type)?.definition?.renderPriority ?? 1000;
       return pa - pb;
     };
 
@@ -269,12 +277,14 @@ export class HomePageComponent implements OnInit {
   // Automatic layout - select the best layout based on the available endpoints
   private automaticLayout(): HomePageCardLayout {
     const eps = this.connectedEndpoints().filter(ep => {
-      const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
+      const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
       return !!defn.definition.homeCard;
     });
 
     const wideCount = eps.filter(ep => {
-      const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+      // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
+      const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
       return (defn.definition.homeCard?.columnSpan || 1) > 1;
     }).length;
     const mostlyWide = wideCount > eps.length / 2;
@@ -293,7 +303,9 @@ export class HomePageComponent implements OnInit {
   }
 
   private getLayout(x: number, y: number): HomePageCardLayout {
-    return this.layouts.find(item => item && item.x === x && item.y === y);
+    // strict: every (x, y) callers pass — (1,1) (1,2) (2,2) (3,2) — exists in
+    // the hardcoded `layouts` table above, so find always resolves.
+    return this.layouts.find(item => item && item.x === x && item.y === y)!;
   }
 
   // TrackBy functions for optimal change detection
@@ -307,7 +319,8 @@ export class HomePageComponent implements OnInit {
 
   // Get effective column span for an endpoint, clamped to available columns
   getEffectiveSpan(ep: EndpointModel): number {
-    const defn = entityCatalog.getEndpoint(ep.cnsi_type, ep.sub_type);
+    // strict: cnsi_type is populated on every endpoint; '' default keeps the lookup well-formed
+    const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
     const declared = defn?.definition?.homeCard?.columnSpan || 1;
     return Math.min(declared, this.columns || 1);
   }

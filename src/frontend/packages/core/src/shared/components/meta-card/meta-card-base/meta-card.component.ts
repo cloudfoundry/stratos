@@ -56,7 +56,7 @@ export class MetaCardComponent {
   status$!: Observable<StratosStatus>;
 
   @Input()
-  favorite: UserFavorite<IFavoriteMetadata>;
+  favorite?: UserFavorite<IFavoriteMetadata>;
 
   // Vestigial no-op input. The legacy ngrx favorite-star fallback (entity
   // monitor -> UserFavoriteManager.getFavorite) was removed with the rest of
@@ -85,7 +85,7 @@ export class MetaCardComponent {
   mode!: string;
 
   @Input()
-  clickAction: () => void = null;
+  clickAction?: () => void;
 
   @Input()
   set actionMenu(actionMenu: MenuItem[]) {

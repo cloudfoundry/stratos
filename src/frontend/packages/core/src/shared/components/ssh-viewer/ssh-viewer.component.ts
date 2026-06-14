@@ -22,7 +22,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   private resizer = inject(EventWatcherService);
 
   @Input()
-  errorMessage: string;
+  errorMessage?: string;
 
   @Input()
   sshStream!: Observable<any>;

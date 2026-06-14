@@ -33,7 +33,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @HostBinding('@.disabled')
   public animationsDisabled = false;
-  public userId$: Observable<string>;
+  public userId$: Observable<string | null>;
 
   constructor() {
     // Trigger initial session verification BEFORE routing starts

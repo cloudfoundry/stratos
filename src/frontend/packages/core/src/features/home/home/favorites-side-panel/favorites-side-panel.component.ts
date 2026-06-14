@@ -19,7 +19,8 @@ import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-met
 })
 export class FavoritesSidePanelComponent implements PreviewableComponent {
 
-  favorites$: Observable<any>;
+  // strict: assigned in setProps (PreviewableComponent contract) before use
+  favorites$!: Observable<any>;
   name!: string;
 
   setProps(props: { [key: string]: any; }): void {

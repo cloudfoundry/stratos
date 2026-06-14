@@ -53,7 +53,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   alertInfo: any;
 
   formattedValue!: string;
-  formattedLimit!: string;
+  formattedLimit?: string;
   usage!: string;
   private utils = inject(UtilsService);
   private router = inject(Router);

@@ -11,7 +11,8 @@ import { RowState } from './row-state.types';
  */
 @Directive()
 export abstract class TableCellCustom<T, C = any> {
-  protected pRow: T;
+  // strict: backing field for the required `row` @Input, set by Angular before render
+  protected pRow!: T;
   @Input()
   get row(): T {
     return this.pRow;
@@ -20,7 +21,8 @@ export abstract class TableCellCustom<T, C = any> {
     this.pRow = row;
   }
 
-  protected pEntityKey: string;
+  // strict: backing field for `entityKey`, set by the host list before render
+  protected pEntityKey!: string;
   set entityKey(entityKey: string) {
     this.pEntityKey = entityKey;
   }
@@ -28,7 +30,8 @@ export abstract class TableCellCustom<T, C = any> {
     return this.pEntityKey;
   }
 
-  protected pConfig: C;
+  // strict: backing field for the `config` @Input, set by Angular before render
+  protected pConfig!: C;
   @Input()
   set config(config: C) {
     this.pConfig = config;
@@ -37,7 +40,8 @@ export abstract class TableCellCustom<T, C = any> {
     return this.pConfig;
   }
 
-  rowState: Observable<RowState>;
+  // strict: assigned by the host signal-list when the cell is instantiated
+  rowState!: Observable<RowState>;
 }
 
 export abstract class CardCell<T> extends TableCellCustom<T> {

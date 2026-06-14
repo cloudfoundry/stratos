@@ -54,7 +54,7 @@ export class DateTimeComponent implements OnDestroy {
     ).pipe(
       debounceTime(250),
       filter(([time, date]) => !!(time && date)),
-      map(([time, date]: [string, string]) => {
+      map(([time, date]: [string, string]): [number, number, Date] => {
         const [hour, minute] = time.split(':');
         return [
           parseInt(hour, 10),

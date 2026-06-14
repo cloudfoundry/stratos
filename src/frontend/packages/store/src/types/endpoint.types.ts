@@ -19,7 +19,8 @@ export interface IApiEndpointInfo {
   RawPath: string;
   RawQuery: string;
   Scheme: string;
-  User: object;
+  // Go url.Userinfo pointer: serializes to JSON null when no userinfo is present.
+  User: object | null;
 }
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
 export interface EndpointModel {

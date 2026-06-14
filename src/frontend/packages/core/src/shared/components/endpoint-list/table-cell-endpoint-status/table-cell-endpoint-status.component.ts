@@ -34,7 +34,7 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   }
 
   ngOnInit() {
-    const ep = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);
+    const ep = this.row.cnsi_type ? entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type) : null;
     if (ep) {
       this.connectable = !ep.definition.unConnectable;
     }

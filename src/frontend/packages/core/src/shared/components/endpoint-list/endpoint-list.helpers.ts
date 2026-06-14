@@ -19,7 +19,7 @@ import { TableCellCustom } from '../signal-list/cell-base';
 
 interface EndpointDetailsContainerRefs {
   componentRef: ComponentRef<EndpointListDetailsComponent>;
-  component: EndpointListDetailsComponent;
+  component: EndpointListDetailsComponent | null;
   endpointDetails: ViewContainerRef;
 }
 
@@ -28,7 +28,7 @@ export abstract class EndpointListDetailsComponent extends TableCellCustom<Endpo
   isTable = true;
 }
 
-function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent {
+function isEndpointListDetailsComponent(obj: any): EndpointListDetailsComponent | null {
   return obj ? obj.isEndpointListDetailsComponent ? obj as EndpointListDetailsComponent : null : null;
 }
 
@@ -86,6 +86,10 @@ export class EndpointListHelper {
     return [
       {
         action: (item) => {
+          const guid = item.guid;
+          if (!guid) {
+            return;
+          }
           const message1 = `Are you sure you want to disconnect endpoint '${item.name}'?`;
           // TODO: This only current applies to CF
           const message2 = item.local ? `This will also update your local configuration.` : '';
@@ -99,7 +103,7 @@ export class EndpointListHelper {
             // Disconnect via the signal-native EndpointsDataService
             // (Promise<ActionState>); it updates the endpoints signal so the
             // list and nav reflect the change without a separate refresh.
-            void this.handlePromiseAction(this.endpointsData.disconnect(item.guid), () => {
+            void this.handlePromiseAction(this.endpointsData.disconnect(guid), () => {
               this.snackBarService.show(`Disconnected endpoint '${item.name}'`);
             });
           });
@@ -146,7 +150,7 @@ export class EndpointListHelper {
                 // multiple user endpoints that all have the same url.
                 return false;
               } else {
-                const endpoint = entityCatalog.getEndpoint(row.cnsi_type, row.sub_type);
+                const endpoint = row.cnsi_type ? entityCatalog.getEndpoint(row.cnsi_type, row.sub_type) : null;
                 const ep = endpoint ? endpoint.definition : { unConnectable: false };
                 return !ep.unConnectable && row.connectionStatus === 'disconnected';
               }
@@ -156,6 +160,10 @@ export class EndpointListHelper {
       },
       {
         action: (item) => {
+          const guid = item.guid;
+          if (!guid) {
+            return;
+          }
           const confirmation = new ConfirmationDialogConfig(
             'Unregister Endpoint',
             `Are you sure you want to unregister endpoint '${item.name}'?`,
@@ -163,7 +171,7 @@ export class EndpointListHelper {
             true
           );
           this.confirmDialog.open(confirmation, () => {
-            void this.handlePromiseAction(this.endpointsData.unregister(item.guid), () => {
+            void this.handlePromiseAction(this.endpointsData.unregister(guid), () => {
               this.snackBarService.show(`Unregistered ${item.name}`);
             });
           });

@@ -63,7 +63,7 @@ export class CurrentUserPermissionsService {
     endpointGuid?: string,
     ...args: any[]
   ): Observable<boolean> {
-    let actionConfig;
+    let actionConfig: PermissionConfig[] | PermissionConfig | undefined;
     if (typeof action === 'string') {
       const permConfigType = this.getPermissionConfig(action);
       if (!permConfigType) {
@@ -80,9 +80,9 @@ export class CurrentUserPermissionsService {
   }
 
   private getCanObservable(
-    actionConfig: PermissionConfig[] | PermissionConfig,
-    endpointGuid: string,
-    ...args: any[]): Observable<boolean> {
+    actionConfig: PermissionConfig[] | PermissionConfig | undefined,
+    endpointGuid?: string,
+    ...args: any[]): Observable<boolean> | null {
     if (Array.isArray(actionConfig)) {
       return this.getComplexPermission(actionConfig, endpointGuid, ...args);
     } else if (actionConfig) {
@@ -91,8 +91,10 @@ export class CurrentUserPermissionsService {
       // W36-B Wave 3: read endpoint via EndpointsDataService signal
       // bridge instead of the legacy EntityMonitor.entity$.
       return toObservable(this.endpointsData.endpointById(endpointGuid), { injector: this.injector }).pipe(
+        // strict: a registered endpoint always carries a cnsi_type; preserve the
+        // original guard (call through when an endpoint resolves, else emit false).
         switchMap(endpoint => endpoint ?
-          this.getFallbackPermission(endpointGuid, endpoint.cnsi_type) :
+          this.getFallbackPermission(endpointGuid, endpoint.cnsi_type!) :
           of(false)
         )
       );
@@ -100,7 +102,7 @@ export class CurrentUserPermissionsService {
     return null;
   }
 
-  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid: string, ...args: any[]): Observable<boolean> {
+  private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, ...args: any[]): Observable<boolean> {
     return this.findChecker<Observable<boolean>>(
       (checker: ICurrentUserPermissionsChecker) => checker.getSimpleCheck(actionConfig, endpointGuid, ...args),
       'permissions check',
@@ -116,7 +118,7 @@ export class CurrentUserPermissionsService {
 
   private getComplexChecks(
     permissionConfig: PermissionConfig[],
-    endpointGuid: string,
+    endpointGuid?: string,
     ...args: any[]
   ): IPermissionCheckCombiner[] {
     return this.findChecker<IPermissionCheckCombiner[]>(
@@ -129,12 +131,12 @@ export class CurrentUserPermissionsService {
     );
   }
 
-  private getConfig(config: PermissionConfigType, tries = 0): PermissionConfig[] | PermissionConfig {
+  private getConfig(config: PermissionConfigType, tries = 0): PermissionConfig[] | PermissionConfig | undefined {
     const linkConfig = config as PermissionConfigLink;
     if (linkConfig.link) {
       if (tries >= 20) {
         // Tried too many times to get permission config, circular reference very likely.
-        return;
+        return undefined;
       }
       ++tries;
       return this.getLinkedPermissionConfig(linkConfig, tries);
@@ -143,8 +145,12 @@ export class CurrentUserPermissionsService {
     }
   }
 
-  private getLinkedPermissionConfig(linkConfig: PermissionConfigLink, tries = 0) {
-    return this.getConfig(this.getPermissionConfig(linkConfig.link), tries);
+  private getLinkedPermissionConfig(linkConfig: PermissionConfigLink, tries = 0): PermissionConfig[] | PermissionConfig | undefined {
+    const linked = this.getPermissionConfig(linkConfig.link);
+    if (!linked) {
+      return undefined;
+    }
+    return this.getConfig(linked, tries);
   }
 
   private combineChecks(
@@ -163,12 +169,14 @@ export class CurrentUserPermissionsService {
       (checker: ICurrentUserPermissionsChecker) => checker.getFallbackCheck(endpointGuid, endpointType),
       'fallback permission',
       'N/A',
-      of(null)
+      // No fallback checker found => permission denied (falsy, same as the
+      // previous of(null) under the declared Observable<boolean> contract).
+      of(false)
     );
   }
 
-  private getPermissionConfig(key: CurrentUserPermissions): PermissionConfigType {
-    return this.findChecker<PermissionConfigType>(
+  private getPermissionConfig(key: CurrentUserPermissions): PermissionConfigType | null {
+    return this.findChecker<PermissionConfigType | null>(
       (checker: ICurrentUserPermissionsChecker) => checker.getPermissionConfig(key),
       'permissions checker',
       key,
@@ -182,7 +190,7 @@ export class CurrentUserPermissionsService {
    * If more than one is found log warning (hints re bug/misconfigure/devious plugin)
    */
   private findChecker<T>(
-    checkFn: (checker: ICurrentUserPermissionsChecker) => T,
+    checkFn: (checker: ICurrentUserPermissionsChecker) => T | null | undefined,
     checkNoun: string,
     checkType: string,
     failureValue: T
@@ -194,10 +202,6 @@ export class CurrentUserPermissionsService {
         res.push(checkerRes);
       }
     }
-    if (res.length === 0) {
-      console.warn(`Permissions: Failed to find a '${checkNoun}' for '${checkType}'. Permission Denied.`);
-      return failureValue;
-    }
     if (res.length === 1) {
       return res[0];
     }
@@ -205,5 +209,8 @@ export class CurrentUserPermissionsService {
       console.warn(`Permissions: Found too many '${checkNoun}' for '${checkType}'. Permission Denied.`);
       return failureValue;
     }
+    // res.length === 0
+    console.warn(`Permissions: Failed to find a '${checkNoun}' for '${checkType}'. Permission Denied.`);
+    return failureValue;
   }
 }

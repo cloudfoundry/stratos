@@ -52,7 +52,8 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   @Output() valueChange = new EventEmitter<any>();
   @Output() change = new EventEmitter<MatButtonToggleChange>();
 
-  @ContentChildren(CustomButtonToggleComponent) toggles: QueryList<CustomButtonToggleComponent>;
+  // strict: @ContentChildren is populated by Angular before ngAfterContentInit
+  @ContentChildren(CustomButtonToggleComponent) toggles!: QueryList<CustomButtonToggleComponent>;
 
   selectedValues: any[] = [];
 

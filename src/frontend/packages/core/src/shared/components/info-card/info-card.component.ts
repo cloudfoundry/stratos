@@ -18,5 +18,5 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
   `,
 })
 export class InfoCardComponent {
-  @Input() title: string;
+  @Input() title?: string;
 }

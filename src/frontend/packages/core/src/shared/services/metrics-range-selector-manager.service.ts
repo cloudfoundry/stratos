@@ -17,11 +17,14 @@ export class MetricsRangeSelectorManagerService {
 
   public timeWindow$ = new Subject<ITimeRange>();
 
-  public commit: () => void = null;
+  // null until a valid start/end range has been chosen; reset to null after
+  // each commit. Templates guard the Set button on `!commit`.
+  public commit: (() => void) | null = null;
 
   public dateValid = false;
 
-  public committedStartEnd: [Date, Date] = [null, null];
+  // Slots are independently nullable: a range can be partially entered.
+  public committedStartEnd: [Date | null, Date | null] = [null, null];
 
   public rangeTypes = MetricQueryType;
 
@@ -31,26 +34,29 @@ export class MetricsRangeSelectorManagerService {
 
   private readonly endIndex = 1;
 
-  public startEnd: [Date, Date] = [null, null];
+  public startEnd: [Date | null, Date | null] = [null, null];
 
-  public selectedTimeRangeValue: ITimeRange;
+  // Assigned by `init()` / the selectedTimeRange setter before any read.
+  public selectedTimeRangeValue!: ITimeRange; // strict: lifecycle-assigned in init() before use
 
   public request$ = new Subject<MetricsRequest>();
 
-  private baseRequest: MetricsRequest;
+  // Assigned by `init()` before any commit path reads it.
+  private baseRequest!: MetricsRequest; // strict: lifecycle-assigned in init() before use
 
-  private pollIndex: number;
+  // setInterval handle, assigned in startWindowPoll; only read by clearInterval.
+  private pollIndex!: number; // strict: assigned before clearInterval reads it
 
   public pollInterval = 10000;
 
-  private commitDate(date: Date, type: 'start' | 'end') {
+  private commitDate(date: Date | null, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
     const oldDate = this.startEnd[index];
     if (oldDate && !date) {
       this.startEnd[index] = date;
       return;
     }
-    if (!date || !isValid(date) || isEqual(date, oldDate)) {
+    if (!date || !isValid(date) || (oldDate && isEqual(date, oldDate))) {
       return;
     }
     this.startEnd[index] = date;
@@ -95,7 +101,7 @@ export class MetricsRangeSelectorManagerService {
     }
   }
 
-  set start(start: Date) {
+  set start(start: Date | null) {
     this.commitDate(start, 'start');
   }
 
@@ -103,7 +109,7 @@ export class MetricsRangeSelectorManagerService {
     return this.startEnd[this.startIndex];
   }
 
-  set end(end: Date) {
+  set end(end: Date | null) {
     this.commitDate(end, 'end');
   }
 
@@ -132,15 +138,16 @@ export class MetricsRangeSelectorManagerService {
 
   private commitWindow(timeWindow: ITimeRange) {
     this.endWindowPoll();
-    if (!timeWindow) {
+    // Only reached for ranges with a window value (the selectedTimeRange
+    // setter guards on `value` before calling); a value-less custom range
+    // commits dates instead. Bail if there is no window to commit.
+    if (!timeWindow || !timeWindow.value) {
       return;
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
     this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
-    if (timeWindow.value) {
-      this.startWindowPoll(timeWindow);
-    }
+    this.startWindowPoll(timeWindow);
   }
 
   private commitRequest(request: MetricsRequest) {

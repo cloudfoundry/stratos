@@ -66,7 +66,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   registerForm: FormGroup<CreateEndpointForm>;
 
-  @Input() finalStep: boolean;
+  @Input() finalStep = false;
   private pFixedUrl!: string;
   @Input()
   get fixedUrl(): string {
@@ -82,9 +82,11 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     }
   }
 
-  validate: Observable<boolean>;
+  // strict: assigned in ngAfterContentInit before any template/consumer read.
+  validate!: Observable<boolean>;
 
-  urlValidation: string;
+  // strict: assigned in the constructor via setUrlValidation().
+  urlValidation!: string;
 
   showAdvancedFields = false;
   clientRedirectURI!: string;
@@ -157,8 +159,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     const name = this.registerForm.value.nameField ?? '';
 
     const result = await this.endpointsSignalConfig.register({
-      endpointType: type,
-      endpointSubType: subType,
+      endpointType: type ?? '',
+      endpointSubType: subType ?? null,
       name,
       endpoint: url,
       skipSslValidation: sslAllow,
@@ -212,7 +214,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   }
 
   setUrlValidation(endpoint: StratosCatalogEndpointEntity) {
-    this.urlValidation = endpoint ? endpoint.definition.urlValidationRegexString : '';
+    this.urlValidation = endpoint ? (endpoint.definition.urlValidationRegexString ?? '') : '';
     this.setAdvancedFields(endpoint);
   }
 

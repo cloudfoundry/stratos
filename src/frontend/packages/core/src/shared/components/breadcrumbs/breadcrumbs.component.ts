@@ -17,8 +17,8 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BreadcrumbsComponent {
-  public breadcrumbDefinitions: IBreadcrumbLink[] = null;
-  breadcrumbKey: string;
+  public breadcrumbDefinitions: IBreadcrumbLink[] = [];
+  breadcrumbKey: string | null;
 
   @Input()
   set breadcrumbs(breadcrumbs: IBreadcrumb[]) {

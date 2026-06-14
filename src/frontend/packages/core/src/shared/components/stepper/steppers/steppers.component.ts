@@ -44,9 +44,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) stepComponents!: QueryList<StepComponent>;
 
-  @Input() cancel: string = null;
+  @Input() cancel?: string;
   @Input() nextButtonProgress = true;
-  @Input() basePreviousRedirect: StepperRedirectPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
+  @Input() basePreviousRedirect: StepperRedirectPayload | null = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
   } : null;
   // Optional context summary rendered above the step headers. Hosts pass
@@ -61,7 +61,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   hiddenSubs: Subscription[] = [];
 
-  stepValidateSub: Subscription = null;
+  stepValidateSub: Subscription | null = null;
 
   private enterData: any;
   private snackBarRef!: TailwindSnackBarRef<any>;
@@ -193,13 +193,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$.pipe(
         take(1),
-        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: null, ignoreSuccess: false } as StepOnNextResult),
+        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: undefined, ignoreSuccess: false } as StepOnNextResult),
         catchError(err => {
           console.warn('Stepper failed: ', err);
           return observableOf({
             success: false,
             message: err || 'Failed',
-            redirectPayload: null,
+            redirectPayload: undefined,
             redirect: false,
             data: {},
             ignoreSuccess: false

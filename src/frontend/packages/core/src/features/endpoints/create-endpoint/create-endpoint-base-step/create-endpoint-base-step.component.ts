@@ -41,7 +41,7 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
 
   set selectedTile(tile: ITileConfig<ICreateEndpointTilesData>) {
     super.selectedTile = tile;
-    if (tile) {
+    if (tile && tile.data) {
       this.router.navigate(
         `endpoints/new/${tile.data.parentType || tile.data.type}/${tile.data.parentType ? tile.data.type : ''}`.split('/'),
         { queryParams: { [BASE_REDIRECT_QUERY]: 'endpoints/new' } }

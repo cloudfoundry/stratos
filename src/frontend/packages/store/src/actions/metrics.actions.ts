@@ -1,6 +1,6 @@
 export interface IMetricQueryConfigParams {
   window?: string;
-  [key: string]: string | number;
+  [key: string]: string | number | undefined;
 }
 
 function joinParams(queryConfig: MetricQueryConfig) {

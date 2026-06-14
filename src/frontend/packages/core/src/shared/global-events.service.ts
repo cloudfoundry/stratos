@@ -117,8 +117,8 @@ export class GlobalEventService {
   private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
 
   public events$: Observable<IGlobalEvent[]>;
-  public priorityType$: Observable<GlobalEventTypes>;
-  public priorityStratosStatus$: Observable<StratosStatus>;
+  public priorityType$: Observable<GlobalEventTypes | null>;
+  public priorityStratosStatus$: Observable<StratosStatus | undefined>;
 
   public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
     this.eventConfigs.push(event);
@@ -162,7 +162,10 @@ export class GlobalEventService {
     );
   }
 
-  public eventTypeToStratosStatus(eventType: GlobalEventTypes) {
+  // The 'complete' event type (and the no-priority null case) has no
+  // associated StratosStatus, so this is genuinely sometimes-absent.
+  // Callers treat the absent case as "no status".
+  public eventTypeToStratosStatus(eventType: GlobalEventTypes | null): StratosStatus | undefined {
     switch (eventType) {
       case ('warning'):
         return StratosStatus.WARNING;
@@ -171,7 +174,7 @@ export class GlobalEventService {
       case ('error'):
         return StratosStatus.ERROR;
       default:
-        return null;
+        return undefined;
     }
   }
 
@@ -213,18 +216,23 @@ export class GlobalEventService {
     selectedState: any,
     config: IGlobalEventConfig<any>,
     appState: GeneralEntityAppState
-  ) {
+  ): IGlobalEvent[] {
     if (Array.isArray(eventData)) {
       if (eventData.length) {
         return eventData.map((data) => this.getEvent(data.data || selectedState, config, appState));
       }
+      // Empty trigger array -> no events (previously fell through to
+      // undefined, which callers already coerced via `newEvents && ...`).
+      return [];
     } else {
       return [this.getEvent(eventData.data || selectedState, config, appState)];
     }
   }
 
   // Will get the highest priority event type as dictated by eventTypePriority (0 index is highest priority)
-  private getHighestPriorityEventType(eventTypes: IGlobalEventType[]): GlobalEventTypes {
+  // Returns null when none of the supplied events carry a recognised type
+  // (the accumulator starts empty and may never be assigned).
+  private getHighestPriorityEventType(eventTypes: IGlobalEventType[]): GlobalEventTypes | null {
     return eventTypes.reduce((currentPriority, nextType) => {
       if (
         currentPriority.priority !== 0 &&
@@ -240,7 +248,7 @@ export class GlobalEventService {
         }
       }
       return currentPriority;
-    }, { eventType: null, priority: null } as { eventType: GlobalEventTypes, priority: number }).eventType;
+    }, { eventType: null, priority: null } as { eventType: GlobalEventTypes | null, priority: number | null }).eventType;
   }
 
   // We cache the event results by keying them by the selectedState object.
@@ -295,14 +303,14 @@ export class GlobalEventService {
           const newEvents = this.getNewTriggeredEventsOrCached(config, appState);
           if (newEvents && newEvents.length) {
             const newHighestPriority = this.getHighestPriorityEventType([
-              { type: eventsAndPriority[1] },
+              { type: eventsAndPriority[1] ?? undefined },
               ...newEvents,
             ]);
             eventsAndPriority[0] = [...eventsAndPriority[0], ...newEvents];
             eventsAndPriority[1] = newHighestPriority;
           }
           return eventsAndPriority;
-        }, [[], null] as [IGlobalEvent[], GlobalEventTypes]);
+        }, [[], null] as [IGlobalEvent[], GlobalEventTypes | null]);
       }),
       publishReplay(1),
       refCount(),
@@ -341,7 +349,7 @@ export class GlobalEventService {
             });
           }
         });
-        return [events, types] as [IGlobalEvent[], GlobalEventTypes];
+        return [events, types] as [IGlobalEvent[], GlobalEventTypes | null];
       })
     );
 

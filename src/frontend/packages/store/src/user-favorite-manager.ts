@@ -20,8 +20,10 @@ import {
 
 
 interface IGroupedFavorites {
-  endpoint: UserFavorite<IEndpointFavMetadata>;
-  entities: UserFavorite<IFavoriteMetadata>[];
+  // Both may be null: getUserFavoriteFromObject returns null when a favorite
+  // record is missing required fields or the endpoint cannot be resolved.
+  endpoint: UserFavorite<IEndpointFavMetadata> | null;
+  entities: (UserFavorite<IFavoriteMetadata> | null)[];
 }
 
 @Injectable({
@@ -102,10 +104,10 @@ export class UserFavoriteManager {
       // guid. Resolve via EndpointsDataService.endpointById signal rather
       // than the deleted endpointEntitiesSelector.
       const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
-      const endpointEntity = this.endpointsService.endpointById(endpointGuid)();
-      const endpointFavorite = this.getFavoriteEndpointFromEntity(endpointEntity);
+      const endpointEntity = endpointGuid ? this.endpointsService.endpointById(endpointGuid)() : null;
+      const endpointFavorite = endpointEntity ? this.getFavoriteEndpointFromEntity(endpointEntity) : null;
       return of({
-        endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite),
+        endpoint: endpointFavorite ? this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite) : null,
         entities
       });
     }
@@ -115,7 +117,7 @@ export class UserFavoriteManager {
     });
   }
 
-  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> => {
+  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> | null => {
     // Defensive: Validate favorite object before creating UserFavorite
     if (!f) {
       console.error('User favorites: getUserFavoriteFromObject - favorite object is null or undefined');
@@ -165,7 +167,10 @@ export class UserFavoriteManager {
         Object.values(favs).forEach(f => {
           if (f.endpointId === endpointID && f.entityId) {
             // Ensure we actually have a UserFavorite object and not a struct
-            result.push(this.getUserFavoriteFromObject(f));
+            const userFavorite = this.getUserFavoriteFromObject(f);
+            if (userFavorite) {
+              result.push(userFavorite);
+            }
           }
         });
         return result;
@@ -214,15 +219,17 @@ export class UserFavoriteManager {
     // Transient state during data load: callers retry once the entity row
     // resolves with a stamped endpoint id. Skip silently rather than emit
     // a UserFavorite with no endpoint context (which can't round-trip
-    // through the favorites store anyway).
-    if (!endpointId) {
+    // through the favorites store anyway). The same applies to a missing
+    // endpoint/entity type.
+    if (!endpointId || !endpointType || !entityType) {
       return null;
     }
     return new UserFavorite<T>(
       endpointId,
       endpointType,
       entityType,
-      guid,
+      // Endpoint favorites carry no entityId (guid is intentionally null here).
+      guid ?? undefined,
       metadata
     );
   }
@@ -281,7 +288,10 @@ export class UserFavoriteManager {
 
   public getFavoriteEndpointFromEntity(
     endpoint: EndpointModel
-  ): UserFavoriteEndpoint {
+  ): UserFavoriteEndpoint | null {
+    if (!endpoint.cnsi_type || !endpoint.guid) {
+      return null;
+    }
     return this.getFavoriteFromEntity(
       EntityCatalogHelpers.endpointType,
       endpoint.cnsi_type,
@@ -297,7 +307,7 @@ export class UserFavoriteManager {
     entities.forEach(e => {
       const defn = e.builders?.entityBuilder;
       if (defn) {
-        const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+        const canFavorite = !!defn.getGuid && !!defn.getMetadata && !!defn.getLink;
         if (canFavorite) {
           total++;
         }
@@ -309,7 +319,7 @@ export class UserFavoriteManager {
   public canFavoriteEntityType(entityDefn: StratosBaseCatalogEntity) {
     const defn = entityDefn.builders?.entityBuilder;
     if (defn) {
-      const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+      const canFavorite = !!defn.getGuid && !!defn.getMetadata && !!defn.getLink;
       return canFavorite;
     }
     return false;

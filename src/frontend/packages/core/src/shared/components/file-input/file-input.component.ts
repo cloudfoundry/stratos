@@ -36,7 +36,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   private formGroupControl!: FormGroupName;
   public disabled = false;
-  private sub: Subscription;
+  private sub?: Subscription;
 
   ngOnInit(): void {
     if (this.parent instanceof FormGroupName) {
@@ -49,7 +49,9 @@ export class FileInputComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    safeUnsubscribe(this.sub);
+    if (this.sub) {
+      safeUnsubscribe(this.sub);
+    }
   }
 
   get fileCount(): number { return this.files && this.files.length || 0; }
@@ -109,7 +111,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     reader.readAsText(file);
   }
 
-  private updateFileState(value: string | ArrayBuffer) {
+  private updateFileState(value: string | ArrayBuffer | null) {
     this.formGroupControl.control.controls[this.fileFormControlName].setValue(value);
   }
 }
