@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { ActivatedRoute } from '@angular/router';
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { BehaviorSubject, from, of as observableOf } from 'rxjs';
@@ -21,7 +20,6 @@ import {
   AppAutoscalerPolicyLocal,
   AppSpecificDate } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
-import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import {
   TileGridComponent,
   TileGroupComponent,

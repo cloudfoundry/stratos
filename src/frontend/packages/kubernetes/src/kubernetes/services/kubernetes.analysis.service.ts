@@ -148,7 +148,7 @@ export class KubernetesAnalysisService {
     return obs$;
   }
 
-  public getByID(endpoint: string, id: string, refresh = false): Observable<AnalysisReport> {
+  public getByID(endpoint: string, id: string, _refresh = false): Observable<AnalysisReport> {
     // Always do a network fetch — there's no entity cache to wait for.
     // The detail view requires the heavy `report` payload, which is only
     // returned on this dedicated detail endpoint (the list endpoint

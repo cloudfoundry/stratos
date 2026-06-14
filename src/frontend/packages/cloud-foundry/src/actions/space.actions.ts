@@ -7,8 +7,6 @@ import { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
-  domainEntityType,
-  routeEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
   serviceInstancesWithSpaceEntityType,

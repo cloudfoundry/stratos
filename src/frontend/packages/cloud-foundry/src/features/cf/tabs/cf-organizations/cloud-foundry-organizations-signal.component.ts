@@ -10,7 +10,6 @@ import {
   CurrentUserPermissionsService,
   ListSubNavAddAction,
   ListSubNavComponent,
-  SignalListColumn,
   SignalListComponent,
   SignalListConfig,
   SignalListPillColor,

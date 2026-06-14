@@ -26,36 +26,6 @@ import { ApplicationEnvVarsHelper } from './application/application-tabs-base/ta
 // Minimal stubs
 // ---------------------------------------------------------------------------
 
-/** Stub entity catalog entry that satisfies cfEntityCatalog lookups. */
-function makeEntityCatalogStub() {
-  const entityService = {
-    waitForEntity$: { pipe: () => ({ pipe: () => ({ pipe: () => ({}) }) }) },
-    updatingSection$: { pipe: () => ({}) },
-    entityObs$: { pipe: () => ({}) },
-    poll: () => ({ pipe: () => ({}) }),
-    isFetchingEntity$: { pipe: () => ({}) },
-    isDeletingEntity$: { pipe: () => ({}) },
-    entityMonitor: {
-      entityRequest$: { pipe: () => ({}) },
-      entity$: { pipe: () => ({}) },
-      updatingSection$: { pipe: () => ({}) },
-      isDeletingEntity$: { pipe: () => ({}) },
-      isFetchingEntity$: { pipe: () => ({}) },
-    },
-    action: { type: 'STUB' },
-  };
-  return {
-    getEntityService: () => entityService,
-    store: {
-      getEntityService: () => entityService,
-      getEntityMonitor: () => entityService.entityMonitor,
-    },
-    api: {
-      update: () => ({ pipe: () => ({}) }),
-    },
-  };
-}
-
 /** Minimal data-service stub that exposes writable signals. */
 function makeDataServiceStub() {
   const _app = signal<any>(undefined);

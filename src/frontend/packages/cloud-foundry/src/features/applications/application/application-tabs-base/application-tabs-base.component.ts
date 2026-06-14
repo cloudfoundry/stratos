@@ -36,7 +36,6 @@ import {
 import { CfEndpointsDataService } from '../../../../services/domain-data/cf-endpoints-data.service';
 import { StOrg, StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { AppApplicationActionBarComponent } from '../../../../shared/components/application-action-bar/application-action-bar.component';
-import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
 import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
 

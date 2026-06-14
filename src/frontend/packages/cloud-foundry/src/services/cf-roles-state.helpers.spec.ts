@@ -118,7 +118,7 @@ describe('cf-roles-state.helpers', () => {
 
   describe('endpoint lifecycle', () => {
     it('registerCfEndpoint seeds a default row and is idempotent', () => {
-      let state = registerCfEndpoint({}, cf);
+      const state = registerCfEndpoint({}, cf);
       expect(state[cf]).toEqual(getDefaultCfEndpointRoles());
       const same = registerCfEndpoint(state, cf);
       expect(same).toBe(state);

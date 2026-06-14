@@ -12,7 +12,7 @@ import {
   entityCatalog,
 } from '@stratosui/store';
 import { from, Observable } from 'rxjs';
-import { map, startWith, take } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 
 import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
 import { getIdFromRoute } from '../../../../core/utils.service';

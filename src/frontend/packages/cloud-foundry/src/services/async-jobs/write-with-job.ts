@@ -117,7 +117,7 @@ async function pollJob<T>(
         // Non-200 with a body — treat as unknown.
         return { status: 'UNKNOWN', state: undefined, jobId };
       }
-    } catch (err) {
+    } catch (_err) {
       // 404 → status unknown per HA-degradation rule. Other errors (e.g.,
       // network failures) also surface as UNKNOWN so the UI can refetch
       // instead of stranding on an exception during a polling loop.

@@ -1,8 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, defer, firstValueFrom, from, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, defer, firstValueFrom, from } from 'rxjs';
 
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';

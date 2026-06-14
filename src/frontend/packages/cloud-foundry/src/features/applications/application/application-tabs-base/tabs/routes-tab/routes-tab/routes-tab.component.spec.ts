@@ -29,15 +29,6 @@ describe('RoutesTabComponent', () => {
   let component: RoutesTabComponent;
   let fixture: ComponentFixture<RoutesTabComponent>;
 
-  const mockPmf = {
-    create: vi.fn(() => ({
-      currentPage$: of([]),
-      pagination$: of({}),
-      fetchingCurrentPage$: of(false),
-      isLoadingPage$: of(false),
-    })),
-  };
-
   // Spy holders, refreshed per test.
   let refreshScope: ReturnType<typeof vi.fn>;
   let removeRoute: ReturnType<typeof vi.fn>;

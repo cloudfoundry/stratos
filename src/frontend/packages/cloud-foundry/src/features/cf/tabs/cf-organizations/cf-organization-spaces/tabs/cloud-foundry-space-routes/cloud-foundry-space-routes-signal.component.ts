@@ -97,7 +97,6 @@ export class CloudFoundrySpaceRoutesSignalComponent {
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
-    const orgGuid = this.cfOrgService.orgGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.routesConfig.initialize(cfGuid, spaceGuid);
 
