@@ -215,7 +215,9 @@ describe('DeployApplicationStep2Component', () => {
       // setupForGit's other upstream collaborators just enough to reach the
       // suggestedRepos$ assignment where the tap callback is registered.
       const valueChanges = new Subject<Record<string, string | undefined>>();
-      (component as unknown as { sourceSelectionForm: { valueChanges: Subject<unknown> } }).sourceSelectionForm = {
+      (component as unknown as {
+        sourceSelectionForm: { valueChanges: Subject<Record<string, string | undefined>> };
+      }).sourceSelectionForm = {
         valueChanges,
       };
       // updateSuggestedRepositories is called inside switchMap; stub it to

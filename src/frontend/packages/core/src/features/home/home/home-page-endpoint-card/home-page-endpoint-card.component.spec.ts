@@ -49,13 +49,18 @@ describe('HomePageEndpointCardComponent', () => {
     // UserFavorite constructor: (endpointId, endpointType, entityType, entityId, metadata)
     // For endpoint favorites, entityType is 'endpoint' and endpointType is the endpoint's cnsi_type
     const mockFavorite = new UserFavorite<IEndpointFavMetadata>(
-      mockEndpoint.guid,              // endpointId
-      mockEndpoint.cnsi_type,          // endpointType (metrics)
+      // strict: mockEndpoint is built above with guid: 'test-guid' set
+      mockEndpoint.guid!,              // endpointId
+      // strict: mockEndpoint is built above with cnsi_type: 'metrics' set
+      mockEndpoint.cnsi_type!,         // endpointType (metrics)
       'endpoint',                      // entityType (this is an endpoint favorite)
       mockEndpoint.guid,               // entityId
       {
         name: mockEndpoint.name || 'Test Endpoint',
-        guid: mockEndpoint.guid,
+        // strict: mockEndpoint is built above with guid: 'test-guid' set
+        guid: mockEndpoint.guid!,
+        // strict: mockEndpoint is built above with cnsi_type: 'metrics' set
+        subType: mockEndpoint.cnsi_type!,
       }
     );
 

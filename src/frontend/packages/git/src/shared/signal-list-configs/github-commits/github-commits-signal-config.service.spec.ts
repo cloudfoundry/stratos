@@ -14,6 +14,9 @@ const commit = (sha: string, message: string, name: string, date: string): GitCo
   html_url: `https://example.com/${sha}`,
   projectName: 'org/repo',
   commit: { message, author: { name, date, email: `${name}@x.io` } },
+  guid: `github--org/repo--${sha}`,
+  endpointGuid: 'ep-1',
+  scmType: 'github',
 });
 
 const COMMITS: GitCommit[] = [

@@ -49,7 +49,9 @@ describe('DeployApplicationStep21Component', () => {
 
     it('onNext pins the selected commit SHA when not deploying latest HEAD', () => {
       (component as unknown as { selectedCommitSubject: { next(c: GitCommit): void } }).selectedCommitSubject.next(commit);
-      component.onNext();
+      // strict: onNext's impl is a zero-arg arrow that ignores the stepper's
+      // (index, step) contract args; call it via its real runtime shape.
+      (component.onNext as () => unknown)();
       expect(deployData.setDeployCommit).toHaveBeenCalledWith('abc123def456');
     });
 
@@ -57,7 +59,8 @@ describe('DeployApplicationStep21Component', () => {
       // Even with a commit still selected underneath, latest-HEAD wins and unpins.
       (component as unknown as { selectedCommitSubject: { next(c: GitCommit): void } }).selectedCommitSubject.next(commit);
       (component as unknown as { useLatestHeadSubject: { next(v: boolean): void } }).useLatestHeadSubject.next(true);
-      component.onNext();
+      // strict: see above — onNext ignores the (index, step) contract args.
+      (component.onNext as () => unknown)();
       expect(deployData.setDeployCommit).toHaveBeenCalledWith('');
     });
   });

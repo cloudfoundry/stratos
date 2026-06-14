@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 import { signal, computed } from '@angular/core';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
-import { RequestInfoState, APIResource, EntityInfo } from '@stratosui/store';
+import { RequestInfoState, APIResource, EntityInfo, StratosStatus } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { IApp, IAppSummary } from '../src/cf-api.types';
 import { StDomain, StOrg, StSpace } from '../src/services/endpoint-data/stratos-types';
@@ -95,7 +95,17 @@ export class ApplicationServiceMock {
   } as EntityInfo<APIResource<IAppSummary>>);
   appStats$: Observable<AppStat[]> = observableOf(new Array<AppStat>());
   applicationStratProject$: Observable<EnvVarStratosProject> =
-    observableOf({ deploySource: { type: 'github', timestamp: 0, commit: '', endpointGuid: ''  }, deployOverrides: null});
+    observableOf({
+      deploySource: { type: 'github', timestamp: 0, commit: '', endpointGuid: '' },
+      // "Nothing overridden" — every OverrideAppDetails field at its documented
+      // empty/null default (the deploy form leaves them null when untouched).
+      deployOverrides: {
+        name: null, buildpack: null, instances: null, diskQuota: null, memQuota: null,
+        doNotStart: false, noRoute: false, randomRoute: false, host: null, domain: null,
+        path: null, startCmd: null, healthCheckType: null, stack: null, time: null,
+        dockerImage: null, dockerUsername: null,
+      },
+    });
   isFetchingApp$: Observable<boolean> = observableOf(false);
   isFetchingEnvVars$: Observable<boolean> = observableOf(false);
   isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
@@ -105,7 +115,7 @@ export class ApplicationServiceMock {
   };
   applicationState$: Observable<ApplicationStateData> = observableOf({
     label: '',
-    indicator: null,
+    indicator: StratosStatus.NONE,
     actions: {}
   });
   appOrg$: Observable<StOrg | undefined> = this.appOrgSubject.asObservable();

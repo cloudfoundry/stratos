@@ -5,8 +5,8 @@ import { take, timeout } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { PermissionConfig, CurrentUserPermissionsService, StratosScopeStrings } from '@stratosui/core';
 import { createBasicStoreModule, createEntityStoreState, TestStoreEntity, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { AppState, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, EntityCatalogEntityConfig, endpointEntityType, stratosEntityFactory, generateStratosEntities, APIResource, EndpointModel, BaseEntityValues, EntityCatalogHelper, EntityCatalogHelpers, CurrentUserRolesDataService } from '@stratosui/store';
-import { PaginationState } from '@stratosui/store/types/pagination.types';
+import { AppState, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, EntityCatalogEntityConfig, endpointEntityType, stratosEntityFactory, generateStratosEntities, APIResource, EndpointModel, BaseEntityValues, EntityCatalogHelper, EntityCatalogHelpers, CurrentUserRolesDataService, SessionUser } from '@stratosui/store';
+import { PaginationEntityTypeState } from '@stratosui/store/types/pagination.types';
 import { CFFeatureFlagTypes, IFeatureFlag } from '../../cf-api.types';
 import { cfEntityFactory } from '../../cf-entity-factory';
 import { generateCFEntities } from '../../cf-entity-generator';
@@ -23,7 +23,19 @@ const ffSchema = cfEntityFactory(featureFlagEntityType);
 
 describe('CurrentUserPermissionsService with CF checker', () => {
   let service: CurrentUserPermissionsService;
-  function createStoreState(): Partial<AppState<BaseEntityValues>> {
+  // The roles slice is no longer part of AppState (it moved to the signal-native
+  // CurrentUserRolesDataService — see beforeEach), but this fixture still emits
+  // the legacy `currentUserRoles` shape to seed that service. Describe it here so
+  // the literal type-checks and the beforeEach reads narrow correctly.
+  interface TestUserRolesFixture {
+    internal: { isAdmin: boolean; scopes: StratosScopeStrings[] };
+    endpoints: { cf: Record<string, any> };
+    state: { initialised: boolean; fetching: boolean; error: null };
+  }
+  type StoreStateWithRoles = Partial<AppState<BaseEntityValues>> & {
+    currentUserRoles: TestUserRolesFixture;
+  };
+  function createStoreState(): StoreStateWithRoles {
     // Data
     const endpoints: EndpointModel[] = [
       {
@@ -115,9 +127,10 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'user_org_creation',
           enabled: false,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/user_org_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
+          guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0'
         },
         metadata: {
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-0',
@@ -130,7 +143,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'private_domain_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/private_domain_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-1'
@@ -145,7 +158,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'app_bits_upload',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/app_bits_upload',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-2'
@@ -160,7 +173,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'app_scaling',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/app_scaling',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-3'
@@ -175,7 +188,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'route_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/route_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-4'
@@ -190,7 +203,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'service_instance_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/service_instance_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-5'
@@ -205,7 +218,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'diego_docker',
           enabled: false,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/diego_docker',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-6'
@@ -220,7 +233,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'set_roles_by_username',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/set_roles_by_username',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-7'
@@ -235,7 +248,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'unset_roles_by_username',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/unset_roles_by_username',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-8'
@@ -250,7 +263,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'env_var_visibility',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/env_var_visibility',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-10'
@@ -265,7 +278,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'space_scoped_private_broker_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/space_scoped_private_broker_creation',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-11'
@@ -280,7 +293,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'space_developer_env_var_visibility',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/space_developer_env_var_visibility',
           cfGuid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb',
           guid: '0e934dc8-7ad4-40ff-b85c-53c1b61d2abb-12'
@@ -314,7 +327,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'private_domain_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/private_domain_creation',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-1'
@@ -330,7 +343,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'app_bits_upload',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/app_bits_upload',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-2'
@@ -346,7 +359,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'app_scaling',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/app_scaling',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-3'
@@ -362,7 +375,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'route_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/route_creation',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-4'
@@ -378,7 +391,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'service_instance_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/service_instance_creation',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-5'
@@ -394,7 +407,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'diego_docker',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/diego_docker',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-6'
@@ -410,7 +423,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'set_roles_by_username',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/set_roles_by_username',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-7'
@@ -426,7 +439,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'unset_roles_by_username',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/unset_roles_by_username',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-8'
@@ -442,7 +455,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'env_var_visibility',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/env_var_visibility',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-10'
@@ -458,7 +471,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'space_scoped_private_broker_creation',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/space_scoped_private_broker_creation',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-11'
@@ -474,7 +487,7 @@ describe('CurrentUserPermissionsService with CF checker', () => {
         entity: {
           name: 'space_developer_env_var_visibility',
           enabled: true,
-          error_message: null,
+          error_message: undefined,
           url: '/v2/config/feature_flags/space_developer_env_var_visibility',
           cfGuid: 'c80420ca-204b-4879-bf69-b6b7a202ad87',
           guid: 'c80420ca-204b-4879-bf69-b6b7a202ad87-12'
@@ -489,14 +502,15 @@ describe('CurrentUserPermissionsService with CF checker', () => {
     ];
 
     // Pagination
-    const pagination: PaginationState = {
+    const pagination = {
       stratosEndpoint: {
         'endpoint-list': {
           currentPage: 1,
           totalResults: 2,
           pageCount: 1,
           ids: {
-            1: endpoints.map(endpoint => endpoint.guid),
+            // strict: every endpoint fixture above declares a literal guid
+            1: endpoints.map(endpoint => endpoint.guid!),
           },
           pageRequests: {
             1: {
@@ -531,7 +545,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
           currentPage: 1,
           totalResults: 13,
           ids: {
-            1: featureFlags1.map(ff => ff.entity.guid),
+            // strict: every featureFlags1 fixture entity declares a literal guid
+            1: featureFlags1.map(ff => ff.entity.guid!),
           },
           pageRequests: {
             1: {
@@ -558,7 +573,8 @@ describe('CurrentUserPermissionsService with CF checker', () => {
           currentPage: 1,
           totalResults: 13,
           ids: {
-            1: featureFlags2.map(ff => ff.entity.guid),
+            // strict: every featureFlags2 fixture entity declares a literal guid
+            1: featureFlags2.map(ff => ff.entity.guid!),
           },
           pageRequests: {
             1: {
@@ -581,6 +597,11 @@ describe('CurrentUserPermissionsService with CF checker', () => {
           isListPagination: false,
         }
       },
+      // No system/metrics paginations are seeded by this fixture; the empty
+      // PaginationEntityTypeState (genuine "nothing paged yet") satisfies the
+      // required BaseEntityValues keys on AppState.pagination.
+      system: {} as PaginationEntityTypeState,
+      metrics: {} as PaginationEntityTypeState,
     };
 
     // User roles
@@ -592,14 +613,16 @@ describe('CurrentUserPermissionsService with CF checker', () => {
       [
         stratosEntityFactory(endpointEntityType),
         endpoints.map(endpoint => ({
-          guid: endpoint.guid,
+          // strict: every endpoint fixture above declares a literal guid
+          guid: endpoint.guid!,
           data: endpoint,
         })),
       ],
       [
         ffSchema,
         [...featureFlags1, ...featureFlags2].map(featureFlag => ({
-          guid: featureFlag.entity.guid,
+          // strict: every feature-flag fixture entity declares a literal guid
+          guid: featureFlag.entity.guid!,
           data: featureFlag,
         })),
       ]
@@ -955,7 +978,15 @@ describe('CurrentUserPermissionsService with CF checker', () => {
       rolesData.updateEndpointRoles('cf', () => roles.endpoints.cf);
     }
     if (roles?.internal) {
-      rolesData.applySessionScopes({ admin: roles.internal.isAdmin, scopes: roles.internal.scopes } as any);
+      // applySessionScopes only reads admin + scopes; guid/name are required by
+      // SessionUser but irrelevant to this test, so they carry stub values.
+      const sessionUser: SessionUser = {
+        admin: roles.internal.isAdmin,
+        scopes: roles.internal.scopes,
+        guid: 'test-user',
+        name: 'test-user',
+      };
+      rolesData.applySessionScopes(sessionUser);
     }
 
     service = TestBed.inject(CurrentUserPermissionsService);

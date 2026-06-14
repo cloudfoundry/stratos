@@ -90,7 +90,8 @@ describe('EntityFavoriteStarComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const starEl: HTMLElement = element.querySelector('[role="button"]');
+    // strict: the star control renders for a favorited entity after detectChanges/whenStable
+    const starEl: HTMLElement = element.querySelector('[role="button"]')!;
     starEl.click();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -123,7 +124,8 @@ describe('EntityFavoriteStarComponent', () => {
       expect(element.textContent).toContain('star');
 
       // Click the star to trigger confirmation dialog
-      const starEl: HTMLElement = element.querySelector('[role="button"]');
+      // strict: the star control renders for a favorited entity after detectChanges
+      const starEl: HTMLElement = element.querySelector('[role="button"]')!;
       starEl.click();
       fixture.detectChanges();
       await vi.advanceTimersByTimeAsync(0);
@@ -175,7 +177,8 @@ describe('EntityFavoriteStarComponent', () => {
       await vi.advanceTimersByTimeAsync(0);
 
       // Click the star
-      const starEl: HTMLElement = element.querySelector('[role="button"]');
+      // strict: the star control renders for a favorited entity after detectChanges
+      const starEl: HTMLElement = element.querySelector('[role="button"]')!;
       starEl.click();
       fixture.detectChanges();
       await vi.advanceTimersByTimeAsync(0);

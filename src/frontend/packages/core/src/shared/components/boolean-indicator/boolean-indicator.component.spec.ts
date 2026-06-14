@@ -44,7 +44,10 @@ describe('BooleanIndicatorComponent', () => {
   });
 
   it('should show unknown if not boolean value', () => {
-    component.isTrue = null;
+    // strict: the component renders "Unknown" for non-boolean isTrue by design
+    // (`typeof this.isTrue !== 'boolean'`); the input's `boolean` type understates
+    // the runtime contract this test verifies.
+    (component as { isTrue: boolean | null }).isTrue = null;
     // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
     expect(element.textContent).toContain('Unknown');

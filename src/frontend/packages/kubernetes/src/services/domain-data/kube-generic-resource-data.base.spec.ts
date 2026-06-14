@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import { describe, expect, it } from 'vitest';
 import { KubeGenericResourceConfig, KubeGenericResourceDataServiceBase } from './kube-generic-resource-data.base';
 
 class TestResourceService extends KubeGenericResourceDataServiceBase<{ metadata: { name: string } }> {

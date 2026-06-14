@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { Route } from '@angular/router';
 
 import { APPLICATIONS_ROUTES } from './applications.routes';

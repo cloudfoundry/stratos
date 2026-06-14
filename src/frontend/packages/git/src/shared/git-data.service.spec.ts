@@ -113,7 +113,8 @@ describe('GitDataService', () => {
       const branch = await firstValueFrom(service.getBranch(scm, 'org/repo', 'main').waitForValue$);
 
       expect(branch.name).toBe('main');
-      expect(branch.commit.sha).toBe('abc');
+      // strict: the makeScm fake always returns a branch with a commit.
+      expect(branch.commit!.sha).toBe('abc');
       expect(branch.projectName).toBe('org/repo');
       expect(branch.guid).toBe('github--org/repo--main');
     });

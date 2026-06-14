@@ -40,7 +40,11 @@ describe('CfCurrentUserRolesDataService', () => {
   });
 
   it('propagateConnectedAdmin derives global flags + scopes', () => {
-    svc.propagateConnectedAdmin(ENDPOINT_A, { admin: true, scopes: ['cloud_controller.admin'] });
+    // The real endpoint user object carries an `admin` flag (see
+    // cf-endpoint-role-sync.service runFetch); propagateConnectedAdmin must
+    // ignore it and derive isAdmin purely from the cloud_controller.admin scope.
+    const user: { admin?: boolean; scopes?: string[] } = { admin: true, scopes: ['cloud_controller.admin'] };
+    svc.propagateConnectedAdmin(ENDPOINT_A, user);
     expect(svc.cfGlobalState(ENDPOINT_A, 'isAdmin')()).toBe(true);
     expect(svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.admin' as CfScopeStrings)()).toBe(true);
     expect(svc.cfEndpointHasScope(ENDPOINT_A, 'cloud_controller.write' as CfScopeStrings)()).toBe(false);

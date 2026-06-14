@@ -50,7 +50,8 @@ describe('RoutingHistoryService', () => {
   it('captures the current route on first navigation, previous stays null', () => {
     const svc = makeService();
     navigate('/home');
-    expect(svc.currentState().url).toBe('/home');
+    // strict: a navigation was just dispatched, so currentState is non-null here
+    expect(svc.currentState()!.url).toBe('/home');
     expect(svc.previousState()).toBeNull();
   });
 
@@ -58,8 +59,9 @@ describe('RoutingHistoryService', () => {
     const svc = makeService();
     navigate('/home');
     navigate('/applications/new');
-    expect(svc.currentState().url).toBe('/applications/new');
-    expect(svc.previousState().url).toBe('/home');
+    // strict: two navigations were dispatched, so both states are non-null here
+    expect(svc.currentState()!.url).toBe('/applications/new');
+    expect(svc.previousState()!.url).toBe('/home');
   });
 
   it('ignores a navigation to the same url (dedup, mirrors routingReducer)', () => {
@@ -67,15 +69,17 @@ describe('RoutingHistoryService', () => {
     navigate('/home');
     navigate('/applications/new');
     navigate('/applications/new');
-    expect(svc.currentState().url).toBe('/applications/new');
-    expect(svc.previousState().url).toBe('/home');
+    // strict: navigations were dispatched, so both states are non-null here
+    expect(svc.currentState()!.url).toBe('/applications/new');
+    expect(svc.previousState()!.url).toBe('/home');
   });
 
   it('exposes query params parsed from the url, keeping the query string on url', () => {
     const svc = makeService();
     navigate('/events?endpointGuid=abc&cf=def');
-    expect(svc.currentState().url).toBe('/events?endpointGuid=abc&cf=def');
-    expect(svc.currentState().state.queryParams).toEqual({ endpointGuid: 'abc', cf: 'def' });
+    // strict: a navigation was just dispatched, so currentState is non-null here
+    expect(svc.currentState()!.url).toBe('/events?endpointGuid=abc&cf=def');
+    expect(svc.currentState()!.state.queryParams).toEqual({ endpointGuid: 'abc', cf: 'def' });
   });
 
   // The observable bridges preserve store.select(...) replay timing: consumers

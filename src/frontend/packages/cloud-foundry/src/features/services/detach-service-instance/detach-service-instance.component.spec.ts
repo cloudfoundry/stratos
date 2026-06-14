@@ -110,7 +110,9 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
     const b2 = makeBinding('bind-2', 'app-2');
     const { component, httpMock } = await bootstrap([b1, b2]);
 
-    const submitPromise = component.confirmStepHandle.submit();
+    // strict: this component's confirmStepHandle literal always defines submit
+    // (SignalStepHandle.submit is optional on the interface, present here).
+    const submitPromise = component.confirmStepHandle.submit!();
     // Both DELETEs fire in parallel.
     const reqs = httpMock.match(`/pp/v1/cf/service_bindings/${cfGuid}/bind-1`)
       .concat(httpMock.match(`/pp/v1/cf/service_bindings/${cfGuid}/bind-2`));
@@ -131,7 +133,8 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
     const b2 = makeBinding('bind-bad', 'app-2');
     const { component, httpMock } = await bootstrap([b1, b2]);
 
-    const submitPromise = component.confirmStepHandle.submit();
+    // strict: confirmStepHandle literal always defines submit (optional on the interface).
+    const submitPromise = component.confirmStepHandle.submit!();
     const okReq = httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/bind-ok`);
     const badReq = httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/bind-bad`);
 
@@ -168,14 +171,16 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
     const { component, httpMock } = await bootstrap([makeBinding('b1', 'app-1')]);
 
     // First click — fires the delete.
-    const first = component.confirmStepHandle.submit();
+    // strict: confirmStepHandle literal always defines submit (optional on the interface).
+    const first = component.confirmStepHandle.submit!();
     httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/b1`)
       .flush({}, { status: 200, statusText: 'OK' });
     await first;
 
     // Second click — navigates instead of re-deleting.
     routerStub.navigate.mockClear();
-    await component.confirmStepHandle.submit();
+    // strict: confirmStepHandle literal always defines submit (optional on the interface).
+    await component.confirmStepHandle.submit!();
     expect(routerStub.navigate).toHaveBeenCalledWith(['/services']);
     httpMock.match(`/pp/v1/cf/service_bindings/${cfGuid}/b1`).forEach(r =>
       r.flush({}, { status: 200, statusText: 'OK' }),
@@ -185,7 +190,8 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
 
   it('safe no-op when no bindings selected', async () => {
     const { component, httpMock } = await bootstrap([]);
-    await component.confirmStepHandle.submit();
+    // strict: confirmStepHandle literal always defines submit (optional on the interface).
+    await component.confirmStepHandle.submit!();
     // No DELETE issued.
     expect(httpMock.match(req => req.url.includes('/service_bindings/')).length).toBe(0);
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
