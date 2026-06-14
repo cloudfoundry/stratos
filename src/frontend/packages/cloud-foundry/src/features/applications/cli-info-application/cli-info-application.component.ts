@@ -86,7 +86,10 @@ export class CliInfoApplicationComponent implements OnInit {
           {
             breadcrumbs: [
               { value: 'Applications', routerLink: '/applications' },
-              { value: context.appName, routerLink: `/applications/${cfGuid}/${appGuid}` }
+              // strict: context$ derives from application$ filtered to a loaded
+              // app, so appName is always populated here (optional on the shared
+              // CFAppCLIInfoContext type only).
+              { value: context.appName!, routerLink: `/applications/${cfGuid}/${appGuid}` }
             ]
           }
         ];

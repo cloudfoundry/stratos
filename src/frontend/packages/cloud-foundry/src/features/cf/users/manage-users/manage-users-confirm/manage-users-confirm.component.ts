@@ -40,8 +40,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   changes$!: Observable<CfRoleChangeWithNames[]>;
 
-  private cfGuid$: Observable<string>;
-  public orgName$: Observable<string>;
+  private cfGuid$!: Observable<string>; // strict: assigned in ngOnInit via createCfObs
+  public orgName$!: Observable<string>; // strict: assigned in ngAfterContentInit
 
   private updateChanges = new Subject();
   private nameCache: {

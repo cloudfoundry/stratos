@@ -323,7 +323,7 @@ const UserProvidedServiceInstanceSchema = new CFEntitySchema(userProvidedService
   }
 },
   { idAttribute: getCFCompositeEntityId },
-  null,
+  undefined,
   [
     servicePlanEntityType,
     // Service bindings

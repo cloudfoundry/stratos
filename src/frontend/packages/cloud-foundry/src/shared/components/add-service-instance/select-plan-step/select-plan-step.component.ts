@@ -36,7 +36,7 @@ import { ServicePlanPublicComponent } from '../../service-plan-public/service-pl
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiModeService } from '../csi-mode.service';
-import { CsiStateService } from '../csi-state.service';
+import { CsiState, CsiStateService } from '../csi-state.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 
 interface SelectPlanForm {
@@ -128,12 +128,16 @@ export class SelectPlanStepComponent implements OnDestroy {
     });
 
     this.servicePlans$ = this.csiState$.pipe(
-      filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
+      filter((p): p is CsiState & { orgGuid: string; spaceGuid: string; serviceGuid: string } =>
+        !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
       distinctUntilChanged((x, y) => {
         return (x.cfGuid === y.cfGuid && x.spaceGuid === y.spaceGuid && x.orgGuid === y.orgGuid && x.serviceGuid === y.serviceGuid);
       }),
       switchMap(state => {
-        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
+        // strict: cfGuid is set alongside org/space before a service is
+        // pickable; create() itself throws if it is ever falsy, so the
+        // original throw-on-absent behavior is preserved.
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid!, state.serviceGuid);
         // Trigger the per-CNSI services-details fetch (idempotent).
         // Marketplace-mode init calls this elsewhere; bind-service mode
         // (Applications → Bind Service) skips that init path so the

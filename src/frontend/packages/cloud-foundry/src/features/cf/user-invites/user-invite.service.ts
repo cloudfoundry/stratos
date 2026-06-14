@@ -142,7 +142,7 @@ export class UserInviteService {
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
       // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
-      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
+      map(v => !!v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
 
     this.canConfigure$ = combineLatest(
@@ -183,7 +183,7 @@ export class UserInviteService {
       },
       emails
     };
-    return this.http.post(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
+    return this.http.post<UserInviteResponseUaa>(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
       map((response: UserInviteResponseUaa) => ({
         error: response.failed_invites.length > 0,
         ...response

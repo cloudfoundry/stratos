@@ -42,7 +42,7 @@ export class GithubProjectExistsDirective implements Validator {
     return this.lastValue.length && this.lastValue.indexOf(name) === 0;
   }
 
-  private getTypeAndEndpointWithAuth(): [GitSCMType, string, string] {
+  private getTypeAndEndpointWithAuth(): [GitSCMType, string, string] | null {
     const res = this.appGithubProjectExists.split(',');
     if (res.length === 3) {
       return [res[0] as GitSCMType, res[1], res[2]];
@@ -52,7 +52,7 @@ export class GithubProjectExistsDirective implements Validator {
   }
 
 
-  validate(c: AbstractControl): Observable<GithubProjectExistsResponse> {
+  validate(c: AbstractControl): Observable<GithubProjectExistsResponse | null> {
     if (c.value) {
       if (!this.isValidProjectName(c.value) || this.haveAlreadyChecked(c.value)) {
         return observableOf({
@@ -64,9 +64,10 @@ export class GithubProjectExistsDirective implements Validator {
       return this.deployState$.pipe(
         debounceTime(250),
         tap(createAppState => {
-          if (createAppState?.projectExists && createAppState.projectExists.name !== c.value) {
+          const typeAndEndpoint = this.getTypeAndEndpointWithAuth();
+          if (typeAndEndpoint && createAppState?.projectExists && createAppState.projectExists.name !== c.value) {
             this.deployData.checkProjectExists(
-              this.scmService.getSCM(...this.getTypeAndEndpointWithAuth()),
+              this.scmService.getSCM(...typeAndEndpoint),
               c.value,
             );
           }
@@ -76,11 +77,14 @@ export class GithubProjectExistsDirective implements Validator {
           !createAppState.projectExists.checking &&
           createAppState.projectExists.name === c.value
         ),
-        map((createAppState): GithubProjectExistsResponse =>
-          createAppState.projectExists.exists ? null : {
-            githubProjectDoesNotExist: !createAppState.projectExists.exists,
-            githubProjectError: createAppState.projectExists.error ? createAppState.projectExists.data || '' : ''
-          }),
+        map((createAppState): GithubProjectExistsResponse | null => {
+          // strict: the preceding filter guarantees projectExists is set
+          const projectExists = createAppState.projectExists!;
+          return projectExists.exists ? null : {
+            githubProjectDoesNotExist: !projectExists.exists,
+            githubProjectError: projectExists.error ? projectExists.data || '' : ''
+          };
+        }),
         take(1)
       );
     } else {

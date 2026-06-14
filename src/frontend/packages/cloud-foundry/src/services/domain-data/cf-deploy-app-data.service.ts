@@ -15,9 +15,10 @@ import {
 } from '../../store/types/deploy-application.types';
 
 const DEFAULT_STATE: DeployApplicationState = {
+  // Wizard starts with no CF target, source, or overrides selected yet.
   cloudFoundryDetails: null,
-  applicationSource: { type: null },
-  applicationOverrides: null,
+  applicationSource: undefined,
+  applicationOverrides: undefined,
   projectExists: { checking: false, exists: false, error: false, name: '' },
 };
 
@@ -51,7 +52,7 @@ export class CfDeployAppDataService {
   readonly deployBranchName: Signal<string | undefined> = computed(
     () => this._state().applicationSource?.gitDetails?.branchName,
   );
-  readonly cfDetails: Signal<NewAppCFDetails | undefined> = computed(
+  readonly cfDetails: Signal<NewAppCFDetails | null> = computed(
     () => this._state().cloudFoundryDetails,
   );
 
@@ -67,14 +68,21 @@ export class CfDeployAppDataService {
   }
 
   saveAppDetails(git: GitAppDetails | null, docker: DockerAppDetails | null) {
-    this._state.update(s => ({
-      ...s,
-      applicationSource: {
-        ...s.applicationSource,
-        gitDetails: git || s.applicationSource?.gitDetails,
-        dockerDetails: docker || s.applicationSource?.dockerDetails,
-      },
-    }));
+    this._state.update(s => {
+      // The wizard always selects a source type before saving its details,
+      // so applicationSource (and its type) is present at runtime.
+      if (!s.applicationSource) {
+        return s;
+      }
+      return {
+        ...s,
+        applicationSource: {
+          ...s.applicationSource,
+          gitDetails: git || s.applicationSource.gitDetails,
+          dockerDetails: docker || s.applicationSource.dockerDetails,
+        },
+      };
+    });
   }
 
   saveAppOverrides(overrides: OverrideAppDetails) {
@@ -82,33 +90,51 @@ export class CfDeployAppDataService {
   }
 
   setBranch(branch: GitBranch | null) {
-    this._state.update(s => ({
-      ...s,
-      applicationSource: {
-        ...s.applicationSource,
-        gitDetails: { ...s.applicationSource?.gitDetails, branch } as GitAppDetails,
-      },
-    }));
+    this._state.update(s => {
+      // Reached only after a git source type is selected, so applicationSource exists.
+      if (!s.applicationSource) {
+        return s;
+      }
+      return {
+        ...s,
+        applicationSource: {
+          ...s.applicationSource,
+          gitDetails: { ...s.applicationSource.gitDetails, branch } as GitAppDetails,
+        },
+      };
+    });
   }
 
   setDeployBranch(branchName: string) {
-    this._state.update(s => ({
-      ...s,
-      applicationSource: {
-        ...s.applicationSource,
-        gitDetails: { ...s.applicationSource?.gitDetails, branchName } as GitAppDetails,
-      },
-    }));
+    this._state.update(s => {
+      // Reached only after a git source type is selected, so applicationSource exists.
+      if (!s.applicationSource) {
+        return s;
+      }
+      return {
+        ...s,
+        applicationSource: {
+          ...s.applicationSource,
+          gitDetails: { ...s.applicationSource.gitDetails, branchName } as GitAppDetails,
+        },
+      };
+    });
   }
 
   setDeployCommit(commit: string) {
-    this._state.update(s => ({
-      ...s,
-      applicationSource: {
-        ...s.applicationSource,
-        gitDetails: { ...s.applicationSource?.gitDetails, commit } as GitAppDetails,
-      },
-    }));
+    this._state.update(s => {
+      // Reached only after a git source type is selected, so applicationSource exists.
+      if (!s.applicationSource) {
+        return s;
+      }
+      return {
+        ...s,
+        applicationSource: {
+          ...s.applicationSource,
+          gitDetails: { ...s.applicationSource.gitDetails, commit } as GitAppDetails,
+        },
+      };
+    });
   }
 
   projectDoesntExist(projectName: string) {

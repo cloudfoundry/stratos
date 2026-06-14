@@ -13,7 +13,7 @@ export interface IGlobalRolesState {
   scopes: string[];
 }
 export interface ISpaceRoleState {
-  orgId: string;
+  orgId: string | null;
   isManager: boolean;
   isAuditor: boolean;
   isDeveloper: boolean;

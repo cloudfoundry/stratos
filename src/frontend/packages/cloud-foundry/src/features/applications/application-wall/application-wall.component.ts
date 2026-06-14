@@ -212,7 +212,9 @@ export class ApplicationWallComponent implements OnInit {
     }
 
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid)),
+      map(endpoints => endpoints
+        .map(endpoint => endpoint.guid)
+        .filter((guid): guid is string => guid !== undefined)),
     );
 
     // Resolve APPLICATION_CREATE for the current user; mirror the previous
@@ -245,7 +247,9 @@ export class ApplicationWallComponent implements OnInit {
         take(1),
       ),
     );
-    const cnsiGuids = (connected ?? []).map(ep => ep.guid);
+    const cnsiGuids = (connected ?? [])
+      .map(ep => ep.guid)
+      .filter((guid): guid is string => guid !== undefined);
     // The signal config service is a root singleton shared with the
     // per-space apps tab; clear any locked space scope from a prior visit
     // so the wall's filter predicate covers every connected CF.

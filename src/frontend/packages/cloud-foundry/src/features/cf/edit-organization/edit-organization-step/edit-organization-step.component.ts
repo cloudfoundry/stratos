@@ -157,7 +157,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): { [key: string]: any } | null => {
       const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { nameTaken: { value: formField.value } } : null;
     };
@@ -189,7 +189,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     });
   }
 
-  isNameUnique = (value: string = null): boolean => {
+  isNameUnique = (value: string | null = null): boolean => {
     if (this.allOrgsInEndpoint && this.editOrgName) {
       return this.allOrgsInEndpoint
         .filter((o: string) => o !== this.originalName)

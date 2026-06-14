@@ -218,10 +218,16 @@ function isValidByExistenceProbe(url: string): Observable<boolean> {
 // Read tolerantly (typed `any` — the input is genuinely heterogeneous) so a
 // favourite created from a V3 page still captures name + guid, rather than
 // persisting null metadata and rendering as a bare guid.
-const favName = (e: any): string | undefined => e?.entity?.name ?? e?.name;
-const favGuid = (e: any): string | undefined => e?.metadata?.guid ?? e?.guid;
-const favSpaceOrgGuid = (e: any): string | undefined =>
-  e?.entity?.organization_guid ?? e?.entity?.organization?.metadata?.guid ?? e?.orgGuid ?? e?.organization_guid;
+// IFavoriteMetadata.name is a required string; an unresolved name maps to '' (the
+// pre-strict behaviour rendered a missing name as blank), keeping the return type sound.
+const favName = (e: any): string => e?.entity?.name ?? e?.name ?? '';
+// getGuid is contractually string; an unresolved guid maps to '' (a favourite without a
+// resolvable guid was already non-navigable), keeping the return type sound.
+const favGuid = (e: any): string => e?.metadata?.guid ?? e?.guid ?? '';
+// ISpaceFavMetadata.orgGuid is a required string; default to '' when the org can't be
+// resolved (the space link already guards on a missing orgGuid and renders no link).
+const favSpaceOrgGuid = (e: any): string =>
+  e?.entity?.organization_guid ?? e?.entity?.organization?.metadata?.guid ?? e?.orgGuid ?? e?.organization_guid ?? '';
 
 export function generateCFEntities(): StratosBaseCatalogEntity[] {
   const endpointDefinition: StratosEndpointExtensionDefinition = {
@@ -246,7 +252,11 @@ export function generateCFEntities(): StratosBaseCatalogEntity[] {
     // the action class and the effect are gone. refreshCfInfo() bypasses
     // CfInfoDataService's warm-cache short-circuit so the periodic endpoint
     // health pulse still produces a fresh /pp/v1/cf/info/{guid} fetch.
-    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => refreshCfInfo(endpoint.guid)),
+    healthCheck: new EndpointHealthCheck(CF_ENDPOINT_TYPE, (endpoint) => {
+      if (endpoint.guid) {
+        refreshCfInfo(endpoint.guid);
+      }
+    }),
     getEndpointIdFromEntity: (entity: CfAPIResource) => entity.entity.cfGuid,
     globalSuccessfulRequestDataMapper: (data, endpointGuid, guid) => {
       if (data) {
@@ -379,7 +389,9 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
       getTotalEntities: (_responses: JetstreamResponse<CFResponse>) => 1,
       getPaginationParameters: (_page: number) => ({ page: '1' }),
       canIgnoreMaxedState: () => of(false),
-      maxedStateStartAt: () => of(null),
+      // Inert legacy threshold (no consumer); emit a valid number so the typed
+      // Observable<number> contract holds without fabricating list data.
+      maxedStateStartAt: () => of(0),
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       return {
@@ -388,7 +400,10 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
           cfGuid: endpointGuid
         },
         metadata: {
-          guid: action.guid,
+          // The pipeline-supplied `guid` is the non-optional entity guid for this
+          // single-resource request (action.guid is typed optional); they carry the
+          // same value here, so use the guaranteed-present parameter.
+          guid,
           created_at: '',
           updated_at: '',
           url: ''
@@ -524,7 +539,9 @@ function generateCFAppStatsEntity(endpointDefinition: StratosEndpointExtensionDe
       }, 0),
       getPaginationParameters: (page: number) => ({ page: page + '' }),
       canIgnoreMaxedState: () => of(false),
-      maxedStateStartAt: () => of(null),
+      // Inert legacy threshold (no consumer); emit a valid number so the typed
+      // Observable<number> contract holds without fabricating list data.
+      maxedStateStartAt: () => of(0),
     },
     successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
       if (data) {
@@ -807,7 +824,9 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
       actionBuilders: serviceInstanceActionBuilders,
       entityBuilder: {
         getMetadata: ent => ({
-          name: ent.entity.name,
+          // IServiceInstance.name is optional; default to '' to satisfy the required
+          // IFavoriteMetadata.name (a nameless instance already rendered blank).
+          name: ent.entity.name ?? '',
         }),
         getGuid: entity => entity.metadata.guid
       }
@@ -1083,7 +1102,11 @@ function generateFeatureFlagEntity(endpointDefinition: StratosEndpointExtensionD
           getMetadata: ff => ({
             name: ff.name,
           }),
-          getGuid: entity => entity.guid,
+          // IFeatureFlag.guid is typed optional, but every feature flag is
+          // synthesised with `${cnsiGuid}-${name}` in getEntitiesFromResponse
+          // above. Mirror that synthesis so getGuid always returns a string
+          // rather than depending on the optionally-typed stamped field.
+          getGuid: entity => entity.guid ?? `${entity.cfGuid}-${entity.name}`,
         }
       }
     );
@@ -1189,7 +1212,13 @@ function generateCfSpaceEntity(endpointDefinition: StratosEndpointExtensionDefin
           orgGuid: favSpaceOrgGuid(space),
           name: favName(space),
         }),
-        getLink: favorite => `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.metadata.orgGuid}/spaces/${favorite.entityId}/summary`,
+        // UserFavorite.metadata is optional (some favorites are built before
+        // metadata resolves). Without orgGuid the org-scoped space link can't be
+        // formed, so signal "no link" (the getLink contract returns string | null)
+        // rather than emitting a broken `/undefined/` URL.
+        getLink: favorite => favorite.metadata
+          ? `/cloud-foundry/${favorite.endpointId}/organizations/${favorite.metadata.orgGuid}/spaces/${favorite.entityId}/summary`
+          : null,
         getGuid: entity => favGuid(entity),
         getIsValid: (fav) => isValidByExistenceProbe(`/pp/v1/cf/spaces/${fav.endpointId}/${fav.entityId}`)
       }

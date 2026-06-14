@@ -329,7 +329,7 @@ export function removeCfSpace(state: IAllCfRolesState, endpointGuid: string, spa
   const { orgId } = endpointState.spaces[spaceGuid];
   const { [spaceGuid]: _omit, ...spaces } = endpointState.spaces;
   const org = orgId ? endpointState.organizations[orgId] : undefined;
-  const organizations = org
+  const organizations = orgId && org
     ? { ...endpointState.organizations, [orgId]: { ...org, spaceGuids: org.spaceGuids.filter(id => id !== spaceGuid) } }
     : endpointState.organizations;
   return { ...state, [endpointGuid]: { ...endpointState, spaces, organizations } };

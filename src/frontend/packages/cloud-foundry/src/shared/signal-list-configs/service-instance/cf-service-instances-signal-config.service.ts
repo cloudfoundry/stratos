@@ -158,7 +158,7 @@ export class CfServiceInstancesSignalConfigService {
     this.cnsiOptions = computed(() => {
       const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
       for (const ep of this.connectedEndpoints() ?? []) {
-        opts.push({ label: ep.name ?? ep.guid, value: ep.guid });
+        opts.push({ label: ep.name ?? ep.guid, value: ep.guid ?? null });
       }
       return opts;
     });
@@ -166,7 +166,7 @@ export class CfServiceInstancesSignalConfigService {
     this.endpointNames = computed(() => {
       const m = new Map<string, string>();
       for (const ep of this.connectedEndpoints() ?? []) {
-        if (ep.name) m.set(ep.guid, ep.name);
+        if (ep.guid && ep.name) m.set(ep.guid, ep.name);
       }
       return m;
     });

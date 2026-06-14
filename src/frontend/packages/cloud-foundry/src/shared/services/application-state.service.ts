@@ -5,7 +5,7 @@ import { StratosStatus, StratosStatusMetadata } from '@stratosui/store';
 export interface ApplicationStateData extends StratosStatusMetadata {
   actions: {
     [key: string]: boolean
-  };
+  } | null;
 }
 @Injectable({
   providedIn: 'root'

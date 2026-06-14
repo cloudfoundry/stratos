@@ -12,7 +12,7 @@ export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuil
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetUserProvidedService;
   remove: (
     guid: string,
@@ -22,7 +22,7 @@ export interface UserProvidedServiceActionBuilder extends OrchestratedActionBuil
   getMultiple: (
     paginationKey?: string,
     endpointGuid?: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllUserProvidedServices;
   getAllInSpace: (
     endpointGuid: string,
@@ -45,8 +45,8 @@ export const userProvidedServiceActionBuilder: UserProvidedServiceActionBuilder 
     proxyPaginationEntityConfig?: EntityCatalogEntityConfig
   ) => new DeleteUserProvidedInstance(endpointGuid, guid, proxyPaginationEntityConfig),
   getMultiple: (
-    paginationKey: string,
-    endpointGuid: string,
+    paginationKey?: string,
+    endpointGuid?: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllUserProvidedServices(paginationKey, endpointGuid, includeRelations, populateMissing),
   getAllInSpace: (

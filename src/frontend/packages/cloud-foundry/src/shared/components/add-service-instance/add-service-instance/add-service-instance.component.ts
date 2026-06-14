@@ -51,7 +51,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
-import { CsiStateService } from '../csi-state.service';
+import { CsiState, CsiStateService } from '../csi-state.service';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
@@ -160,7 +160,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   private _initialisedService = signal<boolean>(false);
   readonly initialisedService: Signal<boolean> = this._initialisedService.asReadonly();
 
-  public cfGuid$: Observable<string>;
+  public cfGuid$: Observable<string | null | undefined>;
   public spaceGuid$ = this.cfDetails$.pipe(
     map(details => details?.spaceGuid),
     takeUntil(this.destroyed$)
@@ -436,7 +436,8 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     // We map to the {metadata, entity} APIResource shape the bind-apps
     // template still consumes.
     this.apps$ = this.cfDetails$.pipe(
-      filter(csi => !!csi && !!csi.spaceGuid && !!csi.cfGuid),
+      filter((csi): csi is CsiState & { cfGuid: string; spaceGuid: string } =>
+        !!csi && !!csi.spaceGuid && !!csi.cfGuid),
       distinctUntilChanged((x, y) => x.cfGuid + x.spaceGuid === y.cfGuid + y.spaceGuid),
       tap(() => this._appsLoading.set(true)),
       switchMap(csi => this.http.get<{ resources: Array<{ guid: string; name: string }> }>(

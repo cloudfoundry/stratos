@@ -75,7 +75,8 @@ export class CfEndpointRoleSyncService implements OnDestroy {
   private readonly fetchEffect = effect(() => {
     const endpoints = this.endpointsService.endpoints();
     const connected = Array.from(endpoints.values())
-      .filter(ep => ep.cnsi_type === CF_ENDPOINT_TYPE && ep.connectionStatus === 'connected');
+      .filter((ep): ep is typeof ep & { guid: string } =>
+        ep.cnsi_type === CF_ENDPOINT_TYPE && ep.connectionStatus === 'connected' && !!ep.guid);
 
     const toFetch = connected.filter(ep => !this.fetchedCfGuids.has(ep.guid));
     toFetch.forEach(ep => this.fetchedCfGuids.add(ep.guid));

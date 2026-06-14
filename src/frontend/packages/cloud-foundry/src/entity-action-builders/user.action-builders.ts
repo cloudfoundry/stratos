@@ -13,7 +13,7 @@ export interface UserActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllCfUsersAsAdmin;
   getAllInOrganization: (
     guid: string,

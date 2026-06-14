@@ -84,7 +84,7 @@ export const getServiceName = (serviceEntity: APIResource<IService>): string => 
   if (!serviceEntity || !serviceEntity.entity) {
     return '';
   }
-  let extraInfo: IServiceExtra = null;
+  let extraInfo: IServiceExtra | null = null;
   try {
     extraInfo = serviceEntity.entity.extra ? JSON.parse(serviceEntity.entity.extra) : null;
   } catch (_e) { /* intentionally empty */ }

@@ -34,7 +34,7 @@ export interface EntityInlineChildAction {
   endpointGuid: string;
 }
 
-export function isEntityInlineChildAction(anything: any): EntityInlineChildAction {
+export function isEntityInlineChildAction(anything: any): EntityInlineChildAction | null {
   const inlineChildAction = anything as EntityInlineChildAction;
   return inlineChildAction &&
     !!inlineChildAction.parentGuid &&
@@ -53,7 +53,7 @@ export interface EntityInlineParentAction extends EntityRequestAction {
   populateMissing: boolean;
 }
 
-export function isEntityInlineParentAction(anything: any): EntityInlineParentAction {
+export function isEntityInlineParentAction(anything: any): EntityInlineParentAction | null {
   return anything && !!anything.includeRelations && anything.populateMissing !== undefined ? anything as EntityInlineParentAction : null;
 }
 

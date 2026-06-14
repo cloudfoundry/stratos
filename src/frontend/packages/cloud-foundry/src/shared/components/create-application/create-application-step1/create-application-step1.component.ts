@@ -150,7 +150,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngAfterContentInit() {
-    this.validate = this.cfForm.statusChanges.pipe(
+    // strict: cfForm is a `static: true` ViewChild, so the NgForm and its
+    // statusChanges stream are initialised by the time ngAfterContentInit runs.
+    this.validate = this.cfForm.statusChanges!.pipe(
       startWith(this.cfForm.valid || this.isRedeploy),
       map(() => this.cfForm.valid || this.isRedeploy),
       observeOn(asapScheduler)

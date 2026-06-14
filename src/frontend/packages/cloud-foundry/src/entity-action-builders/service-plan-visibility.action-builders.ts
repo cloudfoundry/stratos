@@ -6,7 +6,7 @@ export interface ServicePlanVisibilityActionBuilders extends OrchestratedActionB
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServicePlanVisibilities;
 }
 

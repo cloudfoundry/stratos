@@ -333,7 +333,7 @@ export function createDefaultOrgRoles(orgGuid: string, orgName: string): IUserPe
   return {
     name: orgName,
     orgGuid,
-    permissions: createUserRoleInOrg(undefined, undefined, undefined, undefined),
+    permissions: createUserRoleInOrg(false, false, false, false),
     spaces: {},
   };
 }
@@ -344,7 +344,7 @@ export function createDefaultSpaceRoles(orgGuid: string, orgName: string, spaceG
     spaceGuid,
     orgGuid,
     orgName,
-    permissions: createUserRoleInSpace(undefined, undefined, undefined),
+    permissions: createUserRoleInSpace(false, false, false),
   };
 }
 

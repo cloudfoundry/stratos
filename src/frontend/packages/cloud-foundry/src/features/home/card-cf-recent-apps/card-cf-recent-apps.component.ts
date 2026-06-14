@@ -41,7 +41,10 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
-  public recentApps$: Observable<APIResource<IApp>[]>;
+  // strict: assigned in ngOnInit for the live path; in placeholderMode the
+  // hasEntities$=of(false) gate makes the template render placeholders and
+  // never read recentApps$, so the field is never observed unassigned.
+  public recentApps$!: Observable<APIResource<IApp>[]>;
   @Input() allApps$!: Observable<APIResource<IApp>[]>;
   @Input() loading$!: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();

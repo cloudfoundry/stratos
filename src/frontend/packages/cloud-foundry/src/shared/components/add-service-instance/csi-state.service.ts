@@ -16,17 +16,19 @@ import { Injectable, Signal, computed, signal } from '@angular/core';
  */
 export interface CsiState {
   name: string;
-  servicePlanGuid: string;
-  spaceGuid: string;
-  orgGuid: string;
+  // Cleared back to null by the legacy reducer contract (setServiceGuid
+  // blanks the plan; setCFDetails / resetOrgAndSpace clear org & space).
+  servicePlanGuid: string | null;
+  spaceGuid: string | null;
+  orgGuid: string | null;
   parameters?: string;
   tags?: string[];
-  bindAppGuid?: string;
+  bindAppGuid?: string | null;
   bindAppParams?: object;
-  serviceInstanceGuid?: string;
+  serviceInstanceGuid?: string | null;
   spaceScoped: boolean;
   cfGuid?: string;
-  serviceGuid?: string;
+  serviceGuid?: string | null;
 }
 
 const defaultState: CsiState = {

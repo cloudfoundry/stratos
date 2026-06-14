@@ -15,9 +15,10 @@ import { AppStatsDataRegistry } from '../../../services/endpoint-data/app-stats-
 export class RunningInstancesComponent implements OnInit {
   private readonly registry = inject(AppStatsDataRegistry);
 
-  @Input() instances: number;
-  @Input() cfGuid: string;
-  @Input() appGuid: string;
+  // strict: required @Inputs, always bound by the host template
+  @Input() instances!: number;
+  @Input() cfGuid!: string;
+  @Input() appGuid!: string;
 
   running: Signal<number> = signal(0);
 

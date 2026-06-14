@@ -50,7 +50,8 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   // Signal for connection status tracking
   connectionStatusSignal = signal<number>(0);
 
-  @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
+  // strict: populated by Angular's @ViewChild query after view init.
+  @ViewChild('searchFilter', { static: false }) searchFilter!: NgModel;
 
   filter;
 
@@ -89,7 +90,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
 
       console.log('WebSocket connection URL:', streamUrl);
 
-      const socket$ = makeWebSocketObservable(streamUrl).pipe(
+      const socket$ = makeWebSocketObservable<string>(streamUrl).pipe(
         tap(() => {
           // Reset connection tracking on successful connection
           this.connectionAttempts = 0;
@@ -157,7 +158,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
       );
 
       this.messages = socket$.pipe(
-        switchMap((getResponses: GetWebSocketResponses | null) => {
+        switchMap((getResponses: GetWebSocketResponses<string> | null) => {
           if (!getResponses) {
             console.warn('WebSocket getResponses is null');
             return EMPTY;
@@ -256,9 +257,11 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         return;
       }
 
-      let msgColour;
-      let sourceColour;
-      let bold;
+      // Defaults preserve the legacy behavior: an empty colour string and
+      // bold=false take colorize's no-style branch just as undefined did.
+      let msgColour = '';
+      let sourceColour: string;
+      let bold = false;
 
       // CF timestamps are in nanoseconds
       const msStamp = Math.round(messageObj.timestamp / 1000000);

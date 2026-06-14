@@ -104,15 +104,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       // Without this guard, ngrx state churn during refreshes (or a slow
       // endpoint reducer hydrating after waitForAppEntity$ already replayed)
       // produces console TypeErrors on every navigation.
-      filter(([app, endpoints, org, space]) =>
-        !!endpoints?.[app.entity.entity.cfGuid] && !!org && !!space
-      ),
+      filter(([app, endpoints, org, space]) => {
+        const cfGuid = app.entity.entity.cfGuid;
+        return !!cfGuid && !!endpoints?.[cfGuid] && !!org && !!space;
+      }),
       map(([app, endpoints, org, space]) => {
+        // strict: the filter above guarantees cfGuid, the endpoint entry,
+        // org and space are all present on emissions that reach here.
+        const cfGuid = app.entity.entity.cfGuid!;
         return this.getBreadcrumbs(
           app.entity.entity,
-          endpoints[app.entity.entity.cfGuid],
-          org,
-          space
+          endpoints![cfGuid],
+          org!,
+          space!
         );
       }),
       take(1)
@@ -120,7 +124,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
     const appDoesNotHaveEnvVars$ = this.applicationService.appSpace$.pipe(
       switchMap(space => this.currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
-        this.applicationService.cfGuid, space.guid)
+        this.applicationService.cfGuid, space?.guid)
       ),
       map(can => !can),
     );

@@ -69,7 +69,8 @@ export class CfRolesService {
   static filterEditableOrgOrSpace<T extends IOrganization | ISpace>(
     userPerms: CurrentUserPermissionsService,
     isOrg: boolean,
-    orgOrSpaces$: Observable<APIResource<T>[]>
+    orgOrSpaces$: Observable<APIResource<T>[]>,
+    cfGuid: string,
   ): Observable<APIResource<T>[]> {
     return orgOrSpaces$.pipe(
       // Create an observable containing the original list of organisations and a corresponding list of whether an org can be edited
@@ -79,13 +80,18 @@ export class CfRolesService {
           combineLatest(orgsOrSpaces.map(orgOrSpace => CfRolesService.canEditOrgOrSpace(
             userPerms,
             orgOrSpace.metadata.guid,
-            orgOrSpace.entity.cfGuid,
-            isOrg ? orgOrSpace.metadata.guid : (orgOrSpace as APIResource<ISpace>).entity.organization_guid,
+            // entity.cfGuid is typed optional on IOrganization/ISpace; the cnsi
+            // is always known by the caller, so fall back to it.
+            orgOrSpace.entity.cfGuid ?? cfGuid,
+            isOrg ? orgOrSpace.metadata.guid : ((orgOrSpace as APIResource<ISpace>).entity.organization_guid),
             isOrg ? CfUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
           ))));
       }),
       // Filter out orgs than the current user cannot edit
-      map(([orgs, canEdit]) => orgs.filter(org => canEdit.find(canEditOrgOrSpace => canEditOrgOrSpace.guid === org.metadata.guid).canEdit)),
+      map(([orgs, canEdit]) => orgs.filter(org => {
+        const entry = canEdit.find(canEditOrgOrSpace => canEditOrgOrSpace.guid === org.metadata.guid);
+        return !!entry && entry.canEdit;
+      })),
     );
   }
 
@@ -177,10 +183,16 @@ export class CfRolesService {
       if (!mappedUser[space.orgGuid]) {
         mappedUser[space.orgGuid] = createDefaultOrgRoles(space.orgGuid, space.orgName);
       }
-      if (!space.orgName && mappedUser[space.orgGuid]) {
-        space.orgName = mappedUser[space.orgGuid].name;
+      const orgEntry = mappedUser[space.orgGuid];
+      if (!space.orgName) {
+        space.orgName = orgEntry.name;
       }
-      mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
+      // Both construction paths above (the org-roles loop and
+      // createDefaultOrgRoles) initialise `spaces` to {}; guard so TS sees it.
+      if (!orgEntry.spaces) {
+        orgEntry.spaces = {};
+      }
+      orgEntry.spaces[space.spaceGuid] = {
         ...space
       };
     });
@@ -226,23 +238,25 @@ export class CfRolesService {
       userGuid: user.guid,
       orgGuid,
       orgName: newRoles.name,
-      add: false,
-      role: null
     },
       existingOrgRoles.permissions, newRoles.permissions));
 
     // Compare space roles
-    Object.keys(newRoles.spaces).forEach(spaceGuid => {
-      const newSpace = newRoles.spaces[spaceGuid];
-      const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
+    const newSpaces = newRoles.spaces;
+    const existingSpaces = existingOrgRoles.spaces;
+    if (!newSpaces) {
+      return newChanges;
+    }
+    Object.keys(newSpaces).forEach(spaceGuid => {
+      const newSpace = newSpaces[spaceGuid];
+      const oldSpace = (existingSpaces && existingSpaces[spaceGuid]) ||
+        createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
       newChanges.push(...this.comparePermissions({
         userGuid: user.guid,
         orgGuid,
         orgName: newRoles.name,
         spaceGuid,
         spaceName: newSpace.name,
-        add: false,
-        role: null
       },
         oldSpace.permissions, newSpace.permissions));
     });
@@ -254,8 +268,8 @@ export class CfRolesService {
   // APIResource<IOrganization>. Bridging the native StOrg payload into that
   // shape here keeps the UI files unchanged; a future cleanup can lift the
   // native shape through the consumers.
-  fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
-    const fetching: EntityInfo<APIResource<IOrganization>> = {
+  fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization> | null>> {
+    const fetching: EntityInfo<APIResource<IOrganization> | null> = {
       entity: null,
       entityRequestInfo: {
         fetching: true,
@@ -271,7 +285,7 @@ export class CfRolesService {
           error: false,
           deleting: { busy: false, deleted: false, error: false, message: '' },
         } as any,
-      }) as EntityInfo<APIResource<IOrganization>>),
+      }) as EntityInfo<APIResource<IOrganization> | null>),
       startWith(fetching),
       catchError(() => of({
         entity: null,
@@ -280,13 +294,13 @@ export class CfRolesService {
           error: true,
           deleting: { busy: false, deleted: false, error: false, message: '' },
         } as any,
-      } as EntityInfo<APIResource<IOrganization>>)),
+      } as EntityInfo<APIResource<IOrganization> | null>)),
     );
   }
 
   fetchOrgEntity(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {
     return this.fetchOrg(cfGuid, orgGuid).pipe(
-      filter(entityInfo => !!entityInfo.entity),
+      filter((entityInfo): entityInfo is EntityInfo<APIResource<IOrganization>> => !!entityInfo.entity),
       map(entityInfo => entityInfo.entity),
     );
   }
@@ -299,7 +313,7 @@ export class CfRolesService {
         map(resp => (resp?.resources ?? []).map(adaptOrgToApiResource)),
         catchError(() => of([] as APIResource<IOrganization>[])),
       );
-      this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$).pipe(
+      this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$, cfGuid).pipe(
         map(orgs => orgs.sort((a, b) => naturalCompare(a.entity.name, b.entity.name))),
         publishReplay(1),
         refCount()
@@ -376,7 +390,7 @@ export class CfRolesService {
    * Compare a set of org or space permissions and return the differences
    */
   private comparePermissions(
-    template: CfRoleChange,
+    template: Omit<CfRoleChange, 'add' | 'role'>,
     oldPerms: UserRoleInOrg | UserRoleInSpace,
     newPerms: UserRoleInOrg | UserRoleInSpace)
     : CfRoleChange[] {

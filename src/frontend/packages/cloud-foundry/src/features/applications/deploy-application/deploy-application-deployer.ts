@@ -72,8 +72,8 @@ interface DeploySource {
 interface GitSCMSourceInfo extends DeploySource {
   project: string;
   branch: string;
-  url: string;
-  commit: string;
+  url?: string;
+  commit?: string;
   scm: string;
   endpointGuid: string;
   accessToken?: string;
@@ -89,7 +89,7 @@ interface GitUrlSourceInfo extends DeploySource {
 interface DockerImageSourceInfo extends DeploySource {
   applicationName: string;
   dockerImage: string;
-  dockerUsername: string;
+  dockerUsername?: string;
 }
 
 interface FolderSourceInfo extends DeploySource {
@@ -105,7 +105,8 @@ export class DeployApplicationDeployer {
   updateSub!: Subscription;
   msgSub!: Subscription;
   streamTitle = 'Preparing...';
-  appData: AppData;
+  // strict: populated from the MANIFEST websocket event before any read
+  appData!: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
   cfGuid!: string;
   orgGuid!: string;
@@ -186,7 +187,7 @@ export class DeployApplicationDeployer {
       () => true :
       (appDetail: DeployApplicationState) => {
         if (!appDetail.applicationSource || !appDetail.applicationOverrides) {
-          return;
+          return false;
         }
         return (!!appDetail.applicationSource.gitDetails && !!appDetail.applicationSource.gitDetails.projectName) ||
           (!!appDetail.applicationSource.dockerDetails && !!appDetail.applicationSource.dockerDetails.dockerImage);
@@ -203,7 +204,9 @@ export class DeployApplicationDeployer {
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
         this.applicationSource = appDetail.applicationSource;
-        this.applicationOverrides = appDetail.applicationOverrides;
+        if (appDetail.applicationOverrides) {
+          this.applicationOverrides = appDetail.applicationOverrides;
+        }
         // Resolve org / space names from the signal-native picker — it
         // already loaded both lists when the user made their selection,
         // so the lookup is synchronous. Replaces the legacy ngrx
@@ -256,7 +259,9 @@ export class DeployApplicationDeployer {
     this.updateSub = deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
-        this.applicationOverrides = appDetail.applicationOverrides;
+        if (appDetail.applicationOverrides) {
+          this.applicationOverrides = appDetail.applicationOverrides;
+        }
       })
     ).subscribe();
   }
@@ -294,15 +299,19 @@ export class DeployApplicationDeployer {
   };
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.group === 'gitscm',
+    // which the source-type selection guarantees populates gitDetails.
+    const gitDetails = appSource.gitDetails!;
     const gitscm: GitSCMSourceInfo = {
-      project: appSource.gitDetails.projectName,
-      branch: appSource.gitDetails.branch.name,
-      type: appSource.type.group,
-      commit: appSource.gitDetails.commit,
-      url: appSource.gitDetails.url,
+      project: gitDetails.projectName,
+      branch: gitDetails.branch.name,
+      // strict: gitscm branch guarantees type.group === 'gitscm'
+      type: appSource.type.group!,
+      commit: gitDetails.commit,
+      url: gitDetails.url,
       scm: appSource.type.id,
-      endpointGuid: appSource.gitDetails.endpointGuid,
-      accessToken: appSource.gitDetails.accessToken,
+      endpointGuid: gitDetails.endpointGuid,
+      accessToken: gitDetails.accessToken,
     };
 
     const msg = {
@@ -314,9 +323,12 @@ export class DeployApplicationDeployer {
   };
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.id === GIT_URL,
+    // which the source-type selection guarantees populates gitDetails.
+    const gitDetails = appSource.gitDetails!;
     const gitUrl: GitUrlSourceInfo = {
-      url: appSource.gitDetails.projectName,
-      branch: appSource.gitDetails.branch.name,
+      url: gitDetails.projectName,
+      branch: gitDetails.branch.name,
       type: appSource.type.id
     };
 
@@ -329,10 +341,13 @@ export class DeployApplicationDeployer {
   };
 
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.id === DOCKER_IMG,
+    // which the source-type selection guarantees populates dockerDetails.
+    const dockerDetails = appSource.dockerDetails!;
     const dockerInfo: DockerImageSourceInfo = {
-      applicationName: appSource.dockerDetails.applicationName,
-      dockerImage: appSource.dockerDetails.dockerImage,
-      dockerUsername: appSource.dockerDetails.dockerUsername,
+      applicationName: dockerDetails.applicationName,
+      dockerImage: dockerDetails.dockerImage,
+      dockerUsername: dockerDetails.dockerUsername,
       type: appSource.type.id
     };
 
@@ -465,7 +480,7 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log: any, title: string, error: any) {
+  private onClose(log: any, title: string | null, error: any) {
     if (title) {
       this.streamTitle = title;
     }
@@ -512,7 +527,7 @@ export class DeployApplicationDeployer {
   }
 
   // Flatten files and folders
-  collectFoldersAndFiles(metadata: any, base: string, folder: any) {
+  collectFoldersAndFiles(metadata: any, base: string | null, folder: any) {
     if (folder.files) {
       folder.files.forEach((file: any) => {
         file.fullPath = base ? base + '/' + file.name : file.name;

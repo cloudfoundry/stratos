@@ -211,7 +211,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
 export class GetAllServicesForSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
-    public endpointGuid: string = null,
+    public endpointGuid: string = '',
     public spaceGuid: string,
     public includeRelations: string[] = [
       createEntityRelationKey(serviceEntityType, servicePlanEntityType)
@@ -244,7 +244,7 @@ export class GetServiceInstancesForSpace
     public spaceGuid: string,
     public endpointGuid: string,
     public paginationKey: string,
-    public q: string[] = null,
+    public q?: string[],
     public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public flattenPagination = true

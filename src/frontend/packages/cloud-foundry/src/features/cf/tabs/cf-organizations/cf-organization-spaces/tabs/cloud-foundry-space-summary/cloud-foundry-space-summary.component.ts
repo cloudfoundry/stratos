@@ -56,7 +56,7 @@ export class CloudFoundrySpaceSummaryComponent {
   private spacesConfig = inject(CfSpacesSignalConfigService);
 
   detailsLoading$: Observable<boolean>;
-  name$: Observable<string>;
+  name$?: Observable<string>;
   public permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
   public permsSpaceDelete = CfCurrentUserPermissions.SPACE_DELETE;
 

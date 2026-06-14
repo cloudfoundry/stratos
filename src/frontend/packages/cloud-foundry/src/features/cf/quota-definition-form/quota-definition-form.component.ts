@@ -122,7 +122,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): { [key: string]: any } | null => {
       if (!this.validateNameTaken(formField.value)) {
         return { nameTaken: { value: formField.value } };
       }
@@ -130,7 +130,7 @@ export class QuotaDefinitionFormComponent implements OnInit, OnDestroy {
     };
   }
 
-  validateNameTaken = (value: string = null) => {
+  validateNameTaken = (value: string | null = null) => {
     if (this.quota && value === this.quota.name) {
       return true;
     }

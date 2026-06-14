@@ -27,7 +27,8 @@ export class CloudFoundryFirehoseComponent implements OnInit {
   messages!: Observable<string>;
   connectionStatus!: Observable<number>;
 
-  filter: (jsonString: string) => string;
+  // strict: assigned in ngOnInit (lifecycle-guaranteed before template use)
+  filter!: (jsonString: string) => string;
 
   // Formatter for fire hose log messages
   formatter!: CloudFoundryFirehoseFormatter;
@@ -45,7 +46,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
   }
 
   private setupFirehoseStream(streamUrl: string) {
-    this.messages = websocketConnect(
+    this.messages = websocketConnect<string>(
       streamUrl
     ).pipe(
       switchMap((get) => get(new Subject<string>())),

@@ -31,8 +31,8 @@ export const getUserProvidedServiceInstanceRelations = [
 
 export class GetAllUserProvidedServices extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
-    paginationKey: string = null,
-    public endpointGuid: string = null,
+    paginationKey: string = '',
+    public endpointGuid: string = '',
     public includeRelations: string[] = getUserProvidedServiceInstanceRelations,
     public populateMissing = true,
     public spaceGuid?: string

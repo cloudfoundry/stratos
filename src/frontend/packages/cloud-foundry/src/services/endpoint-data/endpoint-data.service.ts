@@ -204,6 +204,7 @@ export class EndpointDataService {
       ),
     ).pipe(
       timeout(60_000),
+      map(() => undefined),
       finalize(() => {
         this._isLoading.set(false);
         this._lastFetched.set(new Date());
@@ -217,7 +218,7 @@ export class EndpointDataService {
         this._inFlightLoad = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
-    ) as Observable<void>;
+    );
     return this._inFlightLoad;
   }
 

@@ -85,7 +85,8 @@ export class CloudFoundryCellBaseComponent {
       take(1)
     );
 
-    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks).hidden$ =
+    // strict: AppsLinks tab is statically present in the tabLinks array literal above
+    this.tabLinks.find(link => link.link === CloudFoundryCellBaseComponent.AppsLinks)!.hidden$ =
       cfEndpointService.currentUser$.pipe(
         map(user => !user.admin)
       );

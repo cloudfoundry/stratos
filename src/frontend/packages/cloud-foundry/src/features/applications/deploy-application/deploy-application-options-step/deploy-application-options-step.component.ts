@@ -10,7 +10,14 @@ import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
-import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
+import { NewAppCFDetails } from '../../../../store/types/create-application.types';
+import {
+  DeployApplicationSource,
+  DeployApplicationState,
+  DockerAppDetails,
+  OverrideAppDetails,
+  SourceType,
+} from '../../../../store/types/deploy-application.types';
 import {
   ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { StDomain, StDomainsResponse, StEnvVars, StStack, StStacksResponse } from '../../../../services/endpoint-data/stratos-types';
@@ -70,7 +77,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
-  public sourceType$!: Observable<SourceType>;
+  public sourceType$!: Observable<SourceType | undefined>;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor() {
@@ -164,7 +171,9 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
 
     // Set previously supplied docker values
     this.subs.push(this.deployState$.pipe(
-      filter(deployAppState =>
+      filter((deployAppState): deployAppState is DeployApplicationState & {
+        applicationSource: DeployApplicationSource & { dockerDetails: DockerAppDetails };
+      } =>
         !!deployAppState &&
         !!deployAppState.applicationSource &&
         !!deployAppState.applicationSource.dockerDetails &&
@@ -182,7 +191,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
     const cfDetails$ = this.deployCfDetails$.pipe(
-      filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
+      filter((cfDetails): cfDetails is NewAppCFDetails => !!cfDetails && !!cfDetails.cloudFoundry)
     );
 
     // Create the domains list for the domains drop down. cf push overrides
@@ -260,8 +269,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.name.disable();
     controls.buildpack.setValue(overrides.buildpack);
     controls.instances.setValue(overrides.instances);
-    controls.disk_quota.setValue(parseInt(overrides.diskQuota.replace('MB', ''), 10));
-    controls.memory.setValue(parseInt(overrides.memQuota.replace('MB', ''), 10));
+    controls.disk_quota.setValue(overrides.diskQuota ? parseInt(overrides.diskQuota.replace('MB', ''), 10) : null);
+    controls.memory.setValue(overrides.memQuota ? parseInt(overrides.memQuota.replace('MB', ''), 10) : null);
     controls.no_start.setValue(overrides.doNotStart);
     controls.no_route.setValue(overrides.noRoute);
     // Random route has no affect on redeploy, so disable.

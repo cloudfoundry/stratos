@@ -11,7 +11,7 @@ export interface CfErrorObject {
  */
 export type CfErrorResponse = CfErrorObject | string | any;
 
-function isCfError(errorResponse: CfErrorResponse): CfErrorObject {
+function isCfError(errorResponse: CfErrorResponse): CfErrorObject | null {
   return !!errorResponse &&
     !!errorResponse.code &&
     !!errorResponse.description &&
@@ -26,9 +26,10 @@ export function getCfError(jetStreamErrorResponse: JetStreamErrorResponse<CfErro
     return `${cfError.description}. Code: ${cfError.error_code}`;
   } else if (typeof jetStreamErrorResponse.errorResponse === 'string') {
     return jetStreamErrorResponse.errorResponse;
-  } else if (jetStreamErrorResponseToSafeString(jetStreamErrorResponse)) {
-    return jetStreamErrorResponseToSafeString(jetStreamErrorResponse);
-  } else {
-    return `Unknown Cloud Foundry Error`;
   }
+  const safeString = jetStreamErrorResponseToSafeString(jetStreamErrorResponse);
+  if (safeString) {
+    return safeString;
+  }
+  return `Unknown Cloud Foundry Error`;
 }

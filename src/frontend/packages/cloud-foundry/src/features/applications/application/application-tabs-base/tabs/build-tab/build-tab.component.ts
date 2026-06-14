@@ -36,6 +36,26 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   commitURL?: string;
 }
 
+// The view-model the Build tab's deploy-source pipeline actually emits: a
+// git/docker deploy source, the docker-image variant, or one of the
+// 'loading' / 'not-available' sentinels. All fields the template reads are
+// optional because each variant populates a different subset.
+interface DeploySourceView {
+  type: string;
+  scm?: string;
+  project?: string;
+  branch?: string;
+  commit?: string;
+  url?: string;
+  endpointGuid?: string;
+  timestamp?: number | null;
+  label?: string;
+  icon?: SCMIcon;
+  commitURL?: string;
+  dockerImage?: string;
+  dockerUrl?: string | null;
+}
+
 @Component({
   selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
@@ -79,7 +99,7 @@ export class BuildTabComponent implements OnInit {
 
   sshStatus$!: Observable<string>;
 
-  deploySource$!: Observable<CustomEnvVarStratosProjectSource>;
+  deploySource$!: Observable<DeploySourceView | null>;
 
   public gitRepo$!: Observable<GitRepo>;
   public gitRepo: GitRepo | null = null;
@@ -102,7 +122,7 @@ export class BuildTabComponent implements OnInit {
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
       map(([app, space]) => {
-        if (!space.allowSsh) {
+        if (!space?.allowSsh) {
           return 'Disabled by the space';
         } else {
           return app.app.entity.enable_ssh ? 'Yes' : 'No';
@@ -114,7 +134,7 @@ export class BuildTabComponent implements OnInit {
       switchMap(space => this.cups.can(
         CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid,
-        space.guid)
+        space?.guid)
       )
     );
 
@@ -122,7 +142,10 @@ export class BuildTabComponent implements OnInit {
       map(project => {
         const scmType = project.deploySource.scm || project.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType, project.deploySource.endpointGuid);
-        return this.gitData.getRepository(scm, project.deploySource.project);
+        // strict: applicationStratProject$ only carries a git deploySource here,
+        // whose project name is always populated (optional on the shared source
+        // type because docker/other deploy kinds omit it).
+        return this.gitData.getRepository(scm, project.deploySource.project!);
       }),
       switchMap(repoResource => repoResource.waitForValue$)
     );
@@ -131,7 +154,7 @@ export class BuildTabComponent implements OnInit {
       this.applicationService.applicationStratProject$,
       this.applicationService.application$
     ).pipe(
-      map(([project, app]) => {
+      map(([project, app]): DeploySourceView | null => {
         if (project) {
           const deploySource: CustomEnvVarStratosProjectSource = { ...project.deploySource };
 
@@ -160,41 +183,41 @@ export class BuildTabComponent implements OnInit {
           return null;
         }
       }),
-      switchMap((deploySource: CustomEnvVarStratosProjectSource) => {
-        const res: Observable<any>[] = [
-          of(deploySource),
-        ];
+      switchMap((deploySource: DeploySourceView | null) => {
+        let commit$: Observable<GitResourceState<GitCommit> | null> = of(null);
         if (deploySource && deploySource.type === 'gitscm') {
           // Add gitscm info... add async info in next section
           const scmType = deploySource.scm as GitSCMType;
-          const scm = this.scmService.getSCM(scmType, deploySource.endpointGuid);
+          // strict: a gitscm deploy source always carries endpointGuid/project/commit.
+          const scm = this.scmService.getSCM(scmType, deploySource.endpointGuid!);
           deploySource.label = scm.getLabel();
           deploySource.icon = scm.getIcon();
-          res.push(this.gitData.getCommit(scm, deploySource.project, deploySource.commit).state$);
-        } else {
-          res.push(of(null));
+          commit$ = this.gitData.getCommit(scm, deploySource.project!, deploySource.commit!).state$;
         }
-        return observableCombineLatest(res);
+        return observableCombineLatest([of(deploySource), commit$]);
       }),
-      map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, GitResourceState<GitCommit>]) => {
+      map(([deploySource, commit]: [DeploySourceView | null, GitResourceState<GitCommit> | null]) => {
         if (deploySource) {
           deploySource.commitURL = commit?.value?.html_url;
         }
         return deploySource;
       }),
-      startWith({ type: 'loading', timestamp: null, endpointGuid: null })
+      startWith({ type: 'loading', timestamp: null } as DeploySourceView)
     );
 
     this.deploySource$ = canSeeEnvVars$.pipe(
-      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of({ type: 'not-available', timestamp: null, endpointGuid: null })),
+      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of({ type: 'not-available', timestamp: null } as DeploySourceView)),
     );
   }
 
-  private createDockerImageUrl(dockerImage: string): string {
+  private createDockerImageUrl(dockerImage: string | undefined): string | null {
     // https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html
     // Private Registry: MY-PRIVATE-REGISTRY.DOMAIN:PORT/REPO/IMAGE:TAG
     // GCP: docker://MY-REGISTRY-URL/MY-PROJECT/MY-IMAGE-NAME
     // DockerHub: REPO/IMAGE:TAG
+    if (!dockerImage) {
+      return null;
+    }
     isDockerHubRegEx.lastIndex = 0;
     const res = isDockerHubRegEx.exec(dockerImage);
     return res && res.length === 4 ? `https://hub.docker.com/r/${res[1]}/${res[2]}` : null;

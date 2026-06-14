@@ -132,11 +132,11 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   quotaSource!: SignalSource<StOrgQuota[]>;
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): { [key: string]: any, } | null =>
       !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
-  validateNameTaken = (value: string = null) => this.allOrgs.length === 0 ? true : this.allOrgs.indexOf(value || this.orgName.value) === -1;
+  validateNameTaken = (value: string | null = null) => this.allOrgs.length === 0 ? true : this.allOrgs.indexOf(value || this.orgName.value) === -1;
 
   validate = () => this.validSignal();
 
