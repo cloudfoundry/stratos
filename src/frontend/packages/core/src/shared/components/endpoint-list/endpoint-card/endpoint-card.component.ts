@@ -15,7 +15,7 @@ import {
 } from '@stratosui/store';
 
 import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
-import { combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/endpoints.service';

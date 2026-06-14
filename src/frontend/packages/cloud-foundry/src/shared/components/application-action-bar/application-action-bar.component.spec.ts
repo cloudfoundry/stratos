@@ -3,7 +3,7 @@ import { Component, provideZonelessChangeDetection, signal } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { CdkPortalOutlet, Portal } from '@angular/cdk/portal';
+import { CdkPortalOutlet } from '@angular/cdk/portal';
 import { describe, it, expect, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 

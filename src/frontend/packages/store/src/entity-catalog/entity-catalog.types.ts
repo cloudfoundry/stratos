@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 
 import type { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
 import type { IListAction } from '../../../core/src/shared/components/signal-list/list-action.types';
-import type { AppState, GeneralEntityAppState } from '../app-state';
+import type { GeneralEntityAppState } from '../app-state';
 import type {
   ApiErrorMessageHandler,
   EntitiesFetchHandler,

@@ -31,7 +31,6 @@ import { DynamicExtensionRoutes } from "./core/extension/dynamic-extension-route
 import { ExtensionService } from "./core/extension/extension-service";
 import { CurrentUserPermissionsService } from "./core/permissions/current-user-permissions.service";
 import { CustomImportModule } from "./custom-import.module";
-import { environment } from "./environments/environment";
 import { DashboardModule } from "./features/dashboard/dashboard.module";
 import { HomeModule } from "./features/home/home.module";
 import { LoginModule } from "./features/login/login.module";

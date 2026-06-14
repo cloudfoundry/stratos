@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
@@ -11,7 +10,6 @@ import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
-import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 interface EditLimitForm {
   instance_min_count: FormControl<number>;

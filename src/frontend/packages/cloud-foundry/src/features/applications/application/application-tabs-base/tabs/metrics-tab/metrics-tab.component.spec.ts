@@ -35,13 +35,6 @@ describe('MetricsTabComponent', () => {
       cfGuid: cfId,
     };
 
-    const mockEntityMonitorFactory = {
-      create: () => ({
-        entity$: { pipe: () => ({ subscribe: () => ({}) }) },
-        entityRequest$: { pipe: () => ({ subscribe: () => ({}) }) }
-      })
-    };
-
     await TestBed.configureTestingModule({
       imports: [MetricsTabComponent],
       providers: [

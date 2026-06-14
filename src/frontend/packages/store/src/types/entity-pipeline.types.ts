@@ -8,7 +8,7 @@ import type {
 } from '../entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import type { JetStreamErrorResponse } from '../jetstream';
-import type { EntityInfo, NormalizedResponse } from './api.types';
+import type { EntityInfo } from './api.types';
 import type { EndpointUser } from './endpoint.types';
 import type { PaginatedAction, PaginationEntityState } from './pagination.types';
 import type { EntityRequestAction } from './request.types';

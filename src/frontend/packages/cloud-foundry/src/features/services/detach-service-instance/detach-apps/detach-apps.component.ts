@@ -8,7 +8,6 @@ import {
   computed,
   effect,
   inject,
-  signal,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { of as observableOf } from 'rxjs';

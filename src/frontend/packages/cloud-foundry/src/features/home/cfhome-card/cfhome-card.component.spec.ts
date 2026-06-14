@@ -12,15 +12,6 @@ describe('CFHomeCardComponent', () => {
   let fixture: ComponentFixture<CFHomeCardComponent>;
 
   // Mock services
-  const mockPmf = {
-    create: vi.fn(() => ({
-      currentPage$: of([]),
-      pagination$: of({}),
-      fetchingCurrentPage$: of(false),
-      isLoadingPage$: of(false)
-    }))
-  };
-
   const mockAppDeploySourceTypes = {
     types$: of([])
   };

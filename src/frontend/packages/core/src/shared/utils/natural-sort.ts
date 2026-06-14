@@ -89,11 +89,11 @@ interface TextToken { text: string; num?: undefined; }
 interface NumToken  { text?: undefined; num: number; }
 type Token = TextToken | NumToken;
 
-const SEPARATOR_CHAR_CLASS = /[\s_\-]/g;
+const SEPARATOR_CHAR_CLASS = /[\s_-]/g;
 // Pattern that flags an entry as part of the xxx-sep?-nnn family. Both
 // directions covered (letter→digit and digit→letter), separator class
 // matches zero or more of [whitespace _ -].
-const XXX_NNN_FAMILY = /[A-Za-z][\s_\-]*\d|\d[\s_\-]*[A-Za-z]/;
+const XXX_NNN_FAMILY = /[A-Za-z][\s_-]*\d|\d[\s_-]*[A-Za-z]/;
 
 /**
  * Analyze a collection of strings to decide which tokenization hints

@@ -1,4 +1,4 @@
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Injectable, Signal, computed, signal } from '@angular/core';
 
 /**
  * UI dashboard preferences. Replaces the @stratosui/store `dashboard`
