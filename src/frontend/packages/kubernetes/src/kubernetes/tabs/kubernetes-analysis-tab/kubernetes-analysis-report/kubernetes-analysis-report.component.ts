@@ -45,13 +45,15 @@ import { AnalysisReport } from '../../../../services/endpoint-data/kube-types';
   ],
 })
 export class KubernetesAnalysisReportComponent implements OnInit {
-  report$: Observable<AnalysisReport | false>;
-  isLoading$: Observable<boolean>;
+  // strict: assigned in ngOnInit; the route guarantees the :id param so the
+  // defensive early-return for a missing id is not reached in practice
+  report$!: Observable<AnalysisReport | false>;
+  isLoading$!: Observable<boolean>;
 
   private errorMsg = new Subject<{ firstLine: string; secondLine?: string } | string>();
   errorMsg$ = this.errorMsg.pipe(startWith(''));
 
-  endpointID: string;
+  endpointID?: string;
   id: string;
 
   private breadcrumbsSignal = signal<IHeaderBreadcrumbLink[]>([

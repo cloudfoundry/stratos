@@ -17,7 +17,7 @@ import { catchError, map } from 'rxjs/operators';
 export class AnalysisInfoCardComponent {
 
   public loading = true;
-  public content$: Observable<string>;
+  public content$?: Observable<string>;
   private renderer = new marked.Renderer();
   private parser = new marked.Parser();
 

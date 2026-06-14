@@ -121,7 +121,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     });
   }
 
-  isNameUnique = (spaceName: string = null) => {
+  isNameUnique = (spaceName: string | null = null) => {
     const names = this.allSpacesInOrg();
     // Signal returns [] before the org-data load completes. Treat as "no
     // siblings yet, name is OK" so the validator doesn't false-positive

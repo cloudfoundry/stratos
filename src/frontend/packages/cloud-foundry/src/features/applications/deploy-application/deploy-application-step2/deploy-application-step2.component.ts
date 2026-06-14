@@ -236,7 +236,8 @@ export class DeployApplicationStep2Component
     );
 
     const cfGuid$ = this.deployState$.pipe(
-      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails),
+      filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
+        !!appDetail && !!appDetail.cloudFoundryDetails),
       map(appDetail => appDetail.cloudFoundryDetails.cloudFoundry)
     );
 

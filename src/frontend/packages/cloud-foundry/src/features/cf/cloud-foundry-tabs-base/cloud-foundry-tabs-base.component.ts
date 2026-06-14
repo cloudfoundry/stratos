@@ -53,7 +53,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  public favorite$: Observable<UserFavoriteEndpoint>;
+  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity);
+  // the template binds via `| async`, which already yields null.
+  public favorite$: Observable<UserFavoriteEndpoint | null>;
 
   constructor() {
     const cfEndpointService = this.cfEndpointService;

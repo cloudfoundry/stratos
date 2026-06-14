@@ -227,7 +227,9 @@ export class HelmReleaseHelperService {
   }
 
   // tslint:disable-next-line:ban-types
-  private isContainerReady(state: ContainerStateCollection = {}): boolean {
+  // Returns null for a completed (exit 0) container so the caller counts it
+  // as neither ready nor not-ready.
+  private isContainerReady(state: ContainerStateCollection = {}): boolean | null {
     if (state.running) {
       return true;
     } else if (state.waiting) {
@@ -239,7 +241,7 @@ export class HelmReleaseHelperService {
     return false;
   }
 
-  public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade> {
+  public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade | null> {
     const updates = combineLatest(this.getCharts(), this.release$);
     return updates.pipe(
       map(([charts, release]: [any, any]) => {

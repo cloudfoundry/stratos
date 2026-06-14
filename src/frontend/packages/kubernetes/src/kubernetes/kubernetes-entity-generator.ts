@@ -17,6 +17,7 @@ import {
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  IEntityMetadata,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
 } from '../../../store/src/entity-catalog/entity-catalog.types';
@@ -195,7 +196,7 @@ class KubeResourceEntityHelper {
     };
 
     const entity = defn.getKubeCatalogEntity ? defn.getKubeCatalogEntity(d) : new StratosCatalogEntity<IFavoriteMetadata, B, C>(d, {
-      actionBuilders: createKubeResourceActionBuilder(d.type) as unknown as C
+      actionBuilders: createKubeResourceActionBuilder(defn.type) as unknown as C
     });
 
     if (defn.canFavorite && defn.getIsValid) {
@@ -233,7 +234,7 @@ export class KubeEntityCatalog {
   public namespace: StratosCatalogEntity<IFavoriteMetadata, KubernetesNamespace, KubeNamespaceActionBuilders>;
   public service: StratosCatalogEntity<IFavoriteMetadata, KubeService, KubeServiceActionBuilders>;
   public dashboard: StratosCatalogEntity<IFavoriteMetadata, KubeDashboardStatus, KubeDashboardActionBuilders>;
-  public analysisReport: StratosCatalogEntity<undefined, AnalysisReport, AnalysisReportsActionBuilders>;
+  public analysisReport: StratosCatalogEntity<IEntityMetadata, AnalysisReport, AnalysisReportsActionBuilders>;
   public configMap: StratosCatalogEntity<IFavoriteMetadata, KubernetesConfigMap, KubeResourceActionBuilders>;
 
   public secrets: StratosCatalogEntity<IFavoriteMetadata, KubeAPIResource, KubeResourceActionBuilders>;
@@ -596,7 +597,7 @@ export class KubeEntityCatalog {
   }
 
   private generateAnalysisReportsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-    return new StratosCatalogEntity<undefined, AnalysisReport, AnalysisReportsActionBuilders>({
+    return new StratosCatalogEntity<IEntityMetadata, AnalysisReport, AnalysisReportsActionBuilders>({
       type: analysisReportEntityType,
       schema: kubernetesEntityFactory(analysisReportEntityType),
       endpoint: endpointDefinition

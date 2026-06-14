@@ -71,7 +71,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   deployButtonText = 'Deploy';
   skipConfig$: Observable<boolean> = observableOf(false);
   isRedeploy: boolean;
-  selectedSourceType$: Observable<SourceType>;
+  // undefined when the wizard is opened without an auto-select query param
+  // (getAutoSelectedType returns of(undefined)); the title consumer guards for it.
+  selectedSourceType$: Observable<SourceType | undefined>;
 
   // Reactive deploy button text — switches to "Redeploy" when the
   // wizard is invoked with an existing appGuid. Step 4's handle reads

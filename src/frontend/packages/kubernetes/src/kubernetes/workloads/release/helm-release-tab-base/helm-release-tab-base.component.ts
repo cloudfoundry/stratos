@@ -100,7 +100,9 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
         if (defn.apiWorkspaced && !defn.hidden) {
           tabsFromRouterConfig.push({
             link: `resource/${catalogEntity.type}`,
-            label: defn.labelTab || defn.labelPlural,
+            // Definitions should carry a tab/plural label; fall back to the
+            // entity type so the required `label` is always a real string.
+            label: defn.labelTab || defn.labelPlural || catalogEntity.type,
             icon: defn.icon,
             iconFont: defn.iconFont,
           });

@@ -45,7 +45,9 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubernetesDashboardTabComponent implements OnInit {
 
-  private pKubeDash: ElementRef;
+  // The @ViewChild setter is never hit in tests, so this can genuinely be unset;
+  // every read guards with `if (this.pKubeDash ...)`.
+  private pKubeDash: ElementRef | undefined;
   @ViewChild('kubeDash', { read: ElementRef, static: false }) set kubeDash(kubeDash: ElementRef) {
     if (!this.pKubeDash) {
       this.pKubeDash = kubeDash;
@@ -53,11 +55,11 @@ export class KubernetesDashboardTabComponent implements OnInit {
       this.setupEventListener();
     }
   }
-  get kubeDash(): ElementRef {
+  get kubeDash(): ElementRef | undefined {
     return this.pKubeDash;
   }
 
-  source: SafeResourceUrl;
+  source!: SafeResourceUrl; // strict: assigned in ngOnInit
   href = '';
   private isLoadingSignal = signal<boolean>(true);
   private hasErrorSignal = signal<boolean>(false);
@@ -68,7 +70,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   private loadCheckTries = 0;
   private haveSetupEventLister = false;
   private hasIframeLoaded = false;
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit
 
   public errorMsg = signal<EndpointMissingMessageParts>({} as EndpointMissingMessageParts);
 
@@ -221,7 +223,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   // Can we detect a Stratos error message page?
-  private getStratosError(): string {
+  private getStratosError(): string | null {
     if (this.pKubeDash &&
       this.pKubeDash.nativeElement &&
       this.pKubeDash.nativeElement.contentDocument &&

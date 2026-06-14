@@ -92,7 +92,7 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
       )();
       const local = buildMetricData(
         this.metricType,
-        { resources: raw, total_results: raw.length, total_pages: 1, prev_url: null, next_url: null },
+        { resources: raw, total_results: raw.length, total_pages: 1, prev_url: '', next_url: '' },
         parseInt(this.paramsMetrics['start-time'] ?? '0', 10),
         parseInt(this.paramsMetrics['end-time'] ?? '0', 10),
         false,

@@ -21,7 +21,8 @@ selector: 'app-kube-config-table-sub-type-select',
 })
 export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 
-  selected: string;
+  // strict: assigned in ngOnInit before the template reads it
+  selected!: string;
 
   subTypes: Array<{ id: string; name: string }>;
   private helper = inject(KubeConfigHelper);

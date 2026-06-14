@@ -49,7 +49,8 @@ interface GithubTypes {
 }
 
 interface GithubType {
-  url: string;
+  // Optional: enterprise options carry no preset URL — the user supplies one.
+  url?: string;
   label: string;
   description: string[];
   name?: string;
@@ -102,9 +103,11 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
 
   public epSubType: GIT_ENDPOINT_SUB_TYPES;
 
-  registerForm: FormGroup<GitRegistrationForm>;
+  // strict: built in init(), invoked from the constructor's endpoints
+  // subscription before the template binds the form.
+  registerForm!: FormGroup<GitRegistrationForm>;
 
-  private sub: Subscription;
+  private sub?: Subscription;
   private validateSub?: Subscription;
 
   public showEndpointFields = false;
@@ -115,9 +118,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // was skipped.
   public autoSelectNote: string | null = null;
 
-  validate: Observable<boolean>;
+  // strict: assigned in init() before any consumer subscribes.
+  validate!: Observable<boolean>;
 
-  urlValidation: string;
+  urlValidation?: string;
 
   // FWT-959 Part 2 (Partition A) — SignalStepHandle wiring.
   //
@@ -212,8 +216,11 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
     const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
 
-    const publicGithubUrl = gitSCMService.getSCM('github', null).getPublicApi();
-    const publicGitlabUrl = gitSCMService.getSCM('gitlab', null).getPublicApi();
+    // No endpoint context here — only getPublicApi() is needed. An empty
+    // guid is the falsy "no endpoint" sentinel BaseSCM.getEndpoint() already
+    // handles (if (!endpointGuid)), identical to the previous null.
+    const publicGithubUrl = gitSCMService.getSCM('github', '').getPublicApi();
+    const publicGitlabUrl = gitSCMService.getSCM('gitlab', '').getPublicApi();
 
     // Set a default/starting option
     this.gitTypes = {
@@ -231,7 +238,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
             ] },
           [GitTypeKeys.GITHUB_ENTERPRISE]: {
             label: 'Github Enterprise',
-            url: null,
+            url: undefined,
             description: [
               `Register your own GitHub Enterprise server.`,
               'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',
@@ -252,7 +259,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
             ] },
           [GitTypeKeys.GITLAB_ENTERPRISE]: {
             label: 'Gitlab Enterprise',
-            url: null,
+            url: undefined,
             description: [
               `Register your own Gitlab Enterprise server.`,
               'Registering an endpoint allows you to access public repositories. Connect with a Personal Access Token to additionally access your private repositories',

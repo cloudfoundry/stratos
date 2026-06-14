@@ -19,6 +19,7 @@ import {
 import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import {
+  HelmReleaseGraph,
   HelmReleaseGraphLink,
   HelmReleaseGraphNode,
   HelmReleaseGraphNodeData,
@@ -55,7 +56,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   fill: string;
   text: string;
   icon: any;
-  alerts: [];
+  alerts: ResourceAlert[] | null;
   alertSummary: Record<string, unknown>;
 }
 
@@ -94,7 +95,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   public layoutIndex = 0;
 
-  private graph: Subscription;
+  private graph?: Subscription;
 
   private didInitialFit = false;
 
@@ -127,7 +128,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     this.graph = combineLatest(
       this.helper.fetchReleaseGraph(),
       this.analysisReportUpdated$
-    ).subscribe(([g, report]: [any, any]) => {
+    ).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);
@@ -176,7 +177,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private applyAlertToNode(newNode: CustomHelmReleaseGraphNode, report: any) {
     if (report && report.alerts) {
-      Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
+      Object.values<ResourceAlert[]>(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
           if (
             newNode.data.kind.toLowerCase() === alert.kind &&
@@ -268,7 +269,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
+  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource | undefined> {
     return this.helper.fetchReleaseResources().pipe(
       filter((r: any) => !!r),
       map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>

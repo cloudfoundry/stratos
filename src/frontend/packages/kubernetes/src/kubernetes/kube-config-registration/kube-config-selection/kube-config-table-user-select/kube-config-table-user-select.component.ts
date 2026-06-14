@@ -22,7 +22,8 @@ selector: 'app-kube-config-table-user-select',
 export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 
   hasUser = false;
-  selected: string;
+  // strict: assigned in ngOnInit before the template reads it
+  selected!: string;
   private helper = inject(KubeConfigHelper);
 
   constructor() {

@@ -42,7 +42,7 @@ export class MonocularChartViewComponent implements OnInit {
 
     if (parts.version) {
       breadcrumbs.push(
-        { value: this.title, routerLink: this.chartService.getChartSummaryRoute(parts.repo, parts.chartName, null, this.route) }
+        { value: this.title, routerLink: this.chartService.getChartSummaryRoute(parts.repo, parts.chartName, undefined, this.route) }
       );
       this.title = parts.version;
     }

@@ -166,7 +166,8 @@ export class KubernetesEndpointsSignalConfigService {
       isAnyLoading: this.endpointsData.loading,
       errorsByCnsi: signal(new Map()),
       columns,
-      getRowKey: (ep: EndpointModel) => ep.guid,
+      // strict: registered endpoint rows always carry a guid (matches backup-endpoints getRowKey)
+      getRowKey: (ep: EndpointModel) => ep.guid!,
       emptyMessage: 'There are no endpoints',
       emptyFilterMessage: 'No endpoints match the current filters',
       pageSizeOptions: {

@@ -36,7 +36,7 @@ export class AutoscalerMetricPageComponent implements OnInit {
   private chartConfig = inject(AppAutoscalerMetricChartSignalConfigService);
 
   parentUrl: string;
-  applicationName$!: Observable<string>;
+  applicationName$!: Observable<string | null>;
 
   // Re-exposed for template binding so the time-window dropdown can
   // read/write the selected window.

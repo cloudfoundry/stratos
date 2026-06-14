@@ -19,7 +19,7 @@ interface GKEAuthForm {
   ]
 })
 export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: FormGroup<GKEAuthForm>;
+  @Input() formGroup!: FormGroup<GKEAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
     return { gkeconfig: (values?.gkeconfig as string) ?? '' };

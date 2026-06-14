@@ -10,6 +10,7 @@ import { GitCommit } from '@stratosui/git';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GithubCommitAuthorComponent {
-  @Input() commit: GitCommit;
+  // strict: required @Input, always bound by the host template.
+  @Input() commit!: GitCommit;
   @Input() showAvatar = true;
 }

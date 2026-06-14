@@ -19,8 +19,8 @@ import { mergeObjects } from './merge';
 
 export interface ChartValuesConfig {
 
-  // URL of the JSON Schema for the chart values
-  schemaUrl: string;
+  // URL of the JSON Schema for the chart values (null when the chart has no schema)
+  schemaUrl: string | null;
 
   // URL of the Chart Values
   valuesUrl: string;
@@ -62,9 +62,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     }
   }
 
-  schemaUrl!: string;
+  schemaUrl: string | null = null;
   valuesUrl!: string;
-  releaseValues!: string;
+  releaseValues?: string;
 
   // Model for the editor - we set this once when the YAML support has been loaded
   public model: any;
@@ -110,22 +110,23 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Monaco editor
   public editor: any;
 
-  // Observable - are we still loading resources?
-  public loading$: Observable<boolean>;
+  // Observable - are we still loading resources? Assigned in init() once a
+  // config is provided via the @Input setter.
+  public loading$!: Observable<boolean>;
 
   public initing = true;
 
   // Signal for tracking if the Monaco editor has loaded
   private monacoLoaded = signal<boolean>(false);
 
-  private resizeSub: Subscription;
-  private themeSub: Subscription;
+  private resizeSub?: Subscription;
+  private themeSub?: Subscription;
 
   // Track whether the user changes the code in the text editor
   private codeOnEnter!: string;
 
   // Reference to the editor, so we can adjust its size to fit
-  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor: ElementRef;
+  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor!: ElementRef; // strict: @ViewChild populated by Angular after view init
 
   @ViewChild('schemaForm', { static: false }) schemaForm: any;
 
@@ -169,8 +170,12 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   private init() {
     // Observabled for loading schema and values for the Chart
-    const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError((_e: any) => of(null)));
-    const values$: Observable<string> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
+    // No schema URL means the chart ships no JSON Schema — skip the fetch and
+    // emit null so the editor falls back to an auto-generated schema.
+    const schema$ = this.schemaUrl
+      ? this.httpClient.get(this.schemaUrl).pipe(catchError((_e: any) => of(null)))
+      : of(null);
+    const values$: Observable<string | null> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
       catchError((_e: any) => of(null))
     );
 
@@ -414,7 +419,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Copy the release values into either the form or the code editor, depending on the current mode
   private doCopyReleaseValues() {
     if (this.mode === EditorMode.JSonSchemaForm) {
-      this.initialFormData = this.releaseValues;
+      if (this.releaseValues !== undefined) {
+        this.initialFormData = this.releaseValues;
+      }
     } else {
       this.code = yaml.dump(this.releaseValues);
     }

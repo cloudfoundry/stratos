@@ -170,7 +170,7 @@ export class KubeConfigImportComponent implements OnDestroy {
   set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   private iteration = 0;
 
-  private connectService: ConnectEndpointService;
+  private connectService?: ConnectEndpointService;
   private environmentInjector = inject(EnvironmentInjector);
   private injector = inject(Injector);
   private fb = inject(UntypedFormBuilder);
@@ -188,7 +188,8 @@ export class KubeConfigImportComponent implements OnDestroy {
     }
 
     // Get the next action
-    const i = actions.shift();
+    // strict: actions.length === 0 was handled above, so shift() yields a value
+    const i = actions.shift()!;
     if (i.action === REGISTER_ACTION) {
       this.doRegister(i, actions);
     } else if (i.action === CONNECT_ACTION) {
@@ -235,7 +236,7 @@ export class KubeConfigImportComponent implements OnDestroy {
     reg.actionState.next({ busy: true, error: false, completed: false, message: '' });
     this.endpointsSignalConfig.register({
       endpointType: KUBERNETES_ENDPOINT_TYPE,
-      endpointSubType: reg.cluster._subType,
+      endpointSubType: reg.cluster._subType ?? null,
       name: reg.cluster.name,
       endpoint: reg.cluster.cluster.server,
       skipSslValidation: reg.cluster.cluster['insecure-skip-tls-verify'],
@@ -295,9 +296,11 @@ export class KubeConfigImportComponent implements OnDestroy {
   private connectEndpoint(action: KubeConfigImportAction, pData: ConnectEndpointData): Observable<IActionMonitorComponentState> {
     const config: ConnectEndpointConfig = {
       name: action.cluster.name,
-      guid: action.depends.cluster._guid || action.cluster._guid,
+      guid: action.depends?.cluster._guid || action.cluster._guid,
       type: KUBERNETES_ENDPOINT_TYPE,
-      subType: action.user._authData.subType,
+      // strict: connectEndpoint is only reached from doConnect, which returns
+      // early unless connect.user is set
+      subType: action.user!._authData.subType,
       ssoAllowed: false
     };
 

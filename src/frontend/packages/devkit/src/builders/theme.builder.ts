@@ -23,6 +23,9 @@ async function commandBuilder(
     FS.ensureDir(outPath);
 
     // Get project root
+    if (!context.target) {
+      return { success: false, error: 'No build target supplied to the theme builder' };
+    }
     const prjMetadata = await context.getProjectMetadata(context.target);
 
     // Copy all files from root to the outPath

@@ -120,7 +120,7 @@ export function getSpaceRoles(userRolesInSpace: UserRoleInSpace): IUserRole<Spac
   return roles;
 }
 
-function assignRole(currentRoles: string, role: string) {
+function assignRole(currentRoles: string | null, role: string) {
   const newRoles = currentRoles ? `${currentRoles}, ${role}` : role;
   return newRoles;
 }
@@ -167,7 +167,7 @@ export function hasRoleWithinSpace(user: CfUser, spaceGuid: string): boolean {
 }
 
 export function hasRoleWithin(user: CfUser, orgGuid?: string, spaceGuid?: string): boolean {
-  return hasRoleWithinOrg(user, orgGuid) || hasRoleWithinSpace(user, spaceGuid);
+  return (!!orgGuid && hasRoleWithinOrg(user, orgGuid)) || (!!spaceGuid && hasRoleWithinSpace(user, spaceGuid));
 }
 
 export function hasSpaceRoleWithinOrg(user: CfUser, orgGuid: string): boolean {
@@ -295,7 +295,7 @@ export function haveMultiConnectedCfs(cfRoles: CfCurrentUserRolesSignalService):
   );
 }
 
-export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> {
+export function filterEntitiesByGuid<T>(guid: string, array?: Array<APIResource<T>>): Array<APIResource<T>> | null {
   return array ? array.filter(entity => entity.metadata.guid === guid) : null;
 }
 
@@ -306,14 +306,19 @@ export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: Pagin
     return entities;
   }
 
-  const fetchOrgGuid = (e: APIResource<CfOrgSpaceFilterTypes>): string => {
+  const fetchOrgGuid = (e: APIResource<CfOrgSpaceFilterTypes>): string | null => {
     return e.entity.space ? e.entity.space.entity.organization_guid : null;
   };
 
   // Filter by cf/org/space
-  const cfGuid = paginationState.clientPagination.filter.items.cf;
-  const orgGuid = paginationState.clientPagination.filter.items.org;
-  const spaceGuid = paginationState.clientPagination.filter.items.space;
+  const clientPagination = paginationState.clientPagination;
+  if (!clientPagination) {
+    // No client pagination state => no filter criteria to apply.
+    return entities;
+  }
+  const cfGuid = clientPagination.filter.items.cf;
+  const orgGuid = clientPagination.filter.items.org;
+  const spaceGuid = clientPagination.filter.items.space;
   return !cfGuid && !orgGuid && !spaceGuid ? entities : entities.filter(e => {
     e = extractActualListEntity(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
@@ -357,11 +362,11 @@ export function createCfOrgSpaceUserRemovalUrl(
   return route;
 }
 
-export function isServiceInstance(obj: any): IServiceInstance {
+export function isServiceInstance(obj: any): IServiceInstance | null {
   return !!obj && !!obj.service_plan_url ? obj as IServiceInstance : null;
 }
 
-export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance {
+export function isUserProvidedServiceInstance(obj: any): IUserProvidedServiceInstance | null {
   return !!obj && (obj.route_service_url !== null && obj.route_service_url !== undefined) ? obj as IUserProvidedServiceInstance : null;
 }
 

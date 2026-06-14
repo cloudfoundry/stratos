@@ -31,7 +31,7 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
   private eventsConfig = inject(CfAppAutoscalerEventsSignalConfigService);
 
   parentUrl: string;
-  applicationName$!: Observable<string>;
+  applicationName$!: Observable<string | null>;
 
   public listConfig: WritableSignal<SignalListConfig<AppAutoscalerEvent> | undefined> = signal(undefined);
 

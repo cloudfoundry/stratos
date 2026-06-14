@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
@@ -89,11 +89,11 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   };
 
   validateGlobalLimitMin(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ?
-        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.get('instance_max_count').value - 1, true) : false;
+        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.controls.instance_max_count.value - 1, true) : false;
       const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editLimitForm && control.value < this.editLimitForm.get('instance_max_count').value;
+      this.editLimitValid = this.editLimitForm && control.value < this.editLimitForm.controls.instance_max_count.value;
       if (this.editLimitForm && this.editLimitValid !== lastValid) {
         this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
       }
@@ -102,11 +102,11 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   }
 
   validateGlobalLimitMax(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ? numberWithFractionOrExceedRange(control.value,
-        this.editLimitForm.get('instance_min_count').value + 1, Number.MAX_VALUE, true) : false;
+        this.editLimitForm.controls.instance_min_count.value + 1, Number.MAX_VALUE, true) : false;
       const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editLimitForm && this.editLimitForm.get('instance_min_count').value < control.value;
+      this.editLimitValid = this.editLimitForm && this.editLimitForm.controls.instance_min_count.value < control.value;
       if (this.editLimitForm && this.editLimitValid !== lastValid) {
         this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
       }

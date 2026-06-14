@@ -66,7 +66,6 @@ interface AutoscalerTabPaginationParams {
   icon: 'meter',
   iconFont: 'stratos-icons',
   hidden: (
-    esf: unknown,
     activatedRoute: ActivatedRoute,
     cups: CurrentUserPermissionsService,
     http: HttpClient,
@@ -95,7 +94,7 @@ interface AutoscalerTabPaginationParams {
       catchError(() => of(false)),
     );
 
-    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid);
 
     return canEditApp$.pipe(
       switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
@@ -466,7 +465,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     void this.scalingHistoryData.load(
       this.applicationService.cfGuid,
       this.applicationService.appGuid,
-      this.paramsHistory as Record<string, string>,
+      { ...this.paramsHistory },
     );
   }
 

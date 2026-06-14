@@ -8,8 +8,10 @@ export function numberWithFractionOrExceedRange(value: number | string | null | 
   if ((!value || isNaN(Number(value))) && !required) {
     return false;
   }
-  if ((!value || isNaN(Number(value))) && required) {
-    return true;
+  if (!value || isNaN(Number(value))) {
+    // value is falsy or non-numeric; both required branches handled above, so
+    // `required` is the only remaining possibility here.
+    return required;
   }
   const numValue = Number(value);
   return value.toString().indexOf('.') > -1 || numValue > max || numValue < min;
@@ -34,8 +36,8 @@ export function dateTimeIsSameOrAfter(startDateTime: string, endDateTime: string
 }
 
 export function recurringSchedulesInvalidRepeatOn(inputRecurringSchedules: AppRecurringSchedule) {
-  const weekdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_week') ? inputRecurringSchedules.days_of_week.length : 0;
-  const monthdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_month') ? inputRecurringSchedules.days_of_month.length : 0;
+  const weekdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_week') ? (inputRecurringSchedules.days_of_week?.length ?? 0) : 0;
+  const monthdayCount = Object.hasOwn(inputRecurringSchedules, 'days_of_month') ? (inputRecurringSchedules.days_of_month?.length ?? 0) : 0;
   return (weekdayCount > 0 && monthdayCount > 0) || (weekdayCount === 0 && monthdayCount === 0);
 }
 

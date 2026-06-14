@@ -170,7 +170,9 @@ export interface AppAutoscalerInvalidPolicyErrorEntity {
 
 export interface AppAutoscaleMetricChart {
   name: string;
-  unit: string;
+  // A scaling rule may omit its unit (AppScalingRule.unit is optional), so the
+  // derived chart metric's unit is likewise sometimes-absent.
+  unit?: string;
 }
 
 export interface AppAutoscalerCredential {

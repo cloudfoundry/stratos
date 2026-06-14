@@ -27,21 +27,29 @@ const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
 })
 export class KubernetesNodeMetricsChartComponent implements OnInit {
 
+  // strict: required @Input, set by Angular before ngOnInit/template render
   @Input()
-  private nodeName: string;
+  private nodeName!: string;
+  // strict: required @Input, set by Angular before ngOnInit/template render
   @Input()
-  private endpointGuid: string;
+  private endpointGuid!: string;
+  // strict: required @Input, set by Angular before ngOnInit/template render
   @Input()
-  private yAxisLabel: string;
+  private yAxisLabel!: string;
+  // strict: required @Input, set by Angular before ngOnInit/template render
   @Input()
-  private metricName: string;
+  private metricName!: string;
+  // strict: required @Input, set by Angular before ngOnInit/template render
   @Input()
-  private seriesTranslation: string;
+  private seriesTranslation!: string;
+  // strict: required @Input, set by Angular before ngOnInit/template render
   @Input()
-  public title: string;
+  public title!: string;
 
-  public instanceChartConfig: MetricsLineChartConfig;
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+  // strict: assigned in ngOnInit before the template reads them
+  public instanceChartConfig!: MetricsLineChartConfig;
+  // strict: assigned in ngOnInit before the template reads them
+  public instanceMetricConfig!: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
   constructor() { }
 
   ngOnInit() {
@@ -66,7 +74,7 @@ export class KubernetesNodeMetricsChartComponent implements OnInit {
   private getmapSeriesItemValue() {
     switch (this.seriesTranslation) {
       case 'mb':
-        return (bytes) => bytes / 1000000;
+        return (bytes: number) => bytes / 1000000;
       default:
         return undefined;
     }

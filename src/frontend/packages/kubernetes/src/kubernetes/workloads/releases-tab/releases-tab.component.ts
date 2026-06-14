@@ -38,7 +38,8 @@ export class HelmReleasesTabComponent {
   private readonly helmEndpointIds = computed(() =>
     Object.values(this.endpointsSignals.endpoints())
       .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
-      .map(ep => ep.guid),
+      .map(ep => ep.guid)
+      .filter((g): g is string => !!g),
   );
 
   readonly listConfig: WritableSignal<SignalListConfig<HelmRelease> | undefined> = signal(undefined);

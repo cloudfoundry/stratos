@@ -48,7 +48,7 @@ function createSignalWrapper<T>(initialValue: T) {
 export interface KubernetesNamespacesFilterItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  select: ReturnType<typeof createSignalWrapper<string>>;
+  select: ReturnType<typeof createSignalWrapper<string | undefined>>;
 }
 
 // NB: `KubeNamespace` carries `metadata.kubeId` (stamped by the endpoint
@@ -83,7 +83,9 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
   // All namespaces across the connected kube endpoints, from the signal
   // data service (replaces the legacy getPaginationService(null) read).
   private allNamespacesSig = computed(() =>
-    this.namespaceData.allNamespacesAcrossEndpoints(this.connectedKubeEndpoints().map(ep => ep.guid))()
+    this.namespaceData.allNamespacesAcrossEndpoints(
+      this.connectedKubeEndpoints().map(ep => ep.guid).filter((g): g is string => !!g)
+    )()
   );
 
   // Loading mirrors the legacy pagination `busy` gate: true while the initial
@@ -103,7 +105,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
   // Prime the per-endpoint namespace caches for every connected kube, then
   // drop the loading flag so dependent filters render.
   private async refreshNamespaces(): Promise<void> {
-    const guids = this.connectedKubeEndpoints().map(ep => ep.guid);
+    const guids = this.connectedKubeEndpoints().map(ep => ep.guid).filter((g): g is string => !!g);
     this.namespacesLoading.set(true);
     await Promise.all(guids.map(g => this.namespaceData.refresh({ kubeGuid: g })));
     this.namespacesLoading.set(false);
@@ -121,7 +123,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
         // false on first read; matches the legacy `!kubes` semantics
         // because the signal never emits null.
         loading$: list$.pipe(map(kubes => !kubes)),
-        select: createSignalWrapper<string>(undefined)
+        select: createSignalWrapper<string | undefined>(undefined)
       };
     });
   }
@@ -153,7 +155,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
       return {
         list$: namespaceList$,
         loading$: this.allNamespacesLoading$,
-        select: createSignalWrapper<string>(undefined)
+        select: createSignalWrapper<string | undefined>(undefined)
       };
     });
   }
@@ -177,7 +179,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     this.subs.push(namespaceResetSub);
   }
 
-  private selectSet(selectWrapper: ReturnType<typeof createSignalWrapper<string>>, newValue: string) {
+  private selectSet(selectWrapper: ReturnType<typeof createSignalWrapper<string | undefined>>, newValue: string | undefined) {
     if (selectWrapper() !== newValue) {
       selectWrapper.set(newValue);
     }

@@ -23,8 +23,10 @@ import { KubernetesNode, KubernetesPod } from '../../store/kube.types';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
 interface IEndpointDetails {
-  imagePath: string;
-  label: string;
+  // imagePath/label derive from the endpoint definition's optional
+  // logoUrl/label fields, so both may legitimately be absent.
+  imagePath?: string;
+  label?: string;
   name: string;
 }
 
@@ -43,9 +45,11 @@ interface IEndpointDetails {
   ]
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
-  public podCount$: Observable<number>;
-  public nodeCount$: Observable<number>;
-  public namespaceCount$: Observable<number>;
+  // strict: the count/chart/loading streams below are all assigned in ngOnInit
+  // before the template subscribes to them
+  public podCount$!: Observable<number | null>;
+  public nodeCount$!: Observable<number | null>;
+  public namespaceCount$!: Observable<number | null>;
 
   public highUsageColors = {
     domain: ['#00000026', '#00af00']
@@ -66,7 +70,9 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   public endpointDetails$: Observable<IEndpointDetails> = this.kubeEndpointService.endpoint$.pipe(
     map(endpoint => {
-      const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
+      // strict: this view only renders for a connected kubernetes endpoint,
+      // so its model always carries a cnsi_type
+      const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type!, endpoint.entity.sub_type);
       const { logoUrl, label } = endpointConfig.definition;
       // const { imagePath, label } = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
 
@@ -78,19 +84,20 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       };
     })
   );
-  source: SafeResourceUrl;
+  source?: SafeResourceUrl;
 
-  dashboardLink: string;
-  kubeTerminalLink: string;
+  // strict: assigned in ngOnInit before the template reads them
+  dashboardLink!: string;
+  kubeTerminalLink!: string;
 
-  public podCapacity$: Observable<ISimpleUsageChartData>;
-  public diskPressure$: Observable<ISimpleUsageChartData>;
-  public memoryPressure$: Observable<ISimpleUsageChartData>;
-  public outOfDisk$: Observable<ISimpleUsageChartData>;
-  public nodesReady$: Observable<ISimpleUsageChartData>;
-  public networkUnavailable$: Observable<ISimpleUsageChartData>;
-  public kubeNodeVersions$: Observable<string>;
-  public caaspData$: Observable<CaaspNodesData>;
+  public podCapacity$!: Observable<ISimpleUsageChartData>;
+  public diskPressure$!: Observable<ISimpleUsageChartData>;
+  public memoryPressure$!: Observable<ISimpleUsageChartData>;
+  public outOfDisk$!: Observable<ISimpleUsageChartData>;
+  public nodesReady$!: Observable<ISimpleUsageChartData>;
+  public networkUnavailable$!: Observable<ISimpleUsageChartData>;
+  public kubeNodeVersions$!: Observable<string>;
+  public caaspData$!: Observable<CaaspNodesData | null>;
 
   public pressureChartThresholds: IChartThresholds = {
     danger: 90,
@@ -113,7 +120,8 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
 
   private polls: Subscription[] = [];
 
-  public isLoading$: Observable<boolean>;
+  // strict: assigned in ngOnInit before the template subscribes
+  public isLoading$!: Observable<boolean>;
 
   // Go the Kubernetes Dashboard configuration page
   public configureDashboard() {

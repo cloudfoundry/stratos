@@ -45,7 +45,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
-    const obs$ = parts.length !== 2 ?
+    const obs$: Observable<unknown> = parts.length !== 2 ?
       observableOf(null) :
       this.getAPI().pipe(switchMap(api => httpClient.get(`${api.url}/projects/${parts.join('%2F')}`, api.requestArgs)));
 
@@ -240,7 +240,12 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
       projectName: commitData.projectName,
       scmType: commitData.scmType,
       endpointGuid: null,
-    };
+      // strict: GitLab commits carry no GitHub-style user identity (id/login/
+      // html_url are null) and the endpointGuid is backfilled later by the
+      // caller. GitUser/GitEntity in the store package model these as
+      // non-nullable, so an external-API boundary conversion is required here —
+      // matching convertProject() above which converts the same way.
+    } as unknown as GitCommit;
   }
 
   parseErrorAsString(error: unknown): string {

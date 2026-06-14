@@ -4,7 +4,7 @@
     <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
   }
 </div>
-@if (deployer && deployer.messages) {
+@if (deployer) {
   <app-log-viewer style="flex: 1 1 0%; min-height: 0; display: flex;" [logStream]="deployer.messages.asObservable()">
   </app-log-viewer>
 }

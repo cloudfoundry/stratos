@@ -1,5 +1,18 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
+interface ResourceAlert {
+  namespace?: string;
+  name?: string;
+  level?: number;
+  message?: string;
+  path?: string;
+}
+
+interface ResourceAlertGroup {
+  name: string;
+  alerts: ResourceAlert[];
+}
+
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-resource-alert-view',
@@ -8,7 +21,7 @@ changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResourceAlertViewComponent {
 
-  alertInfo;
+  alertInfo?: ResourceAlertGroup[];
 
   @Input()
   set alerts(data: any) {
@@ -20,11 +33,11 @@ export class ResourceAlertViewComponent {
 
   @Input() showHeader = true;
 
-  normalize(data) {
+  normalize(data: ResourceAlert[]): ResourceAlertGroup[] {
     // Normalize the alerts into groups
-    const normalized = {};
+    const normalized: Record<string, ResourceAlert[]> = {};
     data.forEach(item => {
-      const path = item.namespace ? `${item.namespace}/${item.name}` : item.name;
+      const path = item.namespace ? `${item.namespace}/${item.name}` : item.name ?? '';
       if (!normalized[path]) {
         normalized[path] = [];
       }
@@ -34,7 +47,7 @@ export class ResourceAlertViewComponent {
       });
     });
 
-    const arr = [];
+    const arr: ResourceAlertGroup[] = [];
     Object.keys(normalized).forEach(group => {
       arr.push({
         name: group,

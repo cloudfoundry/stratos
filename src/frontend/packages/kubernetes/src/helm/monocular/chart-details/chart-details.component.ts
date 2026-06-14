@@ -96,6 +96,6 @@ export class ChartDetailsComponent implements OnInit {
   updateMetaTags(): void { }
 
   goToRepoUrl(): string {
-    return `/charts/${getMonocularEndpoint(null, this.chart)}/${this.chart.attributes.repo.name}`;
+    return `/charts/${getMonocularEndpoint(undefined, this.chart)}/${this.chart.attributes.repo.name}`;
   }
 }

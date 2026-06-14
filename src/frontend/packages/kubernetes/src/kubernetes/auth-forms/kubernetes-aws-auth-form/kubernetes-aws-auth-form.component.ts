@@ -25,5 +25,5 @@ interface AWSAuthForm {
 })
 export class KubernetesAWSAuthFormComponent implements IAuthForm {
   showPassword = false;
-  @Input() formGroup: FormGroup<AWSAuthForm>;
+  @Input() formGroup!: FormGroup<AWSAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 }

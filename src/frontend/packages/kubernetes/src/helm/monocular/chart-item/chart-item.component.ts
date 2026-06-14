@@ -23,7 +23,7 @@ export class ChartItemComponent implements OnInit {
   // Truncate the description
   @Input() showDescription = true;
 
-  @Input() artifactHubAndHelmRepoTypes$: Observable<boolean>;
+  @Input() artifactHubAndHelmRepoTypes$!: Observable<boolean>; // strict: required @Input, always bound by the parent template
 
   private chartsService = inject(ChartsService);
 
@@ -32,7 +32,7 @@ export class ChartItemComponent implements OnInit {
   }
 
   goToDetailUrl(): string {
-    return this.chartsService.getChartSummaryRoute(this.chart.attributes.repo.name, this.chart.attributes.name, null, null, this.chart);
+    return this.chartsService.getChartSummaryRoute(this.chart.attributes.repo.name, this.chart.attributes.name, undefined, undefined, this.chart);
   }
 
 }

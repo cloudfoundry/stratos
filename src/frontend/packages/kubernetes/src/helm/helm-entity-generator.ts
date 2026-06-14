@@ -66,7 +66,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
           }];
         },
         renderPriority: helmRepoRenderPriority,
-        registeredLimit: null, // Ensure this is null, otherwise inherits parent's value
+        registeredLimit: undefined, // Ensure this is unset (falsy), otherwise inherits parent's value
       },
       {
         type: HELM_HUB_ENDPOINT_TYPE,
@@ -86,7 +86,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
           }
           return toObservable(authData.sessionData, { injector }).pipe(
             filter(sessionData => !!sessionData?.['plugin-config']),
-            map(sessionData => sessionData['plugin-config'].artifactHubDisabled === 'true' ? 0 : 1),
+            map(sessionData => sessionData?.['plugin-config']?.artifactHubDisabled === 'true' ? 0 : 1),
           );
         }
       },

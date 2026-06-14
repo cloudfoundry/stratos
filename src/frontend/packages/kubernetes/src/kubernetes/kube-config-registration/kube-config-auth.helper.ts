@@ -37,8 +37,8 @@ export class KubeConfigAuthHelper {
       // Collect all of the auth types for the sub-types
       if (defn.subTypes) {
         defn.subTypes.forEach(st => {
-          if (st.type !== 'config') {
-            this.subTypes.push({ id: st.type, name: st.labelShort });
+          if (st.type && st.type !== 'config') {
+            this.subTypes.push({ id: st.type, name: st.labelShort ?? st.type });
           }
           if (st.authTypes) {
             st.authTypes.forEach(at => {

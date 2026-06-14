@@ -88,7 +88,8 @@ export interface KubeConfigFile {
 }
 
 export interface KubeConfigImportAction {
-  action: string;
+  // null marks a skipped action (e.g. a connect whose register failed)
+  action: string | null;
   description: string;
   cluster: KubeConfigFileCluster;
   user?: KubeConfigFileUser;

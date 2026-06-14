@@ -7,7 +7,7 @@ export interface EntityCatalogHelperConfig {
 export class EntityCatalogTestHelper {
   private catalogEntitiesMap = new Map<string, StratosBaseCatalogEntity>();
   constructor(public spyOn: (object: any, method: keyof any) => jasmine.Spy, helperConfig: EntityCatalogHelperConfig) {
-    helperConfig.catalogEntities.forEach(([config, entity]) => {
+    helperConfig.catalogEntities?.forEach(([config, entity]) => {
       const key = this.stringifyEntityConfig(config);
       this.catalogEntitiesMap.set(key, entity);
     });

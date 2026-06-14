@@ -22,7 +22,7 @@ import { KubernetesNodeConditionComponent } from './kubernetes-node-condition/ku
 ]
 })
 export class KubernetesNodeConditionCardComponent {
-  public caaspNode$: Observable<CaaspNodeData>;
+  public caaspNode$: Observable<CaaspNodeData | undefined>;
   public caaspNodeDisruptive$: Observable<boolean>;
   public caaspNodSecurity$: Observable<boolean>;  public kubeEndpointService = inject(KubernetesEndpointService);
   public kubeNodeService = inject(KubernetesNodeService);
@@ -37,11 +37,13 @@ export class KubernetesNodeConditionCardComponent {
     );
 
     this.caaspNodeDisruptive$ = this.caaspNode$.pipe(
-      map(node => node.disruptiveUpdates)
+      // A node without CaaSP annotations has no pending disruptive updates
+      map(node => node?.disruptiveUpdates ?? false)
     );
 
     this.caaspNodSecurity$ = this.caaspNode$.pipe(
-      map(node => node.securityUpdates)
+      // A node without CaaSP annotations has no pending security updates
+      map(node => node?.securityUpdates ?? false)
     );
 
 
