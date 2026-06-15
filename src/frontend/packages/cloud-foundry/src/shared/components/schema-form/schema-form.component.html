@@ -14,7 +14,7 @@
     </div>
     @if (schemaView === 'schemaForm') {
       <div class="schema-form__form">
-        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
+        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (changes)="onFormChange($event)">
         </json-schema-form>
         @if (!!formValidationErrorsStr) {
           <div class="schema-form__form--data-bad" [innerHTML]="formValidationErrorsStr"></div>

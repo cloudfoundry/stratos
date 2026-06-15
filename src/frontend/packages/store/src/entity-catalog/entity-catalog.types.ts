@@ -182,7 +182,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly homeCard?: HomeCardMetadata;
 }
 
-export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
+export type StratosEndpointExtensionDefinition = Omit<IStratosEndpointDefinition, 'schema'>;
 export interface EntityTableConfig<T = any> {
   rowBuilders: EntityRowBuilder<T>[];
   showHeader?: boolean;

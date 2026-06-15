@@ -11,7 +11,7 @@ function arraysAreEqual(a1: unknown[], a2: unknown[]): boolean {
       if (!arraysAreEqual(a1[i] as unknown[], a2[i] as unknown[])) {
         return false;
       }
-    } else if (typeof (a1[i] === 'object')) {
+    } else if (typeof a1[i] === 'object') {
       if (!objectsAreEqual(a1[i] as Record<string, unknown>, a2[i] as Record<string, unknown>)) {
         return false;
       }

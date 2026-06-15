@@ -15,6 +15,7 @@ import { LoggedInService } from './logged-in.service';
   selector: 'app-root',
   templateUrl: './app.component.html',
   host: { class: 'flex flex-col flex-1 h-screen min-h-0' },
+  // eslint-disable-next-line @angular-eslint/prefer-standalone -- declared and bootstrapped in NgModule AppModule (app.module.ts, out of scope); standalone migration tracked separately
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush
 })

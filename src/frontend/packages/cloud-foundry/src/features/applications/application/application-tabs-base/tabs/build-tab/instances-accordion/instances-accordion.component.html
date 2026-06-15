@@ -59,8 +59,9 @@
 
         <div class="flex items-center gap-4 flex-wrap">
           <!-- Momentary shared selection across all three usage charts. -->
-          <label class="flex items-center gap-2 text-sm text-content-muted">
+          <label for="instances-all-metrics" class="flex items-center gap-2 text-sm text-content-muted">
             <input
+              id="instances-all-metrics"
               type="checkbox"
               class="accent-primary"
               [checked]="allActive()"
@@ -68,9 +69,10 @@
             All metrics
           </label>
 
-          <label class="flex items-center gap-2 text-sm text-content-muted">
+          <label for="instances-sample-interval" class="flex items-center gap-2 text-sm text-content-muted">
             Sample every
             <select
+              id="instances-sample-interval"
               class="rounded border border-content-border bg-content-bg px-2 py-1 text-content-text"
               (change)="setSampleInterval(+$any($event.target).value)">
               <option [value]="5000" [selected]="intervalMs() === 5000">5s</option>

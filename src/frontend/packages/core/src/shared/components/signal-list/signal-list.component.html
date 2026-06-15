@@ -287,6 +287,7 @@
                             <span class="material-icons text-xl leading-none">more_vert</span>
                           </button>
                           @if (openActionsRowKey() === config.getRowKey(row)) {
+                            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- not interactive; (click) is only a stopPropagation guard so a click inside the menu doesn't bubble to the outside-click closer. Actions are real focusable <button>s below. -->
                             <div
                               data-test="row-actions-menu"
                               (click)="$event.stopPropagation()"
@@ -499,6 +500,7 @@
                           <span class="material-icons text-xl leading-none">more_vert</span>
                         </button>
                         @if (openActionsRowKey() === config.getRowKey(row)) {
+                          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- not interactive; (click) is only a stopPropagation guard so a click inside the menu doesn't bubble to the outside-click closer. Actions are real focusable <button>s below. -->
                           <div
                             data-test="row-actions-menu"
                             (click)="$event.stopPropagation()"
@@ -594,6 +596,7 @@
                         <span class="material-icons text-xl leading-none">more_vert</span>
                       </button>
                       @if (openActionsRowKey() === config.getRowKey(row)) {
+                        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- not interactive; (click) is only a stopPropagation guard so a click inside the menu doesn't bubble to the outside-click closer. Actions are real focusable <button>s below. -->
                         <div
                           data-test="row-actions-menu"
                           (click)="$event.stopPropagation()"

@@ -214,7 +214,11 @@ export class InstancesAccordionComponent implements OnDestroy {
   /** Flip an instance in the shared overlay set (drives all three charts). */
   onToggleLinked(index: number): void {
     const next = new Set(this.unifiedHidden());
-    next.has(index) ? next.delete(index) : next.add(index);
+    if (next.has(index)) {
+      next.delete(index);
+    } else {
+      next.add(index);
+    }
     this.unifiedHidden.set(next);
   }
 

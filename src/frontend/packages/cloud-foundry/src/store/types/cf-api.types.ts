@@ -11,6 +11,7 @@ export function createEmptyCfResponse<T = any>(): CFResponse<T> {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional: T is part of the public generic API surface (mirrors PaginationResponse<T>/CFResponse<T>); the entity body is an open string-keyed map so T is not referenced internally.
 export interface CfAPIResource<T = any> extends APIResource {
   entity: {
     [entityKey: string]: any,
@@ -26,5 +27,4 @@ export interface PaginationResponse<T = any> {
   resources: T[];
 }
 
-export interface CFResponse<T = any> extends PaginationResponse<APIResource<T>> {
-}
+export type CFResponse<T = any> = PaginationResponse<APIResource<T>>;

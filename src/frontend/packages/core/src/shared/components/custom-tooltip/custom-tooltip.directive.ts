@@ -10,6 +10,7 @@ export class CustomTooltipDirective implements OnDestroy {
 
   @Input('matTooltip') tooltipText: string = '';
   @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- intentional: drop-in replacement for Angular Material's matTooltip; the matTooltipClass alias IS the public API
   @Input('matTooltipClass') tooltipClass: string = '';
   @Input('matTooltipShowDelay') showDelay: number = 250;
   @Input('matTooltipHideDelay') hideDelay: number = 100;

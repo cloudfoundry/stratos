@@ -101,7 +101,11 @@ export class InstanceUsageChartComponent {
    *  makes the signal emit so `chartData()` recomputes and the plugin re-runs. */
   private toggleInstanceHidden(index: number): void {
     const next = new Set(this.hiddenInstances());
-    next.has(index) ? next.delete(index) : next.add(index);
+    if (next.has(index)) {
+      next.delete(index);
+    } else {
+      next.add(index);
+    }
     this.hiddenInstances.set(next);
   }
 

@@ -9,7 +9,7 @@ import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { CfUserPermissionDirective } from './cf-user-permission.directive';
 
 @Component({
-  standalone: false,
+  imports: [CfUserPermissionDirective],
   template: `
     <div *appCfUserPermission="permission">
       Test Content
@@ -29,8 +29,6 @@ describe('CfUserPermissionDirective', () => {
       imports: [
         NoopAnimationsModule,
         CfUserPermissionDirective,
-      ],
-      declarations: [
         TestUserPermissionComponent,
       ],
       providers: [

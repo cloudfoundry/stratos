@@ -101,7 +101,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     });
 
     // Track form valid+dirty as a signal so signalHandle.valid is reactive
-    // without the legacy onValidChange emitter chain. Combine statusChanges
+    // without the legacy validChange emitter chain. Combine statusChanges
     // and valueChanges so we react to BOTH validator transitions and dirty-
     // flag flips (markAsDirty fires on valueChanges, not statusChanges).
     const formChanges$ = this.editAppForm.statusChanges.pipe(

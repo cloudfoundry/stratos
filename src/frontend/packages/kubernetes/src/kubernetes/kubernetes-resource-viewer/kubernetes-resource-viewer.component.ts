@@ -31,7 +31,7 @@ import { KubePodDataService } from '../../services/domain-data/kube-pod-data.ser
 import { KubeServiceDataService } from '../../services/domain-data/kube-service-data.service';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
+import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition } from '../store/kube.types';
 import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
 import { SidePanelService } from './../../../../core/src/shared/services/side-panel.service';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';

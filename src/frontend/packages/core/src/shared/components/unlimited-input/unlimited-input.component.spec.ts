@@ -1,14 +1,14 @@
 import {  Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../core/core.module';
 import { UnlimitedInputComponent } from './unlimited-input.component';
 
 @Component({
-  standalone: false,
+  imports: [ReactiveFormsModule, UnlimitedInputComponent],
   template: `
     <form [formGroup]="formGroup">
       <app-unlimited-input name="inputName"
@@ -38,11 +38,11 @@ describe('UnlimitedInputComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [WrapperComponent],
       imports: [
         BrowserAnimationsModule,
         CoreModule,
         UnlimitedInputComponent,
+        WrapperComponent,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     });

@@ -20,6 +20,7 @@ export class CustomButtonToggleComponent {
   @Input() disabled = false;
   @Input() checked = false;
 
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle which emits (change)
   @Output() change = new EventEmitter<CustomButtonToggleComponent>();
 
   toggle() {
@@ -50,6 +51,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   @Input() name!: string;
 
   @Output() valueChange = new EventEmitter<any>();
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle-group which emits (change)
   @Output() change = new EventEmitter<MatButtonToggleChange>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit

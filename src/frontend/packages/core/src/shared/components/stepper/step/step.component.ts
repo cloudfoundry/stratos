@@ -97,15 +97,15 @@ export class StepComponent {
   // busy gates the parent stepper's Next/Apply [disabled] binding, but the
   // steppers component is OnPush and busy mutations happen outside its CD
   // scope (the destructive-entry timer below, goNext teardown). Mirror the
-  // onValidChange pattern so the stepper can markForCheck — a bare property
+  // validChange pattern so the stepper can markForCheck — a bare property
   // write is invisible to it (a step's markForCheck walks the declaration
   // tree, which doesn't include the steppers view). Without this the
   // destructive confirm step's Apply stayed disabled forever under zoneless.
-  @Output() onBusyChange = new EventEmitter<boolean>();
+  @Output() busyChange = new EventEmitter<boolean>();
   set busy(v: boolean) {
     if (this._busy !== v) {
       this._busy = v;
-      this.onBusyChange.emit(v);
+      this.busyChange.emit(v);
     }
   }
   get busy(): boolean { return this._busy; }
@@ -116,12 +116,12 @@ export class StepComponent {
   @Input()
   title!: string;
 
-  @Output() onHidden = new EventEmitter<boolean>();
+  @Output() hiddenChange = new EventEmitter<boolean>();
 
   @Input()
   set hidden(hidden: boolean) {
     this.pHidden = hidden;
-    this.onHidden.emit(this.pHidden);
+    this.hiddenChange.emit(this.pHidden);
   }
 
   // Signal-handle `hidden` overrides legacy storage. Signal reads inside the
@@ -136,19 +136,19 @@ export class StepComponent {
     if (this._valid !== value) {
       this._valid = value;
       // Emit event to notify parent stepper of validation change
-      this.onValidChange.emit(value);
+      this.validChange.emit(value);
     }
   }
   // When `signalHandle` is set, the stepper reads validity from
   // `signalHandle.valid()` — the legacy `_valid` storage is ignored.
   // Signal reads are tracked by Angular's CD so this is reactive without
-  // the manual `onValidChange` emitter pattern.
+  // the manual `validChange` emitter pattern.
   get valid(): boolean {
     return this.signalHandle ? this.signalHandle.valid() : this._valid;
   }
   private _valid = true;
 
-  @Output() onValidChange = new EventEmitter<boolean>();
+  @Output() validChange = new EventEmitter<boolean>();
 
   // Setter-backed inputs that emit change events so the parent stepper
   // component can re-run change detection. Under OnPush + zoneless change
@@ -164,13 +164,13 @@ export class StepComponent {
   set canClose(v: boolean) {
     if (this._canClose !== v) {
       this._canClose = v;
-      this.onCanCloseChange.emit(v);
+      this.canCloseChange.emit(v);
     }
   }
   get canClose(): boolean {
     return this.signalHandle?.canClose ? this.signalHandle.canClose() : this._canClose;
   }
-  @Output() onCanCloseChange = new EventEmitter<boolean>();
+  @Output() canCloseChange = new EventEmitter<boolean>();
 
   private _hideCloseButton = false;
   @Input()
@@ -208,13 +208,13 @@ export class StepComponent {
   set disablePrevious(v: boolean) {
     if (this._disablePrevious !== v) {
       this._disablePrevious = v;
-      this.onDisablePreviousChange.emit(v);
+      this.disablePreviousChange.emit(v);
     }
   }
   get disablePrevious(): boolean {
     return this.signalHandle?.disablePrevious ? this.signalHandle.disablePrevious() : this._disablePrevious;
   }
-  @Output() onDisablePreviousChange = new EventEmitter<boolean>();
+  @Output() disablePreviousChange = new EventEmitter<boolean>();
 
   private _blocked = false;
   @Input()

@@ -469,7 +469,7 @@ export interface StServiceCredentialBindingsResponse {
   pagination?: { totalResults?: number };
 }
 
-export interface StOrgDetailResponse extends StOrgDetail {}
+export type StOrgDetailResponse = StOrgDetail;
 
 export interface StSpacesResponse {
   resources: StSpace[];

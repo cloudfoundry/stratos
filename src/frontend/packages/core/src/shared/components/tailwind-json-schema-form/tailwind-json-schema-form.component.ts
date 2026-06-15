@@ -25,7 +25,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit, OnChanges {
   @Input() options: TailwindJsonSchemaFormConfig = { addSubmit: false };
   @Input() loadExternalAssets: boolean = false;
 
-  @Output() onChanges = new EventEmitter<any>();
+  @Output() changes = new EventEmitter<any>();
   @Output() validationErrors = new EventEmitter<any[]>();
 
   form!: FormGroup<any>;
@@ -85,7 +85,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit, OnChanges {
     // Subscribe to form changes
     this.form.valueChanges.subscribe(value => {
       this.formData = value;
-      this.onChanges.emit(value);
+      this.changes.emit(value);
       this.checkValidation();
     });
   }

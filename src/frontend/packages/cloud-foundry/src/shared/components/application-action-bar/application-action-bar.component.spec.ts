@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, inject, provideZonelessChangeDetection, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
@@ -44,10 +44,7 @@ import { AppApplicationActionBarComponent } from './application-action-bar.compo
   `,
 })
 class ActionBarTestHostComponent {
-  portal$;
-  constructor(tabNav: TabNavService) {
-    this.portal$ = tabNav.tabSubNav$;
-  }
+  portal$ = inject(TabNavService).tabSubNav$;
 }
 
 describe('AppApplicationActionBarComponent', () => {

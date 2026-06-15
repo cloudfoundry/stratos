@@ -47,14 +47,14 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   @Input() options: any;
   @Input() framework: string = "tailwind";
 
-  @Output() onChanges = new EventEmitter<any>();
-  @Output() onSubmit = new EventEmitter<any>();
+  @Output() changes = new EventEmitter<any>();
+  @Output() formSubmit = new EventEmitter<any>();
   @Output() isValid = new EventEmitter<boolean>();
 
   ngOnInit(): void {
     // Basic initialization
     if (this.data) {
-      this.onChanges.emit(this.data);
+      this.changes.emit(this.data);
     }
     this.isValid.emit(true);
   }
@@ -70,7 +70,7 @@ export class TailwindJsonSchemaFormComponent implements OnInit {
   }
 
   submitForm(): void {
-    this.onSubmit.emit(this.data);
+    this.formSubmit.emit(this.data);
   }
 }
 

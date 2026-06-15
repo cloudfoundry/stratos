@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import { ActionState } from '@stratosui/store';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional public-API generic: T is propagated to extending action interfaces (IListAction/IOptionalAction/etc.) so the whole family shares one row type
 export interface IBaseListAction<T> {
   icon?: string;
   label: string;

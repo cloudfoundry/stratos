@@ -10,7 +10,7 @@ import { MetaCardComponent } from './meta-card.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
 @Component({
-  standalone: false,
+  imports: [MetaCardComponent, MetaCardTitleComponent],
   template: `
     <app-meta-card>
       <app-meta-card-title>Title</app-meta-card-title>
@@ -57,8 +57,8 @@ describe('MetaCardComponent', () => {
         CoreTestingModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
+        WrapperComponent,
       ],
-      declarations: [WrapperComponent],
       providers: [
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
         provideZonelessChangeDetection(),

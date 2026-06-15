@@ -308,6 +308,7 @@ export interface SignalListHeaderAction {
  * to act on the selection — leaving bulk operations unmigratable. This is
  * the slot, no consumers wired by this commit.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional public-API generic: T keeps bulk-action row type aligned with SignalListConfig<T> at the consumer call site
 export interface SignalListBulkAction<T> {
   /** Display label inside the button. */
   readonly label: string;

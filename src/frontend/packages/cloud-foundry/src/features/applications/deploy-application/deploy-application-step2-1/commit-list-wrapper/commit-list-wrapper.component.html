@@ -2,8 +2,8 @@
   <!-- Deploy the latest commit on the branch without pinning a specific SHA.
        When on, the commit list is hidden and the deploy sends an empty commit
        so CF builds whatever HEAD currently points at. -->
-  <label class="flex items-center gap-2 mb-3 text-sm text-content-text cursor-pointer">
-    <input type="checkbox" [checked]="useLatestHead()"
+  <label for="deploy-latest-head" class="flex items-center gap-2 mb-3 text-sm text-content-text cursor-pointer">
+    <input id="deploy-latest-head" type="checkbox" [checked]="useLatestHead()"
       (change)="setUseLatestHead($any($event.target).checked)">
     <span>Deploy the latest commit on <b>{{ branchName() || 'the branch' }}</b> (don't pin a commit)</span>
   </label>
