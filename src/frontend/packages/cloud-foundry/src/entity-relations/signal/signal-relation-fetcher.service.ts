@@ -18,7 +18,7 @@
 // single in-flight Promise (epoch-token de-dup mirrors
 // cnsi-entity-source.ts).
 
-import { Injectable, signal, Signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, signal, Signal, WritableSignal } from '@angular/core';
 import {
   RelationDescriptor,
   RelationFetchContext,
@@ -53,7 +53,7 @@ export class SignalRelationFetcherService {
   private readonly childSignals = new Map<string, WritableSignal<unknown[]>>();
   private readonly inFlight = new Map<string, Promise<unknown[]>>();
 
-  constructor(private readonly postProcessors: SignalRelationPostProcessorRegistry) {}
+  private readonly postProcessors = inject(SignalRelationPostProcessorRegistry);
 
   /** Register a single descriptor. Idempotent on (parent, child, paramName). */
   register(descriptor: RelationDescriptor): void {

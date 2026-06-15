@@ -89,14 +89,14 @@
       </div>
     }
     @if (hasSchema) {
-      <json-schema-form (onChanges)="formChanged($event)" #schemaForm loadExternalAssets="false"
+      <json-schema-form (changes)="formChanged($event)" #schemaForm loadExternalAssets="false"
         [options]="{ addSubmit: false }" [schema]="schema" framework="tailwind" [data]="initialFormData">
       </json-schema-form>
     }
   </div>
   <div [ngClass]="{'editor-hidden': mode !== 'editor'}" class="editor-monaco" #monacoContainer>
     <app-monaco-editor #monacoEditor class="editor-monaco-edit " [options]="editorOptions" [model]="model"
-    [(ngModel)]="code" (onInit)="onMonacoInit($event)"></app-monaco-editor>
+    [(ngModel)]="code" (editorInit)="onMonacoInit($event)"></app-monaco-editor>
   </div>
 
 </div>

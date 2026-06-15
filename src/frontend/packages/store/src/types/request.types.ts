@@ -15,6 +15,7 @@ export interface SingleEntityAction {
   guid?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional class/interface merge: the abstract RequestAction class (below) is augmented with these optional action fields
 export interface RequestAction extends Action, BasePipelineRequestAction, SingleEntityAction {
   updatingKey?: string;
 }
@@ -84,6 +85,7 @@ export abstract class StartAction implements Action {
   type = ApiActionTypes.API_REQUEST_START;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional class/interface merge: this abstract class carries the same-named interface's optional action fields
 export abstract class RequestAction implements Action {
   type = RequestTypes.START;
 }

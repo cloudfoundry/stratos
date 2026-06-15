@@ -50,7 +50,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   @Input() options: MonacoEditorOptions = {};
   @Input() model?: MonacoEditorModel;
-  @Output() onInit = new EventEmitter<any>();
+  @Output() editorInit = new EventEmitter<any>();
 
   private editor: any;
   private value = '';
@@ -122,7 +122,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     }
 
     // Emit initialization event
-    this.onInit.emit(this.editor);
+    this.editorInit.emit(this.editor);
   }
 
   private setupResizeObserver(): void {

@@ -88,7 +88,7 @@ export class VariableEditDialogComponent {
     fontSize: 16,
   };
 
-  /** Captured Monaco editor instance (undefined until onInit fires; never
+  /** Captured Monaco editor instance (undefined until editorInit fires; never
    *  fires in unit tests, where Monaco isn't loaded). */
   private editor: any;
 

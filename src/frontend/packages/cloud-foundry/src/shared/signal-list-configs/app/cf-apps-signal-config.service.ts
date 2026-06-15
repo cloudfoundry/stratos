@@ -170,7 +170,9 @@ export class CfAppsSignalConfigService {
   private readonly errorEvents = inject(EndpointErrorEventsService);
   private _errorEffect?: EffectRef;
 
-  constructor(private readonly http: HttpClient) {
+  private readonly http = inject(HttpClient);
+
+  constructor() {
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
       ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })

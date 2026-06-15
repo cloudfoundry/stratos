@@ -61,8 +61,8 @@ interface GithubType {
 enum GitTypeKeys {
   GITHUB_COM = 'githubdotcom',
   GITHUB_ENTERPRISE = 'githubenterprize',
-  GITLAB_COM = 'githubdotcom',
-  GITLAB_ENTERPRISE = 'githubenterprize' }
+  GITLAB_COM = 'gitlabdotcom',
+  GITLAB_ENTERPRISE = 'gitlabenterprise' }
 
 interface GitRegistrationForm {
   selectedType: FormControl<string>;

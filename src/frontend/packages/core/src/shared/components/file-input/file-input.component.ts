@@ -23,8 +23,8 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   @Input() accept!: string;
   @Input() placeholder = '';
-  @Output() onFileSelect: EventEmitter<File> = new EventEmitter();
-  @Output() onFileData: EventEmitter<string> = new EventEmitter();
+  @Output() fileSelect: EventEmitter<File> = new EventEmitter();
+  @Output() fileData: EventEmitter<string> = new EventEmitter();
 
   @Input() fileFormControlName!: string;
 
@@ -60,12 +60,12 @@ export class FileInputComponent implements OnInit, OnDestroy {
     const fs = getEventFiles($event);
     if (fs && fs.length > 0) {
       this.files = Array.from(fs);
-      this.onFileSelect.emit(this.files[0]);
+      this.fileSelect.emit(this.files[0]);
 
       if (this.formGroupControl) {
         this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.updateFileState(value));
       } else {
-        this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.onFileData.emit(value as string));
+        this.handleFileData(this.files[0], (value: string | ArrayBuffer | null) => this.fileData.emit(value as string));
       }
       if (this.files.length > 0) {
         this.name = this.files[0].name;
@@ -87,7 +87,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     if (this.formGroupControl) {
       this.formGroupControl.control.controls[this.fileFormControlName].setValue('');
     }
-    this.onFileData.emit('');
+    this.fileData.emit('');
   }
 
   onPathInput($event: Event) {
@@ -96,7 +96,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     if (this.formGroupControl) {
       this.formGroupControl.control.controls[this.fileFormControlName].setValue(input.value);
     }
-    this.onFileData.emit(input.value);
+    this.fileData.emit(input.value);
   }
 
   handleFileData(file: File, done: (value: string | ArrayBuffer | null) => void) {

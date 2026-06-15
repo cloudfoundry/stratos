@@ -13,7 +13,9 @@
       <ng-template appSignalListCell="type" let-row>
         <div class="flex flex-col gap-1 py-1">
           @if (hasDetails(row)) {
-            <a class="cursor-pointer text-primary hover:underline break-all" (click)="openEventDetails(row)">{{ row.type }}</a>
+            <a class="cursor-pointer text-primary hover:underline break-all" role="button" tabindex="0"
+              (click)="openEventDetails(row)" (keydown.enter)="openEventDetails(row)"
+              (keydown.space)="$event.preventDefault(); openEventDetails(row)">{{ row.type }}</a>
           } @else {
             <span class="break-all">{{ row.type }}</span>
           }

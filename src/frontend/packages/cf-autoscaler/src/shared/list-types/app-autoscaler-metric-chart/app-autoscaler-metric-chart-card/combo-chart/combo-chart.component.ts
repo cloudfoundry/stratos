@@ -27,6 +27,7 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   @Input() colorSchemeLine: any;
   @Input() scheme: any;
 
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped chart's (select) event under the same name
   @Output() select = new EventEmitter();
   @Output() activate = new EventEmitter();
   @Output() deactivate = new EventEmitter();

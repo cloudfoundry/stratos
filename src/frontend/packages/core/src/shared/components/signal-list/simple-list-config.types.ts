@@ -6,4 +6,5 @@
  * once aliased is gone with the list framework; consumers only use it as an
  * opaque, `any`-typed holder.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional public-API generic: T is retained from the legacy ISimpleListConfig<T> signature so existing call sites keep compiling; the alias is an opaque any-typed holder
 export type ISimpleListConfig<T = any> = Record<string, any>;

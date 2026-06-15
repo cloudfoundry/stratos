@@ -12,7 +12,7 @@ import { UserPermissionDirective } from './user-permission.directive';
 import { CurrentUserPermissionsService } from '../core/permissions/current-user-permissions.service';
 
 @Component({
-  standalone: false,
+  imports: [UserPermissionDirective],
   template: `<div *appUserPermission="['test.permission']">Test Content</div>`
 })
 class TestUserPermissionComponent {
@@ -43,9 +43,9 @@ describe('UserPermissionDirective', () => {
         },
         createBasicStoreModule(),
         AppTestModule,
-        UserPermissionDirective
-      ],
-      declarations: [TestUserPermissionComponent]
+        UserPermissionDirective,
+        TestUserPermissionComponent
+      ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);
     component = fixture.componentInstance;

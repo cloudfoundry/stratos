@@ -110,7 +110,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.setActive(0);
 
     this.allSteps.forEach((step => {
-      this.hiddenSubs.push(step.onHidden.subscribe((_hidden) => {
+      this.hiddenSubs.push(step.hiddenChange.subscribe((_hidden) => {
         this.filterSteps();
       }));
       // Listen for validation/canClose/disablePrevious changes to trigger
@@ -120,19 +120,19 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // template bindings that read from `this.steps[i].canClose` etc.
       // Without these markForCheck calls the Previous/Close button
       // disabled state stays frozen at the initial bind state.
-      this.hiddenSubs.push(step.onValidChange.subscribe(() => {
+      this.hiddenSubs.push(step.validChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
       // busy gates the Next/Apply [disabled] binding; its mutations (e.g.
       // the destructive-entry delay timer in StepComponent.pOnEnter) happen
       // outside this component's CD scope. See StepComponent.busy.
-      this.hiddenSubs.push(step.onBusyChange.subscribe(() => {
+      this.hiddenSubs.push(step.busyChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
-      this.hiddenSubs.push(step.onCanCloseChange.subscribe(() => {
+      this.hiddenSubs.push(step.canCloseChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
-      this.hiddenSubs.push(step.onDisablePreviousChange.subscribe(() => {
+      this.hiddenSubs.push(step.disablePreviousChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
     }));

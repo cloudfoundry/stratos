@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, map, share, switchMap } from 'rxjs/operators';
+import { catchError, share, switchMap } from 'rxjs/operators';
 
 import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import {

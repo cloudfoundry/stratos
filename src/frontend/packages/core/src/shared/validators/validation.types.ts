@@ -47,6 +47,7 @@ export interface UrlValidatorConfig {
 /**
  * Configuration for async uniqueness validator
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional public-API generic: T is the validated-value type carried by the config so call sites can parameterize it; the alias keeps the existing signature stable
 export interface UniquenessValidatorConfig<T = any> {
   /** Function to check if value exists */
   checkFn: (value: string) => Promise<boolean> | Observable<boolean>;

@@ -6,7 +6,7 @@ import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 
 
 @Component({
-  standalone: false,
+  imports: [ButtonBlurOnClickDirective],
   template: `<button mat-icon-button aria-label="Test button"></button>`
 })
 class TestButtonComponent {
@@ -30,10 +30,8 @@ describe('ButtonBlurOnClickDirective', () => {
         { provide: Renderer2, useClass: MockRenderer },
         provideZonelessChangeDetection(),
       ],
-      declarations: [
-        TestButtonComponent,
-      ],
       imports: [
+        TestButtonComponent,
         ButtonBlurOnClickDirective,
       ],
     }).compileComponents();

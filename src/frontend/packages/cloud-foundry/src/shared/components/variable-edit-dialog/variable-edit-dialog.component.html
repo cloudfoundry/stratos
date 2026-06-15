@@ -46,7 +46,7 @@
         [options]="editorOptions"
         [ngModel]="value()"
         (ngModelChange)="value.set($event)"
-        (onInit)="onEditorInit($event)">
+        (editorInit)="onEditorInit($event)">
       </app-monaco-editor>
     </div>
     @if (jsonWarning()) {

@@ -7,6 +7,7 @@ export interface TailwindSnackBarConfig {
   panelClass?: string | string[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional public-API generic: T mirrors MatSnackBarRef<T> (the attached component-instance type) so callers can type the ref; the impl propagates it via implements TailwindSnackBarRef<T>
 export interface TailwindSnackBarRef<T> {
   afterDismissed(): Observable<any>;
   onAction(): Observable<any>;

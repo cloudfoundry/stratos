@@ -63,7 +63,8 @@ export class KubernetesPodExpandedStatusHelper {
       const state = container.state || {};
 
       if (!!state.terminated && state.terminated.exitCode === 0) {
-
+        // Init container completed successfully (exit code 0) — no reason
+        // to surface, fall through and leave the running reason as-is.
       } else if (state.terminated) {
         if (state.terminated.reason.length === 0) {
           if (state.terminated.signal !== 0) {

@@ -393,7 +393,7 @@ function generateCFAppEnvVarEntity(endpointDefinition: StratosEndpointExtensionD
       // Observable<number> contract holds without fabricating list data.
       maxedStateStartAt: () => of(0),
     },
-    successfulRequestDataMapper: (data, endpointGuid, guid, entityType, endpointType, action) => {
+    successfulRequestDataMapper: (data, endpointGuid, guid, _entityType, _endpointType, _action) => {
       return {
         entity: {
           ...(data || {}),

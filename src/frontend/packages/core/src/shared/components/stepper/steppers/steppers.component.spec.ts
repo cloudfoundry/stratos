@@ -54,7 +54,7 @@ describe('SteppersComponent', () => {
   // Regression: dev.56 shipped a template change that swapped @if-wrapped
   // steps for [hidden] bindings so the stepper's one-shot @ContentChildren
   // capture sees all steps at ngAfterContentInit. That exposed a second
-  // zoneless-CD bug: onHidden → filterSteps reassigns this.steps but
+  // zoneless-CD bug: hiddenChange → filterSteps reassigns this.steps but
   // without markForCheck the template kept rendering the step list from
   // the initial filter. Routes step would never appear even after routes
   // loaded. This test pins the filter path to mark for check.
