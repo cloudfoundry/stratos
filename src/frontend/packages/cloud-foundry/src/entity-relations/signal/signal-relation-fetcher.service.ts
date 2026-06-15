@@ -18,7 +18,7 @@
 // single in-flight Promise (epoch-token de-dup mirrors
 // cnsi-entity-source.ts).
 
-import { inject, Injectable, signal, Signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, Signal, WritableSignal } from '@angular/core';
 import {
   RelationDescriptor,
   RelationFetchContext,
@@ -53,7 +53,8 @@ export class SignalRelationFetcherService {
   private readonly childSignals = new Map<string, WritableSignal<unknown[]>>();
   private readonly inFlight = new Map<string, Promise<unknown[]>>();
 
-  private readonly postProcessors = inject(SignalRelationPostProcessorRegistry);
+  // eslint-disable-next-line @angular-eslint/prefer-inject -- constructor injection retained: the deliberately pure-TS spec (signal-relation-fetcher.spec.ts) directly `new`s this service with a mock registry, which an inject() field initializer can't support
+  constructor(private readonly postProcessors: SignalRelationPostProcessorRegistry) {}
 
   /** Register a single descriptor. Idempotent on (parent, child, paramName). */
   register(descriptor: RelationDescriptor): void {
