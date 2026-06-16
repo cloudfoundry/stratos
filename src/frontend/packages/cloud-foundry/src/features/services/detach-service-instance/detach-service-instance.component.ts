@@ -4,6 +4,7 @@ import { Component, OnDestroy, Signal, signal, ChangeDetectionStrategy, computed
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
+  IHeaderBreadcrumb,
   PageHeaderComponent,
   SignalStepHandle,
   StepComponent,
@@ -58,6 +59,9 @@ export class DetachServiceInstanceComponent implements OnDestroy {
     const name = this._instanceSource?.value()?.name;
     return name ? `Unbind apps from '${name}'` : '';
   });
+  readonly breadcrumbs: IHeaderBreadcrumb[] = [
+    { breadcrumbs: [{ value: 'Services', routerLink: '/services' }] },
+  ];
   cfGuid!: string;
   deleteStarted = signal(false);
 
