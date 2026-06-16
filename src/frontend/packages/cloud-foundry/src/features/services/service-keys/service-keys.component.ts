@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, Signal, computed, effect, inject, s
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
+import { CopyToClipboardComponent, IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -20,17 +20,48 @@ interface OfferingBindableResponse {
   bindable?: boolean;
 }
 
+// One displayable credential entry. `sensitive` drives on-screen masking;
+// `value` always holds the real value so copy works even while masked.
+interface CredentialField {
+  key: string;
+  value: string;
+  sensitive: boolean;
+}
+
+// Mask credential keys that look like secrets. We iterate every field (rather
+// than hardcoding username/password/url) so the list survives broker key-name
+// changes; only the display is masked, never the copied value.
+const SENSITIVE_KEY = /pass|secret|token|private|key|cred/i;
+// Connection strings frequently embed the password as scheme://user:pass@host
+// (e.g. a postgres `uri`). Mask by VALUE too so these don't leak even though
+// the key ("uri"/"read_uri") looks innocuous; a plain URL without credentials
+// stays visible.
+const EMBEDDED_CREDENTIAL = /:\/\/[^/\s:@]+:[^/\s@]+@/;
+
+function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
+  return Object.entries(creds).map(([key, raw]) => {
+    const value = typeof raw === 'string' ? raw : JSON.stringify(raw);
+    return {
+      key,
+      value,
+      sensitive: SENSITIVE_KEY.test(key) || EMBEDDED_CREDENTIAL.test(value),
+    };
+  });
+}
+
 // ServiceKeysComponent — per-instance Service Keys page, reached via the
 // /services/:type/:endpointId/:serviceInstanceId/keys route (sibling to the
-// existing edit/detach action routes). Lists the instance's service keys
-// (credential bindings with type=key), with create / reveal-credentials /
-// delete. Create and delete ride the writeWithJob async-job contract.
+// edit/detach action routes). Service keys are credential bindings (type=key).
+// Each key renders as an accordion panel (mirroring the app instances
+// accordion); expanding lazily loads its credentials, shown as a masked,
+// per-field-copyable list. Create/delete ride the writeWithJob async-job
+// contract.
 @Component({
   selector: 'app-service-keys',
   templateUrl: './service-keys.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, PageHeaderComponent],
+  imports: [DatePipe, PageHeaderComponent, CopyToClipboardComponent],
 })
 export class ServiceKeysComponent {
   private http = inject(HttpClient);
@@ -53,7 +84,6 @@ export class ServiceKeysComponent {
 
   // Reloadable list source: swapping the signal re-derives keys/loading.
   private keysSource = signal<SignalSource<ServiceKeyView[]>>(
-    // placeholder replaced in the constructor once guids are read
     { value: signal<ServiceKeyView[]>([]).asReadonly(), isLoading: signal(false).asReadonly(), error: signal(null).asReadonly() },
   );
   readonly keys: Signal<ServiceKeyView[]> = computed(() => this.keysSource().value());
@@ -67,18 +97,34 @@ export class ServiceKeysComponent {
   // off the warmed offerings store (which can be cold/slow on multi-CF
   // foundations), so it may fail open and show the action for a non-bindable
   // service. Here we fetch the offering directly once the instance loads and
-  // block create if the broker doesn't support keys. undefined = not yet known
-  // (fail open); false = confirmed not supported.
+  // block create when the broker doesn't support keys. undefined = not yet
+  // known (fail open); false = confirmed not supported.
   readonly bindable = signal<boolean | undefined>(undefined);
   readonly notBindable = computed(() => this.bindable() === false);
   private bindableFetchStarted = false;
 
-  // Per-row delete status + revealed credentials, keyed by key guid.
+  // Accordion + per-key credential state, all keyed by key guid.
+  private openByGuid = signal<Record<string, boolean>>({});
+  private credsByGuid = signal<Record<string, Record<string, unknown>>>({});
+  private credsLoadingByGuid = signal<Record<string, boolean>>({});
+  private credsErrorByGuid = signal<Record<string, string>>({});
+  // Revealed sensitive fields, keyed `${guid}::${fieldKey}`.
+  private shownFields = signal<ReadonlySet<string>>(new Set<string>());
+  // Per-key delete status.
   private statusByGuid = signal<Record<string, RowStatus>>({});
-  private credentialsByGuid = signal<Record<string, string>>({});
 
+  isOpen = (guid: string): boolean => this.openByGuid()[guid] ?? false;
+  credsLoading = (guid: string): boolean => this.credsLoadingByGuid()[guid] ?? false;
+  credsError = (guid: string): string | undefined => this.credsErrorByGuid()[guid];
   rowStatus = (guid: string): RowStatus => this.statusByGuid()[guid] ?? 'idle';
-  revealedCredentials = (guid: string): string | undefined => this.credentialsByGuid()[guid];
+  credentialFields = (guid: string): CredentialField[] => {
+    const creds = this.credsByGuid()[guid];
+    return creds ? toCredentialFields(creds) : [];
+  };
+  fieldShown = (guid: string, key: string): boolean => this.shownFields().has(`${guid}::${key}`);
+  displayValue = (guid: string, field: CredentialField): string =>
+    field.sensitive && !this.fieldShown(guid, field.key) ? '••••••••' : field.value;
+  allCredsJson = (guid: string): string => JSON.stringify(this.credsByGuid()[guid] ?? {}, null, 2);
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -88,7 +134,7 @@ export class ServiceKeysComponent {
     this.reload();
 
     // Once the instance summary lands we know the offering guid; fetch the
-    // offering once to resolve bindability authoritatively (the backup for the
+    // offering once to resolve bindability authoritatively (backup for the
     // best-effort list gate). Runs in the injection context so the effect is
     // cleaned up with the component.
     effect(() => {
@@ -101,6 +147,38 @@ export class ServiceKeysComponent {
 
   reload(): void {
     this.keysSource.set(this.catalog.serviceKeysForInstance(this.cfGuid, this.siGuid));
+  }
+
+  toggleOpen(guid: string): void {
+    const opening = !this.isOpen(guid);
+    this.openByGuid.update(prev => ({ ...prev, [guid]: opening }));
+    if (opening && this.credsByGuid()[guid] === undefined && !this.credsLoading(guid)) {
+      void this.loadCredentials(guid);
+    }
+  }
+
+  toggleField(guid: string, key: string): void {
+    const id = `${guid}::${key}`;
+    this.shownFields.update(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
+  }
+
+  private async loadCredentials(guid: string): Promise<void> {
+    this.credsLoadingByGuid.update(prev => ({ ...prev, [guid]: true }));
+    this.credsErrorByGuid.update(prev => { const n = { ...prev }; delete n[guid]; return n; });
+    try {
+      const details = await firstValueFrom(
+        this.http.get<KeyDetailsResponse>(`/pp/v1/cf/service_keys/${this.cfGuid}/${guid}/details`),
+      );
+      this.credsByGuid.update(prev => ({ ...prev, [guid]: details?.credentials ?? {} }));
+    } catch (err: unknown) {
+      this.credsErrorByGuid.update(prev => ({ ...prev, [guid]: this.messageOf(err) }));
+    } finally {
+      this.credsLoadingByGuid.update(prev => ({ ...prev, [guid]: false }));
+    }
   }
 
   private async loadBindable(offeringGuid: string): Promise<void> {
@@ -154,27 +232,6 @@ export class ServiceKeysComponent {
     } catch (err: unknown) {
       this.setStatus(guid, 'error');
       this.errorMessage.set(`Failed to delete key: ${this.messageOf(err)}`);
-    }
-  }
-
-  async revealCredentials(guid: string): Promise<void> {
-    if (this.revealedCredentials(guid) !== undefined) {
-      // Toggle off.
-      this.credentialsByGuid.update(prev => {
-        const next = { ...prev };
-        delete next[guid];
-        return next;
-      });
-      return;
-    }
-    try {
-      const details = await firstValueFrom(
-        this.http.get<KeyDetailsResponse>(`/pp/v1/cf/service_keys/${this.cfGuid}/${guid}/details`),
-      );
-      const creds = JSON.stringify(details?.credentials ?? {}, null, 2);
-      this.credentialsByGuid.update(prev => ({ ...prev, [guid]: creds }));
-    } catch (err: unknown) {
-      this.errorMessage.set(`Failed to load credentials: ${this.messageOf(err)}`);
     }
   }
 
