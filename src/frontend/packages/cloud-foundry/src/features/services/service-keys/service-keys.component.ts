@@ -1,10 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Signal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { PageHeaderComponent } from '@stratosui/core';
+import { IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -14,6 +14,10 @@ type RowStatus = 'idle' | 'busy' | 'error';
 
 interface KeyDetailsResponse {
   credentials?: Record<string, unknown>;
+}
+
+interface OfferingBindableResponse {
+  bindable?: boolean;
 }
 
 // ServiceKeysComponent — per-instance Service Keys page, reached via the
@@ -41,6 +45,12 @@ export class ServiceKeysComponent {
     return name ? `Service keys for '${name}'` : 'Service keys';
   });
 
+  // Breadcrumb back to the services wall (no per-instance detail page exists
+  // to link the instance itself; the title carries the instance name).
+  readonly breadcrumbs: IHeaderBreadcrumb[] = [
+    { breadcrumbs: [{ value: 'Services', routerLink: '/services' }] },
+  ];
+
   // Reloadable list source: swapping the signal re-derives keys/loading.
   private keysSource = signal<SignalSource<ServiceKeyView[]>>(
     // placeholder replaced in the constructor once guids are read
@@ -52,6 +62,16 @@ export class ServiceKeysComponent {
   readonly newKeyName = signal('');
   readonly creating = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  // Authoritative bindability backup. The list row-action gate is best-effort
+  // off the warmed offerings store (which can be cold/slow on multi-CF
+  // foundations), so it may fail open and show the action for a non-bindable
+  // service. Here we fetch the offering directly once the instance loads and
+  // block create if the broker doesn't support keys. undefined = not yet known
+  // (fail open); false = confirmed not supported.
+  readonly bindable = signal<boolean | undefined>(undefined);
+  readonly notBindable = computed(() => this.bindable() === false);
+  private bindableFetchStarted = false;
 
   // Per-row delete status + revealed credentials, keyed by key guid.
   private statusByGuid = signal<Record<string, RowStatus>>({});
@@ -66,15 +86,38 @@ export class ServiceKeysComponent {
     this.siGuid = route.snapshot.params.serviceInstanceId;
     this.instanceSource = this.catalog.serviceInstance(this.cfGuid, this.siGuid);
     this.reload();
+
+    // Once the instance summary lands we know the offering guid; fetch the
+    // offering once to resolve bindability authoritatively (the backup for the
+    // best-effort list gate). Runs in the injection context so the effect is
+    // cleaned up with the component.
+    effect(() => {
+      const offeringGuid = this.instanceSource.value()?.servicePlan?.serviceOffering?.guid;
+      if (this.bindableFetchStarted || !offeringGuid) return;
+      this.bindableFetchStarted = true;
+      void this.loadBindable(offeringGuid);
+    });
   }
 
   reload(): void {
     this.keysSource.set(this.catalog.serviceKeysForInstance(this.cfGuid, this.siGuid));
   }
 
+  private async loadBindable(offeringGuid: string): Promise<void> {
+    try {
+      const offering = await firstValueFrom(
+        this.http.get<OfferingBindableResponse>(`/pp/v1/cf/service_offerings/${this.cfGuid}/${offeringGuid}`),
+      );
+      // Absent flag → treat as supported (fail open); explicit false → blocked.
+      this.bindable.set(offering?.bindable ?? true);
+    } catch {
+      // Leave undefined (fail open) — don't block create on a lookup failure.
+    }
+  }
+
   async createKey(): Promise<void> {
     const name = this.newKeyName().trim();
-    if (!name || this.creating()) {
+    if (!name || this.creating() || this.notBindable()) {
       return;
     }
     this.creating.set(true);
