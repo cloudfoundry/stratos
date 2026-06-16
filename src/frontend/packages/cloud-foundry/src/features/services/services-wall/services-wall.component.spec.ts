@@ -37,6 +37,7 @@ function makeStubSignalConfigService() {
     registerSortExtractor: vi.fn(),
     registerFilterExtractor: vi.fn(),
     deleteServiceInstance: vi.fn().mockResolvedValue(undefined),
+    isOfferingBindable: vi.fn().mockReturnValue(undefined),
     filter: filterSig,
     sort: sortSig,
     pageSize,
@@ -141,13 +142,18 @@ describe('ServicesWallComponent', () => {
     expect(serviceCol!.render!(ups)).toBe('User Provided');
   });
 
-  it('row actions are Edit / Detach / Delete', async () => {
+  it('row actions: managed gets Service Keys (bindable), user-provided does not', async () => {
     await component.ngOnInit();
     const cfg = component.listConfig();
     const actionsCol = cfg!.columns.find(c => c.key === 'actions');
     expect(actionsCol).toBeDefined();
+    // isOfferingBindable returns undefined here (cache cold) → fail open, so a
+    // managed instance shows Service Keys; user-provided never does.
     const managed: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
     expect((actionsCol as any).actions!(managed).map((a: any) => a.label))
+      .toEqual(['Edit', 'Detach', 'Service Keys', 'Delete']);
+    const ups: any = { cnsiGuid: 'cnsi-1', guid: 'si-2', name: 'legacy-db', type: 'user-provided' };
+    expect((actionsCol as any).actions!(ups).map((a: any) => a.label))
       .toEqual(['Edit', 'Detach', 'Delete']);
   });
 
