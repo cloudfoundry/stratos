@@ -10,7 +10,7 @@
   }
 
   @if (notBindable()) {
-    <div class="rounded border border-content-3 bg-content-2 px-3 py-2 text-content-2" role="status">
+    <div class="rounded border border-content-border bg-content-bg px-3 py-2 text-content-muted" role="status">
       This service does not support service keys (the offering is not bindable).
     </div>
   }
@@ -18,8 +18,8 @@
   <!-- Create -->
   <form class="flex items-end gap-2" (submit)="$event.preventDefault(); createKey()">
     <label class="flex flex-col text-sm">
-      <span class="mb-1 text-content-2">New key name</span>
-      <input class="rounded border border-content-3 bg-content px-2 py-1"
+      <span class="mb-1 text-content-muted">New key name</span>
+      <input class="rounded border border-content-border bg-content-bg px-2 py-1"
         type="text" name="keyName" autocomplete="off"
         [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
         [disabled]="creating()" />
@@ -30,46 +30,78 @@
     </button>
   </form>
 
-  <!-- List -->
+  <!-- List (accordion) -->
   @if (loading()) {
-    <p class="text-content-2">Loading service keys…</p>
+    <p class="text-content-muted">Loading service keys…</p>
   } @else if (keys().length === 0) {
-    <p class="text-content-2">This service instance has no service keys.</p>
+    <p class="text-content-muted">This service instance has no service keys.</p>
   } @else {
-    <table class="w-full text-left">
-      <thead>
-        <tr class="border-b border-content-2 text-sm uppercase tracking-wide">
-          <th class="py-2">Name</th>
-          <th class="py-2">Created</th>
-          <th class="py-2">Last Operation</th>
-          <th class="py-2 text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (key of keys(); track key.guid) {
-          <tr class="border-b border-content-3">
-            <td class="py-2">{{ key.name }}</td>
-            <td class="py-2 text-content-2">{{ key.createdAt | date:'medium' }}</td>
-            <td class="py-2 text-content-2">{{ key.lastOperationState || '—' }}</td>
-            <td class="py-2 text-right">
-              <button class="text-link hover:underline" type="button" (click)="revealCredentials(key.guid)">
-                {{ revealedCredentials(key.guid) !== undefined ? 'Hide' : 'Reveal' }} credentials
-              </button>
-              <button class="ml-3 text-danger-strong hover:underline disabled:opacity-50" type="button"
-                [disabled]="rowStatus(key.guid) === 'busy'" (click)="deleteKey(key.guid)">
-                {{ rowStatus(key.guid) === 'busy' ? 'Deleting…' : 'Delete' }}
-              </button>
-            </td>
-          </tr>
-          @if (revealedCredentials(key.guid); as creds) {
-            <tr class="border-b border-content-3">
-              <td class="py-2" colspan="4">
-                <pre class="overflow-x-auto rounded bg-content-2 p-3 text-xs">{{ creds }}</pre>
-              </td>
-            </tr>
+    <div class="flex flex-col gap-2">
+      @for (key of keys(); track key.guid) {
+        <section class="border border-content-border rounded-md overflow-hidden">
+          <!-- Header row: toggle area + delete (siblings, not nested buttons). -->
+          <div class="w-full flex items-center gap-3 px-4 py-3 bg-content-bg">
+            <button type="button"
+              class="flex items-center gap-3 grow min-w-0 text-left hover:opacity-80"
+              [attr.aria-expanded]="isOpen(key.guid)"
+              (click)="toggleOpen(key.guid)">
+              <svg class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+                [class.rotate-90]="isOpen(key.guid)"
+                viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+              </svg>
+              <span class="font-medium text-content-text truncate">{{ key.name }}</span>
+              <span class="text-sm text-content-muted shrink-0">{{ key.createdAt | date:'medium' }}</span>
+              <span class="text-sm text-content-muted shrink-0">{{ key.lastOperationState || '—' }}</span>
+            </button>
+            <button type="button"
+              class="text-danger-strong hover:underline disabled:opacity-50 shrink-0"
+              [disabled]="rowStatus(key.guid) === 'busy'"
+              (click)="deleteKey(key.guid)">
+              {{ rowStatus(key.guid) === 'busy' ? 'Deleting…' : 'Delete' }}
+            </button>
+          </div>
+
+          <!-- Body: credentials, lazily loaded on first expand. -->
+          @if (isOpen(key.guid)) {
+            <div class="px-4 py-4 border-t border-content-border">
+              @if (credsLoading(key.guid)) {
+                <p class="text-content-muted">Loading credentials…</p>
+              } @else if (credsError(key.guid); as cerr) {
+                <p class="text-danger-strong">Failed to load credentials: {{ cerr }}</p>
+              } @else if (credentialFields(key.guid).length === 0) {
+                <p class="text-content-muted">No credentials returned for this key.</p>
+              } @else {
+                <div class="flex items-center justify-end mb-2">
+                  <app-copy-to-clipboard [text]="allCredsJson(key.guid)"
+                    tooltip="Copy all credentials as JSON"></app-copy-to-clipboard>
+                  <span class="ml-1 text-sm text-content-muted">Copy all (JSON)</span>
+                </div>
+                <table class="w-full text-left text-sm">
+                  <tbody>
+                    @for (field of credentialFields(key.guid); track field.key) {
+                      <tr class="border-b border-content-border last:border-0">
+                        <td class="py-2 pr-4 align-top font-medium text-content-muted whitespace-nowrap">{{ field.key }}</td>
+                        <td class="py-2 pr-4 align-top break-all font-mono">{{ displayValue(key.guid, field) }}</td>
+                        <td class="py-2 align-top whitespace-nowrap">
+                          @if (field.sensitive) {
+                            <button type="button" class="text-link hover:underline mr-3"
+                              (click)="toggleField(key.guid, field.key)">
+                              {{ fieldShown(key.guid, field.key) ? 'Hide' : 'Show' }}
+                            </button>
+                          }
+                          <app-copy-to-clipboard [text]="field.value"
+                            [tooltip]="'Copy ' + field.key" compact></app-copy-to-clipboard>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
           }
-        }
-      </tbody>
-    </table>
+        </section>
+      }
+    </div>
   }
 </div>
