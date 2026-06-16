@@ -2,7 +2,26 @@
   {{ title() }}
 </app-page-header>
 
-<div class="p-4 space-y-4">
+<!-- L5 sub-nav: count + Add button that swaps in an inline create form
+     (same pattern as the Variables tab). -->
+<app-list-sub-nav title="Total Service Keys" [count]="keyCount"
+  [addAction]="addKeyAction" [isAdding]="isAdding">
+  <div subNavForm class="flex items-center gap-2">
+    <input class="rounded border border-content-border bg-content-bg px-2 py-1 text-sm"
+      type="text" name="keyName" autocomplete="off" placeholder="Key name"
+      [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
+      (keydown.enter)="createKey()" [disabled]="creating()" />
+    <button type="button"
+      class="rounded bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
+      [disabled]="creating() || !newKeyName().trim()" (click)="createKey()">
+      {{ creating() ? 'Creating…' : 'Create' }}
+    </button>
+    <button type="button" class="text-sm text-content-muted hover:underline disabled:opacity-50"
+      [disabled]="creating()" (click)="cancelCreate()">Cancel</button>
+  </div>
+</app-list-sub-nav>
+
+<div class="px-6 py-4 space-y-4">
   @if (errorMessage(); as err) {
     <div class="rounded border border-danger-strong bg-danger-subtle px-3 py-2 text-danger-strong" role="alert">
       {{ err }}
@@ -14,21 +33,6 @@
       This service does not support service keys (the offering is not bindable).
     </div>
   }
-
-  <!-- Create -->
-  <form class="flex items-end gap-2" (submit)="$event.preventDefault(); createKey()">
-    <label class="flex flex-col text-sm">
-      <span class="mb-1 text-content-muted">New key name</span>
-      <input class="rounded border border-content-border bg-content-bg px-2 py-1"
-        type="text" name="keyName" autocomplete="off"
-        [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
-        [disabled]="creating()" />
-    </label>
-    <button class="rounded bg-primary px-3 py-1.5 text-on-primary disabled:opacity-50"
-      type="submit" [disabled]="creating() || !newKeyName().trim() || notBindable()">
-      {{ creating() ? 'Creating…' : 'Create Service Key' }}
-    </button>
-  </form>
 
   <!-- List (accordion) -->
   @if (loading()) {
@@ -64,7 +68,7 @@
 
           <!-- Body: credentials, lazily loaded on first expand. -->
           @if (isOpen(key.guid)) {
-            <div class="px-4 py-4 border-t border-content-border">
+            <div class="px-4 py-3 border-t border-content-border">
               @if (credsLoading(key.guid)) {
                 <p class="text-content-muted">Loading credentials…</p>
               } @else if (credsError(key.guid); as cerr) {
@@ -72,26 +76,30 @@
               } @else if (credentialFields(key.guid).length === 0) {
                 <p class="text-content-muted">No credentials returned for this key.</p>
               } @else {
-                <div class="flex items-center justify-end mb-2">
-                  <app-copy-to-clipboard [text]="allCredsJson(key.guid)"
-                    tooltip="Copy all credentials as JSON"></app-copy-to-clipboard>
-                  <span class="ml-1 text-sm text-content-muted">Copy all (JSON)</span>
+                <div class="flex items-center justify-end gap-1 mb-1">
+                  <span class="text-sm text-content-muted">Copy all (JSON)</span>
+                  <app-copy-to-clipboard class="w-5" [text]="allCredsJson(key.guid)"
+                    tooltip="Copy all credentials as JSON"
+                    [showSuccessText]="false" [compact]="true"></app-copy-to-clipboard>
                 </div>
                 <table class="w-full text-left text-sm">
                   <tbody>
                     @for (field of credentialFields(key.guid); track field.key) {
                       <tr class="border-b border-content-border last:border-0">
-                        <td class="py-2 pr-4 align-top font-medium text-content-muted whitespace-nowrap">{{ field.key }}</td>
-                        <td class="py-2 pr-4 align-top break-all font-mono">{{ displayValue(key.guid, field) }}</td>
-                        <td class="py-2 align-top whitespace-nowrap">
-                          @if (field.sensitive) {
-                            <button type="button" class="text-link hover:underline mr-3"
-                              (click)="toggleField(key.guid, field.key)">
-                              {{ fieldShown(key.guid, field.key) ? 'Hide' : 'Show' }}
-                            </button>
-                          }
-                          <app-copy-to-clipboard [text]="field.value"
-                            [tooltip]="'Copy ' + field.key" compact></app-copy-to-clipboard>
+                        <td class="py-1 pr-4 align-top font-medium text-content-muted whitespace-nowrap">{{ field.key }}</td>
+                        <td class="py-1 align-top">
+                          <div class="flex items-start gap-2">
+                            <span class="grow min-w-0 break-all font-mono">{{ displayValue(key.guid, field) }}</span>
+                            @if (field.sensitive) {
+                              <button type="button" class="shrink-0 text-link hover:underline text-xs"
+                                (click)="toggleField(key.guid, field.key)">
+                                {{ fieldShown(key.guid, field.key) ? 'Hide' : 'Show' }}
+                              </button>
+                            }
+                            <app-copy-to-clipboard class="shrink-0 w-5" [text]="field.value"
+                              [tooltip]="'Copy ' + field.key"
+                              [showSuccessText]="false" [compact]="true"></app-copy-to-clipboard>
+                          </div>
                         </td>
                       </tr>
                     }
