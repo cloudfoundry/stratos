@@ -59,6 +59,11 @@
               <span class="text-sm text-content-muted shrink-0">{{ key.lastOperationState || '—' }}</span>
             </button>
             <button type="button"
+              class="text-link hover:underline shrink-0"
+              (click)="copyAllCredentials(key.guid)">
+              {{ copiedAllGuid() === key.guid ? 'Copied' : 'Copy all (JSON)' }}
+            </button>
+            <button type="button"
               class="text-danger-strong hover:underline disabled:opacity-50 shrink-0"
               [disabled]="rowStatus(key.guid) === 'busy'"
               (click)="deleteKey(key.guid)">
@@ -76,30 +81,30 @@
               } @else if (credentialFields(key.guid).length === 0) {
                 <p class="text-content-muted">No credentials returned for this key.</p>
               } @else {
-                <div class="flex items-center justify-end gap-1 mb-1">
-                  <span class="text-sm text-content-muted">Copy all (JSON)</span>
-                  <app-copy-to-clipboard class="w-5" [text]="allCredsJson(key.guid)"
-                    tooltip="Copy all credentials as JSON"
-                    [showSuccessText]="false" [compact]="true"></app-copy-to-clipboard>
-                </div>
-                <table class="w-full text-left text-sm">
+                <!-- Not w-full: columns size to content so the key/value/actions
+                     align in tidy columns packed to the left, with the copy
+                     controls in one aligned column right after the values. -->
+                <table class="text-left text-sm">
                   <tbody>
                     @for (field of credentialFields(key.guid); track field.key) {
                       <tr class="border-b border-content-border last:border-0">
-                        <td class="py-1 pr-4 align-top font-medium text-content-muted whitespace-nowrap">{{ field.key }}</td>
-                        <td class="py-1 align-top">
-                          <div class="flex items-start gap-2">
-                            <span class="grow min-w-0 break-all font-mono">{{ displayValue(key.guid, field) }}</span>
-                            @if (field.sensitive) {
-                              <button type="button" class="shrink-0 text-link hover:underline text-xs"
-                                (click)="toggleField(key.guid, field.key)">
-                                {{ fieldShown(key.guid, field.key) ? 'Hide' : 'Show' }}
-                              </button>
-                            }
-                            <app-copy-to-clipboard class="shrink-0 w-5" [text]="field.value"
-                              [tooltip]="'Copy ' + field.key"
-                              [showSuccessText]="false" [compact]="true"></app-copy-to-clipboard>
-                          </div>
+                        <td class="py-1 pr-8 align-top font-medium text-content-muted whitespace-nowrap">{{ field.key }}</td>
+                        <td class="py-1 pr-4 align-top break-all font-mono">{{ displayValue(key.guid, field) }}</td>
+                        <td class="py-1 align-top whitespace-nowrap text-right">
+                          @if (field.sensitive) {
+                            <button type="button" class="text-link hover:underline text-xs"
+                              (click)="toggleField(key.guid, field.key)">
+                              {{ fieldShown(key.guid, field.key) ? 'Hide' : 'Show' }}
+                            </button>
+                          }
+                        </td>
+                        <!-- pl-8: the copy component renders its icon absolute-left of
+                             its own (0-width) box, so reserve space here so it doesn't
+                             overlap the Show column. -->
+                        <td class="py-1 pl-10 align-top">
+                          <app-copy-to-clipboard class="inline-block w-5" [text]="field.value"
+                            [tooltip]="'Copy ' + field.key"
+                            [showSuccessText]="false" [compact]="true"></app-copy-to-clipboard>
                         </td>
                       </tr>
                     }
