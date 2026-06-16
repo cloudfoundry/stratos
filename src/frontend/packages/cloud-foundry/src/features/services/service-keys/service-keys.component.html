@@ -10,7 +10,7 @@
   }
 
   <!-- Create -->
-  <form class="flex items-end gap-2" (ngSubmit)="createKey()">
+  <form class="flex items-end gap-2" (submit)="$event.preventDefault(); createKey()">
     <label class="flex flex-col text-sm">
       <span class="mb-1 text-content-2">New key name</span>
       <input class="rounded border border-content-3 bg-content px-2 py-1"
