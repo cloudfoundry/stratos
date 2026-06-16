@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, Signal, computed, effect, inject, s
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { CopyToClipboardComponent, IHeaderBreadcrumb, PageHeaderComponent } from '@stratosui/core';
+import { CopyToClipboardComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -61,7 +61,7 @@ function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
   templateUrl: './service-keys.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, PageHeaderComponent, CopyToClipboardComponent],
+  imports: [DatePipe, PageHeaderComponent, CopyToClipboardComponent, ListSubNavComponent],
 })
 export class ServiceKeysComponent {
   private http = inject(HttpClient);
@@ -92,6 +92,10 @@ export class ServiceKeysComponent {
   readonly newKeyName = signal('');
   readonly creating = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  // Inline create form on the sub-nav row (revealed by the Add button),
+  // mirroring the Variables tab pattern rather than an always-visible form.
+  readonly isAdding = signal(false);
+  readonly keyCount = computed(() => this.keys().length);
 
   // Authoritative bindability backup. The list row-action gate is best-effort
   // off the warmed offerings store (which can be cold/slow on multi-CF
@@ -102,6 +106,15 @@ export class ServiceKeysComponent {
   readonly bindable = signal<boolean | undefined>(undefined);
   readonly notBindable = computed(() => this.bindable() === false);
   private bindableFetchStarted = false;
+
+  // Sub-nav "Add Service Key" button → reveals the inline create form.
+  // Disabled when the offering isn't bindable (no keys possible).
+  readonly addKeyAction: ListSubNavAddAction = {
+    label: 'Add Service Key',
+    icon: 'add',
+    invoke: () => { this.errorMessage.set(null); this.newKeyName.set(''); this.isAdding.set(true); },
+    disabled: this.notBindable,
+  };
 
   // Accordion + per-key credential state, all keyed by key guid.
   private openByGuid = signal<Record<string, boolean>>({});
@@ -210,12 +223,18 @@ export class ServiceKeysComponent {
         this.http.post(`/pp/v1/cf/service_keys/${this.cfGuid}`, body, { observe: 'response' as const }),
       );
       this.newKeyName.set('');
+      this.isAdding.set(false);
       this.reload();
     } catch (err: unknown) {
       this.errorMessage.set(`Failed to create key: ${this.messageOf(err)}`);
     } finally {
       this.creating.set(false);
     }
+  }
+
+  cancelCreate(): void {
+    this.isAdding.set(false);
+    this.newKeyName.set('');
   }
 
   async deleteKey(guid: string): Promise<void> {
