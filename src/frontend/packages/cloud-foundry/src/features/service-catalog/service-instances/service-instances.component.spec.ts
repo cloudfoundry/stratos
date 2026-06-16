@@ -41,6 +41,7 @@ describe('ServiceInstancesComponent (signal-native)', () => {
       refresh: vi.fn(async () => undefined),
       clearFilters: vi.fn(),
       deleteServiceInstance: vi.fn(async () => undefined),
+      isOfferingBindable: vi.fn(() => undefined),
     };
   };
 

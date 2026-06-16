@@ -40,6 +40,7 @@ function makeStubSignalConfigService() {
     registerSortExtractor: vi.fn(),
     registerFilterExtractor: vi.fn(),
     deleteServiceInstance: vi.fn().mockResolvedValue(undefined),
+    isOfferingBindable: vi.fn().mockReturnValue(undefined),
     clearFilters: vi.fn(),
     filter: filterSig,
     sort: sortSig,
@@ -139,11 +140,12 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     );
   });
 
-  it('row actions are Edit / Detach / Delete', () => {
+  it('row actions are Edit / Detach / Service Keys / Delete (managed, bindable)', () => {
     const cfg = component.listConfig();
     const actionsCol: any = cfg!.columns.find(c => c.key === 'actions');
+    // Managed + isOfferingBindable undefined (cold) → fail open → Service Keys shown.
     const managed: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
-    expect(actionsCol.actions(managed).map((a: any) => a.label)).toEqual(['Edit', 'Detach', 'Delete']);
+    expect(actionsCol.actions(managed).map((a: any) => a.label)).toEqual(['Edit', 'Detach', 'Service Keys', 'Delete']);
   });
 
   it('omits CF/Org/Space dropdowns and toolbar Type column', () => {
