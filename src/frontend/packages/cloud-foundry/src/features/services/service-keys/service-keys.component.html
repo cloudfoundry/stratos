@@ -1,0 +1,69 @@
+<app-page-header>
+  {{ title() }}
+</app-page-header>
+
+<div class="p-4 space-y-4">
+  @if (errorMessage(); as err) {
+    <div class="rounded border border-danger-strong bg-danger-subtle px-3 py-2 text-danger-strong" role="alert">
+      {{ err }}
+    </div>
+  }
+
+  <!-- Create -->
+  <form class="flex items-end gap-2" (ngSubmit)="createKey()">
+    <label class="flex flex-col text-sm">
+      <span class="mb-1 text-content-2">New key name</span>
+      <input class="rounded border border-content-3 bg-content px-2 py-1"
+        type="text" name="keyName" autocomplete="off"
+        [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
+        [disabled]="creating()" />
+    </label>
+    <button class="rounded bg-primary px-3 py-1.5 text-on-primary disabled:opacity-50"
+      type="submit" [disabled]="creating() || !newKeyName().trim()">
+      {{ creating() ? 'Creating…' : 'Create Service Key' }}
+    </button>
+  </form>
+
+  <!-- List -->
+  @if (loading()) {
+    <p class="text-content-2">Loading service keys…</p>
+  } @else if (keys().length === 0) {
+    <p class="text-content-2">This service instance has no service keys.</p>
+  } @else {
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-content-2 text-sm uppercase tracking-wide">
+          <th class="py-2">Name</th>
+          <th class="py-2">Created</th>
+          <th class="py-2">Last Operation</th>
+          <th class="py-2 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (key of keys(); track key.guid) {
+          <tr class="border-b border-content-3">
+            <td class="py-2">{{ key.name }}</td>
+            <td class="py-2 text-content-2">{{ key.createdAt | date:'medium' }}</td>
+            <td class="py-2 text-content-2">{{ key.lastOperationState || '—' }}</td>
+            <td class="py-2 text-right">
+              <button class="text-link hover:underline" type="button" (click)="revealCredentials(key.guid)">
+                {{ revealedCredentials(key.guid) !== undefined ? 'Hide' : 'Reveal' }} credentials
+              </button>
+              <button class="ml-3 text-danger-strong hover:underline disabled:opacity-50" type="button"
+                [disabled]="rowStatus(key.guid) === 'busy'" (click)="deleteKey(key.guid)">
+                {{ rowStatus(key.guid) === 'busy' ? 'Deleting…' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+          @if (revealedCredentials(key.guid); as creds) {
+            <tr class="border-b border-content-3">
+              <td class="py-2" colspan="4">
+                <pre class="overflow-x-auto rounded bg-content-2 p-3 text-xs">{{ creds }}</pre>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+</div>

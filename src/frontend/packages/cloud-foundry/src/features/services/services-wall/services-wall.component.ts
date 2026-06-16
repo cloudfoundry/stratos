@@ -356,6 +356,14 @@ export class ServicesWallComponent implements OnInit {
           void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'detach']);
         },
       },
+      // Service keys are broker-mediated, so only managed instances get the
+      // action; user-provided instances have no keys.
+      ...(si.type === 'user-provided' ? [] : [{
+        label: 'Service Keys', icon: 'vpn_key',
+        invoke: () => {
+          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'keys']);
+        },
+      }]),
       {
         label: 'Delete', icon: 'delete', danger: true,
         invoke: () => {
