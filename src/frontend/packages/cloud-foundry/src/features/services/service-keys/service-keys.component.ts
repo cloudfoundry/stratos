@@ -125,6 +125,8 @@ export class ServiceKeysComponent {
   private shownFields = signal<ReadonlySet<string>>(new Set<string>());
   // Per-key delete status.
   private statusByGuid = signal<Record<string, RowStatus>>({});
+  // Transient "Copied" feedback for the header Copy-all button, by key guid.
+  readonly copiedAllGuid = signal<string | null>(null);
 
   isOpen = (guid: string): boolean => this.openByGuid()[guid] ?? false;
   credsLoading = (guid: string): boolean => this.credsLoadingByGuid()[guid] ?? false;
@@ -137,7 +139,6 @@ export class ServiceKeysComponent {
   fieldShown = (guid: string, key: string): boolean => this.shownFields().has(`${guid}::${key}`);
   displayValue = (guid: string, field: CredentialField): string =>
     field.sensitive && !this.fieldShown(guid, field.key) ? '••••••••' : field.value;
-  allCredsJson = (guid: string): string => JSON.stringify(this.credsByGuid()[guid] ?? {}, null, 2);
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -179,6 +180,28 @@ export class ServiceKeysComponent {
     });
   }
 
+  // Header "Copy all (JSON)" — works without expanding the panel: loads the
+  // credentials on demand if they aren't cached yet, then copies. (The copy
+  // component copies synchronously, so it can't drive a lazy fetch — hence
+  // this async handler.)
+  async copyAllCredentials(guid: string): Promise<void> {
+    if (this.credsByGuid()[guid] === undefined) {
+      await this.loadCredentials(guid);
+    }
+    const creds = this.credsByGuid()[guid];
+    if (creds === undefined) {
+      this.errorMessage.set(`Failed to load credentials: ${this.credsError(guid) ?? 'unknown error'}`);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(creds, null, 2));
+      this.copiedAllGuid.set(guid);
+      setTimeout(() => { if (this.copiedAllGuid() === guid) this.copiedAllGuid.set(null); }, 2000);
+    } catch {
+      this.errorMessage.set('Failed to copy credentials to clipboard.');
+    }
+  }
+
   private async loadCredentials(guid: string): Promise<void> {
     this.credsLoadingByGuid.update(prev => ({ ...prev, [guid]: true }));
     this.credsErrorByGuid.update(prev => { const n = { ...prev }; delete n[guid]; return n; });
@@ -196,8 +219,10 @@ export class ServiceKeysComponent {
 
   private async loadBindable(offeringGuid: string): Promise<void> {
     try {
+      // ?return=summary — bindable is only populated at summary+ tier; the
+      // base tier omits it (which would leave the guard fail-open).
       const offering = await firstValueFrom(
-        this.http.get<OfferingBindableResponse>(`/pp/v1/cf/service_offerings/${this.cfGuid}/${offeringGuid}`),
+        this.http.get<OfferingBindableResponse>(`/pp/v1/cf/service_offerings/${this.cfGuid}/${offeringGuid}?return=summary`),
       );
       // Absent flag → treat as supported (fail open); explicit false → blocked.
       this.bindable.set(offering?.bindable ?? true);
