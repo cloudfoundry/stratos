@@ -40,6 +40,18 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	nativeGroup.POST("/cf/service_bindings/:cnsiGuid", c.createServiceBinding)
 	nativeGroup.DELETE("/cf/service_bindings/:cnsiGuid/:bindingGuid", c.deleteServiceBinding)
 	nativeGroup.GET("/cf/apps/:cnsiGuid/:appGuid/service_bindings", c.getAppServiceBindings)
+	// Service route bindings (GH#4302) + service keys (GH#4301): registered
+	// for forward-wiring; capi already ships both clients. Async create/delete
+	// follow the RunFastPath / writeWithJob contract (see the handler files).
+	nativeGroup.GET("/cf/service_route_bindings/:cnsiGuid", c.getNativeServiceRouteBindings)
+	nativeGroup.POST("/cf/service_route_bindings/:cnsiGuid", c.createServiceRouteBinding)
+	nativeGroup.DELETE("/cf/service_route_bindings/:cnsiGuid/:bindingGuid", c.deleteServiceRouteBinding)
+	nativeGroup.GET("/cf/service_route_bindings/:cnsiGuid/:bindingGuid/parameters", c.getNativeServiceRouteBindingParameters)
+	nativeGroup.GET("/cf/service_keys/:cnsiGuid", c.getNativeServiceKeys)
+	nativeGroup.POST("/cf/service_keys/:cnsiGuid", c.createServiceKey)
+	nativeGroup.DELETE("/cf/service_keys/:cnsiGuid/:keyGuid", c.deleteServiceKey)
+	nativeGroup.GET("/cf/service_keys/:cnsiGuid/:keyGuid/details", c.getNativeServiceKeyDetails)
+	nativeGroup.GET("/cf/service_keys/:cnsiGuid/:keyGuid/parameters", c.getNativeServiceKeyParameters)
 	nativeGroup.GET("/cf/org/:cnsiGuid/:orgGuid", c.getNativeOrgDetail)
 	nativeGroup.GET("/cf/org/:cnsiGuid/:orgGuid/spaces", c.getNativeOrgSpaces)
 	nativeGroup.GET("/cf/org/:cnsiGuid/:orgGuid/private_domains", c.getNativeOrgDomains)
