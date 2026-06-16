@@ -7,6 +7,7 @@ import {
   AddServiceInstanceComponent,
 } from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
 import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
+import { ServiceKeysComponent } from './service-keys/service-keys.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
 
 export const SERVICES_ROUTES: Routes = [
@@ -29,5 +30,9 @@ export const SERVICES_ROUTES: Routes = [
   {
     path: ':type/:endpointId/:serviceInstanceId/detach',
     component: DetachServiceInstanceComponent
+  },
+  {
+    path: ':type/:endpointId/:serviceInstanceId/keys',
+    component: ServiceKeysComponent
   }
 ];
