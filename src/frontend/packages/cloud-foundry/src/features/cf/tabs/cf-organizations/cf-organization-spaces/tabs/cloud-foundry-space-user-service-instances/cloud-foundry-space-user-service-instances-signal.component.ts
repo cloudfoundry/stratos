@@ -5,7 +5,6 @@ import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
-  ConfirmationDialogConfig,
   ConfirmationDialogService,
   CurrentUserPermissionsService,
   ListSubNavAddAction,
@@ -26,7 +25,7 @@ import {
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { extractHttpErrorMessage } from '../../../../../../../services/extract-error-message';
+import { buildServiceInstanceRowActions } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Scoped to one space under one org under one CF endpoint, narrowed to
@@ -230,44 +229,14 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
   // actions from cf-user-service-instances-list-config that the signal-
   // native migration dropped (catalog 2026-05-26 Space-scope row).
   // Every row on this tab is user-provided, so siType is 'user-service'.
-  private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] => {
-    return [
-      {
-        label: 'Edit', icon: 'edit',
-        invoke: () => {
-          void this.router.navigate([
-            '/services', 'user-service', si.cnsiGuid, si.guid, 'edit',
-          ]);
-        },
-      },
-      {
-        label: 'Detach', icon: 'link_off',
-        invoke: () => {
-          void this.router.navigate([
-            '/services', 'user-service', si.cnsiGuid, si.guid, 'detach',
-          ]);
-        },
-      },
-      {
-        label: 'Delete', icon: 'delete', danger: true,
-        invoke: () => {
-          const confirm = new ConfirmationDialogConfig(
-            'Delete Service Instance',
-            `Delete the service instance "${si.name}"? This cannot be undone and will detach any apps bound to it.`,
-            'Delete',
-            true,
-          );
-          this.confirmDialog.open(confirm, async () => {
-            try {
-              await this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid);
-            } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
-            }
-          });
-        },
-      },
-    ];
-  };
+  private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] =>
+    buildServiceInstanceRowActions(si, {
+      router: this.router,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
+      isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+    });
 
   static formatDate(iso: string | null | undefined): string {
     if (!iso) return '';

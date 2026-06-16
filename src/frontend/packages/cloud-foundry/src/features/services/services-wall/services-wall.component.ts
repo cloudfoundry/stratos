@@ -7,7 +7,6 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import {
-  ConfirmationDialogConfig,
   ConfirmationDialogService,
   ListSubNavAddAction,
   ListSubNavComponent,
@@ -31,6 +30,7 @@ import {
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-configs/bound-apps-cell';
+import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
 // Stratos Services Wall — multi-CNSI service instances list (managed +
@@ -330,57 +330,14 @@ export class ServicesWallComponent implements OnInit {
     }
   }
 
-  private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
-      try {
-        await op();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
-      }
-    };
-    // The wall mixes managed and user-provided instances, so the
-    // edit/detach route's :type segment branches on the row kind:
-    // 'service' for managed, 'user-service' for user-provided. Mirrors
-    // the per-space tabs that already restored Edit + Detach.
-    const siType = si.type === 'user-provided' ? 'user-service' : 'service';
-    return [
-      {
-        label: 'Edit', icon: 'edit',
-        invoke: () => {
-          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'edit']);
-        },
-      },
-      {
-        label: 'Detach', icon: 'link_off',
-        invoke: () => {
-          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'detach']);
-        },
-      },
-      // Service keys are broker-mediated, so only managed instances get the
-      // action; user-provided instances have no keys.
-      ...(si.type === 'user-provided' ? [] : [{
-        label: 'Service Keys', icon: 'vpn_key',
-        invoke: () => {
-          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'keys']);
-        },
-      }]),
-      {
-        label: 'Delete', icon: 'delete', danger: true,
-        invoke: () => {
-          const confirm = new ConfirmationDialogConfig(
-            'Delete Service Instance',
-            `Delete the service instance "${si.name}"? This cannot be undone and will detach any apps bound to it.`,
-            'Delete',
-            true,
-          );
-          this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () =>
-              this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid));
-          });
-        },
-      },
-    ];
-  };
+  private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] =>
+    buildServiceInstanceRowActions(si, {
+      router: this.router,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
+      isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+    });
 
   static formatDate(iso: string | null | undefined): string {
     if (!iso) return '';

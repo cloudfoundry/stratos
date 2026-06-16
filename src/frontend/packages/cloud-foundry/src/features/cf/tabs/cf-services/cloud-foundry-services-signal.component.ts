@@ -5,7 +5,6 @@ import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
-  ConfirmationDialogConfig,
   ConfirmationDialogService,
   CurrentUserPermissionsService,
   ListSubNavAddAction,
@@ -28,6 +27,7 @@ import {
 } from '../../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { buildServiceInstanceRowActions } from '../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
 // Per-CF Services tab. Single-CNSI variant of the top-level Services Wall.
@@ -257,49 +257,14 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     void this.instancesConfig.loadAll();
   }
 
-  private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
-      try {
-        await op();
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
-      }
-    };
-    // This surface mixes managed and user-provided instances, so the
-    // edit/detach route's :type segment branches on the row kind:
-    // 'service' for managed, 'user-service' for user-provided. Mirrors
-    // the per-space tabs that already restored Edit + Detach.
-    const siType = si.type === 'user-provided' ? 'user-service' : 'service';
-    return [
-      {
-        label: 'Edit', icon: 'edit',
-        invoke: () => {
-          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'edit']);
-        },
-      },
-      {
-        label: 'Detach', icon: 'link_off',
-        invoke: () => {
-          void this.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'detach']);
-        },
-      },
-      {
-        label: 'Delete', icon: 'delete', danger: true,
-        invoke: () => {
-          const confirm = new ConfirmationDialogConfig(
-            'Delete Service Instance',
-            `Delete the service instance "${si.name}"? This cannot be undone and will detach any apps bound to it.`,
-            'Delete',
-            true,
-          );
-          this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () =>
-              this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid));
-          });
-        },
-      },
-    ];
-  };
+  private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] =>
+    buildServiceInstanceRowActions(si, {
+      router: this.router,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
+      isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+    });
 
   static formatDate(iso: string | null | undefined): string {
     if (!iso) return '';
