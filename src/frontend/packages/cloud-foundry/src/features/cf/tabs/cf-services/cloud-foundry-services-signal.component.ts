@@ -28,6 +28,7 @@ import {
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { buildServiceInstanceRowActions } from '../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { renderServiceKeyCount, serviceKeysLink } from '../../../../shared/signal-list-configs/service-keys-count-cell';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
 // Per-CF Services tab. Single-CNSI variant of the top-level Services Wall.
@@ -194,6 +195,14 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
           widthHint: '10rem',
         },
         {
+          // This list has no Attached Apps column; the keys count sits right
+          // after Last Operation, the same neighbourhood it occupies elsewhere.
+          header: 'Service Keys', key: 'serviceKeys', kind: 'link',
+          render: (si) => renderServiceKeyCount(si, this.instancesConfig.serviceKeyCount(si.guid)),
+          link: serviceKeysLink,
+          widthHint: '8rem',
+        },
+        {
           header: 'Tags', key: 'tags', sortField: renderTags,
           render: renderTags,
           widthHint: '14rem',
@@ -254,7 +263,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     this.instancesConfig.registerFilterExtractor('service', renderService);
     this.instancesConfig.registerFilterExtractor('tags', renderTags);
 
-    void this.instancesConfig.loadAll();
+    void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
   }
 
   private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] =>

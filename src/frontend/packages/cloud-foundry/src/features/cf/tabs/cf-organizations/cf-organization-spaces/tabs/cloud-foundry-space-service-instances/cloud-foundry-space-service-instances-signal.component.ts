@@ -26,6 +26,7 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { boundAppSegments, renderBoundApps } from '../../../../../../../shared/signal-list-configs/bound-apps-cell';
+import { renderServiceKeyCount, serviceKeysLink } from '../../../../../../../shared/signal-list-configs/service-keys-count-cell';
 import { buildServiceInstanceRowActions } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
@@ -185,6 +186,12 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
           widthHint: '14rem',
         },
         {
+          header: 'Service Keys', key: 'serviceKeys', kind: 'link',
+          render: (si) => renderServiceKeyCount(si, this.instancesConfig.serviceKeyCount(si.guid)),
+          link: serviceKeysLink,
+          widthHint: '8rem',
+        },
+        {
           header: 'Tags', key: 'tags', sortField: renderTags,
           render: renderTags,
           widthHint: '14rem',
@@ -232,7 +239,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
 
-    void this.instancesConfig.loadAll();
+    void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
   }
 
   private toggleFavorite(si: StServiceInstance): void {

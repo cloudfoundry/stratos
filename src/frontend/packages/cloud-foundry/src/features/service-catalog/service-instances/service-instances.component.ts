@@ -26,6 +26,7 @@ import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-configs/bound-apps-cell';
+import { renderServiceKeyCount, serviceKeysLink } from '../../../shared/signal-list-configs/service-keys-count-cell';
 import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
@@ -139,6 +140,12 @@ export class ServiceInstancesComponent implements OnInit {
         widthHint: '14rem',
       },
       {
+        header: 'Service Keys', key: 'serviceKeys', kind: 'link',
+        render: (si) => renderServiceKeyCount(si, this.instancesConfig.serviceKeyCount(si.guid)),
+        link: serviceKeysLink,
+        widthHint: '8rem',
+      },
+      {
         header: 'Tags', key: 'tags', sortField: renderTags,
         render: renderTags,
         widthHint: '14rem',
@@ -192,7 +199,7 @@ export class ServiceInstancesComponent implements OnInit {
     this.instancesConfig.registerSortExtractor('type', renderType);
     this.instancesConfig.registerFilterExtractor('name', (si) => si.name ?? '');
 
-    void this.instancesConfig.loadAll();
+    void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
   }
 
   // Per-row Edit / Detach / Delete. Restores the V2-era listActionEdit
