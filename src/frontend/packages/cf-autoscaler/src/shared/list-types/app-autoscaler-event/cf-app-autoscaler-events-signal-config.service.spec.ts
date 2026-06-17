@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppAutoscalerEvent } from '../../../store/app-autoscaler.types';
 import { CfAppAutoscalerEventsSignalConfigService } from './cf-app-autoscaler-events-signal-config.service';
@@ -49,6 +49,34 @@ describe('CfAppAutoscalerEventsSignalConfigService', () => {
     expect(svc.events()).toEqual([]);
     expect(svc.hasLoadedOnce()).toBe(false);
     expect(svc.view.totalFilteredResults()).toBe(0);
+  });
+
+  it('initialize does not stack a filter effect on re-entry', () => {
+    // Regression: root singleton, but the scale-history page calls
+    // initialize() from its constructor per mount. The filter effect was
+    // created uncaptured, so each navigation stacked a live effect on the
+    // root injector. The fix captures the EffectRef and destroys the prior.
+    svc.initialize(CNSI, APP);
+    svc.initialize(CNSI, APP);
+    TestBed.tick();
+
+    const setSpy = vi.spyOn(svc.filter, 'set');
+    svc.nameFilter.set('scale');
+    TestBed.tick();
+
+    expect(setSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('loadAll() resolves (not rejects) when the fetch fails', async () => {
+    // load() rethrows on HTTP error after recording it in its error()
+    // signal; the page calls `void loadAll()`, so loadAll must swallow the
+    // rejection rather than surface it as an unhandled promise rejection.
+    svc.initialize(CNSI, APP);
+    const promise = svc.loadAll();
+    httpMock.expectOne(EVENTS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+
+    await expect(promise).resolves.toBeUndefined();
+    expect(svc.hasLoadedOnce()).toBe(true);
   });
 
   it('loadAll() fetches events through the autoscaler URL with cnsi headers', async () => {
