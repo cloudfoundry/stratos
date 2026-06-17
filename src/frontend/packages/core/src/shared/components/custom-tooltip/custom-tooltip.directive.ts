@@ -48,7 +48,10 @@ export class CustomTooltipDirective implements OnDestroy {
     if (this.tooltipClass) {
       this.renderer.addClass(el, this.tooltipClass);
     }
-    this.renderer.setProperty(el, 'innerHTML', this.tooltipText);
+    // Use textContent, not innerHTML: tooltip text can carry untrusted values
+    // (e.g. CF usernames) and Renderer2.setProperty(innerHTML) bypasses Angular's
+    // sanitizer. No tooltip relies on HTML markup, so this is a behaviour-neutral fix.
+    this.renderer.setProperty(el, 'textContent', this.tooltipText);
 
     // Apply visual styles BEFORE positioning so getBoundingClientRect()
     // measures the content-sized box. A bare `<div>` with no styling is
