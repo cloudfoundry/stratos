@@ -9,6 +9,7 @@ import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 
@@ -66,6 +67,7 @@ function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
 export class ServiceKeysComponent {
   private http = inject(HttpClient);
   private catalog = inject(ServiceCatalogDataService);
+  private endpoints = inject(CfEndpointsDataService);
 
   readonly cfGuid: string;
   readonly siGuid: string;
@@ -76,11 +78,42 @@ export class ServiceKeysComponent {
     return name ? `Service keys for '${name}'` : 'Service keys';
   });
 
-  // Breadcrumb back to the services wall (no per-instance detail page exists
-  // to link the instance itself; the title carries the instance name).
-  readonly breadcrumbs: IHeaderBreadcrumb[] = [
-    { breadcrumbs: [{ value: 'Services', routerLink: '/services' }] },
-  ];
+  // Context-aware breadcrumbs. The keys page is reached from several lists, so
+  // it offers one breadcrumb set per origin and lets PageHeader pick by the
+  // ?breadcrumbs= query hint the row action set (see buildServiceInstanceRowActions):
+  //   - default (no key): the global /services wall.
+  //   - 'cf': back to this endpoint's CF Services tab.
+  //   - 'space-services': the full endpoint -> org -> space trail back to the
+  //     space's Service Instances tab.
+  // The CF trail is built from the instance's space/organization (populated at
+  // the summary tier this page fetches) and the endpoint name from the
+  // registry; the space-services set is omitted until that data has loaded, so
+  // PageHeader transiently falls back to the default until it re-resolves.
+  readonly breadcrumbs: Signal<IHeaderBreadcrumb[]> = computed(() => {
+    const cfGuid = this.cfGuid;
+    const cfBase = `/cloud-foundry/${cfGuid}`;
+    const endpointName = this.endpoints.connectedCfList().find(e => e.guid === cfGuid)?.name ?? 'Services';
+
+    const crumbs: IHeaderBreadcrumb[] = [
+      { breadcrumbs: [{ value: 'Services', routerLink: '/services' }] },
+      { key: 'cf', breadcrumbs: [{ value: endpointName, routerLink: `${cfBase}/services` }] },
+    ];
+
+    const space = this.instanceSource.value()?.space;
+    const org = space?.organization;
+    if (space?.guid && org?.guid) {
+      const orgBase = `${cfBase}/organizations/${org.guid}`;
+      crumbs.push({
+        key: 'space-services',
+        breadcrumbs: [
+          { value: endpointName, routerLink: `${cfBase}/organizations` },
+          { value: org.name ?? 'Organization', routerLink: `${orgBase}/spaces` },
+          { value: space.name ?? 'Space', routerLink: `${orgBase}/spaces/${space.guid}/service-instances` },
+        ],
+      });
+    }
+    return crumbs;
+  });
 
   // Reloadable list source: swapping the signal re-derives keys/loading.
   private keysSource = signal<SignalSource<ServiceKeyView[]>>(

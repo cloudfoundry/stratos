@@ -23,6 +23,12 @@ export interface ServiceInstanceRowActionDeps {
   // services-details store (CfServiceInstancesSignalConfigService
   // .isOfferingBindable). undefined → offering not cached yet (fail open).
   isOfferingBindable: (si: StServiceInstance) => boolean | undefined;
+  // Origin breadcrumb hint for the Service Keys page. CF-scoped lists pass a
+  // key (e.g. 'cf', 'space-services') that the keys page's PageHeader reads
+  // from ?breadcrumbs= to render a breadcrumb back into the originating CF
+  // context, instead of popping out to the global /services wall. Omitted by
+  // the global wall and marketplace lists, which want that default.
+  breadcrumbKey?: string;
 }
 
 // supportsServiceKeys — service keys are broker-mediated credential bindings
@@ -72,7 +78,10 @@ export function buildServiceInstanceRowActions(
     actions.push({
       label: 'Service Keys', icon: 'vpn_key',
       invoke: () => {
-        void deps.router.navigate(['/services', siType, si.cnsiGuid, si.guid, 'keys']);
+        const route = ['/services', siType, si.cnsiGuid, si.guid, 'keys'];
+        void (deps.breadcrumbKey
+          ? deps.router.navigate(route, { queryParams: { breadcrumbs: deps.breadcrumbKey } })
+          : deps.router.navigate(route));
       },
     });
   }

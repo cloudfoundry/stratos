@@ -148,6 +148,21 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     expect(actionsCol.actions(managed).map((a: any) => a.label)).toEqual(['Edit', 'Detach', 'Service Keys', 'Delete']);
   });
 
+  it('Service Keys action keeps CF context via ?breadcrumbs=space-services', () => {
+    const router = TestBed.inject(Router);
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const cfg = component.listConfig();
+    const actionsCol: any = cfg!.columns.find(c => c.key === 'actions');
+    const managed: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
+
+    actionsCol.actions(managed).find((a: any) => a.label === 'Service Keys').invoke();
+
+    expect(navSpy).toHaveBeenCalledWith(
+      ['/services', 'service', 'cnsi-1', 'si-1', 'keys'],
+      { queryParams: { breadcrumbs: 'space-services' } },
+    );
+  });
+
   it('omits CF/Org/Space dropdowns and toolbar Type column', () => {
     const cfg = component.listConfig();
     expect(cfg!.filterDropdowns).toBeUndefined();
