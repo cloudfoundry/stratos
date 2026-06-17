@@ -390,6 +390,12 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 		metadata.Assumed = true
 	}
 
+	// When /v2/info is absent (V2 API disabled), source the auth/token/doppler/
+	// routing endpoints and CC API version from the root `/` links so endpoint
+	// registration (token refresh) and cf push work on a v3-only foundation.
+	// No-op when /v2/info responded — it stays the source of truth (#5047).
+	backfillFromRoot(&newCNSI, &v2InfoResponse, apiRootResponse, metadata.SupportsV2)
+
 	if metaBytes, err := json.Marshal(metadata); err == nil {
 		newCNSI.Metadata = string(metaBytes)
 	}

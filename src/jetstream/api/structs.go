@@ -27,8 +27,24 @@ type LogCacheLink struct {
 	Href string `json:"href"`
 }
 
+type ApiRootLink struct {
+	Href string `json:"href"`
+}
+
+type CloudControllerV3Link struct {
+	Href string `json:"href"`
+	Meta struct {
+		Version string `json:"version"`
+	} `json:"meta"`
+}
+
 type ApiRootLinks struct {
-	LogCache LogCacheLink `json:"log_cache"`
+	LogCache          LogCacheLink          `json:"log_cache"`
+	Login             ApiRootLink           `json:"login"`
+	Uaa               ApiRootLink           `json:"uaa"`
+	Logging           ApiRootLink           `json:"logging"`
+	Routing           ApiRootLink           `json:"routing"`
+	CloudControllerV3 CloudControllerV3Link `json:"cloud_controller_v3"`
 }
 
 type ApiRoot struct {
