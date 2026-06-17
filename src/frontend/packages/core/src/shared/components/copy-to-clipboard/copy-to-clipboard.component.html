@@ -1,17 +1,10 @@
-<div class="relative inline-flex items-center gap-2">
-  <div class="absolute right-0 top-0 flex items-center gap-1 transition-opacity duration-300"
-    [class.opacity-100]="copySuccessWait"
-    [class.opacity-0]="!copySuccessWait">
-    @if (showSuccessText) {
-      <span class="text-sm text-success-shade-600 mr-[5px] whitespace-nowrap">Copied to clipboard</span>
-    }
-    <span class="material-icons text-success-shade-600 mr-[5px]"
-      [ngClass]="{'text-sm': compact, 'text-base': !compact}">
-      check_circle
-    </span>
-  </div>
+<!-- The copy icon and the transient success indicator stack in a single grid
+     cell (no absolute positioning), so the column reserves space for the
+     widest child — the "Copied to clipboard" text when shown — and the copy
+     icon flows in normal layout so it aligns with its row. -->
+<div class="inline-grid items-center">
   @if (canCopy) {
-    <span class="material-icons absolute right-0 top-0 cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300"
+    <span class="material-icons col-start-1 row-start-1 justify-self-end cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300"
       [class.opacity-0]="copySuccessWait"
       [class.opacity-100]="!copySuccessWait"
       [ngClass]="{'text-sm': compact, 'text-base': !compact}"
@@ -23,4 +16,15 @@
       content_copy
     </span>
   }
+  <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300"
+    [class.opacity-100]="copySuccessWait"
+    [class.opacity-0]="!copySuccessWait">
+    @if (showSuccessText) {
+      <span class="text-sm text-success-shade-600 whitespace-nowrap">Copied to clipboard</span>
+    }
+    <span class="material-icons text-success-shade-600"
+      [ngClass]="{'text-sm': compact, 'text-base': !compact}">
+      check_circle
+    </span>
+  </div>
 </div>
