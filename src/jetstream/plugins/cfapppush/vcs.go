@@ -23,6 +23,7 @@ import (
 //     it as a pathspec and "--hard" rejects paths ("Cannot do hard reset with
 //     paths", exit 128). "--end-of-options" (git 2.24+) stops option parsing
 //     while still treating the value as a revision.
+//
 // See FWT-922.
 var vcsGit = &vcsCmd{
 	name:             "Git",
