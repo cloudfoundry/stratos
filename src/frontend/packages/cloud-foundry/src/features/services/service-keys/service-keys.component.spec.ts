@@ -6,7 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ServiceKeysComponent } from './service-keys.component';
+import { ServiceKeysComponent, toCredentialFields } from './service-keys.component';
 import { ServiceCatalogDataService, ServiceKeyView } from '../../../services/endpoint-data/service-catalog-data.service';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
@@ -176,5 +176,63 @@ describe('ServiceKeysComponent — context-aware breadcrumbs', () => {
   it('omits the space-services trail until the instance (with its space/org) has loaded', () => {
     const c = setup(null, [{ guid: 'cf-1', name: 'prod-cf' }]);
     expect(c.breadcrumbs().find(b => b.key === 'space-services')).toBeUndefined();
+  });
+});
+
+describe('toCredentialFields — credential masking', () => {
+  const fieldFor = (key: string, value: unknown) =>
+    toCredentialFields({ [key]: value }).find(f => f.key === key)!;
+
+  it('redacts only the password in an embedded-credential URL, keeping the rest visible', () => {
+    const f = fieldFor('uri', 'postgres://user:s3cr3t@host:5432/db');
+    expect(f.sensitive).toBe(true);
+    expect(f.displayMasked).toBe('postgres://user:<redacted>@host:5432/db');
+    // The real value is preserved for copy / reveal.
+    expect(f.value).toBe('postgres://user:s3cr3t@host:5432/db');
+  });
+
+  it('fully masks a key-sensitive non-URL secret', () => {
+    const f = fieldFor('password', 's3cr3t');
+    expect(f.sensitive).toBe(true);
+    expect(f.displayMasked).toBe('••••••••');
+  });
+
+  it('leaves a plain non-sensitive value unmasked', () => {
+    const f = fieldFor('host', 'db.example.com');
+    expect(f.sensitive).toBe(false);
+  });
+
+  it('does not mask a URL that carries no embedded credentials', () => {
+    const f = fieldFor('dashboard_url', 'https://dashboard.example.com/db');
+    expect(f.sensitive).toBe(false);
+  });
+});
+
+describe('ServiceKeysComponent — displayValue masking toggle', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ServiceKeysComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        {
+          provide: ServiceCatalogDataService,
+          useValue: { serviceInstance: () => source(null), serviceKeysForInstance: () => source([] as ServiceKeyView[]) },
+        },
+      ],
+    }).compileComponents();
+  });
+
+  it('shows the partial mask when hidden and the real value once revealed', () => {
+    const c = TestBed.createComponent(ServiceKeysComponent).componentInstance;
+    const field = { key: 'uri', value: 'postgres://user:s3cr3t@host/db', sensitive: true, displayMasked: 'postgres://user:<redacted>@host/db' };
+
+    expect(c.displayValue('k1', field)).toBe('postgres://user:<redacted>@host/db');
+
+    c.toggleField('k1', 'uri');
+    expect(c.displayValue('k1', field)).toBe('postgres://user:s3cr3t@host/db');
   });
 });
