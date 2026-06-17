@@ -1,6 +1,7 @@
 import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
 import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiServiceInstancesSource } from '../../../services/data-sources/cnsi-service-instances-source';
@@ -148,6 +149,15 @@ export class CfServiceInstancesSignalConfigService {
   // orchestrator's HTTP drain on revisit by pre-seeding each per-CNSI
   // source from the registry's pre-warmed services-details cache.
   private readonly registry = inject(EndpointDataRegistry, { optional: true });
+
+  // Lazy per-instance service-key counts. guid → count; absent = not yet
+  // loaded / failed (rendered as "—"). Filled by ensureServiceKeyCounts via a
+  // batched fetch per CNSI; read reactively by the list's Service Keys column
+  // render. Deliberately an explicit method + cache (not an effect) so the
+  // root-singleton config never leaks an uncaptured effect across re-entry.
+  private readonly _keyCountByGuid: WritableSignal<Map<string, number>> = signal(new Map());
+  // CNSIs with a count fetch in flight — dedupes ensureServiceKeyCounts() calls.
+  private readonly _keyCountCnsiInFlight = new Set<string>();
 
   constructor() {
     const cfService = inject(CloudFoundryService, { optional: true });
@@ -426,6 +436,9 @@ export class CfServiceInstancesSignalConfigService {
   // releases everything.
   private _destroyHookRegistered = false;
   private swapAcquiredEds(cnsiGuids: readonly string[]): void {
+    // New scope ⇒ drop stale key counts so a re-bound list re-fetches fresh.
+    this._keyCountByGuid.set(new Map());
+    this._keyCountCnsiInFlight.clear();
     if (!this.registry) {
       this._edsByCnsi.set(new Map());
       return;
@@ -549,6 +562,65 @@ export class CfServiceInstancesSignalConfigService {
       path: `/pp/v1/cf/service_instances/${cnsiGuid}/${siGuid}`,
     });
     this.orchestrator?.removeRow(cnsiGuid, siGuid);
+  }
+
+  // Read a previously-fetched key count. undefined = not yet loaded or the
+  // fetch failed — callers render "—" rather than a misleading "0".
+  serviceKeyCount(guid: string): number | undefined {
+    return this._keyCountByGuid().get(guid);
+  }
+
+  // Lazily fetch service-key counts for the currently-loaded managed
+  // instances, batched one request per CNSI. Idempotent: skips guids already
+  // counted and CNSIs whose fetch is in flight, so the consuming list can call
+  // it freely after each load without duplicate requests. User-provided
+  // instances are skipped (they have no service keys / keys page).
+  ensureServiceKeyCounts(): void {
+    if (!this.orchestrator) return;
+    const known = this._keyCountByGuid();
+    const guidsByCnsi = new Map<string, string[]>();
+    for (const si of this.orchestrator.allItems()) {
+      if (si.type === 'user-provided' || known.has(si.guid)) continue;
+      const list = guidsByCnsi.get(si.cnsiGuid) ?? [];
+      list.push(si.guid);
+      guidsByCnsi.set(si.cnsiGuid, list);
+    }
+    for (const [cnsiGuid, guids] of guidsByCnsi) {
+      if (this._keyCountCnsiInFlight.has(cnsiGuid)) continue;
+      this._keyCountCnsiInFlight.add(cnsiGuid);
+      void this.fetchKeyCounts(cnsiGuid, guids);
+    }
+  }
+
+  // One batched GET per CNSI: ask for every requested instance's keys in a
+  // single call, then group the returned bindings by their owning instance
+  // guid. A requested guid with no returned bindings is a real 0; a failed
+  // request leaves every guid undefined (tolerated → "—"). per_page is set
+  // high so the single page covers all of the page's instances' keys.
+  private async fetchKeyCounts(cnsiGuid: string, guids: string[]): Promise<void> {
+    try {
+      const params = new HttpParams()
+        .set('service_instance_guids', guids.join(','))
+        .set('per_page', '5000');
+      const res = await firstValueFrom(
+        this.http.get<{ resources?: Array<{ relationships?: { service_instance?: { data?: { guid?: string } } } }> }>(
+          `/pp/v1/cf/service_keys/${cnsiGuid}`, { params }),
+      );
+      const counts = new Map<string, number>(guids.map(g => [g, 0]));
+      for (const binding of res?.resources ?? []) {
+        const owner = binding?.relationships?.service_instance?.data?.guid;
+        if (owner && counts.has(owner)) counts.set(owner, (counts.get(owner) ?? 0) + 1);
+      }
+      this._keyCountByGuid.update(prev => {
+        const next = new Map(prev);
+        for (const [g, c] of counts) next.set(g, c);
+        return next;
+      });
+    } catch {
+      // Tolerated: leave the counts undefined so the column shows "—".
+    } finally {
+      this._keyCountCnsiInFlight.delete(cnsiGuid);
+    }
   }
 
   // isOfferingBindable resolves the instance's service-offering bindability
