@@ -1,4 +1,5 @@
 import {
+  EffectRef,
   Injectable,
   Injector,
   Signal,
@@ -130,6 +131,10 @@ export class KubernetesPodsSignalConfigService {
 
   view!: KubePodViewPipeline;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   errors(): Signal<StratosError[]> {
     return this.podData.errors();
   }
@@ -152,8 +157,9 @@ export class KubernetesPodsSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((p: KubePod) => {
           if (!q) return true;

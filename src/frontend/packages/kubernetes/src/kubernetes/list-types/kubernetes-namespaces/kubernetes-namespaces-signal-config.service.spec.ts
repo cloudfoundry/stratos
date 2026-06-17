@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
@@ -121,6 +121,26 @@ describe('KubernetesNamespacesSignalConfigService', () => {
     expect(svc.nameFilter()).toBe('');
     expect(svc.sort().direction).toBe('asc');
     expect(svc.pageIndex()).toBe(0);
+  });
+
+  it('initialize does not stack a filter effect on re-entry', () => {
+    // Regression: this service is a root singleton, but the host tab calls
+    // initialize() from its constructor on every mount. The filter effect
+    // was created uncaptured, so each navigation left a live effect on the
+    // root injector — N visits meant the filter predicate was recomputed N
+    // times per keystroke. The fix captures the EffectRef and destroys the
+    // prior one on re-entry.
+    svc.initialize(KUBE_GUID);
+    svc.initialize(KUBE_GUID);
+    TestBed.tick();
+
+    const setSpy = vi.spyOn(svc.filter, 'set');
+    svc.nameFilter.set('abc');
+    TestBed.tick();
+
+    // One live effect → one filter recompute. Without the fix the two
+    // stacked effects would each fire, yielding 2.
+    expect(setSpy).toHaveBeenCalledTimes(1);
   });
 
   it('refresh re-fetches namespaces only', async () => {
