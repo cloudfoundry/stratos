@@ -38,6 +38,8 @@ function makeStubSignalConfigService() {
     registerFilterExtractor: vi.fn(),
     deleteServiceInstance: vi.fn().mockResolvedValue(undefined),
     isOfferingBindable: vi.fn().mockReturnValue(undefined),
+    serviceKeyCount: vi.fn().mockReturnValue(undefined),
+    ensureServiceKeyCounts: vi.fn(),
     filter: filterSig,
     sort: sortSig,
     pageSize,
@@ -116,12 +118,23 @@ describe('ServicesWallComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Tags', 'Created', 'Type', 'CF', '', '',
+      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Service Keys', 'Tags', 'Created', 'Type', 'CF', '', '',
     ]);
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'redis', type: 'managed',
       tags: [], createdAt: '',
     } as any)).toBe('cnsi-1:si-1');
+  });
+
+  it('Service Keys column links to the keys page, renders the lazy count, and triggers the fetch', async () => {
+    await component.ngOnInit();
+    await Promise.resolve();
+    const col: any = component.listConfig()!.columns.find(c => c.key === 'serviceKeys');
+    expect(col.kind).toBe('link');
+    const si: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'redis', type: 'managed' };
+    expect(col.link(si)).toEqual(['/services', 'service', 'cnsi-1', 'si-1', 'keys']);
+    expect(col.render(si)).toBe('—');
+    expect(stubSignalConfig.ensureServiceKeyCounts).toHaveBeenCalled();
   });
 
   it('renders Service column from offering name for managed and label for user-provided', async () => {

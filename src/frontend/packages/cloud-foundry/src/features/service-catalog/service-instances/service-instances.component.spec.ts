@@ -42,6 +42,8 @@ describe('ServiceInstancesComponent (signal-native)', () => {
       clearFilters: vi.fn(),
       deleteServiceInstance: vi.fn(async () => undefined),
       isOfferingBindable: vi.fn(() => undefined),
+      serviceKeyCount: vi.fn(() => undefined as number | undefined),
+      ensureServiceKeyCounts: vi.fn(),
     };
   };
 
@@ -87,7 +89,32 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig!.pagedItems).toBe(configStub.view.pagedItems);
     const keys = component.listConfig!.columns.map(c => c.key);
-    expect(keys).toEqual(['name', 'plan', 'lastOp', 'boundApps', 'tags', 'createdAt', 'type', 'actions']);
+    expect(keys).toEqual(['name', 'plan', 'lastOp', 'boundApps', 'serviceKeys', 'tags', 'createdAt', 'type', 'actions']);
+  });
+
+  it('Service Keys column links to the keys page and renders the lazy count', () => {
+    fixture.detectChanges();
+    const cols = component.listConfig!.columns;
+    const idx = cols.findIndex(c => c.key === 'serviceKeys');
+    // Positioned right after Attached Apps, and a whole-cell link.
+    expect(cols[idx - 1].key).toBe('boundApps');
+    const col = cols[idx] as any;
+    expect(col.header).toBe('Service Keys');
+    expect(col.kind).toBe('link');
+
+    const si = { guid: 'si-7', cnsiGuid: 'cnsi-1', name: 'redis', type: 'managed' };
+    expect(col.link(si)).toEqual(['/services', 'service', 'cnsi-1', 'si-7', 'keys']);
+
+    // Unknown count → em-dash; resolved count → the number.
+    expect(col.render(si)).toBe('—');
+    configStub.serviceKeyCount.mockReturnValue(3);
+    expect(col.render(si)).toBe('3');
+  });
+
+  it('triggers the lazy key-count fetch after the instances load', async () => {
+    fixture.detectChanges();
+    await Promise.resolve();
+    expect(configStub.ensureServiceKeyCounts).toHaveBeenCalled();
   });
 
   it('Delete row action opens confirm and on confirm calls deleteServiceInstance', async () => {

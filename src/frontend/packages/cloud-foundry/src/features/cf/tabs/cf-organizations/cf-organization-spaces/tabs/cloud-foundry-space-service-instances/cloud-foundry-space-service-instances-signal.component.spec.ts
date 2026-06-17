@@ -41,6 +41,8 @@ function makeStubSignalConfigService() {
     registerFilterExtractor: vi.fn(),
     deleteServiceInstance: vi.fn().mockResolvedValue(undefined),
     isOfferingBindable: vi.fn().mockReturnValue(undefined),
+    serviceKeyCount: vi.fn().mockReturnValue(undefined),
+    ensureServiceKeyCounts: vi.fn(),
     clearFilters: vi.fn(),
     filter: filterSig,
     sort: sortSig,
@@ -98,8 +100,13 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Tags', 'Created', '', '',
+      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Service Keys', 'Tags', 'Created', '', '',
     ]);
+    const keysCol: any = cfg!.columns.find(c => c.key === 'serviceKeys');
+    expect(keysCol.kind).toBe('link');
+    const si: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
+    expect(keysCol.link(si)).toEqual(['/services', 'service', 'cnsi-1', 'si-1', 'keys']);
+    expect(keysCol.render(si)).toBe('—');
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed',
       tags: [], createdAt: '',
@@ -146,6 +153,11 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     // Managed + isOfferingBindable undefined (cold) → fail open → Service Keys shown.
     const managed: any = { cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed' };
     expect(actionsCol.actions(managed).map((a: any) => a.label)).toEqual(['Edit', 'Detach', 'Service Keys', 'Delete']);
+  });
+
+  it('triggers the lazy key-count fetch after the instances load', async () => {
+    await Promise.resolve();
+    expect(stubSignalConfig.ensureServiceKeyCounts).toHaveBeenCalled();
   });
 
   it('Service Keys action keeps CF context via ?breadcrumbs=space-services', () => {
