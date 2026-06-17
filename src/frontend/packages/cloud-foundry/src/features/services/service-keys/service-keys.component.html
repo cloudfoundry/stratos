@@ -1,0 +1,120 @@
+<app-page-header [breadcrumbs]="breadcrumbs">
+  {{ title() }}
+</app-page-header>
+
+<!-- L5 sub-nav: count + Add button that swaps in an inline create form
+     (same pattern as the Variables tab). -->
+<app-list-sub-nav title="Total Service Keys" [count]="keyCount"
+  [addAction]="addKeyAction" [isAdding]="isAdding">
+  <div subNavForm class="flex items-center gap-2">
+    <input class="rounded border border-content-border bg-content-bg px-2 py-1 text-sm"
+      type="text" name="keyName" autocomplete="off" placeholder="Key name"
+      [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
+      (keydown.enter)="createKey()" [disabled]="creating()" />
+    <button type="button"
+      class="rounded bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
+      [disabled]="creating() || !newKeyName().trim()" (click)="createKey()">
+      {{ creating() ? 'Creating…' : 'Create' }}
+    </button>
+    <button type="button" class="text-sm text-content-muted hover:underline disabled:opacity-50"
+      [disabled]="creating()" (click)="cancelCreate()">Cancel</button>
+  </div>
+</app-list-sub-nav>
+
+<div class="px-6 py-4 space-y-4">
+  @if (errorMessage(); as err) {
+    <div class="rounded border border-danger-strong bg-danger-subtle px-3 py-2 text-danger-strong" role="alert">
+      {{ err }}
+    </div>
+  }
+
+  @if (notBindable()) {
+    <div class="rounded border border-content-border bg-content-bg px-3 py-2 text-content-muted" role="status">
+      This service does not support service keys (the offering is not bindable).
+    </div>
+  }
+
+  <!-- List (accordion) -->
+  @if (loading()) {
+    <p class="text-content-muted">Loading service keys…</p>
+  } @else if (keys().length === 0) {
+    <p class="text-content-muted">This service instance has no service keys.</p>
+  } @else {
+    <div class="flex flex-col gap-2">
+      @for (key of keys(); track key.guid) {
+        <section class="border border-content-border rounded-md overflow-hidden">
+          <!-- Header row: toggle area + delete (siblings, not nested buttons). -->
+          <div class="w-full flex items-center gap-3 px-4 py-3 bg-content-bg">
+            <button type="button"
+              class="flex items-center gap-3 grow min-w-0 text-left hover:opacity-80"
+              [attr.aria-expanded]="isOpen(key.guid)"
+              (click)="toggleOpen(key.guid)">
+              <svg class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+                [class.rotate-90]="isOpen(key.guid)"
+                viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+              </svg>
+              <span class="font-medium text-content-text truncate">{{ key.name }}</span>
+              <span class="text-sm text-content-muted shrink-0">{{ key.createdAt | date:'medium' }}</span>
+              <span class="text-sm text-content-muted shrink-0">{{ key.lastOperationState || '—' }}</span>
+            </button>
+            <button type="button"
+              class="text-link hover:underline shrink-0"
+              (click)="copyAllCredentials(key.guid)">
+              {{ copiedAllGuid() === key.guid ? 'Copied' : 'Copy all (JSON)' }}
+            </button>
+            <button type="button"
+              class="text-danger-strong hover:underline disabled:opacity-50 shrink-0"
+              [disabled]="rowStatus(key.guid) === 'busy'"
+              (click)="deleteKey(key.guid)">
+              {{ rowStatus(key.guid) === 'busy' ? 'Deleting…' : 'Delete' }}
+            </button>
+          </div>
+
+          <!-- Body: credentials, lazily loaded on first expand. -->
+          @if (isOpen(key.guid)) {
+            <div class="px-4 py-3 border-t border-content-border">
+              @if (credsLoading(key.guid)) {
+                <p class="text-content-muted">Loading credentials…</p>
+              } @else if (credsError(key.guid); as cerr) {
+                <p class="text-danger-strong">Failed to load credentials: {{ cerr }}</p>
+              } @else if (credentialFields(key.guid).length === 0) {
+                <p class="text-content-muted">No credentials returned for this key.</p>
+              } @else {
+                <!-- Not w-full: columns size to content so the key/value/actions
+                     align in tidy columns packed to the left, with the copy
+                     controls in one aligned column right after the values. -->
+                <table class="text-left text-sm">
+                  <tbody>
+                    @for (field of credentialFields(key.guid); track field.key) {
+                      <tr class="border-b border-content-border last:border-0">
+                        <td class="py-1 pr-8 align-top font-medium text-content-muted whitespace-nowrap">{{ field.key }}</td>
+                        <td class="py-1 pr-4 align-top break-all font-mono">{{ displayValue(key.guid, field) }}</td>
+                        <td class="py-1 align-top whitespace-nowrap text-right">
+                          @if (field.sensitive) {
+                            <button type="button" class="text-link hover:underline text-xs"
+                              (click)="toggleField(key.guid, field.key)">
+                              {{ fieldShown(key.guid, field.key) ? 'Hide' : 'Show' }}
+                            </button>
+                          }
+                        </td>
+                        <!-- pl-8: the copy component renders its icon absolute-left of
+                             its own (0-width) box, so reserve space here so it doesn't
+                             overlap the Show column. -->
+                        <td class="py-1 pl-10 align-top">
+                          <app-copy-to-clipboard class="inline-block w-5" [text]="field.value"
+                            [tooltip]="'Copy ' + field.key"
+                            [showSuccessText]="false" [compact]="true"></app-copy-to-clipboard>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>

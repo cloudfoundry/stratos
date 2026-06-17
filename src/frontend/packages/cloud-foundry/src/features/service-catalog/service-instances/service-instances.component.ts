@@ -12,7 +12,6 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
-  ConfirmationDialogConfig,
   ConfirmationDialogService,
   SignalListColumn,
   SignalListComponent,
@@ -27,8 +26,8 @@ import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-configs/bound-apps-cell';
+import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 
 /**
  * ServiceInstancesComponent — service-catalog Instances tab on a service
@@ -205,43 +204,12 @@ export class ServiceInstancesComponent implements OnInit {
   // vanishes.
   private readonly buildRowActions = (
     si: StServiceInstance,
-  ): readonly SignalListRowAction<StServiceInstance>[] => {
-    const siType = si.type === 'user-provided' ? 'user-service' : 'service';
-    return [
-      {
-        label: 'Edit', icon: 'edit',
-        invoke: () => {
-          void this.router.navigate([
-            '/services', siType, si.cnsiGuid, si.guid, 'edit',
-          ]);
-        },
-      },
-      {
-        label: 'Detach', icon: 'link_off',
-        invoke: () => {
-          void this.router.navigate([
-            '/services', siType, si.cnsiGuid, si.guid, 'detach',
-          ]);
-        },
-      },
-      {
-        label: 'Delete', icon: 'delete', danger: true,
-        invoke: () => {
-          const confirm = new ConfirmationDialogConfig(
-            'Delete Service Instance',
-            `Delete the service instance "${si.name}"? This cannot be undone and will detach any apps bound to it.`,
-            'Delete',
-            true,
-          );
-          this.confirmDialog.open(confirm, async () => {
-            try {
-              await this.instancesConfig.deleteServiceInstance(si.cnsiGuid, si.guid);
-            } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
-            }
-          });
-        },
-      },
-    ];
-  };
+  ): readonly SignalListRowAction<StServiceInstance>[] =>
+    buildServiceInstanceRowActions(si, {
+      router: this.router,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
+      isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+    });
 }

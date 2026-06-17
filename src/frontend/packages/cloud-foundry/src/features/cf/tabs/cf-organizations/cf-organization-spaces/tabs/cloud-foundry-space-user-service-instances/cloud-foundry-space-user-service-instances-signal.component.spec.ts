@@ -40,6 +40,7 @@ function makeStubSignalConfigService() {
     registerSortExtractor: vi.fn(),
     registerFilterExtractor: vi.fn(),
     deleteServiceInstance: vi.fn().mockResolvedValue(undefined),
+    isOfferingBindable: vi.fn().mockReturnValue(undefined),
     clearFilters: vi.fn(),
     filter: filterSig,
     sort: sortSig,

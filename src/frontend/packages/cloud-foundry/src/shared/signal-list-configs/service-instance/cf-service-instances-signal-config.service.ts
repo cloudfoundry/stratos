@@ -550,4 +550,19 @@ export class CfServiceInstancesSignalConfigService {
     });
     this.orchestrator?.removeRow(cnsiGuid, siGuid);
   }
+
+  // isOfferingBindable resolves the instance's service-offering bindability
+  // from the registry's already-warmed services-details cache (offerings are
+  // fetched alongside instances on acquire → loadServicesDetails, the same
+  // source as the marketplace Bindable column). Returns:
+  //   true/false — offering known and (not) bindable
+  //   undefined  — offering not in cache yet (cold) → callers fail open
+  // Avoids a per-row HTTP fetch; gates the Service Keys row action.
+  isOfferingBindable(si: StServiceInstance): boolean | undefined {
+    const offeringGuid = si.servicePlan?.serviceOffering?.guid;
+    if (!offeringGuid) return undefined;
+    const offering = this.registry?.peek(si.cnsiGuid)?.serviceOfferings()
+      .find(o => o.guid === offeringGuid);
+    return offering?.bindable;
+  }
 }

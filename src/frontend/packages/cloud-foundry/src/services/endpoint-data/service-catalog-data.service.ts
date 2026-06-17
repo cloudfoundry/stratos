@@ -48,6 +48,36 @@ function toRouteServiceBindingView(raw: RawRouteServiceBinding): RouteServiceBin
   };
 }
 
+// Service keys come back from GH#4301's native handler as raw v3
+// service_credential_binding resources (type=key). We only render a few
+// fields, so map to this view model rather than the full St shape.
+export interface ServiceKeyView {
+  guid: string;
+  name: string;
+  createdAt: string;
+  lastOperationState?: string;
+}
+
+interface RawServiceKey {
+  guid: string;
+  name?: string;
+  created_at?: string;
+  last_operation?: { state?: string };
+}
+
+interface RawServiceKeysResponse {
+  resources?: RawServiceKey[];
+}
+
+function toServiceKeyView(raw: RawServiceKey): ServiceKeyView {
+  return {
+    guid: raw.guid,
+    name: raw.name ?? '',
+    createdAt: raw.created_at ?? '',
+    lastOperationState: raw.last_operation?.state,
+  };
+}
+
 // Per-call loadable signal triple — value + lifecycle signals so
 // consumers with loading-state machinery (e.g. cf-service-plans-signal
 // -config) can wire UI states without re-implementing the pieces.
@@ -179,6 +209,21 @@ export class ServiceCatalogDataService {
         `/pp/v1/cf/service_instances/${cnsiGuid}/${instanceGuid}/service_bindings`,
         { params },
       ).pipe(map(resp => resp?.resources ?? [])),
+      [],
+    );
+  }
+
+  // Service keys for a single instance — credential bindings with type=key
+  // (filtered server-side by GH#4301's native handler). Maps the raw v3
+  // binding resources to a small view model the keys page renders. The keys
+  // management page (and its reload after create/delete) consume this.
+  serviceKeysForInstance(cnsiGuid: string, instanceGuid: string): SignalSource<ServiceKeyView[]> {
+    const params = new HttpParams().set('service_instance_guids', instanceGuid);
+    return this.signalize(
+      this.http.get<RawServiceKeysResponse>(
+        `/pp/v1/cf/service_keys/${cnsiGuid}`,
+        { params },
+      ).pipe(map(resp => (resp?.resources ?? []).map(toServiceKeyView))),
       [],
     );
   }
