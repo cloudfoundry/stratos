@@ -39,4 +39,22 @@ describe('CopyToClipboardComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('renders the copy icon in normal flow (not absolutely positioned), stacked via grid', () => {
+    component.canCopy = true;
+    fixture.detectChanges();
+
+    const icons = Array.from(
+      fixture.nativeElement.querySelectorAll('.material-icons'),
+    ) as HTMLElement[];
+    const copyIcon = icons.find(el => el.textContent?.trim() === 'content_copy');
+
+    expect(copyIcon).toBeTruthy();
+    // Absolute positioning was the cause of the row-misalignment — the icon
+    // must flow so it tracks its row.
+    expect(copyIcon!.classList.contains('absolute')).toBe(false);
+    // Icon + transient success indicator share one grid cell, so the column
+    // reserves space for the "Copied to clipboard" text without overlap.
+    expect(fixture.nativeElement.querySelector('.inline-grid')).toBeTruthy();
+  });
 });
