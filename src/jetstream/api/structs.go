@@ -294,10 +294,10 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview               bool   `json:"enableTechPreview"`
-		ListMaxSize               int64  `json:"listMaxSize,omitempty"`
-		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
-		APIKeysEnabled            string `json:"APIKeysEnabled"`
+		TechPreview                bool   `json:"enableTechPreview"`
+		ListMaxSize                int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed         bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled             string `json:"APIKeysEnabled"`
 		HomeViewShowFavoritesOnly  bool   `json:"homeViewShowFavoritesOnly"`
 		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
 		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
@@ -474,7 +474,7 @@ type PortalConfig struct {
 	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
 	// Off by default in production; opt-in per deployment (dev, staging) via the
 	// DIAGNOSTICS_ENABLED env var. FWT-934.
-	DiagnosticsEnabled                 bool                         `configName:"DIAGNOSTICS_ENABLED"`
+	DiagnosticsEnabled bool `configName:"DIAGNOSTICS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
