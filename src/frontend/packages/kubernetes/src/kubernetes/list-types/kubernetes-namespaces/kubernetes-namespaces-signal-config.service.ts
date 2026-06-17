@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import { ListStateStore, SignalListSort } from '@stratosui/core';
 
@@ -60,6 +60,11 @@ export class KubernetesNamespacesSignalConfigService {
 
   view!: KubeViewPipeline<KubeNamespace>;
 
+  // Captured so a re-entry (this is a root singleton, but components call
+  // initialize() on every mount) destroys the prior filter effect instead
+  // of stacking one live effect per navigation on the root injector.
+  private filterEffect?: EffectRef;
+
   // Tristate visibility — when the kube version / namespace fetch is
   // listed in the endpoint service's `unavailable`, we surface that to
   // the consumer so the page can render "Not Available" rather than a
@@ -87,8 +92,9 @@ export class KubernetesNamespacesSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((ns: KubeNamespace) => {
           if (!q) return true;
