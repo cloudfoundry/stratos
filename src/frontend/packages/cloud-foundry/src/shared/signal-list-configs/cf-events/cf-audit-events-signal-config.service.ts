@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -130,6 +130,11 @@ export class CfAuditEventsSignalConfigService {
 
   view!: ViewPipeline<StAuditEvent>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior effects instead of stacking them per navigation.
+  private filterEffect?: EffectRef;
+  private cascadeEffect?: EffectRef;
+
   initialize(cnsiGuid: string): void {
     // Swap CNSI: release the previous EDS handle if a re-initialize() in
     // the same singleton swapped foundations. Refcount-balanced —
@@ -156,8 +161,10 @@ export class CfAuditEventsSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
+    this.cascadeEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         const base = this.basePredicate();
         const org = this.selectedOrg();
@@ -180,7 +187,7 @@ export class CfAuditEventsSignalConfigService {
       // different specific org. When Org returns to All, the Space
       // dropdown shows every space (labelled "<space> - <org>"), so the
       // current selection remains valid and must be preserved.
-      effect(() => {
+      this.cascadeEffect = effect(() => {
         const org = this.selectedOrg();
         const space = this.selectedSpace();
         if (!space) return;

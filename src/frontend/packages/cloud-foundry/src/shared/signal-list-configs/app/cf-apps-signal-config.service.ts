@@ -75,6 +75,9 @@ export class CfAppsSignalConfigService {
   readonly appStats: Signal<Map<string, { running: number; total: number }>> =
     computed(() => this._appStats());
   private statsTimer?: ReturnType<typeof setInterval>;
+  // Reactive stats refresh effect, captured so a re-entry (root singleton +
+  // per-mount startStatsPolling) destroys the prior one instead of stacking.
+  private statsEffect?: EffectRef;
   // Tracks `${cnsiGuid}:${appGuid}` keys with an in-flight stats request so
   // burst signal updates during initial render don't issue 4× duplicate
   // calls per app — the original symptom on multi-CNSI walls with slow CFs.
@@ -871,8 +874,14 @@ export class CfAppsSignalConfigService {
     this.statsTimer = setInterval(runOnce, intervalMs);
     // effect() requires an injection context; startStatsPolling is called
     // from the component's ngOnInit which isn't one. Wrap it explicitly.
+    //
+    // Tear down any previous mount's effect first. This service is a root
+    // singleton, so a re-entry (app-wall remounted on navigation) would
+    // otherwise stack one live effect per visit, multiplying stats fetches
+    // across a session — same reasoning as the statsTimer reset above.
+    this.statsEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.statsEffect = effect(() => {
         const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
         this.refreshStatsForKeys(keys);
       });

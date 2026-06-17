@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
@@ -61,6 +61,11 @@ export class CfOrgsSignalConfigService {
   // at every call site.
   view!: ViewPipeline<StOrg>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior effects instead of stacking them per navigation.
+  private filterEffect?: EffectRef;
+  private loadedOnceEffect?: EffectRef;
+
   // Sort-extractor map for columns whose sort key doesn't map to a direct
   // property on StOrg (e.g. the Spaces column, which composes over the
   // space lookup). Populated via registerSortExtractor from the component.
@@ -97,15 +102,17 @@ export class CfOrgsSignalConfigService {
     // Effects need an injection context; initialize() is called from a
     // component's ngOnInit which isn't one. Wrap via the injector
     // captured at service construction.
+    this.filterEffect?.destroy();
+    this.loadedOnceEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((o: StOrg) => {
           if (!q) return true;
           return (o.name ?? '').toLowerCase().includes(q);
         });
       });
-      effect(() => {
+      this.loadedOnceEffect = effect(() => {
         const cur = this.endpointDataService();
         if (!cur) return;
         if (cur.orgs().length > 0) this._hasLoadedOnce.set(true);

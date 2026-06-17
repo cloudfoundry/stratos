@@ -463,6 +463,42 @@ describe('CfAppsSignalConfigService', () => {
     expect(httpMock.get).toHaveBeenCalledTimes(2);
   });
 
+  it('startStatsPolling does not stack a reactive effect on re-entry', () => {
+    // Regression: this service is a root singleton, and the app-wall calls
+    // startStatsPolling() from ngOnInit on every mount. The reactive stats
+    // effect used to be created uncaptured, so each navigation left a live
+    // effect on the root injector — N visits meant N refreshes per page
+    // change, multiplying app-stats traffic across a session. The fix
+    // captures the EffectRef and destroys the prior one on re-entry.
+    const http = makeHttp();
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(http, cf);
+    svc.initialize(['cnsi-1']);
+    seedApps(svc, [{
+      guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cnsi-1',
+      spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp]);
+    TestBed.tick();
+
+    // Simulate two mounts of the app-wall (route re-entry).
+    svc.startStatsPolling();
+    svc.startStatsPolling();
+    TestBed.tick();
+
+    // Count only refreshes driven by the reactive effect on a pagedItems
+    // change — isolate from the synchronous runOnce()/interval legs.
+    const refresh = vi.spyOn(svc as any, 'refreshStatsForKeys');
+    seedApps(svc, [{
+      guid: 'b', name: 'b-app', state: 'STARTED', cnsiGuid: 'cnsi-1',
+      spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp]);
+    TestBed.tick();
+
+    // Exactly one live effect → one reactive refresh. Without the fix the
+    // two stacked effects would each fire, yielding 2.
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
   it('cnsiOptions picks up connected CF endpoints from CloudFoundryService', () => {
     const http = makeHttp();
     const cf = makeStubCfService([

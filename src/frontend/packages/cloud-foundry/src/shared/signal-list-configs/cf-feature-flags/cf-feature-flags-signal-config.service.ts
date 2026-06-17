@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
@@ -44,6 +44,10 @@ export class CfFeatureFlagsSignalConfigService {
 
   view!: ViewPipeline<StFeatureFlag>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   initialize(cnsiGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this.source = new CnsiFeatureFlagsSource(cnsiGuid, this.http);
@@ -56,8 +60,9 @@ export class CfFeatureFlagsSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((f: StFeatureFlag) => {
           if (!q) return true;
