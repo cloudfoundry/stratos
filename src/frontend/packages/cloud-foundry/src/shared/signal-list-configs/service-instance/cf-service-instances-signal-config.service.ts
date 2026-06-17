@@ -472,7 +472,7 @@ export class CfServiceInstancesSignalConfigService {
   // seeding mid-flight stale data.
   private makeSource(guid: string): CnsiServiceInstancesSource {
     const ds = this.registry?.acquire(guid);
-    const source = new CnsiServiceInstancesSource(guid, this.http, ds);
+    const source = new CnsiServiceInstancesSource(guid, this.http);
     if (ds && !ds.isLoadingServicesDetails()) {
       const bundle = ds.serviceInstancesAndBrokers();
       if (bundle) source.preSeed(bundle.instances);

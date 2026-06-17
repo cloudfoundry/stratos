@@ -452,13 +452,6 @@ export class EndpointDataService {
     this._serviceCredentialBindings.update(curr =>
       curr.filter(b => (b as { guid?: string }).guid !== guid));
   }
-  addServiceCredentialBinding(b: StServiceCredentialBinding): void {
-    this._serviceCredentialBindings.update(curr => {
-      const idx = curr.findIndex(x => (x as { guid?: string }).guid === (b as { guid?: string }).guid);
-      if (idx >= 0) { const next = [...curr]; next[idx] = b; return next; }
-      return [...curr, b];
-    });
-  }
 
   // -------- Staleness + cascade ---------------------------------------------
 
