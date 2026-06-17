@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { ListStateStore } from '@stratosui/core';
@@ -52,6 +52,10 @@ export class RevisionsSignalConfigService {
 
   view!: ViewPipeline<RevisionRow>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   initialize(cnsiGuid: string, appGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this.appGuid = appGuid;
@@ -65,8 +69,9 @@ export class RevisionsSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((r: RevisionRow) => {
           if (!q) return true;

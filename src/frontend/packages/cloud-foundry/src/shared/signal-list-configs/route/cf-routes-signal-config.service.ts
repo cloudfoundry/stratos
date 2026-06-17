@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
@@ -89,6 +89,11 @@ export class CfRoutesSignalConfigService {
 
   view!: ViewPipeline<StRoute>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior effects instead of stacking them per navigation.
+  private filterEffect?: EffectRef;
+  private cascadeEffect?: EffectRef;
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StRoute) => unknown>> = signal(new Map());
 
   private readonly _hasLoadedOnce = signal(false);
@@ -116,8 +121,10 @@ export class CfRoutesSignalConfigService {
     // Fetch the route list itself; errors here do surface because without
     // them the page has nothing to show.
     void this.fetchRoutes();
+    this.filterEffect?.destroy();
+    this.cascadeEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         const org = this.selectedOrg();
         const space = this.selectedSpace();
@@ -134,7 +141,7 @@ export class CfRoutesSignalConfigService {
       });
       // Reset Space when Org changes — the cascade rule. Stale space
       // selections in a now-hidden org would silently filter to empty.
-      effect(() => {
+      this.cascadeEffect = effect(() => {
         const org = this.selectedOrg();
         const space = this.selectedSpace();
         if (!space) return;

@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -69,6 +69,10 @@ export class CfSpacesSignalConfigService {
 
   view!: ViewPipeline<StSpace>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StSpace) => unknown>> = signal(new Map());
 
   private readonly _hasLoadedOnce = signal(false);
@@ -94,8 +98,9 @@ export class CfSpacesSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
     void this.fetchOrgSpaces();
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((s: StSpace) => {
           if (!q) return true;

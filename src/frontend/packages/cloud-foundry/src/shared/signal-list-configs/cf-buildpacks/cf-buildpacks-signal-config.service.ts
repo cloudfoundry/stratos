@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { ListStateStore } from '@stratosui/core';
@@ -46,6 +46,10 @@ export class CfBuildpacksSignalConfigService {
 
   view!: ViewPipeline<StBuildpack>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   initialize(cnsiGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this.source = new CnsiBuildpacksSource(cnsiGuid, this.http);
@@ -58,8 +62,9 @@ export class CfBuildpacksSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((b: StBuildpack) => {
           if (!q) return true;

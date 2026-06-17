@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
@@ -97,6 +97,11 @@ export class CfUsersSignalConfigService {
   });
 
   view!: ViewPipeline<StUser>;
+
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior effects instead of stacking them per navigation.
+  private filterEffect?: EffectRef;
+  private cascadeEffect?: EffectRef;
 
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StUser) => unknown>> = signal(new Map());
 
@@ -221,8 +226,10 @@ export class CfUsersSignalConfigService {
     // fall back to the GUID short-form / em-dash).
     void firstValueFrom(this.endpointDataService.loadDetails()).catch((): void => undefined);
     this.triggerUsersLoad(cnsiGuid);
+    this.filterEffect?.destroy();
+    this.cascadeEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         const org = this.selectedOrg();
         const space = this.selectedSpace();
@@ -250,7 +257,7 @@ export class CfUsersSignalConfigService {
       // returns to All, the Space dropdown shows every space across orgs
       // (labelled "<space> - <org>"), so the current selection is still
       // valid and must be preserved.
-      effect(() => {
+      this.cascadeEffect = effect(() => {
         const org = this.selectedOrg();
         const space = this.selectedSpace();
         if (!space) return;
