@@ -3,6 +3,7 @@ package cloudfoundry
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -76,6 +77,26 @@ type AuthorizedConsumer struct {
 	refreshToken   func() error
 }
 
+// dopplerTLSConfig builds the TLS config for the Doppler/Noaa connection that
+// carries the user's CF OAuth bearer token. It honours the endpoint's
+// SkipSSLValidation setting and CA certificate instead of unconditionally
+// skipping verification (which exposed the bearer token to an on-path MITM),
+// mirroring how every other CF connection for this endpoint is built.
+func dopplerTLSConfig(cnsiRecord api.CNSIRecord) *tls.Config {
+	config := &tls.Config{InsecureSkipVerify: cnsiRecord.SkipSSLValidation}
+	if len(cnsiRecord.CACert) > 0 {
+		rootCAs, err := x509.SystemCertPool()
+		if rootCAs == nil || err != nil {
+			rootCAs = x509.NewCertPool()
+		}
+		if ok := rootCAs.AppendCertsFromPEM([]byte(cnsiRecord.CACert)); !ok {
+			log.Warn("Could not append the CA for the Doppler endpoint - using system certs only")
+		}
+		config.RootCAs = rootCAs
+	}
+	return config
+}
+
 // Refresh the Authorization token if needed and create a new Noaa consumer
 func (c *CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*AuthorizedConsumer, error) {
 
@@ -120,7 +141,7 @@ func (c *CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (
 
 	// Open a Noaa consumer to the doppler endpoint
 	log.Debugf("Creating Noaa consumer for Doppler endpoint %s", dopplerAddress)
-	ac.consumer = consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, http.ProxyFromEnvironment)
+	ac.consumer = consumer.New(dopplerAddress, dopplerTLSConfig(cnsiRecord), http.ProxyFromEnvironment)
 
 	//Open a LogCache client to the log cache endpoint
 	logCacheUrl := strings.Replace(cnsiRecord.APIEndpoint.String(), "api.sys.", "log-cache.sys.", 1)
