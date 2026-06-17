@@ -19,6 +19,35 @@ interface PagedResp<T> {
   pagination?: { totalResults?: number };
 }
 
+// A route's route-service binding (a route binds to 0-or-1 service instance).
+// Mapped from the raw v3 service_route_binding resource.
+export interface RouteServiceBindingView {
+  guid: string;
+  serviceInstanceGuid: string;
+  routeServiceUrl?: string;
+  lastOperationState?: string;
+}
+
+interface RawRouteServiceBinding {
+  guid: string;
+  route_service_url?: string;
+  last_operation?: { state?: string };
+  relationships?: { service_instance?: { data?: { guid?: string } } };
+}
+
+interface RawRouteServiceBindingsResponse {
+  resources?: RawRouteServiceBinding[];
+}
+
+function toRouteServiceBindingView(raw: RawRouteServiceBinding): RouteServiceBindingView {
+  return {
+    guid: raw.guid,
+    serviceInstanceGuid: raw.relationships?.service_instance?.data?.guid ?? '',
+    routeServiceUrl: raw.route_service_url,
+    lastOperationState: raw.last_operation?.state,
+  };
+}
+
 // Service keys come back from GH#4301's native handler as raw v3
 // service_credential_binding resources (type=key). We only render a few
 // fields, so map to this view model rather than the full St shape.
@@ -209,6 +238,22 @@ export class ServiceCatalogDataService {
         { params },
       ).pipe(map(resp => resp?.resources ?? [])),
       [],
+    );
+  }
+
+  // The route-service binding for a single route (0-or-1). Drives the Route
+  // Service page; reloaded after bind/unbind by re-invoking this.
+  routeServiceBinding(cnsiGuid: string, routeGuid: string): SignalSource<RouteServiceBindingView | null> {
+    const params = new HttpParams().set('route_guids', routeGuid);
+    return this.signalize(
+      this.http.get<RawRouteServiceBindingsResponse>(
+        `/pp/v1/cf/service_route_bindings/${cnsiGuid}`,
+        { params },
+      ).pipe(map(resp => {
+        const first = resp?.resources?.[0];
+        return first ? toRouteServiceBindingView(first) : null;
+      })),
+      null,
     );
   }
 

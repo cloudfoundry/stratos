@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
@@ -50,6 +50,7 @@ import { extractHttpErrorMessage } from '../../../../services/extract-error-mess
 export class CloudFoundryRoutesSignalComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private routesConfig = inject(CfRoutesSignalConfigService);
+  private router = inject(Router);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -406,6 +407,15 @@ export class CloudFoundryRoutesSignalComponent {
             await runAction('Unmap', () =>
               this.routesConfig.unmapAllAppsFromRoute(route.cnsiGuid, route.guid, appGuids));
           });
+        },
+      },
+      {
+        label: 'Route Service', icon: 'lan',
+        invoke: () => {
+          void this.router.navigate(
+            ['/services', 'route-service', route.cnsiGuid, route.guid],
+            { queryParams: { space: route.spaceGuid, url: route.url } },
+          );
         },
       },
       {
