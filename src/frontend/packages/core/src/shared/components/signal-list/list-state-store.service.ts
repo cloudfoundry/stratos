@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import type { SignalListSort, SignalListViewMode } from './signal-list.component';
 
@@ -49,6 +49,12 @@ export interface BoundListState {
 export class ListStateStore {
   private readonly injector = inject(Injector);
 
+  // Root singleton: callers bind a fixed key once, so today nothing
+  // accumulates. Capturing the persistence effect per key keeps it that
+  // way defensively — a re-bind of the same key destroys the prior effect
+  // instead of leaving an orphan running against the abandoned signals.
+  private readonly persistEffects = new Map<string, EffectRef>();
+
   bind(key: string, defaults: ListStateDefaults): BoundListState {
     const persisted = this.read(key);
     const initial: ListStateDefaults = persisted ?? defaults;
@@ -65,8 +71,9 @@ export class ListStateStore {
     // Persist on any change. Effect runs in a dedicated injection context
     // so config services can call bind() outside an injection context
     // (e.g. inside a field initializer).
+    this.persistEffects.get(key)?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.persistEffects.set(key, effect(() => {
         const snapshot: ListStateDefaults = {
           viewMode: viewMode(),
           pageSize: pageSizeByMode(),
@@ -74,7 +81,7 @@ export class ListStateStore {
           sort: sortByMode(),
         };
         this.write(key, snapshot);
-      });
+      }));
     });
 
     return { viewMode, pageSizeByMode, pageIndexByMode, sortByMode, pageSize, pageIndex, sort };

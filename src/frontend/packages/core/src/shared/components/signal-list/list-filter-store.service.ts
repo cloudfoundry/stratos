@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 // Persists per-list-type filter selections — name-filter text, the
 // active filter field (when the toolbar offers a column-picker), and
@@ -49,6 +49,12 @@ const EMPTY_FILTERS: Readonly<Record<string, string | null>> = Object.freeze({})
 export class ListFilterStore {
   private readonly injector = inject(Injector);
 
+  // Root singleton: callers bind a fixed key once, so today nothing
+  // accumulates. Capturing the persistence effect per key keeps it that
+  // way defensively — a re-bind of the same key destroys the prior effect
+  // instead of leaving an orphan running against the abandoned signals.
+  private readonly persistEffects = new Map<string, EffectRef>();
+
   bind(key: string, defaults: ListFilterDefaults): BoundListFilterState {
     const persisted = this.read(key);
     const initial: ListFilterDefaults = persisted ?? defaults;
@@ -59,15 +65,16 @@ export class ListFilterStore {
       initial.multiFilters ?? EMPTY_FILTERS,
     );
 
+    this.persistEffects.get(key)?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.persistEffects.set(key, effect(() => {
         const snapshot: ListFilterDefaults = {
           nameFilter: nameFilter(),
           filterField: filterField(),
           multiFilters: multiFilters(),
         };
         this.write(key, snapshot);
-      });
+      }));
     });
 
     const multiFilterValue = (k: string): Signal<string | null> =>

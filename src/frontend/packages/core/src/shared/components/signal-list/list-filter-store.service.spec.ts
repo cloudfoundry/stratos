@@ -84,6 +84,25 @@ describe('ListFilterStore', () => {
     expect(bound.multiFilterValue('cf')()).toBeNull();
   });
 
+  it('re-binding a key tears down the prior effect (no orphan persistence)', () => {
+    // Defensive: callers bind a fixed key once today, so this never fires
+    // in practice — but a second bind of the same key must destroy the
+    // first effect so writes to the now-abandoned first binding can't keep
+    // persisting against the shared storage slot.
+    const store = TestBed.inject(ListFilterStore);
+    const first = store.bind(KEY, DEFAULTS);
+    store.bind(KEY, DEFAULTS); // rebind → first's effect destroyed
+    flushEffects();
+
+    first.nameFilter.set('orphan-write');
+    flushEffects();
+
+    // first's effect is dead, so 'orphan-write' is not persisted; the slot
+    // still holds the live (second) binding's default value.
+    const parsed = JSON.parse(localStorage.getItem(STORAGE)!);
+    expect(parsed.nameFilter).toBe('');
+  });
+
   it('multiFilterValue returns null for unknown keys', () => {
     const store = TestBed.inject(ListFilterStore);
     const bound = store.bind(KEY, DEFAULTS);
