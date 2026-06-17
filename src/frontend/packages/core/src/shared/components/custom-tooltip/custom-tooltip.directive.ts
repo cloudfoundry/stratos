@@ -1,4 +1,5 @@
-import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, inject } from '@angular/core';
+import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Directive({
   selector: '[matTooltip]',
@@ -7,6 +8,7 @@ import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, injec
 export class CustomTooltipDirective implements OnDestroy {
   private elementRef = inject(ElementRef);
   private renderer = inject(Renderer2);
+  private sanitizer = inject(DomSanitizer);
 
   @Input('matTooltip') tooltipText: string = '';
   @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
@@ -48,10 +50,14 @@ export class CustomTooltipDirective implements OnDestroy {
     if (this.tooltipClass) {
       this.renderer.addClass(el, this.tooltipClass);
     }
-    // Use textContent, not innerHTML: tooltip text can carry untrusted values
-    // (e.g. CF usernames) and Renderer2.setProperty(innerHTML) bypasses Angular's
-    // sanitizer. No tooltip relies on HTML markup, so this is a behaviour-neutral fix.
-    this.renderer.setProperty(el, 'textContent', this.tooltipText);
+    // Tooltips DO carry simple HTML markup (e.g. <b> for emphasis), so plain
+    // textContent isn't an option. But tooltip text can also carry untrusted
+    // values (e.g. CF usernames), and Renderer2.setProperty(innerHTML) bypasses
+    // Angular's sanitizer. Run the value through DomSanitizer first: it keeps
+    // the safe formatting subset (<b>, <strong>, <i>, <em>, <br>, …) while
+    // stripping scripts, event handlers, and other XSS vectors.
+    const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, this.tooltipText) ?? '';
+    this.renderer.setProperty(el, 'innerHTML', safeHtml);
 
     // Apply visual styles BEFORE positioning so getBoundingClientRect()
     // measures the content-sized box. A bare `<div>` with no styling is
