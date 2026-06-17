@@ -27,17 +27,17 @@ func isSSLRelatedError(err error) (bool, string) {
 	var urlError *url.Error
 	if errors.As(err, &urlError) {
 		var (
-			certInvalidError      *x509.CertificateInvalidError
-			unknownAuthorityError *x509.UnknownAuthorityError
-			hostnameError         *x509.HostnameError
+			certInvalidError      x509.CertificateInvalidError
+			unknownAuthorityError x509.UnknownAuthorityError
+			hostnameError         x509.HostnameError
 		)
-		if errors.As(urlError.Err, unknownAuthorityError) {
+		if errors.As(urlError.Err, &unknownAuthorityError) {
 			return true, unknownAuthorityError.Error()
 		}
-		if errors.As(urlError.Err, hostnameError) {
+		if errors.As(urlError.Err, &hostnameError) {
 			return true, hostnameError.Error()
 		}
-		if errors.As(urlError.Err, certInvalidError) {
+		if errors.As(urlError.Err, &certInvalidError) {
 			return true, certInvalidError.Error()
 		}
 	}
