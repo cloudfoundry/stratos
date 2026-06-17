@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import { ListStateStore } from '@stratosui/core';
 
@@ -121,6 +121,10 @@ export class AppAutoscalerMetricChartSignalConfigService {
   // a shared place is a separate refactor outside this wave's scope.
   view!: ViewPipeline<AutoscalerMetricChartRow>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   initialize(cnsiGuid: string, appGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this.appGuid = appGuid;
@@ -133,8 +137,9 @@ export class AppAutoscalerMetricChartSignalConfigService {
       this.pageIndex,
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((row: AutoscalerMetricChartRow) => {
           if (!q) return true;

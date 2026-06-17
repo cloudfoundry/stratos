@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import { ListStateStore } from '@stratosui/core';
 
@@ -59,6 +59,10 @@ export class CfAppAutoscalerEventsSignalConfigService {
 
   view!: ViewPipeline<AppAutoscalerEvent>;
 
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
   initialize(cnsiGuid: string, appGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     this.appGuid = appGuid;
@@ -72,8 +76,9 @@ export class CfAppAutoscalerEventsSignalConfigService {
       this._sortExtractors.asReadonly(),
     );
 
+    this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
-      effect(() => {
+      this.filterEffect = effect(() => {
         const q = this.nameFilter().trim().toLowerCase();
         this.filter.set((ev: AppAutoscalerEvent) => {
           if (!q) return true;
@@ -94,6 +99,11 @@ export class CfAppAutoscalerEventsSignalConfigService {
     if (!this.cnsiGuid || !this.appGuid) return;
     try {
       await this.historyData.load(this.cnsiGuid, this.appGuid);
+    } catch {
+      // load() rethrows after recording the failure in its own error()
+      // signal (which the page renders). Swallow here so the fire-and-
+      // forget `void loadAll()` call site doesn't raise an unhandled
+      // promise rejection.
     } finally {
       this._hasLoadedOnce.set(true);
     }
