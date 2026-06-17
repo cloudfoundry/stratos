@@ -12,8 +12,12 @@
       [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
       (keydown.enter)="createKey()" [disabled]="creating()" />
     <button type="button"
-      class="rounded bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
+      class="inline-flex items-center gap-2 rounded bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
       [disabled]="creating() || !newKeyName().trim()" (click)="createKey()">
+      @if (creating()) {
+        <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+          aria-hidden="true"></span>
+      }
       {{ creating() ? 'Creating…' : 'Create' }}
     </button>
     <button type="button" class="text-sm text-content-muted hover:underline disabled:opacity-50"
@@ -36,7 +40,11 @@
 
   <!-- List (accordion) -->
   @if (loading()) {
-    <p class="text-content-muted">Loading service keys…</p>
+    <p class="flex items-center gap-2 text-content-muted">
+      <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+        aria-hidden="true"></span>
+      Loading service keys…
+    </p>
   } @else if (keys().length === 0) {
     <p class="text-content-muted">This service instance has no service keys.</p>
   } @else {
@@ -64,9 +72,13 @@
               {{ copiedAllGuid() === key.guid ? 'Copied' : 'Copy all (JSON)' }}
             </button>
             <button type="button"
-              class="text-danger-strong hover:underline disabled:opacity-50 shrink-0"
+              class="inline-flex items-center gap-1.5 text-danger-strong hover:underline disabled:opacity-50 shrink-0"
               [disabled]="rowStatus(key.guid) === 'busy'"
               (click)="deleteKey(key.guid)">
+              @if (rowStatus(key.guid) === 'busy') {
+                <span class="animate-spin inline-block h-3.5 w-3.5 rounded-full border-2 border-current border-t-transparent"
+                  aria-hidden="true"></span>
+              }
               {{ rowStatus(key.guid) === 'busy' ? 'Deleting…' : 'Delete' }}
             </button>
           </div>
@@ -75,7 +87,11 @@
           @if (isOpen(key.guid)) {
             <div class="px-4 py-3 border-t border-content-border">
               @if (credsLoading(key.guid)) {
-                <p class="text-content-muted">Loading credentials…</p>
+                <p class="flex items-center gap-2 text-content-muted">
+                  <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+                    aria-hidden="true"></span>
+                  Loading credentials…
+                </p>
               } @else if (credsError(key.guid); as cerr) {
                 <p class="text-danger-strong">Failed to load credentials: {{ cerr }}</p>
               } @else if (credentialFields(key.guid).length === 0) {
