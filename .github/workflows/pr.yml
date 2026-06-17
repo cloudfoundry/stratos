@@ -14,7 +14,7 @@ on:
 env:
   NODE_OPTIONS: --max-old-space-size=5500
   NODE_VERSION: '24'
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.26'
   BUN_VERSION: 'latest'
 
 jobs:
