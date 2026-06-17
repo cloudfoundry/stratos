@@ -264,6 +264,9 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
       snackBar: this.snackBar,
       deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
       isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+      // Keep the keys page anchored in this endpoint's CF services tab rather
+      // than popping out to the global /services wall.
+      breadcrumbKey: 'cf',
     });
 
   static formatDate(iso: string | null | undefined): string {

@@ -252,6 +252,9 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
       snackBar: this.snackBar,
       deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
       isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+      // Keep the keys page anchored in this space's CF context (endpoint → org
+      // → space → service-instances) rather than the global /services wall.
+      breadcrumbKey: 'space-services',
     });
 
   static formatDate(iso: string | null | undefined): string {
