@@ -22,11 +22,15 @@ interface OfferingBindableResponse {
 }
 
 // One displayable credential entry. `sensitive` drives on-screen masking;
-// `value` always holds the real value so copy works even while masked.
-interface CredentialField {
+// `value` always holds the real value so copy works even while masked;
+// `displayMasked` is what to show while hidden — a full bullet mask for plain
+// secrets, or a URL with only its password redacted so the host/port/db stay
+// readable.
+export interface CredentialField {
   key: string;
   value: string;
   sensitive: boolean;
+  displayMasked: string;
 }
 
 // Mask credential keys that look like secrets. We iterate every field (rather
@@ -38,14 +42,25 @@ const SENSITIVE_KEY = /pass|secret|token|private|key|cred/i;
 // the key ("uri"/"read_uri") looks innocuous; a plain URL without credentials
 // stays visible.
 const EMBEDDED_CREDENTIAL = /:\/\/[^/\s:@]+:[^/\s@]+@/;
+const FULL_MASK = '••••••••';
 
-function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
+// Redact only the password run in a scheme://user:pass@host URL, leaving the
+// scheme, user, host, port and path readable. Non-URL values (or URLs without
+// embedded credentials) pass through unchanged.
+function redactEmbeddedCredential(value: string): string {
+  return value.replace(/(:\/\/[^/\s:@]+:)[^/\s@]+(@)/, '$1<redacted>$2');
+}
+
+export function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
   return Object.entries(creds).map(([key, raw]) => {
     const value = typeof raw === 'string' ? raw : JSON.stringify(raw);
+    const embedsCredential = EMBEDDED_CREDENTIAL.test(value);
+    const sensitive = SENSITIVE_KEY.test(key) || embedsCredential;
     return {
       key,
       value,
-      sensitive: SENSITIVE_KEY.test(key) || EMBEDDED_CREDENTIAL.test(value),
+      sensitive,
+      displayMasked: embedsCredential ? redactEmbeddedCredential(value) : FULL_MASK,
     };
   });
 }
@@ -171,7 +186,7 @@ export class ServiceKeysComponent {
   };
   fieldShown = (guid: string, key: string): boolean => this.shownFields().has(`${guid}::${key}`);
   displayValue = (guid: string, field: CredentialField): string =>
-    field.sensitive && !this.fieldShown(guid, field.key) ? '••••••••' : field.value;
+    field.sensitive && !this.fieldShown(guid, field.key) ? field.displayMasked : field.value;
 
   constructor() {
     const route = inject(ActivatedRoute);
