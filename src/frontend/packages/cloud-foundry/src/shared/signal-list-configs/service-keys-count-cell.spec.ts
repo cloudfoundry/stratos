@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import type { StServiceInstance } from '../../services/endpoint-data/stratos-types';
-import { renderServiceKeyCount, serviceKeysLink } from './service-keys-count-cell';
+import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from './service-keys-count-cell';
 
 const managed = (): StServiceInstance => ({
   guid: 'si-1', cnsiGuid: 'cf-1', name: 'cache', type: 'managed',
@@ -29,5 +29,26 @@ describe('serviceKeysLink', () => {
   it('returns null for a user-provided instance (no keys page)', () => {
     const ups = { guid: 'ups-1', cnsiGuid: 'cf-1', name: 'ups', type: 'user-provided' } as StServiceInstance;
     expect(serviceKeysLink(ups)).toBeNull();
+  });
+});
+
+describe('serviceKeysLinkQueryParams', () => {
+  const ups = (): StServiceInstance =>
+    ({ guid: 'ups-1', cnsiGuid: 'cf-1', name: 'ups', type: 'user-provided' } as StServiceInstance);
+
+  it('carries the CF-context breadcrumb hint so the count cell anchors like the row action', () => {
+    expect(serviceKeysLinkQueryParams('cf')(managed())).toEqual({ breadcrumbs: 'cf' });
+  });
+
+  it('carries the space-services breadcrumb hint', () => {
+    expect(serviceKeysLinkQueryParams('space-services')(managed())).toEqual({ breadcrumbs: 'space-services' });
+  });
+
+  it('emits no query params when no breadcrumb key is given (default → global services wall)', () => {
+    expect(serviceKeysLinkQueryParams()(managed())).toBeNull();
+  });
+
+  it('emits no query params for a user-provided instance even with a key', () => {
+    expect(serviceKeysLinkQueryParams('cf')(ups())).toBeNull();
   });
 });

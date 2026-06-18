@@ -28,7 +28,7 @@ import {
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { buildServiceInstanceRowActions } from '../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
-import { renderServiceKeyCount, serviceKeysLink } from '../../../../shared/signal-list-configs/service-keys-count-cell';
+import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from '../../../../shared/signal-list-configs/service-keys-count-cell';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
 // Per-CF Services tab. Single-CNSI variant of the top-level Services Wall.
@@ -200,6 +200,9 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
           header: 'Service Keys', key: 'serviceKeys', kind: 'link',
           render: (si) => renderServiceKeyCount(si, this.instancesConfig.serviceKeyCount(si.guid)),
           link: serviceKeysLink,
+          // Keep the cell click anchored in this endpoint's CF Services tab,
+          // matching this list's 'cf' row-action breadcrumbKey below.
+          linkQueryParams: serviceKeysLinkQueryParams('cf'),
           widthHint: '8rem',
         },
         {
