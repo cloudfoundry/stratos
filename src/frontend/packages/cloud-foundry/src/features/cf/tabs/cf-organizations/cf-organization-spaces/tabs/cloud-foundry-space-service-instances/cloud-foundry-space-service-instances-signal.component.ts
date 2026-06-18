@@ -26,7 +26,7 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { boundAppSegments, renderBoundApps } from '../../../../../../../shared/signal-list-configs/bound-apps-cell';
-import { renderServiceKeyCount, serviceKeysLink } from '../../../../../../../shared/signal-list-configs/service-keys-count-cell';
+import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from '../../../../../../../shared/signal-list-configs/service-keys-count-cell';
 import { buildServiceInstanceRowActions } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
@@ -189,6 +189,9 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
           header: 'Service Keys', key: 'serviceKeys', kind: 'link',
           render: (si) => renderServiceKeyCount(si, this.instancesConfig.serviceKeyCount(si.guid)),
           link: serviceKeysLink,
+          // Keep the cell click on the endpoint → org → space trail, matching
+          // this list's 'space-services' row-action breadcrumbKey below.
+          linkQueryParams: serviceKeysLinkQueryParams('space-services'),
           widthHint: '8rem',
         },
         {

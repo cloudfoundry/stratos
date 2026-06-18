@@ -23,3 +23,23 @@ export function serviceKeysLink(si: StServiceInstance): readonly (string | numbe
   if (si.type === 'user-provided') return null;
   return ['/services', 'service', si.cnsiGuid, si.guid, 'keys'];
 }
+
+// The breadcrumb origin hints the keys page understands (see
+// service-keys.component breadcrumbs): omit → the global /services wall,
+// 'cf' → this endpoint's CF Services tab, 'space-services' → the
+// endpoint → org → space trail. Mirrors buildServiceInstanceRowActions'
+// `breadcrumbKey` so a count-cell click anchors back to the same place the
+// row-action "Service Keys" menu item does, rather than always popping out
+// to the global wall.
+export type ServiceKeysBreadcrumbKey = 'cf' | 'space-services';
+
+// Query params for the count-cell link, paired with serviceKeysLink as the
+// column's linkQueryParams. Returns null (no params → default global-wall
+// breadcrumb) for user-provided instances or when the list has no origin
+// context, matching serviceKeysLink's own null cases.
+export function serviceKeysLinkQueryParams(
+  breadcrumbKey?: ServiceKeysBreadcrumbKey,
+): (si: StServiceInstance) => Record<string, string> | null {
+  return (si: StServiceInstance) =>
+    si.type === 'user-provided' || !breadcrumbKey ? null : { breadcrumbs: breadcrumbKey };
+}
