@@ -26,9 +26,11 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../service
 // joined with their org and space role grants by the backend handler.
 //
 // Manage Roles + Remove User wizards are still legacy ngrx (separate
-// route entries under /cloud-foundry/:cnsi/users/manage|remove); per-row
-// kebab entries here just navigate to those routes with ?user={guid}
-// pre-filling the wizard. The Org Roles + Space Roles columns resolve
+// route entries under /cloud-foundry/:cnsi/users/manage|remove). Manage
+// Roles is selection-driven via the bulk action (forwards the selected
+// users as ?users=g1,g2,…); the per-row kebab now carries only the two
+// Remove entries, which navigate with ?user={guid} to pre-fill the
+// wizard for that row. The Org Roles + Space Roles columns resolve
 // org/space names via EndpointDataService signals so cells never render
 // raw GUIDs (no_raw_guids feedback rule).
 @Component({
