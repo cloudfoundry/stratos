@@ -230,3 +230,41 @@ describe('CloudFoundryUsersComponent — manage-roles gating', () => {
     expect(bulkManageAction(component).disabled!()).toBe(true);
   });
 });
+
+describe('CloudFoundryUsersComponent — row actions trimmed', () => {
+  let component: CloudFoundryUsersComponent;
+  let fixture: ComponentFixture<CloudFoundryUsersComponent>;
+
+  beforeEach(async () => {
+    const stubSignalConfig = makeStubSignalConfigService();
+    await TestBed.configureTestingModule({
+      imports: [
+        CloudFoundryUsersComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        TabNavService,
+        { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
+        { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CloudFoundryUsersComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('per-row kebab no longer offers Manage Roles (selection-driven now)', () => {
+    const cfg = component.listConfig();
+    const actionsColumn = cfg!.columns.find(c => c.key === 'actions')!;
+    const u = { guid: 'u1', cnsiGuid: 'cnsi-1', username: 'a', orgRoles: [], spaceRoles: [] } as any;
+    const labels = actionsColumn.actions!(u).map(a => a.label);
+    expect(labels).not.toContain('Manage Roles');
+    expect(labels).toContain('Remove from Spaces');
+    expect(labels).toContain('Remove from Org and Spaces');
+  });
+});
