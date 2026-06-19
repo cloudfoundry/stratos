@@ -31,6 +31,7 @@ describe('bulkRemoveUsers', () => {
     expect(deps.rolesData.setChanges).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ userGuid: 'u1', add: false })]));
     expect(deps.rolesData.setIsRemove).toHaveBeenCalledWith(true);
     expect(deps.rolesData.executeChanges).toHaveBeenCalled();
+    expect(deps.snackBar.open).toHaveBeenCalled();
     expect(onComplete).toHaveBeenCalled();
   });
 

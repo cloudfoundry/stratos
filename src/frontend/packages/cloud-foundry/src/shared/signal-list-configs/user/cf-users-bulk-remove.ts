@@ -1,6 +1,15 @@
+import { firstValueFrom, combineLatest, of, map } from 'rxjs';
 import type { StUser } from '../../../services/endpoint-data/stratos-types';
+import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
 import { CfRoleChange } from '../../../store/types/users-roles.types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
+import {
+  CurrentUserPermissionsService,
+  ConfirmationDialogService,
+  ConfirmationDialogConfig,
+  TailwindSnackBarService,
+} from '@stratosui/core';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions.types';
 
 export type RemoveScope = 'spaces' | 'orgAndSpaces';
 
@@ -74,16 +83,6 @@ export function selectedHasAnyRole(users: StUser[], orgGuid?: string): boolean {
 }
 
 // ─── Bulk-remove orchestrator ──────────────────────────────────────────────
-
-import { firstValueFrom, combineLatest, of, map } from 'rxjs';
-import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
-import {
-  CurrentUserPermissionsService,
-  ConfirmationDialogService,
-  ConfirmationDialogConfig,
-  TailwindSnackBarService,
-} from '@stratosui/core';
-import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions.types';
 
 export interface BulkRemoveDeps {
   rolesData: CfUsersRolesDataService;
