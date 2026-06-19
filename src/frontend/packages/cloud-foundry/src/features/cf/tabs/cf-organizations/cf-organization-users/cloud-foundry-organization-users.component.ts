@@ -1,20 +1,32 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
+import { combineLatest, map } from 'rxjs';
 
 import {
+  ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAction,
   ListSubNavComponent,
-  SignalListBulkAction,
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
-  SignalListRowAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions.types';
 import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../../services/endpoint-data/stratos-types';
+import {
+  bulkRemoveUsers,
+  selectedHasAnyRole,
+  RemoveScope,
+  BulkRemoveDeps,
+} from '../../../../../shared/signal-list-configs/user/cf-users-bulk-remove';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
 
 // Signal-native replacement for the legacy CloudFoundryOrganizationUsers
 // component. Scoped to one org under one CF endpoint. Reuses the CF-level
@@ -30,15 +42,16 @@ import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../../serv
 //   shared name-lookup signals (no_raw_guids feedback rule).
 // - Username, Origin, Created retained.
 //
-// Manage Roles + Remove User flows stay on the legacy stepper paths
-// (/users/manage, /users/remove) — same scope contract as the CF-level
-// page commit. The legacy page-sub-nav "Manage Roles" button is dropped
-// here for parity with the CF-level + per-space signal-native pages;
-// future work can reintroduce it as a SignalListConfig.headerActions
-// binding when the framework slot lands.
+// Action bar (always-visible, "Total Users" line):
+// - Manage Roles (primary): opens org-scoped manage wizard for selected users.
+// - Remove from Org and Spaces (destructive): bulk-removes all org+space role
+//   grants for selected users within this org; gated on canManageRoles +
+//   selectedHasAnyRole(selected, orgGuid).
+// Per-row kebab retired; both operations are now selection-driven.
 @Component({
   selector: 'app-cloud-foundry-organization-users',
   templateUrl: './cloud-foundry-organization-users.component.html',
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -53,23 +66,93 @@ export class CloudFoundryOrganizationUsersComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   private usersConfig = inject(CfUsersSignalConfigService);
   private router = inject(Router);
+  private readonly perms = inject(CurrentUserPermissionsService);
+  private readonly rolesData = inject(CfUsersRolesDataService);
+  private readonly confirmDialog = inject(ConfirmationDialogService);
+  private readonly snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
   // Bulk-selection state for the checkbox column. Holds the set of selected
-  // row keys (`${cnsiGuid}:${guid}`, per getRowKey). The "Manage Roles" bulk
-  // action resolves keys → user GUIDs and navigates to the org-scoped
-  // manage-users wizard with ?users=g1,g2,… then clears the set.
-  private readonly selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+  // row keys (`${cnsiGuid}:${guid}`, per getRowKey). The "Manage Roles"
+  // subNavAction reads this, resolves keys → user GUIDs, and navigates to
+  // the org-scoped manage-users wizard with ?users=g1,g2,… then clears.
+  private readonly _selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+  readonly selectedUserKeys: Signal<ReadonlySet<string>> = this._selectedUserKeys.asReadonly();
 
   /** Reactive count for the L5 sub-nav. Wired in the constructor — the
    *  underlying `usersConfig.view` is built by initializeForOrg() and
    *  isn't available at field-initializer time. */
   readonly totalUsers!: Signal<number>;
 
+  /** True when the current user holds org or space role-change rights on
+   *  this endpoint. Bridged from Observable → signal via toSignal;
+   *  initialValue: false keeps actions safely disabled until first emission. */
+  private readonly canManageRoles: Signal<boolean> = toSignal(
+    combineLatest([
+      this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+      this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+    ]).pipe(map(([org, space]) => org || space)),
+    { initialValue: false },
+  );
+
+  /** The concrete StUser objects for the current selection, resolved from
+   *  filteredItems by row key. Used by Remove to pass actual role data to
+   *  the bulk-remove orchestrator without re-fetching. */
+  private readonly selectedUsers: Signal<StUser[]> = computed(() => {
+    const keys = this._selectedUserKeys();
+    if (keys.size === 0) return [];
+    return this.usersConfig.view.filteredItems().filter(u => keys.has(`${u.cnsiGuid}:${u.guid}`));
+  });
+
+  private readonly cfGuid: string;
+  private readonly orgGuid: string;
+
+  /** Action buttons surfaced in the always-visible ListSubNavComponent
+   *  "Total Users" bar. Two entries:
+   *  - Manage Roles (primary): selection-driven wizard navigation.
+   *  - Remove from Org and Spaces (destructive): bulk role removal scoped
+   *    to this org (passes orgGuid to selectedHasAnyRole + buildRemoveChanges). */
+  protected readonly subNavActions: readonly ListSubNavAction[] = [
+    {
+      label: 'Manage Roles',
+      variant: 'primary',
+      icon: 'group',
+      dataTest: 'cf-org-users-bulk-manage-roles',
+      disabled: computed(() => this._selectedUserKeys().size === 0 || !this.canManageRoles()),
+      disabledReason: 'Select one or more users to manage roles',
+      invoke: () => this.bulkManageRoles(
+        this._selectedUserKeys(),
+        ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'users', 'manage'],
+      ),
+    },
+    {
+      label: 'Remove from Org and Spaces',
+      variant: 'destructive',
+      icon: 'remove_circle',
+      dataTest: 'cf-org-users-bulk-remove-org-spaces',
+      disabled: computed(() => !this.canManageRoles() || !selectedHasAnyRole(this.selectedUsers(), this.orgGuid)),
+      disabledReason: 'Select one or more users with roles to remove',
+      invoke: () => {
+        const n = this.selectedUsers().length;
+        this.bulkRemove(
+          `Remove ${n} selected ${n === 1 ? 'user' : 'users'} from all their org and space roles in this org? This cannot be undone.`,
+        );
+      },
+    },
+  ];
+
+  /** Reactive selection count for the sub-nav "N selected · Clear" indicator. */
+  protected readonly selectedCount: Signal<number> = computed(() => this._selectedUserKeys().size);
+
+  /** Clears the user selection — bound to the sub-nav Clear button. */
+  protected readonly clearSelection = (): void => { this._selectedUserKeys.set(new Set<string>()); };
+
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     const orgGuid = this.cfOrgService.orgGuid;
+    this.cfGuid = cfGuid;
+    this.orgGuid = orgGuid;
     this.usersConfig.initializeForOrg(cfGuid, orgGuid);
     (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
 
@@ -106,12 +189,6 @@ export class CloudFoundryOrganizationUsersComponent {
 
     const renderCreated = (u: StUser): string =>
       CloudFoundryOrganizationUsersComponent.formatDate(u.createdAt);
-
-    // The L5 sub-nav row above this list shows "Total Users: N" with no
-    // add affordance — Manage Roles and Invite User stay on the legacy
-    // stepper paths (/users/manage, /users/invite). When those flows
-    // migrate signal-native, wire an `addAction` onto the L5 row in the
-    // template instead of reintroducing in-toolbar buttons.
 
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
@@ -152,13 +229,6 @@ export class CloudFoundryOrganizationUsersComponent {
           render: renderCreated,
           widthHint: '12rem',
         },
-        {
-          header: '', key: 'actions',
-          kind: 'actions',
-          actions: (u: StUser) => this.buildRowActions(u, cfGuid, orgGuid),
-          render: () => '',
-          widthHint: '3rem',
-        },
       ],
       getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
       emptyMessage: 'There are no users in this organization',
@@ -173,15 +243,6 @@ export class CloudFoundryOrganizationUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
-      bulkActions: [
-        {
-          label: 'Manage Roles', icon: 'group',
-          dataTest: 'cf-org-users-bulk-manage-roles',
-          run: (keys) => this.bulkManageRoles(
-            keys, ['/cloud-foundry', cfGuid, 'organizations', orgGuid, 'users', 'manage'],
-          ),
-        },
-      ] as SignalListBulkAction<StUser>[],
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);
@@ -198,7 +259,7 @@ export class CloudFoundryOrganizationUsersComponent {
       render: () => '',
       widthHint: '3rem',
       checkbox: {
-        selectedKeys: this.selectedUserKeys,
+        selectedKeys: this._selectedUserKeys,
         selectAll: {
           selectableCount: () => this.usersConfig.view.totalFilteredResults(),
           onToggle: () => this.toggleSelectAllFiltered(),
@@ -210,9 +271,9 @@ export class CloudFoundryOrganizationUsersComponent {
   private toggleSelectAllFiltered(): void {
     const filtered = this.usersConfig.view.filteredItems();
     const allKeys = filtered.map(u => `${u.cnsiGuid}:${u.guid}`);
-    const current = this.selectedUserKeys();
+    const current = this._selectedUserKeys();
     const allSelected = allKeys.length > 0 && allKeys.every(k => current.has(k));
-    this.selectedUserKeys.set(allSelected ? new Set<string>() : new Set(allKeys));
+    this._selectedUserKeys.set(allSelected ? new Set<string>() : new Set(allKeys));
   }
 
   // Bulk Manage Roles: resolve selected row keys (`${cnsiGuid}:${guid}`) to
@@ -222,36 +283,32 @@ export class CloudFoundryOrganizationUsersComponent {
     const guids = Array.from(keys).map(k => k.split(':')[1]).filter(Boolean);
     if (guids.length === 0) return;
     void this.router.navigate([...manageUrl], { queryParams: { users: guids.join(',') } });
-    this.selectedUserKeys.set(new Set<string>());
+    this._selectedUserKeys.set(new Set<string>());
   }
 
-  // Per-row Manage Roles + Remove (2 variants). Mirrors the CF Users
-  // tab pattern, but the wizard target lives under the org sub-tree
-  // so its scope guard pre-selects this org. ?user= still forwards the
-  // user GUID and ?spaces=true scopes the remove-flow to space-only
-  // role grants.
-  private buildRowActions(u: StUser, cfGuid: string, orgGuid: string): readonly SignalListRowAction<StUser>[] {
-    const base = ['/cloud-foundry', cfGuid, 'organizations', orgGuid, 'users'];
-    return [
-      {
-        label: 'Manage Roles', icon: 'group',
-        invoke: () => {
-          void this.router.navigate([...base, 'manage'], { queryParams: { user: u.guid } });
-        },
+  private removeDeps(): BulkRemoveDeps {
+    return {
+      rolesData: this.rolesData,
+      userPerms: this.perms,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      cfGuid: this.cfGuid,
+    };
+  }
+
+  private async bulkRemove(message: string): Promise<void> {
+    await bulkRemoveUsers(this.removeDeps(), {
+      users: this.selectedUsers(),
+      opts: {
+        scope: 'orgAndSpaces' as RemoveScope,
+        orgGuid: this.orgGuid,
+        orgNameByGuid: this.usersConfig.orgNameByGuid(),
+        spaceNameByGuid: this.usersConfig.spaceNameByGuid(),
       },
-      {
-        label: 'Remove from Spaces', icon: 'remove_circle_outline',
-        invoke: () => {
-          void this.router.navigate([...base, 'remove'], { queryParams: { user: u.guid, spaces: 'true' } });
-        },
-      },
-      {
-        label: 'Remove from Org and Spaces', icon: 'remove_circle', danger: true,
-        invoke: () => {
-          void this.router.navigate([...base, 'remove'], { queryParams: { user: u.guid } });
-        },
-      },
-    ];
+      title: 'Remove from Org and Spaces',
+      message,
+      onComplete: () => this._selectedUserKeys.set(new Set<string>()),
+    });
   }
 
   // Resolves a space-role bucket's display label. Used by the plain-text

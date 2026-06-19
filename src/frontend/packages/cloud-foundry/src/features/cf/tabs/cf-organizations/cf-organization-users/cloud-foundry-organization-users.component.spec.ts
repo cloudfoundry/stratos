@@ -3,8 +3,9 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
-import { TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -16,16 +17,21 @@ import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-end
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StUser } from '../../../../../services/endpoint-data/stratos-types';
 
-function makeStubSignalConfigService() {
+function makeStubSignalConfigService(opts?: {
+  filteredItems?: StUser[];
+}) {
   const pageIndex = signal(0);
   const pageSize = signal(25);
   const filterSig = signal(() => true);
   const sortSig = signal({ field: 'username' as const, direction: 'asc' as const });
+  const filteredItemsSig = signal<StUser[]>(opts?.filteredItems ?? []);
   const view = {
     pagedItems: signal<StUser[]>([]).asReadonly(),
     totalItems: signal(0).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
+    filteredItems: filteredItemsSig.asReadonly(),
+    _filteredItemsWritable: filteredItemsSig,
   };
   return {
     initialize: vi.fn(),
@@ -80,11 +86,11 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
     expect(stubSignalConfig.initializeForOrg).toHaveBeenCalledWith('cnsi-1', 'org-1');
   });
 
-  it('builds a SignalListConfig with the per-org columns', () => {
+  it('builds a SignalListConfig with the per-org columns (no actions column)', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      '', 'Username', 'Origin', 'Org Roles', 'Space Roles', 'Created', '',
+      '', 'Username', 'Origin', 'Org Roles', 'Space Roles', 'Created',
     ]);
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'user-1', username: 'alice',
@@ -134,5 +140,170 @@ describe('CloudFoundryOrganizationUsersComponent', () => {
       spaceRoles: [{ orgGuid: 'org-other', spaceGuid: 'space-b', roles: ['auditor'] }],
     };
     expect(col!.render!(noneInOrg)).toBe('—');
+  });
+});
+
+// ─── subNavActions ───────────────────────────────────────────────────────────
+
+async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): Promise<{
+  component: CloudFoundryOrganizationUsersComponent;
+  fixture: ComponentFixture<CloudFoundryOrganizationUsersComponent>;
+  stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
+}> {
+  const stubSignalConfig = makeStubSignalConfigService({ filteredItems: filteredItems ?? [] });
+  await TestBed.configureTestingModule({
+    imports: [CloudFoundryOrganizationUsersComponent],
+    providers: [
+      provideZonelessChangeDetection(),
+      provideRouter([]),
+      provideHttpClient(),
+      ...STORE_TEST_PROVIDERS,
+      importProvidersFrom(generateCfBaseTestModulesNoShared()),
+      TabNavService,
+      { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
+      { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      { provide: CloudFoundryOrganizationService, useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1' } },
+      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
+    ],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(CloudFoundryOrganizationUsersComponent);
+  const component = fixture.componentInstance;
+  fixture.detectChanges();
+  return { component, fixture, stubSignalConfig };
+}
+
+describe('CloudFoundryOrganizationUsersComponent — subNavActions', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('exposes two subNavActions with correct dataTest and variant', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string }[];
+    expect(actions).toHaveLength(2);
+    const manageRoles = actions.find(a => a.dataTest === 'cf-org-users-bulk-manage-roles');
+    const removeOrgSpaces = actions.find(a => a.dataTest === 'cf-org-users-bulk-remove-org-spaces');
+    expect(manageRoles).toBeDefined();
+    expect(removeOrgSpaces).toBeDefined();
+    expect(manageRoles!.variant).toBe('primary');
+    expect(removeOrgSpaces!.variant).toBe('destructive');
+  });
+
+  it('sets disabledReason on every subNavAction', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const actions = (component as any).subNavActions as readonly { disabledReason?: string }[];
+    for (const a of actions) {
+      expect(a.disabledReason).toBeTruthy();
+    }
+  });
+
+  it('listConfig has no bulkActions', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const cfg = component.listConfig();
+    expect(cfg!.bulkActions == null || cfg!.bulkActions!.length === 0).toBe(true);
+  });
+
+  it('selectedCount() reflects _selectedUserKeys size', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const c = component as any;
+    expect(c.selectedCount()).toBe(0);
+    c._selectedUserKeys.set(new Set(['cnsi-1:u1', 'cnsi-1:u2']));
+    expect(c.selectedCount()).toBe(2);
+  });
+
+  it('clearSelection() empties _selectedUserKeys', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const c = component as any;
+    c._selectedUserKeys.set(new Set(['cnsi-1:u1']));
+    expect(c._selectedUserKeys().size).toBe(1);
+    c.clearSelection();
+    expect(c._selectedUserKeys().size).toBe(0);
+  });
+});
+
+// ─── manage-roles gating ─────────────────────────────────────────────────────
+
+function subNavManageAction(component: CloudFoundryOrganizationUsersComponent) {
+  const actions = (component as any).subNavActions as readonly { dataTest?: string; disabled?: () => boolean }[];
+  return actions.find(a => a.dataTest === 'cf-org-users-bulk-manage-roles')!;
+}
+
+describe('CloudFoundryOrganizationUsersComponent — manage-roles gating', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('disables Manage Roles when nothing is selected (even with permission)', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set());
+    expect(subNavManageAction(component).disabled!()).toBe(true);
+  });
+
+  it('enables Manage Roles when users are selected and the user may change roles', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    expect(subNavManageAction(component).disabled!()).toBe(false);
+  });
+
+  it('disables Manage Roles when the user may NOT change roles, regardless of selection', async () => {
+    const { component } = await makeSubNavFixture(false);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    expect(subNavManageAction(component).disabled!()).toBe(true);
+  });
+});
+
+// ─── bulk remove ──────────────────────────────────────────────────────────────
+
+const userWithOrgRole: StUser = {
+  guid: 'u1', cnsiGuid: 'cnsi-1', username: 'alice',
+  orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }],
+  spaceRoles: [],
+} as any;
+
+const userWithNoRole: StUser = {
+  guid: 'u2', cnsiGuid: 'cnsi-1', username: 'bob',
+  orgRoles: [],
+  spaceRoles: [],
+} as any;
+
+describe('CloudFoundryOrganizationUsersComponent — bulk remove', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  function subNavAction(component: CloudFoundryOrganizationUsersComponent, dt: string) {
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; disabled?: () => boolean }[];
+    return actions.find(a => a.dataTest === dt)!;
+  }
+
+  it('exposes Remove from Org and Spaces in subNavActions', async () => {
+    const { component } = await makeSubNavFixture(true);
+    expect(subNavAction(component, 'cf-org-users-bulk-remove-org-spaces')).toBeTruthy();
+  });
+
+  it('disables Remove from Org and Spaces when selection is empty', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set());
+    expect(subNavAction(component, 'cf-org-users-bulk-remove-org-spaces').disabled!()).toBe(true);
+  });
+
+  it('disables Remove from Org and Spaces when canManageRoles is false', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(false, [userWithOrgRole]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithOrgRole]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u1']));
+    expect(subNavAction(component, 'cf-org-users-bulk-remove-org-spaces').disabled!()).toBe(true);
+  });
+
+  it('disables Remove from Org and Spaces when selected user has no role in this org', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(true, [userWithNoRole]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithNoRole]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u2']));
+    expect(subNavAction(component, 'cf-org-users-bulk-remove-org-spaces').disabled!()).toBe(true);
+  });
+
+  it('enables Remove from Org and Spaces when selected user has an org role', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(true, [userWithOrgRole]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithOrgRole]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u1']));
+    expect(subNavAction(component, 'cf-org-users-bulk-remove-org-spaces').disabled!()).toBe(false);
+  });
+
+  it('drops the per-row kebab (no actions column)', async () => {
+    const { component } = await makeSubNavFixture(true);
+    expect(component.listConfig()!.columns.find(c => c.key === 'actions')).toBeUndefined();
   });
 });

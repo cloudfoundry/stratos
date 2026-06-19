@@ -1,5 +1,6 @@
 <div class="org-users h-full flex flex-col">
-  <app-list-sub-nav title="Total Users" [count]="totalUsers"></app-list-sub-nav>
+  <app-list-sub-nav title="Total Users" [count]="totalUsers"
+    [actions]="subNavActions" [selectedCount]="selectedCount" [onClearSelection]="clearSelection"></app-list-sub-nav>
   @if (listConfig(); as config) {
     <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
   }
