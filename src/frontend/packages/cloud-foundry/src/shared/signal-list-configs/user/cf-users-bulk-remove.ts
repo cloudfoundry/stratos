@@ -72,3 +72,68 @@ export function selectedHasAnyRole(users: StUser[], orgGuid?: string): boolean {
     u.orgRoles.some(b => (!orgGuid || b.orgGuid === orgGuid) && b.roles.length > 0) ||
     u.spaceRoles.some(b => (!orgGuid || b.orgGuid === orgGuid) && b.roles.length > 0));
 }
+
+// ─── Bulk-remove orchestrator ──────────────────────────────────────────────
+
+import { firstValueFrom, combineLatest, of, map } from 'rxjs';
+import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
+import {
+  CurrentUserPermissionsService,
+  ConfirmationDialogService,
+  ConfirmationDialogConfig,
+  TailwindSnackBarService,
+} from '@stratosui/core';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions.types';
+
+export interface BulkRemoveDeps {
+  rolesData: CfUsersRolesDataService;
+  userPerms: CurrentUserPermissionsService;
+  confirmDialog: ConfirmationDialogService;
+  snackBar: TailwindSnackBarService;
+  cfGuid: string;
+}
+
+export interface BulkRemoveRequest {
+  users: StUser[];
+  opts: BuildRemoveOpts;
+  title: string;
+  message: string;
+  onComplete?: () => void;
+}
+
+export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveRequest): Promise<void> {
+  const candidates = buildRemoveChanges(req.users, req.opts);
+  if (candidates.length === 0) { return; }
+
+  // Permission-filter per change (mirrors RemoveUserComponent).
+  const checks = candidates.map(c => {
+    const can$ = c.spaceGuid
+      ? deps.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, deps.cfGuid, c.orgGuid, c.spaceGuid)
+      : deps.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, deps.cfGuid, c.orgGuid);
+    return can$.pipe(map(can => ({ can, change: c })));
+  });
+  const verdicts = await firstValueFrom(checks.length ? combineLatest(checks) : of([]));
+  const allowed = verdicts.filter(v => v.can).map(v => v.change);
+  if (allowed.length === 0) {
+    deps.snackBar.error('You do not have permission to remove the selected roles');
+    return;
+  }
+
+  const config = new ConfirmationDialogConfig(req.title, req.message, 'Remove', true);
+  deps.confirmDialog.open(config, async () => {
+    deps.rolesData.setUsers(deps.cfGuid, req.users);
+    deps.rolesData.setIsRemove(true);
+    deps.rolesData.setChanges(allowed);
+    await deps.rolesData.executeChanges();
+    const status = deps.rolesData.applyStatus();
+    const failed = allowed.filter(c => status[CfUsersRolesDataService.changeKey(c)] === 'error');
+    if (failed.length) {
+      deps.snackBar.error(
+        `Removed ${allowed.length - failed.length} of ${allowed.length} role grants; ${failed.length} failed`,
+      );
+    } else {
+      deps.snackBar.open('Selected users removed');
+    }
+    req.onComplete?.();
+  });
+}
