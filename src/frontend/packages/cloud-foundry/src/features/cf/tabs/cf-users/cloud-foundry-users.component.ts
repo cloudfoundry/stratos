@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
+import { combineLatest, map } from 'rxjs';
 
 import {
+  CurrentUserPermissionsService,
   ListSubNavComponent,
   SignalListBulkAction,
   SignalListCompoundSegment,
@@ -16,6 +19,7 @@ import {
 
 import { CfUsersSignalConfigService } from '../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions.types';
 import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../services/endpoint-data/stratos-types';
 
 // Signal-native replacement for the legacy CloudFoundryUsersComponent at
@@ -45,6 +49,7 @@ export class CloudFoundryUsersComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private usersConfig = inject(CfUsersSignalConfigService);
   private router = inject(Router);
+  private readonly perms = inject(CurrentUserPermissionsService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -52,17 +57,32 @@ export class CloudFoundryUsersComponent {
   // row keys (`${cnsiGuid}:${guid}`, per getRowKey). The "Manage Roles" bulk
   // action reads this, resolves keys → user GUIDs, and navigates to the
   // manage-users wizard with ?users=g1,g2,… then clears the set.
-  private readonly selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+  readonly selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
 
   /** Reactive count for the L5 sub-nav. Wired in the constructor — the
    *  underlying `usersConfig.view` is built by initialize() and isn't
    *  available at field-initializer time. */
   readonly totalUsers!: Signal<number>;
 
+  /** True when the current user holds org or space role-change rights on
+   *  this endpoint. Admin satisfies both checks; non-admin must have the
+   *  specific permission in at least one org or space. Bridges the
+   *  Observable from CurrentUserPermissionsService into a signal via
+   *  toSignal; initialValue: false keeps the action safely disabled until
+   *  the first emission resolves. */
+  private readonly canManageRoles!: Signal<boolean>;
+
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
     this.usersConfig.initialize(cfGuid);
     (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
+    (this as { canManageRoles: Signal<boolean> }).canManageRoles = toSignal(
+      combineLatest([
+        this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid),
+        this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid),
+      ]).pipe(map(([org, space]) => org || space)),
+      { initialValue: false },
+    );
 
     // Cell renderers. Each role-bucket cell resolves org/space names via
     // the config service's lookup signals (which read EndpointDataService
@@ -259,6 +279,7 @@ export class CloudFoundryUsersComponent {
         {
           label: 'Manage Roles', icon: 'group',
           dataTest: 'cf-users-bulk-manage-roles',
+          disabled: computed(() => this.selectedUserKeys().size === 0 || !this.canManageRoles()),
           run: (keys) => this.bulkManageRoles(keys, ['/cloud-foundry', cfGuid, 'users', 'manage']),
         },
       ] as SignalListBulkAction<StUser>[],

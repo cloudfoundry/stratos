@@ -3,8 +3,9 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
-import { TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -47,6 +48,8 @@ function makeStubSignalConfigService(opts?: {
     orgOptions: signal([{ label: 'All', value: null }]).asReadonly(),
     spaceOptions: signal([{ label: 'All', value: null }]).asReadonly(),
     hasLoadedOnce: signal(true).asReadonly(),
+    isLoadingOrgs: signal(false).asReadonly(),
+    isLoadingSpaces: signal(false).asReadonly(),
   };
 }
 
@@ -135,4 +138,62 @@ describe('CloudFoundryUsersComponent', () => {
   // (see commit "Sweep remaining headerActions consumers"); a framework
   // slot for non-add page-level actions is tracked separately. The test
   // is dropped along with the field.
+});
+
+// ─── manage-roles gating ────────────────────────────────────────────────────
+
+function bulkManageAction(component: CloudFoundryUsersComponent) {
+  const cfg = component.listConfig();
+  return cfg!.bulkActions!.find(a => a.dataTest === 'cf-users-bulk-manage-roles')!;
+}
+
+async function makeGatingFixture(canReturn: boolean): Promise<{
+  component: CloudFoundryUsersComponent;
+  fixture: ComponentFixture<CloudFoundryUsersComponent>;
+}> {
+  const stubSignalConfig = makeStubSignalConfigService({
+    orgNames: new Map(),
+    spaceNames: new Map(),
+  });
+  await TestBed.configureTestingModule({
+    imports: [CloudFoundryUsersComponent],
+    providers: [
+      provideZonelessChangeDetection(),
+      provideRouter([]),
+      provideHttpClient(),
+      ...STORE_TEST_PROVIDERS,
+      importProvidersFrom(generateCfBaseTestModulesNoShared()),
+      TabNavService,
+      { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
+      { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
+    ],
+  }).compileComponents();
+
+  const fixture = TestBed.createComponent(CloudFoundryUsersComponent);
+  const component = fixture.componentInstance;
+  fixture.detectChanges();
+  return { component, fixture };
+}
+
+describe('CloudFoundryUsersComponent — manage-roles gating', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('disables Manage Roles when nothing is selected (even with permission)', async () => {
+    const { component } = await makeGatingFixture(true);
+    component.selectedUserKeys.set(new Set());
+    expect(bulkManageAction(component).disabled!()).toBe(true);
+  });
+
+  it('enables Manage Roles when users are selected and the user may change roles', async () => {
+    const { component } = await makeGatingFixture(true);
+    component.selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    expect(bulkManageAction(component).disabled!()).toBe(false);
+  });
+
+  it('disables Manage Roles when the user may NOT change roles, regardless of selection', async () => {
+    const { component } = await makeGatingFixture(false);
+    component.selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    expect(bulkManageAction(component).disabled!()).toBe(true);
+  });
 });
