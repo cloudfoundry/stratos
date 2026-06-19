@@ -57,7 +57,8 @@ export class CloudFoundryUsersComponent {
   // row keys (`${cnsiGuid}:${guid}`, per getRowKey). The "Manage Roles" bulk
   // action reads this, resolves keys → user GUIDs, and navigates to the
   // manage-users wizard with ?users=g1,g2,… then clears the set.
-  readonly selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+  private readonly _selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+  readonly selectedUserKeys: Signal<ReadonlySet<string>> = this._selectedUserKeys.asReadonly();
 
   /** Reactive count for the L5 sub-nav. Wired in the constructor — the
    *  underlying `usersConfig.view` is built by initialize() and isn't
@@ -300,7 +301,7 @@ export class CloudFoundryUsersComponent {
       render: () => '',
       widthHint: '3rem',
       checkbox: {
-        selectedKeys: this.selectedUserKeys,
+        selectedKeys: this._selectedUserKeys,
         selectAll: {
           selectableCount: () => this.usersConfig.view.totalFilteredResults(),
           onToggle: () => this.toggleSelectAllFiltered(),
@@ -314,9 +315,9 @@ export class CloudFoundryUsersComponent {
   private toggleSelectAllFiltered(): void {
     const filtered = this.usersConfig.view.filteredItems();
     const allKeys = filtered.map(u => `${u.cnsiGuid}:${u.guid}`);
-    const current = this.selectedUserKeys();
+    const current = this._selectedUserKeys();
     const allSelected = allKeys.length > 0 && allKeys.every(k => current.has(k));
-    this.selectedUserKeys.set(allSelected ? new Set<string>() : new Set(allKeys));
+    this._selectedUserKeys.set(allSelected ? new Set<string>() : new Set(allKeys));
   }
 
   // Bulk Manage Roles: resolve selected row keys (`${cnsiGuid}:${guid}`) to
@@ -327,7 +328,7 @@ export class CloudFoundryUsersComponent {
     const guids = Array.from(keys).map(k => k.split(':')[1]).filter(Boolean);
     if (guids.length === 0) return;
     void this.router.navigate([...manageUrl], { queryParams: { users: guids.join(',') } });
-    this.selectedUserKeys.set(new Set<string>());
+    this._selectedUserKeys.set(new Set<string>());
   }
 
   // Per-row Manage Roles + Remove (2 variants) kebab entries. Restores

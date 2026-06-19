@@ -181,19 +181,19 @@ describe('CloudFoundryUsersComponent — manage-roles gating', () => {
 
   it('disables Manage Roles when nothing is selected (even with permission)', async () => {
     const { component } = await makeGatingFixture(true);
-    component.selectedUserKeys.set(new Set());
+    (component as any)._selectedUserKeys.set(new Set());
     expect(bulkManageAction(component).disabled!()).toBe(true);
   });
 
   it('enables Manage Roles when users are selected and the user may change roles', async () => {
     const { component } = await makeGatingFixture(true);
-    component.selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:user-1']));
     expect(bulkManageAction(component).disabled!()).toBe(false);
   });
 
   it('disables Manage Roles when the user may NOT change roles, regardless of selection', async () => {
     const { component } = await makeGatingFixture(false);
-    component.selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:user-1']));
     expect(bulkManageAction(component).disabled!()).toBe(true);
   });
 });
