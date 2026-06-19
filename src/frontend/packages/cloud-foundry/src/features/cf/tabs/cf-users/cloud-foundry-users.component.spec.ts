@@ -140,6 +140,39 @@ describe('CloudFoundryUsersComponent', () => {
   // is dropped along with the field.
 });
 
+describe('CloudFoundryUsersComponent — no broken header actions', () => {
+  let component: CloudFoundryUsersComponent;
+  let fixture: ComponentFixture<CloudFoundryUsersComponent>;
+
+  beforeEach(async () => {
+    const stubSignalConfig = makeStubSignalConfigService();
+    await TestBed.configureTestingModule({
+      imports: [
+        CloudFoundryUsersComponent,
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        TabNavService,
+        { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
+        { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CloudFoundryUsersComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('exposes no page-level header actions (Invite/Manage moved to selection / later phases)', () => {
+    const cfg = component.listConfig();
+    expect(cfg!.headerActions ?? []).toEqual([]);
+  });
+});
+
 // ─── manage-roles gating ────────────────────────────────────────────────────
 
 function bulkManageAction(component: CloudFoundryUsersComponent) {
