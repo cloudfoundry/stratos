@@ -297,26 +297,18 @@ export class CloudFoundryUsersComponent {
     this._selectedUserKeys.set(new Set<string>());
   }
 
-  // Per-row Manage Roles + Remove (2 variants) kebab entries. Restores
-  // the V2-era manageUserAction + removeUserActions() singles that the
-  // signal-native migration dropped (catalog 2026-05-26 CF-scope row).
-  // Each entry navigates to the existing legacy wizard route with the
-  // user GUID forwarded via ?user= so the wizard pre-selects this row.
-  // "Remove from Spaces" sets ?spaces=true to scope the wizard to
-  // space-role grants only; without the param the wizard strips org +
-  // space roles together. Both variants ship today as separate kebab
-  // items rather than a sub-menu since SignalListRowAction is flat.
+  // Per-row Remove (2 variants) kebab entries. Restores the V2-era
+  // removeUserActions() singles that the signal-native migration dropped
+  // (catalog 2026-05-26 CF-scope row). Each entry navigates to the
+  // existing legacy wizard route with the user GUID forwarded via ?user=
+  // so the wizard pre-selects this row. "Remove from Spaces" sets
+  // ?spaces=true to scope the wizard to space-role grants only; without
+  // the param the wizard strips org + space roles together. Both variants
+  // ship today as separate kebab items rather than a sub-menu since
+  // SignalListRowAction is flat. The per-row "Manage Roles" entry was
+  // retired in favor of selection-driven bulk Manage Roles.
   private buildRowActions(u: StUser, cfGuid: string): readonly SignalListRowAction<StUser>[] {
     return [
-      {
-        label: 'Manage Roles', icon: 'group',
-        invoke: () => {
-          void this.router.navigate(
-            ['/cloud-foundry', cfGuid, 'users', 'manage'],
-            { queryParams: { user: u.guid } },
-          );
-        },
-      },
       {
         label: 'Remove from Spaces', icon: 'remove_circle_outline',
         invoke: () => {
