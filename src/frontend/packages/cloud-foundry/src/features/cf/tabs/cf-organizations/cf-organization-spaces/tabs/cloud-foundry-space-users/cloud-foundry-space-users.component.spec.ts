@@ -3,8 +3,9 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
-import { TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -17,16 +18,21 @@ import { CloudFoundryOrganizationService } from '../../../../../services/cloud-f
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import type { StUser } from '../../../../../../../services/endpoint-data/stratos-types';
 
-function makeStubSignalConfigService() {
+function makeStubSignalConfigService(opts?: {
+  filteredItems?: StUser[];
+}) {
   const pageIndex = signal(0);
   const pageSize = signal(25);
   const filterSig = signal(() => true);
   const sortSig = signal({ field: 'username' as const, direction: 'asc' as const });
+  const filteredItemsSig = signal<StUser[]>(opts?.filteredItems ?? []);
   const view = {
     pagedItems: signal<StUser[]>([]).asReadonly(),
     totalItems: signal(0).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
+    filteredItems: filteredItemsSig.asReadonly(),
+    _filteredItemsWritable: filteredItemsSig,
   };
   return {
     initialize: vi.fn(),
@@ -81,13 +87,14 @@ describe('CloudFoundrySpaceUsersComponent', () => {
     expect(stubSignalConfig.initializeForSpace).toHaveBeenCalledWith('cnsi-1', 'space-1');
   });
 
-  it('builds a SignalListConfig with the per-space columns (no Org Roles)', () => {
+  it('builds a SignalListConfig with the per-space columns (no Org Roles, no actions column)', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      '', 'Username', 'Origin', 'Space Roles', 'Created', '',
+      '', 'Username', 'Origin', 'Space Roles', 'Created',
     ]);
     expect(cfg!.columns.find(c => c.key === 'orgRoles')).toBeUndefined();
+    expect(cfg!.columns.find(c => c.key === 'actions')).toBeUndefined();
     expect(cfg!.getRowKey({
       cnsiGuid: 'cnsi-1', guid: 'user-1', username: 'alice',
       orgRoles: [], spaceRoles: [],
@@ -116,10 +123,183 @@ describe('CloudFoundrySpaceUsersComponent', () => {
     };
     expect(col!.render!(notInThisSpace)).toBe('—');
   });
+});
 
-  // Note: a previous test asserted on `cfg.headerActions` for "Manage
-  // Roles" + "Invite User" placeholders. SignalListConfig.headerActions
-  // was removed (see commit "Sweep remaining headerActions consumers");
-  // a framework slot for non-add page-level actions is tracked
-  // separately. The test is dropped along with the field.
+// ─── subNavActions ───────────────────────────────────────────────────────────
+
+async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): Promise<{
+  component: CloudFoundrySpaceUsersComponent;
+  fixture: ComponentFixture<CloudFoundrySpaceUsersComponent>;
+  stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
+}> {
+  const stubSignalConfig = makeStubSignalConfigService({ filteredItems: filteredItems ?? [] });
+  await TestBed.configureTestingModule({
+    imports: [CloudFoundrySpaceUsersComponent],
+    providers: [
+      provideZonelessChangeDetection(),
+      provideRouter([]),
+      provideHttpClient(),
+      ...STORE_TEST_PROVIDERS,
+      importProvidersFrom(generateCfBaseTestModulesNoShared()),
+      TabNavService,
+      { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
+      { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+      { provide: CloudFoundryOrganizationService, useValue: { orgGuid: 'org-1', cfGuid: 'cnsi-1' } },
+      { provide: CloudFoundrySpaceService, useValue: { spaceGuid: 'space-1', orgGuid: 'org-1', cfGuid: 'cnsi-1' } },
+      { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
+    ],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(CloudFoundrySpaceUsersComponent);
+  const component = fixture.componentInstance;
+  fixture.detectChanges();
+  return { component, fixture, stubSignalConfig };
+}
+
+describe('CloudFoundrySpaceUsersComponent — subNavActions', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('exposes two subNavActions with correct dataTest and variant', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string }[];
+    expect(actions).toHaveLength(2);
+    const manageRoles = actions.find(a => a.dataTest === 'cf-space-users-bulk-manage-roles');
+    const removeSpace = actions.find(a => a.dataTest === 'cf-space-users-bulk-remove-space');
+    expect(manageRoles).toBeDefined();
+    expect(removeSpace).toBeDefined();
+    expect(manageRoles!.variant).toBe('primary');
+    expect(removeSpace!.variant).toBe('destructive');
+  });
+
+  it('sets disabledReason on every subNavAction', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const actions = (component as any).subNavActions as readonly { disabledReason?: string }[];
+    for (const a of actions) {
+      expect(a.disabledReason).toBeTruthy();
+    }
+  });
+
+  it('listConfig has no bulkActions', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const cfg = component.listConfig();
+    expect(cfg!.bulkActions == null || cfg!.bulkActions!.length === 0).toBe(true);
+  });
+
+  it('selectedCount() reflects _selectedUserKeys size', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const c = component as any;
+    expect(c.selectedCount()).toBe(0);
+    c._selectedUserKeys.set(new Set(['cnsi-1:u1', 'cnsi-1:u2']));
+    expect(c.selectedCount()).toBe(2);
+  });
+
+  it('clearSelection() empties _selectedUserKeys', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const c = component as any;
+    c._selectedUserKeys.set(new Set(['cnsi-1:u1']));
+    expect(c._selectedUserKeys().size).toBe(1);
+    c.clearSelection();
+    expect(c._selectedUserKeys().size).toBe(0);
+  });
+});
+
+// ─── manage-roles gating ─────────────────────────────────────────────────────
+
+function subNavManageAction(component: CloudFoundrySpaceUsersComponent) {
+  const actions = (component as any).subNavActions as readonly { dataTest?: string; disabled?: () => boolean }[];
+  return actions.find(a => a.dataTest === 'cf-space-users-bulk-manage-roles')!;
+}
+
+describe('CloudFoundrySpaceUsersComponent — manage-roles gating', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('disables Manage Roles when nothing is selected (even with permission)', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set());
+    expect(subNavManageAction(component).disabled!()).toBe(true);
+  });
+
+  it('enables Manage Roles when users are selected and the user may change roles', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    expect(subNavManageAction(component).disabled!()).toBe(false);
+  });
+
+  it('disables Manage Roles when the user may NOT change roles, regardless of selection', async () => {
+    const { component } = await makeSubNavFixture(false);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:user-1']));
+    expect(subNavManageAction(component).disabled!()).toBe(true);
+  });
+});
+
+// ─── bulk remove (space-scoped) ──────────────────────────────────────────────
+
+const userWithSpaceRole: StUser = {
+  guid: 'u1', cnsiGuid: 'cnsi-1', username: 'alice',
+  orgRoles: [],
+  spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', roles: ['developer'] }],
+} as any;
+
+const userWithRoleInOtherSpace: StUser = {
+  guid: 'u2', cnsiGuid: 'cnsi-1', username: 'bob',
+  orgRoles: [],
+  spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-other', roles: ['developer'] }],
+} as any;
+
+const userWithNoSpaceRole: StUser = {
+  guid: 'u3', cnsiGuid: 'cnsi-1', username: 'charlie',
+  orgRoles: [],
+  spaceRoles: [],
+} as any;
+
+describe('CloudFoundrySpaceUsersComponent — bulk remove', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  function subNavAction(component: CloudFoundrySpaceUsersComponent, dt: string) {
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; disabled?: () => boolean }[];
+    return actions.find(a => a.dataTest === dt)!;
+  }
+
+  it('exposes Remove from Space in subNavActions', async () => {
+    const { component } = await makeSubNavFixture(true);
+    expect(subNavAction(component, 'cf-space-users-bulk-remove-space')).toBeTruthy();
+  });
+
+  it('disables Remove from Space when selection is empty', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set());
+    expect(subNavAction(component, 'cf-space-users-bulk-remove-space').disabled!()).toBe(true);
+  });
+
+  it('disables Remove from Space when canManageRoles is false', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(false, [userWithSpaceRole]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithSpaceRole]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u1']));
+    expect(subNavAction(component, 'cf-space-users-bulk-remove-space').disabled!()).toBe(true);
+  });
+
+  it('disables Remove from Space when selected user has no role in THIS space', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(true, [userWithRoleInOtherSpace]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithRoleInOtherSpace]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u2']));
+    expect(subNavAction(component, 'cf-space-users-bulk-remove-space').disabled!()).toBe(true);
+  });
+
+  it('disables Remove from Space when selected user has no space roles at all', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(true, [userWithNoSpaceRole]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithNoSpaceRole]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u3']));
+    expect(subNavAction(component, 'cf-space-users-bulk-remove-space').disabled!()).toBe(true);
+  });
+
+  it('enables Remove from Space when selected user has a role in THIS space', async () => {
+    const { component, stubSignalConfig } = await makeSubNavFixture(true, [userWithSpaceRole]);
+    stubSignalConfig.view._filteredItemsWritable.set([userWithSpaceRole]);
+    (component as any)._selectedUserKeys.set(new Set(['cnsi-1:u1']));
+    expect(subNavAction(component, 'cf-space-users-bulk-remove-space').disabled!()).toBe(false);
+  });
+
+  it('drops the per-row kebab (no actions column)', async () => {
+    const { component } = await makeSubNavFixture(true);
+    expect(component.listConfig()!.columns.find(c => c.key === 'actions')).toBeUndefined();
+  });
 });
