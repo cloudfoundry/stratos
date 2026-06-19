@@ -102,7 +102,10 @@ export interface BulkRemoveRequest {
 
 export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveRequest): Promise<void> {
   const candidates = buildRemoveChanges(req.users, req.opts);
-  if (candidates.length === 0) { return; }
+  if (candidates.length === 0) {
+    deps.snackBar.open('Nothing to remove for the selected users');
+    return;
+  }
 
   // Permission-filter per change (mirrors RemoveUserComponent).
   const checks = candidates.map(c => {
@@ -113,6 +116,7 @@ export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveReque
   });
   const verdicts = await firstValueFrom(checks.length ? combineLatest(checks) : of([]));
   const allowed = verdicts.filter(v => v.can).map(v => v.change);
+  const skipped = candidates.length - allowed.length;
   if (allowed.length === 0) {
     deps.snackBar.error('You do not have permission to remove the selected roles');
     return;
@@ -128,8 +132,10 @@ export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveReque
     const failed = allowed.filter(c => status[CfUsersRolesDataService.changeKey(c)] === 'error');
     if (failed.length) {
       deps.snackBar.error(
-        `Removed ${allowed.length - failed.length} of ${allowed.length} role grants; ${failed.length} failed`,
+        `Removed ${allowed.length - failed.length} of ${allowed.length} role grants; ${failed.length} failed${skipped > 0 ? `; ${skipped} skipped (no permission)` : ''}`,
       );
+    } else if (skipped > 0) {
+      deps.snackBar.open(`Removed ${allowed.length} role grant${allowed.length === 1 ? '' : 's'}; ${skipped} skipped (no permission)`);
     } else {
       deps.snackBar.open('Selected users removed');
     }
