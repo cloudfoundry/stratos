@@ -7,6 +7,17 @@ import type { StUser } from '../../../services/endpoint-data/stratos-types';
 const u: StUser = { guid: 'u1', username: 'alice', cnsiGuid: 'cnsi',
   orgRoles: [{ orgGuid: 'o1', roles: ['manager'] }], spaceRoles: [] };
 
+// User with both an org role and a space role, used to test partial permission filtering.
+const uWithSpace: StUser = {
+  guid: 'u2', username: 'bob', cnsiGuid: 'cnsi',
+  orgRoles: [{ orgGuid: 'o1', roles: ['manager'] }],
+  spaceRoles: [{ orgGuid: 'o1', spaceGuid: 's1', roles: ['developer'] }],
+};
+
+// User with no roles — buildRemoveChanges returns [] for them.
+const uNoRoles: StUser = { guid: 'u3', username: 'carol', cnsiGuid: 'cnsi',
+  orgRoles: [], spaceRoles: [] };
+
 function makeDeps(over: any = {}) {
   return {
     rolesData: {
@@ -31,7 +42,7 @@ describe('bulkRemoveUsers', () => {
     expect(deps.rolesData.setChanges).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ userGuid: 'u1', add: false })]));
     expect(deps.rolesData.setIsRemove).toHaveBeenCalledWith(true);
     expect(deps.rolesData.executeChanges).toHaveBeenCalled();
-    expect(deps.snackBar.open).toHaveBeenCalled();
+    expect(deps.snackBar.open).toHaveBeenCalledWith('Selected users removed');
     expect(onComplete).toHaveBeenCalled();
   });
 
@@ -55,5 +66,25 @@ describe('bulkRemoveUsers', () => {
     await bulkRemoveUsers(deps, { users: [u], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });
     await Promise.resolve(); await Promise.resolve();
     expect(deps.snackBar.error).toHaveBeenCalled();
+  });
+
+  it('includes skipped count in success message when some changes lack permission', async () => {
+    // org changes allowed, space changes denied → skipped = 1
+    const canFn = vi.fn().mockImplementation((_perm: any, _cf: any, _org: any, spaceGuid?: string) =>
+      of(spaceGuid === undefined), // org-level: true; space-level: false
+    );
+    const deps = makeDeps({ userPerms: { can: canFn } });
+    await bulkRemoveUsers(deps, { users: [uWithSpace], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });
+    await Promise.resolve(); await Promise.resolve();
+    expect(deps.snackBar.open).toHaveBeenCalledWith(expect.stringContaining('skipped'));
+    expect(deps.rolesData.executeChanges).toHaveBeenCalled();
+  });
+
+  it('emits a neutral notice and skips execution when candidates list is empty', async () => {
+    const deps = makeDeps();
+    await bulkRemoveUsers(deps, { users: [uNoRoles], opts: { scope: 'orgAndSpaces' }, title: 'T', message: 'M' });
+    expect(deps.snackBar.open).toHaveBeenCalledWith('Nothing to remove for the selected users');
+    expect(deps.rolesData.executeChanges).not.toHaveBeenCalled();
+    expect(deps.confirmDialog.open).not.toHaveBeenCalled();
   });
 });
