@@ -13,7 +13,6 @@ import {
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
-  SignalListHeaderAction,
   SignalListRowAction,
 } from '@stratosui/core';
 
@@ -153,38 +152,6 @@ export class CloudFoundryUsersComponent {
     const renderCreated = (u: StUser): string =>
       CloudFoundryUsersComponent.formatDate(u.createdAt);
 
-    // Page-level actions reintroduced via SignalList headerActions slot.
-    // Both Invite User and Manage Users currently route to the legacy
-    // stepper components — when they migrate signal-native we keep these
-    // entries pointed at whatever the new home is. Surface as header
-    // buttons rather than per-row actions because they operate on the
-    // CF as a whole, not on individual user rows.
-    const headerActions: SignalListHeaderAction[] = [
-      {
-        label: 'Invite User',
-        icon: 'mail_outline',
-        title: 'Invite a new user to this Cloud Foundry',
-        dataTest: 'cf-users-invite-user',
-        run: (): void => {
-          void this.router.navigate(
-            ['/cloud-foundry', cfGuid, 'users', 'invite'],
-          );
-        },
-      },
-      {
-        label: 'Manage Users',
-        icon: 'group',
-        title: 'Manage org / space role assignments',
-        dataTest: 'cf-users-manage-users',
-        primary: true,
-        run: (): void => {
-          void this.router.navigate(
-            ['/cloud-foundry', cfGuid, 'users', 'manage'],
-          );
-        },
-      },
-    ];
-
     this.listConfig.set({
       pagedItems: this.usersConfig.view.pagedItems,
       totalFilteredResults: this.usersConfig.view.totalFilteredResults,
@@ -275,7 +242,6 @@ export class CloudFoundryUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
-      headerActions,
       bulkActions: [
         {
           label: 'Manage Roles', icon: 'group',
