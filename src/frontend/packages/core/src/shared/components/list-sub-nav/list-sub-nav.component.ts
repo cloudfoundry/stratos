@@ -18,16 +18,61 @@ export interface ListSubNavAddAction {
 }
 
 /**
+ * Selection-aware action button for the L5 sub-nav row.
+ *
+ * Typically used for bulk operations that act on the current selection
+ * (e.g. "Remove", "Assign Role"). Buttons appear to the right of the
+ * selection indicator and to the left of the primary `addAction` button.
+ *
+ * Fields:
+ * - `label`         — button text (also used as title fallback).
+ * - `icon`          — optional material-icons glyph rendered before label.
+ * - `invoke`        — called on click (only when not disabled).
+ * - `disabled`      — optional signal; button is disabled while true.
+ * - `visible`       — optional signal; button is hidden while false.
+ * - `variant`       — visual style: 'primary' | 'destructive' | 'default'.
+ * - `tooltip`       — title shown on hover (when enabled).
+ * - `disabledReason`— title shown on hover when button is disabled
+ *                     (overrides tooltip while disabled).
+ * - `dataTest`      — data-test attribute value; defaults to
+ *                     `list-sub-nav-action-<label>`.
+ */
+export interface ListSubNavAction {
+  readonly label: string;
+  readonly icon?: string;
+  readonly invoke: () => void;
+  readonly disabled?: Signal<boolean>;
+  readonly visible?: Signal<boolean>;
+  readonly variant?: 'primary' | 'destructive' | 'default';
+  readonly tooltip?: string;
+  readonly disabledReason?: string;
+  readonly dataTest?: string;
+}
+
+/** Base Tailwind classes shared by all action variant buttons. */
+const ACTION_BASE =
+  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm ' +
+  'transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed';
+
+/** Variant-specific Tailwind additions. */
+const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> = {
+  primary:     'bg-primary text-white hover:bg-primary/90',
+  destructive: 'bg-red-600 text-white hover:bg-red-700 border border-red-600',
+  default:     'border border-content-border bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700',
+};
+
+/**
  * AppListSubNavComponent — the L5 row that sits above every list in the app.
  *
  * Renders a horizontal strip:
- *   ┌─────────────────────────────────────────────────────────────┐
- *   │ Total <Thing>: <N>                       [ + Add <Thing> ]  │
- *   └─────────────────────────────────────────────────────────────┘
+ *   ┌──────────────────────────────────────────────────────────────────────┐
+ *   │ Total <Thing>: <N>   [N selected · Clear] [actions…] [+ Add <Thing>] │
+ *   └──────────────────────────────────────────────────────────────────────┘
  *
  * - **Left:** `Total <Thing>: <N>` — colon form, plural always (handles
  *   0/1/N uniformly).
- * - **Right:** primary add button. Blue background, `+` icon and label,
+ * - **Right (in order):** selection indicator + Clear, action buttons,
+ *   primary add button. Blue background, `+` icon and label,
  *   the whole button clickable.
  *
  * Always rendered on list pages, even when there's no add affordance —
@@ -57,18 +102,58 @@ export interface ListSubNavAddAction {
         <div data-test="list-sub-nav-form" class="flex items-center gap-2 flex-1 justify-end">
           <ng-content select="[subNavForm]"></ng-content>
         </div>
-      } @else if (addAction && isAddVisible()) {
-        <button
-          data-test="list-sub-nav-add"
-          type="button"
-          [disabled]="isAddDisabled()"
-          (click)="addAction.invoke()"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
-                 bg-primary text-white hover:bg-primary/90 transition-all duration-150
-                 disabled:opacity-50 disabled:cursor-not-allowed">
-          <span class="material-icons text-base leading-5">{{ addAction.icon ?? 'add' }}</span>
-          <span>{{ addAction.label }}</span>
-        </button>
+      } @else {
+        <div class="flex items-center gap-2">
+          <!-- Selection indicator + Clear -->
+          @if (showSelected()) {
+            <span data-test="list-sub-nav-selected"
+                  class="flex items-center gap-1.5 text-sm text-content-muted">
+              {{ selectedCount!() }} selected
+              @if (onClearSelection) {
+                <button
+                  type="button"
+                  data-test="list-sub-nav-clear"
+                  (click)="onClearSelection()"
+                  class="text-primary hover:underline font-medium">
+                  Clear
+                </button>
+              }
+            </span>
+          }
+
+          <!-- Contextual action buttons -->
+          @for (action of actions; track action.label) {
+            @if (isActionVisible(action)) {
+              <button
+                type="button"
+                [disabled]="isActionDisabled(action)"
+                (click)="action.invoke()"
+                [attr.data-test]="action.dataTest ?? ('list-sub-nav-action-' + action.label)"
+                [title]="actionTitle(action)"
+                [class]="actionClasses(action)">
+                @if (action.icon) {
+                  <span class="material-icons text-base leading-5">{{ action.icon }}</span>
+                }
+                <span>{{ action.label }}</span>
+              </button>
+            }
+          }
+
+          <!-- Primary add button -->
+          @if (addAction && isAddVisible()) {
+            <button
+              data-test="list-sub-nav-add"
+              type="button"
+              [disabled]="isAddDisabled()"
+              (click)="addAction.invoke()"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
+                     bg-primary text-white hover:bg-primary/90 transition-all duration-150
+                     disabled:opacity-50 disabled:cursor-not-allowed">
+              <span class="material-icons text-base leading-5">{{ addAction.icon ?? 'add' }}</span>
+              <span>{{ addAction.label }}</span>
+            </button>
+          }
+        </div>
       }
     </div>
   `,
@@ -92,6 +177,19 @@ export class ListSubNavComponent {
    *  separate row. */
   @Input() isAdding?: Signal<boolean>;
 
+  /** Optional list of contextual action buttons (e.g. bulk-operation
+   *  buttons) rendered between the selection indicator and the add button.
+   *  Buttons whose `visible` signal returns false are omitted from the DOM. */
+  @Input() actions?: readonly ListSubNavAction[];
+
+  /** When provided, shows "N selected" text on the right side while the
+   *  signal returns a value greater than zero. */
+  @Input() selectedCount?: Signal<number>;
+
+  /** When provided alongside `selectedCount`, a "Clear" link is rendered
+   *  that calls this function when clicked. */
+  @Input() onClearSelection?: () => void;
+
   protected readonly isAddVisible = computed(() => {
     const v = this.addAction?.visible;
     return v ? v() : true;
@@ -110,6 +208,29 @@ export class ListSubNavComponent {
     const d = this.addAction?.disabled;
     return d ? d() : false;
   });
+
+  protected isActionDisabled(a: ListSubNavAction): boolean {
+    return a.disabled ? a.disabled() : false;
+  }
+
+  protected isActionVisible(a: ListSubNavAction): boolean {
+    return a.visible ? a.visible() : true;
+  }
+
+  protected actionTitle(a: ListSubNavAction): string {
+    return this.isActionDisabled(a)
+      ? (a.disabledReason ?? a.tooltip ?? a.label)
+      : (a.tooltip ?? a.label);
+  }
+
+  protected actionClasses(a: ListSubNavAction): string {
+    const variant = a.variant ?? 'default';
+    return `${ACTION_BASE} ${VARIANT_CLASSES[variant]}`;
+  }
+
+  protected showSelected(): boolean {
+    return !!this.selectedCount && this.selectedCount() > 0;
+  }
 
   /** Constant count signal helper — useful for test stubs and pages that
    *  haven't yet wired a reactive source. Returns a Signal<number> that
