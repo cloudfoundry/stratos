@@ -12,6 +12,7 @@ import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry
 import { CloudFoundryUsersComponent } from './cloud-foundry-users.component';
 import { CfUsersSignalConfigService } from '../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { UserInviteService } from '../../user-invites/user-invite.service';
 import type { StUser } from '../../../../services/endpoint-data/stratos-types';
 
 function makeStubSignalConfigService(opts?: {
@@ -80,6 +81,7 @@ describe('CloudFoundryUsersComponent', () => {
         TabNavService,
         { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+        { provide: UserInviteService, useValue: { configured$: of(false) } },
       ],
     }).compileComponents();
 
@@ -163,6 +165,7 @@ describe('CloudFoundryUsersComponent — no broken header actions', () => {
         TabNavService,
         { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
         { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
+        { provide: UserInviteService, useValue: { configured$: of(false) } },
       ],
     }).compileComponents();
 
@@ -201,6 +204,7 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
       { provide: CfUsersSignalConfigService, useValue: stubSignalConfig },
       { provide: CloudFoundryEndpointService, useValue: { cfGuid: 'cnsi-1' } },
       { provide: CurrentUserPermissionsService, useValue: { can: () => of(canReturn) } },
+      { provide: UserInviteService, useValue: { configured$: of(false) } },
     ],
   }).compileComponents();
   const fixture = TestBed.createComponent(CloudFoundryUsersComponent);
@@ -212,25 +216,30 @@ async function makeSubNavFixture(canReturn: boolean, filteredItems?: StUser[]): 
 describe('CloudFoundryUsersComponent — subNavActions', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('exposes three subNavActions with correct dataTest and variant', async () => {
+  it('exposes four subNavActions with correct dataTest and variant', async () => {
     const { component } = await makeSubNavFixture(true);
     const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string }[];
-    expect(actions).toHaveLength(3);
+    expect(actions).toHaveLength(4);
+    const addUser = actions.find(a => a.dataTest === 'cf-users-add');
     const manageRoles = actions.find(a => a.dataTest === 'cf-users-bulk-manage-roles');
     const removeSpaces = actions.find(a => a.dataTest === 'cf-users-bulk-remove-spaces');
     const removeOrgSpaces = actions.find(a => a.dataTest === 'cf-users-bulk-remove-org-spaces');
+    expect(addUser).toBeDefined();
     expect(manageRoles).toBeDefined();
     expect(removeSpaces).toBeDefined();
     expect(removeOrgSpaces).toBeDefined();
+    expect(addUser!.variant).toBe('default');
     expect(manageRoles!.variant).toBe('primary');
     expect(removeSpaces!.variant).toBe('destructive');
     expect(removeOrgSpaces!.variant).toBe('destructive');
   });
 
-  it('sets disabledReason on every subNavAction', async () => {
+  it('sets disabledReason on selection-gated subNavActions', async () => {
     const { component } = await makeSubNavFixture(true);
-    const actions = (component as any).subNavActions as readonly { disabledReason?: string }[];
-    for (const a of actions) {
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; disabledReason?: string }[];
+    // Add User uses visible-gating (not selection-gated) — no disabledReason needed.
+    const selectionGated = actions.filter(a => a.dataTest !== 'cf-users-add');
+    for (const a of selectionGated) {
       expect(a.disabledReason).toBeTruthy();
     }
   });
@@ -351,5 +360,40 @@ describe('CloudFoundryUsersComponent — bulk remove', () => {
   it('drops the per-row Remove kebab (no actions column)', async () => {
     const { component } = await makeSubNavFixture(true);
     expect(component.listConfig()!.columns.find(c => c.key === 'actions')).toBeUndefined();
+  });
+});
+
+// ─── Add User action ─────────────────────────────────────────────────────────
+
+describe('CloudFoundryUsersComponent — Add User action', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('exposes an always-visible, gated Add User action', async () => {
+    const { component } = await makeSubNavFixture(true);
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; variant?: string; visible?: () => boolean; disabled?: () => boolean }[];
+    const add = actions.find(a => a.dataTest === 'cf-users-add');
+    expect(add).toBeTruthy();
+    expect(add!.variant).toBe('default');
+    // visible + enabled when canManageRoles is true
+    expect(add!.visible!()).toBe(true);
+    expect(add!.disabled!()).toBe(false);
+  });
+
+  it('hides and disables Add User when canManageRoles is false', async () => {
+    const { component } = await makeSubNavFixture(false);
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; visible?: () => boolean; disabled?: () => boolean }[];
+    const add = actions.find(a => a.dataTest === 'cf-users-add');
+    expect(add!.visible!()).toBe(false);
+    expect(add!.disabled!()).toBe(true);
+  });
+
+  it('Add User is NOT gated on selection (visible regardless of empty selection)', async () => {
+    const { component } = await makeSubNavFixture(true);
+    (component as any)._selectedUserKeys.set(new Set());
+    const actions = (component as any).subNavActions as readonly { dataTest?: string; visible?: () => boolean; disabled?: () => boolean }[];
+    const add = actions.find(a => a.dataTest === 'cf-users-add');
+    // canManageRoles=true, no selection → still visible + enabled
+    expect(add!.visible!()).toBe(true);
+    expect(add!.disabled!()).toBe(false);
   });
 });

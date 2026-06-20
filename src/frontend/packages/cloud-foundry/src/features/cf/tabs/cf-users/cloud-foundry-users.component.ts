@@ -14,6 +14,7 @@ import {
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
+  TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 
@@ -29,6 +30,8 @@ import {
   BulkRemoveDeps,
 } from '../../../../shared/signal-list-configs/user/cf-users-bulk-remove';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
+import { UserInviteService } from '../../user-invites/user-invite.service';
+import { AddUserDialogComponent } from '../../users/add-user/add-user-dialog.component';
 
 // Signal-native replacement for the legacy CloudFoundryUsersComponent at
 // /cloud-foundry/:cnsi/users. CNSI-wide — shows every user the CF returns,
@@ -63,6 +66,8 @@ export class CloudFoundryUsersComponent {
   private readonly rolesData = inject(CfUsersRolesDataService);
   private readonly confirmDialog = inject(ConfirmationDialogService);
   private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly dialog = inject(TailwindDialogService);
+  private readonly userInviteService = inject(UserInviteService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -79,10 +84,19 @@ export class CloudFoundryUsersComponent {
   readonly totalUsers!: Signal<number>;
 
   /** Action buttons surfaced in the always-visible ListSubNavComponent
-   *  "Total Users" bar. Mirrors the three former bulkActions: Manage Roles
-   *  (primary) + two destructive Remove entries. disabled/invoke semantics
-   *  are identical — only the rendering host has changed. */
+   *  "Total Users" bar. Prepended Add User + Manage Roles (primary) +
+   *  two destructive Remove entries. disabled/invoke semantics are
+   *  identical — only the rendering host has changed. */
   protected readonly subNavActions: readonly ListSubNavAction[] = [
+    {
+      label: 'Add User',
+      icon: 'person_add',
+      variant: 'default',
+      dataTest: 'cf-users-add',
+      visible: computed(() => this.canManageRoles()),
+      disabled: computed(() => !this.canManageRoles()),
+      invoke: () => this.openAddUser(),
+    },
     {
       label: 'Manage Roles',
       variant: 'primary',
@@ -124,6 +138,18 @@ export class CloudFoundryUsersComponent {
   /** Clears the user selection — bound to the sub-nav Clear button. */
   protected readonly clearSelection = (): void => { this._selectedUserKeys.set(new Set<string>()); };
 
+  /** Opens the Add User dialog scoped to this CF endpoint (no org/space lock —
+   *  the dialog shows a full org picker). */
+  protected openAddUser(): void {
+    this.dialog.open(AddUserDialogComponent, {
+      data: {
+        cfGuid: this.cfGuid,
+        userInviteAllowed: this.userInviteAllowed(),
+      },
+      width: '640px',
+    });
+  }
+
   /** True when the current user holds org or space role-change rights on
    *  this endpoint. Admin satisfies both checks; non-admin must have the
    *  specific permission in at least one org or space. Bridges the
@@ -136,6 +162,14 @@ export class CloudFoundryUsersComponent {
       this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
       this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
     ]).pipe(map(([org, space]) => org || space)),
+    { initialValue: false },
+  );
+
+  /** True when the CF endpoint has the UAA invite feature configured.
+   *  Bridges UserInviteService.configured$ into a signal; false until the
+   *  first emission so the invite tab stays absent until resolved. */
+  private readonly userInviteAllowed: Signal<boolean> = toSignal(
+    this.userInviteService.configured$,
     { initialValue: false },
   );
 
