@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
@@ -93,5 +93,77 @@ describe('CloudFoundryEndpointService — fetchAppCount / fetchRouteCount', () =
     svc.fetchAppCount().subscribe(n => (count = n));
     http.expectOne('/pp/v1/cf/apps/cnsi-1?return=counts').flush({});
     expect(count).toBe(0);
+  });
+});
+
+// A.#2: guard for construction outside a CF route subtree (e.g. CDK overlay
+// injector for the Add User dialog). When cfGuid is falsy the service must
+// construct without issuing any HTTP requests — no acquire(), no load().
+describe('CloudFoundryEndpointService — no-op when cfGuid is falsy', () => {
+  function buildWithGuid(cfGuid: string | undefined) {
+    const acquireFn = vi.fn().mockReturnValue({
+      apps: () => [],
+      orgs: () => [],
+      appCount: () => 0,
+      isLoadingDetails: () => false,
+      load: () => ({ subscribe: vi.fn() }),
+    });
+    const cfInfoAcquireFn = vi.fn().mockReturnValue({
+      info: () => null,
+      load: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
+    });
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid } },
+        { provide: CnsiUsersSnapshotService, useValue: { users: () => () => null } },
+        { provide: EndpointDataRegistry, useValue: { acquire: acquireFn, release: vi.fn() } },
+        { provide: CfInfoDataRegistry, useValue: { acquire: cfInfoAcquireFn } },
+        { provide: EndpointsDataService, useValue: { waitFor: () => new Promise(() => { /* never resolves */ }) } },
+        CloudFoundryEndpointService,
+      ],
+    });
+    const svc = TestBed.inject(CloudFoundryEndpointService);
+    const http = TestBed.inject(HttpTestingController);
+    return { svc, http, acquireFn, cfInfoAcquireFn };
+  }
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
+  it('does not call EndpointDataRegistry.acquire when cfGuid is undefined', () => {
+    const { acquireFn, http } = buildWithGuid(undefined);
+    http.expectNone(() => true);
+    expect(acquireFn).not.toHaveBeenCalled();
+  });
+
+  it('does not call CfInfoDataRegistry.acquire when cfGuid is undefined', () => {
+    const { cfInfoAcquireFn } = buildWithGuid(undefined);
+    expect(cfInfoAcquireFn).not.toHaveBeenCalled();
+  });
+
+  it('does not call EndpointDataRegistry.acquire when cfGuid is empty string', () => {
+    const { acquireFn, http } = buildWithGuid('');
+    http.expectNone(() => true);
+    expect(acquireFn).not.toHaveBeenCalled();
+  });
+
+  it('observable fields are inert EMPTY streams when cfGuid is undefined', () => {
+    const { svc } = buildWithGuid(undefined);
+    let emitted = false;
+    svc.apps$.subscribe(() => { emitted = true; });
+    svc.orgs$.subscribe(() => { emitted = true; });
+    svc.endpoint$.subscribe(() => { emitted = true; });
+    expect(emitted).toBe(false);
+  });
+
+  it('still calls acquire/load when cfGuid IS present (regression guard)', () => {
+    const { acquireFn, cfInfoAcquireFn } = buildWithGuid('cnsi-1');
+    expect(acquireFn).toHaveBeenCalledWith('cnsi-1');
+    expect(cfInfoAcquireFn).toHaveBeenCalledWith('cnsi-1');
   });
 });
