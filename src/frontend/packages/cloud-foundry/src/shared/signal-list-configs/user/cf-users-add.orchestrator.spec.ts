@@ -216,4 +216,46 @@ describe('addUsers', () => {
     // Should report error via snackbar
     expect(deps.snackBar.error).toHaveBeenCalled();
   });
+
+  it('partial failure: multiple errored role-changes for one identity count as 1 failed identity', async () => {
+    // alice fails 2 of 3 role grants; bob succeeds all. Total identities = 2,
+    // failed identities = 1 (alice), NOT 2 (the errored change count).
+    const aliceGuid = 'alice/cf1/org1';
+    const changeA = { userGuid: aliceGuid, orgGuid: 'org1', orgName: 'My Org', add: true, role: OrgUserRoleNames.MANAGER };
+    const changeB = { userGuid: aliceGuid, orgGuid: 'org1', orgName: 'My Org', add: true, role: OrgUserRoleNames.AUDITOR };
+    const bobGuid = 'bob/cf1/org1';
+    const changeC = { userGuid: bobGuid, orgGuid: 'org1', orgName: 'My Org', add: true, role: OrgUserRoleNames.MANAGER };
+
+    const keyA = CfUsersRolesDataService.changeKey(changeA);
+    const keyB = CfUsersRolesDataService.changeKey(changeB);
+    const keyC = CfUsersRolesDataService.changeKey(changeC);
+
+    const deps = makeDeps({
+      rolesData: {
+        setUsers: vi.fn(),
+        setIsSetByUsername: vi.fn(),
+        setChanges: vi.fn(),
+        executeChanges: vi.fn().mockResolvedValue(undefined),
+        // alice's 2 changes errored; bob's succeeded
+        applyStatus: vi.fn().mockReturnValue({
+          [keyA]: 'error',
+          [keyB]: 'error',
+          [keyC]: 'done',
+        }),
+        associateUser: vi.fn().mockResolvedValue({ guid: 'g', associated: true }),
+      },
+    });
+    const req = makeReq({
+      mode: 'associate',
+      identities: ['alice', 'bob'],
+      origin: 'ldap',
+      selection: { orgRoles: [OrgUserRoleNames.MANAGER, OrgUserRoleNames.AUDITOR], spaceRolesBySpace: {} },
+    });
+
+    // Identity-based: 2 total, 1 failed (alice), NOT 2 (the errored change count).
+    await expect(addUsers(deps, req)).resolves.toEqual({ ok: false, total: 2, failed: 1 });
+
+    // Snackbar should report "Added 1 of 2 users; 1 failed" (not "Added -1 of 2 users; 2 failed")
+    expect(deps.snackBar.error).toHaveBeenCalledWith('Added 1 of 2 users; 1 failed');
+  });
 });

@@ -29,7 +29,7 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}) {
   const close = vi.fn();
   const listOrigins = vi.fn().mockReturnValue(of(opts.idpsOrigins ?? []));
   const fetchOrgs = vi.fn().mockReturnValue(
-    of((opts.orgs ?? []).map(o => ({ entity: { guid: o.guid, name: o.name } }))),
+    of((opts.orgs ?? []).map(o => ({ metadata: { guid: o.guid }, entity: { name: o.name } }))),
   );
   const fetchSpacesForOrg = vi.fn().mockReturnValue(of(opts.spaces ?? []));
 
@@ -109,6 +109,28 @@ describe('AddUserDialogComponent', () => {
     // Service returned [] — originOptions stays empty, component still works
     // (free-text entry is always available).
     expect(cmpEmpty.originOptions()).toEqual([]);
+  });
+
+  it('CF-level (no orgGuid): orgOptions maps metadata.guid + entity.name correctly', () => {
+    const { cmp, fetchOrgs } = make(
+      { cfGuid: CF_GUID, userInviteAllowed: false }, // no orgGuid → CF-level, unlocked
+      { orgs: [
+        { guid: 'o1', name: 'Org One' },
+        { guid: 'o2', name: 'Org Two' },
+      ] },
+    );
+
+    // fetchOrgs should have been called (org picker not locked)
+    expect(fetchOrgs).toHaveBeenCalledWith(CF_GUID);
+
+    // orgOptions() should reflect the APIResource-shaped mock
+    expect((cmp as any).orgOptions()).toEqual([
+      { guid: 'o1', name: 'Org One' },
+      { guid: 'o2', name: 'Org Two' },
+    ]);
+
+    // org is NOT locked at the CF level
+    expect(cmp.orgLocked()).toBe(false);
   });
 
   it('role picker writes orgRoles and spaceRolesBySpace into selection', () => {

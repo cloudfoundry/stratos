@@ -248,7 +248,7 @@ export class AddUserDialogComponent {
   protected toggleOrgRole(role: OrgUserRoleNames, checked: boolean): void {
     this.selection.update(s => {
       const set = new Set(s.orgRoles);
-      checked ? set.add(role) : set.delete(role);
+      if (checked) { set.add(role); } else { set.delete(role); }
       return { ...s, orgRoles: Array.from(set) };
     });
   }
@@ -260,7 +260,7 @@ export class AddUserDialogComponent {
   protected toggleSpaceRole(spaceGuid: string, role: SpaceUserRoleNames, checked: boolean): void {
     this.selection.update(s => {
       const set = new Set(s.spaceRolesBySpace[spaceGuid] ?? []);
-      checked ? set.add(role) : set.delete(role);
+      if (checked) { set.add(role); } else { set.delete(role); }
       const next = { ...s.spaceRolesBySpace };
       const roles = Array.from(set);
       if (roles.length > 0) {
