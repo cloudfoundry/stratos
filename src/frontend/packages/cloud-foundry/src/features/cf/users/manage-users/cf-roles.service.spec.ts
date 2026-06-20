@@ -208,4 +208,90 @@ describe('CfRolesService', () => {
     expect(roles).toEqual({});
     httpMock.expectNone('/pp/v1/cf/orgs/cf-1?per_page=500&page=1');
   });
+
+  // ── drainCfList pagination ──────────────────────────────────────────────────
+
+  it('drainCfList (via fetchSpacesForOrg): totalResults absent — fetches page 2 when page 1 is full and includes spaces from page 2', async () => {
+    const service = TestBed.inject(CfRolesService);
+
+    // Make 500 spaces for page 1 (all in org-A), plus one target space on page 2
+    const page1Spaces = Array.from({ length: 500 }, (_, i) => ({
+      guid: `space-p1-${i}`,
+      name: `Space P1 ${i}`,
+      orgGuid: 'org-A',
+      cnsiGuid: 'cf-drain',
+    }));
+    const page2Spaces = [
+      { guid: 'space-target', name: 'Target Space', orgGuid: 'org-B', cnsiGuid: 'cf-drain' },
+      ...Array.from({ length: 9 }, (_, i) => ({
+        guid: `space-p2-${i}`,
+        name: `Space P2 ${i}`,
+        orgGuid: 'org-A',
+        cnsiGuid: 'cf-drain',
+      })),
+    ];
+
+    const result = firstValueFrom(service.fetchSpacesForOrg('cf-drain', 'org-B'));
+
+    // Page 1: full (500 items), NO totalResults
+    httpMock.expectOne('/pp/v1/cf/spaces/cf-drain?per_page=500&page=1')
+      .flush({ resources: page1Spaces });
+
+    // Page 2: short (10 items < 500), NO totalResults — stops here
+    httpMock.expectOne('/pp/v1/cf/spaces/cf-drain?per_page=500&page=2')
+      .flush({ resources: page2Spaces });
+
+    const spaces = await result;
+    expect(spaces.length).toBe(1);
+    expect(spaces[0].guid).toBe('space-target');
+    expect(spaces[0].name).toBe('Target Space');
+
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-drain?per_page=500&page=3');
+  });
+
+  it('drainCfList (via fetchSpacesForOrg): totalResults absent — single short page, no extra fetch', async () => {
+    const service = TestBed.inject(CfRolesService);
+
+    const result = firstValueFrom(service.fetchSpacesForOrg('cf-short', 'org-X'));
+
+    // Only 60 items — short page, must NOT trigger page 2
+    httpMock.expectOne('/pp/v1/cf/spaces/cf-short?per_page=500&page=1')
+      .flush({ resources: Array.from({ length: 60 }, (_, i) => ({
+        guid: `space-${i}`,
+        name: `Space ${i}`,
+        orgGuid: 'org-X',
+        cnsiGuid: 'cf-short',
+      })) });
+
+    const spaces = await result;
+    expect(spaces.length).toBe(60);
+
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-short?per_page=500&page=2');
+  });
+
+  it('drainCfList (via populateRoles): totalResults present — uses totalResults to compute pages, no short-page logic', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const user = stUser({
+      guid: 'user-1',
+      orgRoles: [{ orgGuid: 'org-far', roles: ['manager'] }],
+    });
+
+    const result = firstValueFrom(service.populateRoles('cf-total', [user]).pipe(take(1)));
+
+    // Orgs: totalResults=600 → 2 pages fetched (fast path)
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-total?per_page=500&page=1')
+      .flush({ resources: [], totalResults: 600 });
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-total?per_page=500&page=2')
+      .flush({ resources: [{ guid: 'org-far', name: 'Far Org', cnsiGuid: 'cf-total' }], totalResults: 600 });
+    // Spaces: totalResults=0 → 1 page (fast path, single)
+    httpMock.expectOne('/pp/v1/cf/spaces/cf-total?per_page=500&page=1')
+      .flush({ resources: [], totalResults: 0 });
+
+    const roles = await result;
+    expect(roles['user-1']['org-far'].name).toBe('Far Org');
+    expect(roles['user-1']['org-far'].permissions.managers).toBe(true);
+
+    // No page 3 fetched for orgs (totalResults=600 → exactly 2 pages)
+    httpMock.expectNone('/pp/v1/cf/orgs/cf-total?per_page=500&page=3');
+  });
 });

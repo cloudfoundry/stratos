@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest, from, Observable, of as observableOf, of } from 'rxjs';
+import { combineLatest, EMPTY, from, Observable, of as observableOf, of } from 'rxjs';
 import { take,
   catchError,
   combineLatest as combineLatestOperators,
   distinctUntilChanged,
+  expand,
   filter,
   map,
   mergeMap,
@@ -344,9 +345,18 @@ export class CfRolesService {
   // native handler is a single-CAPI-page passthrough (forwards per_page/page),
   // so a name lookup must page through all results — a single per_page=500 call
   // would silently miss orgs/spaces past the first 500 on large foundations.
-  // Page 1 inline, pages 2..N fanned at concurrency 4 (mirrors the
-  // EndpointDataService / CfUsersPagedDataService drains). totalPages is derived
-  // from the flat { resources, totalResults } envelope these endpoints return.
+  //
+  // Two strategies depending on the response envelope:
+  //
+  // 1. totalResults present (e.g. orgs endpoint): compute totalPages from it,
+  //    fan out remaining pages at concurrency 4 (fast path, mirrors
+  //    EndpointDataService / CfUsersPagedDataService drains).
+  //
+  // 2. totalResults absent (e.g. spaces endpoint): paginate sequentially using
+  //    expand until a page returns fewer than perPage resources (short-page
+  //    sentinel), accumulating all resources across pages. This avoids the
+  //    truncation bug where lack of totalResults caused page-count=1 and only
+  //    the first 500 spaces were returned on large foundations (>500 spaces).
   private drainCfList<T>(urlBase: string): Observable<T[]> {
     const perPage = 500;
     const fetchPage = (page: number) =>
@@ -355,15 +365,34 @@ export class CfRolesService {
       );
     return fetchPage(1).pipe(
       switchMap(first => {
-        const total = first.totalResults ?? first.resources.length;
-        const totalPages = Math.max(1, Math.ceil(total / perPage));
-        if (totalPages <= 1) {
-          return of(first.resources);
+        if (first.totalResults !== undefined) {
+          // Fast path: totalResults present — compute pages and fan out.
+          const totalPages = Math.max(1, Math.ceil(first.totalResults / perPage));
+          if (totalPages <= 1) {
+            return of(first.resources);
+          }
+          const rest = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+          return from(rest).pipe(
+            mergeMap(page => fetchPage(page).pipe(map(r => r.resources)), 4),
+            reduce((acc, res) => [...acc, ...res], [...first.resources]),
+          );
         }
-        const rest = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
-        return from(rest).pipe(
-          mergeMap(page => fetchPage(page).pipe(map(r => r.resources)), 4),
-          reduce((acc, res) => [...acc, ...res], [...first.resources]),
+
+        // Slow path: totalResults absent — expand pages until a short page.
+        // expand() recursively subscribes to the returned observable; returning
+        // EMPTY stops the recursion. State carries { page, resources } for the
+        // current page so reduce can accumulate across all emitted states.
+        type PageState = { page: number; resources: T[] };
+        const seed: PageState = { page: 1, resources: first.resources };
+        return of(seed).pipe(
+          expand(state =>
+            state.resources.length < perPage
+              ? EMPTY
+              : fetchPage(state.page + 1).pipe(
+                  map(resp => ({ page: state.page + 1, resources: resp.resources })),
+                ),
+          ),
+          reduce((acc: T[], state: PageState) => [...acc, ...state.resources], []),
         );
       }),
     );
