@@ -5,21 +5,30 @@ import { Router, RouterModule } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
 
 import {
+  ConfirmationDialogService,
   CurrentUserPermissionsService,
+  ListSubNavAction,
   ListSubNavComponent,
-  SignalListBulkAction,
   SignalListCompoundSegment,
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
   SignalListDropdown,
-  SignalListRowAction,
+  TailwindSnackBarService,
 } from '@stratosui/core';
 
 import { CfUsersSignalConfigService } from '../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions.types';
 import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../services/endpoint-data/stratos-types';
+import {
+  bulkRemoveUsers,
+  selectedHasSpaceRole,
+  selectedHasAnyRole,
+  RemoveScope,
+  BulkRemoveDeps,
+} from '../../../../shared/signal-list-configs/user/cf-users-bulk-remove';
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 
 // Signal-native replacement for the legacy CloudFoundryUsersComponent at
 // /cloud-foundry/:cnsi/users. CNSI-wide — shows every user the CF returns,
@@ -51,6 +60,9 @@ export class CloudFoundryUsersComponent {
   private usersConfig = inject(CfUsersSignalConfigService);
   private router = inject(Router);
   private readonly perms = inject(CurrentUserPermissionsService);
+  private readonly rolesData = inject(CfUsersRolesDataService);
+  private readonly confirmDialog = inject(ConfirmationDialogService);
+  private readonly snackBar = inject(TailwindSnackBarService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -66,26 +78,85 @@ export class CloudFoundryUsersComponent {
    *  available at field-initializer time. */
   readonly totalUsers!: Signal<number>;
 
+  /** Action buttons surfaced in the always-visible ListSubNavComponent
+   *  "Total Users" bar. Mirrors the three former bulkActions: Manage Roles
+   *  (primary) + two destructive Remove entries. disabled/invoke semantics
+   *  are identical — only the rendering host has changed. */
+  protected readonly subNavActions: readonly ListSubNavAction[] = [
+    {
+      label: 'Manage Roles',
+      variant: 'primary',
+      icon: 'group',
+      dataTest: 'cf-users-bulk-manage-roles',
+      disabled: computed(() => this._selectedUserKeys().size === 0 || !this.canManageRoles()),
+      disabledReason: 'Select one or more users to manage roles',
+      invoke: () => this.bulkManageRoles(this._selectedUserKeys(), ['/cloud-foundry', this.cfGuid, 'users', 'manage']),
+    },
+    {
+      label: 'Remove from Spaces',
+      variant: 'destructive',
+      icon: 'remove_circle_outline',
+      dataTest: 'cf-users-bulk-remove-spaces',
+      disabled: computed(() => !this.canManageRoles() || !selectedHasSpaceRole(this.selectedUsers())),
+      disabledReason: 'Select one or more users with space roles to remove',
+      invoke: () => {
+        const n = this.selectedUsers().length;
+        this.bulkRemove('spaces', 'Remove from Spaces', `Remove ${n} selected ${n === 1 ? 'user' : 'users'} from all their space roles? This cannot be undone.`);
+      },
+    },
+    {
+      label: 'Remove from Org and Spaces',
+      variant: 'destructive',
+      icon: 'remove_circle',
+      dataTest: 'cf-users-bulk-remove-org-spaces',
+      disabled: computed(() => !this.canManageRoles() || !selectedHasAnyRole(this.selectedUsers())),
+      disabledReason: 'Select one or more users with roles to remove',
+      invoke: () => {
+        const n = this.selectedUsers().length;
+        this.bulkRemove('orgAndSpaces', 'Remove from Org and Spaces', `Remove ${n} selected ${n === 1 ? 'user' : 'users'} from all their org and space roles? This cannot be undone.`);
+      },
+    },
+  ];
+
+  /** Reactive selection count for the sub-nav "N selected · Clear" indicator. */
+  protected readonly selectedCount: Signal<number> = computed(() => this._selectedUserKeys().size);
+
+  /** Clears the user selection — bound to the sub-nav Clear button. */
+  protected readonly clearSelection = (): void => { this._selectedUserKeys.set(new Set<string>()); };
+
   /** True when the current user holds org or space role-change rights on
    *  this endpoint. Admin satisfies both checks; non-admin must have the
    *  specific permission in at least one org or space. Bridges the
    *  Observable from CurrentUserPermissionsService into a signal via
    *  toSignal; initialValue: false keeps the action safely disabled until
-   *  the first emission resolves. */
-  private readonly canManageRoles!: Signal<boolean>;
+   *  the first emission resolves. Field initializer (injection context) —
+   *  needs only perms + the endpoint guid, no usersConfig.initialize(). */
+  private readonly canManageRoles: Signal<boolean> = toSignal(
+    combineLatest([
+      this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+      this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+    ]).pipe(map(([org, space]) => org || space)),
+    { initialValue: false },
+  );
+
+  /** Resolves the selected row keys against the full filtered list to yield
+   *  the concrete StUser objects. Used by the bulk Remove actions to pass
+   *  actual role data to the orchestrator without re-fetching. computed() is
+   *  lazy, so reading _selectedUserKeys / usersConfig here is safe at field
+   *  init — the body only runs when the signal is first evaluated. */
+  private readonly selectedUsers: Signal<StUser[]> = computed(() => {
+    const keys = this._selectedUserKeys();
+    if (keys.size === 0) return [];
+    return this.usersConfig.view.filteredItems().filter(u => keys.has(`${u.cnsiGuid}:${u.guid}`));
+  });
+
+  private readonly cfGuid: string;
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
+    this.cfGuid = cfGuid;
     this.usersConfig.initialize(cfGuid);
     (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
-    (this as { canManageRoles: Signal<boolean> }).canManageRoles = toSignal(
-      combineLatest([
-        this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid),
-        this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid),
-      ]).pipe(map(([org, space]) => org || space)),
-      { initialValue: false },
-    );
-
     // Cell renderers. Each role-bucket cell resolves org/space names via
     // the config service's lookup signals (which read EndpointDataService
     // orgs() / spaces() — populated by the home-page parallelization
@@ -209,13 +280,6 @@ export class CloudFoundryUsersComponent {
           render: renderCreated,
           widthHint: '12rem',
         },
-        {
-          header: '', key: 'actions',
-          kind: 'actions',
-          actions: (u: StUser) => this.buildRowActions(u, cfGuid),
-          render: () => '',
-          widthHint: '3rem',
-        },
       ],
       getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
       emptyMessage: 'There are no users in this Cloud Foundry',
@@ -244,14 +308,6 @@ export class CloudFoundryUsersComponent {
       onClear: () => this.usersConfig.clearFilters(),
       viewMode: this.usersConfig.viewMode,
       sort: this.usersConfig.sort,
-      bulkActions: [
-        {
-          label: 'Manage Roles', icon: 'group',
-          dataTest: 'cf-users-bulk-manage-roles',
-          disabled: computed(() => this.selectedUserKeys().size === 0 || !this.canManageRoles()),
-          run: (keys) => this.bulkManageRoles(keys, ['/cloud-foundry', cfGuid, 'users', 'manage']),
-        },
-      ] as SignalListBulkAction<StUser>[],
     });
 
     this.usersConfig.registerSortExtractor('origin', renderOrigin);
@@ -299,37 +355,23 @@ export class CloudFoundryUsersComponent {
     this._selectedUserKeys.set(new Set<string>());
   }
 
-  // Per-row Remove (2 variants) kebab entries. Restores the V2-era
-  // removeUserActions() singles that the signal-native migration dropped
-  // (catalog 2026-05-26 CF-scope row). Each entry navigates to the
-  // existing legacy wizard route with the user GUID forwarded via ?user=
-  // so the wizard pre-selects this row. "Remove from Spaces" sets
-  // ?spaces=true to scope the wizard to space-role grants only; without
-  // the param the wizard strips org + space roles together. Both variants
-  // ship today as separate kebab items rather than a sub-menu since
-  // SignalListRowAction is flat. The per-row "Manage Roles" entry was
-  // retired in favor of selection-driven bulk Manage Roles.
-  private buildRowActions(u: StUser, cfGuid: string): readonly SignalListRowAction<StUser>[] {
-    return [
-      {
-        label: 'Remove from Spaces', icon: 'remove_circle_outline',
-        invoke: () => {
-          void this.router.navigate(
-            ['/cloud-foundry', cfGuid, 'users', 'remove'],
-            { queryParams: { user: u.guid, spaces: 'true' } },
-          );
-        },
-      },
-      {
-        label: 'Remove from Org and Spaces', icon: 'remove_circle', danger: true,
-        invoke: () => {
-          void this.router.navigate(
-            ['/cloud-foundry', cfGuid, 'users', 'remove'],
-            { queryParams: { user: u.guid } },
-          );
-        },
-      },
-    ];
+  private removeDeps(): BulkRemoveDeps {
+    return {
+      rolesData: this.rolesData,
+      userPerms: this.perms,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      cfGuid: this.cfGuid,
+    };
+  }
+
+  private async bulkRemove(scope: RemoveScope, title: string, message: string): Promise<void> {
+    await bulkRemoveUsers(this.removeDeps(), {
+      users: this.selectedUsers(),
+      opts: { scope, orgNameByGuid: this.usersConfig.orgNameByGuid(), spaceNameByGuid: this.usersConfig.spaceNameByGuid() },
+      title, message,
+      onComplete: () => this._selectedUserKeys.set(new Set<string>()),
+    });
   }
 
   // Resolves an org-role bucket's display label. Used by the plain-text
