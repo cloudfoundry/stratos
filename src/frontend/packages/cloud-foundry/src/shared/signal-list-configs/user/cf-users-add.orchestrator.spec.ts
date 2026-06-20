@@ -81,15 +81,20 @@ describe('addUsers', () => {
     expect(changes.length).toBeGreaterThan(0);
     expect(changes[0].add).toBe(true);
 
-    // Should call executeChanges
-    expect(deps.rolesData.executeChanges).toHaveBeenCalled();
+    // Should call executeChanges with silent:true so executeChanges owns the snackbar suppression
+    expect(deps.rolesData.executeChanges).toHaveBeenCalledWith({ silent: true });
 
     // Should NOT call associateUser (grant auto-associates)
     expect(deps.rolesData.associateUser).not.toHaveBeenCalled();
 
-    // Should refresh
-    expect(deps.paged.markStale).toHaveBeenCalledWith('cf1');
-    expect(deps.snapshot.refreshIfLoaded).toHaveBeenCalledWith('cf1');
+    // Cache refresh is owned by executeChanges on this path; orchestrator must
+    // NOT call markStale/refreshIfLoaded a second time (no double-refresh).
+    expect(deps.paged.markStale).not.toHaveBeenCalled();
+    expect(deps.snapshot.refreshIfLoaded).not.toHaveBeenCalled();
+
+    // Exactly ONE snackbar from the orchestrator; none from executeChanges (silent).
+    const snackCalls = (deps.snackBar.open as any).mock.calls.length + (deps.snackBar.error as any).mock.calls.length;
+    expect(snackCalls).toBe(1);
   });
 
   it('associate, no roles: calls associateUser per username, no executeChanges', async () => {
@@ -163,8 +168,16 @@ describe('addUsers', () => {
     const [changes] = (deps.rolesData.setChanges as any).mock.calls[0];
     expect(changes.some((c: any) => c.userGuid === 'u9')).toBe(true);
 
-    // Should execute changes
-    expect(deps.rolesData.executeChanges).toHaveBeenCalled();
+    // Should execute changes with silent:true (orchestrator posts the snackbar)
+    expect(deps.rolesData.executeChanges).toHaveBeenCalledWith({ silent: true });
+
+    // No double-refresh: executeChanges owns the cache flush on this path.
+    expect(deps.paged.markStale).not.toHaveBeenCalled();
+    expect(deps.snapshot.refreshIfLoaded).not.toHaveBeenCalled();
+
+    // Exactly one snackbar (orchestrator's reportSnackBar only).
+    const snackCalls = (deps.snackBar.open as any).mock.calls.length + (deps.snackBar.error as any).mock.calls.length;
+    expect(snackCalls).toBe(1);
   });
 
   it('partial failure: does not throw, reports failures via snackbar', async () => {

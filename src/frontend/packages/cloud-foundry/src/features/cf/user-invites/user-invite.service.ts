@@ -178,9 +178,7 @@ export class UserInviteService {
     const users: UserInviteSend = {
       org: orgGuid,
       space: spaceGuid,
-      spaceRoles: {
-        [spaceRole]: true
-      },
+      spaceRoles: spaceRole ? { [spaceRole]: true } : {},
       emails
     };
     return this.http.post<UserInviteResponseUaa>(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(

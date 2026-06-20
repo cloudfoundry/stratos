@@ -165,7 +165,7 @@ export class CfUsersRolesDataService {
    * outcome. Never rejects on a per-change failure — the status + snackbar
    * convey it — so the two-click apply flow stays in control of navigation.
    */
-  async executeChanges(): Promise<void> {
+  async executeChanges(opts?: { silent?: boolean }): Promise<void> {
     const cfGuid = this._cfGuid();
     const changes = this._changedRoles();
     if (!changes.length) {
@@ -202,7 +202,9 @@ export class CfUsersRolesDataService {
         }
         return next;
       });
-      this.snackBar.error(`Failed to apply role changes: ${errorMessage(e)}`);
+      if (!opts?.silent) {
+        this.snackBar.error(`Failed to apply role changes: ${errorMessage(e)}`);
+      }
       return;
     }
 
@@ -266,10 +268,12 @@ export class CfUsersRolesDataService {
       }
     }
 
-    if (errors.length) {
-      this.snackBar.error(`${errors.length} of ${changes.length} role changes failed: ${errors.join('; ')}`);
-    } else {
-      this.snackBar.open(`Applied ${changes.length} role change${changes.length === 1 ? '' : 's'}`);
+    if (!opts?.silent) {
+      if (errors.length) {
+        this.snackBar.error(`${errors.length} of ${changes.length} role changes failed: ${errors.join('; ')}`);
+      } else {
+        this.snackBar.open(`Applied ${changes.length} role change${changes.length === 1 ? '' : 's'}`);
+      }
     }
   }
 }

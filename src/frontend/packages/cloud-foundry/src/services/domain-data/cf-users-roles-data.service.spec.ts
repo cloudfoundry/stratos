@@ -125,6 +125,25 @@ describe('CfUsersRolesDataService', () => {
     expect(snackBar.open).toHaveBeenCalled();
   });
 
+  it('executeChanges({ silent: true }) skips the internal snackbar but keeps cache refresh', async () => {
+    svc.setUsers('cf-1', [userA]);
+    svc.setChanges([
+      { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' },
+    ]);
+
+    const done = svc.executeChanges({ silent: true });
+    httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes')
+      .flush({ results: [{ index: 0, success: true }] });
+    await done;
+
+    // No snackbar on either path
+    expect(snackBar.open).not.toHaveBeenCalled();
+    expect(snackBar.error).not.toHaveBeenCalled();
+    // applyStatus still updated (cache machinery still runs)
+    const change = svc.changedRoles()[0];
+    expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(change)]).toBe('done');
+  });
+
   it('executeChanges identifies users by username+origin when setting by username', async () => {
     // Set-by-username users carry synthetic guids (username/cfGuid/orgGuid);
     // the wire payload must use username+origin instead so the backend can

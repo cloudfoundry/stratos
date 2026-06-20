@@ -117,16 +117,14 @@ function hasRoles(req: AddUsersRequest): boolean {
 }
 
 /**
- * Read applyStatus, snackbar the partial-success summary, then refresh
- * the user caches. Mirrors bulkRemoveUsers' reporting + onComplete pattern.
+ * Post the orchestrator-framed snackbar without touching caches.
+ * Used on execute paths where executeChanges already owns the refresh.
  */
-function reportAndRefresh(
+function reportSnackBar(
   deps: AddUsersDeps,
   failedCount: number,
   totalCount: number,
 ): void {
-  deps.paged.markStale(deps.cfGuid);
-  deps.snapshot.refreshIfLoaded(deps.cfGuid);
   if (failedCount > 0) {
     deps.snackBar.error(
       `Added ${totalCount - failedCount} of ${totalCount} user${totalCount === 1 ? '' : 's'}; ${failedCount} failed`,
@@ -137,9 +135,24 @@ function reportAndRefresh(
 }
 
 /**
- * Read applyStatus after executeChanges and report partial failures.
- * executeChanges fires its own generic snackbar; this one carries
- * per-orchestrator context (user count). Refreshes caches regardless.
+ * Read applyStatus, snackbar the partial-success summary, then refresh
+ * the user caches. Used only on the associate-no-roles path (which never
+ * calls executeChanges and therefore owns its own refresh).
+ */
+function reportAndRefresh(
+  deps: AddUsersDeps,
+  failedCount: number,
+  totalCount: number,
+): void {
+  deps.paged.markStale(deps.cfGuid);
+  deps.snapshot.refreshIfLoaded(deps.cfGuid);
+  reportSnackBar(deps, failedCount, totalCount);
+}
+
+/**
+ * Read applyStatus after executeChanges and report partial failures via
+ * snackbar only — executeChanges already refreshed the caches, so no
+ * double-refresh here.
  */
 function reportFromApplyStatus(
   deps: AddUsersDeps,
@@ -147,7 +160,7 @@ function reportFromApplyStatus(
 ): void {
   const status = deps.rolesData.applyStatus();
   const failedCount = Object.values(status).filter(s => s === 'error').length;
-  reportAndRefresh(deps, failedCount, totalCount);
+  reportSnackBar(deps, failedCount, totalCount);
 }
 
 // ─── Orchestrator ─────────────────────────────────────────────────────────────
@@ -190,14 +203,14 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
       spaceNameByGuid: req.spaceNameByGuid,
       selection: req.selection,
     }));
-    await deps.rolesData.executeChanges();
+    await deps.rolesData.executeChanges({ silent: true });
     reportFromApplyStatus(deps, req.identities.length);
     return;
   }
 
   // Invite mode: role-free invite, then grant full matrix by returned guids.
-  // Pass '' as the spaceRole arg to produce an empty key in the spaceRoles
-  // object — the backend ignores unrecognised keys, keeping this role-free.
+  // Pass '' as the spaceRole sentinel — invite() treats a falsy spaceRole as
+  // genuinely role-free and sends spaceRoles: {} on the wire.
   const resp = await firstValueFrom(
     deps.invite.invite(
       deps.cfGuid,
@@ -221,14 +234,16 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
       spaceNameByGuid: req.spaceNameByGuid,
       selection: req.selection,
     }));
-    await deps.rolesData.executeChanges();
-    // Report combined: invite failures + any role-grant failures
+    await deps.rolesData.executeChanges({ silent: true });
+    // Report combined: invite failures + any role-grant failures.
+    // executeChanges owns the cache refresh; orchestrator posts the snackbar only.
     const grantStatus = deps.rolesData.applyStatus();
     const grantFailedCount = Object.values(grantStatus).filter(s => s === 'error').length;
-    reportAndRefresh(deps, failedCount + grantFailedCount, req.identities.length);
+    reportSnackBar(deps, failedCount + grantFailedCount, req.identities.length);
     return;
   }
 
-  // Invite only (no roles, or all invites failed)
+  // Invite only (no roles, or all invites failed) — executeChanges not called,
+  // so the orchestrator owns the refresh here.
   reportAndRefresh(deps, failedCount, req.identities.length);
 }
