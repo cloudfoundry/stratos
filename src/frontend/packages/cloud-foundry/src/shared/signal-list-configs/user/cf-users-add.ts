@@ -164,13 +164,24 @@ function reportAndRefresh(
  * Read applyStatus after executeChanges and report partial failures via
  * snackbar only — executeChanges already refreshed the caches, so no
  * double-refresh here.
+ *
+ * `userGuids` is the list of synthetic/real guids that were passed to
+ * executeChanges. The changeKey format is `${userGuid}/...` — a user is
+ * counted as "failed" if ANY of its role-change keys is in error state.
+ * This keeps `failed` identity-scoped (≤ total) rather than change-scoped.
  */
 function reportFromApplyStatus(
   deps: AddUsersDeps,
   totalCount: number,
+  userGuids: string[],
 ): number {
   const status = deps.rolesData.applyStatus();
-  const failedCount = Object.values(status).filter(s => s === 'error').length;
+  const errorKeys = new Set(
+    Object.entries(status).filter(([, s]) => s === 'error').map(([k]) => k),
+  );
+  const failedCount = userGuids.filter(
+    guid => [...errorKeys].some(k => k.startsWith(`${guid}/`)),
+  ).length;
   reportSnackBar(deps, failedCount, totalCount);
   return failedCount;
 }
@@ -220,7 +231,7 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
       selection: req.selection,
     }));
     await deps.rolesData.executeChanges({ silent: true });
-    const failedCount = reportFromApplyStatus(deps, req.identities.length);
+    const failedCount = reportFromApplyStatus(deps, req.identities.length, syntheticGuids);
     return summary(failedCount);
   }
 
