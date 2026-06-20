@@ -253,6 +253,15 @@ describe('CfUsersRolesDataService', () => {
     expect(CfUsersRolesDataService.changeKey(add)).not.toBe(CfUsersRolesDataService.changeKey(remove));
   });
 
+  it('associateUser POSTs username+origin and resolves the guid', async () => {
+    const p = svc.associateUser('cf-1', 'alice', 'ldap');
+    const req = httpMock.expectOne('/pp/v1/cf/users/cf-1/associate');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ username: 'alice', origin: 'ldap' });
+    req.flush({ guid: 'u-1', associated: true });
+    await expect(p).resolves.toEqual({ guid: 'u-1', associated: true });
+  });
+
   it('clear resets applyStatus so a new wizard run does not inherit "Done" rows', async () => {
     svc.setUsers('cf-1', [userA]);
     const change: CfRoleChange = { userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' };
