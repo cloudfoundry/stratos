@@ -141,6 +141,21 @@ export class CfUsersRolesDataService {
   }
 
   /**
+   * Associate a user (by username + identity-provider origin) with a CF
+   * foundation, creating the UAA account if necessary. Returns the resolved
+   * CF user guid and whether the association was freshly created
+   * (`associated: false` means the user was already associated — still a
+   * success path; the caller can proceed to role assignment either way).
+   */
+  async associateUser(cfGuid: string, username: string, origin: string): Promise<{ guid: string; associated: boolean }> {
+    return firstValueFrom(
+      this.http.post<{ guid: string; associated: boolean }>(
+        `/pp/v1/cf/users/${cfGuid}/associate`, { username, origin },
+      ),
+    );
+  }
+
+  /**
    * Apply the pending role changes via the native batch endpoint. The
    * backend orders org-user membership relative to other roles and resolves
    * GUIDs for removals, so the wizard just hands over the diff.
