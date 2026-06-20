@@ -345,3 +345,7 @@ func (p *noTokenProxy) DoProxySingleRequestWithToken(_ string, _ *api.TokenRecor
 func (p *noTokenProxy) GetUserTokenInfo(_ string) (*api.JWTUserTokenInfo, error) {
 	return &api.JWTUserTokenInfo{}, nil
 }
+
+func (p *noTokenProxy) GetHttpClient(_ bool, _ string) http.Client {
+	return *http.DefaultClient
+}

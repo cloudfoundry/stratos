@@ -60,7 +60,8 @@ func (cf *CloudFoundrySpecification) getIdentityProviders(ctx echo.Context) erro
 	req.Header.Set("Authorization", "bearer "+tokenRecord.AuthToken)
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	httpClient := cf.nativeProxy().GetHttpClient(cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, "UAA request failed: "+err.Error())
 	}

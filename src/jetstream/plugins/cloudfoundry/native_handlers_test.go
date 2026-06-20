@@ -63,6 +63,12 @@ func (m *mockNativeCFProxy) GetUserTokenInfo(_ string) (*api.JWTUserTokenInfo, e
 	return &api.JWTUserTokenInfo{UserGUID: "cf-user-default"}, nil
 }
 
+// GetHttpClient returns http.DefaultClient for tests — test servers use plain
+// HTTP so TLS settings are irrelevant; this satisfies the nativeCFProxy interface.
+func (m *mockNativeCFProxy) GetHttpClient(_ bool, _ string) http.Client {
+	return *http.DefaultClient
+}
+
 // mustParseURL parses a URL and panics on error — for test setup only.
 func mustParseURL(raw string) *url.URL {
 	u, err := url.Parse(raw)
