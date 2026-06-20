@@ -12,6 +12,7 @@ import {
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
+  TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 
@@ -28,6 +29,8 @@ import {
   BulkRemoveDeps,
 } from '../../../../../../../shared/signal-list-configs/user/cf-users-bulk-remove';
 import { CfUsersRolesDataService } from '../../../../../../../services/domain-data/cf-users-roles-data.service';
+import { UserInviteService } from '../../../../../user-invites/user-invite.service';
+import { AddUserDialogComponent } from '../../../../../users/add-user/add-user-dialog.component';
 
 // Signal-native replacement for the legacy CloudFoundrySpaceUsersComponent.
 // Scoped to one space under one org under one CF endpoint. Reuses the
@@ -71,6 +74,8 @@ export class CloudFoundrySpaceUsersComponent {
   private readonly rolesData = inject(CfUsersRolesDataService);
   private readonly confirmDialog = inject(ConfirmationDialogService);
   private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly dialog = inject(TailwindDialogService);
+  private readonly userInviteService = inject(UserInviteService);
 
   public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
 
@@ -97,6 +102,12 @@ export class CloudFoundrySpaceUsersComponent {
     { initialValue: false },
   );
 
+  /** True when the CF endpoint has the UAA invite feature configured. */
+  private readonly userInviteAllowed: Signal<boolean> = toSignal(
+    this.userInviteService.configured$,
+    { initialValue: false },
+  );
+
   /** The concrete StUser objects for the current selection, resolved from
    *  filteredItems by row key. Used by Remove to pass actual role data to
    *  the bulk-remove orchestrator without re-fetching. */
@@ -111,11 +122,18 @@ export class CloudFoundrySpaceUsersComponent {
   private readonly spaceGuid: string;
 
   /** Action buttons surfaced in the always-visible ListSubNavComponent
-   *  "Total Users" bar. Two entries:
-   *  - Manage Roles (primary): selection-driven wizard navigation.
-   *  - Remove from Space (destructive): bulk role removal scoped to this
-   *    space (passes spaceGuid to selectedHasSpaceRole + buildRemoveChanges). */
+   *  "Total Users" bar. Prepended Add User + Manage Roles (primary) +
+   *  Remove from Space (destructive). */
   protected readonly subNavActions: readonly ListSubNavAction[] = [
+    {
+      label: 'Add User',
+      icon: 'person_add',
+      variant: 'default',
+      dataTest: 'cf-users-add',
+      visible: computed(() => this.canManageRoles()),
+      disabled: computed(() => !this.canManageRoles()),
+      invoke: () => this.openAddUser(),
+    },
     {
       label: 'Manage Roles',
       variant: 'primary',
@@ -149,6 +167,23 @@ export class CloudFoundrySpaceUsersComponent {
 
   /** Clears the user selection — bound to the sub-nav Clear button. */
   protected readonly clearSelection = (): void => { this._selectedUserKeys.set(new Set<string>()); };
+
+  /** Opens the Add User dialog locked to this org+space (no org/space pickers shown). */
+  protected openAddUser(): void {
+    const orgName = this.cfOrgService.orgDataService.org()?.name;
+    const spaceName = this.cfSpaceService.spaceDataService.space()?.name;
+    this.dialog.open(AddUserDialogComponent, {
+      data: {
+        cfGuid: this.cfGuid,
+        orgGuid: this.orgGuid,
+        orgName,
+        spaceGuid: this.spaceGuid,
+        spaceName,
+        userInviteAllowed: this.userInviteAllowed(),
+      },
+      width: '640px',
+    });
+  }
 
   constructor() {
     const cfGuid = this.cfEndpointService.cfGuid;
