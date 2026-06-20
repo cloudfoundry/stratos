@@ -387,6 +387,22 @@ export class CfRolesService {
   }
 
   /**
+   * Public guid→name list of the spaces belonging to a single org, sorted by
+   * name. Used by the Add User dialog's role picker to render space-role
+   * checkboxes for the chosen org. Reuses the cached native space drain (not
+   * editable-filtered — grant editability is enforced when changes are
+   * applied), so callers get spaces without the wizard's StUser-mapping coupling.
+   */
+  fetchSpacesForOrg(cfGuid: string, orgGuid: string): Observable<{ guid: string; name: string }[]> {
+    return this.fetchSpaces(cfGuid).pipe(
+      map(spaces => spaces
+        .filter(s => s.orgGuid === orgGuid)
+        .map(s => ({ guid: s.guid, name: s.name }))
+        .sort((a, b) => naturalCompare(a.name, b.name))),
+    );
+  }
+
+  /**
    * Compare a set of org or space permissions and return the differences
    */
   private comparePermissions(
