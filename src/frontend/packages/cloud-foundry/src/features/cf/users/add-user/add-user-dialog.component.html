@@ -1,0 +1,94 @@
+<div class="p-6 flex flex-col gap-4">
+  <!-- Dialog header -->
+  <h2 class="text-lg font-semibold text-content-text">Add User</h2>
+
+  <!-- Mode tabs: Associate (username/origin) vs Invite (email) -->
+  @if (inviteTabVisible()) {
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="px-3 py-1 rounded border text-sm"
+        [class.bg-primary]="mode() === 'associate'"
+        [class.text-white]="mode() === 'associate'"
+        (click)="switchMode('associate')"
+      >Associate</button>
+      <button
+        type="button"
+        class="px-3 py-1 rounded border text-sm"
+        [class.bg-primary]="mode() === 'invite'"
+        [class.text-white]="mode() === 'invite'"
+        (click)="switchMode('invite')"
+      >Invite</button>
+    </div>
+  }
+
+  <!-- Origin selector (associate mode only) -->
+  @if (mode() === 'associate') {
+    <div class="flex flex-col gap-1">
+      <label for="origin-input" class="text-sm text-content-muted">Identity Provider Origin</label>
+      <!-- Pick from options OR type freely (editable combobox) -->
+      @if (originOptions().length > 0) {
+        <select
+          id="origin-input"
+          class="border rounded px-2 py-1 text-sm"
+          [ngModel]="origin()"
+          (ngModelChange)="origin.set($event)"
+        >
+          @for (opt of originOptions(); track opt) {
+            <option [value]="opt" [selected]="opt === origin()">{{ opt }}</option>
+          }
+        </select>
+      } @else {
+        <!-- Degrade to free-text input when no origin options are available -->
+        <input
+          id="origin-input"
+          type="text"
+          class="border rounded px-2 py-1 text-sm"
+          [ngModel]="origin()"
+          (ngModelChange)="origin.set($event)"
+          placeholder="uaa"
+        />
+      }
+    </div>
+  }
+
+  <!-- Identity input (usernames in associate mode, emails in invite mode) -->
+  <div>
+    <app-stacked-input-actions
+      [stateIn$]="stateIn$"
+      [stackedActionConfig]="stackedActionConfig"
+      (stateOut)="onIdentities($event)"
+    ></app-stacked-input-actions>
+  </div>
+
+  <!-- Org/space context when locked (opened from org or space page) -->
+  @if (orgLocked()) {
+    <div class="text-sm text-content-muted">
+      Organization: <span class="text-content-text">{{ data.orgName }}</span>
+    </div>
+  }
+  @if (spaceLocked()) {
+    <div class="text-sm text-content-muted">
+      Space: <span class="text-content-text">{{ data.spaceName }}</span>
+    </div>
+  }
+
+  <!-- Roles section placeholder — Phase 4 D7 widget replaces this comment -->
+  <!-- (Roles are optional; canSubmit does NOT gate on role selection) -->
+
+  <!-- Actions -->
+  <div class="flex justify-end gap-2 pt-2">
+    <button
+      type="button"
+      class="px-4 py-2 text-sm rounded border"
+      [disabled]="submitting()"
+      (click)="cancel()"
+    >Cancel</button>
+    <button
+      type="button"
+      class="px-4 py-2 text-sm rounded bg-primary text-white disabled:opacity-50"
+      [disabled]="!canSubmit()"
+      (click)="submit()"
+    >Add User{{ identities().length > 1 ? 's' : '' }}</button>
+  </div>
+</div>
