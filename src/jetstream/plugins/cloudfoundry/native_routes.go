@@ -119,6 +119,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	nativeGroup.POST("/cf/roles/:cnsiGuid", c.createNativeRole)
 	nativeGroup.POST("/cf/roles/:cnsiGuid/changes", c.applyNativeRoleChanges)
 	nativeGroup.DELETE("/cf/roles/:cnsiGuid/:roleGuid", c.deleteNativeRole)
+	nativeGroup.POST("/cf/users/:cnsiGuid/associate", c.associateUser)
 
 	// Services-domain scoped reads (slice 5: services-domain signal+V3).
 	// Path-derived filters layer on top of the existing CF-scoped handlers'
