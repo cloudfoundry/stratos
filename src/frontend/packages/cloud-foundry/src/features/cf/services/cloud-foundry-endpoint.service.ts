@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, Subscription, from } from 'rxjs';
+import { EMPTY, Observable, Subscription, from } from 'rxjs';
 import { catchError, take, filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -126,6 +126,36 @@ export class CloudFoundryEndpointService {
     // tests still reference its type) but no consumer reads from it
     // directly within this service.
     this.cfEndpointEntityService = null;
+
+    // Guard: when constructed outside a CF route subtree (e.g. CDK overlay
+    // injector for the Add User dialog) cfGuid is undefined. Skip ALL data
+    // prefetches — no acquire(), no load(), no HTTP — to prevent the 502
+    // storm of /pp/v1/cf/<resource>/undefined requests. All observable
+    // fields are initialised to inert empty streams so downstream consumers
+    // that happen to read them do not throw.
+    if (!this.cfGuid) {
+      this.cfInfoData = { info: signal(null) } as unknown as CfInfoDataService;
+      this.endpoint$ = EMPTY;
+      this.endpoint = signal(undefined);
+      this.info$ = EMPTY;
+      this.usersCount$ = EMPTY;
+      this.apps$ = EMPTY;
+      this.appsLoading$ = EMPTY;
+      this.hasApps$ = EMPTY;
+      this.appCount$ = EMPTY;
+      this.orgs$ = EMPTY;
+      this.hasSSHAccess$ = EMPTY;
+      this.totalMem$ = EMPTY;
+      this.connected$ = EMPTY;
+      this.currentUser$ = EMPTY;
+      this.endpointData = {
+        apps: signal([]),
+        orgs: signal([]),
+        appCount: signal(0),
+        isLoadingDetails: signal(false),
+      } as unknown as EndpointDataService;
+      return;
+    }
 
     // V3-native CF info: acquire the registry-cached signal and trigger
     // load() (idempotent — warm-cache short-circuit + in-flight dedup).
