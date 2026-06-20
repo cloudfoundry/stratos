@@ -65,6 +65,17 @@ export interface AddUsersRequest {
   selection: AddRoleSelection;
 }
 
+/**
+ * Outcome summary so the caller (dialog) can decide whether to close.
+ * `total` = identities attempted; `failed` = count of failures on the path
+ * taken; `ok` = failed === 0 (full success).
+ */
+export interface AddUsersSummary {
+  ok: boolean;
+  total: number;
+  failed: number;
+}
+
 // ─── Internal helpers ────────────────────────────────────────────────────────
 
 /**
@@ -157,10 +168,11 @@ function reportAndRefresh(
 function reportFromApplyStatus(
   deps: AddUsersDeps,
   totalCount: number,
-): void {
+): number {
   const status = deps.rolesData.applyStatus();
   const failedCount = Object.values(status).filter(s => s === 'error').length;
   reportSnackBar(deps, failedCount, totalCount);
+  return failedCount;
 }
 
 // ─── Orchestrator ─────────────────────────────────────────────────────────────
@@ -175,9 +187,13 @@ function reportFromApplyStatus(
  *   invite             — role-free invite → grant full matrix by returned guids.
  *
  * Never rejects on partial failure — failures are reported via snackBar and
- * the cache is refreshed. The caller (dialog) decides whether to close.
+ * the cache is refreshed. The caller (dialog) decides whether to close,
+ * using the returned summary (ok/total/failed).
  */
-export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promise<void> {
+export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promise<AddUsersSummary> {
+  const total = req.identities.length;
+  const summary = (failed: number): AddUsersSummary => ({ ok: failed === 0, total, failed });
+
   if (req.mode === 'associate') {
     if (!hasRoles(req)) {
       // Associate-only: no role machinery; call associateUser per identity.
@@ -186,7 +202,7 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
       );
       const failedCount = results.filter(r => r.status === 'rejected').length;
       reportAndRefresh(deps, failedCount, req.identities.length);
-      return;
+      return summary(failedCount);
     }
 
     // Associate + roles: seed synthetic users by username+origin; executeChanges
@@ -204,8 +220,8 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
       selection: req.selection,
     }));
     await deps.rolesData.executeChanges({ silent: true });
-    reportFromApplyStatus(deps, req.identities.length);
-    return;
+    const failedCount = reportFromApplyStatus(deps, req.identities.length);
+    return summary(failedCount);
   }
 
   // Invite mode: role-free invite, then grant full matrix by returned guids.
@@ -240,10 +256,11 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
     const grantStatus = deps.rolesData.applyStatus();
     const grantFailedCount = Object.values(grantStatus).filter(s => s === 'error').length;
     reportSnackBar(deps, failedCount + grantFailedCount, req.identities.length);
-    return;
+    return summary(failedCount + grantFailedCount);
   }
 
   // Invite only (no roles, or all invites failed) — executeChanges not called,
   // so the orchestrator owns the refresh here.
   reportAndRefresh(deps, failedCount, req.identities.length);
+  return summary(failedCount);
 }

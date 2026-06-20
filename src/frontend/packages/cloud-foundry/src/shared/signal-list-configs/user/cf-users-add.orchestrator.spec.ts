@@ -60,7 +60,10 @@ describe('addUsers', () => {
       selection: { orgRoles: [OrgUserRoleNames.MANAGER], spaceRolesBySpace: {} },
     });
 
-    await addUsers(deps, req);
+    const r = await addUsers(deps, req);
+
+    // Full success: one identity, no failures.
+    expect(r).toEqual({ ok: true, total: 1, failed: 0 });
 
     // Should seed synthetic user with username 'alice' and origin 'ldap'
     expect(deps.rolesData.setUsers).toHaveBeenCalledOnce();
@@ -116,7 +119,10 @@ describe('addUsers', () => {
       selection: { orgRoles: [], spaceRolesBySpace: {} },
     });
 
-    await addUsers(deps, req);
+    const r = await addUsers(deps, req);
+
+    // Two identities, both associated.
+    expect(r).toEqual({ ok: true, total: 2, failed: 0 });
 
     expect(deps.rolesData.associateUser).toHaveBeenCalledTimes(2);
     expect(deps.rolesData.associateUser).toHaveBeenCalledWith('cf1', 'alice', 'ldap');
@@ -145,7 +151,10 @@ describe('addUsers', () => {
       spaceNameByGuid: new Map([['s1', 'Space One']]),
     });
 
-    await addUsers(deps, req);
+    const r = await addUsers(deps, req);
+
+    // One invite, no failures.
+    expect(r).toEqual({ ok: true, total: 1, failed: 0 });
 
     // Should call invite with empty spaceRole (role-free)
     expect(deps.invite.invite).toHaveBeenCalledOnce();
@@ -201,8 +210,8 @@ describe('addUsers', () => {
       selection: { orgRoles: [OrgUserRoleNames.MANAGER], spaceRolesBySpace: {} },
     });
 
-    // Must not throw
-    await expect(addUsers(deps, req)).resolves.toBeUndefined();
+    // Must not throw; returns a partial-failure summary (ok:false, failed>0).
+    await expect(addUsers(deps, req)).resolves.toEqual({ ok: false, total: 1, failed: 1 });
 
     // Should report error via snackbar
     expect(deps.snackBar.error).toHaveBeenCalled();
