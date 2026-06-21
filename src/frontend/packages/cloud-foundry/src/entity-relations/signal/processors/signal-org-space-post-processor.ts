@@ -13,6 +13,7 @@
 // `SpaceUserRoleNames -> CfUserRoleParams` mappings.
 
 import { organizationEntityType, spaceEntityType, cfUserEntityType } from '../../../cf-entity-types';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS } from '../../../roles/role-registry';
 import {
   CfUserRoleParams,
   OrgUserRoleNames,
@@ -24,19 +25,11 @@ import {
   SignalRelationPostProcessorContext,
 } from '../signal-relation-types';
 
-const ORG_ROLE_TABLE: ReadonlyArray<{ source: OrgUserRoleNames; target: CfUserRoleParams }> = [
-  { source: OrgUserRoleNames.USER, target: CfUserRoleParams.ORGANIZATIONS },
-  { source: OrgUserRoleNames.MANAGER, target: CfUserRoleParams.MANAGED_ORGS },
-  { source: OrgUserRoleNames.BILLING_MANAGERS, target: CfUserRoleParams.BILLING_MANAGER_ORGS },
-  { source: OrgUserRoleNames.AUDITOR, target: CfUserRoleParams.AUDITED_ORGS },
-];
+const ORG_ROLE_TABLE: ReadonlyArray<{ source: OrgUserRoleNames; target: CfUserRoleParams }> =
+  ORG_ROLE_DEFS.map(d => ({ source: d.stratos as OrgUserRoleNames, target: d.bucket }));
 
-const SPACE_ROLE_TABLE: ReadonlyArray<{ source: SpaceUserRoleNames; target: CfUserRoleParams }> = [
-  { source: SpaceUserRoleNames.DEVELOPER, target: CfUserRoleParams.SPACES },
-  { source: SpaceUserRoleNames.MANAGER, target: CfUserRoleParams.MANAGED_SPACES },
-  { source: SpaceUserRoleNames.AUDITOR, target: CfUserRoleParams.AUDITED_SPACES },
-  { source: SpaceUserRoleNames.SUPPORTER, target: CfUserRoleParams.SUPPORTED_SPACES },
-];
+const SPACE_ROLE_TABLE: ReadonlyArray<{ source: SpaceUserRoleNames; target: CfUserRoleParams }> =
+  SPACE_ROLE_DEFS.map(d => ({ source: d.stratos as SpaceUserRoleNames, target: d.bucket }));
 
 interface OrgOrSpacePayload {
   guid?: string;
