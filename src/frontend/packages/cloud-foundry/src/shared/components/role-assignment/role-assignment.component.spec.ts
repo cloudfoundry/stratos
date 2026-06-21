@@ -64,14 +64,19 @@ describe('RoleAssignmentComponent', () => {
     return fixture;
   }
 
-  it('lists only permission-allowed orgs in the multi-select', async () => {
+  it('picker shows all orgs that fetchOrgs returned (fetchOrgs owns the broadened filter)', async () => {
+    // The widget trusts fetchOrgs to return only orgs the user can act on.
+    // allowedOrgs must NOT re-narrow by org-level edit permission — that would
+    // exclude space-manager-only users (the dead-end bug).
+    // Default mock: ORGANIZATION_CHANGE_ROLES true only for o1, but fetchOrgs returns both.
     const fixture = createFixture();
     await fixture.whenStable();
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
-    // allowedOrgs should only contain o1 (o2 filtered out by permission)
-    expect(component.allowedOrgs()).toEqual([o1]);
+    // Both o1 and o2 must appear in the picker (fetchOrgs result is the source of truth).
+    expect(component.allowedOrgs()).toEqual([o1, o2]);
+    // org-level permission is still resolved for org-cell gating
     expect(mockUserPerms.can).toHaveBeenCalledWith(
       CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
       cfGuid,
@@ -82,6 +87,50 @@ describe('RoleAssignmentComponent', () => {
       cfGuid,
       'o2',
     );
+    // canEditOrg reflects org-level only: o1=true, o2=false
+    expect(component.canEditOrg('o1')).toBe(true);
+    expect(component.canEditOrg('o2')).toBe(false);
+  });
+
+  it('space-manager-only user: org cells disabled, their space cell enabled', async () => {
+    // Scenario: user is space manager of 'spaceA' in orgX, but NOT org manager of orgX.
+    // Expected: canEditOrg(orgX)=false, canChangeSpaceRoles(orgX,'spaceA')=true,
+    //           canChangeSpaceRoles(orgX,'spaceB')=false.
+    const orgX = makeOrg('orgX', 'Org X');
+    const spaceA = { guid: 'spaceA', name: 'Space A' };
+    const spaceB = { guid: 'spaceB', name: 'Space B' };
+
+    mockCfRolesService.fetchOrgs.mockReturnValue(of([orgX]));
+    mockCfRolesService.fetchSpacesForOrg.mockReturnValue(of([spaceA, spaceB]));
+    mockUserPerms.can.mockImplementation(
+      (perm: unknown, _cf: unknown, _org: unknown, spaceGuid?: unknown) => {
+        if (perm === CfCurrentUserPermissions.SPACE_CHANGE_ROLES && spaceGuid === 'spaceA') {
+          return of(true);
+        }
+        return of(false);
+      },
+    );
+
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+
+    // Org cell gating: only org-level permission (false for orgX)
+    expect(component.canEditOrg('orgX')).toBe(false);
+
+    // Pick the org to trigger space loading + per-space permission resolution
+    component.pickOrg(orgX);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Space-level permission resolved per-space
+    expect(component.canChangeSpaceRoles('orgX', 'spaceA')).toBe(true);
+    expect(component.canChangeSpaceRoles('orgX', 'spaceB')).toBe(false);
   });
 
   it('materializes a picked org as an accordion section with org + space roles', async () => {
