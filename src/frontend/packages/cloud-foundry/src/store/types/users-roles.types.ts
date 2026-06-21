@@ -1,5 +1,6 @@
 import { CfUserRoleParams, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames } from './cf-user.types';
 import { StUser } from '../../services/endpoint-data/stratos-types';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS, shortLabelOfScoped, longLabelOfScoped, RoleScope } from '../../roles/role-registry';
 
 export interface UsersRolesState {
   cfGuid: string;
@@ -34,6 +35,18 @@ export class CfRoleChangeWithNames extends CfRoleChange {
   roleName!: string;
 }
 
+function buildLabels(defs: ReadonlyArray<{ stratos: string; bucket: string }>, scope: RoleScope) {
+  const short: Record<string, string> = {};
+  const long: Record<string, string> = {};
+  for (const d of defs) {
+    const s = shortLabelOfScoped(d.stratos);
+    const l = longLabelOfScoped(d.stratos, scope);
+    short[d.stratos] = s; short[d.bucket] = s;
+    long[d.stratos] = l;  long[d.bucket] = l;
+  }
+  return { short, long };
+}
+
 export const UserRoleLabels: {
   org: {
     short: Record<OrgUserRoleNames | CfUserRoleParams, string>;
@@ -44,48 +57,6 @@ export const UserRoleLabels: {
     long: Record<SpaceUserRoleNames | CfUserRoleParams, string>;
   };
 } = {
-  org: {
-    short: {
-      [OrgUserRoleNames.MANAGER]: 'Manager',
-      [CfUserRoleParams.MANAGED_ORGS]: 'Manager',
-      [OrgUserRoleNames.BILLING_MANAGERS]: 'Billing Manager',
-      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Billing Manager',
-      [OrgUserRoleNames.AUDITOR]: 'Auditor',
-      [CfUserRoleParams.AUDITED_ORGS]: 'Auditor',
-      [OrgUserRoleNames.USER]: 'User',
-      [CfUserRoleParams.ORGANIZATIONS]: 'User'
-    } as Record<OrgUserRoleNames | CfUserRoleParams, string>,
-    long: {
-      [OrgUserRoleNames.MANAGER]: 'Org Manager',
-      [CfUserRoleParams.MANAGED_ORGS]: 'Org Manager',
-      [OrgUserRoleNames.BILLING_MANAGERS]: 'Org Billing Manager',
-      [CfUserRoleParams.BILLING_MANAGER_ORGS]: 'Org Billing Manager',
-      [OrgUserRoleNames.AUDITOR]: 'Org Auditor',
-      [CfUserRoleParams.AUDITED_ORGS]: 'Org Auditor',
-      [OrgUserRoleNames.USER]: 'Org User',
-      [CfUserRoleParams.ORGANIZATIONS]: 'Org User'
-    } as Record<OrgUserRoleNames | CfUserRoleParams, string>
-  },
-  space: {
-    short: {
-      [SpaceUserRoleNames.MANAGER]: 'Manager',
-      [CfUserRoleParams.MANAGED_SPACES]: 'Manager',
-      [SpaceUserRoleNames.DEVELOPER]: 'Developer',
-      [CfUserRoleParams.SPACES]: 'Developer',
-      [SpaceUserRoleNames.AUDITOR]: 'Auditor',
-      [CfUserRoleParams.AUDITED_SPACES]: 'Auditor',
-      [SpaceUserRoleNames.SUPPORTER]: 'Supporter',
-      [CfUserRoleParams.SUPPORTED_SPACES]: 'Supporter',
-    } as Record<SpaceUserRoleNames | CfUserRoleParams, string>,
-    long: {
-      [SpaceUserRoleNames.MANAGER]: 'Space Manager',
-      [CfUserRoleParams.MANAGED_SPACES]: 'Space Manager',
-      [SpaceUserRoleNames.DEVELOPER]: 'Space Developer',
-      [CfUserRoleParams.SPACES]: 'Space Developer',
-      [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
-      [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
-      [SpaceUserRoleNames.SUPPORTER]: 'Space Supporter',
-      [CfUserRoleParams.SUPPORTED_SPACES]: 'Space Supporter',
-    } as Record<SpaceUserRoleNames | CfUserRoleParams, string>
-  }
+  org: buildLabels(ORG_ROLE_DEFS, 'org') as any,
+  space: buildLabels(SPACE_ROLE_DEFS, 'space') as any,
 };
