@@ -86,11 +86,18 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** Permission map: orgGuid → can edit */
   private readonly canEditByOrg = signal<Record<string, boolean>>({});
 
-  /** Orgs filtered by permission — what the picker offers */
-  readonly allowedOrgs = computed(() => {
-    const perms = this.canEditByOrg();
-    return this.allOrgs().filter(o => perms[o.metadata.guid] === true);
-  });
+  /** Orgs the picker offers.
+   *
+   * fetchOrgs already applies the broadened filter (ORGANIZATION_CHANGE_ROLES OR
+   * SPACE_CHANGE_ROLES on any space within the org), so allOrgs is the correct
+   * admissible set.  We do NOT re-narrow here by canEditByOrg — that would
+   * exclude space-manager-only users whose org-level check is false.
+   * canEditByOrg is still used for org-cell gating (concern #1).
+   */
+  readonly allowedOrgs = computed(() => this.allOrgs());
+
+  /** Per-space permission map: `${orgGuid}:${spaceGuid}` → can change space roles */
+  private readonly canChangeSpaceByKey = signal<Record<string, boolean>>({});
 
   /** The orgs the user has selected (or the locked org) */
   readonly pickedOrgs = signal<APIResource<IOrganization>[]>([]);
@@ -240,8 +247,31 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     }
     const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe(spaces => {
       this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
+      this.resolveSpacePermissions(orgGuid, spaces);
     });
     this.subs.add(spaceSub);
+  }
+
+  /** Resolve SPACE_CHANGE_ROLES per loaded space and write into canChangeSpaceByKey. */
+  private resolveSpacePermissions(orgGuid: string, spaces: SpaceEntry[]): void {
+    if (!spaces.length) {
+      return;
+    }
+    const obs = spaces.map(space =>
+      this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, orgGuid, space.guid).pipe(
+        map(can => ({ key: `${orgGuid}:${space.guid}`, can })),
+      ),
+    );
+    const permSub = combineLatest(obs).subscribe(results => {
+      this.canChangeSpaceByKey.update(current => {
+        const next = { ...current };
+        for (const { key, can } of results) {
+          next[key] = can;
+        }
+        return next;
+      });
+    });
+    this.subs.add(permSub);
   }
 
   spacesFor(orgGuid: string): SpaceEntry[] {
@@ -348,6 +378,15 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   canEditOrg(orgGuid: string): boolean {
     return this.canEditByOrg()[orgGuid] ?? false;
+  }
+
+  /** Returns true if the logged-in user may change roles in the given space.
+   * Resolves to true for org managers (ORGANIZATION_CHANGE_ROLES arm) and
+   * space managers of that specific space (SPACE_MANAGER arm).
+   * Defaults to false until the space-permission observable fires.
+   */
+  canChangeSpaceRoles(orgGuid: string, spaceGuid: string): boolean {
+    return this.canChangeSpaceByKey()[`${orgGuid}:${spaceGuid}`] ?? false;
   }
 
   // --- Toggle handlers ---

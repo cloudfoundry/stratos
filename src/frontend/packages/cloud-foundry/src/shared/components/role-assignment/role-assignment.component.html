@@ -92,7 +92,7 @@
                   >
                     <app-role-tristate-checkbox
                       [checked]="checkedForSpace(org.metadata.guid, space.guid, def.name)"
-                      [disabled]="!canEditOrg(org.metadata.guid)"
+                      [disabled]="!canChangeSpaceRoles(org.metadata.guid, space.guid)"
                       [label]="def.label"
                       (toggled)="onToggleSpaceRole(org, space, def.name, $event)"
                     ></app-role-tristate-checkbox>
