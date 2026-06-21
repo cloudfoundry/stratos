@@ -190,5 +190,17 @@ describe('cf-roles-state.helpers', () => {
       expect(state[cf].spaces[testSpaceGuid].isDeveloper).toBe(true);
       expect(state[cf].organizations[testOrgGuid].spaceGuids).toContain(testSpaceGuid);
     });
+    it('adds a space MANAGER role via the scoped registry path (locks scope-aware lookup)', () => {
+      // SpaceUserRoleNames.MANAGER and OrgUserRoleNames.MANAGER share the enum value 'managers'.
+      // The old switch returned the ORG arm first (value coincidence). The registry resolves
+      // unambiguously by scope — this test locks that behaviour via the public path.
+      let state = applyCfUserRelations({}, CfUserRelationTypes.ORGANIZATIONS, cf, orgData());
+      state = applyCfRoleChange(state, {
+        endpointGuid: cf, isSpace: true, entityGuid: testSpaceGuid, orgGuid: testOrgGuid,
+        permissionTypeKey: SpaceUserRoleNames.MANAGER, updateConnectedUser: true,
+      }, true);
+      expect(state[cf].spaces[testSpaceGuid].isManager).toBe(true);
+      expect(state[cf].organizations[testOrgGuid].spaceGuids).toContain(testSpaceGuid);
+    });
   });
 });

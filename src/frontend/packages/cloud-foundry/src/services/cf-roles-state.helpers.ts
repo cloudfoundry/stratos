@@ -14,6 +14,7 @@ import {
   ISpaceRoleState,
   ISpacesRoleState,
 } from '../store/types/cf-current-user-roles.types';
+import { permissionOfScoped, RoleScope } from '../roles/role-registry';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../store/types/cf-user.types';
 import { CfPermissionStrings, CfScopeStrings } from '../user-permissions/cf-user-permissions.types';
 
@@ -350,17 +351,8 @@ export interface CfRoleCacheChange {
   updateConnectedUser: boolean;
 }
 
-function roleNameToPermission(roleName: OrgUserRoleNames | SpaceUserRoleNames): CfPermissionStrings {
-  switch (roleName) {
-    case OrgUserRoleNames.AUDITOR: return CfPermissionStrings.ORG_AUDITOR;
-    case OrgUserRoleNames.BILLING_MANAGERS: return CfPermissionStrings.ORG_BILLING_MANAGER;
-    case OrgUserRoleNames.MANAGER: return CfPermissionStrings.ORG_MANAGER;
-    case OrgUserRoleNames.USER: return CfPermissionStrings.ORG_USER;
-    case SpaceUserRoleNames.AUDITOR: return CfPermissionStrings.SPACE_AUDITOR;
-    case SpaceUserRoleNames.DEVELOPER: return CfPermissionStrings.SPACE_DEVELOPER;
-    case SpaceUserRoleNames.MANAGER: return CfPermissionStrings.SPACE_MANAGER;
-    case SpaceUserRoleNames.SUPPORTER: return CfPermissionStrings.SPACE_SUPPORTER;
-  }
+function roleNameToPermission(roleName: OrgUserRoleNames | SpaceUserRoleNames, scope: RoleScope): CfPermissionStrings {
+  return permissionOfScoped(roleName, scope);
 }
 
 /** Apply an add/remove of a single role for the connected user. Was `updateAfterCfRoleChange`. */
@@ -373,7 +365,7 @@ export function applyCfRoleChange(state: IAllCfRolesState, change: CfRoleCacheCh
   if (!endpointState) {
     return state;
   }
-  const permType = roleNameToPermission(change.permissionTypeKey);
+  const permType = roleNameToPermission(change.permissionTypeKey, change.isSpace ? 'space' : 'org');
 
   if (change.isSpace) {
     const spaceState: ISpaceRoleState = (endpointState.spaces[change.entityGuid] as ISpaceRoleState)
