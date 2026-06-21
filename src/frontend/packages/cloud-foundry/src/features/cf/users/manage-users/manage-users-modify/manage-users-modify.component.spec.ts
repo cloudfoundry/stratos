@@ -1,12 +1,15 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, importProvidersFrom, NO_ERRORS_SCHEMA } from '@angular/core';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject, of } from 'rxjs';
+
+import { OrgUserRoleNames } from '../../../../../store/types/cf-user.types';
+import { RoleAssignmentDriver } from '../../../../../shared/components/role-assignment/role-assignment.test-deps';
 
 import { CurrentUserPermissionsService } from '@stratosui/core';
 
@@ -74,7 +77,6 @@ function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
     imports: [
       UsersRolesModifyComponent,
     ],
-    schemas: [NO_ERRORS_SCHEMA],
     providers: [
       provideZonelessChangeDetection(),
       provideRouter([]),
@@ -205,5 +207,48 @@ describe('UsersRolesModifyComponent — org-scoped (lockedOrg)', () => {
     const locked = component.lockedOrg();
     expect(locked).toBeDefined();
     expect(locked?.guid).toBe('org-guid-locked');
+  });
+});
+
+describe('UsersRolesModifyComponent — driver: real widget toggle flows through to rolesData', () => {
+  // Scope: CF-level (no orgGuid) so the org picker is visible and the driver can use it.
+  // The mock CfRolesService.fetchOrgs returns a single org 'Test Org' / 'org-guid'.
+  // Seeding a real user makes diffToChanges produce a non-empty change set.
+  let component: UsersRolesModifyComponent;
+  let fixture: ComponentFixture<UsersRolesModifyComponent>;
+
+  beforeEach(async () => {
+    buildTestBed({ orgGuid: '', spaceGuid: '' }); // CF-level: no locked org
+
+    fixture = TestBed.createComponent(UsersRolesModifyComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  });
+
+  it('toggling Manager via the real widget DOM updates rolesData.changedRoles()', async () => {
+    const rolesData = TestBed.inject(CfUsersRolesDataService);
+
+    // Seed a user so diffToChanges has a non-empty user list to iterate over.
+    rolesData.setUsers('cfGuid', [mockUser1]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Use the shared DOM driver to pick the org then toggle the Manager role.
+    const driver = new RoleAssignmentDriver(fixture);
+    driver.pickOrg('Test Org');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    driver.toggleOrgRole('org-guid', 'Manager');
+    fixture.detectChanges();
+
+    // The widget emits changeSet → UsersRolesModifyComponent.onChangeSet stores it
+    // in rolesData.setChanges. Verify the change landed with the correct role.
+    const changes = rolesData.changedRoles();
+    expect(changes.length).toBeGreaterThan(0);
+    expect(changes.some(c => c.role === OrgUserRoleNames.MANAGER && c.add === true)).toBe(true);
   });
 });
