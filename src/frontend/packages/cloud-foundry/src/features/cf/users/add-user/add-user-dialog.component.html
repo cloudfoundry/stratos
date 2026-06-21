@@ -68,7 +68,7 @@
     <div class="text-sm font-medium text-content-text">Scope &amp; roles (optional)</div>
     <app-role-assignment
       [cfGuid]="data.cfGuid"
-      [users]="[]"
+      [users]="pendingUsers"
       [baseline]="{}"
       [lockedOrg]="orgLocked() ? { guid: data.orgGuid!, name: data.orgName! } : undefined"
       (changeSet)="onRoleChangeSet($event)"
