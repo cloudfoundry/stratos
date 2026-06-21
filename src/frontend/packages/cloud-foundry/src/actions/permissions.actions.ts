@@ -15,5 +15,6 @@ export enum CfUserRelationTypes {
   ORGANIZATIONS = 'organizations',
   AUDITED_SPACES = 'audited_spaces',
   MANAGED_SPACES = 'managed_spaces',
-  SPACES = 'spaces'
+  SPACES = 'spaces',
+  SUPPORTED_SPACES = 'supported_spaces',
 }
