@@ -11,53 +11,10 @@
 @if ((usersWithWarning$ | async).length) {
   <div class="modify-users__users-warning"><i>* Not all roles are known for user.</i></div>
 }
-<div class="modify-users__org-roles">
-  <app-signal-list [config]="listConfig">
-    <ng-template appSignalListCell="org" let-row>
-      <app-table-cell-select-org [row]="row"></app-table-cell-select-org>
-    </ng-template>
-    <ng-template appSignalListCell="manager" let-row>
-      <app-cf-role-checkbox
-        [cfGuid]="row.entity.cfGuid"
-        [orgGuid]="$safeNavigationMigration(row?.metadata.guid)"
-        [orgName]="$safeNavigationMigration(row?.entity.name)"
-        [spaceName]="null"
-        [spaceGuid]="''"
-        [role]="orgRoles.MANAGER"
-      ></app-cf-role-checkbox>
-    </ng-template>
-    <ng-template appSignalListCell="auditor" let-row>
-      <app-cf-role-checkbox
-        [cfGuid]="row.entity.cfGuid"
-        [orgGuid]="$safeNavigationMigration(row?.metadata.guid)"
-        [orgName]="$safeNavigationMigration(row?.entity.name)"
-        [spaceName]="null"
-        [spaceGuid]="''"
-        [role]="orgRoles.AUDITOR"
-      ></app-cf-role-checkbox>
-    </ng-template>
-    <ng-template appSignalListCell="billingManager" let-row>
-      <app-cf-role-checkbox
-        [cfGuid]="row.entity.cfGuid"
-        [orgGuid]="$safeNavigationMigration(row?.metadata.guid)"
-        [orgName]="$safeNavigationMigration(row?.entity.name)"
-        [spaceName]="null"
-        [spaceGuid]="''"
-        [role]="orgRoles.BILLING_MANAGERS"
-      ></app-cf-role-checkbox>
-    </ng-template>
-    <ng-template appSignalListCell="user" let-row>
-      <app-cf-role-checkbox
-        [cfGuid]="row.entity.cfGuid"
-        [orgGuid]="$safeNavigationMigration(row?.metadata.guid)"
-        [orgName]="$safeNavigationMigration(row?.entity.name)"
-        [spaceName]="null"
-        [spaceGuid]="''"
-        [role]="orgRoles.USER"
-      ></app-cf-role-checkbox>
-    </ng-template>
-  </app-signal-list>
-</div>
-<div class="modify-users__spaces-roles">
-  <div #spaceRolesTable></div>
-</div>
+<app-role-assignment
+  [cfGuid]="activeRouteCfOrgSpace.cfGuid"
+  [users]="rolesDataUsers()"
+  [baseline]="baseline()"
+  [lockedOrg]="lockedOrg()"
+  (changeSet)="onChangeSet($event)"
+></app-role-assignment>
