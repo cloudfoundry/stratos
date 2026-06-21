@@ -1,0 +1,7 @@
+<app-checkbox
+  [checked]="checked === true"
+  [indeterminate]="checked === null"
+  [disabled]="disabled"
+  [matTooltip]="tooltip"
+  [matTooltipPosition]="'below'"
+  (change)="onChange($event.checked)">{{ label }}</app-checkbox>
