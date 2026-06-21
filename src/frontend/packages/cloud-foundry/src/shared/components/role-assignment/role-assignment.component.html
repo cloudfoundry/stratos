@@ -85,7 +85,7 @@
             class="role-assignment__space-search"
           />
           @for (space of filteredSpacesFor(org.metadata.guid); track space.guid) {
-            <div class="role-assignment__space-section">
+            <div class="role-assignment__space-section" [attr.data-space]="space.guid">
               <div class="role-assignment__space-name">{{ space.name }}</div>
               <div class="role-assignment__role-row">
                 @for (def of spaceRoleDefs; track def.name) {

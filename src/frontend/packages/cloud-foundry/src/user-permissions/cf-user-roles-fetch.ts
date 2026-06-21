@@ -30,10 +30,10 @@ export interface CfRolesFetchEndpoint {
 }
 
 /**
- * Single-fetch replacement for the legacy 7-fanout permission fetch.
+ * Single-fetch replacement for the legacy 8-fanout permission fetch.
  *
  * Hits GET /pp/v1/cf/current-user-roles/{endpointGuid} once and applies each of
- * the 7 returned buckets to the signal source of truth via the CF roles facade
+ * the 8 returned buckets to the signal source of truth via the CF roles facade
  * (replaces the former per-bucket `GetCurrentCfUserRelationsComplete` dispatch).
  * Missing buckets default to `[]` so a now-empty relation clears prior roles.
  * On HTTP error: swallow + return false so the caller can mark the endpoint
