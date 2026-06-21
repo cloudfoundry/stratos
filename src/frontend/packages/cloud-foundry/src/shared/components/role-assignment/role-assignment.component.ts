@@ -8,6 +8,7 @@ import {
   Output,
   computed,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { Subscription, combineLatest } from 'rxjs';
@@ -52,8 +53,8 @@ interface SpaceEntry {
 })
 export class RoleAssignmentComponent implements OnInit, OnDestroy {
   @Input({ required: true }) cfGuid!: string;
-  @Input() users: StUser[] = [];
-  @Input() baseline: CfUserRolesSelected = {};
+  readonly users = input<StUser[]>([]);
+  readonly baseline = input<CfUserRolesSelected>({});
   @Input() lockedOrg?: { guid: string; name: string };
 
   @Output() changeSet = new EventEmitter<CfRoleChange[]>();
@@ -272,29 +273,31 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Role checked state ---
 
   checkedForOrg(orgGuid: string, role: OrgUserRoleNames): boolean | null {
-    return computeChecked(role, this.users, this.baseline, this.selection(), orgGuid);
+    return computeChecked(role, this.users(), this.baseline(), this.selection(), orgGuid);
   }
 
   checkedForSpace(orgGuid: string, spaceGuid: string, role: SpaceUserRoleNames): boolean | null {
-    return computeChecked(role, this.users, this.baseline, this.selection(), orgGuid, spaceGuid);
+    return computeChecked(role, this.users(), this.baseline(), this.selection(), orgGuid, spaceGuid);
   }
 
   // --- Org-USER auto-disable rule ---
   // Org USER checkbox is disabled when any other org or space role is set for this org.
   // Ported from CfRoleCheckboxComponent.isDisabled / hasOrgSpaceRole (lines 336-367).
   //
-  // Memoized: recomputes only when selection or spacesByOrg changes (both are signals).
+  // Memoized: recomputes when selection, spacesByOrg, users, or baseline changes (all signals).
   // Cost is bounded: the dialog has low CD frequency and Add User operates on 1 user.
   private readonly orgUserDisabledMap = computed<Record<string, boolean>>(() => {
     const sel = this.selection();
     const spacesByOrg = this.spacesByOrg();
+    const users = this.users();
+    const baseline = this.baseline();
     const result: Record<string, boolean> = {};
 
     for (const orgGuid of Object.keys(sel).concat(Object.keys(spacesByOrg))) {
       if (orgGuid in result) {
         continue;
       }
-      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg);
+      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg, users, baseline);
     }
     return result;
   });
@@ -303,13 +306,15 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     orgGuid: string,
     sel: RoleSelection,
     spacesByOrg: Record<string, SpaceEntry[]>,
+    users: StUser[],
+    baseline: CfUserRolesSelected,
   ): boolean {
     const selOrg = sel[orgGuid];
 
     // Check org roles other than USER
     const otherOrgRoles = [OrgUserRoleNames.MANAGER, OrgUserRoleNames.BILLING_MANAGERS, OrgUserRoleNames.AUDITOR];
     for (const role of otherOrgRoles) {
-      const checked = computeChecked(role, this.users, this.baseline, sel, orgGuid);
+      const checked = computeChecked(role, users, baseline, sel, orgGuid);
       if (checked !== false) {
         return true;
       }
@@ -319,7 +324,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     const spaces = spacesByOrg[orgGuid] ?? [];
     for (const space of spaces) {
       for (const def of this.spaceRoleDefs) {
-        const checked = computeChecked(def.name, this.users, this.baseline, sel, orgGuid, space.guid);
+        const checked = computeChecked(def.name, users, baseline, sel, orgGuid, space.guid);
         if (checked !== false) {
           return true;
         }
@@ -381,7 +386,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
         },
       },
     }));
-    this.changeSet.emit(diffToChanges(this.users, this.baseline, this.selection()));
+    this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
   }
 
   onToggleSpaceRole(org: APIResource<IOrganization>, space: SpaceEntry, role: SpaceUserRoleNames, value: boolean): void {
@@ -406,6 +411,6 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
         },
       };
     });
-    this.changeSet.emit(diffToChanges(this.users, this.baseline, this.selection()));
+    this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
   }
 }
