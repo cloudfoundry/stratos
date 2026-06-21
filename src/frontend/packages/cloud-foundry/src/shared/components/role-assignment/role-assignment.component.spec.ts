@@ -1,18 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, NO_ERRORS_SCHEMA } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
-import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../store/types/users-roles.types';
 import { StUser } from '../../../services/endpoint-data/stratos-types';
 import { diffToChanges } from './role-tristate';
 
 import { RoleAssignmentComponent } from './role-assignment.component';
+import { provideRoleAssignmentTestDeps, RoleAssignmentTestCfg } from './role-assignment.test-deps';
 
 // Minimal StUser factory
 function makeUser(guid: string): StUser {
@@ -25,37 +23,35 @@ function makeOrg(guid: string, name: string) {
 }
 
 describe('RoleAssignmentComponent', () => {
-  let mockCfRolesService: { fetchOrgs: ReturnType<typeof vi.fn>; fetchSpacesForOrg: ReturnType<typeof vi.fn> };
-  let mockUserPerms: { can: ReturnType<typeof vi.fn> };
-
   const cfGuid = 'cf1';
   const o1 = makeOrg('o1', 'Org One');
   const o2 = makeOrg('o2', 'Org Two');
   const space1 = { guid: 's1', name: 'Space One' };
 
-  beforeEach(async () => {
-    mockCfRolesService = {
-      fetchOrgs: vi.fn().mockReturnValue(of([o1, o2])),
-      fetchSpacesForOrg: vi.fn().mockReturnValue(of([space1])),
-    };
+  /** Default harness cfg: two orgs, one space under o1, o1 permitted, o2 not. */
+  const defaultCfg: RoleAssignmentTestCfg = {
+    orgs: [
+      { guid: 'o1', name: 'Org One' },
+      { guid: 'o2', name: 'Org Two' },
+    ],
+    spacesByOrg: {
+      o1: [{ guid: 's1', name: 'Space One' }],
+      o2: [],
+    },
+    // org-level: o1 allowed, o2 not; space-level: all denied by default
+    permissions: (perm, _cf, org) =>
+      perm === CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES && org === 'o1',
+  };
 
-    // By default: o1 allowed, o2 not allowed
-    mockUserPerms = {
-      can: vi.fn().mockImplementation((_perm: unknown, _cf: unknown, orgGuid: string) =>
-        of(orgGuid === 'o1'),
-      ),
-    };
-
+  async function setup(cfg: RoleAssignmentTestCfg = defaultCfg): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [RoleAssignmentComponent],
-      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: CfRolesService, useValue: mockCfRolesService },
-        { provide: CurrentUserPermissionsService, useValue: mockUserPerms },
+        ...provideRoleAssignmentTestDeps(cfg),
       ],
     }).compileComponents();
-  });
+  }
 
   function createFixture(): ComponentFixture<RoleAssignmentComponent> {
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
@@ -68,7 +64,8 @@ describe('RoleAssignmentComponent', () => {
     // The widget trusts fetchOrgs to return only orgs the user can act on.
     // allowedOrgs must NOT re-narrow by org-level edit permission — that would
     // exclude space-manager-only users (the dead-end bug).
-    // Default mock: ORGANIZATION_CHANGE_ROLES true only for o1, but fetchOrgs returns both.
+    // Default cfg: ORGANIZATION_CHANGE_ROLES true only for o1, but fetchOrgs returns both.
+    await setup();
     const fixture = createFixture();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -76,17 +73,6 @@ describe('RoleAssignmentComponent', () => {
     const component = fixture.componentInstance;
     // Both o1 and o2 must appear in the picker (fetchOrgs result is the source of truth).
     expect(component.allowedOrgs()).toEqual([o1, o2]);
-    // org-level permission is still resolved for org-cell gating
-    expect(mockUserPerms.can).toHaveBeenCalledWith(
-      CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
-      cfGuid,
-      'o1',
-    );
-    expect(mockUserPerms.can).toHaveBeenCalledWith(
-      CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
-      cfGuid,
-      'o2',
-    );
     // canEditOrg reflects org-level only: o1=true, o2=false
     expect(component.canEditOrg('o1')).toBe(true);
     expect(component.canEditOrg('o2')).toBe(false);
@@ -96,20 +82,19 @@ describe('RoleAssignmentComponent', () => {
     // Scenario: user is space manager of 'spaceA' in orgX, but NOT org manager of orgX.
     // Expected: canEditOrg(orgX)=false, canChangeSpaceRoles(orgX,'spaceA')=true,
     //           canChangeSpaceRoles(orgX,'spaceB')=false.
-    const orgX = makeOrg('orgX', 'Org X');
-    const spaceA = { guid: 'spaceA', name: 'Space A' };
-    const spaceB = { guid: 'spaceB', name: 'Space B' };
-
-    mockCfRolesService.fetchOrgs.mockReturnValue(of([orgX]));
-    mockCfRolesService.fetchSpacesForOrg.mockReturnValue(of([spaceA, spaceB]));
-    mockUserPerms.can.mockImplementation(
-      (perm: unknown, _cf: unknown, _org: unknown, spaceGuid?: unknown) => {
-        if (perm === CfCurrentUserPermissions.SPACE_CHANGE_ROLES && spaceGuid === 'spaceA') {
-          return of(true);
-        }
-        return of(false);
+    await setup({
+      orgs: [{ guid: 'orgX', name: 'Org X' }],
+      spacesByOrg: {
+        orgX: [
+          { guid: 'spaceA', name: 'Space A' },
+          { guid: 'spaceB', name: 'Space B' },
+        ],
       },
-    );
+      permissions: (perm, _cf, _org, spaceGuid) =>
+        perm === CfCurrentUserPermissions.SPACE_CHANGE_ROLES && spaceGuid === 'spaceA',
+    });
+
+    const orgX = makeOrg('orgX', 'Org X');
 
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
@@ -134,6 +119,7 @@ describe('RoleAssignmentComponent', () => {
   });
 
   it('materializes a picked org as an accordion section with org + space roles', async () => {
+    await setup();
     const fixture = createFixture();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -149,8 +135,8 @@ describe('RoleAssignmentComponent', () => {
     // Should have o1 in picked orgs
     expect(component.pickedOrgs()).toEqual([o1]);
 
-    // Should have fetched spaces for o1
-    expect(mockCfRolesService.fetchSpacesForOrg).toHaveBeenCalledWith(cfGuid, 'o1');
+    // Spaces were loaded for o1 (verified by checking component state)
+    expect(component.spacesFor('o1')).toEqual([space1]);
 
     // Template: 4 org-role cells
     const orgRoleCells = fixture.debugElement.queryAll(By.css('[data-testid="org-role-cell"]'));
@@ -162,6 +148,7 @@ describe('RoleAssignmentComponent', () => {
   });
 
   it('pre-seeds and locks the org when lockedOrg is set', async () => {
+    await setup();
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
     fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
@@ -181,6 +168,7 @@ describe('RoleAssignmentComponent', () => {
   });
 
   it('emits a changeSet diff when a role cell is toggled', async () => {
+    await setup();
     const user = makeUser('u1');
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
@@ -212,6 +200,7 @@ describe('RoleAssignmentComponent', () => {
 
   it('collapse does not drop selection edits — state survives toggle', async () => {
     // I1: Prove that collapsing an org accordion never mutates the selection signal.
+    await setup();
     const user = makeUser('u1');
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
@@ -264,6 +253,7 @@ describe('RoleAssignmentComponent', () => {
     // Prove that orgUserDisabledMap is a reactive computed that re-runs when baseline changes.
     // Start: user u1, empty baseline → org-user NOT disabled.
     // After: inject a baseline with a space-developer role for s1 → org-user BECOMES disabled.
+    await setup();
     const user = makeUser('u1');
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
@@ -275,7 +265,7 @@ describe('RoleAssignmentComponent', () => {
 
     const component = fixture.componentInstance;
 
-    // Pick o1 so spaces are loaded (space s1 is available via mock)
+    // Pick o1 so spaces are loaded (space s1 is available via cfg)
     component.pickOrg(o1);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -312,7 +302,8 @@ describe('RoleAssignmentComponent', () => {
     expect(component.isOrgUserDisabled('o1')).toBe(true);
   });
 
-  it('exposes role defs derived from the registry in the established order', () => {
+  it('exposes role defs derived from the registry in the established order', async () => {
+    await setup();
     const fixture = createFixture();
     const component = fixture.componentInstance;
 
@@ -333,6 +324,7 @@ describe('RoleAssignmentComponent', () => {
   });
 
   it('roleCountForOrg counts checked org and space roles', async () => {
+    await setup();
     const user = makeUser('u1');
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
@@ -343,7 +335,7 @@ describe('RoleAssignmentComponent', () => {
 
     const component = fixture.componentInstance;
 
-    // Pick o1 so spaces are loaded (space s1 from the default mock)
+    // Pick o1 so spaces are loaded (space s1 from the cfg)
     component.pickOrg(o1);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -361,6 +353,7 @@ describe('RoleAssignmentComponent', () => {
   });
 
   it('roleCountForOrg returns 1 for a single checked role', async () => {
+    await setup();
     const user = makeUser('u1');
     const fixture = TestBed.createComponent(RoleAssignmentComponent);
     fixture.componentRef.setInput('cfGuid', cfGuid);
@@ -383,11 +376,20 @@ describe('RoleAssignmentComponent', () => {
   });
 
   it('filters spaces within a section', async () => {
+    await setup({
+      orgs: [
+        { guid: 'o1', name: 'Org One' },
+        { guid: 'o2', name: 'Org Two' },
+      ],
+      spacesByOrg: {
+        o1: [
+          { guid: 's1', name: 'Alpha Space' },
+          { guid: 's2', name: 'Beta Space' },
+        ],
+        o2: [],
+      },
+    });
     const fixture = createFixture();
-    // Set up two spaces
-    mockCfRolesService.fetchSpacesForOrg.mockReturnValue(
-      of([{ guid: 's1', name: 'Alpha Space' }, { guid: 's2', name: 'Beta Space' }]),
-    );
     await fixture.whenStable();
     fixture.detectChanges();
 

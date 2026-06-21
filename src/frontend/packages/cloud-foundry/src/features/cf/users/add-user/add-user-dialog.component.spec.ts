@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output, provideZonelessChangeDetection } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -14,32 +14,31 @@ import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-use
 import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { OrgUserRoleNames } from '../../../../store/types/cf-user.types';
-import { RoleAssignmentComponent } from '../../../../shared/components/role-assignment/role-assignment.component';
+import {
+  provideRoleAssignmentTestDeps,
+  RoleAssignmentDriver,
+} from '../../../../shared/components/role-assignment/role-assignment.test-deps';
 import * as addModule from '../../../../shared/signal-list-configs/user/cf-users-add';
 import { AddUserDialogComponent, AddUserDialogData } from './add-user-dialog.component';
 
 const CF_GUID = 'test-cf-guid';
 
-// ── Stub for RoleAssignmentComponent ──────────────────────────────────────────
-// Avoids pulling in CfRolesService / CurrentUserPermissionsService in dialog specs.
-@Component({
-  selector: 'app-role-assignment',
-  standalone: true,
-  template: '<div class="role-assignment-stub"></div>',
-})
-class RoleAssignmentStub {
-  @Input() cfGuid!: string;
-  @Input() users: any[] = [];
-  @Input() baseline: any = {};
-  @Input() lockedOrg: { guid: string; name: string } | undefined = undefined;
-  @Output() changeSet = new EventEmitter<CfRoleChange[]>();
-}
+// Harness cfg: one org (org-1 / Org One) with no spaces, all permissions granted.
+const TEST_HARNESS_CFG = {
+  orgs: [{ guid: 'org-1', name: 'Org One' }],
+  spacesByOrg: { 'org-1': [] },
+};
 
 interface MakeOpts {
   idpsOrigins?: string[];
 }
 
-function make(data: AddUserDialogData, opts: MakeOpts = {}) {
+function make(data: AddUserDialogData, opts: MakeOpts = {}): {
+  cmp: AddUserDialogComponent;
+  fixture: ComponentFixture<AddUserDialogComponent>;
+  close: ReturnType<typeof vi.fn>;
+  listOrigins: ReturnType<typeof vi.fn>;
+} {
   const close = vi.fn();
   const listOrigins = vi.fn().mockReturnValue(of(opts.idpsOrigins ?? []));
 
@@ -57,16 +56,14 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}) {
       { provide: TailwindSnackBarService, useValue: { open: vi.fn(), error: vi.fn() } },
       { provide: CfUsersPagedDataService, useValue: {} },
       { provide: CnsiUsersSnapshotService, useValue: {} },
+      // Real RoleAssignmentComponent services (no stub, no overrideComponent).
+      ...provideRoleAssignmentTestDeps(TEST_HARNESS_CFG),
     ],
-  })
-  // Override the real RoleAssignmentComponent with a stub to keep tests hermetic.
-  .overrideComponent(AddUserDialogComponent, {
-    remove: { imports: [RoleAssignmentComponent] },
-    add: { imports: [RoleAssignmentStub] },
   });
 
   const fixture = TestBed.createComponent(AddUserDialogComponent);
-  return { cmp: fixture.componentInstance, close, listOrigins };
+  fixture.detectChanges();
+  return { cmp: fixture.componentInstance, fixture, close, listOrigins };
 }
 
 describe('AddUserDialogComponent', () => {
@@ -99,7 +96,7 @@ describe('AddUserDialogComponent', () => {
   });
 
   it('locks org when opened with an orgGuid', () => {
-    const { cmp } = make({ cfGuid: CF_GUID, orgGuid: 'org-123', userInviteAllowed: false });
+    const { cmp } = make({ cfGuid: CF_GUID, orgGuid: 'org-1', userInviteAllowed: false });
     expect(cmp.orgLocked()).toBe(true);
   });
 
@@ -222,6 +219,59 @@ describe('AddUserDialogComponent', () => {
     // Partial failure → dialog stays open and submit re-enables.
     expect(close).not.toHaveBeenCalled();
     expect(c.submitting()).toBe(false);
+    spy.mockRestore();
+  });
+
+  // ── EMPTY-GRANTS REGRESSION TEST ──────────────────────────────────────────
+  // This is the regression net for the Phase 4 Critical: "Add User granting no
+  // roles because diffToChanges iterated over an empty users array."
+  //
+  // Path: pick org → click Manager checkbox via the real widget DOM → submit
+  //   → addUsers called with req.changes containing the toggled role.
+  //
+  // The real RoleAssignmentComponent is rendered (no stub). The driver drives
+  // its DOM to produce a real changeSet emission. Confirms that the sentinel
+  // [users] binding is non-empty (so diffToChanges runs) and the change flows
+  // all the way to addUsers.
+
+  it('grants the selected roles when adding a user (no empty change set)', async () => {
+    const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
+
+    // Open with a locked org so the org section is auto-shown (picker hidden).
+    const { cmp, fixture } = make({
+      cfGuid: CF_GUID,
+      orgGuid: 'org-1',
+      orgName: 'Org One',
+      userInviteAllowed: false,
+    });
+    const c = cmp as any;
+
+    // Wait for async init (fetchOrgs subscription + permission resolution).
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The real widget is now rendered.  Drive it: toggle the Manager org role.
+    const driver = new RoleAssignmentDriver(fixture);
+    driver.toggleOrgRole('org-1', 'Manager');
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // The widget should have emitted a changeSet with one role grant.
+    const roleChanges: CfRoleChange[] = c.roleChanges();
+    expect(roleChanges.length).toBeGreaterThan(0);
+    expect(roleChanges.some(r => r.role === OrgUserRoleNames.MANAGER && r.add === true)).toBe(true);
+
+    // Provide a valid identity and submit.
+    c.identities.set(['alice']);
+    c.identitiesValid.set(true);
+    await c.submit();
+
+    expect(spy).toHaveBeenCalledOnce();
+    const [, req] = spy.mock.calls[0];
+    // req.changes must NOT be empty — this is the regression guard.
+    expect(req.changes.length).toBeGreaterThan(0);
+    expect(req.changes.some((r: CfRoleChange) => r.role === OrgUserRoleNames.MANAGER && r.add === true)).toBe(true);
+
     spy.mockRestore();
   });
 });
