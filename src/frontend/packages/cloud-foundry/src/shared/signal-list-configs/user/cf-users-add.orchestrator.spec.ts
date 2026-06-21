@@ -275,6 +275,76 @@ describe('addUsers', () => {
     expect(deps.rolesData.executeChanges).not.toHaveBeenCalled();
   });
 
+  // ── invite + req.changes (widget hands pre-built space-scoped CfRoleChange[]) ──
+
+  it('invite + req.changes: firstSpaceGuid derived from changes, space role stamped with returned guid', async () => {
+    // This test locks the invite + space-role path through the `changes` branch
+    // (Task 7 follow-up). The widget emits a space-scoped CfRoleChange; the
+    // orchestrator must: (a) pass the change's spaceGuid as the 3rd arg to invite(),
+    // (b) stamp the returned userid onto each change, and (c) call executeChanges.
+    const SPACE_GUID = 'space-abc';
+    const RETURNED_GUID = 'invited-u42';
+
+    const spaceChange: CfRoleChange = {
+      userGuid: '',      // placeholder — addUsers stamps the real guid
+      orgGuid: 'org1',
+      orgName: 'My Org',
+      spaceGuid: SPACE_GUID,
+      spaceName: 'Space ABC',
+      add: true,
+      role: SpaceUserRoleNames.DEVELOPER,
+    };
+
+    const deps = makeDeps({
+      invite: {
+        invite: vi.fn().mockReturnValue(of({
+          error: false,
+          new_invites: [{ userid: RETURNED_GUID, email: 'alice@example.com', success: true, errorCode: '', errorMessage: '', inviteLink: '' }],
+          failed_invites: [],
+        })),
+      },
+    });
+
+    const req = makeReq({
+      mode: 'invite',
+      identities: ['alice@example.com'],
+      selection: { orgRoles: [], spaceRolesBySpace: {} }, // empty sentinel — changes takes precedence
+      changes: [spaceChange],
+    });
+
+    const r = await addUsers(deps, req);
+
+    expect(r).toEqual({ ok: true, total: 1, failed: 0 });
+
+    // (a) invite() called with spaceGuid from the changes list (not '' for org-only)
+    expect(deps.invite.invite).toHaveBeenCalledOnce();
+    const inviteCall = (deps.invite.invite as any).mock.calls[0];
+    expect(inviteCall[2]).toBe(SPACE_GUID);   // 3rd arg = firstSpaceGuid(req)
+    expect(inviteCall[3]).toBe('');           // sentinel: role-free invite
+
+    // (b) real guid from invite response seeded into rolesData
+    expect(deps.rolesData.setUsers).toHaveBeenCalledOnce();
+    const [, users] = (deps.rolesData.setUsers as any).mock.calls[0];
+    expect(users[0].guid).toBe(RETURNED_GUID);
+    expect(deps.rolesData.setIsSetByUsername).toHaveBeenCalledWith(false);
+
+    // (c) change stamped with returned guid, space-scoped fields preserved
+    expect(deps.rolesData.setChanges).toHaveBeenCalledOnce();
+    const [changes] = (deps.rolesData.setChanges as any).mock.calls[0];
+    expect(changes).toHaveLength(1);
+    expect(changes[0].userGuid).toBe(RETURNED_GUID);
+    expect(changes[0].spaceGuid).toBe(SPACE_GUID);
+    expect(changes[0].role).toBe(SpaceUserRoleNames.DEVELOPER);
+    expect(changes[0].add).toBe(true);
+
+    // executeChanges runs to grant the space role
+    expect(deps.rolesData.executeChanges).toHaveBeenCalledWith({ silent: true });
+
+    // No double-refresh (executeChanges owns cache)
+    expect(deps.paged.markStale).not.toHaveBeenCalled();
+    expect(deps.snapshot.refreshIfLoaded).not.toHaveBeenCalled();
+  });
+
   it('partial failure: multiple errored role-changes for one identity count as 1 failed identity', async () => {
     // alice fails 2 of 3 role grants; bob succeeds all. Total identities = 2,
     // failed identities = 1 (alice), NOT 2 (the errored change count).
