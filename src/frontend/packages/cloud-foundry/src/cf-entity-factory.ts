@@ -206,7 +206,8 @@ const coreSpaceSchemaParams = {
   service_instances: [ServiceInstancesSchema],
   [SpaceUserRoleNames.DEVELOPER]: [CFUserSchema],
   [SpaceUserRoleNames.MANAGER]: [CFUserSchema],
-  [SpaceUserRoleNames.AUDITOR]: [CFUserSchema]
+  [SpaceUserRoleNames.AUDITOR]: [CFUserSchema],
+  [SpaceUserRoleNames.SUPPORTER]: [CFUserSchema]
 };
 const SpaceSchema = new CFSpaceEntitySchema({
   entity: {

@@ -35,6 +35,7 @@ const SPACE_ROLE_TABLE: ReadonlyArray<{ source: SpaceUserRoleNames; target: CfUs
   { source: SpaceUserRoleNames.DEVELOPER, target: CfUserRoleParams.SPACES },
   { source: SpaceUserRoleNames.MANAGER, target: CfUserRoleParams.MANAGED_SPACES },
   { source: SpaceUserRoleNames.AUDITOR, target: CfUserRoleParams.AUDITED_SPACES },
+  { source: SpaceUserRoleNames.SUPPORTER, target: CfUserRoleParams.SUPPORTED_SPACES },
 ];
 
 interface OrgOrSpacePayload {

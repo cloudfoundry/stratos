@@ -74,6 +74,8 @@ export const UserRoleLabels: {
       [CfUserRoleParams.SPACES]: 'Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Auditor',
       [CfUserRoleParams.AUDITED_SPACES]: 'Auditor',
+      [SpaceUserRoleNames.SUPPORTER]: 'Supporter',
+      [CfUserRoleParams.SUPPORTED_SPACES]: 'Supporter',
     } as Record<SpaceUserRoleNames | CfUserRoleParams, string>,
     long: {
       [SpaceUserRoleNames.MANAGER]: 'Space Manager',
@@ -82,6 +84,8 @@ export const UserRoleLabels: {
       [CfUserRoleParams.SPACES]: 'Space Developer',
       [SpaceUserRoleNames.AUDITOR]: 'Space Auditor',
       [CfUserRoleParams.AUDITED_SPACES]: 'Space Auditor',
+      [SpaceUserRoleNames.SUPPORTER]: 'Space Supporter',
+      [CfUserRoleParams.SUPPORTED_SPACES]: 'Space Supporter',
     } as Record<SpaceUserRoleNames | CfUserRoleParams, string>
   }
 };
