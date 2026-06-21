@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, EventEmitter, Input, Output, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -8,30 +8,40 @@ import { of } from 'rxjs';
 import { MAT_DIALOG_DATA, TailwindDialogRef, TailwindSnackBarService } from '@stratosui/core';
 
 import { CfIdentityProvidersService } from '../../../../shared/data-services/cf-identity-providers.service';
-import { CfRolesService } from '../manage-users/cf-roles.service';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
-import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../../store/types/cf-user.types';
+import { CfRoleChange } from '../../../../store/types/users-roles.types';
+import { OrgUserRoleNames } from '../../../../store/types/cf-user.types';
+import { RoleAssignmentComponent } from '../../../../shared/components/role-assignment/role-assignment.component';
 import * as addModule from '../../../../shared/signal-list-configs/user/cf-users-add';
 import { AddUserDialogComponent, AddUserDialogData } from './add-user-dialog.component';
 
 const CF_GUID = 'test-cf-guid';
 
+// ── Stub for RoleAssignmentComponent ──────────────────────────────────────────
+// Avoids pulling in CfRolesService / CurrentUserPermissionsService in dialog specs.
+@Component({
+  selector: 'app-role-assignment',
+  standalone: true,
+  template: '<div class="role-assignment-stub"></div>',
+})
+class RoleAssignmentStub {
+  @Input() cfGuid!: string;
+  @Input() users: any[] = [];
+  @Input() baseline: any = {};
+  @Input() lockedOrg: { guid: string; name: string } | undefined = undefined;
+  @Output() changeSet = new EventEmitter<CfRoleChange[]>();
+}
+
 interface MakeOpts {
   idpsOrigins?: string[];
-  orgs?: { guid: string; name: string }[];
-  spaces?: { guid: string; name: string }[];
 }
 
 function make(data: AddUserDialogData, opts: MakeOpts = {}) {
   const close = vi.fn();
   const listOrigins = vi.fn().mockReturnValue(of(opts.idpsOrigins ?? []));
-  const fetchOrgs = vi.fn().mockReturnValue(
-    of((opts.orgs ?? []).map(o => ({ metadata: { guid: o.guid }, entity: { name: o.name } }))),
-  );
-  const fetchSpacesForOrg = vi.fn().mockReturnValue(of(opts.spaces ?? []));
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -42,19 +52,21 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}) {
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: TailwindDialogRef, useValue: { close } },
       { provide: CfIdentityProvidersService, useValue: { listOrigins } },
-      { provide: CfRolesService, useValue: { fetchOrgs, fetchSpacesForOrg } },
       { provide: CfUsersRolesDataService, useValue: {} },
       { provide: UserInviteService, useValue: {} },
       { provide: TailwindSnackBarService, useValue: { open: vi.fn(), error: vi.fn() } },
       { provide: CfUsersPagedDataService, useValue: {} },
       { provide: CnsiUsersSnapshotService, useValue: {} },
     ],
+  })
+  // Override the real RoleAssignmentComponent with a stub to keep tests hermetic.
+  .overrideComponent(AddUserDialogComponent, {
+    remove: { imports: [RoleAssignmentComponent] },
+    add: { imports: [RoleAssignmentStub] },
   });
 
-  // createComponent (no detectChanges) runs constructor — initialising signals
-  // from MAT_DIALOG_DATA — without rendering child components.
   const fixture = TestBed.createComponent(AddUserDialogComponent);
-  return { cmp: fixture.componentInstance, close, listOrigins, fetchOrgs, fetchSpacesForOrg };
+  return { cmp: fixture.componentInstance, close, listOrigins };
 }
 
 describe('AddUserDialogComponent', () => {
@@ -83,7 +95,6 @@ describe('AddUserDialogComponent', () => {
 
   it('canSubmit is false when there are no valid identities', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false });
-    // No identities set — default state
     expect(cmp.canSubmit()).toBe(false);
   });
 
@@ -98,76 +109,68 @@ describe('AddUserDialogComponent', () => {
       { idpsOrigins: ['uaa', 'ldap'] }
     );
     expect(spy1).toHaveBeenCalledWith(CF_GUID);
-    // After the promise resolves (synchronously via of()) originOptions should
-    // contain the two options returned by the service.
     expect(cmpWithOptions.originOptions()).toEqual(['uaa', 'ldap']);
 
     const { cmp: cmpEmpty } = make(
       { cfGuid: CF_GUID, userInviteAllowed: false },
       {}
     );
-    // Service returned [] — originOptions stays empty, component still works
-    // (free-text entry is always available).
     expect(cmpEmpty.originOptions()).toEqual([]);
   });
 
-  it('CF-level (no orgGuid): orgOptions maps metadata.guid + entity.name correctly', () => {
-    const { cmp, fetchOrgs } = make(
-      { cfGuid: CF_GUID, userInviteAllowed: false }, // no orgGuid → CF-level, unlocked
-      { orgs: [
-        { guid: 'o1', name: 'Org One' },
-        { guid: 'o2', name: 'Org Two' },
-      ] },
-    );
+  // ── Widget integration tests ───────────────────────────────────────────────
 
-    // fetchOrgs should have been called (org picker not locked)
-    expect(fetchOrgs).toHaveBeenCalledWith(CF_GUID);
-
-    // orgOptions() should reflect the APIResource-shaped mock
-    expect((cmp as any).orgOptions()).toEqual([
-      { guid: 'o1', name: 'Org One' },
-      { guid: 'o2', name: 'Org Two' },
-    ]);
-
-    // org is NOT locked at the CF level
+  it('renders the shared role widget with an empty baseline (orgLocked false at CF level)', () => {
+    const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false });
+    // No orgGuid → orgLocked is false
     expect(cmp.orgLocked()).toBe(false);
+    // roleChanges starts empty
+    expect((cmp as any).roleChanges()).toEqual([]);
   });
 
-  it('role picker writes orgRoles and spaceRolesBySpace into selection', () => {
-    const { cmp } = make(
-      { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
-      { spaces: [{ guid: 'space-1', name: 'Space One' }] }
-    );
-
-    // Org locked → chosenOrgGuid seeded from data.orgGuid; spaces loaded.
-    const c = cmp as any;
-    expect(c.chosenOrgGuid()).toBe('org-1');
-    expect(c.spaceOptions()).toEqual([{ guid: 'space-1', name: 'Space One' }]);
-
-    // Toggle an org role on.
-    c.toggleOrgRole(OrgUserRoleNames.MANAGER, true);
-    expect(cmp.selection().orgRoles).toEqual([OrgUserRoleNames.MANAGER]);
-
-    // Toggle a space role on, then verify the map.
-    c.toggleSpaceRole('space-1', SpaceUserRoleNames.DEVELOPER, true);
-    expect(cmp.selection().spaceRolesBySpace).toEqual({ 'space-1': [SpaceUserRoleNames.DEVELOPER] });
-
-    // Toggle the org role back off — empties orgRoles.
-    c.toggleOrgRole(OrgUserRoleNames.MANAGER, false);
-    expect(cmp.selection().orgRoles).toEqual([]);
-
-    // Toggle the only space role off — removes the space key entirely.
-    c.toggleSpaceRole('space-1', SpaceUserRoleNames.DEVELOPER, false);
-    expect(cmp.selection().spaceRolesBySpace).toEqual({});
+  it('locks the org in the widget when opened from an org page', () => {
+    const { cmp } = make({
+      cfGuid: CF_GUID,
+      orgGuid: 'org-1',
+      orgName: 'Org One',
+      userInviteAllowed: false,
+    });
+    expect(cmp.orgLocked()).toBe(true);
+    // The lockedOrg binding in the template resolves to { guid, name }
+    // We verify the data fields that feed the binding:
+    expect(cmp.data.orgGuid).toBe('org-1');
+    expect(cmp.data.orgName).toBe('Org One');
   });
 
-  it('submit calls addUsers with the assembled request and closes(true) on ok', async () => {
+  it('onRoleChangeSet captures widget changeSet into roleChanges signal', () => {
+    const { cmp } = make({ cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false });
+    const change: CfRoleChange = {
+      userGuid: '',
+      orgGuid: 'org-1',
+      orgName: 'Org One',
+      add: true,
+      role: OrgUserRoleNames.MANAGER,
+    };
+    (cmp as any).onRoleChangeSet([change]);
+    expect((cmp as any).roleChanges()).toEqual([change]);
+  });
+
+  it('submit forwards the widget grants to addUsers via req.changes', async () => {
     const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: true, total: 1, failed: 0 });
     const { cmp, close } = make(
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
-      { spaces: [] }
     );
     const c = cmp as any;
+
+    // Simulate widget emitting a role change
+    const change: CfRoleChange = {
+      userGuid: '',
+      orgGuid: 'org-1',
+      orgName: 'Org One',
+      add: true,
+      role: OrgUserRoleNames.MANAGER,
+    };
+    c.onRoleChangeSet([change]);
 
     // Provide a valid identity so canSubmit() is true.
     c.identities.set(['alice']);
@@ -181,8 +184,11 @@ describe('AddUserDialogComponent', () => {
     expect(req.identities).toEqual(['alice']);
     expect(req.orgGuid).toBe('org-1');
     expect(req.orgName).toBe('Org One');
+    // changes (not selection) carries the widget output
+    expect(req.changes).toEqual([change]);
+    expect(req.selection).toEqual({ orgRoles: [], spaceRolesBySpace: {} });
 
-    // Full success → closed with true; submitting need not be reset (view gone).
+    // Full success → closed with true
     expect(close).toHaveBeenCalledWith(true);
     spy.mockRestore();
   });
@@ -191,7 +197,6 @@ describe('AddUserDialogComponent', () => {
     const spy = vi.spyOn(addModule, 'addUsers').mockResolvedValue({ ok: false, total: 2, failed: 1 });
     const { cmp, close } = make(
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
-      { spaces: [] }
     );
     const c = cmp as any;
 

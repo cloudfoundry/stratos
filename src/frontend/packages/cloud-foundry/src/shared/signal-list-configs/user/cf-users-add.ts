@@ -61,8 +61,14 @@ export interface AddUsersRequest {
   orgGuid: string;
   orgName: string;
   spaceNameByGuid?: Map<string, string>;
-  /** Role selection; may be empty (no roles). */
+  /** Role selection; may be empty (no roles). Mutually exclusive with `changes`. */
   selection: AddRoleSelection;
+  /**
+   * Pre-built role-grant changes from the RoleAssignmentComponent widget.
+   * When present, used directly instead of building from `selection`.
+   * All entries must be `add:true` (the widget emits grants only when baseline is empty).
+   */
+  changes?: CfRoleChange[];
 }
 
 /**
@@ -111,18 +117,28 @@ function stUserFromGuid(guid: string, cfGuid: string): StUser {
 }
 
 /**
- * Return the first space guid from the selection (for the invite endpoint's
+ * Return the first space guid from the request (for the invite endpoint's
  * `space` arg), or '' if org-only.
+ * When `req.changes` is present, derives from the changes list; otherwise
+ * falls back to `req.selection.spaceRolesBySpace`.
  */
 function firstSpaceGuid(req: AddUsersRequest): string {
+  if (req.changes) {
+    const spaceChange = req.changes.find(c => c.spaceGuid);
+    return spaceChange?.spaceGuid ?? '';
+  }
   const keys = Object.keys(req.selection.spaceRolesBySpace);
   return keys.length > 0 ? keys[0] : '';
 }
 
 /**
  * Return true when at least one role is selected in the request.
+ * Checks `req.changes` when present, otherwise `req.selection`.
  */
 function hasRoles(req: AddUsersRequest): boolean {
+  if (req.changes) {
+    return req.changes.length > 0;
+  }
   return req.selection.orgRoles.length > 0 ||
     Object.values(req.selection.spaceRolesBySpace).some(roles => roles.length > 0);
 }
@@ -224,12 +240,22 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
     const syntheticGuids = syntheticUsers.map(u => u.guid);
     deps.rolesData.setUsers(deps.cfGuid, syntheticUsers, req.origin);
     deps.rolesData.setIsSetByUsername(true);
-    deps.rolesData.setChanges(buildAddChanges(syntheticGuids, {
-      orgGuid: req.orgGuid,
-      orgName: req.orgName,
-      spaceNameByGuid: req.spaceNameByGuid,
-      selection: req.selection,
-    }));
+    // When the widget hands us pre-built changes, stamp the correct synthetic guids
+    // onto each change (the widget has no user guids at dialog open time).
+    // When using selection, build changes the classic way.
+    if (req.changes) {
+      const stamped = syntheticGuids.flatMap(guid =>
+        req.changes!.map(c => ({ ...c, userGuid: guid })),
+      );
+      deps.rolesData.setChanges(stamped);
+    } else {
+      deps.rolesData.setChanges(buildAddChanges(syntheticGuids, {
+        orgGuid: req.orgGuid,
+        orgName: req.orgName,
+        spaceNameByGuid: req.spaceNameByGuid,
+        selection: req.selection,
+      }));
+    }
     await deps.rolesData.executeChanges({ silent: true });
     const failedCount = reportFromApplyStatus(deps, req.identities.length, syntheticGuids);
     return summary(failedCount);
@@ -255,12 +281,19 @@ export async function addUsers(deps: AddUsersDeps, req: AddUsersRequest): Promis
     const invitedUsers = newGuids.map(guid => stUserFromGuid(guid, deps.cfGuid));
     deps.rolesData.setUsers(deps.cfGuid, invitedUsers);
     deps.rolesData.setIsSetByUsername(false);
-    deps.rolesData.setChanges(buildAddChanges(newGuids, {
-      orgGuid: req.orgGuid,
-      orgName: req.orgName,
-      spaceNameByGuid: req.spaceNameByGuid,
-      selection: req.selection,
-    }));
+    if (req.changes) {
+      const stamped = newGuids.flatMap(guid =>
+        req.changes!.map(c => ({ ...c, userGuid: guid })),
+      );
+      deps.rolesData.setChanges(stamped);
+    } else {
+      deps.rolesData.setChanges(buildAddChanges(newGuids, {
+        orgGuid: req.orgGuid,
+        orgName: req.orgName,
+        spaceNameByGuid: req.spaceNameByGuid,
+        selection: req.selection,
+      }));
+    }
     await deps.rolesData.executeChanges({ silent: true });
     // Report combined: invite failures + any role-grant failures.
     // executeChanges owns the cache refresh; orchestrator posts the snackbar only.
