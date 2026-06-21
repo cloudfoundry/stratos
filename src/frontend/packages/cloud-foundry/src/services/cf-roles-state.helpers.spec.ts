@@ -105,8 +105,8 @@ describe('cf-roles-state.helpers', () => {
       let state = applyCfUserRelations({}, CfUserRelationTypes.SPACES, cf, spaceData());
       state = applyCfUserRelations(state, CfUserRelationTypes.MANAGED_SPACES, cf, spaceData(generalGuid, generalGuid));
       const expected = getState(RoleEntities.SPACES, [
-        { guid: testSpaceGuid, roles: { orgId: testOrgGuid, isManager: false, isAuditor: false, isDeveloper: true } },
-        { guid: generalGuid, roles: { orgId: generalGuid, isManager: true, isAuditor: false, isDeveloper: false } },
+        { guid: testSpaceGuid, roles: { orgId: testOrgGuid, isManager: false, isAuditor: false, isDeveloper: true, isSupporter: false } },
+        { guid: generalGuid, roles: { orgId: generalGuid, isManager: true, isAuditor: false, isDeveloper: false, isSupporter: false } },
       ]);
       const orgExpected = getState(RoleEntities.ORGS, [
         { guid: testOrgGuid, roles: { isManager: false, isAuditor: false, isBillingManager: false, isUser: false, spaceGuids: [testSpaceGuid] } },
