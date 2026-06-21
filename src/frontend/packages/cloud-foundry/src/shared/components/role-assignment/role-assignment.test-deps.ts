@@ -120,33 +120,28 @@ export class RoleAssignmentDriver {
 
   /**
    * Toggle the space-level role cell with the given label inside the org section
-   * for `orgGuid`, scoped to the space section for `spaceGuid`.
+   * for `orgGuid`, scoped to the exact space section identified by `spaceGuid`.
+   *
+   * Requires the template to emit `[attr.data-space]="space.guid"` on each
+   * `.role-assignment__space-section` div (added alongside the existing
+   * `[attr.data-org]` on org sections).  Throws a loud diagnostic error if the
+   * space section is not found, consistent with the fail-loud contract of
+   * {@link toggleOrgRole}.
    */
   toggleSpaceRole(orgGuid: string, spaceGuid: string, label: string): void {
-    const section = this.orgSection(orgGuid);
-    // Space sections are identified by their contained space-role-cells; we find
-    // the space section whose space-name text matches the space whose role we want,
-    // then restrict the cell search to that section.  Alternatively, we use all
-    // space-role-cells in the org section and rely on positional ordering, but that
-    // is fragile.  Since spaceGuid is available and the widget renders all cells for
-    // all visible spaces, we gather all space-role cells in order and pick by label.
-    // For multi-space scenarios the caller should rely on label uniqueness per
-    // space section; for now we simply find the first matching label within the org.
-    const spaceSections = Array.from(section.querySelectorAll('.role-assignment__space-section'));
-    for (const spaceSection of spaceSections) {
-      const cells = Array.from(spaceSection.querySelectorAll('[data-testid="space-role-cell"]'));
-      if (cells.length > 0) {
-        // Try to find a matching label in this space section
-        const found = this.tryToggleRoleInCells(cells, label);
-        if (found) {
-          this.fixture.detectChanges();
-          return;
-        }
-      }
+    const orgSec = this.orgSection(orgGuid);
+    const spaceSec = orgSec.querySelector(`[data-space="${spaceGuid}"]`);
+    if (!spaceSec) {
+      const found = Array.from(orgSec.querySelectorAll('.role-assignment__space-section'))
+        .map(s => s.getAttribute('data-space'))
+        .join(', ');
+      throw new Error(
+        `RoleAssignmentDriver.toggleSpaceRole: space section [data-space="${spaceGuid}"] ` +
+        `not found inside org [data-org="${orgGuid}"]. Found data-space values: [${found}]`
+      );
     }
-    // Fallback: search all space-role-cells in the org section
-    const allCells = Array.from(section.querySelectorAll('[data-testid="space-role-cell"]'));
-    this.toggleRoleInCells(allCells, label, `toggleSpaceRole(${orgGuid}, ${spaceGuid}, ${label})`);
+    const cells = Array.from(spaceSec.querySelectorAll('[data-testid="space-role-cell"]'));
+    this.toggleRoleInCells(cells, label, `toggleSpaceRole(${orgGuid}, ${spaceGuid}, ${label})`);
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
