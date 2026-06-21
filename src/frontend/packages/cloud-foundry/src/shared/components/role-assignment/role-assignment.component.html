@@ -1,0 +1,108 @@
+<!-- Org multi-select picker (hidden when lockedOrg is set) -->
+@if (!lockedOrg) {
+  <div data-testid="org-picker" class="role-assignment__picker">
+    <input
+      type="text"
+      placeholder="Search organizations…"
+      [value]="orgSearchText()"
+      (input)="orgSearchText.set($any($event.target).value)"
+      class="role-assignment__search"
+    />
+    <ul class="role-assignment__org-list">
+      @for (org of filteredAllowedOrgs(); track org.metadata.guid) {
+        <li>
+          <button
+            type="button"
+            (click)="pickOrg(org)"
+            [disabled]="pickedOrgs().some(p => p.metadata.guid === org.metadata.guid)"
+            class="role-assignment__org-btn"
+          >
+            {{ org.entity.name }}
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+}
+
+<!-- Accordion: one section per picked org -->
+@for (org of pickedOrgs(); track org.metadata.guid) {
+  <div class="role-assignment__org-section" [attr.data-org]="org.metadata.guid">
+    <!-- Accordion header -->
+    <div class="role-assignment__org-header">
+      <button
+        type="button"
+        (click)="toggleExpanded(org.metadata.guid)"
+        class="role-assignment__accordion-btn"
+        [attr.aria-expanded]="isExpanded(org.metadata.guid)"
+      >
+        {{ org.entity.name }}
+        <span class="role-assignment__chevron">{{ isExpanded(org.metadata.guid) ? '▲' : '▼' }}</span>
+      </button>
+      @if (!lockedOrg) {
+        <button
+          type="button"
+          (click)="removePickedOrg(org.metadata.guid)"
+          class="role-assignment__remove-btn"
+          aria-label="Remove {{ org.entity.name }}"
+        >✕</button>
+      }
+    </div>
+
+    @if (isExpanded(org.metadata.guid)) {
+      <div class="role-assignment__org-body">
+        <!-- Org-level role cells -->
+        <div class="role-assignment__org-roles">
+          <h4>Org Roles</h4>
+          <div class="role-assignment__role-row">
+            @for (def of orgRoleDefs; track def.name) {
+              <div
+                data-testid="org-role-cell"
+                class="role-assignment__role-cell"
+              >
+                <app-role-tristate-checkbox
+                  [checked]="checkedForOrg(org.metadata.guid, def.name)"
+                  [disabled]="!canEditOrg(org.metadata.guid) || (def.name === 'users' && isOrgUserDisabled(org.metadata.guid))"
+                  [label]="def.label"
+                  (toggled)="onToggleOrgRole(org, def.name, $event)"
+                ></app-role-tristate-checkbox>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Space-level role cells -->
+        <div class="role-assignment__spaces">
+          <h4>Space Roles</h4>
+          <input
+            type="text"
+            placeholder="Filter spaces…"
+            [value]="spaceFilterFor(org.metadata.guid)"
+            (input)="setSpaceFilter(org.metadata.guid, $any($event.target).value)"
+            class="role-assignment__space-search"
+          />
+          @for (space of filteredSpacesFor(org.metadata.guid); track space.guid) {
+            <div class="role-assignment__space-section">
+              <div class="role-assignment__space-name">{{ space.name }}</div>
+              <div class="role-assignment__role-row">
+                @for (def of spaceRoleDefs; track def.name) {
+                  <div
+                    data-testid="space-role-cell"
+                    class="role-assignment__role-cell"
+                  >
+                    <app-role-tristate-checkbox
+                      [checked]="checkedForSpace(org.metadata.guid, space.guid, def.name)"
+                      [disabled]="!canEditOrg(org.metadata.guid)"
+                      [label]="def.label"
+                      (toggled)="onToggleSpaceRole(org, space, def.name, $event)"
+                    ></app-role-tristate-checkbox>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
