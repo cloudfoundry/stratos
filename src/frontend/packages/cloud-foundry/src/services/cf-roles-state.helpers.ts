@@ -46,6 +46,7 @@ export const defaultCfUserSpaceRoleState: ISpaceRoleState = {
   isManager: false,
   isAuditor: false,
   isDeveloper: false,
+  isSupporter: false,
 };
 
 export function getDefaultCfEndpointRoles(): ICfRolesState {
@@ -358,6 +359,7 @@ function roleNameToPermission(roleName: OrgUserRoleNames | SpaceUserRoleNames): 
     case SpaceUserRoleNames.AUDITOR: return CfPermissionStrings.SPACE_AUDITOR;
     case SpaceUserRoleNames.DEVELOPER: return CfPermissionStrings.SPACE_DEVELOPER;
     case SpaceUserRoleNames.MANAGER: return CfPermissionStrings.SPACE_MANAGER;
+    case SpaceUserRoleNames.SUPPORTER: return CfPermissionStrings.SPACE_SUPPORTER;
   }
 }
 
@@ -385,7 +387,7 @@ export function applyCfRoleChange(state: IAllCfRolesState, change: CfRoleCacheCh
     const idx = spaceGuids.indexOf(change.entityGuid);
     if (isAdd && idx < 0) {
       spaceGuids = [...spaceGuids, change.entityGuid];
-    } else if (!isAdd && idx >= 0 && !spacePermissions.isAuditor && !spacePermissions.isDeveloper && !spacePermissions.isManager) {
+    } else if (!isAdd && idx >= 0 && !spacePermissions.isAuditor && !spacePermissions.isDeveloper && !spacePermissions.isManager && !spacePermissions.isSupporter) {
       spaceGuids = spaceGuids.filter(guid => guid !== change.entityGuid);
     }
     return {

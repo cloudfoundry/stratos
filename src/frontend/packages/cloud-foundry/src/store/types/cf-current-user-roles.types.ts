@@ -17,6 +17,7 @@ export interface ISpaceRoleState {
   isManager: boolean;
   isAuditor: boolean;
   isDeveloper: boolean;
+  isSupporter: boolean;
 }
 export interface ISpacesRoleState {
   [spaceId: string]: ISpaceRoleState;
