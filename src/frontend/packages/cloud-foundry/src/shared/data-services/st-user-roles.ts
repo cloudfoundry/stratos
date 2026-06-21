@@ -10,7 +10,7 @@ import { StUser } from '../../services/endpoint-data/stratos-types';
 
 // StUser buckets carry backend stripRolePrefix SINGULAR names:
 //   org   -> 'manager' | 'billing_manager' | 'auditor' | 'user'
-//   space -> 'manager' | 'auditor' | 'developer'
+//   space -> 'manager' | 'auditor' | 'developer' | 'supporter'
 // createUserRoleInOrg/InSpace key by the PLURAL OrgUserRoleNames enum values.
 
 export function orgPermissionsFromRoles(roles: string[]): UserRoleInOrg {
@@ -27,6 +27,7 @@ export function spacePermissionsFromRoles(roles: string[]): UserRoleInSpace {
     roles.includes('manager'),
     roles.includes('auditor'),
     roles.includes('developer'),
+    roles.includes('supporter'),
   );
 }
 
@@ -64,6 +65,7 @@ export const stIsOrgUser = (u: StUser, g: string) => hasOrgRole(u, g, 'user');
 export const stIsSpaceManager = (u: StUser, g: string) => hasSpaceRole(u, g, 'manager');
 export const stIsSpaceAuditor = (u: StUser, g: string) => hasSpaceRole(u, g, 'auditor');
 export const stIsSpaceDeveloper = (u: StUser, g: string) => hasSpaceRole(u, g, 'developer');
+export const stIsSpaceSupporter = (u: StUser, g: string) => hasSpaceRole(u, g, 'supporter');
 
 export const stHasRoleInOrg = (u: StUser, orgGuid: string): boolean =>
   u.orgRoles.some(b => b.orgGuid === orgGuid && b.roles.length > 0) ||
