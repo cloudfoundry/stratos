@@ -332,6 +332,56 @@ describe('RoleAssignmentComponent', () => {
     ]);
   });
 
+  it('roleCountForOrg counts checked org and space roles', async () => {
+    const user = makeUser('u1');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [user]);
+    fixture.componentRef.setInput('baseline', {});
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+
+    // Pick o1 so spaces are loaded (space s1 from the default mock)
+    component.pickOrg(o1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Initially no roles set
+    expect(component.roleCountForOrg('o1')).toBe(0);
+
+    // Toggle one org role (Manager) and one space role (Developer in s1)
+    component.onToggleOrgRole(o1, OrgUserRoleNames.MANAGER, true);
+    component.onToggleSpaceRole(o1, { guid: 's1', name: 'Space One' }, SpaceUserRoleNames.DEVELOPER, true);
+    fixture.detectChanges();
+
+    expect(component.roleCountForOrg('o1')).toBe(2);
+  });
+
+  it('roleCountForOrg returns 1 for a single checked role', async () => {
+    const user = makeUser('u1');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [user]);
+    fixture.componentRef.setInput('baseline', {});
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+
+    component.pickOrg(o1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    component.onToggleOrgRole(o1, OrgUserRoleNames.AUDITOR, true);
+    fixture.detectChanges();
+
+    expect(component.roleCountForOrg('o1')).toBe(1);
+  });
+
   it('filters spaces within a section', async () => {
     const fixture = createFixture();
     // Set up two spaces

@@ -39,6 +39,9 @@
         {{ org.entity.name }}
         <span class="role-assignment__chevron">{{ isExpanded(org.metadata.guid) ? '▲' : '▼' }}</span>
       </button>
+      <span class="role-assignment__summary" data-testid="org-role-summary">
+        {{ roleCountForOrg(org.metadata.guid) }} role{{ roleCountForOrg(org.metadata.guid) === 1 ? '' : 's' }} set
+      </span>
       @if (!lockedOrg) {
         <button
           type="button"

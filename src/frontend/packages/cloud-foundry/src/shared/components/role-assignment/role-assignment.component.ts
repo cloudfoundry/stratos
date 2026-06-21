@@ -376,6 +376,19 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     return this.orgUserDisabledMap()[orgGuid] ?? false;
   }
 
+  roleCountForOrg(orgGuid: string): number {
+    let n = 0;
+    for (const def of this.orgRoleDefs) {
+      if (this.checkedForOrg(orgGuid, def.name) === true) { n++; }
+    }
+    for (const space of this.spacesFor(orgGuid)) {
+      for (const def of this.spaceRoleDefs) {
+        if (this.checkedForSpace(orgGuid, space.guid, def.name) === true) { n++; }
+      }
+    }
+    return n;
+  }
+
   canEditOrg(orgGuid: string): boolean {
     return this.canEditByOrg()[orgGuid] ?? false;
   }
