@@ -66,12 +66,13 @@ func TestGetNativeCurrentUserRoles_HappyPath(t *testing.T) {
 							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-b"}},
 						},
 					},
-					// space_supporter — intentionally unmapped, must be dropped
+					// space_supporter — mapped to supported_spaces bucket
 					{
 						"guid": "role-5", "type": "space_supporter",
 						"relationships": map[string]interface{}{
-							"user":  map[string]interface{}{"data": map[string]interface{}{"guid": "cf-user-1"}},
-							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}},
+							"user":         map[string]interface{}{"data": map[string]interface{}{"guid": "cf-user-1"}},
+							"space":        map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}},
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-a"}},
 						},
 					},
 				},
@@ -107,10 +108,10 @@ func TestGetNativeCurrentUserRoles_HappyPath(t *testing.T) {
 	var resp CfCurrentUserRolesResponse
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 
-	// All 7 canonical buckets must be present (empty ones as []).
+	// All 8 canonical buckets must be present (empty ones as []).
 	for _, key := range []string{
 		"organizations", "managed_organizations", "billing_managed_organizations", "audited_organizations",
-		"spaces", "managed_spaces", "audited_spaces",
+		"spaces", "managed_spaces", "audited_spaces", "supported_spaces",
 	} {
 		_, ok := resp.Buckets[key]
 		assert.Truef(t, ok, "missing canonical bucket key %q", key)
@@ -133,6 +134,11 @@ func TestGetNativeCurrentUserRoles_HappyPath(t *testing.T) {
 	assert.Equal(t, "sp-2", resp.Buckets["audited_spaces"][0].Metadata.GUID)
 	assert.Equal(t, "org-b", resp.Buckets["audited_spaces"][0].Entity.OrganizationGUID)
 	assert.Empty(t, resp.Buckets["managed_spaces"])
+
+	// Populated supported_spaces bucket carries organization_guid
+	require.Len(t, resp.Buckets["supported_spaces"], 1)
+	assert.Equal(t, "sp-3", resp.Buckets["supported_spaces"][0].Metadata.GUID)
+	assert.Equal(t, "org-a", resp.Buckets["supported_spaces"][0].Entity.OrganizationGUID)
 }
 
 // TestGetNativeCurrentUserRoles_SpaceOrgFallback verifies the back-fill
@@ -252,11 +258,70 @@ func TestGetNativeCurrentUserRoles_EmptyForAdmin(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	for _, key := range []string{
 		"organizations", "managed_organizations", "billing_managed_organizations", "audited_organizations",
-		"spaces", "managed_spaces", "audited_spaces",
+		"spaces", "managed_spaces", "audited_spaces", "supported_spaces",
 	} {
 		assert.NotNilf(t, resp.Buckets[key], "bucket %q must be present and serialize as [] for admins with no grants", key)
 		assert.Emptyf(t, resp.Buckets[key], "bucket %q must be empty when user has no explicit grants", key)
 	}
+}
+
+// TestUserRolesRead_IncludesSpaceSupporter verifies that a /v3/roles
+// response containing a space_supporter role results in a supported_spaces
+// bucket entry in the response. Prior to this change the role type was
+// absent from roleTypeToBucket and would be silently dropped.
+func TestUserRolesRead_IncludesSpaceSupporter(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/roles":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "role-sup", "type": "space_supporter",
+						"relationships": map[string]interface{}{
+							"user":         map[string]interface{}{"data": map[string]interface{}{"guid": "cf-user-1"}},
+							"space":        map[string]interface{}{"data": map[string]interface{}{"guid": "s-1"}},
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+					},
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "stratos-user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "token"},
+			tokenInfo:   &api.JWTUserTokenInfo{UserGUID: "cf-user-1"},
+		},
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/current-user-roles/cnsi-1", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetParamNames("cnsiGuid")
+	c.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeCurrentUserRoles(c))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp CfCurrentUserRolesResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
+	// supported_spaces bucket must be present and populated
+	require.Len(t, resp.Buckets["supported_spaces"], 1,
+		"space_supporter role must land in the supported_spaces bucket")
+	assert.Equal(t, "s-1", resp.Buckets["supported_spaces"][0].Metadata.GUID)
+	assert.Equal(t, "org-1", resp.Buckets["supported_spaces"][0].Entity.OrganizationGUID)
 }
 
 // TestProjectRolesToBuckets_Dedup verifies the projector collapses

@@ -30,17 +30,15 @@ type cfRelationEntity struct {
 // getNativeCurrentUserRoles. Buckets are keyed by the frontend
 // CfUserRelationTypes string values: organizations, managed_organizations,
 // billing_managed_organizations, audited_organizations, spaces,
-// managed_spaces, audited_spaces. Every canonical key is always present;
-// missing-grant buckets serialize as `[]` (not null) so the frontend
-// can dispatch one GetCurrentCfUserRelationsComplete per key without
-// nil-guards.
+// managed_spaces, audited_spaces, supported_spaces. Every canonical key
+// is always present; missing-grant buckets serialize as `[]` (not null)
+// so the frontend can dispatch one GetCurrentCfUserRelationsComplete per
+// key without nil-guards.
 type CfCurrentUserRolesResponse struct {
 	Buckets map[string][]CfRelationBucketEntry `json:"buckets"`
 }
 
 // roleTypeToBucket maps a CF v3 role .Type to the frontend bucket key.
-// space_supporter is intentionally absent — the frontend enum doesn't
-// carry it and the legacy 7-fetch flow never queries that relation.
 var roleTypeToBucket = map[string]string{
 	"organization_user":            "organizations",
 	"organization_manager":         "managed_organizations",
@@ -49,6 +47,7 @@ var roleTypeToBucket = map[string]string{
 	"space_developer":              "spaces",
 	"space_manager":                "managed_spaces",
 	"space_auditor":                "audited_spaces",
+	"space_supporter":              "supported_spaces",
 }
 
 var orgBucketKeys = []string{
@@ -62,6 +61,7 @@ var spaceBucketKeys = []string{
 	"spaces",
 	"managed_spaces",
 	"audited_spaces",
+	"supported_spaces",
 }
 
 // getNativeCurrentUserRoles handles GET /pp/v1/cf/current-user-roles/:cnsiGuid.

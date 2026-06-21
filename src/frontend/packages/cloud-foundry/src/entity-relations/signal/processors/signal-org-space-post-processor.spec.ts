@@ -55,17 +55,37 @@ describe('Signal Entity Relations - Org/Space role post-processor', () => {
         developers: ['user-dev'],
         managers: ['user-mgr'],
         auditors: ['user-aud'],
+        supporters: ['user-sup'],
       },
     };
     const { ctx, upserts } = makeCtx();
 
     applyOrgSpaceRoles(spaceEntityType, [spacePayload], ctx);
 
-    expect(upserts).toHaveLength(3);
+    expect(upserts).toHaveLength(4);
     const byUser = new Map(upserts.map(u => [u.guid, u.row]));
     expect(byUser.get('user-dev')).toEqual({ [CfUserRoleParams.SPACES]: ['space-1'] });
     expect(byUser.get('user-mgr')).toEqual({ [CfUserRoleParams.MANAGED_SPACES]: ['space-1'] });
     expect(byUser.get('user-aud')).toEqual({ [CfUserRoleParams.AUDITED_SPACES]: ['space-1'] });
+    expect(byUser.get('user-sup')).toEqual({ [CfUserRoleParams.SUPPORTED_SPACES]: ['space-1'] });
+  });
+
+  it('mirrors supporter role: user payload with supported_spaces surfaces as supporter', () => {
+    const spacePayload = {
+      metadata: { guid: 's-1' },
+      entity: {
+        name: 'my-space',
+        supporters: ['user-supporter-1'],
+      },
+    };
+    const { ctx, upserts } = makeCtx();
+
+    applyOrgSpaceRoles(spaceEntityType, [spacePayload], ctx);
+
+    expect(upserts).toHaveLength(1);
+    expect(upserts[0].entityType).toBe(cfUserEntityType);
+    expect(upserts[0].guid).toBe('user-supporter-1');
+    expect(upserts[0].row).toEqual({ [CfUserRoleParams.SUPPORTED_SPACES]: ['s-1'] });
   });
 
   it('no-ops on unknown root entity type', () => {
