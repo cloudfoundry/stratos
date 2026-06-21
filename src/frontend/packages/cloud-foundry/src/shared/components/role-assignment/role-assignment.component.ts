@@ -22,6 +22,7 @@ import { StUser } from '../../../services/endpoint-data/stratos-types';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../store/types/users-roles.types';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS, shortLabelOfScoped } from '../../../roles/role-registry';
 import { RoleTristateCheckboxComponent } from './role-tristate-checkbox.component';
 import {
   RoleSelection,
@@ -64,19 +65,15 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** Exposed for template: enum-safe reference used to disable the org-user checkbox */
   protected readonly orgUserRole = OrgUserRoleNames.USER;
 
-  readonly orgRoleDefs: OrgDef[] = [
-    { name: OrgUserRoleNames.MANAGER, label: 'Manager' },
-    { name: OrgUserRoleNames.AUDITOR, label: 'Auditor' },
-    { name: OrgUserRoleNames.BILLING_MANAGERS, label: 'Billing Manager' },
-    { name: OrgUserRoleNames.USER, label: 'User' },
-  ];
+  readonly orgRoleDefs: OrgDef[] = ORG_ROLE_DEFS.map(d => ({
+    name: d.stratos as OrgUserRoleNames,
+    label: shortLabelOfScoped(d.stratos),
+  }));
 
-  readonly spaceRoleDefs: SpaceDef[] = [
-    { name: SpaceUserRoleNames.MANAGER, label: 'Manager' },
-    { name: SpaceUserRoleNames.AUDITOR, label: 'Auditor' },
-    { name: SpaceUserRoleNames.DEVELOPER, label: 'Developer' },
-    { name: SpaceUserRoleNames.SUPPORTER, label: 'Supporter' },
-  ];
+  readonly spaceRoleDefs: SpaceDef[] = SPACE_ROLE_DEFS.map(d => ({
+    name: d.stratos as SpaceUserRoleNames,
+    label: shortLabelOfScoped(d.stratos),
+  }));
 
   // --- Injected services ---
   private readonly cfRolesService = inject(CfRolesService);
