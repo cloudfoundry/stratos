@@ -211,6 +211,58 @@ describe('RoleAssignmentComponent', () => {
     expect(freshChanges[0].add).toBe(changeSetBeforeCollapse[0].add);
   });
 
+  it('isOrgUserDisabled recomputes reactively when baseline changes via setInput', async () => {
+    // Prove that orgUserDisabledMap is a reactive computed that re-runs when baseline changes.
+    // Start: user u1, empty baseline → org-user NOT disabled.
+    // After: inject a baseline with a space-developer role for s1 → org-user BECOMES disabled.
+    const user = makeUser('u1');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [user]);
+    fixture.componentRef.setInput('baseline', {});
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+
+    // Pick o1 so spaces are loaded (space s1 is available via mock)
+    component.pickOrg(o1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Initially no roles in baseline → org-user should NOT be disabled
+    expect(component.isOrgUserDisabled('o1')).toBe(false);
+
+    // Now push a baseline where user u1 already has space-developer on s1.
+    // CfUserRolesSelected = { [userGuid]: { [orgGuid]: IUserPermissionInOrg } }
+    // This means the org-user auto-disable rule should fire.
+    const baselineWithSpaceRole = {
+      [user.guid]: {
+        o1: {
+          name: 'Org One',
+          orgGuid: 'o1',
+          permissions: { managers: false, billing_managers: false, auditors: false, users: false },
+          spaces: {
+            s1: {
+              name: 'Space One',
+              orgGuid: 'o1',
+              orgName: 'Org One',
+              spaceGuid: 's1',
+              permissions: { managers: false, developers: true, auditors: false, supporters: false },
+            },
+          },
+        },
+      },
+    };
+    fixture.componentRef.setInput('baseline', baselineWithSpaceRole);
+    fixture.detectChanges();
+
+    // The computed orgUserDisabledMap must have re-run; org-user is now disabled
+    expect(component.isOrgUserDisabled('o1')).toBe(true);
+  });
+
   it('filters spaces within a section', async () => {
     const fixture = createFixture();
     // Set up two spaces
