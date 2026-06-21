@@ -18,6 +18,7 @@ import {
 } from '../../store/types/cf-user.types';
 import { StUser } from '../endpoint-data/stratos-types';
 import { CfRoleChange, UsersRolesState } from '../../store/types/users-roles.types';
+import { cfTypeOf } from '../../roles/role-registry';
 
 // Signal-native owner of the Manage Roles / Remove User wizard state. This
 // replaces the legacy `manageUsersRoles` NgRx slice (actions + reducer +
@@ -326,22 +327,7 @@ function bucketRoleName(c: CfRoleChange): string {
 }
 
 function nativeRoleType(role: string, isSpace: boolean): string {
-  if (isSpace) {
-    switch (role) {
-      case SpaceUserRoleNames.MANAGER: return 'space_manager';
-      case SpaceUserRoleNames.AUDITOR: return 'space_auditor';
-      case SpaceUserRoleNames.DEVELOPER: return 'space_developer';
-      case SpaceUserRoleNames.SUPPORTER: return 'space_supporter';
-      default: throw new Error(`Unknown space role: ${role}`);
-    }
-  }
-  switch (role) {
-    case OrgUserRoleNames.MANAGER: return 'organization_manager';
-    case OrgUserRoleNames.BILLING_MANAGERS: return 'organization_billing_manager';
-    case OrgUserRoleNames.AUDITOR: return 'organization_auditor';
-    case OrgUserRoleNames.USER: return 'organization_user';
-    default: throw new Error(`Unknown org role: ${role}`);
-  }
+  return cfTypeOf(role, isSpace); // derives + throws loudly on unknown
 }
 
 // ---------------------------------------------------------------------------
