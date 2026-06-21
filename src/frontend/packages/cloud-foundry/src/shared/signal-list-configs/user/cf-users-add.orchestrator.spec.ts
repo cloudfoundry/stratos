@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 import { addUsers } from './cf-users-add';
 import type { AddUsersDeps, AddUsersRequest } from './cf-users-add';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
+import { CfRoleChange } from '../../../store/types/users-roles.types';
 import { CfUsersRolesDataService } from '../../../services/domain-data/cf-users-roles-data.service';
 
 // ─── Minimal deps factory ─────────────────────────────────────────────────────
@@ -215,6 +216,63 @@ describe('addUsers', () => {
 
     // Should report error via snackbar
     expect(deps.snackBar.error).toHaveBeenCalled();
+  });
+
+  // ── req.changes path (widget hands pre-built CfRoleChange[]) ──────────────
+
+  it('associate + req.changes: stamps synthetic guid onto each change, executes', async () => {
+    const deps = makeDeps();
+    const templateChange: CfRoleChange = {
+      userGuid: '',       // placeholder — addUsers stamps the real guid
+      orgGuid: 'org1',
+      orgName: 'My Org',
+      add: true,
+      role: OrgUserRoleNames.MANAGER,
+    };
+    const req = makeReq({
+      mode: 'associate',
+      identities: ['alice'],
+      origin: 'ldap',
+      selection: { orgRoles: [], spaceRolesBySpace: {} }, // empty sentinel
+      changes: [templateChange],
+    });
+
+    const r = await addUsers(deps, req);
+
+    expect(r).toEqual({ ok: true, total: 1, failed: 0 });
+
+    // Synthetic user seeded
+    expect(deps.rolesData.setUsers).toHaveBeenCalledOnce();
+    const [, users] = (deps.rolesData.setUsers as any).mock.calls[0];
+    expect(users[0].guid).toBe('alice/cf1/org1');
+
+    // setChanges called with stamped guid
+    expect(deps.rolesData.setChanges).toHaveBeenCalledOnce();
+    const [changes] = (deps.rolesData.setChanges as any).mock.calls[0];
+    expect(changes).toHaveLength(1);
+    expect(changes[0].userGuid).toBe('alice/cf1/org1');
+    expect(changes[0].role).toBe(OrgUserRoleNames.MANAGER);
+    expect(changes[0].add).toBe(true);
+
+    expect(deps.rolesData.executeChanges).toHaveBeenCalledWith({ silent: true });
+  });
+
+  it('associate + req.changes: empty changes array → no-roles path (associateUser only)', async () => {
+    const deps = makeDeps();
+    const req = makeReq({
+      mode: 'associate',
+      identities: ['alice'],
+      origin: 'ldap',
+      selection: { orgRoles: [], spaceRolesBySpace: {} },
+      changes: [],  // empty widget output → no roles selected
+    });
+
+    const r = await addUsers(deps, req);
+
+    // Empty changes → hasRoles() is false → associate-only path
+    expect(r).toEqual({ ok: true, total: 1, failed: 0 });
+    expect(deps.rolesData.associateUser).toHaveBeenCalledWith('cf1', 'alice', 'ldap');
+    expect(deps.rolesData.executeChanges).not.toHaveBeenCalled();
   });
 
   it('partial failure: multiple errored role-changes for one identity count as 1 failed identity', async () => {

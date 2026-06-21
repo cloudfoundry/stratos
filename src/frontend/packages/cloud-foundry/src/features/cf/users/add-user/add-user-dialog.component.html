@@ -62,73 +62,17 @@
   </div>
 
   <!-- ── Scope & roles sub-section ─────────────────────────────────────────
-       SEPARATE, clearly-marked block: Phase 4's D7 multi-org widget replaces
-       ONLY this <section>. Roles are OPTIONAL (canSubmit gates on identity). -->
+       Delegated to the shared RoleAssignmentComponent widget (Phase 4 D7).
+       Roles are OPTIONAL (canSubmit gates on identity only). -->
   <section class="flex flex-col gap-3 border-t pt-3" aria-label="Scope and roles">
     <div class="text-sm font-medium text-content-text">Scope &amp; roles (optional)</div>
-
-    <!-- Org: dropdown at CF level; fixed label when locked to a route org. -->
-    <div class="flex flex-col gap-1">
-      <label for="org-input" class="text-sm text-content-muted">Organization</label>
-      @if (orgLocked()) {
-        <div id="org-input" class="text-sm text-content-text">{{ data.orgName }}</div>
-      } @else {
-        <select
-          id="org-input"
-          class="border rounded px-2 py-1 text-sm"
-          [ngModel]="chosenOrgGuid()"
-          (ngModelChange)="onOrgChange($event)"
-        >
-          <option value="" [selected]="chosenOrgGuid() === ''">— Select an organization —</option>
-          @for (org of orgOptions(); track org.guid) {
-            <option [value]="org.guid" [selected]="org.guid === chosenOrgGuid()">{{ org.name }}</option>
-          }
-        </select>
-      }
-    </div>
-
-    @if (chosenOrgGuid()) {
-      <!-- Org roles -->
-      <div class="flex flex-col gap-1">
-        <span class="text-sm text-content-muted">Organization roles</span>
-        <div class="flex flex-wrap gap-3">
-          @for (def of orgRoleDefs; track def.name) {
-            <label class="flex items-center gap-1 text-sm">
-              <input
-                type="checkbox"
-                [checked]="isOrgRoleSelected(def.name)"
-                (change)="toggleOrgRole(def.name, $any($event.target).checked)"
-              />
-              {{ def.label }}
-            </label>
-          }
-        </div>
-      </div>
-
-      <!-- Space roles per space of the chosen org -->
-      @if (spaceOptions().length > 0) {
-        <div class="flex flex-col gap-2">
-          <span class="text-sm text-content-muted">Space roles</span>
-          @for (space of spaceOptions(); track space.guid) {
-            <div class="flex flex-col gap-1">
-              <span class="text-sm text-content-text">{{ space.name }}</span>
-              <div class="flex flex-wrap gap-3 pl-2">
-                @for (def of spaceRoleDefs; track def.name) {
-                  <label class="flex items-center gap-1 text-sm">
-                    <input
-                      type="checkbox"
-                      [checked]="isSpaceRoleSelected(space.guid, def.name)"
-                      (change)="toggleSpaceRole(space.guid, def.name, $any($event.target).checked)"
-                    />
-                    {{ def.label }}
-                  </label>
-                }
-              </div>
-            </div>
-          }
-        </div>
-      }
-    }
+    <app-role-assignment
+      [cfGuid]="data.cfGuid"
+      [users]="[]"
+      [baseline]="{}"
+      [lockedOrg]="orgLocked() ? { guid: data.orgGuid!, name: data.orgName! } : undefined"
+      (changeSet)="onRoleChangeSet($event)"
+    ></app-role-assignment>
   </section>
 
   <!-- Actions -->
