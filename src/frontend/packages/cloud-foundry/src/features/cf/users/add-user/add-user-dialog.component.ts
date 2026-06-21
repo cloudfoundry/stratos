@@ -28,6 +28,7 @@ import { TailwindSnackBarService } from '@stratosui/core';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
+import { StUser } from '../../../../services/endpoint-data/stratos-types';
 import { RoleAssignmentComponent } from '../../../../shared/components/role-assignment/role-assignment.component';
 import {
   AddMode,
@@ -69,6 +70,21 @@ export class AddUserDialogComponent {
 
   /** Injected dialog data — accessed in spec via `cmp.data` (protected). */
   protected data = inject<AddUserDialogData>(MAT_DIALOG_DATA);
+
+  /**
+   * A single sentinel StUser fed to the RoleAssignmentComponent widget.
+   * diffToChanges iterates `for (const user of users)` — if users is empty
+   * the inner loops never run and the widget emits []. The sentinel provides
+   * a stable user guid placeholder; addUsers stamps the real synthetic guids
+   * onto each change when it builds the final role-grant set.
+   */
+  protected readonly pendingUsers: StUser[] = [{
+    guid: 'pending-add-user',
+    username: '',
+    cnsiGuid: this.data.cfGuid,
+    orgRoles: [],
+    spaceRoles: [],
+  }];
 
   private idps = inject(CfIdentityProvidersService);
 

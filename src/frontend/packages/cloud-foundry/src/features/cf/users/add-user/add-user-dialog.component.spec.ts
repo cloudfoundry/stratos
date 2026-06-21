@@ -128,6 +128,19 @@ describe('AddUserDialogComponent', () => {
     expect((cmp as any).roleChanges()).toEqual([]);
   });
 
+  // ── sentinel-user regression guard ────────────────────────────────────────
+  // Ensures the [users] binding to RoleAssignmentComponent is never [] so
+  // diffToChanges inner loops run and the widget can emit role changes.
+
+  it('pendingUsers is a stable array with exactly one sentinel entry', () => {
+    const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false });
+    const pending = (cmp as any).pendingUsers as any[];
+    expect(pending).toHaveLength(1);
+    expect(pending[0].guid).toBeTruthy();
+    expect(pending[0].guid).toBe('pending-add-user');
+    expect(pending[0].cnsiGuid).toBe(CF_GUID);
+  });
+
   it('locks the org in the widget when opened from an org page', () => {
     const { cmp } = make({
       cfGuid: CF_GUID,
