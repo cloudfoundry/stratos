@@ -164,6 +164,25 @@ describe('cf-roles-state.helpers', () => {
     });
   });
 
+  describe('SUPPORTED_SPACES relation (space_supporter self-read vertical)', () => {
+    it('reduces a SUPPORTED_SPACES relation into isSupporter', () => {
+      const state = applyCfUserRelations({}, CfUserRelationTypes.SUPPORTED_SPACES, cf, spaceData());
+      expect(state[cf].spaces[testSpaceGuid].isSupporter).toBe(true);
+    });
+    it('leaves other space role flags false when only SUPPORTED_SPACES is set', () => {
+      const state = applyCfUserRelations({}, CfUserRelationTypes.SUPPORTED_SPACES, cf, spaceData());
+      const space = state[cf].spaces[testSpaceGuid];
+      expect(space.isAuditor).toBe(false);
+      expect(space.isManager).toBe(false);
+      expect(space.isDeveloper).toBe(false);
+    });
+    it('treats SUPPORTED_SPACES as a space relation (back-fills org spaceGuids)', () => {
+      const state = applyCfUserRelations({}, CfUserRelationTypes.SUPPORTED_SPACES, cf, spaceData());
+      // isSpaceRelation returns true → assignSpaceToOrg runs → org gains the space guid
+      expect(state[cf].organizations[testOrgGuid].spaceGuids).toContain(testSpaceGuid);
+    });
+  });
+
   describe('applyCfRoleChange (restored: connected-user role mutation)', () => {
     it('adds an org role for the connected user', () => {
       let state = registerCfEndpoint({}, cf);

@@ -102,6 +102,8 @@ function currentCfUserSpaceRoleReducer(
       return { ...idState, isManager: userHasRelation };
     case CfUserRelationTypes.SPACES:
       return { ...idState, isDeveloper: userHasRelation };
+    case CfUserRelationTypes.SUPPORTED_SPACES:
+      return { ...idState, isSupporter: userHasRelation };
   }
   return idState;
 }
@@ -174,7 +176,8 @@ function isOrgRelation(relationType: CfUserRelationTypes): boolean {
 function isSpaceRelation(relationType: CfUserRelationTypes): boolean {
   return relationType === CfUserRelationTypes.AUDITED_SPACES ||
     relationType === CfUserRelationTypes.MANAGED_SPACES ||
-    relationType === CfUserRelationTypes.SPACES;
+    relationType === CfUserRelationTypes.SPACES ||
+    relationType === CfUserRelationTypes.SUPPORTED_SPACES;
 }
 
 function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResource<ISpace>[]): IOrgsRoleState {
