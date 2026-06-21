@@ -10,6 +10,7 @@ import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 import { CfRoleChange } from '../../../store/types/users-roles.types';
 import { StUser } from '../../../services/endpoint-data/stratos-types';
+import { diffToChanges } from './role-tristate';
 
 import { RoleAssignmentComponent } from './role-assignment.component';
 
@@ -158,6 +159,56 @@ describe('RoleAssignmentComponent', () => {
     expect(lastEmit[0].orgGuid).toBe('o1');
     expect(lastEmit[0].role).toBe(OrgUserRoleNames.MANAGER);
     expect(lastEmit[0].add).toBe(true);
+  });
+
+  it('collapse does not drop selection edits — state survives toggle', async () => {
+    // I1: Prove that collapsing an org accordion never mutates the selection signal.
+    const user = makeUser('u1');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [user]);
+    fixture.componentRef.setInput('baseline', {});
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+
+    // Pick o1 (also expands it) and toggle Manager
+    component.pickOrg(o1);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const emitted: CfRoleChange[][] = [];
+    component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
+
+    component.onToggleOrgRole(o1, OrgUserRoleNames.MANAGER, true);
+    fixture.detectChanges();
+
+    // Capture the changeSet after toggle
+    const changeSetBeforeCollapse = emitted[emitted.length - 1];
+    expect(changeSetBeforeCollapse.length).toBe(1);
+    expect(changeSetBeforeCollapse[0].role).toBe(OrgUserRoleNames.MANAGER);
+
+    // Collapse the org section (same path the template button uses)
+    expect(component.isExpanded('o1')).toBe(true);
+    component.toggleExpanded('o1');
+    fixture.detectChanges();
+    expect(component.isExpanded('o1')).toBe(false);
+
+    // Re-expand
+    component.toggleExpanded('o1');
+    fixture.detectChanges();
+    expect(component.isExpanded('o1')).toBe(true);
+
+    // (a) selection() still contains the toggled Manager role
+    const selAfter = component['selection']();
+    expect(selAfter['o1']?.orgRoles[OrgUserRoleNames.MANAGER]).toBe(true);
+
+    // (b) A fresh diffToChanges from current selection matches the pre-collapse emit
+    const freshChanges = diffToChanges([user], {}, selAfter);
+    expect(freshChanges.length).toBe(changeSetBeforeCollapse.length);
+    expect(freshChanges[0].role).toBe(changeSetBeforeCollapse[0].role);
+    expect(freshChanges[0].add).toBe(changeSetBeforeCollapse[0].add);
   });
 
   it('filters spaces within a section', async () => {

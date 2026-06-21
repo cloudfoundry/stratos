@@ -62,7 +62,7 @@
               >
                 <app-role-tristate-checkbox
                   [checked]="checkedForOrg(org.metadata.guid, def.name)"
-                  [disabled]="!canEditOrg(org.metadata.guid) || (def.name === 'users' && isOrgUserDisabled(org.metadata.guid))"
+                  [disabled]="!canEditOrg(org.metadata.guid) || (def.name === orgUserRole && isOrgUserDisabled(org.metadata.guid))"
                   [label]="def.label"
                   (toggled)="onToggleOrgRole(org, def.name, $event)"
                 ></app-role-tristate-checkbox>
