@@ -263,6 +263,26 @@ describe('RoleAssignmentComponent', () => {
     expect(component.isOrgUserDisabled('o1')).toBe(true);
   });
 
+  it('exposes role defs derived from the registry in the established order', () => {
+    const fixture = createFixture();
+    const component = fixture.componentInstance;
+
+    expect(component.orgRoleDefs.map(d => d.label)).toEqual(['Manager', 'Auditor', 'Billing Manager', 'User']);
+    expect(component.orgRoleDefs.map(d => d.name)).toEqual([
+      OrgUserRoleNames.MANAGER,
+      OrgUserRoleNames.AUDITOR,
+      OrgUserRoleNames.BILLING_MANAGERS,
+      OrgUserRoleNames.USER,
+    ]);
+    expect(component.spaceRoleDefs.map(d => d.label)).toEqual(['Manager', 'Auditor', 'Developer', 'Supporter']);
+    expect(component.spaceRoleDefs.map(d => d.name)).toEqual([
+      SpaceUserRoleNames.MANAGER,
+      SpaceUserRoleNames.AUDITOR,
+      SpaceUserRoleNames.DEVELOPER,
+      SpaceUserRoleNames.SUPPORTER,
+    ]);
+  });
+
   it('filters spaces within a section', async () => {
     const fixture = createFixture();
     // Set up two spaces
