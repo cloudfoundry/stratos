@@ -331,6 +331,7 @@ function nativeRoleType(role: string, isSpace: boolean): string {
       case SpaceUserRoleNames.MANAGER: return 'space_manager';
       case SpaceUserRoleNames.AUDITOR: return 'space_auditor';
       case SpaceUserRoleNames.DEVELOPER: return 'space_developer';
+      case SpaceUserRoleNames.SUPPORTER: return 'space_supporter';
       default: throw new Error(`Unknown space role: ${role}`);
     }
   }

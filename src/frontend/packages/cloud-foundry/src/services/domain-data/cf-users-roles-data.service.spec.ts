@@ -11,6 +11,7 @@ import { StUser } from '../endpoint-data/stratos-types';
 import { CnsiUsersSnapshotService } from '../endpoint-data/cnsi-users-snapshot.service';
 import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 import { CfRoleChange } from '../../store/types/users-roles.types';
+import { SpaceUserRoleNames } from '../../store/types/cf-user.types';
 import { CfUsersRolesDataService } from './cf-users-roles-data.service';
 
 const userA = { guid: 'u-a', username: 'alice' } as unknown as StUser;
@@ -294,5 +295,27 @@ describe('CfUsersRolesDataService', () => {
     svc.clear();
 
     expect(svc.applyStatus()).toEqual({});
+  });
+
+  describe('space_supporter role', () => {
+    it('SpaceUserRoleNames carries SUPPORTER with value "supporters"', () => {
+      expect(SpaceUserRoleNames.SUPPORTER).toBe('supporters');
+    });
+
+    it('maps space SUPPORTER role to the v3 space_supporter type via executeChanges', async () => {
+      svc.setUsers('cf-1', [userA]);
+      svc.setChanges([
+        { userGuid: 'u-a', orgGuid: 'org-1', spaceGuid: 'sp-1', add: true, role: SpaceUserRoleNames.SUPPORTER as any, orgName: 'Org 1', spaceName: 'Space 1' },
+      ]);
+
+      const done = svc.executeChanges();
+
+      const req = httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes');
+      expect(req.request.body.changes).toEqual([
+        { userGuid: 'u-a', spaceGuid: 'sp-1', type: 'space_supporter', add: true },
+      ]);
+      req.flush({ results: [{ index: 0, success: true }] });
+      await expect(done).resolves.toBeUndefined();
+    });
   });
 });
