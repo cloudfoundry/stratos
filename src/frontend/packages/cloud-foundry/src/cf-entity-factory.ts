@@ -40,7 +40,8 @@ import {
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
 import { getCFCompositeEntityId } from './store/selectors/api.selectors';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
+import { CfUser, CfUserRoleParams } from './store/types/cf-user.types';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS } from './roles/role-registry';
 
 const entityCache: {
   [key: string]: EntitySchema;
@@ -199,15 +200,16 @@ const CFUserSchema = new CFUserEntitySchema({
 });
 entityCache[cfUserEntityType] = CFUserSchema;
 
+// @internal — exported only for spec introspection (parity test); not public API
+export const spaceRoleSchemaParams = Object.fromEntries(
+  SPACE_ROLE_DEFS.map(d => [d.stratos, [CFUserSchema]])
+);
 const coreSpaceSchemaParams = {
   routes: [RouteSchema],
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
-  [SpaceUserRoleNames.DEVELOPER]: [CFUserSchema],
-  [SpaceUserRoleNames.MANAGER]: [CFUserSchema],
-  [SpaceUserRoleNames.AUDITOR]: [CFUserSchema],
-  [SpaceUserRoleNames.SUPPORTER]: [CFUserSchema]
+  ...spaceRoleSchemaParams,
 };
 const SpaceSchema = new CFSpaceEntitySchema({
   entity: {
@@ -232,14 +234,15 @@ const OrganizationsWithoutSpaces = new CFOrgEntitySchema({
   }
 });
 
+// @internal — exported only for spec introspection (parity test); not public API
+export const orgRoleSchemaParams = Object.fromEntries(
+  ORG_ROLE_DEFS.map(d => [d.stratos, [CFUserSchema]])
+);
 const OrganizationSchema = new CFOrgEntitySchema({
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    [OrgUserRoleNames.USER]: [CFUserSchema],
-    [OrgUserRoleNames.MANAGER]: [CFUserSchema],
-    [OrgUserRoleNames.BILLING_MANAGERS]: [CFUserSchema],
-    [OrgUserRoleNames.AUDITOR]: [CFUserSchema]
+    ...orgRoleSchemaParams,
   }
 });
 entityCache[organizationEntityType] = OrganizationSchema;
