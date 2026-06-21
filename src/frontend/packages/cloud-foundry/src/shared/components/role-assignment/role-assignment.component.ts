@@ -10,8 +10,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Subscription, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -50,7 +48,7 @@ interface SpaceEntry {
   standalone: true,
   templateUrl: './role-assignment.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RoleTristateCheckboxComponent],
+  imports: [RoleTristateCheckboxComponent],
 })
 export class RoleAssignmentComponent implements OnInit, OnDestroy {
   @Input({ required: true }) cfGuid!: string;
@@ -61,6 +59,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   @Output() changeSet = new EventEmitter<CfRoleChange[]>();
 
   // --- Role definitions ---
+
+  /** Exposed for template: enum-safe reference used to disable the org-user checkbox */
+  protected readonly orgUserRole = OrgUserRoleNames.USER;
+
   readonly orgRoleDefs: OrgDef[] = [
     { name: OrgUserRoleNames.MANAGER, label: 'Manager' },
     { name: OrgUserRoleNames.AUDITOR, label: 'Auditor' },
@@ -280,9 +282,28 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Org-USER auto-disable rule ---
   // Org USER checkbox is disabled when any other org or space role is set for this org.
   // Ported from CfRoleCheckboxComponent.isDisabled / hasOrgSpaceRole (lines 336-367).
-
-  isOrgUserDisabled(orgGuid: string): boolean {
+  //
+  // Memoized: recomputes only when selection or spacesByOrg changes (both are signals).
+  // Cost is bounded: the dialog has low CD frequency and Add User operates on 1 user.
+  private readonly orgUserDisabledMap = computed<Record<string, boolean>>(() => {
     const sel = this.selection();
+    const spacesByOrg = this.spacesByOrg();
+    const result: Record<string, boolean> = {};
+
+    for (const orgGuid of Object.keys(sel).concat(Object.keys(spacesByOrg))) {
+      if (orgGuid in result) {
+        continue;
+      }
+      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg);
+    }
+    return result;
+  });
+
+  private _computeOrgUserDisabled(
+    orgGuid: string,
+    sel: RoleSelection,
+    spacesByOrg: Record<string, SpaceEntry[]>,
+  ): boolean {
     const selOrg = sel[orgGuid];
 
     // Check org roles other than USER
@@ -294,8 +315,8 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Check all space roles across loaded spaces
-    const spaces = this.spacesFor(orgGuid);
+    // Check all space roles across loaded spaces (computeChecked reads baseline + selection)
+    const spaces = spacesByOrg[orgGuid] ?? [];
     for (const space of spaces) {
       for (const def of this.spaceRoleDefs) {
         const checked = computeChecked(def.name, this.users, this.baseline, sel, orgGuid, space.guid);
@@ -305,29 +326,11 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Also check baseline space roles for orgs not yet in spacesByOrg
-    for (const user of this.users) {
-      const userBaseline = this.baseline[user.guid];
-      if (userBaseline && userBaseline[orgGuid]) {
-        const orgPerms = userBaseline[orgGuid];
-        if (orgPerms.spaces) {
-          for (const [spaceGuid, spacePerms] of Object.entries(orgPerms.spaces)) {
-            for (const def of this.spaceRoleDefs) {
-              const checked = computeChecked(def.name, this.users, this.baseline, sel, orgGuid, spaceGuid);
-              if (checked !== false) {
-                return true;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Also check if selection has any explicit space roles set
+    // Check selection's explicit space-role overrides for spaces not yet loaded
     if (selOrg?.spaces) {
-      for (const [spaceGuid, spaceEntry] of Object.entries(selOrg.spaces)) {
+      for (const [, spaceEntry] of Object.entries(selOrg.spaces)) {
         for (const [, val] of Object.entries(spaceEntry.roles)) {
-          if (val === true || val === null) {
+          if (val === true) {
             return true;
           }
         }
@@ -335,6 +338,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     }
 
     return false;
+  }
+
+  isOrgUserDisabled(orgGuid: string): boolean {
+    return this.orgUserDisabledMap()[orgGuid] ?? false;
   }
 
   canEditOrg(orgGuid: string): boolean {
