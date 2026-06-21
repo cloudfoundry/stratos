@@ -16,7 +16,7 @@ import (
 
 // TestGetNativeCurrentUserRoles_HappyPath exercises the contract that
 // replaces the legacy 7-fetch flow: a single /v3/roles call filtered by
-// user_guids={me} returns rows that fan out into 7 buckets keyed by the
+// user_guids={me} returns rows that fan out into 8 buckets keyed by the
 // frontend's CfUserRelationTypes string values. The response always
 // carries every canonical bucket; empty ones serialize as [] so the
 // frontend doesn't have to nil-guard.
