@@ -61,7 +61,13 @@
         <span class="truncate">{{ org.entity.name }}</span>
       </button>
       <span class="role-assignment__summary shrink-0 text-xs text-content-muted" data-testid="org-role-summary">
-        {{ roleCountForOrg(org.metadata.guid) }} role{{ roleCountForOrg(org.metadata.guid) === 1 ? '' : 's' }} set
+        @let setCount = roleCountForOrg(org.metadata.guid);
+        @let mixedCount = mixedRoleCountForOrg(org.metadata.guid);
+        @if (mixedCount > 0) {
+          {{ setCount }} set · {{ mixedCount }} mixed
+        } @else {
+          {{ setCount }} role{{ setCount === 1 ? '' : 's' }} set
+        }
       </span>
       @if (!lockedOrg) {
         <button

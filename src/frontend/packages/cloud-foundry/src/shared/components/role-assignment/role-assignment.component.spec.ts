@@ -517,6 +517,61 @@ describe('RoleAssignmentComponent', () => {
     expect(component.roleCountForOrg('o1')).toBe(2);
   });
 
+  it('E: mixedRoleCountForOrg counts roles only some selected users hold', async () => {
+    // Multi-user: u1 is org manager of o1, u2 is not; both are org users.
+    // The shared 'users' role is counted as set; the 'managers' role is
+    // indeterminate (held by one, not all) and must surface as mixed.
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }],
+      spacesByOrg: { o1: [] },
+    });
+
+    const u1 = makeUser('u1');
+    const u2 = makeUser('u2');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [u1, u2]);
+    fixture.componentRef.setInput('baseline', {
+      u1: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: true, billing_managers: false, auditors: false, users: true } } },
+      u2: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } } },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+
+    // Shared role ('users') counts as set; partial role ('managers') is mixed.
+    expect(component.roleCountForOrg('o1')).toBe(1);
+    expect(component.mixedRoleCountForOrg('o1')).toBe(1);
+  });
+
+  it('E2: collapsed summary renders "N set · M mixed" when roles are divergent', async () => {
+    // Same multi-user divergence as E; the seeded o1 summary must show both the
+    // shared count and the mixed count rather than just "1 role set".
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }],
+      spacesByOrg: { o1: [] },
+    });
+
+    const u1 = makeUser('u1');
+    const u2 = makeUser('u2');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [u1, u2]);
+    fixture.componentRef.setInput('baseline', {
+      u1: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: true, billing_managers: false, auditors: false, users: true } } },
+      u2: { o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } } },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const summary = fixture.debugElement.query(By.css('[data-testid="org-role-summary"]'));
+    expect(summary).toBeTruthy();
+    expect(summary.nativeElement.textContent.replace(/\s+/g, ' ').trim()).toBe('1 set · 1 mixed');
+  });
+
   it('C: pickOrg prepends — newest pick sits at index 0', async () => {
     await setup({
       orgs: [
