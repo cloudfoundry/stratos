@@ -7,6 +7,7 @@ import {
   OnInit,
   Output,
   computed,
+  effect,
   inject,
   input,
   signal,
@@ -56,6 +57,8 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   @Input({ required: true }) cfGuid!: string;
   readonly users = input<StUser[]>([]);
   readonly baseline = input<CfUserRolesSelected>({});
+  /** True while the host is still resolving existing roles (existingRoles$). */
+  readonly loading = input<boolean>(false);
   @Input() lockedOrg?: { guid: string; name: string };
 
   @Output() changeSet = new EventEmitter<CfRoleChange[]>();
@@ -82,6 +85,15 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Internal signals ---
   /** All orgs fetched (before permission filter) */
   private readonly allOrgs = signal<APIResource<IOrganization>[]>([]);
+
+  /** True until the org list fetch resolves (drives the picker spinner). */
+  readonly orgsLoading = signal(true);
+
+  /** Orgs whose per-org space fetch is in flight (drives per-section spinner). */
+  private readonly spacesLoading = signal<Set<string>>(new Set());
+  spacesLoadingFor(orgGuid: string): boolean {
+    return this.spacesLoading().has(orgGuid);
+  }
 
   /** Permission map: orgGuid → can edit */
   private readonly canEditByOrg = signal<Record<string, boolean>>({});
@@ -128,6 +140,41 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
+  /** Guard so the baseline seed runs once — user add/remove must not be re-overridden. */
+  private baselineSeeded = false;
+
+  constructor() {
+    // Seed the accordion with the user's existing-role orgs (from baseline) so
+    // current roles are visible on open without manually re-picking each org.
+    // Reactive: baseline (existingRoles$) resolves async and arrives after the
+    // org list. Seeds collapsed; spaces load lazily on expand. lockedOrg flows
+    // own their seeding (seedLockedOrg).
+    effect(() => {
+      const orgs = this.allOrgs();
+      const baseline = this.baseline();
+      if (this.baselineSeeded || this.lockedOrg || orgs.length === 0) {
+        return;
+      }
+      const orgGuids = new Set<string>();
+      for (const userGuid of Object.keys(baseline)) {
+        for (const orgGuid of Object.keys(baseline[userGuid] ?? {})) {
+          orgGuids.add(orgGuid);
+        }
+      }
+      if (orgGuids.size === 0) {
+        return; // baseline not resolved yet — wait for it to arrive
+      }
+      const toSeed = orgs.filter(o => orgGuids.has(o.metadata.guid));
+      if (toSeed.length) {
+        this.pickedOrgs.update(list => {
+          const have = new Set(list.map(p => p.metadata.guid));
+          return [...toSeed.filter(o => !have.has(o.metadata.guid)), ...list];
+        });
+      }
+      this.baselineSeeded = true;
+    });
+  }
+
   // --- Lifecycle ---
 
   ngOnInit(): void {
@@ -135,6 +182,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe(orgs => {
       this.allOrgs.set(orgs);
       this.resolvePermissions(orgs);
+      this.orgsLoading.set(false);
     });
     this.subs.add(orgsSub);
 
@@ -213,7 +261,8 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     if (already) {
       return;
     }
-    this.pickedOrgs.update(list => [...list, org]);
+    // Prepend so the most-recent pick sits at the top of the accordion (less scrolling).
+    this.pickedOrgs.update(list => [org, ...list]);
     this.loadSpacesFor(org.metadata.guid);
     this.expandedByOrg.update(set => { const next = new Set(set); next.add(org.metadata.guid); return next; });
   }
@@ -224,6 +273,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   }
 
   toggleExpanded(orgGuid: string): void {
+    const willExpand = !this.expandedByOrg().has(orgGuid);
     this.expandedByOrg.update(set => {
       const next = new Set(set);
       if (next.has(orgGuid)) {
@@ -233,6 +283,11 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       }
       return next;
     });
+    // Lazy-load this org's spaces on first expand (seeded orgs aren't loaded up
+    // front). Idempotent — loadSpacesFor no-ops if already loaded.
+    if (willExpand) {
+      this.loadSpacesFor(orgGuid);
+    }
   }
 
   isExpanded(orgGuid: string): boolean {
@@ -245,8 +300,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     if (this.spacesByOrg()[orgGuid]) {
       return; // already loaded
     }
+    this.spacesLoading.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
     const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe(spaces => {
       this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
+      this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
       this.resolveSpacePermissions(orgGuid, spaces);
     });
     this.subs.add(spaceSub);
@@ -381,9 +438,24 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     for (const def of this.orgRoleDefs) {
       if (this.checkedForOrg(orgGuid, def.name) === true) { n++; }
     }
-    for (const space of this.spacesFor(orgGuid)) {
+    // Enumerate this org's space GUIDs from baseline + selection rather than from
+    // loaded spaces, so the collapsed summary is accurate WITHOUT fetching spaces
+    // (seeded orgs stay cheap; spaces load lazily only on expand).
+    const spaceGuids = new Set<string>();
+    const baseline = this.baseline();
+    for (const userGuid of Object.keys(baseline)) {
+      const spaces = baseline[userGuid]?.[orgGuid]?.spaces;
+      if (spaces) {
+        for (const sg of Object.keys(spaces)) { spaceGuids.add(sg); }
+      }
+    }
+    const selSpaces = this.selection()[orgGuid]?.spaces;
+    if (selSpaces) {
+      for (const sg of Object.keys(selSpaces)) { spaceGuids.add(sg); }
+    }
+    for (const sg of spaceGuids) {
       for (const def of this.spaceRoleDefs) {
-        if (this.checkedForSpace(orgGuid, space.guid, def.name) === true) { n++; }
+        if (this.checkedForSpace(orgGuid, sg, def.name) === true) { n++; }
       }
     }
     return n;

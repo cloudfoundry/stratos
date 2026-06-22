@@ -407,4 +407,212 @@ describe('RoleAssignmentComponent', () => {
     expect(filtered.length).toBe(1);
     expect(filtered[0].name).toBe('Alpha Space');
   });
+
+  // ── New behavior tests (Phase 4 role-widget additions) ─────────────────────
+
+  it('A: seeds pickedOrgs from baseline on init (collapsed, not o3)', async () => {
+    // Harness has o1, o2, o3; baseline covers o1 and o2 only.
+    await setup({
+      orgs: [
+        { guid: 'o1', name: 'Org One' },
+        { guid: 'o2', name: 'Org Two' },
+        { guid: 'o3', name: 'Org Three' },
+      ],
+      spacesByOrg: { o1: [], o2: [], o3: [] },
+    });
+
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('baseline', {
+      user1: {
+        o1: { name: 'o1', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
+        o2: { name: 'o2', orgGuid: 'o2', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
+      },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    const guids = component.pickedOrgs().map(o => o.metadata.guid);
+
+    // o1 and o2 must be seeded; o3 must NOT be included
+    expect(guids).toContain('o1');
+    expect(guids).toContain('o2');
+    expect(guids).not.toContain('o3');
+
+    // Seeded orgs are collapsed (not expanded)
+    expect(component.isExpanded('o1')).toBe(false);
+    expect(component.isExpanded('o2')).toBe(false);
+  });
+
+  it('A: baseline seed is a no-op when lockedOrg is set', async () => {
+    // When lockedOrg is present the baseline seeding effect short-circuits.
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }],
+      spacesByOrg: { o1: [] },
+    });
+
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: 'Org One' });
+    fixture.componentRef.setInput('baseline', {
+      user1: {
+        o1: { name: 'o1', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
+      },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    // lockedOrg path seeds o1; the baseline-seeding effect must not run
+    expect(component.pickedOrgs().length).toBe(1);
+    expect(component.pickedOrgs()[0].metadata.guid).toBe('o1');
+    // lockedOrg is always expanded
+    expect(component.isExpanded('o1')).toBe(true);
+  });
+
+  it('B: roleCountForOrg counts baseline org + space roles without loading spaces', async () => {
+    // Baseline has 1 org role (users) + 1 space role (developers) for o1/s1.
+    // roleCountForOrg must return 2 WITHOUT having expanded the org (i.e. spacesFor('o1')===[]).
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }],
+      spacesByOrg: { o1: [{ guid: 's1', name: 'Space One' }] },
+    });
+
+    const user = makeUser('u1');
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [user]);
+    fixture.componentRef.setInput('baseline', {
+      u1: {
+        o1: {
+          name: 'Org One',
+          orgGuid: 'o1',
+          permissions: { managers: false, billing_managers: false, auditors: false, users: true },
+          spaces: {
+            s1: {
+              name: 'Space One',
+              orgGuid: 'o1',
+              orgName: 'Org One',
+              spaceGuid: 's1',
+              permissions: { managers: false, developers: true, auditors: false, supporters: false },
+            },
+          },
+        },
+      },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+
+    // Spaces should NOT have been loaded (no expand triggered)
+    expect(component.spacesFor('o1')).toEqual([]);
+
+    // Count should still be 2: 1 org role (users) + 1 space role (developers)
+    expect(component.roleCountForOrg('o1')).toBe(2);
+  });
+
+  it('C: pickOrg prepends — newest pick sits at index 0', async () => {
+    await setup({
+      orgs: [
+        { guid: 'o1', name: 'Org One' },
+        { guid: 'o2', name: 'Org Two' },
+        { guid: 'o3', name: 'Org Three' },
+      ],
+      spacesByOrg: { o1: [], o2: [], o3: [] },
+    });
+
+    const o3 = makeOrg('o3', 'Org Three');
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+
+    // Pick o1 first, then o3
+    component.pickOrg(o1);
+    component.pickOrg(o3);
+    fixture.detectChanges();
+
+    expect(component.pickedOrgs()[0].metadata.guid).toBe('o3');
+  });
+
+  it('D: toggleExpanded lazy-loads spaces and resolves spacesLoadingFor', async () => {
+    // Harness: o1 with s1. Baseline seeds o1 (collapsed). On toggleExpanded('o1')
+    // the component should call fetchSpacesForOrg and populate spacesFor('o1').
+    let fetchSpacesCalled = false;
+    let fetchSpacesOrgGuid = '';
+
+    await TestBed.configureTestingModule({
+      imports: [RoleAssignmentComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: (await import('../../../features/cf/users/manage-users/cf-roles.service')).CfRolesService,
+          useValue: {
+            fetchOrgs: () => {
+              const { of } = require('rxjs');
+              return of([{ metadata: { guid: 'o1', created_at: '', updated_at: '', url: '' }, entity: { name: 'Org One' } }]);
+            },
+            fetchSpacesForOrg: (_cf: string, orgGuid: string) => {
+              fetchSpacesCalled = true;
+              fetchSpacesOrgGuid = orgGuid;
+              const { of } = require('rxjs');
+              return of([{ guid: 's1', name: 'Space One' }]);
+            },
+          },
+        },
+        {
+          provide: (await import('../../../../../core/src/core/permissions/current-user-permissions.service')).CurrentUserPermissionsService,
+          useValue: { can: () => { const { of } = require('rxjs'); return of(true); } },
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('baseline', {
+      u1: {
+        o1: { name: 'Org One', orgGuid: 'o1', permissions: { managers: false, billing_managers: false, auditors: false, users: true } },
+      },
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+
+    // o1 is seeded by baseline, collapsed, spaces NOT yet loaded
+    expect(component.isExpanded('o1')).toBe(false);
+    expect(component.spacesFor('o1')).toEqual([]);
+
+    // Expand o1 — should trigger lazy space load
+    component.toggleExpanded('o1');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(component.isExpanded('o1')).toBe(true);
+    expect(fetchSpacesCalled).toBe(true);
+    expect(fetchSpacesOrgGuid).toBe('o1');
+
+    // After the synchronous of() resolves, spaces are populated and loading is cleared
+    expect(component.spacesFor('o1')).toEqual([{ guid: 's1', name: 'Space One' }]);
+    expect(component.spacesLoadingFor('o1')).toBe(false);
+  });
+
+  it('E: orgsLoading is false after ngOnInit resolves', async () => {
+    await setup();
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    // After the synchronous of() from the harness resolves orgsLoading must be false
+    expect(component.orgsLoading()).toBe(false);
+  });
 });
