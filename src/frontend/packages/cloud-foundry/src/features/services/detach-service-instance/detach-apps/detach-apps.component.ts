@@ -10,7 +10,6 @@ import {
   inject,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { of as observableOf } from 'rxjs';
 
 import {
   BoundListSelectionState,
@@ -96,6 +95,4 @@ export class DetachAppsComponent {
   toggleRow(b: StServiceCredentialBinding): void {
     this.selection.toggle(b);
   }
-
-  onNext = () => observableOf({ success: true });
 }
