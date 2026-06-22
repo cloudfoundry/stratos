@@ -364,5 +364,8 @@ func TestGetNativeUsers_SpaceOrgFromIncludedSpaces(t *testing.T) {
 	require.Len(t, resp.Resources[0].SpaceRoles, spaceCount)
 	for _, sr := range resp.Resources[0].SpaceRoles {
 		assert.Equal(t, "org-1", sr.OrgGuid, "space bucket %s must carry the include-resolved parent org", sr.SpaceGuid)
+		// The mock sets each space's name == its guid; the bucket must carry
+		// the include-resolved space name so the UI needs no /v3/spaces drain.
+		assert.Equal(t, sr.SpaceGuid, sr.SpaceName, "space bucket %s must carry the include-resolved name", sr.SpaceGuid)
 	}
 }

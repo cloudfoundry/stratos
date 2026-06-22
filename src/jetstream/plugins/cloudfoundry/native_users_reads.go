@@ -149,7 +149,7 @@ func buildUserRoleBuckets(
 		return orgRolesByUser, spaceRolesByUser
 	}
 
-	roles, includedSpaceOrg, rolesErr := listRolesForUsers(ctx, cfClient, userGUIDs)
+	roles, includedSpaces, rolesErr := listRolesForUsers(ctx, cfClient, userGUIDs)
 	if rolesErr != nil {
 		return orgRolesByUser, spaceRolesByUser
 	}
@@ -213,11 +213,12 @@ func buildUserRoleBuckets(
 				// (rare but defensive) — resolve through the include=space
 				// block that rode along on the /v3/roles response. Still
 				// degrades to empty orgGuid if the space wasn't included.
-				orgGUID = includedSpaceOrg[spaceGUID]
+				orgGUID = includedSpaces[spaceGUID].orgGUID
 			}
 			spaceRolesByUser[uGUID] = append(spaceRolesByUser[uGUID], StUserSpaceRole{
 				OrgGuid:   orgGUID,
 				SpaceGuid: spaceGUID,
+				SpaceName: includedSpaces[spaceGUID].name,
 				Roles:     rolesList,
 			})
 		}
@@ -240,7 +241,7 @@ func buildUserRoleBuckets(
 // pages 2..N concurrently with bounded parallelism. Sequential drain on
 // admin (5K+ grants over ~11 pages) dominated wall time at ~8s; parallel
 // fan-out collapses that to ~max(page latency).
-func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, map[string]string, error) {
+func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, map[string]includedSpace, error) {
 	if len(userGUIDs) == 0 {
 		return nil, nil, nil
 	}
@@ -249,7 +250,7 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 	const maxConcurrency = 6
 
 	filter := strings.Join(userGUIDs, ",")
-	fetchPage := func(page int) ([]capi.Role, map[string]string, capi.Pagination, error) {
+	fetchPage := func(page int) ([]capi.Role, map[string]includedSpace, capi.Pagination, error) {
 		params := capi.NewQueryParams().
 			WithFilter("user_guids", filter).
 			WithPerPage(perPage)
@@ -262,30 +263,30 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 		if derr != nil {
 			return nil, nil, capi.Pagination{}, derr
 		}
-		spaceOrg := make(map[string]string, len(included.Spaces))
+		spaces := make(map[string]includedSpace, len(included.Spaces))
 		for _, s := range included.Spaces {
-			spaceOrg[s.GUID] = relationshipGUID(s.Relationships.Organization)
+			spaces[s.GUID] = includedSpace{orgGUID: relationshipGUID(s.Relationships.Organization), name: s.Name}
 		}
-		return raw.Resources, spaceOrg, raw.Pagination, nil
+		return raw.Resources, spaces, raw.Pagination, nil
 	}
 
-	firstResources, spaceOrg, pagination, err := fetchPage(1)
+	firstResources, spaces, pagination, err := fetchPage(1)
 	if err != nil {
 		return nil, nil, err
 	}
 	totalPages := pagination.TotalPages
 	if totalPages <= 1 {
-		return firstResources, spaceOrg, nil
+		return firstResources, spaces, nil
 	}
 
 	pageRoles := make([][]capi.Role, totalPages)
 	pageRoles[0] = firstResources
 
 	type pageResult struct {
-		page     int
-		roles    []capi.Role
-		spaceOrg map[string]string
-		err      error
+		page   int
+		roles  []capi.Role
+		spaces map[string]includedSpace
+		err    error
 	}
 	sem := make(chan struct{}, maxConcurrency)
 	results := make(chan pageResult, totalPages-1)
@@ -293,8 +294,8 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 		sem <- struct{}{}
 		go func(pn int) {
 			defer func() { <-sem }()
-			res, pso, _, perr := fetchPage(pn)
-			results <- pageResult{page: pn, roles: res, spaceOrg: pso, err: perr}
+			res, psp, _, perr := fetchPage(pn)
+			results <- pageResult{page: pn, roles: res, spaces: psp, err: perr}
 		}(p)
 	}
 	for i := 0; i < totalPages-1; i++ {
@@ -303,8 +304,8 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 			return nil, nil, r.err
 		}
 		pageRoles[r.page-1] = r.roles
-		for k, v := range r.spaceOrg {
-			spaceOrg[k] = v
+		for k, v := range r.spaces {
+			spaces[k] = v
 		}
 	}
 
@@ -316,7 +317,15 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 	for _, p := range pageRoles {
 		all = append(all, p...)
 	}
-	return all, spaceOrg, nil
+	return all, spaces, nil
+}
+
+// includedSpace holds the per-space facts resolved in-band from the
+// /v3/roles include=space block: the parent org GUID (space→org join) and
+// the space name (so the UI labels spaces without a /v3/spaces drain).
+type includedSpace struct {
+	orgGUID string
+	name    string
 }
 
 // stripRolePrefix converts V3 role types (organization_manager,
