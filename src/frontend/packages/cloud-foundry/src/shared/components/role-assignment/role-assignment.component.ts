@@ -461,6 +461,38 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     return n;
   }
 
+  /**
+   * Count of this org's roles that are indeterminate (held by some, but not
+   * all, of the selected users) — i.e. computeChecked returns null. Surfaced
+   * alongside roleCountForOrg so a multi-user org with divergent roles doesn't
+   * read as empty in the collapsed summary. Enumerated from baseline + selection
+   * (same as roleCountForOrg) so it stays accurate without loading spaces.
+   */
+  mixedRoleCountForOrg(orgGuid: string): number {
+    let n = 0;
+    for (const def of this.orgRoleDefs) {
+      if (this.checkedForOrg(orgGuid, def.name) === null) { n++; }
+    }
+    const spaceGuids = new Set<string>();
+    const baseline = this.baseline();
+    for (const userGuid of Object.keys(baseline)) {
+      const spaces = baseline[userGuid]?.[orgGuid]?.spaces;
+      if (spaces) {
+        for (const sg of Object.keys(spaces)) { spaceGuids.add(sg); }
+      }
+    }
+    const selSpaces = this.selection()[orgGuid]?.spaces;
+    if (selSpaces) {
+      for (const sg of Object.keys(selSpaces)) { spaceGuids.add(sg); }
+    }
+    for (const sg of spaceGuids) {
+      for (const def of this.spaceRoleDefs) {
+        if (this.checkedForSpace(orgGuid, sg, def.name) === null) { n++; }
+      }
+    }
+    return n;
+  }
+
   canEditOrg(orgGuid: string): boolean {
     return this.canEditByOrg()[orgGuid] ?? false;
   }
