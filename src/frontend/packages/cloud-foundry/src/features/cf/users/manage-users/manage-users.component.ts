@@ -15,7 +15,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as observableCombineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { take, combineLatest, filter, map } from 'rxjs/operators';
 
-import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
+import { IHeaderBreadcrumb, PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
@@ -67,6 +67,8 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   setUsernames = false;
   title$!: Observable<string>;
+  /** Trail back to the Users list (the page the wizard was launched from). */
+  breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
   // FWT-959 Part 2: SignalStepHandle wiring for the 3-step manage-users
   // flow. The first step (`Usernames`) is rendered conditionally via the
@@ -144,6 +146,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
 
 
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
+    this.breadcrumbs$ = of([{ breadcrumbs: [{ value: 'Users', routerLink: this.defaultCancelUrl }] }]);
 
     // Setup the stepper with the users that will have their roles managed
     this.setUsernames = route.snapshot.queryParams.setByUsername;
