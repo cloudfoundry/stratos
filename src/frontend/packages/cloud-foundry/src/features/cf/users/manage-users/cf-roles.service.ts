@@ -13,6 +13,7 @@ import { take,
   publishReplay,
   reduce,
   refCount,
+  shareReplay,
   startWith,
   switchMap,
 } from 'rxjs/operators';
@@ -62,6 +63,9 @@ export class CfRolesService {
   cfOrgs: { [cfGuid: string]: Observable<APIResource<IOrganization>[]>, } = {};
   private cfOrgNames: { [cfGuid: string]: Observable<StOrg[]>, } = {};
   private cfSpaces: { [cfGuid: string]: Observable<StSpace[]>, } = {};
+  // Per-org space cache (keyed `${cfGuid}:${orgGuid}`). Survives re-subscription
+  // (shareReplay, no refCount) so re-expanding a section reuses the result.
+  private cfOrgSpaces: { [key: string]: Observable<{ guid: string; name: string }[]>, } = {};
   private users$: Observable<StUser[]>;
 
   /**
@@ -423,12 +427,20 @@ export class CfRolesService {
    * applied), so callers get spaces without the wizard's StUser-mapping coupling.
    */
   fetchSpacesForOrg(cfGuid: string, orgGuid: string): Observable<{ guid: string; name: string }[]> {
-    return this.fetchSpaces(cfGuid).pipe(
-      map(spaces => spaces
-        .filter(s => s.orgGuid === orgGuid)
-        .map(s => ({ guid: s.guid, name: s.name }))
-        .sort((a, b) => naturalCompare(a.name, b.name))),
-    );
+    // Fetch ONLY this org's spaces server-side (jetstream getNativeOrgSpaces →
+    // /v3/spaces?organization_guids={org}) instead of draining the whole
+    // endpoint's spaces and filtering client-side. Cached per org and shared
+    // (no refCount) so the role-assignment widget never re-drains on re-expand.
+    const key = `${cfGuid}:${orgGuid}`;
+    if (!this.cfOrgSpaces[key]) {
+      this.cfOrgSpaces[key] = this.drainCfList<StSpace>(`/pp/v1/cf/org/${cfGuid}/${orgGuid}/spaces`).pipe(
+        map(spaces => spaces
+          .map(s => ({ guid: s.guid, name: s.name }))
+          .sort((a, b) => naturalCompare(a.name, b.name))),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+    }
+    return this.cfOrgSpaces[key];
   }
 
   /**
