@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
 
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
@@ -554,21 +555,18 @@ describe('RoleAssignmentComponent', () => {
         {
           provide: (await import('../../../features/cf/users/manage-users/cf-roles.service')).CfRolesService,
           useValue: {
-            fetchOrgs: () => {
-              const { of } = require('rxjs');
-              return of([{ metadata: { guid: 'o1', created_at: '', updated_at: '', url: '' }, entity: { name: 'Org One' } }]);
-            },
+            fetchOrgs: () =>
+              of([{ metadata: { guid: 'o1', created_at: '', updated_at: '', url: '' }, entity: { name: 'Org One' } }]),
             fetchSpacesForOrg: (_cf: string, orgGuid: string) => {
               fetchSpacesCalled = true;
               fetchSpacesOrgGuid = orgGuid;
-              const { of } = require('rxjs');
               return of([{ guid: 's1', name: 'Space One' }]);
             },
           },
         },
         {
           provide: (await import('../../../../../core/src/core/permissions/current-user-permissions.service')).CurrentUserPermissionsService,
-          useValue: { can: () => { const { of } = require('rxjs'); return of(true); } },
+          useValue: { can: () => of(true) },
         },
       ],
     }).compileComponents();
