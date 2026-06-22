@@ -582,6 +582,9 @@ export interface StUserOrgRole {
 export interface StUserSpaceRole {
   orgGuid: string;
   spaceGuid: string;
+  // Resolved server-side from the /v3/roles include=space block so the role
+  // editor can label spaces without draining the full /pp/v1/cf/spaces list.
+  spaceName?: string;
   roles: string[];
 }
 

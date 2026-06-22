@@ -45,7 +45,9 @@ export function spaceRolesFromStUser(
   spaceNameByGuid?: Map<string, string>,
 ): IUserPermissionInSpace[] {
   return user.spaceRoles.map(b => ({
-    name: spaceNameByGuid?.get(b.spaceGuid) ?? '',
+    // The space name rides in on the bucket (include=space); the optional
+    // guid→name map remains a fallback for any older payload without it.
+    name: b.spaceName ?? spaceNameByGuid?.get(b.spaceGuid) ?? '',
     orgGuid: b.orgGuid,
     orgName: orgNameByGuid?.get(b.orgGuid) ?? '',
     spaceGuid: b.spaceGuid,

@@ -62,7 +62,6 @@ export class CfRolesService {
   loading$: Observable<boolean>;
   cfOrgs: { [cfGuid: string]: Observable<APIResource<IOrganization>[]>, } = {};
   private cfOrgNames: { [cfGuid: string]: Observable<StOrg[]>, } = {};
-  private cfSpaces: { [cfGuid: string]: Observable<StSpace[]>, } = {};
   // Per-org space cache (keyed `${cfGuid}:${orgGuid}`). Survives re-subscription
   // (shareReplay, no refCount) so re-expanding a section reuses the result.
   private cfOrgSpaces: { [key: string]: Observable<{ guid: string; name: string }[]>, } = {};
@@ -149,19 +148,20 @@ export class CfRolesService {
 
     // The picked users are already the fully-drained StUser rows (org/space
     // role buckets carry the prefix-stripped role names per scope), so there's
-    // no per-user re-fetch. The buckets hold guids only, so the org/space
-    // *names* are resolved from the native list endpoints via the unfiltered
-    // name-lookup fetches (fetchOrgNames / fetchSpaces). These deliberately
-    // bypass fetchOrgs' editability filter — that filter belongs where roles
-    // are applied, not where display names are resolved, and it would otherwise
-    // leave existingRoles$ never emitting for empty/non-editable org lists.
-    return combineLatest([this.fetchOrgNames(cfGuid), this.fetchSpaces(cfGuid)]).pipe(
+    // no per-user re-fetch. Space *names* now ride in on the space buckets
+    // (resolved server-side from the /v3/roles include=space block), so the
+    // wizard no longer drains the whole /pp/v1/cf/spaces list — that drain was
+    // the dominant cost of "Loading existing roles…". Org names still come from
+    // the bounded native org list (fetchOrgNames), which deliberately bypasses
+    // fetchOrgs' editability filter — display-name resolution isn't where role
+    // editability belongs, and filtering would leave existingRoles$ never
+    // emitting for empty/non-editable org lists.
+    return this.fetchOrgNames(cfGuid).pipe(
       take(1),
-      map(([orgs, spaces]) => {
+      map(orgs => {
         const orgNameByGuid = new Map<string, string>(orgs.map(o => [o.guid, o.name]));
-        const spaceNameByGuid = new Map<string, string>(spaces.map(s => [s.guid, s.name]));
         const roles: CfUserRolesSelected = {};
-        selectedUsers.forEach(user => this.populateUserRoles(user, roles, orgNameByGuid, spaceNameByGuid));
+        selectedUsers.forEach(user => this.populateUserRoles(user, roles, orgNameByGuid));
         return roles;
       }),
     );
@@ -171,11 +171,10 @@ export class CfRolesService {
     user: StUser,
     roles: CfUserRolesSelected,
     orgNameByGuid: Map<string, string>,
-    spaceNameByGuid: Map<string, string>,
   ) {
     const mappedUser: { [orgGuid: string]: IUserPermissionInOrg, } = {};
     const orgRoles = orgRolesFromStUser(user, orgNameByGuid);
-    const spaceRoles = spaceRolesFromStUser(user, orgNameByGuid, spaceNameByGuid);
+    const spaceRoles = spaceRolesFromStUser(user, orgNameByGuid);
     // ... populate org roles ...
     orgRoles.forEach(org => {
       mappedUser[org.orgGuid] = {
@@ -400,23 +399,6 @@ export class CfRolesService {
         );
       }),
     );
-  }
-
-  /**
-   * Native space list used purely as a guid→name lookup when mapping a user's
-   * StUser space-role buckets into the wizard's `existingRoles` shape. Unlike
-   * fetchOrgs this is not editable-filtered — it only supplies display names;
-   * role editability is enforced downstream where the changes are applied.
-   */
-  private fetchSpaces(cfGuid: string): Observable<StSpace[]> {
-    if (!this.cfSpaces[cfGuid]) {
-      this.cfSpaces[cfGuid] = this.drainCfList<StSpace>(`/pp/v1/cf/spaces/${cfGuid}`).pipe(
-        catchError(() => of([] as StSpace[])),
-        publishReplay(1),
-        refCount(),
-      );
-    }
-    return this.cfSpaces[cfGuid];
   }
 
   /**
