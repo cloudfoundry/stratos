@@ -12,6 +12,7 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Subscription, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -46,12 +47,34 @@ interface SpaceEntry {
   name: string;
 }
 
+/** Layout for the picked-org role editor. */
+export type RoleAssignmentViewMode = 'accordion' | 'split';
+
+/**
+ * localStorage key for the persisted view-mode choice. Mirrors the list view
+ * toggle convention (stratos.<feature>.<state>.v<n>) so the choice survives
+ * across sessions, the same way the signal-list card/table toggle does.
+ */
+export const ROLE_ASSIGNMENT_VIEW_MODE_KEY = 'stratos.role-assignment.view-mode.v1';
+
+function readPersistedViewMode(): RoleAssignmentViewMode {
+  if (typeof localStorage === 'undefined') {
+    return 'accordion';
+  }
+  try {
+    const raw = localStorage.getItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY);
+    return raw === 'split' || raw === 'accordion' ? raw : 'accordion';
+  } catch {
+    return 'accordion';
+  }
+}
+
 @Component({
   selector: 'app-role-assignment',
   standalone: true,
   templateUrl: './role-assignment.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RoleTristateCheckboxComponent],
+  imports: [RoleTristateCheckboxComponent, NgTemplateOutlet],
 })
 export class RoleAssignmentComponent implements OnInit, OnDestroy {
   @Input({ required: true }) cfGuid!: string;
@@ -117,6 +140,18 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** Accordion open/closed per orgGuid — presentational, never affects selection */
   private readonly expandedByOrg = signal<Set<string>>(new Set());
 
+  /** Layout for the picked-org editor: stacked accordion or two-pane master/detail. */
+  readonly viewMode = signal<RoleAssignmentViewMode>(readPersistedViewMode());
+
+  /** In split view, the org whose roles are shown in the detail pane. */
+  readonly activeOrg = signal<string | null>(null);
+
+  /** The picked-org resource for the active org (split detail pane), or null. */
+  readonly activeOrgResource = computed(() => {
+    const guid = this.activeOrg();
+    return guid ? this.pickedOrgs().find(o => o.metadata.guid === guid) ?? null : null;
+  });
+
   /** Space filter text per orgGuid — presentational only */
   private readonly spaceFilterByOrg = signal<Record<string, string>>({});
 
@@ -172,6 +207,20 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
         });
       }
       this.baselineSeeded = true;
+    });
+
+    // Persist the view-mode choice (mirrors the list view toggle) so it
+    // survives across sessions. Writes the initial value too — harmless.
+    effect(() => {
+      const mode = this.viewMode();
+      if (typeof localStorage === 'undefined') {
+        return;
+      }
+      try {
+        localStorage.setItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY, mode);
+      } catch {
+        // Storage disabled / quota — the in-memory signal still drives the UI.
+      }
     });
   }
 
@@ -292,6 +341,36 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   isExpanded(orgGuid: string): boolean {
     return this.expandedByOrg().has(orgGuid);
+  }
+
+  // --- View mode (accordion ↔ split) ---
+
+  /**
+   * Switch layout and reconcile the differing "what's open" state between the
+   * two views: the accordion can have many orgs expanded; split shows exactly
+   * one (activeOrg).
+   *  - → split: adopt an active org (keep the current one, else the top of the
+   *    picked list) and ensure its spaces are loaded.
+   *  - → accordion: focus where the user was — expand only the active org.
+   */
+  setViewMode(mode: RoleAssignmentViewMode): void {
+    if (mode === 'split') {
+      const active = this.activeOrg()
+        ?? this.pickedOrgs()[0]?.metadata.guid
+        ?? null;
+      if (active) {
+        this.setActiveOrg(active);
+      }
+    } else if (this.activeOrg()) {
+      const active = this.activeOrg()!;
+      this.expandedByOrg.set(new Set([active]));
+    }
+    this.viewMode.set(mode);
+  }
+
+  setActiveOrg(orgGuid: string): void {
+    this.activeOrg.set(orgGuid);
+    this.loadSpacesFor(orgGuid);
   }
 
   // --- Space loading ---
