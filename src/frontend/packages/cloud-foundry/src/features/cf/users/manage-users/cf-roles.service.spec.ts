@@ -129,17 +129,17 @@ describe('CfRolesService', () => {
     const user = stUser({
       guid: 'user-1',
       orgRoles: [{ orgGuid: 'org-1', roles: ['manager', 'user'] }],
-      spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', roles: ['developer'] }],
+      spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', spaceName: 'My Space', roles: ['developer'] }],
     });
 
     const result = firstValueFrom(service.populateRoles('cf-1', [user]).pipe(take(1)));
 
-    // Names are sourced via the native list endpoints (no per-user re-fetch),
-    // drained page-by-page (page 1 here covers the full result set).
+    // Org names still come from the (bounded) native org list. Space names now
+    // ride in on the StUser bucket (include=space), so the full /pp/v1/cf/spaces
+    // drain is gone.
     httpMock.expectOne('/pp/v1/cf/orgs/cf-1?per_page=500&page=1')
       .flush({ resources: [{ guid: 'org-1', name: 'My Org', cnsiGuid: 'cf-1' }], totalResults: 1 });
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-1?per_page=500&page=1')
-      .flush({ resources: [{ guid: 'space-1', name: 'My Space', orgGuid: 'org-1', cnsiGuid: 'cf-1' }], totalResults: 1 });
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-1?per_page=500&page=1');
 
     const roles = await result;
     const org = roles['user-1']['org-1'];
@@ -161,15 +161,14 @@ describe('CfRolesService', () => {
     const user = stUser({
       guid: 'user-9',
       orgRoles: [],
-      spaceRoles: [{ orgGuid: 'org-2', spaceGuid: 'space-2', roles: ['auditor'] }],
+      spaceRoles: [{ orgGuid: 'org-2', spaceGuid: 'space-2', spaceName: 'Space Two', roles: ['auditor'] }],
     });
 
     const result = firstValueFrom(service.populateRoles('cf-1', [user]).pipe(take(1)));
 
     httpMock.expectOne('/pp/v1/cf/orgs/cf-1?per_page=500&page=1')
       .flush({ resources: [], totalResults: 0 });
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-1?per_page=500&page=1')
-      .flush({ resources: [{ guid: 'space-2', name: 'Space Two', orgGuid: 'org-2', cnsiGuid: 'cf-1' }], totalResults: 1 });
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-1?per_page=500&page=1');
 
     const roles = await result;
     expect(Object.keys(roles)).toEqual(['user-9']);
@@ -194,8 +193,7 @@ describe('CfRolesService', () => {
       .flush({ resources: [], totalResults: 600 });
     httpMock.expectOne('/pp/v1/cf/orgs/cf-1?per_page=500&page=2')
       .flush({ resources: [{ guid: 'org-far', name: 'Far Org', cnsiGuid: 'cf-1' }], totalResults: 600 });
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-1?per_page=500&page=1')
-      .flush({ resources: [], totalResults: 0 });
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-1?per_page=500&page=1');
 
     const roles = await result;
     expect(roles['user-1']['org-far'].name).toBe('Far Org');
@@ -291,9 +289,8 @@ describe('CfRolesService', () => {
       .flush({ resources: [], totalResults: 600 });
     httpMock.expectOne('/pp/v1/cf/orgs/cf-total?per_page=500&page=2')
       .flush({ resources: [{ guid: 'org-far', name: 'Far Org', cnsiGuid: 'cf-total' }], totalResults: 600 });
-    // Spaces: totalResults=0 → 1 page (fast path, single)
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-total?per_page=500&page=1')
-      .flush({ resources: [], totalResults: 0 });
+    // Space names ride in on the StUser bucket now — no /pp/v1/cf/spaces drain.
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-total?per_page=500&page=1');
 
     const roles = await result;
     expect(roles['user-1']['org-far'].name).toBe('Far Org');
