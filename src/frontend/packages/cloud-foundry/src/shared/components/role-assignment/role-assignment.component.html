@@ -1,68 +1,86 @@
 <!-- Org multi-select picker (hidden when lockedOrg is set) -->
 @if (!lockedOrg) {
-  <div data-testid="org-picker" class="role-assignment__picker">
+  <div data-testid="org-picker" class="role-assignment__picker rounded border border-content-border bg-content-bg-alt overflow-hidden">
     <input
       type="text"
       placeholder="Search organizations…"
       [value]="orgSearchText()"
       (input)="orgSearchText.set($any($event.target).value)"
-      class="role-assignment__search"
+      class="role-assignment__search w-full px-3 py-2 text-sm bg-transparent text-content-text placeholder:text-content-muted border-b border-content-border focus:outline-none"
     />
-    <ul class="role-assignment__org-list">
-      @for (org of filteredAllowedOrgs(); track org.metadata.guid) {
-        <li>
-          <button
-            type="button"
-            (click)="pickOrg(org)"
-            [disabled]="pickedOrgs().some(p => p.metadata.guid === org.metadata.guid)"
-            class="role-assignment__org-btn"
-          >
-            {{ org.entity.name }}
-          </button>
-        </li>
-      }
-    </ul>
+    @if (orgsLoading()) {
+      <div class="flex items-center gap-2 px-3 py-4 text-sm text-content-muted">
+        <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        Loading organizations…
+      </div>
+    } @else {
+      <ul class="role-assignment__org-list list-none m-0 p-1 max-h-40 overflow-y-auto">
+        @for (org of filteredAllowedOrgs(); track org.metadata.guid) {
+          <li>
+            <button
+              type="button"
+              (click)="pickOrg(org)"
+              [disabled]="pickedOrgs().some(p => p.metadata.guid === org.metadata.guid)"
+              class="role-assignment__org-btn w-full text-left px-3 py-1.5 text-sm rounded text-content-text hover:bg-primary-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            >
+              {{ org.entity.name }}
+            </button>
+          </li>
+        }
+        @if (filteredAllowedOrgs().length === 0) {
+          <li class="px-3 py-2 text-sm text-content-muted">No organizations match.</li>
+        }
+      </ul>
+    }
+  </div>
+}
+
+<!-- Roles still resolving and nothing seeded yet -->
+@if (loading() && pickedOrgs().length === 0) {
+  <div class="flex items-center gap-2 mt-3 px-3 py-4 text-sm text-content-muted">
+    <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+    Loading existing roles…
   </div>
 }
 
 <!-- Accordion: one section per picked org -->
 @for (org of pickedOrgs(); track org.metadata.guid) {
-  <div class="role-assignment__org-section" [attr.data-org]="org.metadata.guid">
+  <div
+    class="role-assignment__org-section mt-3 rounded border border-content-border bg-content-bg-alt overflow-hidden"
+    [attr.data-org]="org.metadata.guid"
+  >
     <!-- Accordion header -->
-    <div class="role-assignment__org-header">
+    <div class="role-assignment__org-header flex items-center gap-3 px-3 py-2">
       <button
         type="button"
         (click)="toggleExpanded(org.metadata.guid)"
-        class="role-assignment__accordion-btn"
+        class="role-assignment__accordion-btn flex-1 flex items-center gap-2 min-w-0 text-left text-sm font-semibold text-content-text"
         [attr.aria-expanded]="isExpanded(org.metadata.guid)"
       >
-        {{ org.entity.name }}
-        <span class="role-assignment__chevron">{{ isExpanded(org.metadata.guid) ? '▲' : '▼' }}</span>
+        <span class="role-assignment__chevron shrink-0 text-xs text-primary">{{ isExpanded(org.metadata.guid) ? '▲' : '▼' }}</span>
+        <span class="truncate">{{ org.entity.name }}</span>
       </button>
-      <span class="role-assignment__summary" data-testid="org-role-summary">
+      <span class="role-assignment__summary shrink-0 text-xs text-content-muted" data-testid="org-role-summary">
         {{ roleCountForOrg(org.metadata.guid) }} role{{ roleCountForOrg(org.metadata.guid) === 1 ? '' : 's' }} set
       </span>
       @if (!lockedOrg) {
         <button
           type="button"
           (click)="removePickedOrg(org.metadata.guid)"
-          class="role-assignment__remove-btn"
+          class="role-assignment__remove-btn shrink-0 w-6 h-6 flex items-center justify-center rounded text-content-muted hover:text-danger hover:bg-danger-50"
           aria-label="Remove {{ org.entity.name }}"
         >✕</button>
       }
     </div>
 
     @if (isExpanded(org.metadata.guid)) {
-      <div class="role-assignment__org-body">
+      <div class="role-assignment__org-body px-3 py-3 border-t border-content-border flex flex-col gap-5">
         <!-- Org-level role cells -->
-        <div class="role-assignment__org-roles">
-          <h4>Org Roles</h4>
-          <div class="role-assignment__role-row">
+        <div class="role-assignment__org-roles flex flex-col gap-2">
+          <h4 class="m-0 text-xs font-semibold uppercase tracking-wide text-content-muted">Org Roles</h4>
+          <div class="role-assignment__role-row flex flex-wrap gap-x-6 gap-y-2">
             @for (def of orgRoleDefs; track def.name) {
-              <div
-                data-testid="org-role-cell"
-                class="role-assignment__role-cell"
-              >
+              <div data-testid="org-role-cell" class="role-assignment__role-cell">
                 <app-role-tristate-checkbox
                   [checked]="checkedForOrg(org.metadata.guid, def.name)"
                   [disabled]="!canEditOrg(org.metadata.guid) || (def.name === orgUserRole && isOrgUserDisabled(org.metadata.guid))"
@@ -75,33 +93,42 @@
         </div>
 
         <!-- Space-level role cells -->
-        <div class="role-assignment__spaces">
-          <h4>Space Roles</h4>
-          <input
-            type="text"
-            placeholder="Filter spaces…"
-            [value]="spaceFilterFor(org.metadata.guid)"
-            (input)="setSpaceFilter(org.metadata.guid, $any($event.target).value)"
-            class="role-assignment__space-search"
-          />
-          @for (space of filteredSpacesFor(org.metadata.guid); track space.guid) {
-            <div class="role-assignment__space-section" [attr.data-space]="space.guid">
-              <div class="role-assignment__space-name">{{ space.name }}</div>
-              <div class="role-assignment__role-row">
-                @for (def of spaceRoleDefs; track def.name) {
-                  <div
-                    data-testid="space-role-cell"
-                    class="role-assignment__role-cell"
-                  >
-                    <app-role-tristate-checkbox
-                      [checked]="checkedForSpace(org.metadata.guid, space.guid, def.name)"
-                      [disabled]="!canChangeSpaceRoles(org.metadata.guid, space.guid)"
-                      [label]="def.label"
-                      (toggled)="onToggleSpaceRole(org, space, def.name, $event)"
-                    ></app-role-tristate-checkbox>
+        <div class="role-assignment__spaces flex flex-col gap-2">
+          <h4 class="m-0 text-xs font-semibold uppercase tracking-wide text-content-muted">Space Roles</h4>
+          @if (spacesLoadingFor(org.metadata.guid)) {
+            <div class="flex items-center gap-2 py-2 text-sm text-content-muted">
+              <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              Loading spaces…
+            </div>
+          } @else {
+            <input
+              type="text"
+              placeholder="Filter spaces…"
+              [value]="spaceFilterFor(org.metadata.guid)"
+              (input)="setSpaceFilter(org.metadata.guid, $any($event.target).value)"
+              class="role-assignment__space-search w-full max-w-xs px-3 py-1.5 text-sm rounded border border-content-border bg-transparent text-content-text placeholder:text-content-muted focus:outline-none"
+            />
+            <div class="flex flex-col gap-4 mt-1">
+              @for (space of filteredSpacesFor(org.metadata.guid); track space.guid) {
+                <div class="role-assignment__space-section pl-3" [attr.data-space]="space.guid">
+                  <div class="role-assignment__space-name text-sm font-medium text-content-text mb-1.5">{{ space.name }}</div>
+                  <div class="role-assignment__role-row flex flex-wrap gap-x-6 gap-y-2">
+                    @for (def of spaceRoleDefs; track def.name) {
+                      <div data-testid="space-role-cell" class="role-assignment__role-cell">
+                        <app-role-tristate-checkbox
+                          [checked]="checkedForSpace(org.metadata.guid, space.guid, def.name)"
+                          [disabled]="!canChangeSpaceRoles(org.metadata.guid, space.guid)"
+                          [label]="def.label"
+                          (toggled)="onToggleSpaceRole(org, space, def.name, $event)"
+                        ></app-role-tristate-checkbox>
+                      </div>
+                    }
                   </div>
-                }
-              </div>
+                </div>
+              }
+              @if (filteredSpacesFor(org.metadata.guid).length === 0) {
+                <div class="pl-3 text-sm text-content-muted">No spaces in this organization.</div>
+              }
             </div>
           }
         </div>
