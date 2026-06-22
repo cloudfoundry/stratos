@@ -10,7 +10,7 @@ import { CfRoleChange } from '../../../store/types/users-roles.types';
 import { StUser } from '../../../services/endpoint-data/stratos-types';
 import { diffToChanges } from './role-tristate';
 
-import { RoleAssignmentComponent } from './role-assignment.component';
+import { RoleAssignmentComponent, ROLE_ASSIGNMENT_VIEW_MODE_KEY } from './role-assignment.component';
 import { provideRoleAssignmentTestDeps, RoleAssignmentTestCfg } from './role-assignment.test-deps';
 
 // Minimal StUser factory
@@ -43,6 +43,12 @@ describe('RoleAssignmentComponent', () => {
     permissions: (perm, _cf, org) =>
       perm === CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES && org === 'o1',
   };
+
+  // setViewMode persists to localStorage; clear it so a prior test's choice
+  // doesn't leak into the next instance's initial view mode.
+  beforeEach(() => {
+    try { localStorage.removeItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY); } catch { /* storage disabled */ }
+  });
 
   async function setup(cfg: RoleAssignmentTestCfg = defaultCfg): Promise<void> {
     await TestBed.configureTestingModule({
@@ -570,6 +576,108 @@ describe('RoleAssignmentComponent', () => {
     const summary = fixture.debugElement.query(By.css('[data-testid="org-role-summary"]'));
     expect(summary).toBeTruthy();
     expect(summary.nativeElement.textContent.replace(/\s+/g, ' ').trim()).toBe('1 set · 1 mixed');
+  });
+
+  it('F: switching to split view activates the first picked org', async () => {
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }, { guid: 'o2', name: 'Org Two' }],
+      spacesByOrg: { o1: [], o2: [] },
+    });
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+
+    c.pickOrg(o1);
+    c.pickOrg(o2); // prepended → pickedOrgs is [o2, o1]
+
+    expect(c.viewMode()).toBe('accordion');
+    c.setViewMode('split');
+    expect(c.viewMode()).toBe('split');
+    expect(c.activeOrg()).toBe('o2');
+  });
+
+  it('G: switching back to accordion expands only the active org', async () => {
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }, { guid: 'o2', name: 'Org Two' }],
+      spacesByOrg: { o1: [], o2: [] },
+    });
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+
+    c.pickOrg(o1);
+    c.pickOrg(o2);
+    c.setViewMode('split');
+    c.setActiveOrg('o1');
+    c.setViewMode('accordion');
+
+    expect(c.isExpanded('o1')).toBe(true);
+    expect(c.isExpanded('o2')).toBe(false);
+  });
+
+  it('H: view mode initializes from the persisted localStorage choice', async () => {
+    localStorage.setItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY, 'split');
+    await setup({ orgs: [{ guid: 'o1', name: 'Org One' }], spacesByOrg: { o1: [] } });
+    const fixture = createFixture();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewMode()).toBe('split');
+  });
+
+  it('H2: setViewMode persists the choice to localStorage', async () => {
+    await setup({ orgs: [{ guid: 'o1', name: 'Org One' }], spacesByOrg: { o1: [] } });
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    fixture.componentInstance.pickOrg(o1);
+    fixture.componentInstance.setViewMode('split');
+    fixture.detectChanges();
+    expect(localStorage.getItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY)).toBe('split');
+  });
+
+  it('I: split view renders a master list pane and a detail pane for the active org', async () => {
+    await setup({
+      orgs: [{ guid: 'o1', name: 'Org One' }, { guid: 'o2', name: 'Org Two' }],
+      spacesByOrg: { o1: [], o2: [] },
+    });
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+
+    c.pickOrg(o1);
+    c.pickOrg(o2); // pickedOrgs [o2, o1]
+    c.setViewMode('split'); // active = o2
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const list = fixture.debugElement.query(By.css('[data-testid="role-pane-list"]'));
+    const detail = fixture.debugElement.query(By.css('[data-testid="role-pane-detail"]'));
+    expect(list).toBeTruthy();
+    expect(detail).toBeTruthy();
+    // The detail pane shows the active org's 4 org-role cells.
+    expect(detail.queryAll(By.css('[data-testid="org-role-cell"]')).length).toBe(4);
+  });
+
+  it('I2: the view-toggle button flips accordion ↔ split', async () => {
+    await setup({ orgs: [{ guid: 'o1', name: 'Org One' }], spacesByOrg: { o1: [] } });
+    const fixture = createFixture();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const c = fixture.componentInstance;
+
+    c.pickOrg(o1);
+    fixture.detectChanges();
+
+    const toggle = fixture.debugElement.query(By.css('[data-testid="view-toggle"]'));
+    expect(toggle).toBeTruthy();
+    expect(c.viewMode()).toBe('accordion');
+
+    toggle.nativeElement.click();
+    fixture.detectChanges();
+    expect(c.viewMode()).toBe('split');
   });
 
   it('C: pickOrg prepends — newest pick sits at index 0', async () => {
