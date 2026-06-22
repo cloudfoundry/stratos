@@ -215,7 +215,10 @@ export class CloudFoundryUsersComponent {
       for (const r of roles) {
         const orgName = this.usersConfig.orgNameByGuid().get(r.orgGuid);
         const labelText = `${orgName ?? this.shortGuid(r.orgGuid)}: ${(r.roles ?? []).join(', ')}`;
-        if (orgName) {
+        // Link target is guid-based, so link from the first render rather than
+        // waiting for the org name to resolve — the text upgrades guid → name
+        // reactively when the org map loads.
+        if (r.orgGuid) {
           out.push({
             text: labelText,
             link: ['/cloud-foundry', u.cnsiGuid, 'organizations', r.orgGuid],
@@ -238,13 +241,17 @@ export class CloudFoundryUsersComponent {
       if (roles.length === 0) return [{ text: '—' }];
       const out: SignalListCompoundSegment[] = [];
       for (const r of roles) {
-        const spaceName = this.usersConfig.spaceNameByGuid().get(r.spaceGuid);
+        // Prefer the space name carried in the role payload (include=space) so
+        // it shows immediately; fall back to the endpoint-data map.
+        const spaceName = r.spaceName ?? this.usersConfig.spaceNameByGuid().get(r.spaceGuid);
         const orgName = r.orgGuid ? this.usersConfig.orgNameByGuid().get(r.orgGuid) : undefined;
         const display = spaceName
           ? (orgName ? `${orgName} / ${spaceName}` : spaceName)
           : this.shortGuid(r.spaceGuid);
         const labelText = `${display}: ${(r.roles ?? []).join(', ')}`;
-        if (spaceName && r.orgGuid) {
+        // Link target is guid-based — link from the first render rather than
+        // gating on name resolution; the label upgrades reactively.
+        if (r.orgGuid && r.spaceGuid) {
           out.push({
             text: labelText,
             link: ['/cloud-foundry', u.cnsiGuid, 'organizations', r.orgGuid, 'spaces', r.spaceGuid],
@@ -416,7 +423,7 @@ export class CloudFoundryUsersComponent {
   }
 
   private spaceLabel(r: StUserSpaceRole): string {
-    const spaceName = this.usersConfig.spaceNameByGuid().get(r.spaceGuid);
+    const spaceName = r.spaceName ?? this.usersConfig.spaceNameByGuid().get(r.spaceGuid);
     if (!spaceName) return this.shortGuid(r.spaceGuid);
     const orgName = r.orgGuid ? this.usersConfig.orgNameByGuid().get(r.orgGuid) : undefined;
     return orgName ? `${orgName} / ${spaceName}` : spaceName;
