@@ -139,6 +139,37 @@ describe('CloudFoundryUsersComponent', () => {
     expect(text).toContain('developer');
   });
 
+  it('Space Roles compound: links from guids and uses the payload space name before maps resolve', () => {
+    const cfg = component.listConfig();
+    const spaceCol = cfg!.columns.find(c => c.key === 'spaceRoles');
+    // org-9 / space-9 are NOT in the lookup maps (simulates pre-loadDetails),
+    // but the bucket carries spaceName from the include=space payload.
+    const u: any = {
+      cnsiGuid: 'cnsi-1', guid: 'user-9', username: 'dave',
+      orgRoles: [],
+      spaceRoles: [{ orgGuid: 'org-9', spaceGuid: 'space-9', spaceName: 'PayloadSpace', roles: ['developer'] }],
+    };
+    const segs = spaceCol!.compound!(u);
+    // Space name comes straight from the payload (no map lookup needed).
+    expect(segs[0].text).toContain('PayloadSpace');
+    // Link is built from guids, so it's present even though the org name hasn't resolved.
+    expect(segs[0].link).toEqual(['/cloud-foundry', 'cnsi-1', 'organizations', 'org-9', 'spaces', 'space-9']);
+  });
+
+  it('Org Roles compound: links from the org guid before the name resolves', () => {
+    const cfg = component.listConfig();
+    const orgCol = cfg!.columns.find(c => c.key === 'orgRoles');
+    // org-9 is not in the lookup map — text falls back to the short guid, but
+    // the cell must still be a link (target is guid-based).
+    const u: any = {
+      cnsiGuid: 'cnsi-1', guid: 'user-9', username: 'dave',
+      orgRoles: [{ orgGuid: 'org-9', roles: ['manager'] }],
+      spaceRoles: [],
+    };
+    const segs = orgCol!.compound!(u);
+    expect(segs[0].link).toEqual(['/cloud-foundry', 'cnsi-1', 'organizations', 'org-9']);
+  });
+
   // Note: a previous test asserted on `cfg.headerActions` for an "Invite
   // User" placeholder action. SignalListConfig.headerActions was removed
   // (see commit "Sweep remaining headerActions consumers"); a framework
