@@ -1,4 +1,4 @@
-<app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
   {{ title$ | async}}
 </app-page-header>
 <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">

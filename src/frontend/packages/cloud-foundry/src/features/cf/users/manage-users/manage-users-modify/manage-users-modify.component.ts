@@ -58,6 +58,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   /** Baseline roles from existingRoles$ — reactive, fed into the widget. */
   readonly baseline = toSignal(this.cfRolesService.existingRoles$.pipe(startWith({} as CfUserRolesSelected)), { requireSync: true });
 
+  /** True while existing roles are still resolving — drives the widget spinner. */
+  readonly loadingRoles = toSignal(this.cfRolesService.loading$, { initialValue: true });
+
   /** Org name resolved from fetchOrgEntity (org-scoped wizard entry). */
   private readonly orgName = signal<string>('');
 

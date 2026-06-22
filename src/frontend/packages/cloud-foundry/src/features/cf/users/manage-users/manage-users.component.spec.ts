@@ -6,6 +6,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -85,5 +86,20 @@ describe('UsersRolesComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('F: breadcrumbs$ emits a single Users breadcrumb pointing at defaultCancelUrl', async () => {
+    // breadcrumbs$ must emit [{ breadcrumbs: [{ value: 'Users', routerLink: defaultCancelUrl }] }].
+    // The harness uses a real route (cfGuid resolves to null from the ActivatedRoute snapshot),
+    // so we validate structure and coherence rather than a hardcoded URL string.
+    const breadcrumbs = await firstValueFrom(component.breadcrumbs$);
+    expect(breadcrumbs.length).toBe(1);
+    const crumbs = breadcrumbs[0].breadcrumbs;
+    expect(crumbs.length).toBe(1);
+    expect(crumbs[0].value).toBe('Users');
+    // The routerLink must match the component's computed defaultCancelUrl.
+    expect(crumbs[0].routerLink).toBe(component.defaultCancelUrl);
+    // defaultCancelUrl is always a /cloud-foundry path ending in /users.
+    expect(component.defaultCancelUrl).toMatch(/^\/cloud-foundry\/.+\/users$/);
   });
 });
