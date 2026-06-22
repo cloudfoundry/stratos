@@ -102,7 +102,7 @@ func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) 
 	}
 
 	rStart := time.Now()
-	roles, includedSpaceOrg, rerr := listRolesForUsers(ctx.Request().Context(), cfClient, []string{cfUserGUID})
+	roles, includedSpaces, rerr := listRolesForUsers(ctx.Request().Context(), cfClient, []string{cfUserGUID})
 	rRows := -1
 	if rerr == nil {
 		rRows = len(roles)
@@ -122,7 +122,7 @@ func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) 
 		for _, key := range spaceBucketKeys {
 			for i := range buckets[key] {
 				if buckets[key][i].Entity.OrganizationGUID == "" {
-					buckets[key][i].Entity.OrganizationGUID = includedSpaceOrg[buckets[key][i].Metadata.GUID]
+					buckets[key][i].Entity.OrganizationGUID = includedSpaces[buckets[key][i].Metadata.GUID].orgGUID
 				}
 			}
 		}

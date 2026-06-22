@@ -497,8 +497,11 @@ type StUserOrgRole struct {
 // render "<orgName>/<spaceName>: <roles>" off a single struct. Roles strip
 // the "space_" prefix.
 type StUserSpaceRole struct {
-	OrgGuid   string   `json:"orgGuid"`
-	SpaceGuid string   `json:"spaceGuid"`
+	OrgGuid   string `json:"orgGuid"`
+	SpaceGuid string `json:"spaceGuid"`
+	// SpaceName is resolved in-band from the /v3/roles include=space block so
+	// the role-assignment UI labels spaces without draining /v3/spaces.
+	SpaceName string   `json:"spaceName,omitempty"`
 	Roles     []string `json:"roles"`
 }
 
