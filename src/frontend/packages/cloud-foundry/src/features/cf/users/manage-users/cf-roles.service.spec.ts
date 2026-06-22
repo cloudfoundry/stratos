@@ -211,14 +211,18 @@ describe('CfRolesService', () => {
 
   // ── drainCfList pagination ──────────────────────────────────────────────────
 
-  it('drainCfList (via fetchSpacesForOrg): totalResults absent — fetches page 2 when page 1 is full and includes spaces from page 2', async () => {
+  it('drainCfList (via fetchSpacesForOrg): totalResults absent — fetches page 2 when page 1 is full and returns all org spaces sorted', async () => {
+    // fetchSpacesForOrg uses the per-org endpoint /pp/v1/cf/org/<cf>/<org>/spaces
+    // (NOT the old /pp/v1/cf/spaces/<cf> endpoint).  When page 1 is full (500 items)
+    // it must fetch page 2.  All resources are returned (no org-guid filter —
+    // server already scopes by org).
     const service = TestBed.inject(CfRolesService);
 
-    // Make 500 spaces for page 1 (all in org-A), plus one target space on page 2
+    // Make 500 spaces for page 1, plus target spaces on page 2
     const page1Spaces = Array.from({ length: 500 }, (_, i) => ({
       guid: `space-p1-${i}`,
       name: `Space P1 ${i}`,
-      orgGuid: 'org-A',
+      orgGuid: 'org-B',
       cnsiGuid: 'cf-drain',
     }));
     const page2Spaces = [
@@ -226,36 +230,40 @@ describe('CfRolesService', () => {
       ...Array.from({ length: 9 }, (_, i) => ({
         guid: `space-p2-${i}`,
         name: `Space P2 ${i}`,
-        orgGuid: 'org-A',
+        orgGuid: 'org-B',
         cnsiGuid: 'cf-drain',
       })),
     ];
 
     const result = firstValueFrom(service.fetchSpacesForOrg('cf-drain', 'org-B'));
 
-    // Page 1: full (500 items), NO totalResults
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-drain?per_page=500&page=1')
+    // Page 1: full (500 items), NO totalResults — per-org endpoint
+    httpMock.expectOne('/pp/v1/cf/org/cf-drain/org-B/spaces?per_page=500&page=1')
       .flush({ resources: page1Spaces });
 
     // Page 2: short (10 items < 500), NO totalResults — stops here
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-drain?per_page=500&page=2')
+    httpMock.expectOne('/pp/v1/cf/org/cf-drain/org-B/spaces?per_page=500&page=2')
       .flush({ resources: page2Spaces });
 
     const spaces = await result;
-    expect(spaces.length).toBe(1);
-    expect(spaces[0].guid).toBe('space-target');
-    expect(spaces[0].name).toBe('Target Space');
+    // All 510 spaces are returned (server already filters by org)
+    expect(spaces.length).toBe(510);
+    // Results are sorted by name — Target Space sorts before Space P* alphabetically
+    // (natural compare: 'Space P1 0' < 'Space P1 1' < ... 'Target Space')
+    const targetIdx = spaces.findIndex(s => s.guid === 'space-target');
+    expect(targetIdx).toBeGreaterThanOrEqual(0);
 
-    httpMock.expectNone('/pp/v1/cf/spaces/cf-drain?per_page=500&page=3');
+    httpMock.expectNone('/pp/v1/cf/org/cf-drain/org-B/spaces?per_page=500&page=3');
   });
 
   it('drainCfList (via fetchSpacesForOrg): totalResults absent — single short page, no extra fetch', async () => {
+    // fetchSpacesForOrg uses the per-org endpoint; a short page must not trigger page 2.
     const service = TestBed.inject(CfRolesService);
 
     const result = firstValueFrom(service.fetchSpacesForOrg('cf-short', 'org-X'));
 
     // Only 60 items — short page, must NOT trigger page 2
-    httpMock.expectOne('/pp/v1/cf/spaces/cf-short?per_page=500&page=1')
+    httpMock.expectOne('/pp/v1/cf/org/cf-short/org-X/spaces?per_page=500&page=1')
       .flush({ resources: Array.from({ length: 60 }, (_, i) => ({
         guid: `space-${i}`,
         name: `Space ${i}`,
@@ -266,7 +274,7 @@ describe('CfRolesService', () => {
     const spaces = await result;
     expect(spaces.length).toBe(60);
 
-    httpMock.expectNone('/pp/v1/cf/spaces/cf-short?per_page=500&page=2');
+    httpMock.expectNone('/pp/v1/cf/org/cf-short/org-X/spaces?per_page=500&page=2');
   });
 
   it('drainCfList (via populateRoles): totalResults present — uses totalResults to compute pages, no short-page logic', async () => {
@@ -293,5 +301,59 @@ describe('CfRolesService', () => {
 
     // No page 3 fetched for orgs (totalResults=600 → exactly 2 pages)
     httpMock.expectNone('/pp/v1/cf/orgs/cf-total?per_page=500&page=3');
+  });
+
+  // ── G: fetchSpacesForOrg — per-org endpoint, name sort, cache ──────────────
+
+  it('G: fetchSpacesForOrg hits per-org endpoint, maps to {guid,name}, sorts by name', async () => {
+    // fetchSpacesForOrg must use /pp/v1/cf/org/<cf>/<org>/spaces (NOT the global spaces endpoint),
+    // map the response to {guid, name} pairs, and sort them by natural name order.
+    const service = TestBed.inject(CfRolesService);
+
+    const result = firstValueFrom(service.fetchSpacesForOrg('cf-1', 'org-1'));
+
+    // Assert the correct per-org URL is hit (not /pp/v1/cf/spaces/cf-1)
+    const req = httpMock.expectOne('/pp/v1/cf/org/cf-1/org-1/spaces?per_page=500&page=1');
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      resources: [
+        { guid: 's1', name: 'Zebra Space', orgGuid: 'org-1', cnsiGuid: 'cf-1' },
+        { guid: 's2', name: 'Alpha Space', orgGuid: 'org-1', cnsiGuid: 'cf-1' },
+        { guid: 's3', name: 'Mango Space', orgGuid: 'org-1', cnsiGuid: 'cf-1' },
+      ],
+      totalResults: 3,
+    });
+
+    const spaces = await result;
+
+    // Mapped to {guid, name} — no extra fields
+    expect(spaces).toEqual([
+      { guid: 's2', name: 'Alpha Space' },
+      { guid: 's3', name: 'Mango Space' },
+      { guid: 's1', name: 'Zebra Space' },
+    ]);
+
+    // Correct endpoint, NOT the global spaces path
+    httpMock.expectNone('/pp/v1/cf/spaces/cf-1?per_page=500&page=1');
+  });
+
+  it('G: fetchSpacesForOrg caches — second subscription issues no new HTTP request', async () => {
+    // shareReplay({ bufferSize: 1, refCount: false }) must replay the cached
+    // result on re-subscription without issuing a new HTTP GET.
+    const service = TestBed.inject(CfRolesService);
+
+    // First subscription
+    const first = firstValueFrom(service.fetchSpacesForOrg('cf-cache', 'org-cache'));
+    httpMock.expectOne('/pp/v1/cf/org/cf-cache/org-cache/spaces?per_page=500&page=1')
+      .flush({ resources: [{ guid: 's1', name: 'My Space', orgGuid: 'org-cache', cnsiGuid: 'cf-cache' }] });
+    await first;
+
+    // Second subscription — must NOT issue another HTTP request
+    const second = firstValueFrom(service.fetchSpacesForOrg('cf-cache', 'org-cache'));
+    httpMock.expectNone('/pp/v1/cf/org/cf-cache/org-cache/spaces?per_page=500&page=1');
+
+    const spaces = await second;
+    expect(spaces.length).toBe(1);
+    expect(spaces[0].guid).toBe('s1');
   });
 });
