@@ -198,7 +198,7 @@
     "fs-extra": "11.3.1",
     "globby": "14.1.0",
     "happy-dom": "^20.9.0",
-    "js-yaml": "4.1.1",
+    "js-yaml": "4.2.0",
     "jsdom": "^27.4.0",
     "json-schema-to-typescript": "15.0.4",
     "kind-of": "6.0.3",
