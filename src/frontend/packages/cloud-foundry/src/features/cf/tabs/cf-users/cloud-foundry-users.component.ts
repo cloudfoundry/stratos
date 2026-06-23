@@ -142,6 +142,7 @@ export class CloudFoundryUsersComponent {
    *  the dialog shows a full org picker). */
   protected openAddUser(): void {
     this.dialog.open(AddUserDialogComponent, {
+      ariaLabelledBy: 'add-user-dialog-title',
       data: {
         cfGuid: this.cfGuid,
         userInviteAllowed: this.userInviteAllowed(),

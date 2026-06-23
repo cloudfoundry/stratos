@@ -170,6 +170,7 @@ export class CloudFoundryOrganizationUsersComponent {
   protected openAddUser(): void {
     const orgName = this.cfOrgService.orgDataService.org()?.name;
     this.dialog.open(AddUserDialogComponent, {
+      ariaLabelledBy: 'add-user-dialog-title',
       data: {
         cfGuid: this.cfGuid,
         orgGuid: this.orgGuid,

@@ -12,7 +12,8 @@
       (click)="copyToClipboard($event)"
       (keydown.enter)="copyToClipboard($event)"
       (keydown.space)="copyToClipboard($event); $event.preventDefault()"
-      [title]="tooltip">
+      [title]="tooltip"
+      [attr.aria-label]="tooltip || 'Copy to clipboard'">
       content_copy
     </span>
   }

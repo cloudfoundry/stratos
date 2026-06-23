@@ -173,6 +173,7 @@ export class CloudFoundrySpaceUsersComponent {
     const orgName = this.cfOrgService.orgDataService.org()?.name;
     const spaceName = this.cfSpaceService.spaceDataService.space()?.name;
     this.dialog.open(AddUserDialogComponent, {
+      ariaLabelledBy: 'add-user-dialog-title',
       data: {
         cfGuid: this.cfGuid,
         orgGuid: this.orgGuid,
