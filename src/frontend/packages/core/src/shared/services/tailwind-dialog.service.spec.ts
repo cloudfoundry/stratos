@@ -26,6 +26,16 @@ class TestDialogWithDataComponent {
   public data = inject(MAT_DIALOG_DATA);
 }
 
+// Test component exposing a drag handle (as the variable-edit dialog does).
+@Component({
+  selector: 'test-draggable-dialog',
+  template: '<h1 data-dialog-drag-handle class="drag-handle">Header</h1><div class="body">Body</div>',
+  standalone: true,
+})
+class TestDraggableDialogComponent {
+  public dialogRef = inject(TailwindDialogRef<TestDraggableDialogComponent>);
+}
+
 describe('TailwindDialogService', () => {
   let service: TailwindDialogService;
   let _appRef: ApplicationRef;
@@ -125,9 +135,13 @@ describe('TailwindDialogService', () => {
         closed = true;
       });
 
-      // Click on backdrop
+      // A real backdrop click presses AND releases on the backdrop.
       const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
       expect(backdrop).toBeTruthy();
+
+      const downEvent = new MouseEvent('mousedown', { bubbles: true });
+      Object.defineProperty(downEvent, 'target', { value: backdrop, enumerable: true });
+      backdrop.dispatchEvent(downEvent);
 
       const clickEvent = new MouseEvent('click', { bubbles: true });
       Object.defineProperty(clickEvent, 'target', { value: backdrop, enumerable: true });
@@ -135,6 +149,41 @@ describe('TailwindDialogService', () => {
 
       await vi.advanceTimersByTimeAsync(300);
       expect(closed).toBe(true);
+      vi.useRealTimers();
+    });
+
+    it('should NOT close when a drag starts inside the dialog and releases on the backdrop', async () => {
+      // Dragging a resize grip / selecting text inside the dialog and releasing
+      // on the backdrop makes the browser synthesize a click whose target is the
+      // common ancestor (the backdrop overlay). That must NOT dismiss the dialog.
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDialogComponent, { disableClose: false });
+      await vi.advanceTimersByTimeAsync(0);
+
+      let closed = false;
+      dialogRef.afterClosed().subscribe(() => {
+        closed = true;
+      });
+
+      const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
+      const content = backdrop.querySelector('.test-dialog') as HTMLElement;
+      expect(content).toBeTruthy();
+
+      // Press starts inside the dialog content...
+      const downEvent = new MouseEvent('mousedown', { bubbles: true });
+      Object.defineProperty(downEvent, 'target', { value: content, enumerable: true });
+      content.dispatchEvent(downEvent);
+
+      // ...release lands on the backdrop, so the synthesized click targets it.
+      const clickEvent = new MouseEvent('click', { bubbles: true });
+      Object.defineProperty(clickEvent, 'target', { value: backdrop, enumerable: true });
+      backdrop.dispatchEvent(clickEvent);
+
+      await vi.advanceTimersByTimeAsync(300);
+      expect(closed).toBe(false);
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
       vi.useRealTimers();
     });
 
@@ -337,6 +386,90 @@ describe('TailwindDialogService', () => {
       const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
       expect(backdrop.classList.contains('custom-backdrop')).toBe(true);
 
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+  });
+
+  describe('Resizable / Draggable', () => {
+    it('should make the panel resizable when resizable is true', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDialogComponent, { resizable: true });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      expect(panel.style.resize).toBe('both');
+      expect(panel.style.position).toBe('fixed');
+      // Resize is capped at the viewport edge from the panel's top-left. In
+      // jsdom getBoundingClientRect is 0,0, so the cap is the full viewport.
+      expect(panel.style.maxWidth).toBe(`${window.innerWidth}px`);
+      expect(panel.style.maxHeight).toBe(`${window.innerHeight}px`);
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    it('should NOT make the panel resizable by default', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDialogComponent);
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      expect(panel.style.resize).toBe('');
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    it('should move the panel when its drag handle is dragged', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent, { draggable: true });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
+      expect(handle).toBeTruthy();
+
+      handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 160, clientY: 140 }));
+
+      // getBoundingClientRect is 0,0 in jsdom, so left/top == the delta.
+      expect(panel.style.position).toBe('fixed');
+      expect(panel.style.left).toBe('60px');
+      expect(panel.style.top).toBe('40px');
+
+      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    it('should clamp the dragged panel to the viewport', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent, { draggable: true });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
+
+      handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 10, clientY: 10 }));
+
+      // Drag far past the bottom-right — must pin to the viewport edge, not run
+      // off-screen (panel offsetWidth/Height are 0 in jsdom, so the cap is the
+      // full innerWidth/innerHeight).
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 99999, clientY: 99999 }));
+      expect(parseInt(panel.style.left)).toBe(window.innerWidth);
+      expect(parseInt(panel.style.top)).toBe(window.innerHeight);
+
+      // Drag far past the top-left — must pin to 0, not go negative.
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: -99999, clientY: -99999 }));
+      expect(parseInt(panel.style.left)).toBe(0);
+      expect(parseInt(panel.style.top)).toBe(0);
+
+      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
       vi.useRealTimers();
