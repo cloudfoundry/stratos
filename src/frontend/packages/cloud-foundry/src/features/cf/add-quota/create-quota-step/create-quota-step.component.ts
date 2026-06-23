@@ -12,7 +12,7 @@ import { formToOrgQuotaWriteBody } from '../../quota-definition-form/quota-form-
 @Component({
   selector: 'app-create-quota-step',
   templateUrl: './create-quota-step.component.html',
-  styleUrls: ['./create-quota-step.component.scss'],
+  host: { class: 'flex-1' },
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

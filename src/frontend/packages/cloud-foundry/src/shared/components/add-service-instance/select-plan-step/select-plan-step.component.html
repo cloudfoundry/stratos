@@ -11,7 +11,7 @@
     </app-form-field>
   </form>
   @if (selectedPlan$ | async; as selPlan) {
-    <app-card class="select-plan__details">
+    <app-card class="max-w-[450px]">
       @if (selectedPlanAccessibility()) {
         <app-card-status [status]="selectedPlanAccessibility()"></app-card-status>
       }

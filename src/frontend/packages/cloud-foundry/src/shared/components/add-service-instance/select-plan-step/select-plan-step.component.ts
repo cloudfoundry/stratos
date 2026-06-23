@@ -46,7 +46,7 @@ interface SelectPlanForm {
 @Component({
   selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
-  styleUrls: ['./select-plan-step.component.scss'],
+  host: { class: 'flex-1' },
   providers: [
     TitleCasePipe
   ],

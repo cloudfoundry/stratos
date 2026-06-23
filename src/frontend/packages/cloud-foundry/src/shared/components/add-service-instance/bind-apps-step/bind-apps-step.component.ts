@@ -17,7 +17,7 @@ interface BindAppsForm {
 @Component({
   selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
-  styleUrls: ['./bind-apps-step.component.scss'],
+  host: { class: 'flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

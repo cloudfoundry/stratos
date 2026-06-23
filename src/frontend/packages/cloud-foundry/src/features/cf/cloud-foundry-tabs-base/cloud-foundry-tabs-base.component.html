@@ -1,6 +1,6 @@
-<app-page-header [tabs]="tabLinks" [tabsHeader]="tabsHeader" [favorite]="favorite$ | async">
+<app-page-header class="flex-none" [tabs]="tabLinks" [tabsHeader]="tabsHeader" [favorite]="favorite$ | async">
   <h1>{{ cfEndpointService.endpoint()?.entity.name }}</h1>
 </app-page-header>
-<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Cloud Foundry details'">
+<app-loading-page class="flex flex-col flex-1 min-h-0 overflow-hidden" [isLoading]="isFetching$" [text]="'Retrieving Cloud Foundry details'">
   <router-outlet></router-outlet>
 </app-loading-page>

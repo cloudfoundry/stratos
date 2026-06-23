@@ -12,7 +12,7 @@ import { formToSpaceQuotaCreateBody } from '../../quota-definition-form/quota-fo
 @Component({
   selector: 'app-create-space-quota-step',
   templateUrl: './create-space-quota-step.component.html',
-  styleUrls: ['./create-space-quota-step.component.scss'],
+  host: { class: 'flex-1' },
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

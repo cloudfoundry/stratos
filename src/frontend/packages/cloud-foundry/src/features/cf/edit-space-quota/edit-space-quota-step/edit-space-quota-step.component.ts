@@ -13,7 +13,7 @@ import { formToSpaceQuotaUpdateBody } from '../../quota-definition-form/quota-fo
 @Component({
   selector: 'app-edit-space-quota-step',
   templateUrl: './edit-space-quota-step.component.html',
-  styleUrls: ['./edit-space-quota-step.component.scss'],
+  host: { class: 'flex-1' },
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

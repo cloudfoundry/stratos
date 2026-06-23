@@ -24,7 +24,7 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
+  host: { class: 'flex flex-col flex-1 min-h-0 overflow-hidden' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

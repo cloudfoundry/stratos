@@ -19,7 +19,7 @@ import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/man
 @Component({
   selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
-  styleUrls: ['./manage-users-confirm.component.scss'],
+  host: { class: 'flex-1 pr-2.5' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
