@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { buildWorklist } from '../../scripts/seed-worklist.mjs';
+import { buildWorklist } from '../../scripts/seed-worklist';
 
 const html = readFileSync('tests/scripts/fixtures/sample.component.html', 'utf8');
 

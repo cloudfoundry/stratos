@@ -1,7 +1,14 @@
 import { readFileSync } from 'node:fs';
 
+interface WorklistRow {
+  file: string;
+  line: number;
+  dataTest: string;
+  suggestedId: string;
+}
+
 // area from a *.component.html filename: 'cf-users.component.html' -> 'cf.users'
-function areaFromFile(file) {
+function areaFromFile(file: string): string {
   const base = file.replace(/\.component\.html$/, '').split('/').pop() || file;
   return base.replace(/-/g, '.');
 }
@@ -10,16 +17,16 @@ const TAG_RE = /<([a-zA-Z][\w-]*)\b([^>]*)>/g;
 const DATA_TEST_RE = /data-test\s*=\s*"([^"]*)"/;
 const HAS_SID_RE = /data-stratos-snapshot-id\s*=/;
 
-export function buildWorklist(html, file) {
+export function buildWorklist(html: string, file: string): WorklistRow[] {
   const area = areaFromFile(file);
-  const rows = [];
-  let m;
+  const rows: WorklistRow[] = [];
+  let m: RegExpExecArray | null;
   while ((m = TAG_RE.exec(html)) !== null) {
-    const attrs = m[2];
+    const attrs = m[2]!;
     const dt = DATA_TEST_RE.exec(attrs);
     if (!dt || HAS_SID_RE.test(attrs)) continue;
     const line = html.slice(0, m.index).split('\n').length;
-    rows.push({ file, line, dataTest: dt[1], suggestedId: `${area}.${dt[1]}` });
+    rows.push({ file, line, dataTest: dt[1]!, suggestedId: `${area}.${dt[1]!}` });
   }
   return rows;
 }
