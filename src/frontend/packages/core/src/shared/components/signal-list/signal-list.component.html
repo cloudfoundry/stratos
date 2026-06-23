@@ -36,6 +36,7 @@
           data-test="filter-field"
           (change)="onFilterFieldChange($any($event.target).value)"
           title="Filter by"
+          aria-label="Filter by field"
           class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text">
           @for (col of filterableColumns(); track col.key) {
             <option [value]="columnKey(col)" [selected]="config.filterField!() === columnKey(col)">{{ col.header }}</option>
@@ -45,6 +46,7 @@
       <input
         type="text"
         [placeholder]="filterPlaceholder()"
+        [attr.aria-label]="filterPlaceholder()"
         [value]="config.nameFilter()"
         (input)="config.nameFilter!.set($any($event.target).value)"
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
@@ -57,6 +59,7 @@
         (click)="config.onClear!()"
         [disabled]="!hasActiveFilter()"
         title="Clear filters and sort"
+        aria-label="Clear filters and sort"
         class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
         <span class="material-icons text-base leading-5">highlight_off</span>
       </button>
@@ -76,6 +79,7 @@
           type="button"
           (click)="toggleSortDirection()"
           [title]="config.sort!().direction === 'asc' ? 'Ascending' : 'Descending'"
+          [attr.aria-label]="config.sort!().direction === 'asc' ? 'Sort ascending' : 'Sort descending'"
           class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
           <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'asc'">sort</span>
         </button>
@@ -103,6 +107,7 @@
         type="button"
         (click)="setViewMode(config.viewMode!() === 'table' ? 'card' : 'table')"
         [title]="config.viewMode!() === 'table' ? 'Card view' : 'Table view'"
+        [attr.aria-label]="config.viewMode!() === 'table' ? 'Switch to card view' : 'Switch to table view'"
         class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
         <span class="material-icons text-base leading-5">{{ config.viewMode!() === 'table' ? 'grid_on' : 'list' }}</span>
       </button>
@@ -283,6 +288,9 @@
                             type="button"
                             (click)="toggleRowActions(row, $event)"
                             title="Actions"
+                            aria-label="Row actions"
+                            aria-haspopup="menu"
+                            [attr.aria-expanded]="openActionsRowKey() === config.getRowKey(row)"
                             class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
                             <span class="material-icons text-xl leading-none">more_vert</span>
                           </button>
@@ -496,6 +504,9 @@
                           type="button"
                           (click)="toggleRowActions(row, $event)"
                           title="Actions"
+                          aria-label="Row actions"
+                          aria-haspopup="menu"
+                          [attr.aria-expanded]="openActionsRowKey() === config.getRowKey(row)"
                           class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
                           <span class="material-icons text-xl leading-none">more_vert</span>
                         </button>

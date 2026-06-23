@@ -1,5 +1,5 @@
 <div class="p-6 w-full">
-  <h1 class="text-lg font-semibold mb-4 text-content-text">{{ title }}</h1>
+  <h1 id="variable-edit-dialog-title" class="text-lg font-semibold mb-4 text-content-text">{{ title }}</h1>
 
   <!-- Name (full width, on top — never truncated) -->
   <div class="mb-4">
@@ -25,7 +25,7 @@
   <!-- Value (multiline Monaco editor below, full width) -->
   <div class="mb-2">
     <div class="flex items-center justify-between mb-1">
-      <span class="text-sm text-content-muted">Value</span>
+      <span id="variable-value-label" class="text-sm text-content-muted">Value</span>
       <div class="flex items-center gap-2">
         @if (jsonMode()) {
           <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
@@ -39,7 +39,8 @@
     </div>
     <!-- Resizable: drag the bottom-right handle to grow the editor (and the
          dialog with it) in both directions. Monaco automaticLayout re-fits. -->
-    <div class="resize overflow-auto border border-content-border rounded-md
+    <div role="group" aria-labelledby="variable-value-label"
+         class="resize overflow-auto border border-content-border rounded-md
                 h-64 w-[36rem] min-h-[8rem] min-w-[20rem] max-w-[88vw]">
       <app-monaco-editor
         [model]="model()"

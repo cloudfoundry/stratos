@@ -1,6 +1,6 @@
 <div class="p-6 flex flex-col gap-4">
   <!-- Dialog header -->
-  <h2 class="text-lg font-semibold text-content-text">Add User</h2>
+  <h2 id="add-user-dialog-title" class="text-lg font-semibold text-content-text">Add User</h2>
 
   <!-- Mode tabs: Associate (username/origin) vs Invite (email) -->
   @if (inviteTabVisible()) {
@@ -10,6 +10,7 @@
         class="px-3 py-1 rounded border text-sm"
         [class.bg-primary]="mode() === 'associate'"
         [class.text-white]="mode() === 'associate'"
+        [attr.aria-pressed]="mode() === 'associate'"
         (click)="switchMode('associate')"
       >Associate</button>
       <button
@@ -17,6 +18,7 @@
         class="px-3 py-1 rounded border text-sm"
         [class.bg-primary]="mode() === 'invite'"
         [class.text-white]="mode() === 'invite'"
+        [attr.aria-pressed]="mode() === 'invite'"
         (click)="switchMode('invite')"
       >Invite</button>
     </div>

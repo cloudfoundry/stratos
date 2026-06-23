@@ -208,6 +208,7 @@ export class VariablesTabComponent implements OnInit {
       : this.envVarNames();
 
     const ref = this.dialog.open(VariableEditDialogComponent, {
+      ariaLabelledBy: 'variable-edit-dialog-title',
       // No fixed width: the dialog sizes to its (resizable) content so the
       // user can drag the editor wider/taller, capped at the viewport.
       maxWidth: '92vw',
