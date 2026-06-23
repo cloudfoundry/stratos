@@ -209,9 +209,15 @@ export class VariablesTabComponent implements OnInit {
 
     const ref = this.dialog.open(VariableEditDialogComponent, {
       ariaLabelledBy: 'variable-edit-dialog-title',
-      // No fixed width: the dialog sizes to its (resizable) content so the
-      // user can drag the editor wider/taller, capped at the viewport.
+      // Movable + corner-resizable: drag the header to reposition, drag the
+      // bottom-right corner to grow/shrink (the Monaco editor fills the panel).
+      // A roomy default size, capped at the viewport.
+      width: '40rem',
+      height: '34rem',
       maxWidth: '92vw',
+      maxHeight: '90vh',
+      resizable: true,
+      draggable: true,
       data: { mode, name: row?.name, value: row?.value, existingNames },
     });
 
