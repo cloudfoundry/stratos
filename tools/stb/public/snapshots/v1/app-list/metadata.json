@@ -27,8 +27,7 @@
     {
       "selector": ".app-card h2",
       "snapshotId": "cf.applications.app-card-heading",
-      "tokens": [{ "name": "--color-brand-700" }],
-      "locator": { "role": "heading", "name": "Application card heading" }
+      "tokens": [{ "name": "--color-brand-700" }]
     },
     {
       "selector": ".status-success",
