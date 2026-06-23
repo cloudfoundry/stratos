@@ -20,6 +20,6 @@
       "locator": { "role": "textbox", "name": "Username" } },
     { "selector": ".btn-primary", "snapshotId": "auth.login.sign-in",
       "tokens": [{ "name": "--color-brand-500" }],
-      "locator": { "role": "button", "name": "Sign In" } }
+      "locator": { "role": "button", "name": "Sign in" } }
   ]
 }
