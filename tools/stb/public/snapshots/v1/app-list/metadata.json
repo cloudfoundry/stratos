@@ -1,14 +1,52 @@
 {
+  "version": 2,
   "id": "app-list",
   "name": "App list",
-  "selectorTokens": [
-    { "selector": "body", "tokens": ["--color-brand-50"] },
-    { "selector": "nav", "tokens": ["--nav-bg", "--nav-text"] },
-    { "selector": "main h1", "tokens": ["--color-brand-900"] },
-    { "selector": ".app-card", "tokens": ["--color-brand-200"] },
-    { "selector": ".app-card h2", "tokens": ["--color-brand-700"] },
-    { "selector": ".status-success", "tokens": ["--color-success"] },
-    { "selector": ".status-warning", "tokens": ["--color-warning"] },
-    { "selector": ".status-danger", "tokens": ["--color-danger"] }
+  "mappings": [
+    {
+      "selector": "body",
+      "snapshotId": "cf.applications.page",
+      "tokens": [{ "name": "--color-brand-50" }]
+    },
+    {
+      "selector": "nav",
+      "snapshotId": "cf.applications.nav",
+      "tokens": [{ "name": "--nav-bg" }, { "name": "--nav-text" }]
+    },
+    {
+      "selector": "main h1",
+      "snapshotId": "cf.applications.heading",
+      "tokens": [{ "name": "--color-brand-900" }],
+      "locator": { "role": "heading", "name": "Applications" }
+    },
+    {
+      "selector": ".app-card",
+      "snapshotId": "cf.applications.app-card",
+      "tokens": [{ "name": "--color-brand-200" }]
+    },
+    {
+      "selector": ".app-card h2",
+      "snapshotId": "cf.applications.app-card-heading",
+      "tokens": [{ "name": "--color-brand-700" }],
+      "locator": { "role": "heading", "name": "Application card heading" }
+    },
+    {
+      "selector": ".status-success",
+      "snapshotId": "cf.applications.status-success",
+      "tokens": [{ "name": "--color-success" }],
+      "locator": { "role": "status", "name": "Running" }
+    },
+    {
+      "selector": ".status-warning",
+      "snapshotId": "cf.applications.status-warning",
+      "tokens": [{ "name": "--color-warning" }],
+      "locator": { "role": "status", "name": "Stopped" }
+    },
+    {
+      "selector": ".status-danger",
+      "snapshotId": "cf.applications.status-danger",
+      "tokens": [{ "name": "--color-danger" }],
+      "locator": { "role": "status", "name": "Crashed" }
+    }
   ]
 }
