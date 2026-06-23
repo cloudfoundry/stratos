@@ -27,7 +27,7 @@ interface ConnectionError {
 @Component({
   selector: 'app-log-stream-tab',
   templateUrl: './log-stream-tab.component.html',
-  styleUrls: ['./log-stream-tab.component.scss'],
+  host: { class: 'flex flex-col flex-1 min-h-0 w-full' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [

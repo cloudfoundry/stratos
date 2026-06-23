@@ -37,7 +37,7 @@ import type { StApp } from '../../../services/endpoint-data/stratos-types';
 @Component({
   selector: 'app-application-wall',
   templateUrl: './application-wall.component.html',
-  styleUrls: ['./application-wall.component.scss'],
+  host: { class: 'flex flex-col h-full min-h-0 overflow-hidden' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
