@@ -1,12 +1,14 @@
 <app-page-header [endpointIds$]="cfIds$">
-  <h1>Applications</h1>
+  <h1 data-stratos-snapshot-id="cf.applications.heading">Applications</h1>
 </app-page-header>
 <app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 
 <!-- Show loading indicator -->
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
   <div
-    class="flex items-center justify-center p-8">
+    class="flex items-center justify-center p-8"
+    data-stratos-snapshot-id="cf.applications.loading"
+    role="status">
     <div class="flex items-center space-x-3 text-content-muted">
       <div class="spinner spinner-primary"></div>
       <span>Loading applications...</span>
