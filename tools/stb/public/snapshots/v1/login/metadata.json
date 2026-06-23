@@ -1,12 +1,25 @@
 {
+  "version": 2,
   "id": "login",
   "name": "Login",
-  "selectorTokens": [
-    { "selector": ".login-container", "tokens": ["--color-brand-50"] },
-    { "selector": ".login-card", "tokens": ["--color-brand-50", "--color-brand-200"] },
-    { "selector": ".login-card h1", "tokens": ["--color-brand-900"] },
-    { "selector": ".login-card label", "tokens": ["--color-brand-800"] },
-    { "selector": ".login-card input", "tokens": ["--color-brand-300"] },
-    { "selector": ".btn-primary", "tokens": ["--color-brand-500"] }
+  "mappings": [
+    { "selector": ".login-container", "snapshotId": "auth.login.page",
+      "tokens": [{ "name": "--color-brand-50" }],
+      "description": { "ref": "auth.login.page" } },
+    { "selector": ".login-card", "snapshotId": "auth.login.card",
+      "tokens": [{ "name": "--color-brand-50" }, { "name": "--color-brand-200" }],
+      "description": { "ref": "auth.login.card" } },
+    { "selector": ".login-card h1", "snapshotId": "auth.login.title",
+      "tokens": [{ "name": "--color-brand-900" }],
+      "locator": { "role": "heading", "name": "Sign in to Stratos" } },
+    { "selector": ".login-card label", "snapshotId": "auth.login.username-label",
+      "tokens": [{ "name": "--color-brand-800" }],
+      "locator": { "role": "label", "name": "Username" } },
+    { "selector": ".login-card input", "snapshotId": "auth.login.username",
+      "tokens": [{ "name": "--color-brand-300" }],
+      "locator": { "role": "textbox", "name": "Username" } },
+    { "selector": ".btn-primary", "snapshotId": "auth.login.sign-in",
+      "tokens": [{ "name": "--color-brand-500" }],
+      "locator": { "role": "button", "name": "Sign In" } }
   ]
 }
