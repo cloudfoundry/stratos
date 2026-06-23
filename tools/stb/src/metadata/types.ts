@@ -25,4 +25,4 @@ export interface SceneMetadata {
   mappings: ElementMapping[];
 }
 
-export type CuratedDescriptions = Record<string, string>;  // snapshotId -> text
+export type CuratedDescriptions = Record<string, string>;  // ref key (a shared snapshotId) -> description text
