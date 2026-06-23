@@ -37,17 +37,12 @@
   }
 
   function highlightToken(token) {
-    document.querySelectorAll('[data-stb-highlight]').forEach((el) => {
-      el.removeAttribute('data-stb-highlight');
-    });
+    document.querySelectorAll('[data-stb-highlight]').forEach((el) => el.removeAttribute('data-stb-highlight'));
     if (!token || !metadata) return;
-    for (const entry of (metadata.selectorTokens || [])) {
-      if ((entry.tokens || []).includes(token)) {
-        try {
-          document.querySelectorAll(entry.selector).forEach((el) => {
-            el.setAttribute('data-stb-highlight', '');
-          });
-        } catch { /* invalid selector */ }
+    for (const entry of (metadata.mappings || [])) {
+      if ((entry.tokens || []).some((t) => t.name === token)) {
+        try { document.querySelectorAll(entry.selector).forEach((el) => el.setAttribute('data-stb-highlight', '')); }
+        catch { /* invalid selector */ }
       }
     }
     ensureHighlightStyles();
@@ -64,10 +59,10 @@
   function tokensForElement(el) {
     if (!metadata) return [];
     const out = new Set();
-    for (const entry of (metadata.selectorTokens || [])) {
+    for (const entry of (metadata.mappings || [])) {
       try {
         if (el.matches(entry.selector) || el.closest(entry.selector)) {
-          for (const t of entry.tokens || []) out.add(t);
+          for (const t of (entry.tokens || [])) out.add(t.name);
         }
       } catch { /* invalid selector */ }
     }
@@ -99,8 +94,10 @@
     if (!(target instanceof Element)) return;
     const tokens = tokensForElement(target);
     if (tokens.length === 0) return;
-    const selector = bestSelector(target);
-    window.parent.postMessage({ type: 'STB_ELEMENT_SELECTED', selector, tokens }, '*');
+    const el = target.closest('[data-stratos-snapshot-id]') || target;
+    const snapshotId = el.getAttribute('data-stratos-snapshot-id');
+    const selector = bestSelector(el);
+    window.parent.postMessage({ type: 'STB_ELEMENT_SELECTED', selector, tokens, snapshotId }, '*');
   });
 
   function bestSelector(el) {

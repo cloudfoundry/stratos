@@ -4,7 +4,7 @@ import { activeSceneId, previewDark } from '@/state/scene';
 import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages';
 
 export interface PreviewPaneOptions {
-  onElementSelected?: (selector: string, tokens: string[]) => void;
+  onElementSelected?: (selector: string, tokens: string[], snapshotId: string | null) => void;
 }
 
 export interface PreviewPane {
@@ -39,7 +39,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       applyTokens();
       applyDark();
     } else if (msg.type === 'STB_ELEMENT_SELECTED') {
-      opts.onElementSelected?.(msg.selector, msg.tokens);
+      opts.onElementSelected?.(msg.selector, msg.tokens, msg.snapshotId);
     }
   }
 

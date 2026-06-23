@@ -8,4 +8,4 @@ export type ParentToPreview =
 
 export type PreviewToParent =
   | { type: 'STB_PREVIEW_READY'; version: number }
-  | { type: 'STB_ELEMENT_SELECTED'; selector: string; tokens: string[] };
+  | { type: 'STB_ELEMENT_SELECTED'; selector: string; tokens: string[]; snapshotId: string | null };
