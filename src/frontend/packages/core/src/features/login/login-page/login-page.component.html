@@ -2,6 +2,7 @@
   id="app-login-page"
   class="login-page min-h-screen flex items-center justify-center relative"
   [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
+  data-stratos-snapshot-id="auth.login.page"
   >
   <!-- Full-screen background -->
   <div
@@ -20,6 +21,7 @@
     [ngStyle]="{
       'background-color': loginCardBackground()
     }"
+    data-stratos-snapshot-id="auth.login.card"
     >
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
@@ -27,9 +29,10 @@
         class="login-logo h-12 w-12 shrink-0"
         [src]="themeLogo()"
         [alt]="themeDisplayName() || 'Logo'"
+        data-stratos-snapshot-id="auth.login.logo"
         />
       <div class="login-title-section flex-1">
-        <h1 class="login-title text-xl font-bold text-content-text mb-1">
+        <h1 class="login-title text-xl font-bold text-content-text mb-1" data-stratos-snapshot-id="auth.login.title">
           {{ themeDisplayName() || themeTitle() || 'Stratos' }}
         </h1>
         @if (themeSubtitle()) {
@@ -55,6 +58,7 @@
                 placeholder="Username"
                 type="text"
                 autocomplete="username"
+                data-stratos-snapshot-id="auth.login.username"
                 >
             </div>
           }
@@ -71,6 +75,7 @@
                 name="password"
                 placeholder="Password"
                 autocomplete="current-password"
+                data-stratos-snapshot-id="auth.login.password"
                 >
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
@@ -83,6 +88,7 @@
               class="btn btn-primary w-full py-3"
               type="submit"
               [disabled]="(ssoLogin$ | async) === false && !loginForm.valid"
+              data-stratos-snapshot-id="auth.login.sign-in"
               >
               Sign In
             </button>
@@ -110,6 +116,7 @@
         '-translate-y-full opacity-0': !displayMessage
       }"
       role="alert"
+      data-stratos-snapshot-id="auth.login.error"
       >
       <span class="material-icons text-red-500 dark:text-red-400 shrink-0">error_outline</span>
       <span>{{ displayMessage }}</span>
