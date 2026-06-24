@@ -18,10 +18,6 @@ export {
   TailwindSimpleSnackBar as SimpleSnackBar
 } from './tailwind-snackbar.service';
 
-export {
-  TailwindIconRegistry as MatIconRegistry
-} from './tailwind-icon-registry.service';
-
 // Export dialog data token for injection
 export {
   MAT_DIALOG_DATA
@@ -48,12 +44,6 @@ export {
 export {
   TailwindDefaultErrorStateMatcher
 } from './tailwind-error-state-matcher';
-
-export {
-  TailwindSidenav as StratosSidenav,
-  TailwindSidenavService as StratosSidenavService,
-  TailwindSidenavConfig as StratosSidenavConfig
-} from './tailwind-sidenav.service';
 
 export {
   TailwindSortDirective as MatSort,

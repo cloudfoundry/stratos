@@ -100,14 +100,11 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
 import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { TailwindSortDirective, TailwindSortHeaderDirective, TailwindSortService } from './services/tailwind-sort.service';
-import { TailwindSidenavService } from './services/tailwind-sidenav.service';
 import { TailwindPaginatorService } from './services/tailwind-paginator.service';
 import { TailwindSnackBarService } from './services/tailwind-snackbar.service';
 import { TailwindDialogService } from './services/tailwind-dialog.service';
-import { TailwindIconRegistry } from './services/tailwind-icon-registry.service';
 import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
 import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
-import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
 import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 import { DisableRouterLinkDirective } from '../core/disable-router-link.directive';
@@ -222,8 +219,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindSortDirective,
     TailwindSortHeaderDirective,
     // === Custom Material Wrapper Components ===
-    CustomExpansionPanelComponent,
-    CustomExpansionPanelHeaderComponent,
     MatInputDirective,
     MatDatepickerDirective,
     CustomFormFieldComponent,
@@ -355,8 +350,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     NoContentMessageComponent,
 
     // === Custom Material Wrapper Components ===
-    CustomExpansionPanelComponent,
-    CustomExpansionPanelHeaderComponent,
     CustomCheckboxComponent,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
@@ -390,11 +383,9 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     LongRunningOperationsService,
     SessionService,
     TailwindSortService,
-    TailwindSidenavService,
     TailwindPaginatorService,
     TailwindSnackBarService,
     TailwindDialogService,
-    TailwindIconRegistry,
     TailwindErrorStateMatcher,
     TailwindDefaultErrorStateMatcher,
     TailwindShowOnDirtyErrorStateMatcher,
