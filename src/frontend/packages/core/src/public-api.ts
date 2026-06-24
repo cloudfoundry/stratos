@@ -42,11 +42,9 @@ export * from './shared/services/tailwind-material-replacements';
 export * from './shared/services/tailwind-snackbar.service';
 export * from './shared/services/endpoint-auth-state.service';
 export * from './shared/services/tailwind-dialog.service';
-export * from './shared/services/tailwind-sidenav.service';
 export * from './shared/services/tailwind-sort.service';
 export * from './shared/services/tailwind-paginator.service';
 export * from './shared/services/tailwind-json-schema-form.service';
-export * from './shared/services/tailwind-icon-registry.service';
 export * from './shared/services/tailwind-error-state-matcher';
 export { TailwindJsonSchemaFormModule } from './shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
 export { TailwindJsonSchemaFormComponent } from './shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
@@ -80,9 +78,6 @@ export { CustomDatepickerInputComponent } from './shared/components/custom-mater
 export { CustomDatepickerToggleComponent } from './shared/components/custom-material/custom-material.component';
 export { MatDatepickerDirective } from './shared/components/custom-material/custom-material.component';
 export { CustomTabGroupComponent, CustomTabComponent, MatTabChangeEvent } from './shared/components/custom-tabs/custom-tabs.component';
-
-// Custom Expansion Panel Components
-export { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './shared/components/custom-expansion-panel/custom-expansion-panel.component';
 
 // Custom Form Field Components
 export {
