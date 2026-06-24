@@ -29,6 +29,7 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { buildServiceInstanceRowActions } from '../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from '../../../../shared/signal-list-configs/service-keys-count-cell';
+import { dashboardLink, renderDashboard } from '../../../../shared/signal-list-configs/dashboard-link-cell';
 import type { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 
 // Per-CF Services tab. Single-CNSI variant of the top-level Services Wall.
@@ -193,6 +194,12 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
           pillColor: lastOpColor,
           render: renderLastOp,
           widthHint: '10rem',
+        },
+        {
+          header: 'Dashboard', key: 'dashboard', kind: 'link',
+          render: renderDashboard,
+          externalLink: dashboardLink,
+          widthHint: '8rem',
         },
         {
           // This list has no Attached Apps column; the keys count sits right

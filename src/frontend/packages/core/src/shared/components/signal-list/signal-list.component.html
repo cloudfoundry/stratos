@@ -402,7 +402,11 @@
                   <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                     <span class="text-content-muted">{{ col.header }}</span>
                     <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
-                      @if (col.kind === 'link' && col.link && col.link(row); as target) {
+                      @if (col.externalLink && col.externalLink(row); as href) {
+                        <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
+                          <span class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}
+                        </a>
+                      } @else if (col.kind === 'link' && col.link && col.link(row); as target) {
                         <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                       } @else if (col.kind === 'pill') {
                         <span [class]="pillClasses(colorFor(col, row))">{{ col.render(row) }}</span>
@@ -545,7 +549,11 @@
                     [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
                     [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
                     [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">
-                  @if (col.kind === 'link' && col.link) {
+                  @if (col.externalLink && col.externalLink(row); as href) {
+                    <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
+                      <span class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}
+                    </a>
+                  } @else if (col.kind === 'link' && col.link) {
                     @if (col.link(row); as target) {
                       <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
                     } @else {

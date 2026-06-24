@@ -89,7 +89,7 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig!.pagedItems).toBe(configStub.view.pagedItems);
     const keys = component.listConfig!.columns.map(c => c.key);
-    expect(keys).toEqual(['name', 'plan', 'lastOp', 'boundApps', 'serviceKeys', 'tags', 'createdAt', 'type', 'actions']);
+    expect(keys).toEqual(['name', 'plan', 'lastOp', 'dashboard', 'boundApps', 'serviceKeys', 'tags', 'createdAt', 'type', 'actions']);
   });
 
   it('Service Keys column links to the keys page and renders the lazy count', () => {
