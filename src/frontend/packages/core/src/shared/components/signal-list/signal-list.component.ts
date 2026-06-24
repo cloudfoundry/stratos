@@ -168,6 +168,14 @@ export interface SignalListColumn<T> {
   // (instead of the global one) when navigated to from that wall.
   // Returning null/undefined omits the query params entirely.
   linkQueryParams?: (row: T) => Record<string, string | number> | null;
+  // Optional, kind-agnostic. Returns an EXTERNAL http(s) URL to render the
+  // cell value as an `<a [href] target="_blank" rel="noopener">` (a launch
+  // icon + the render() text), or null to render the render() text as plain
+  // text. Distinct from `link` (internal routerLink). Used for the
+  // service-instance Dashboard column, restoring the v4.9.3 external-link
+  // cell the signal-list migration dropped. Does not make the row clickable
+  // (rowLink only follows `kind: 'link'` + `link`).
+  externalLink?: (row: T) => string | null;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
   // Required when kind === 'compound'. Returns an ordered list of segments;

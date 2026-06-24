@@ -100,7 +100,7 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Service', 'Last Operation', 'Attached Apps', 'Service Keys', 'Tags', 'Created', '', '',
+      'Name', 'Service', 'Last Operation', 'Dashboard', 'Attached Apps', 'Service Keys', 'Tags', 'Created', '', '',
     ]);
     const keysCol: any = cfg!.columns.find(c => c.key === 'serviceKeys');
     expect(keysCol.kind).toBe('link');

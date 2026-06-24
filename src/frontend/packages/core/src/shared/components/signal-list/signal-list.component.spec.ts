@@ -680,6 +680,66 @@ describe('SignalListComponent', () => {
     });
   });
 
+  describe('external-link column (externalLink)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`,
+    })
+    class ExtHost {
+      items = signal([
+        { name: 'with', url: 'https://dash.example/x' },
+        { name: 'without', url: '' },
+      ]);
+      pageIndex = signal(0);
+      pageSize = signal(10);
+      config: SignalListConfig<{ name: string; url: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(2).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: this.pageIndex,
+        pageSize: this.pageSize,
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          { header: 'Name', render: r => r.name },
+          {
+            header: 'Dashboard', key: 'dashboard', kind: 'link',
+            render: r => (r.url ? 'View' : 'None'),
+            externalLink: r => r.url || null,
+          },
+        ],
+        getRowKey: r => r.name,
+      };
+    }
+
+    it('renders a new-tab external anchor for rows with a url, plain text otherwise', () => {
+      const fixture = TestBed.createComponent(ExtHost);
+      fixture.detectChanges();
+      const anchor = fixture.nativeElement.querySelector('a[href="https://dash.example/x"]') as HTMLAnchorElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor!.getAttribute('target')).toBe('_blank');
+      expect(anchor!.getAttribute('rel')).toContain('noopener');
+      expect(anchor!.textContent).toContain('View');
+      // Exactly one external anchor (the url-less row renders plain "None").
+      expect(fixture.nativeElement.querySelectorAll('a[target="_blank"]').length).toBe(1);
+      expect(fixture.nativeElement.textContent).toContain('None');
+    });
+
+    it('renders the external anchor in card view too', () => {
+      const fixture = TestBed.createComponent(ExtHost);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode: signal<'table' | 'card'>('card'),
+      };
+      fixture.detectChanges();
+      const anchor = fixture.nativeElement.querySelector('a[href="https://dash.example/x"]') as HTMLAnchorElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor!.getAttribute('target')).toBe('_blank');
+      expect(anchor!.textContent).toContain('View');
+    });
+  });
+
   describe('bulk-action bar (bulkActions slot)', () => {
     @Component({
       standalone: true,

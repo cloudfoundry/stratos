@@ -27,6 +27,7 @@ import {
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-configs/bound-apps-cell';
 import { renderServiceKeyCount, serviceKeysLink } from '../../../shared/signal-list-configs/service-keys-count-cell';
+import { dashboardLink, renderDashboard } from '../../../shared/signal-list-configs/dashboard-link-cell';
 import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
@@ -131,6 +132,12 @@ export class ServiceInstancesComponent implements OnInit {
         pillColor: lastOpColor,
         render: renderLastOp,
         widthHint: '10rem',
+      },
+      {
+        header: 'Dashboard', key: 'dashboard', kind: 'link',
+        render: renderDashboard,
+        externalLink: dashboardLink,
+        widthHint: '8rem',
       },
       {
         header: 'Attached Apps', key: 'boundApps', sortField: renderBoundApps,
