@@ -335,6 +335,15 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     this._updateMapRow(pointer, id, row => ({ ...row, value }));
   }
 
+  /**
+   * Handles `changes` from a recursive child rendering an object-valued map
+   * row. Captures the child's full data into the row's value, then rebuilds
+   * and emits. Without this, nested edits would be silently discarded.
+   */
+  onMapChildChange(pointer: string, id: number, childData: any): void {
+    this._updateMapRow(pointer, id, row => ({ ...row, value: childData }));
+  }
+
   /** Removes a row from the map at `pointer` and rebuilds the object. */
   removeMapKey(pointer: string, id: number): void {
     const current = this._mapRows();

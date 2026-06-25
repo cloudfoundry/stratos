@@ -63,7 +63,7 @@
                     <json-schema-form [schema]="mapValueSchema(f)"
                       [data]="row.value"
                       [_basePointer]="itemPointer(f.pointer, row.id)"
-                      (changes)="setMapKey(f.pointer, row.id, row.key)"></json-schema-form>
+                      (changes)="onMapChildChange(f.pointer, row.id, $event)"></json-schema-form>
                   </div>
                 }
                 <button type="button" [attr.data-map-remove]="f.pointer" (click)="removeMapKey(f.pointer, row.id)"
