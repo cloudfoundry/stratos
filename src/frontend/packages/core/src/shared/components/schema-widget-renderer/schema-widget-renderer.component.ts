@@ -3,10 +3,10 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnInit,
   Output,
   forwardRef,
   signal,
-  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { classifyNode } from './schema-resolve.util';
@@ -28,7 +28,7 @@ export interface FieldDescriptor {
   imports: [CommonModule, forwardRef(() => SchemaWidgetRendererComponent)],
   templateUrl: './schema-widget-renderer.component.html',
 })
-export class SchemaWidgetRendererComponent implements OnChanges {
+export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   @Input() schema: JsonSchema = {};
   @Input() data: any = {};
   /** Back-compat inputs — accepted, not used by this renderer. */
@@ -54,10 +54,26 @@ export class SchemaWidgetRendererComponent implements OnChanges {
   /** Working copy of data — never mutate @Input() data directly. */
   private readonly _working = signal<any>({});
 
-  readonly fields = computed<FieldDescriptor[]>(() => this._buildFields());
+  /**
+   * Rebuilt in ngOnInit/ngOnChanges (not a computed): `_buildFields` reads
+   * plain @Input properties (schema, _basePointer), not signals, so a computed
+   * would never recompute. Task 10 reassigns [schema] on the SAME instance
+   * (service-plan switch) — rebuilding on input change keeps the form in sync.
+   */
+  readonly fields = signal<FieldDescriptor[]>([]);
+
+  ngOnInit(): void {
+    this._seedAndBuild();
+  }
 
   ngOnChanges(): void {
+    this._seedAndBuild();
+  }
+
+  /** Re-seed the working copy from @Input() data and rebuild the field list. */
+  private _seedAndBuild(): void {
     this._working.set(structuredClone(this.data ?? {}));
+    this.fields.set(this._buildFields());
   }
 
   valueAt(pointer: string): any {

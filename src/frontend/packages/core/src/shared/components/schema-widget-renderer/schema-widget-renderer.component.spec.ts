@@ -32,6 +32,20 @@ describe('SchemaWidgetRenderer object/scalar/enum', () => {
     expect(f.nativeElement.querySelector('select[data-path="/tier"]')).toBeTruthy();
   });
 
+  it('re-renders fields when the schema input is reassigned on the same instance', () => {
+    const schemaA = { type: 'object', properties: { a: { type: 'string' } } };
+    const schemaB = { type: 'object', properties: { b: { type: 'string' } } };
+    const f = mount(schemaA);
+    expect(f.nativeElement.querySelector('input[data-path="/a"]')).toBeTruthy();
+    // Task 10: selecting a different service plan reassigns [schema] on the SAME
+    // instance — fields must rebuild so the form reflects the new schema.
+    f.componentInstance.schema = schemaB;
+    f.componentInstance.ngOnChanges();
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('input[data-path="/b"]')).toBeTruthy();
+    expect(f.nativeElement.querySelector('input[data-path="/a"]')).toBeFalsy();
+  });
+
   it('emits an integer (not a string) from a number widget', () => {
     const f = mount({ type: 'object', properties: { size: { type: 'integer' } } });
     let emitted: any; f.componentInstance.changes.subscribe((d: any) => (emitted = d));
