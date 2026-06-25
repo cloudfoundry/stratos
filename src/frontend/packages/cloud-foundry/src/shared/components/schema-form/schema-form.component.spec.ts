@@ -105,4 +105,25 @@ describe('SchemaFormComponent render error fallback', () => {
     expect(notice).toBeTruthy();
     expect(notice.textContent).toContain('Edit the parameters directly as JSON');
   });
+
+  it('seeds jsonText with formInitialData when render error fires', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.formInitialData = { key: 'value' };
+    c.onRenderError('Schema failed');
+    await Promise.resolve();
+    fixture.detectChanges();
+    expect(c.jsonText).toContain('key');
+  });
+
+  it('does not overwrite jsonText already set when render error fires', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.formInitialData = { key: 'value' };
+    c.jsonText = '{"existing":"data"}';
+    c.onRenderError('Schema failed');
+    await Promise.resolve();
+    fixture.detectChanges();
+    expect(c.jsonText).toBe('{"existing":"data"}');
+  });
 });
