@@ -17,10 +17,15 @@ import {
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
+  TailwindDialogService,
 } from '@stratosui/core';
 
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { SERVICE_PLAN_URL_PARAM } from '../../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
+import {
+  PlanParametersPreviewData,
+  PlanParametersPreviewDialogComponent,
+} from '../../../shared/components/plan-parameters-preview-dialog/plan-parameters-preview-dialog.component';
 import {
   CfServicePlansSignalConfigService,
 } from '../../../shared/signal-list-configs/service-plans/cf-service-plans-signal-config.service';
@@ -63,6 +68,7 @@ export class ServicePlansComponent implements OnInit {
   private readonly plansConfig = inject(CfServicePlansSignalConfigService);
   private readonly datePipe = inject(DatePipe);
   private readonly permissionsService = inject(CurrentUserPermissionsService);
+  private readonly dialog = inject(TailwindDialogService);
 
   private readonly cfGuid: string = getIdFromRoute(this.route, 'endpointId');
   private readonly serviceGuid: string = getIdFromRoute(this.route, 'serviceId');
@@ -102,6 +108,29 @@ export class ServicePlansComponent implements OnInit {
                 ['/marketplace', this.cfGuid, this.serviceGuid, 'create'],
                 { queryParams: { [SERVICE_PLAN_URL_PARAM]: p.guid } },
               );
+            },
+          },
+          {
+            // Lazy schema preview: the plans list is summary-tier (no schemas),
+            // so the dialog fetches this one plan at details and shows what the
+            // create wizard would prompt for — no commitment required (#5493).
+            label: 'View parameters',
+            icon: 'tune',
+            invoke: () => {
+              this.dialog.open(PlanParametersPreviewDialogComponent, {
+                ariaLabelledBy: 'plan-parameters-preview-title',
+                width: '40rem',
+                height: '32rem',
+                maxWidth: '92vw',
+                maxHeight: '90vh',
+                resizable: true,
+                draggable: true,
+                data: {
+                  cnsiGuid: p.cnsiGuid,
+                  planGuid: p.guid,
+                  planName: p.name,
+                } as PlanParametersPreviewData,
+              });
             },
           },
         ],
