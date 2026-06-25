@@ -44,10 +44,8 @@ export * from './shared/services/endpoint-auth-state.service';
 export * from './shared/services/tailwind-dialog.service';
 export * from './shared/services/tailwind-sort.service';
 export * from './shared/services/tailwind-paginator.service';
-export * from './shared/services/tailwind-json-schema-form.service';
 export * from './shared/services/tailwind-error-state-matcher';
-export { TailwindJsonSchemaFormModule } from './shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
-export { TailwindJsonSchemaFormComponent } from './shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
+export { SchemaWidgetRendererComponent } from './shared/components/schema-widget-renderer/schema-widget-renderer.component';
 
 // Tailwind Progress Components
 export { ProgressSpinnerComponent, MatSpinnerComponent } from './shared/components/progress-spinner/progress-spinner.component';

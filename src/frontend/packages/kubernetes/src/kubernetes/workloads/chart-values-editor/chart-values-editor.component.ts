@@ -9,7 +9,7 @@ import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/oper
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
+import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
 import { StratosBrandingService } from '@stratosui/theme';
 import { diffObjects } from './diffvalues';
@@ -48,7 +48,7 @@ enum EditorMode {
     CommonModule,
     FormsModule,
     MonacoEditorComponent,
-    TailwindJsonSchemaFormComponent
+    SchemaWidgetRendererComponent
   ]
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {

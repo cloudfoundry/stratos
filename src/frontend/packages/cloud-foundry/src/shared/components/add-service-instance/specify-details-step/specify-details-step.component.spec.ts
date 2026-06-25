@@ -7,7 +7,6 @@ import { firstValueFrom, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { TailwindJsonSchemaFormModule } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -34,7 +33,6 @@ describe('SpecifyDetailsStepComponent', () => {
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
           ...generateCfBaseTestModulesNoShared(),
-          TailwindJsonSchemaFormModule,
         ),
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
@@ -187,7 +185,6 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
           ...generateCfBaseTestModulesNoShared(),
-          TailwindJsonSchemaFormModule,
         ),
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,

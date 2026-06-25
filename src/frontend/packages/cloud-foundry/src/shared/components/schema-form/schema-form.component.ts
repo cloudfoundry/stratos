@@ -2,10 +2,10 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  TailwindJsonSchemaFormModule,
   MonacoEditorComponent,
   safeStringToObj,
 } from '@stratosui/core';
+import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { validateAgainstSchema, SchemaWarning } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-validate.util';
 
 export interface SchemaFormValidationError {
@@ -27,7 +27,7 @@ export class SchemaFormConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TailwindJsonSchemaFormModule,
+    SchemaWidgetRendererComponent,
     MonacoEditorComponent,
   ],
 })
