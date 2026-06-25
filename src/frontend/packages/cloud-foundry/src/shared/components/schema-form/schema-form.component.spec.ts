@@ -164,3 +164,88 @@ describe('SchemaFormComponent render error fallback', () => {
     expect(snackBarSpy.error).not.toHaveBeenCalled(); // no overlay on a gone portal
   });
 });
+
+describe('SchemaFormComponent Form-to-JSON toggle', () => {
+  beforeEach(() => TestBed.configureTestingModule({
+    providers: [provideZonelessChangeDetection()],
+  }));
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('copies data() into jsonText when switching from Form to JSON view', () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {
+      schema: {
+        type: 'object',
+        properties: {
+          region: { type: 'string' },
+          size: { type: 'integer' },
+          network: { type: 'object', properties: { subnet: { type: 'string' } } },
+        },
+      },
+    };
+    fixture.detectChanges();
+
+    // Simulate the form filling in data (as the SchemaWidgetRenderer would)
+    c.onFormChange({ region: 'us-west', size: 3, network: { subnet: 'x' } });
+
+    // Switch to JSON view the same way the radio input does
+    c.schemaView.set('schemaJson');
+    c.onSchemaViewChanged();
+
+    expect(c.jsonText).toBe(JSON.stringify(c.data()));
+  });
+
+  it('seeds a freshly-mounted editor with current jsonText via onMonacoInit', () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {
+      schema: { type: 'object', properties: { key: { type: 'string' } } },
+    };
+    fixture.detectChanges();
+
+    // Populate data via form, then flip to JSON (sets jsonText)
+    c.onFormChange({ key: 'hello' });
+    c.schemaView.set('schemaJson');
+    c.onSchemaViewChanged();
+
+    // Simulate Monaco mounting AFTER jsonText was already set (the race the bug triggered)
+    const setValueSpy = vi.fn();
+    const fakeEditor = {
+      getValue: () => '',                        // editor starts empty (stale [model].value)
+      setValue: setValueSpy,
+      onDidChangeModelContent: () => {},
+    };
+    c.onMonacoInit(fakeEditor);
+
+    // onMonacoInit must have pushed the current jsonText into the editor
+    expect(setValueSpy).toHaveBeenCalledWith(c.jsonText);
+    expect(c.jsonText).toBe(JSON.stringify({ key: 'hello' }));
+  });
+
+  it('does not call setValue when the editor already has the correct text (loop guard)', () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {
+      schema: { type: 'object', properties: { key: { type: 'string' } } },
+    };
+    fixture.detectChanges();
+
+    c.onFormChange({ key: 'hello' });
+    c.schemaView.set('schemaJson');
+    c.onSchemaViewChanged();
+
+    const expectedText = JSON.stringify({ key: 'hello' });
+    const setValueSpy = vi.fn();
+    const fakeEditor = {
+      getValue: () => expectedText,              // editor already has the correct text
+      setValue: setValueSpy,
+      onDidChangeModelContent: () => {},
+    };
+    c.onMonacoInit(fakeEditor);
+
+    // No redundant setValue — editor is already up to date
+    expect(setValueSpy).not.toHaveBeenCalled();
+  });
+});
