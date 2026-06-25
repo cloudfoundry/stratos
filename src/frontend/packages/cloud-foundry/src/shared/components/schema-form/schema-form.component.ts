@@ -8,6 +8,7 @@ import {
 } from '@stratosui/core';
 import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { validateAgainstSchema, SchemaWarning } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-validate.util';
+import { schemaToSkeleton, stripEmpty, mergeSkeleton } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-resolve.util';
 
 export interface SchemaFormValidationError {
   dataPath: Record<string, unknown>;
@@ -94,8 +95,11 @@ export class SchemaFormComponent {
     const parsed = text.trim() === '' || obj !== null;
     this.parseValid.set(parsed);
     if (parsed) {
-      this.data.set(obj);
-      this.warnings.set(validateAgainstSchema(this.cleanSchema ?? undefined, obj)); // advisory only
+      // Strip unset values so an untouched key-skeleton submits no params; the
+      // editor still shows the full skeleton (jsonText), only `data` is cleaned.
+      const cleaned = stripEmpty(obj) as object | undefined;
+      this.data.set(cleaned ?? null);
+      this.warnings.set(validateAgainstSchema(this.cleanSchema ?? undefined, cleaned ?? {})); // advisory only
     } else {
       this.warnings.set([]);                     // syntax error shown by editor itself
     }
@@ -103,16 +107,24 @@ export class SchemaFormComponent {
 
   /** Form-view (`<json-schema-form>`) data changes — also advisory-validated. */
   onFormChange(formData: object) {
-    this.data.set(formData);
+    const cleaned = stripEmpty(formData) as object | undefined;
+    this.data.set(cleaned ?? null);
     this.parseValid.set(true);                   // widget data is always a valid object
-    this.warnings.set(validateAgainstSchema(this.cleanSchema ?? undefined, formData));
+    this.warnings.set(validateAgainstSchema(this.cleanSchema ?? undefined, cleaned ?? {}));
   }
 
   onSchemaViewChanged() {
     if (this.schemaView() === 'schemaForm') {
       this.formInitialData = this.data() ?? undefined; // JSON → form
     } else {
-      this.setJsonText(this.data() ? JSON.stringify(this.data()) : ''); // form → JSON
+      // form → JSON. Always show the full schema skeleton with the user's current
+      // values overlaid, so every field is visible (set ones filled, the rest empty
+      // placeholders). The empty placeholders strip back out on submit via
+      // setJsonText/stripEmpty, so an untouched field shows but is not sent.
+      const seed = this.cleanSchema
+        ? mergeSkeleton(schemaToSkeleton(this.cleanSchema), this.data())
+        : this.data();
+      this.setJsonText(seed != null ? JSON.stringify(seed, null, 2) : '');
       // Push the updated text into a mounted editor so it shows immediately.
       // Guard against the onDidChangeModelContent feedback loop: only setValue
       // when the editor does not already hold the correct value.
