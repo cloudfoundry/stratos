@@ -249,7 +249,15 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     switch (field.kind) {
       case 'number': return 'number';
       case 'boolean': return 'checkbox';
-      default: return 'text';
+      default: {
+        // Consult format before falling back to text — mirrors itemInputType.
+        const fmt = field.schema?.format;
+        if (fmt === 'password') return 'password';
+        if (fmt === 'date' || fmt === 'date-time') return 'date';
+        if (fmt === 'email') return 'email';
+        if (fmt === 'uri' || fmt === 'url') return 'url';
+        return 'text';
+      }
     }
   }
 

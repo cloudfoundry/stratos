@@ -285,3 +285,12 @@ describe('SchemaWidgetRenderer object/scalar/enum', () => {
     expect(emitted.size).toBe(5);                   // number, fixing the `"5"` regression
   });
 });
+
+describe('SchemaWidgetRenderer string format input types', () => {
+  it('renders format:password as type=password input', () => {
+    const f = mount({ type: 'object', properties: { pw: { type: 'string', format: 'password' } } });
+    const input: HTMLInputElement = f.nativeElement.querySelector('input[data-path="/pw"]');
+    expect(input).toBeTruthy();
+    expect(input.type).toBe('password');
+  });
+});
