@@ -13,6 +13,50 @@
               (changes)="onChild(f.pointer, $event)"></json-schema-form>
           </div>
         }
+        @case ('array') {
+          <div class="space-y-2">
+            @for (item of arrayAt(f.pointer); track $index) {
+              <div class="flex items-center gap-2">
+                @if (isScalarItem(f)) {
+                  <input [attr.data-path]="itemPointer(f.pointer, $index)"
+                    type="text" [value]="valueAt(itemPointer(f.pointer, $index)) ?? ''"
+                    (input)="setArrayItemScalar(itemPointer(f.pointer, $index), $event)"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                } @else {
+                  <div class="flex-1 pl-4 border-l border-content-border">
+                    <json-schema-form [schema]="itemSchema(f)"
+                      [data]="valueAt(itemPointer(f.pointer, $index))"
+                      [_basePointer]="itemPointer(f.pointer, $index)"
+                      (changes)="onChild(itemPointer(f.pointer, $index), $event)"></json-schema-form>
+                  </div>
+                }
+                <button type="button" [attr.data-remove]="f.pointer" (click)="removeItem(f.pointer, $index)"
+                  class="px-2 py-1 text-red-500 hover:text-red-700">−</button>
+                <button type="button" [attr.data-move-up]="f.pointer" (click)="moveItem(f.pointer, $index, -1)"
+                  class="px-2 py-1 text-gray-500 hover:text-gray-700">↑</button>
+                <button type="button" [attr.data-move-down]="f.pointer" (click)="moveItem(f.pointer, $index, 1)"
+                  class="px-2 py-1 text-gray-500 hover:text-gray-700">↓</button>
+              </div>
+            }
+            <button type="button" [attr.data-add]="f.pointer" (click)="addItem(f.pointer, f)"
+              class="px-3 py-1 text-sm border border-dashed border-gray-400 rounded hover:border-gray-600">
+              + Add item
+            </button>
+          </div>
+        }
+        @case ('multiselect') {
+          <div class="space-y-1">
+            @for (option of f.schema.items?.['enum'] ?? []; track option) {
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" [attr.data-multi]="f.pointer" [value]="option"
+                  [checked]="isMultiSelected(f.pointer, option)"
+                  (change)="toggleMulti(f.pointer, option, $any($event.target).checked)"
+                  class="h-4 w-4 rounded border-gray-300" />
+                {{ option }}
+              </label>
+            }
+          </div>
+        }
         @case ('enum') {
           <select [id]="f.pointer" [attr.data-path]="f.pointer"
             [value]="valueAt(f.pointer) ?? ''" (change)="setScalar(f, $event)"

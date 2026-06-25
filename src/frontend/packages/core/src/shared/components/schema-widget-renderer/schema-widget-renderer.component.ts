@@ -137,6 +137,99 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     }
   }
 
+  /** Returns the current array at `pointer`, or []. */
+  arrayAt(pointer: string): any[] {
+    const val = this.valueAt(pointer);
+    return Array.isArray(val) ? val : [];
+  }
+
+  /** Returns a sensible default item for the array field's item schema. */
+  private _itemDefault(field: FieldDescriptor): any {
+    const items = field.schema.items;
+    if (!items || typeof items !== 'object' || Array.isArray(items)) {
+      return '';
+    }
+    if (items.type === 'object' || items.properties) {
+      return {};
+    }
+    return '';
+  }
+
+  /** Appends a new default item to the array at `pointer` and emits. */
+  addItem(pointer: string, field: FieldDescriptor): void {
+    const arr = [...this.arrayAt(pointer), this._itemDefault(field)];
+    this._setAt(pointer, arr);
+  }
+
+  /** Removes the item at `index` from the array at `pointer` and emits. */
+  removeItem(pointer: string, index: number): void {
+    const arr = [...this.arrayAt(pointer)];
+    arr.splice(index, 1);
+    this._setAt(pointer, arr);
+  }
+
+  /**
+   * Moves the item at `index` in direction `dir` (+1 = down, -1 = up).
+   * No-ops if the move would go out of bounds.
+   */
+  moveItem(pointer: string, index: number, dir: 1 | -1): void {
+    const arr = [...this.arrayAt(pointer)];
+    const target = index + dir;
+    if (target < 0 || target >= arr.length) {
+      return;
+    }
+    [arr[index], arr[target]] = [arr[target], arr[index]];
+    this._setAt(pointer, arr);
+  }
+
+  /** Returns the item pointer for a given array field pointer and index. */
+  itemPointer(arrayPointer: string, index: number): string {
+    return `${arrayPointer}/${index}`;
+  }
+
+  /** Returns the item schema for an array field (the `items` sub-schema). */
+  itemSchema(field: FieldDescriptor): JsonSchema {
+    return field.schema.items ?? {};
+  }
+
+  /** Returns whether the item schema for an array field is a scalar (non-object). */
+  isScalarItem(field: FieldDescriptor): boolean {
+    const items = field.schema.items;
+    if (!items || typeof items !== 'object' || Array.isArray(items)) {
+      return true;
+    }
+    return items.type !== 'object' && !items.properties;
+  }
+
+  /**
+   * Handles input events for inline scalar array-item inputs.
+   * `pointer` is the full item pointer (e.g. "/hosts/0").
+   */
+  setArrayItemScalar(pointer: string, event: Event): void {
+    const raw = (event.target as HTMLInputElement).value;
+    this._setAt(pointer, raw);
+  }
+
+  /**
+   * Toggles `option` in/out of the multiselect array at `pointer`.
+   * Preserves order of existing values; appends when adding.
+   */
+  toggleMulti(pointer: string, option: any, checked: boolean): void {
+    const current: any[] = this.arrayAt(pointer);
+    let updated: any[];
+    if (checked) {
+      updated = current.includes(option) ? current : [...current, option];
+    } else {
+      updated = current.filter(v => v !== option);
+    }
+    this._setAt(pointer, updated);
+  }
+
+  /** Returns whether `option` is present in the multiselect array at `pointer`. */
+  isMultiSelected(pointer: string, option: any): boolean {
+    return this.arrayAt(pointer).includes(option);
+  }
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
