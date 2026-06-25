@@ -287,15 +287,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   setParamsValid(valid: boolean) {
-    // Service-instance params are optional when the plan exposes no
-    // schema (or only optional fields). schema-form's pValidChange seeds
-    // at false and only flips true on a real value change, which never
-    // fires for an empty/no-schema editor. Without this guard the Create
-    // button stays disabled even though the user has nothing to enter.
-    if (!valid && !this.schemaFormConfig()?.schema) {
-      this._serviceParamsValid.set(true);
-      return;
-    }
+    // The schema-form wrapper's validChange/pValidChange now signals parse
+    // validity only: true when the JSON editor is empty or contains valid
+    // JSON, false when the user has typed unparseable JSON. We trust that
+    // signal unconditionally — empty params are always parse-valid (true),
+    // so the Create button is never blocked by an untouched editor.
+    // Unparseable JSON blocks the step regardless of whether the plan has
+    // a broker-advertised schema.
     this._serviceParamsValid.set(valid);
   }
 

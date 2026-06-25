@@ -124,11 +124,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   setParamValid(valid: boolean) {
-    // Binding params are optional — only let an explicit invalid signal
-    // gate Next when there's actually a schema to violate. Without this,
-    // schema-form's seed `false` on init flips validate off and the Next
-    // button stays disabled even though the user hasn't typed anything.
-    if (!valid && !this.schemaFormConfig?.schema) return;
+    // The schema-form wrapper's validChange/pValidChange now signals parse
+    // validity only: true when the JSON editor is empty or contains valid
+    // JSON, false when the user has typed unparseable JSON. We trust that
+    // signal unconditionally — empty params are always parse-valid (true),
+    // so Next is never blocked by an untouched editor. Unparseable JSON
+    // blocks the step regardless of whether the plan has a binding schema.
     this.validate.set(valid);
   }
 
