@@ -97,5 +97,33 @@
         </app-meta-card-value>
       </app-meta-card-item>
     </app-meta-card>
+
+    <section class="mt-6">
+      <h2 class="text-lg font-semibold text-content-text mb-2">Bound Applications</h2>
+      @if (bindingsLoading()) {
+        <p class="text-content-muted">Loading bindings…</p>
+      } @else if (bindings().length === 0) {
+        <p class="text-content-muted">No applications are bound to this service instance.</p>
+      } @else {
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-content-border text-sm uppercase tracking-wide text-content-muted">
+              <th class="py-2">Application</th>
+              <th class="py-2 w-24 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of bindings(); track b.guid) {
+              <tr class="border-b border-content-border">
+                <td class="py-2 text-content-text">{{ b.appName }}</td>
+                <td class="py-2 text-right">
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="unbind(b)">Unbind</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
   }
 </div>
