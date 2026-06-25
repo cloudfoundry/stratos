@@ -127,6 +127,29 @@ describe('SchemaFormComponent render error fallback', () => {
     expect(c.jsonText).toBe('{"existing":"data"}');
   });
 
+  it('shows schema title and description in the render-error notice when present', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {
+      schema: {
+        title: 'DB params',
+        description: 'Connection settings for the database.',
+        type: 'object',
+        properties: { host: { type: 'string' } },
+      },
+    };
+    fixture.detectChanges();
+
+    c.onRenderError('Could not render form.');
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    const notice = fixture.nativeElement.querySelector('[data-testid="render-error-notice"]');
+    expect(notice).toBeTruthy();
+    expect(notice.textContent).toContain('DB params');
+    expect(notice.textContent).toContain('Connection settings for the database.');
+  });
+
   it('bails out when the view is destroyed before the deferred callback runs', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;

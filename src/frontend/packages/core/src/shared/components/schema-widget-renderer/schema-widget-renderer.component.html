@@ -21,7 +21,7 @@
                   <input [attr.data-path]="itemPointer(f.pointer, $index)"
                     [type]="itemInputType(f)" [value]="valueAt(itemPointer(f.pointer, $index)) ?? ''"
                     (input)="setArrayItemScalar(itemPointer(f.pointer, $index), $event, itemSchema(f))"
-                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                    class="flex-1 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
                 } @else {
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="itemSchema(f)"
@@ -33,13 +33,13 @@
                 <button type="button" [attr.data-remove]="f.pointer" (click)="removeItem(f.pointer, $index)"
                   class="px-2 py-1 text-red-500 hover:text-red-700">−</button>
                 <button type="button" [attr.data-move-up]="f.pointer" (click)="moveItem(f.pointer, $index, -1)"
-                  class="px-2 py-1 text-gray-500 hover:text-gray-700">↑</button>
+                  class="px-2 py-1 text-content-muted hover:text-content-text">↑</button>
                 <button type="button" [attr.data-move-down]="f.pointer" (click)="moveItem(f.pointer, $index, 1)"
-                  class="px-2 py-1 text-gray-500 hover:text-gray-700">↓</button>
+                  class="px-2 py-1 text-content-muted hover:text-content-text">↓</button>
               </div>
             }
             <button type="button" [attr.data-add]="f.pointer" (click)="addItem(f.pointer, f)"
-              class="px-3 py-1 text-sm border border-dashed border-gray-400 rounded hover:border-gray-600">
+              class="px-3 py-1 text-sm border border-dashed border-content-border rounded text-content-muted hover:border-content-text hover:text-content-text">
               + Add item
             </button>
           </div>
@@ -51,13 +51,13 @@
                 <input [attr.data-map-key]="f.pointer" [value]="row.key"
                   (input)="setMapKey(f.pointer, row.id, $any($event.target).value)"
                   placeholder="key"
-                  class="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                  class="w-1/3 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
                 @if (isScalarMapValue(f)) {
                   <input [attr.data-map-value]="f.pointer" [type]="mapValueInputType(f)"
                     [value]="row.value ?? ''"
                     (input)="setMapValue(f.pointer, row.id, $event, mapValueSchema(f))"
                     placeholder="value"
-                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                    class="flex-1 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
                 } @else {
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="mapValueSchema(f)"
@@ -71,7 +71,7 @@
               </div>
             }
             <button type="button" [attr.data-map-add]="f.pointer" (click)="addMapKey(f.pointer, f)"
-              class="px-3 py-1 text-sm border border-dashed border-gray-400 rounded hover:border-gray-600">
+              class="px-3 py-1 text-sm border border-dashed border-content-border rounded text-content-muted hover:border-content-text hover:text-content-text">
               + Add entry
             </button>
           </div>
@@ -85,7 +85,7 @@
                     [type]="tupleItemInputType(itemSch)"
                     [value]="valueAt(itemPointer(f.pointer, $index)) ?? ''"
                     (input)="setTupleItemScalar(f.pointer, $index, $event, itemSch)"
-                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                    class="flex-1 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
                 } @else {
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="itemSch"
@@ -105,7 +105,7 @@
                 <input type="checkbox" [attr.data-multi]="f.pointer" [value]="option"
                   [checked]="isMultiSelected(f.pointer, option)"
                   (change)="toggleMulti(f.pointer, option, $any($event.target).checked)"
-                  class="h-4 w-4 rounded border-gray-300" />
+                  class="h-4 w-4 rounded border-content-border" />
                 {{ option }}
               </label>
             }
@@ -115,7 +115,7 @@
           <div class="space-y-2">
             <select [attr.data-branch]="f.pointer"
               (change)="selectBranch(f.pointer, +$any($event.target).value)"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
+              class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary">
               @for (branch of f.schema.oneOf; track $index) {
                 <option [value]="$index"
                   [selected]="$index === activeOneOf(f.pointer)">{{ branchLabel(branch, $index) }}</option>
@@ -127,11 +127,11 @@
                 <input type="checkbox" [attr.data-path]="f.pointer"
                   [checked]="valueAt(f.pointer) === true"
                   (change)="setBranchScalar(f.pointer, branchNode.kind, $event)"
-                  class="h-4 w-4 rounded border-gray-300" />
+                  class="h-4 w-4 rounded border-content-border" />
               } @else if (branchNode.kind === 'enum') {
                 <select [attr.data-path]="f.pointer"
                   (change)="setBranchScalar(f.pointer, branchNode.kind, $event)"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
+                  class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary">
                   <option value="">Select an option</option>
                   @for (o of branchNode.schema.enum; track o) {
                     <option [value]="o" [selected]="o === valueAt(f.pointer)">{{ o }}</option>
@@ -141,7 +141,7 @@
                 <input [attr.data-path]="f.pointer" [type]="branchInputType(branchNode.kind)"
                   [value]="valueAt(f.pointer) ?? ''"
                   (input)="setBranchScalar(f.pointer, branchNode.kind, $event)"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                  class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
               }
             } @else {
               <div class="pl-4 border-l border-content-border">
@@ -161,7 +161,7 @@
                   <input type="checkbox" [attr.data-anyof]="f.pointer"
                     [checked]="selectedAnyOf(f.pointer).includes($index)"
                     (change)="toggleAnyOf(f.pointer, $index, $any($event.target).checked, f.schema.anyOf)"
-                    class="h-4 w-4 rounded border-gray-300" />
+                    class="h-4 w-4 rounded border-content-border" />
                   {{ branchLabel(branch, $index) }}
                 </label>
               }
@@ -180,7 +180,7 @@
           <select [id]="f.pointer" [attr.data-path]="f.pointer"
             (change)="setScalar(f, $event)"
             [class.border-amber-400]="hasWarning(f.pointer)"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
+            class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary">
             <option value="" [selected]="(valueAt(f.pointer) ?? '') === ''">Select an option</option>
             @for (o of f.schema.enum; track o) {
               <option [value]="o" [selected]="o === valueAt(f.pointer)">{{ o }}</option>
@@ -191,7 +191,7 @@
           <input type="checkbox" [attr.data-path]="f.pointer"
             [checked]="valueAt(f.pointer) === true" (change)="setBool(f, $event)"
             [class.border-amber-400]="hasWarning(f.pointer)"
-            class="h-4 w-4 rounded border-gray-300" />
+            class="h-4 w-4 rounded border-content-border" />
         }
         @case ('unknown') {
           <textarea [attr.data-json]="f.pointer"
@@ -199,14 +199,14 @@
             (input)="onJsonInput(f.pointer, $event)"
             rows="4"
             [class.border-amber-400]="hasWarning(f.pointer)"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md font-mono text-sm"></textarea>
+            class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text font-mono text-sm focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
         }
         @default {
           <input [id]="f.pointer" [attr.data-path]="f.pointer" [type]="inputType(f)"
             [value]="valueAt(f.pointer) ?? ''" (input)="setScalar(f, $event)"
             [placeholder]="f.description ?? ''"
             [class.border-amber-400]="hasWarning(f.pointer)"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+            class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
         }
       }
       @if (f.description && f.kind !== 'boolean') {
