@@ -22,6 +22,15 @@ describe('SchemaWidgetRenderer array + multiselect', () => {
     expect(emitted.hosts).toEqual(['h1']);
   });
 
+  it('emits integers (not strings) from a number-typed array item', () => {
+    const f = mount({ type: 'object', properties: { nums: { type: 'array', items: { type: 'integer' } } } });
+    let emitted: any; f.componentInstance.changes.subscribe((d: any) => (emitted = d));
+    f.nativeElement.querySelector('button[data-add="/nums"]').click(); f.detectChanges();
+    const input = f.nativeElement.querySelector('input[data-path="/nums/0"]');
+    input.value = '5'; input.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.nums).toEqual([5]);
+  });
+
   it('renders a uniqueItems enum array as a multi-select checkbox group', () => {
     const f = mount({ type: 'object', properties: {
       zones: { type: 'array', uniqueItems: true, items: { enum: ['a', 'b', 'c'] } },
