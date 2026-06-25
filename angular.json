@@ -73,6 +73,7 @@
               "src/frontend/packages/core/src/polyfills.ts"
             ],
             "allowedCommonJsDependencies": [
+              "ajv",
               "deepmerge",
               "xterm",
               "xterm-addon-fit",
