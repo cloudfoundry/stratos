@@ -224,13 +224,11 @@ export class ServicesWallComponent implements OnInit {
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
-          // Land on the marketplace offering summary for managed instances;
-          // user-provided instances have no offering so the name stays
-          // plain text (signal-list renders `null` as non-link).
+          // Land on the per-instance detail page (#5370), uniformly for both
+          // managed and user-provided — the latter previously had no link.
           link: (si: StServiceInstance) => {
-            const offeringGuid = si.servicePlan?.serviceOffering?.guid;
-            if (!offeringGuid) return null;
-            return ['/marketplace', si.cnsiGuid, offeringGuid, 'summary'];
+            const siType = si.type === 'user-provided' ? 'user-service' : 'service';
+            return ['/services', siType, si.cnsiGuid, si.guid];
           },
           render: (si: StServiceInstance) => si.name,
           widthHint: '14rem',
