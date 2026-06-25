@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { classifyNode } from './schema-resolve.util';
+import { classifyNode, mergeAllOf } from './schema-resolve.util';
 import { JsonSchema, NodeKind } from './schema-node.model';
 
 export interface FieldDescriptor {
@@ -61,6 +61,18 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    * (service-plan switch) — rebuilding on input change keeps the form in sync.
    */
   readonly fields = signal<FieldDescriptor[]>([]);
+
+  /**
+   * Per-pointer active branch index for `oneOf` fields (default 0).
+   * Keyed by the field's JSON Pointer (e.g. "/x").
+   */
+  private readonly _oneOfIndex = signal<Record<string, number>>({});
+
+  /**
+   * Per-pointer selected branch indices for `anyOf` fields (default []).
+   * Keyed by the field's JSON Pointer (e.g. "/y").
+   */
+  private readonly _anyOfSelected = signal<Record<string, number[]>>({});
 
   ngOnInit(): void {
     this._seedAndBuild();
@@ -246,6 +258,60 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   /** Returns whether `option` is present in the multiselect array at `pointer`. */
   isMultiSelected(pointer: string, option: any): boolean {
     return this.arrayAt(pointer).includes(option);
+  }
+
+  // ---------------------------------------------------------------------------
+  // oneOf / anyOf state
+  // ---------------------------------------------------------------------------
+
+  /** Returns the active branch index for a `oneOf` field. */
+  activeOneOf(pointer: string): number {
+    return this._oneOfIndex()[pointer] ?? 0;
+  }
+
+  /**
+   * Switches the active branch for a `oneOf` field, clearing stale data at
+   * the pointer so old branch fields don't leak into the new branch's value.
+   */
+  selectBranch(pointer: string, index: number): void {
+    this._oneOfIndex.set({ ...this._oneOfIndex(), [pointer]: index });
+    // Reset the data at this pointer to {} so prior branch data is cleared.
+    this._setAt(pointer, {});
+  }
+
+  /** Returns the selected branch indices for an `anyOf` field. */
+  selectedAnyOf(pointer: string): number[] {
+    return this._anyOfSelected()[pointer] ?? [];
+  }
+
+  /** Toggles a branch in/out of the selected set for an `anyOf` field. */
+  toggleAnyOf(pointer: string, index: number, checked: boolean): void {
+    const current = this.selectedAnyOf(pointer);
+    const updated = checked
+      ? current.includes(index) ? current : [...current, index]
+      : current.filter(i => i !== index);
+    this._anyOfSelected.set({ ...this._anyOfSelected(), [pointer]: updated });
+  }
+
+  /**
+   * Returns the merged schema for the currently selected `anyOf` branches.
+   * Uses `mergeAllOf` by wrapping selected sub-schemas as `allOf`.
+   */
+  mergedAnyOf(pointer: string, branches: JsonSchema[]): JsonSchema {
+    const selected = this.selectedAnyOf(pointer);
+    if (selected.length === 0) {
+      return {};
+    }
+    const selectedBranches = selected.map(i => branches[i]).filter(Boolean);
+    if (selectedBranches.length === 1) {
+      return selectedBranches[0];
+    }
+    return mergeAllOf({ allOf: selectedBranches }, this.schema ?? {});
+  }
+
+  /** Returns a display label for a branch schema (title or fallback). */
+  branchLabel(branch: JsonSchema, index: number): string {
+    return branch.title ?? `Option ${index + 1}`;
   }
 
   // ---------------------------------------------------------------------------

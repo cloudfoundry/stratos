@@ -42,6 +42,36 @@ describe('SchemaWidgetRenderer array + multiselect', () => {
   });
 });
 
+describe('SchemaWidgetRenderer oneOf/anyOf branch selectors', () => {
+  it('oneOf renders a branch selector and emits data shaped by the chosen branch', () => {
+    const f = mount({ type:'object', properties:{ x:{ oneOf:[
+      { type:'object', title:'A', properties:{ a:{ type:'string' } } },
+      { type:'object', title:'B', properties:{ b:{ type:'number' } } },
+    ] } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    const sel:HTMLSelectElement = f.nativeElement.querySelector('select[data-branch="/x"]');
+    expect(sel).toBeTruthy();                       // branch selector present
+    sel.value = '1'; sel.dispatchEvent(new Event('change')); f.detectChanges(); // choose branch B
+    const input:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/x/b"]');
+    expect(input).toBeTruthy();                     // chosen branch's fields render
+    input.value = '5'; input.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.x.b).toBe(5);                    // emits data shaped by branch B (number)
+  });
+
+  it('anyOf renders checkboxes and renders all selected branches', () => {
+    const f = mount({ type:'object', properties:{ y:{ anyOf:[
+      { type:'object', properties:{ a:{ type:'string' } } },
+      { type:'object', properties:{ b:{ type:'string' } } },
+    ] } } });
+    const boxes = f.nativeElement.querySelectorAll('input[type=checkbox][data-anyof="/y"]');
+    expect(boxes.length).toBe(2);
+    boxes[0].checked = true; boxes[0].dispatchEvent(new Event('change')); f.detectChanges();
+    boxes[1].checked = true; boxes[1].dispatchEvent(new Event('change')); f.detectChanges();
+    expect(f.nativeElement.querySelector('input[data-path="/y/a"]')).toBeTruthy();
+    expect(f.nativeElement.querySelector('input[data-path="/y/b"]')).toBeTruthy();
+  });
+});
+
 describe('SchemaWidgetRenderer object/scalar/enum', () => {
   it('renders a nested object as nested inputs and emits nested data', () => {
     const schema = { type: 'object', properties: {
