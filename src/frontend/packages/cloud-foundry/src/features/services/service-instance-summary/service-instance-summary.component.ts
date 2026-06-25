@@ -10,7 +10,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import {
   AppChip,
@@ -24,6 +24,7 @@ import {
   MetaCardValueComponent,
   AppChipsComponent,
   PageHeaderComponent,
+  SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
 import { of } from 'rxjs';
@@ -33,6 +34,12 @@ import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-d
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import {
+  CfServiceInstancesSignalConfigService,
+} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
+import {
+  buildServiceInstanceRowActions,
+} from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
 interface BindingRow {
@@ -98,6 +105,8 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   private readonly registry = inject(EndpointDataRegistry);
   private readonly confirmDialog = inject(ConfirmationDialogService);
   private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly router = inject(Router);
+  private readonly instancesConfig = inject(CfServiceInstancesSignalConfigService);
 
   private readonly cfGuid: string;
   private readonly siGuid: string;
@@ -117,6 +126,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   readonly title: Signal<string>;
   readonly bindingsLoading: Signal<boolean>;
   readonly bindings: Signal<BindingRow[]>;
+  readonly actions: Signal<SignalListRowAction<StServiceInstance>[]>;
 
   constructor() {
     this.cfGuid = this.route.snapshot.params.endpointId;
@@ -143,10 +153,37 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
         .filter(b => b.type === 'app')
         .map(b => ({ guid: b.guid, appName: b.app?.name ?? b.app?.guid ?? '' })),
     );
+
+    // Header action bar. Reuse the shared builder (Edit / Service Keys /
+    // Delete) so the route conventions and keys gating match the lists.
+    // Detach is dropped — the inline per-app Unbind above covers it. Delete
+    // here also navigates back to the wall, since the page's instance is gone.
+    this.actions = computed(() => {
+      const si = this.source.value();
+      if (!si) { return []; }
+      return buildServiceInstanceRowActions(si, {
+        router: this.router,
+        confirmDialog: this.confirmDialog,
+        snackBar: this.snackBar,
+        deleteServiceInstance: async (cnsiGuid, guid) => {
+          await this.instancesConfig.deleteServiceInstance(cnsiGuid, guid, si.name);
+          void this.router.navigate(['/services']);
+        },
+        // Offering-bindability cache isn't warmed on this page; fail open so
+        // Service Keys shows for managed instances (the builder's convention).
+        isOfferingBindable: () => undefined,
+      }).filter(a => a.label !== 'Detach');
+    });
   }
 
   ngOnDestroy(): void {
     this.registry.release(this.cfGuid);
+  }
+
+  /** Invoke a header action (the builder's invokes close over the instance). */
+  runAction(action: SignalListRowAction<StServiceInstance>): void {
+    const si = this.source.value();
+    if (si) { void action.invoke(si); }
   }
 
   /** Unbind one app from this instance (confirm → v3 DELETE → re-fetch list). */
