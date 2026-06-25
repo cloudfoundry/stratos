@@ -203,11 +203,29 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
 
   /**
    * Handles input events for inline scalar array-item inputs.
-   * `pointer` is the full item pointer (e.g. "/hosts/0").
+   * `pointer` is the full item pointer (e.g. "/hosts/0"). Coerces numbers
+   * with the same rule as `setScalar` so a `items: { type: number }` array
+   * emits `[5]` rather than `["5"]`.
    */
-  setArrayItemScalar(pointer: string, event: Event): void {
+  setArrayItemScalar(pointer: string, event: Event, itemSchema?: JsonSchema): void {
     const raw = (event.target as HTMLInputElement).value;
-    this._setAt(pointer, raw);
+    const isNumber = itemSchema?.type === 'number' || itemSchema?.type === 'integer';
+    this._setAt(pointer, isNumber ? (raw === '' ? undefined : Number(raw)) : raw);
+  }
+
+  /** Returns the HTML input type for a scalar array-item schema. */
+  itemInputType(field: FieldDescriptor): string {
+    const items = field.schema.items;
+    if (!items || typeof items !== 'object' || Array.isArray(items)) {
+      return 'text';
+    }
+    if (items.type === 'number' || items.type === 'integer') {
+      return 'number';
+    }
+    if (items.type === 'string' && items.format === 'password') {
+      return 'password';
+    }
+    return 'text';
   }
 
   /**
