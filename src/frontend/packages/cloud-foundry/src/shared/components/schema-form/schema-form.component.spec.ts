@@ -126,4 +126,18 @@ describe('SchemaFormComponent render error fallback', () => {
     fixture.detectChanges();
     expect(c.jsonText).toBe('{"existing":"data"}');
   });
+
+  it('bails out when the view is destroyed before the deferred callback runs', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    fixture.detectChanges();
+
+    c.onRenderError('Schema failed');
+    fixture.destroy();          // tear down before the queued microtask fires
+    await Promise.resolve();    // flush the microtask
+
+    expect(c.schemaView()).toBe('schemaForm'); // never switched
+    expect(c.renderError()).toBeNull();        // never set
+    expect(snackBarSpy.error).not.toHaveBeenCalled(); // no overlay on a gone portal
+  });
 });

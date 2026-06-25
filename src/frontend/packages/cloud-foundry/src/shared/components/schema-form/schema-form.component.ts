@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Output, inject, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MonacoEditorComponent,
@@ -70,9 +70,12 @@ export class SchemaFormComponent {
   cleanSchema: object | null | undefined;
   formInitialData: object | null | undefined;
 
+  private _destroyed = false;
+
   constructor() {
     effect(() => this.dataChange.emit(this.data()));
     effect(() => this.validChange.emit(this.parseValid()));
+    inject(DestroyRef).onDestroy(() => { this._destroyed = true; });
   }
 
   /** Called by the Monaco JSON view (and tests) when JSON text changes. */
@@ -108,6 +111,7 @@ export class SchemaFormComponent {
    *  to avoid re-entrancy when the emit arrives mid change-detection (during child ngOnInit). */
   onRenderError(message: string): void {
     queueMicrotask(() => {
+      if (this._destroyed) { return; }   // view torn down before the deferred callback ran
       this.renderError.set(message);
       // Seed the JSON editor with any existing data before switching views,
       // so pre-filled parameters are not lost when the form fails to render.
