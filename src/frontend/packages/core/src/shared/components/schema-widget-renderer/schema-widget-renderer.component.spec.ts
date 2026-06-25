@@ -294,3 +294,18 @@ describe('SchemaWidgetRenderer string format input types', () => {
     expect(input.type).toBe('password');
   });
 });
+
+describe('SchemaWidgetRenderer render error fallback', () => {
+  it('emits renderError and leaves fields empty when _buildFields throws', () => {
+    const evil: any = { type: 'object' };
+    Object.defineProperty(evil, 'properties', { get() { throw new Error('boom'); }, enumerable: true });
+    const f = mount(evil);
+    let err = '';
+    f.componentInstance.renderError.subscribe((m: string) => (err = m));
+    // re-run build so the subscription is in place before the emit
+    f.componentInstance.ngOnChanges({} as any);
+    f.detectChanges();
+    expect(f.componentInstance.fields()).toEqual([]);
+    expect(err).toContain('Edit the parameters directly as JSON');
+  });
+});
