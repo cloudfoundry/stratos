@@ -118,6 +118,12 @@ export class ServiceInstancesComponent implements OnInit {
     const columns: SignalListColumn<StServiceInstance>[] = [
       {
         header: 'Name', key: 'name', sortField: 'name',
+        kind: 'link',
+        // Link to the per-instance detail page (#5370); previously plain text.
+        link: (si) => {
+          const siType = si.type === 'user-provided' ? 'user-service' : 'service';
+          return ['/services', siType, si.cnsiGuid, si.guid];
+        },
         render: (si) => si.name ?? '',
         widthHint: '14rem',
       },
