@@ -200,6 +200,25 @@ describe('SchemaWidgetRenderer map editor + tuple', () => {
   });
 });
 
+describe('SchemaWidgetRenderer unknown fallback + warning highlight', () => {
+  it('renders an unknown node as a JSON fallback editor and round-trips verbatim', () => {
+    const f = mount({ type:'object', properties:{ weird:{ not:{} } } });  // classifyNode → 'unknown'
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    const ta:HTMLTextAreaElement = f.nativeElement.querySelector('textarea[data-json="/weird"]');
+    expect(ta).toBeTruthy();
+    ta.value='{"a":1}'; ta.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.weird).toEqual({ a:1 });
+  });
+
+  it('marks a field whose pointer matches an advisory warning', () => {
+    const f = mount({ type:'object', properties:{ size:{ type:'integer' } } });
+    f.componentRef.setInput('warnings', [{ path:'/size', message:'must be integer' }]);
+    f.detectChanges();
+    const input:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/size"]');
+    expect(input.classList.contains('border-amber-400')).toBe(true);
+  });
+});
+
 describe('SchemaWidgetRenderer object/scalar/enum', () => {
   it('renders a nested object as nested inputs and emits nested data', () => {
     const schema = { type: 'object', properties: {
