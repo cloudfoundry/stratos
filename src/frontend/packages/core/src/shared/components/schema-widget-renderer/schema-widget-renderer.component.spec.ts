@@ -161,6 +161,33 @@ describe('SchemaWidgetRenderer map editor + tuple', () => {
     expect(emitted.labels).toEqual({ foo:'bar' });
   });
 
+  it('object-valued map recurses and emits nested child data (not {})', () => {
+    const f = mount({ type:'object', properties:{ creds:{ type:'object',
+      additionalProperties:{ type:'object', properties:{ host:{ type:'string' } } } } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    f.nativeElement.querySelector('button[data-map-add="/creds"]').click(); f.detectChanges();
+    const keyInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-key="/creds"]');
+    keyInput.value='db'; keyInput.dispatchEvent(new Event('input')); f.detectChanges();
+    const hostInput:HTMLInputElement = f.nativeElement.querySelector('input[data-path$="/host"]');
+    expect(hostInput).toBeTruthy();
+    hostInput.value='localhost'; hostInput.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.creds.db.host).toBe('localhost');
+  });
+
+  it('renaming a map key moves the value under the new key and drops the old', () => {
+    const f = mount({ type:'object', properties:{ labels:{ type:'object', additionalProperties:{ type:'string' } } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    f.nativeElement.querySelector('button[data-map-add="/labels"]').click(); f.detectChanges();
+    const keyInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-key="/labels"]');
+    const valInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-value="/labels"]');
+    keyInput.value='foo'; keyInput.dispatchEvent(new Event('input')); f.detectChanges();
+    valInput.value='bar'; valInput.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.labels).toEqual({ foo:'bar' });
+    keyInput.value='baz'; keyInput.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.labels).toEqual({ baz:'bar' });
+    expect(emitted.labels.foo).toBeUndefined();
+  });
+
   it('tuple array renders one positional widget per item schema and emits a positional array', () => {
     const f = mount({ type:'object', properties:{ pair:{ type:'array', items:[{type:'string'},{type:'integer'}] } } });
     let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
