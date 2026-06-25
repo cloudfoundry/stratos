@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { classifyNode, mergeAllOf } from './schema-resolve.util';
-import { JsonSchema, NodeKind } from './schema-node.model';
+import { JsonSchema, NodeKind, ResolvedNode } from './schema-node.model';
 
 export interface FieldDescriptor {
   pointer: string;
@@ -84,6 +84,10 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
 
   /** Re-seed the working copy from @Input() data and rebuild the field list. */
   private _seedAndBuild(): void {
+    // m3: Task 10 reassigns [schema] on the same instance — clear branch state
+    // so stale (possibly out-of-range) oneOf/anyOf selections don't carry over.
+    this._oneOfIndex.set({});
+    this._anyOfSelected.set({});
     this._working.set(structuredClone(this.data ?? {}));
     this.fields.set(this._buildFields());
   }
@@ -274,9 +278,55 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    * the pointer so old branch fields don't leak into the new branch's value.
    */
   selectBranch(pointer: string, index: number): void {
+    // m2: re-choosing the already-active branch must not wipe entered data.
+    if (this.activeOneOf(pointer) === index) {
+      return;
+    }
     this._oneOfIndex.set({ ...this._oneOfIndex(), [pointer]: index });
     // Reset the data at this pointer to {} so prior branch data is cleared.
     this._setAt(pointer, {});
+  }
+
+  /**
+   * Resolves the active `oneOf` branch sub-schema for a field, classified.
+   * Used by the template to decide between an inline scalar widget and a
+   * recursive `<json-schema-form>` child.
+   */
+  activeOneOfNode(field: FieldDescriptor): ResolvedNode {
+    const branch = (field.schema.oneOf ?? [])[this.activeOneOf(field.pointer)] ?? {};
+    return classifyNode(branch, this.schema ?? {});
+  }
+
+  /**
+   * Whether a classified branch kind is a scalar that should render inline
+   * at the field pointer (rather than recursing into a child object form).
+   */
+  isScalarBranch(kind: NodeKind): boolean {
+    return kind === 'string' || kind === 'number' || kind === 'boolean' || kind === 'enum';
+  }
+
+  /**
+   * Handles input/change for an inline scalar `oneOf` branch at `pointer`.
+   * Coerces numbers the same way `setScalar` does so a number branch emits
+   * `5` rather than `"5"`.
+   */
+  setBranchScalar(pointer: string, kind: NodeKind, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (kind === 'boolean') {
+      this._setAt(pointer, target.checked);
+      return;
+    }
+    const raw = target.value;
+    this._setAt(pointer, kind === 'number' ? (raw === '' ? undefined : Number(raw)) : raw);
+  }
+
+  /** HTML input type for an inline scalar `oneOf` branch kind. */
+  branchInputType(kind: NodeKind): string {
+    switch (kind) {
+      case 'number': return 'number';
+      case 'boolean': return 'checkbox';
+      default: return 'text';
+    }
   }
 
   /** Returns the selected branch indices for an `anyOf` field. */
@@ -284,13 +334,60 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     return this._anyOfSelected()[pointer] ?? [];
   }
 
-  /** Toggles a branch in/out of the selected set for an `anyOf` field. */
-  toggleAnyOf(pointer: string, index: number, checked: boolean): void {
+  /**
+   * Toggles a branch in/out of the selected set for an `anyOf` field.
+   * I1: on deselect, deletes from the working data any keys that belong only
+   * to the deselected branch (not present in any still-selected branch), so
+   * stale values don't get emitted/POSTed.
+   */
+  toggleAnyOf(pointer: string, index: number, checked: boolean, branches?: JsonSchema[]): void {
     const current = this.selectedAnyOf(pointer);
     const updated = checked
       ? current.includes(index) ? current : [...current, index]
       : current.filter(i => i !== index);
     this._anyOfSelected.set({ ...this._anyOfSelected(), [pointer]: updated });
+
+    if (!checked && branches) {
+      this._pruneAnyOfKeys(pointer, branches, index, updated);
+    }
+  }
+
+  /**
+   * Removes from the working data the keys exclusive to the deselected branch
+   * (in its `properties` but not in any still-selected branch's `properties`).
+   */
+  private _pruneAnyOfKeys(
+    pointer: string,
+    branches: JsonSchema[],
+    deselectedIndex: number,
+    stillSelected: number[],
+  ): void {
+    const root = this.schema ?? {};
+    const deselectedProps = classifyNode(branches[deselectedIndex] ?? {}, root).schema.properties ?? {};
+    const deselectedKeys = Object.keys(deselectedProps);
+    if (deselectedKeys.length === 0) {
+      return;
+    }
+    const keptKeys = new Set<string>();
+    for (const i of stillSelected) {
+      const props = classifyNode(branches[i] ?? {}, root).schema.properties ?? {};
+      for (const k of Object.keys(props)) {
+        keptKeys.add(k);
+      }
+    }
+    const exclusiveKeys = deselectedKeys.filter(k => !keptKeys.has(k));
+    if (exclusiveKeys.length === 0) {
+      return;
+    }
+    const currentVal = this.valueAt(pointer);
+    if (currentVal == null || typeof currentVal !== 'object') {
+      return;
+    }
+    const next = { ...currentVal };
+    for (const k of exclusiveKeys) {
+      delete next[k];
+    }
+    this._setAt(pointer, next);
   }
 
   /**

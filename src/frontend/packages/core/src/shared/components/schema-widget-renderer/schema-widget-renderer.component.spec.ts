@@ -70,6 +70,83 @@ describe('SchemaWidgetRenderer oneOf/anyOf branch selectors', () => {
     expect(f.nativeElement.querySelector('input[data-path="/y/a"]')).toBeTruthy();
     expect(f.nativeElement.querySelector('input[data-path="/y/b"]')).toBeTruthy();
   });
+
+  it('oneOf with scalar branches renders an inline control and emits the scalar (C1)', () => {
+    const f = mount({ type:'object', properties:{ x:{ oneOf:[
+      { type:'string' },
+      { type:'number' },
+    ] } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    // branch 0 (string) is active by default
+    const sInput:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/x"]');
+    expect(sInput).toBeTruthy();
+    sInput.value = 'hello'; sInput.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.x).toBe('hello');                // string branch
+    // switch to branch 1 (number)
+    const sel:HTMLSelectElement = f.nativeElement.querySelector('select[data-branch="/x"]');
+    sel.value = '1'; sel.dispatchEvent(new Event('change')); f.detectChanges();
+    const nInput:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/x"]');
+    expect(nInput).toBeTruthy();
+    nInput.value = '5'; nInput.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.x).toBe(5);                       // number branch
+  });
+
+  it('anyOf deselect removes that branch\'s exclusive keys (I1)', () => {
+    const f = mount({ type:'object', properties:{ y:{ anyOf:[
+      { type:'object', properties:{ a:{ type:'string' } } },
+      { type:'object', properties:{ b:{ type:'string' } } },
+    ] } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    const boxes = f.nativeElement.querySelectorAll('input[type=checkbox][data-anyof="/y"]');
+    boxes[0].checked = true; boxes[0].dispatchEvent(new Event('change')); f.detectChanges();
+    boxes[1].checked = true; boxes[1].dispatchEvent(new Event('change')); f.detectChanges();
+    const aIn:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/y/a"]');
+    aIn.value = 'A'; aIn.dispatchEvent(new Event('input')); f.detectChanges();
+    const bIn:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/y/b"]');
+    bIn.value = 'B'; bIn.dispatchEvent(new Event('input')); f.detectChanges();
+    // deselect branch 0
+    boxes[0].checked = false; boxes[0].dispatchEvent(new Event('change')); f.detectChanges();
+    expect(emitted.y.a).toBeUndefined();             // exclusive key removed
+    expect(emitted.y.b).toBe('B');                   // still-selected key kept
+  });
+
+  it('enum select reflects the seeded data value (selected option, not blank) (I2)', () => {
+    const f = mount({ type:'object', properties:{ tier:{ enum:['bronze','gold'] } } }, { tier:'gold' });
+    const sel:HTMLSelectElement = f.nativeElement.querySelector('select[data-path="/tier"]');
+    expect(sel.value).toBe('gold');                  // selection reflects data (was blank w/ [value])
+  });
+
+  it('re-selecting the same oneOf branch keeps entered data (m2)', () => {
+    const f = mount({ type:'object', properties:{ x:{ oneOf:[
+      { type:'object', title:'A', properties:{ a:{ type:'string' } } },
+      { type:'object', title:'B', properties:{ b:{ type:'number' } } },
+    ] } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    const aIn:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/x/a"]');
+    aIn.value = 'keep'; aIn.dispatchEvent(new Event('input')); f.detectChanges();
+    // re-select the already-active branch 0
+    const sel:HTMLSelectElement = f.nativeElement.querySelector('select[data-branch="/x"]');
+    sel.value = '0'; sel.dispatchEvent(new Event('change')); f.detectChanges();
+    expect(emitted.x.a).toBe('keep');                // not wiped
+  });
+
+  it('clears branch state when schema is reassigned on the same instance (m3)', () => {
+    const f = mount({ type:'object', properties:{ x:{ oneOf:[
+      { type:'object', title:'A', properties:{ a:{ type:'string' } } },
+      { type:'object', title:'B', properties:{ b:{ type:'number' } } },
+    ] } } });
+    // select branch 1 on the first schema
+    const sel:HTMLSelectElement = f.nativeElement.querySelector('select[data-branch="/x"]');
+    sel.value = '1'; sel.dispatchEvent(new Event('change')); f.detectChanges();
+    // reassign schema — same instance, oneOf with only ONE branch (index 1 now out of range)
+    f.componentInstance.schema = { type:'object', properties:{ x:{ oneOf:[
+      { type:'object', title:'Only', properties:{ z:{ type:'string' } } },
+    ] } } };
+    f.componentInstance.ngOnChanges();
+    f.detectChanges();
+    // branch index reset to 0 → the single branch renders
+    expect(f.nativeElement.querySelector('input[data-path="/x/z"]')).toBeTruthy();
+  });
 });
 
 describe('SchemaWidgetRenderer object/scalar/enum', () => {
