@@ -44,6 +44,60 @@
             </button>
           </div>
         }
+        @case ('map') {
+          <div class="space-y-2">
+            @for (row of mapRows(f.pointer); track row.id) {
+              <div class="flex items-center gap-2">
+                <input [attr.data-map-key]="f.pointer" [value]="row.key"
+                  (input)="setMapKey(f.pointer, row.id, $any($event.target).value)"
+                  placeholder="key"
+                  class="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                @if (isScalarMapValue(f)) {
+                  <input [attr.data-map-value]="f.pointer" [type]="mapValueInputType(f)"
+                    [value]="row.value ?? ''"
+                    (input)="setMapValue(f.pointer, row.id, $event, mapValueSchema(f))"
+                    placeholder="value"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                } @else {
+                  <div class="flex-1 pl-4 border-l border-content-border">
+                    <json-schema-form [schema]="mapValueSchema(f)"
+                      [data]="row.value"
+                      [_basePointer]="itemPointer(f.pointer, row.id)"
+                      (changes)="setMapKey(f.pointer, row.id, row.key)"></json-schema-form>
+                  </div>
+                }
+                <button type="button" [attr.data-map-remove]="f.pointer" (click)="removeMapKey(f.pointer, row.id)"
+                  class="px-2 py-1 text-red-500 hover:text-red-700">−</button>
+              </div>
+            }
+            <button type="button" [attr.data-map-add]="f.pointer" (click)="addMapKey(f.pointer, f)"
+              class="px-3 py-1 text-sm border border-dashed border-gray-400 rounded hover:border-gray-600">
+              + Add entry
+            </button>
+          </div>
+        }
+        @case ('tuple') {
+          <div class="space-y-2">
+            @for (itemSch of tupleSchemas(f); track $index) {
+              <div class="flex items-center gap-2">
+                @if (isScalarTupleItem(itemSch)) {
+                  <input [attr.data-path]="itemPointer(f.pointer, $index)"
+                    [type]="tupleItemInputType(itemSch)"
+                    [value]="valueAt(itemPointer(f.pointer, $index)) ?? ''"
+                    (input)="setTupleItemScalar(f.pointer, $index, $event, itemSch)"
+                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+                } @else {
+                  <div class="flex-1 pl-4 border-l border-content-border">
+                    <json-schema-form [schema]="itemSch"
+                      [data]="valueAt(itemPointer(f.pointer, $index))"
+                      [_basePointer]="itemPointer(f.pointer, $index)"
+                      (changes)="onChild(itemPointer(f.pointer, $index), $event)"></json-schema-form>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
         @case ('multiselect') {
           <div class="space-y-1">
             @for (option of f.schema.items?.['enum'] ?? []; track option) {

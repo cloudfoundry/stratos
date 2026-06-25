@@ -149,6 +149,30 @@ describe('SchemaWidgetRenderer oneOf/anyOf branch selectors', () => {
   });
 });
 
+describe('SchemaWidgetRenderer map editor + tuple', () => {
+  it('map editor (additionalProperties) adds key/value and emits the map', () => {
+    const f = mount({ type:'object', properties:{ labels:{ type:'object', additionalProperties:{ type:'string' } } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    f.nativeElement.querySelector('button[data-map-add="/labels"]').click(); f.detectChanges();
+    const keyInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-key="/labels"]');
+    const valInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-value="/labels"]');
+    keyInput.value='foo'; keyInput.dispatchEvent(new Event('input')); f.detectChanges();
+    valInput.value='bar'; valInput.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.labels).toEqual({ foo:'bar' });
+  });
+
+  it('tuple array renders one positional widget per item schema and emits a positional array', () => {
+    const f = mount({ type:'object', properties:{ pair:{ type:'array', items:[{type:'string'},{type:'integer'}] } } });
+    let emitted:any; f.componentInstance.changes.subscribe((d:any)=>emitted=d);
+    const a:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/pair/0"]');
+    const b:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/pair/1"]');
+    expect(a && b).toBeTruthy();
+    a.value='x'; a.dispatchEvent(new Event('input')); f.detectChanges();
+    b.value='5'; b.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.pair).toEqual(['x', 5]);
+  });
+});
+
 describe('SchemaWidgetRenderer object/scalar/enum', () => {
   it('renders a nested object as nested inputs and emits nested data', () => {
     const schema = { type: 'object', properties: {

@@ -74,6 +74,16 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    */
   private readonly _anyOfSelected = signal<Record<string, number[]>>({});
 
+  /** Monotonic ID counter for stable map row tracking. */
+  private _mapRowIdCounter = 0;
+
+  /**
+   * Per-pointer list of map editor rows. Each row has a stable `id` for
+   * `@for` tracking so key/value inputs don't lose focus on re-render.
+   * Keyed by the field's JSON Pointer (e.g. "/labels").
+   */
+  private readonly _mapRows = signal<Record<string, { id: number; key: string; value: any }[]>>({});
+
   ngOnInit(): void {
     this._seedAndBuild();
   }
@@ -88,8 +98,35 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     // so stale (possibly out-of-range) oneOf/anyOf selections don't carry over.
     this._oneOfIndex.set({});
     this._anyOfSelected.set({});
+    this._mapRows.set({});
+    this._mapRowIdCounter = 0;
     this._working.set(structuredClone(this.data ?? {}));
     this.fields.set(this._buildFields());
+    this._seedMapRows();
+  }
+
+  /**
+   * Seeds map rows from existing data for any `map`-kind fields. Called after
+   * fields + working data are both set so we can look up initial values.
+   */
+  private _seedMapRows(): void {
+    const rows: Record<string, { id: number; key: string; value: any }[]> = {};
+    for (const field of this.fields()) {
+      if (field.kind !== 'map') {
+        continue;
+      }
+      const existing = this.valueAt(field.pointer);
+      if (existing != null && typeof existing === 'object' && !Array.isArray(existing)) {
+        rows[field.pointer] = Object.entries(existing).map(([k, v]) => ({
+          id: ++this._mapRowIdCounter,
+          key: k,
+          value: v,
+        }));
+      } else {
+        rows[field.pointer] = [];
+      }
+    }
+    this._mapRows.set(rows);
   }
 
   valueAt(pointer: string): any {
@@ -262,6 +299,147 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   /** Returns whether `option` is present in the multiselect array at `pointer`. */
   isMultiSelected(pointer: string, option: any): boolean {
     return this.arrayAt(pointer).includes(option);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Map editor (`additionalProperties` / `kind === 'map'`)
+  // ---------------------------------------------------------------------------
+
+  /** Returns the current rows for the map at `pointer`. */
+  mapRows(pointer: string): { id: number; key: string; value: any }[] {
+    return this._mapRows()[pointer] ?? [];
+  }
+
+  /** Adds a new empty row to the map at `pointer`. */
+  addMapKey(pointer: string, field: FieldDescriptor): void {
+    const valueDefault = this._mapValueDefault(field);
+    const current = this._mapRows();
+    const currentRows = current[pointer] ?? [];
+    this._mapRows.set({
+      ...current,
+      [pointer]: [...currentRows, { id: ++this._mapRowIdCounter, key: '', value: valueDefault }],
+    });
+    // Don't emit yet — empty-key rows are excluded from the emitted object.
+  }
+
+  /** Updates the key of a row and rebuilds the map object. */
+  setMapKey(pointer: string, id: number, newKey: string): void {
+    this._updateMapRow(pointer, id, row => ({ ...row, key: newKey }));
+  }
+
+  /** Updates the value of a scalar row and rebuilds the map object. */
+  setMapValue(pointer: string, id: number, event: Event, valueSchema?: JsonSchema): void {
+    const raw = (event.target as HTMLInputElement).value;
+    const isNumber = valueSchema?.type === 'number' || valueSchema?.type === 'integer';
+    const value = isNumber ? (raw === '' ? undefined : Number(raw)) : raw;
+    this._updateMapRow(pointer, id, row => ({ ...row, value }));
+  }
+
+  /** Removes a row from the map at `pointer` and rebuilds the object. */
+  removeMapKey(pointer: string, id: number): void {
+    const current = this._mapRows();
+    const updated = (current[pointer] ?? []).filter(r => r.id !== id);
+    this._mapRows.set({ ...current, [pointer]: updated });
+    this._rebuildMap(pointer, updated);
+  }
+
+  /** Returns the `additionalProperties` sub-schema for a map field, or `{}`. */
+  mapValueSchema(field: FieldDescriptor): JsonSchema {
+    return (field.schema.additionalProperties as JsonSchema) ?? {};
+  }
+
+  /** Returns whether the `additionalProperties` value schema is scalar (non-object). */
+  isScalarMapValue(field: FieldDescriptor): boolean {
+    const ap = field.schema.additionalProperties;
+    if (!ap || typeof ap !== 'object') {
+      return true; // true / missing → treat as string
+    }
+    return (ap as JsonSchema).type !== 'object' && !(ap as JsonSchema).properties;
+  }
+
+  /** Returns the input type for an inline scalar map-value input. */
+  mapValueInputType(field: FieldDescriptor): string {
+    const ap = field.schema.additionalProperties;
+    if (!ap || typeof ap !== 'object') {
+      return 'text';
+    }
+    const type = (ap as JsonSchema).type;
+    if (type === 'number' || type === 'integer') {
+      return 'number';
+    }
+    return 'text';
+  }
+
+  private _mapValueDefault(field: FieldDescriptor): any {
+    const ap = field.schema.additionalProperties;
+    if (!ap || typeof ap !== 'object') {
+      return '';
+    }
+    const type = (ap as JsonSchema).type;
+    if (type === 'object' || (ap as JsonSchema).properties) {
+      return {};
+    }
+    return '';
+  }
+
+  private _updateMapRow(
+    pointer: string,
+    id: number,
+    updater: (row: { id: number; key: string; value: any }) => { id: number; key: string; value: any },
+  ): void {
+    const current = this._mapRows();
+    const updated = (current[pointer] ?? []).map(r => r.id === id ? updater(r) : r);
+    this._mapRows.set({ ...current, [pointer]: updated });
+    this._rebuildMap(pointer, updated);
+  }
+
+  private _rebuildMap(pointer: string, rows: { id: number; key: string; value: any }[]): void {
+    const obj = Object.fromEntries(
+      rows.filter(r => r.key !== '').map(r => [r.key, r.value]),
+    );
+    this._setAt(pointer, obj);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tuple arrays (`kind === 'tuple'`, items is an array of schemas)
+  // ---------------------------------------------------------------------------
+
+  /** Returns the tuple item schemas (items as array). */
+  tupleSchemas(field: FieldDescriptor): JsonSchema[] {
+    const items = field.schema.items;
+    return Array.isArray(items) ? items : [];
+  }
+
+  /** Returns the HTML input type for a positional tuple item schema. */
+  tupleItemInputType(itemSchema: JsonSchema): string {
+    if (itemSchema.type === 'number' || itemSchema.type === 'integer') {
+      return 'number';
+    }
+    return 'text';
+  }
+
+  /** Returns whether a positional tuple item schema is scalar (non-object). */
+  isScalarTupleItem(itemSchema: JsonSchema): boolean {
+    return itemSchema.type !== 'object' && !itemSchema.properties;
+  }
+
+  /**
+   * Handles input for a positional scalar tuple item.
+   * `arrayPointer` is the full pointer to the tuple field (e.g. "/pair"),
+   * `index` is the position, and `itemSchema` drives coercion.
+   * We write the whole array at once so the value stays an Array, not an object.
+   */
+  setTupleItemScalar(arrayPointer: string, index: number, event: Event, itemSchema: JsonSchema): void {
+    const raw = (event.target as HTMLInputElement).value;
+    const isNumber = itemSchema.type === 'number' || itemSchema.type === 'integer';
+    const value = isNumber ? (raw === '' ? undefined : Number(raw)) : raw;
+    const arr = [...(this.arrayAt(arrayPointer) as any[])];
+    // Ensure the array is long enough for positional writes.
+    while (arr.length <= index) {
+      arr.push(undefined);
+    }
+    arr[index] = value;
+    this._setAt(arrayPointer, arr);
   }
 
   // ---------------------------------------------------------------------------
