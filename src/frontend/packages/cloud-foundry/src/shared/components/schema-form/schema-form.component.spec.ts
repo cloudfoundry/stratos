@@ -194,7 +194,58 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     c.schemaView.set('schemaJson');
     c.onSchemaViewChanged();
 
-    expect(c.jsonText).toBe(JSON.stringify(c.data()));
+    expect(c.jsonText).toBe(JSON.stringify(c.data(), null, 2));
+  });
+
+  it('seeds a schema key-skeleton into the JSON view when no params are set', () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {
+      schema: {
+        type: 'object',
+        properties: {
+          region: { type: 'string' },
+          size: { type: 'integer' },
+          network: { type: 'object', properties: { subnet: { type: 'string' } } },
+        },
+      },
+    };
+    fixture.detectChanges();
+
+    // No data entered — toggle to JSON the way the radio does
+    c.schemaView.set('schemaJson');
+    c.onSchemaViewChanged();
+
+    // Editor shows every key (unset placeholders) so the user sees the structure…
+    expect(c.jsonText).toBe(JSON.stringify({ region: '', size: null, network: { subnet: '' } }, null, 2));
+    // …but the untouched skeleton submits no params (all stripped).
+    expect(c.data()).toBeNull();
+  });
+
+  it('shows all fields on Form→JSON with a set value overlaid on the skeleton', () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {
+      schema: {
+        type: 'object',
+        properties: {
+          region: { type: 'string' },
+          size: { type: 'integer' },
+          network: { type: 'object', properties: { subnet: { type: 'string' } } },
+        },
+      },
+    };
+    fixture.detectChanges();
+
+    // User sets one field in the form, then flips to JSON
+    c.onFormChange({ region: 'us-west' });
+    c.schemaView.set('schemaJson');
+    c.onSchemaViewChanged();
+
+    // JSON shows the set value AND the remaining empty fields…
+    expect(c.jsonText).toBe(JSON.stringify({ region: 'us-west', size: null, network: { subnet: '' } }, null, 2));
+    // …while only the set value is submitted.
+    expect(c.data()).toEqual({ region: 'us-west' });
   });
 
   it('seeds a freshly-mounted editor with current jsonText via onMonacoInit', () => {
@@ -221,7 +272,7 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
 
     // onMonacoInit must have pushed the current jsonText into the editor
     expect(setValueSpy).toHaveBeenCalledWith(c.jsonText);
-    expect(c.jsonText).toBe(JSON.stringify({ key: 'hello' }));
+    expect(c.jsonText).toBe(JSON.stringify({ key: 'hello' }, null, 2));
   });
 
   it('does not call setValue when the editor already has the correct text (loop guard)', () => {
@@ -236,7 +287,7 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     c.schemaView.set('schemaJson');
     c.onSchemaViewChanged();
 
-    const expectedText = JSON.stringify({ key: 'hello' });
+    const expectedText = JSON.stringify({ key: 'hello' }, null, 2);
     const setValueSpy = vi.fn();
     const fakeEditor = {
       getValue: () => expectedText,              // editor already has the correct text
