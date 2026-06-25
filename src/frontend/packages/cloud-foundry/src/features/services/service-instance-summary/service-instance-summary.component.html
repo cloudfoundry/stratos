@@ -1,5 +1,16 @@
 <app-page-header [breadcrumbs]="breadcrumbs">
   {{ title() }}
+  @if (actions().length) {
+    <div class="page-header-right flex gap-2">
+      @for (a of actions(); track a.label) {
+        <button type="button" (click)="runAction(a)"
+          [class]="a.danger ? 'btn btn-secondary btn-sm text-danger' : 'btn btn-secondary btn-sm'">
+          <span class="material-icons text-base align-middle">{{ a.icon }}</span>
+          {{ a.label }}
+        </button>
+      }
+    </div>
+  }
 </app-page-header>
 
 <div class="p-4">
