@@ -1,32 +1,12 @@
 
-import { AfterContentInit, ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal, effect } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import {
-  AppInputDirective,
-  CustomFormFieldComponent,
-  ErrorStateMatcher,
-  ShowOnDirtyErrorStateMatcher,
   TailwindJsonSchemaFormModule,
+  MonacoEditorComponent,
   safeStringToObj,
-  isValidJsonValidator
 } from '@stratosui/core';
-
-interface SchemaJsonForm {
-  json: FormControl<string>;
-}
-
-// Simple JsonPointer replacement
-class JsonPointer {
-  static parse(path: any): string[] {
-    if (!path) return [];
-    const pathStr = path.toString();
-    if (pathStr === '') return [];
-    if (pathStr === '/') return [''];
-    return pathStr.split('/').slice(1);
-  }
-}
+import { validateAgainstSchema, SchemaWarning } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-validate.util';
 
 export interface SchemaFormValidationError {
   dataPath: Record<string, unknown>;
@@ -47,16 +27,11 @@ export class SchemaFormConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    ReactiveFormsModule,
-    AppInputDirective,
-    CustomFormFieldComponent,
-    TailwindJsonSchemaFormModule
-],
-  providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
-  ]
+    TailwindJsonSchemaFormModule,
+    MonacoEditorComponent,
+  ],
 })
-export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit {
+export class SchemaFormComponent {
 
   mode!: 'JSON' | 'schema';
   schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
@@ -72,78 +47,69 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
     this.cleanSchema = this.filterSchema(config.schema);
     this.mode = this.cleanSchema ? 'schema' : 'JSON';
     if (this.mode === 'JSON') {
-      this.setJsonFormData(config.initialData);
+      this.setJsonText(config.initialData ? JSON.stringify(config.initialData) : '');
       if (!config.initialData) {
-        this.pValidChange.next(true);
+        this.parseValid.set(true);
       }
     } else if (this.mode === 'schema') {
       this.formInitialData = config.initialData;
     }
   }
 
-  @Output()
-  dataChange = new EventEmitter<object | null>();
-  pDataChange = new BehaviorSubject<object | null>(null);
+  @Output() dataChange = new EventEmitter<object | null>();
+  @Output() validChange = new EventEmitter<boolean>();
 
-  @Input()
-  valid = false;
-  @Output()
-  validChange = new EventEmitter<boolean>();
-  pValidChange = new BehaviorSubject<boolean>(false);
-
+  readonly data = signal<object | null>(null);
+  readonly parseValid = signal<boolean>(true);   // the ONLY submission gate
+  readonly warnings = signal<SchemaWarning[]>([]);
+  jsonText = '';
 
   cleanSchema: object | null | undefined;
-
-  jsonData: object | null = null;
-  jsonForm!: FormGroup<SchemaJsonForm>;
-
-  formData: object = {};
   formInitialData: object | null | undefined;
-  formValidationErrors: SchemaFormValidationError[] = [];
-  formValidationErrorsStr: string | null = null;
 
-  subs: Subscription[] = [];
-
-  ngOnInit() {
-    this.jsonForm = new FormGroup<SchemaJsonForm>({
-      json: new FormControl('', { nonNullable: true, validators: [isValidJsonValidator()] }),
-    });
+  constructor() {
+    effect(() => this.dataChange.emit(this.data()));
+    effect(() => this.validChange.emit(this.parseValid()));
   }
 
-  ngAfterContentInit() {
-    this.subs.push(this.jsonForm.controls.json.valueChanges.subscribe(jsonStr => {
-      this.jsonData = safeStringToObj(jsonStr);
-      this.pDataChange.next(this.jsonData);
-      this.pValidChange.next(this.isJsonFormValid());
-    }));
-
-    this.subs.push(this.pDataChange.asObservable().pipe(delay(0)).subscribe(data => this.dataChange.emit(data)));
-    this.subs.push(this.pValidChange.asObservable().pipe(delay(0)).subscribe(valid => this.validChange.emit(valid)));
+  /** Called by the Monaco JSON view (and tests) when JSON text changes. */
+  setJsonText(text: string) {
+    this.jsonText = text;
+    const obj = safeStringToObj(text);          // null when unparseable
+    const parsed = text.trim() === '' || obj !== null;
+    this.parseValid.set(parsed);
+    if (parsed) {
+      this.data.set(obj);
+      this.warnings.set(validateAgainstSchema(this.cleanSchema ?? undefined, obj)); // advisory only
+    } else {
+      this.warnings.set([]);                     // syntax error shown by editor itself
+    }
   }
 
-  ngOnDestroy() {
-    this.subs.forEach(sub => sub.unsubscribe());
+  /** Form-view (`<json-schema-form>`) data changes — also advisory-validated. */
+  onFormChange(formData: object) {
+    this.data.set(formData);
+    this.parseValid.set(true);                   // widget data is always a valid object
+    this.warnings.set(validateAgainstSchema(this.cleanSchema ?? undefined, formData));
   }
 
   onSchemaViewChanged() {
     if (this.schemaView === 'schemaForm') {
-      // Copy json into form
-      this.formInitialData = this.jsonData;
+      this.formInitialData = this.data() ?? undefined; // JSON → form
     } else {
-      // Copy form into json
-      this.setJsonFormData(this.formData);
+      this.setJsonText(this.data() ? JSON.stringify(this.data()) : ''); // form → JSON
     }
   }
 
-  setJsonFormData(data: object | null | undefined) {
-    if (this.jsonForm) {
-      const jsonString = data ? JSON.stringify(data) : '';
-      this.jsonForm.controls.json.setValue(jsonString);
-    }
-  }
-
-  private isJsonFormValid(): boolean {
-    return !this.jsonForm.controls.json.value || this.jsonForm.controls.json.valid;
+  onMonacoInit(editor: any) {
+    editor.onDidChangeModelContent(() => this.setJsonText(editor.getValue()));
+    // advisory squiggles; we never gate on these — only on parseValid
+    (window as any).monaco?.languages?.json?.jsonDefaults?.setDiagnosticsOptions({
+      validate: true,
+      schemas: this.cleanSchema
+        ? [{ uri: 'inmemory://plan-schema.json', fileMatch: ['*'], schema: this.cleanSchema }]
+        : [],
+    });
   }
 
   private filterSchema = (schema?: { [key: string]: any }): { [key: string]: any } | null | undefined => {
@@ -155,30 +121,6 @@ export class SchemaFormComponent implements OnInit, OnDestroy, AfterContentInit 
       return obj;
     }, {});
     return Object.keys(filterSchema).length > 0 ? filterSchema : null;
-  };
-
-  onFormChange(formData: object) {
-    this.formData = formData;
-    this.pDataChange.next(formData);
-  }
-
-  onFormValidationErrors(data: SchemaFormValidationError[]): void {
-    this.formValidationErrors = data || [];
-    this.formValidationErrorsStr = this.prettyValidationErrorsFn(this.formValidationErrors);
-    this.pValidChange.next(!this.formValidationErrors.length);
-  }
-
-  private prettyValidationErrorsFn = (formValidationErrors: SchemaFormValidationError[]): string | null => {
-    if (!formValidationErrors) {
-      return null;
-    }
-    return formValidationErrors.reduce((a, c) => {
-      const arrMessage = JsonPointer.parse(c.dataPath).reduce((aa, cc) => {
-        const dd = /^\d+$/.test(cc) ? `[${cc}]` : `.${cc}`;
-        return aa + dd;
-      }, '');
-      return `${a} ${arrMessage} ${c.message} <br>`;
-    }, '');
   };
 
 }

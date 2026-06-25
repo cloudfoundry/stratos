@@ -14,38 +14,36 @@
     </div>
     @if (schemaView === 'schemaForm') {
       <div class="schema-form__form">
-        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (changes)="onFormChange($event)">
+        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (changes)="onFormChange($event)">
         </json-schema-form>
-        @if (!!formValidationErrorsStr) {
-          <div class="schema-form__form--data-bad" [innerHTML]="formValidationErrorsStr"></div>
+        @if (warnings().length) {
+          <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
+            @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+          </ul>
         }
       </div>
     } @else {
-      <form [formGroup]="jsonForm">
-        <app-form-field class="schema-form__raw">
-          <textarea appInput placeholder="JSON" rows="10"
-            class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
-            formControlName="json"></textarea>
-          @if (jsonForm.controls.json.hasError('notValidJson')) {
-            <app-error>
-              Not valid JSON. Please specify a valid JSON Object
-            </app-error>
-          }
-        </app-form-field>
-      </form>
+      <app-monaco-editor
+        [model]="{ language: 'json', value: jsonText }"
+        [options]="{ automaticLayout: true, minimap: { enabled: false } }"
+        (editorInit)="onMonacoInit($event)">
+      </app-monaco-editor>
+      @if (warnings().length) {
+        <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
+          @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+        </ul>
+      }
     }
   </div>
 } @else {
-  <form [formGroup]="jsonForm">
-    <app-form-field class="schema-form__raw">
-      <textarea appInput placeholder="JSON" rows="10"
-        class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
-        formControlName="json"></textarea>
-      @if (jsonForm.controls.json.hasError('notValidJson')) {
-        <app-error>
-          Not valid JSON. Please specify a valid JSON Object
-        </app-error>
-      }
-    </app-form-field>
-  </form>
+  <app-monaco-editor
+    [model]="{ language: 'json', value: jsonText }"
+    [options]="{ automaticLayout: true, minimap: { enabled: false } }"
+    (editorInit)="onMonacoInit($event)">
+  </app-monaco-editor>
+  @if (warnings().length) {
+    <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
+      @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+    </ul>
+  }
 }
