@@ -109,6 +109,14 @@ export class SchemaFormComponent {
   onRenderError(message: string): void {
     queueMicrotask(() => {
       this.renderError.set(message);
+      // Seed the JSON editor with any existing data before switching views,
+      // so pre-filled parameters are not lost when the form fails to render.
+      if (!this.jsonText) {
+        const d = this.data() ?? this.formInitialData;
+        if (d != null) {
+          this.setJsonText(JSON.stringify(d, null, 2));
+        }
+      }
       this.schemaView.set('schemaJson');   // auto-fallback to JSON view
       this.snackBar.error(message);
     });
