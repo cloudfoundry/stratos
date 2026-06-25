@@ -1,0 +1,101 @@
+<app-page-header [breadcrumbs]="breadcrumbs">
+  {{ title() }}
+</app-page-header>
+
+<div class="p-4">
+  @if (loading()) {
+    <p class="text-content-muted">Loading service instance…</p>
+  } @else if (error()) {
+    <p class="text-danger">Could not load this service instance.</p>
+  } @else if (view(); as v) {
+    <app-meta-card>
+      <app-meta-card-title>
+        <div>{{ v.name }}</div>
+      </app-meta-card-title>
+
+      <app-meta-card-item>
+        <app-meta-card-key>Type</app-meta-card-key>
+        <app-meta-card-value>{{ v.typeLabel }}</app-meta-card-value>
+      </app-meta-card-item>
+
+      @if (v.status) {
+        <app-meta-card-item>
+          <app-meta-card-key>Status</app-meta-card-key>
+          <app-meta-card-value>
+            {{ v.status }}@if (v.statusDetail) { — {{ v.statusDetail }} }
+          </app-meta-card-value>
+        </app-meta-card-item>
+      }
+
+      @if (v.isManaged) {
+        @if (v.plan) {
+          <app-meta-card-item>
+            <app-meta-card-key>Plan</app-meta-card-key>
+            <app-meta-card-value>{{ v.plan }}</app-meta-card-value>
+          </app-meta-card-item>
+        }
+        @if (v.offering) {
+          <app-meta-card-item>
+            <app-meta-card-key>Service</app-meta-card-key>
+            <app-meta-card-value>{{ v.offering }}</app-meta-card-value>
+          </app-meta-card-item>
+        }
+        @if (v.broker) {
+          <app-meta-card-item>
+            <app-meta-card-key>Broker</app-meta-card-key>
+            <app-meta-card-value>{{ v.broker }}</app-meta-card-value>
+          </app-meta-card-item>
+        }
+        @if (v.dashboardUrl) {
+          <app-meta-card-item>
+            <app-meta-card-key>Dashboard</app-meta-card-key>
+            <app-meta-card-value>
+              <a [href]="v.dashboardUrl" target="_blank" rel="noopener" class="text-accent">
+                <span class="material-icons align-middle">launch</span>
+              </a>
+            </app-meta-card-value>
+          </app-meta-card-item>
+        }
+      } @else {
+        @if (v.routeServiceUrl) {
+          <app-meta-card-item customStyle="long-text">
+            <app-meta-card-key>Route Service URL</app-meta-card-key>
+            <app-meta-card-value>{{ v.routeServiceUrl }}</app-meta-card-value>
+          </app-meta-card-item>
+        }
+        @if (v.syslogDrainUrl) {
+          <app-meta-card-item customStyle="long-text">
+            <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
+            <app-meta-card-value>{{ v.syslogDrainUrl }}</app-meta-card-value>
+          </app-meta-card-item>
+        }
+      }
+
+      @if (v.space) {
+        <app-meta-card-item>
+          <app-meta-card-key>Space</app-meta-card-key>
+          <app-meta-card-value>{{ v.space }}@if (v.org) { ({{ v.org }}) }</app-meta-card-value>
+        </app-meta-card-item>
+      }
+
+      <app-meta-card-item>
+        <app-meta-card-key>Created</app-meta-card-key>
+        <app-meta-card-value>{{ v.createdAt | date:'medium' }}</app-meta-card-value>
+      </app-meta-card-item>
+
+      @if (v.updatedAt) {
+        <app-meta-card-item>
+          <app-meta-card-key>Updated</app-meta-card-key>
+          <app-meta-card-value>{{ v.updatedAt | date:'medium' }}</app-meta-card-value>
+        </app-meta-card-item>
+      }
+
+      <app-meta-card-item customStyle="column">
+        <app-meta-card-key>Tags</app-meta-card-key>
+        <app-meta-card-value>
+          <app-chips [chips]="v.tags"></app-chips>
+        </app-meta-card-value>
+      </app-meta-card-item>
+    </app-meta-card>
+  }
+</div>
