@@ -34,3 +34,34 @@ describe('SchemaFormComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+describe('SchemaFormComponent advisory validity', () => {
+  beforeEach(() => TestBed.configureTestingModule({
+    providers: [provideZonelessChangeDetection()],
+  }));
+
+  it('emits valid=true for schema-invalid-but-parseable JSON (broker decides)', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    let lastValid = false;
+    c.validChange.subscribe((v: boolean) => (lastValid = v));
+    c.config = { schema: { type: 'object', properties: { size: { type: 'integer' } } } };
+    fixture.detectChanges();
+    c.setJsonText('{"size":"5"}');           // type mismatch — must NOT block
+    await fixture.whenStable();
+    expect(lastValid).toBe(true);
+    expect(c.warnings().length).toBeGreaterThan(0); // but surfaced as a warning
+  });
+
+  it('emits valid=false only for unparseable JSON', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    let lastValid = true;
+    c.validChange.subscribe((v: boolean) => (lastValid = v));
+    c.config = { schema: { type: 'object' } };
+    fixture.detectChanges();
+    c.setJsonText('{ not json');
+    await fixture.whenStable();
+    expect(lastValid).toBe(false);
+  });
+});
