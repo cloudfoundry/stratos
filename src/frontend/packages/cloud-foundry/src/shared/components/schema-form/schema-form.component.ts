@@ -70,6 +70,14 @@ export class SchemaFormComponent {
   cleanSchema: object | null | undefined;
   formInitialData: object | null | undefined;
 
+  get schemaTitle(): string | undefined {
+    return (this.cleanSchema as any)?.title as string | undefined;
+  }
+
+  get schemaDescription(): string | undefined {
+    return (this.cleanSchema as any)?.description as string | undefined;
+  }
+
   private _destroyed = false;
 
   constructor() {

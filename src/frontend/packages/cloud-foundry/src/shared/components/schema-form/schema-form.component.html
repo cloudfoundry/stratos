@@ -14,6 +14,12 @@
     </div>
     @if (renderError()) {
       <div data-testid="render-error-notice" class="mb-3 p-3 rounded-md border border-amber-400 bg-amber-50 text-amber-800 text-sm dark:bg-amber-900/30 dark:text-amber-300">
+        @if (schemaTitle) {
+          <strong class="block font-semibold mb-1">{{ schemaTitle }}</strong>
+        }
+        @if (schemaDescription) {
+          <p class="mb-1">{{ schemaDescription }}</p>
+        }
         {{ renderError() }}
       </div>
     }
