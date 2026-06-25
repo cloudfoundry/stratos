@@ -65,15 +65,22 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     return this.warnings.some(w => w.path === pointer);
   }
 
+  /** Returns the raw verbatim text for an `unknown`-kind fallback textarea. */
+  jsonTextAt(pointer: string): string {
+    return this._jsonText()[pointer] ?? '';
+  }
+
   /**
    * Handles `input` events on the fallback JSON textarea for `unknown` nodes.
-   * Parses the raw text; if valid JSON, writes and emits. If invalid, holds
-   * (does not emit garbage) so the last valid emitted value is preserved.
+   * Holds the raw text verbatim (so it is never reformatted), then parses it:
+   * if valid JSON, writes and emits the parsed VALUE; if invalid, holds the
+   * text and does not emit (last valid emitted value preserved).
    */
-  setFallbackJson(pointer: string, event: Event): void {
-    const raw = (event.target as HTMLTextAreaElement).value;
+  onJsonInput(pointer: string, event: Event): void {
+    const text = (event.target as HTMLTextAreaElement).value;
+    this._jsonText.set({ ...this._jsonText(), [pointer]: text });
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(text);
       this._setAt(pointer, parsed);
     } catch {
       // Invalid JSON — hold: do not emit, keep last valid state.
@@ -113,6 +120,15 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    */
   private readonly _mapRows = signal<Record<string, { id: number; key: string; value: any }[]>>({});
 
+  /**
+   * Per-pointer raw JSON text for `unknown`-kind fallback textareas. Holds
+   * exactly what the user typed (verbatim) so a valid keystroke doesn't trigger
+   * a pretty-printed re-render that clobbers the text and jumps the cursor. The
+   * emitted VALUE is parsed; the DISPLAYED text stays untouched.
+   * Keyed by the field's JSON Pointer (e.g. "/weird").
+   */
+  private readonly _jsonText = signal<Record<string, string>>({});
+
   ngOnInit(): void {
     this._seedAndBuild();
   }
@@ -132,6 +148,24 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     this._working.set(structuredClone(this.data ?? {}));
     this.fields.set(this._buildFields());
     this._seedMapRows();
+    this._seedJsonText();
+  }
+
+  /**
+   * Seeds the raw-text holder for any `unknown`-kind fields from existing data
+   * (initial display only). After this, the text is owned by the user's own
+   * keystrokes via `onJsonInput` — never re-pretty-printed.
+   */
+  private _seedJsonText(): void {
+    const text: Record<string, string> = {};
+    for (const field of this.fields()) {
+      if (field.kind !== 'unknown') {
+        continue;
+      }
+      const value = this.valueAt(field.pointer);
+      text[field.pointer] = value == null ? '' : JSON.stringify(value);
+    }
+    this._jsonText.set(text);
   }
 
   /**

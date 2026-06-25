@@ -208,6 +208,21 @@ describe('SchemaWidgetRenderer unknown fallback + warning highlight', () => {
     expect(ta).toBeTruthy();
     ta.value='{"a":1}'; ta.dispatchEvent(new Event('input')); f.detectChanges();
     expect(emitted.weird).toEqual({ a:1 });
+    // verbatim: the displayed text is NOT re-pretty-printed after a valid keystroke
+    expect(ta.value).toBe('{"a":1}');
+  });
+
+  it('holds invalid JSON text without emitting and keeps last valid value', () => {
+    const f = mount({ type:'object', properties:{ weird:{ not:{} } } });
+    let emitted:any; let count=0;
+    f.componentInstance.changes.subscribe((d:any)=>{ emitted=d; count++; });
+    const ta:HTMLTextAreaElement = f.nativeElement.querySelector('textarea[data-json="/weird"]');
+    ta.value='{"a":1}'; ta.dispatchEvent(new Event('input')); f.detectChanges();
+    expect(emitted.weird).toEqual({ a:1 });
+    const validEmits = count;
+    ta.value='{"a":'; ta.dispatchEvent(new Event('input')); f.detectChanges();  // invalid
+    expect(count).toBe(validEmits);          // no new emit on invalid
+    expect(ta.value).toBe('{"a":');          // raw text held verbatim
   });
 
   it('marks a field whose pointer matches an advisory warning', () => {
@@ -216,6 +231,14 @@ describe('SchemaWidgetRenderer unknown fallback + warning highlight', () => {
     f.detectChanges();
     const input:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/size"]');
     expect(input.classList.contains('border-amber-400')).toBe(true);
+  });
+
+  it('marks an unknown fallback textarea whose pointer matches a warning', () => {
+    const f = mount({ type:'object', properties:{ weird:{ not:{} } } });
+    f.componentRef.setInput('warnings', [{ path:'/weird', message:'invalid' }]);
+    f.detectChanges();
+    const ta:HTMLTextAreaElement = f.nativeElement.querySelector('textarea[data-json="/weird"]');
+    expect(ta.classList.contains('border-amber-400')).toBe(true);
   });
 });
 
