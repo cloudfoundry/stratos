@@ -32,6 +32,8 @@ import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import { ResourceAlert } from './../../../../services/analysis-report.types';
 
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
 @Component({
   selector: 'app-helm-release-summary-tab',
   templateUrl: './helm-release-summary-tab.component.html',
@@ -70,8 +72,11 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   public podsChartData: any[] = [];
   public containersChartData: any[] = [];
 
-  private successChartColor = '#4DD3A7';
-  private completedChartColour = '#7aa3e5';
+  // Resolve adaptive theme colors once at construction. These feed the ring
+  // chart domains; the component is not rebuilt on a live theme toggle, so the
+  // colors reflect the theme active when this view loaded.
+  private successChartColor = cssVar('--color-success');
+  private completedChartColour = cssVar('--color-info');
 
   public path!: string; // strict: assigned in the constructor inside runInInjectionContext
 
@@ -98,7 +103,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     },
     {
       name: 'Not Ready',
-      value: '#E7727D'
+      value: cssVar('--color-danger')
     }
   ];
 

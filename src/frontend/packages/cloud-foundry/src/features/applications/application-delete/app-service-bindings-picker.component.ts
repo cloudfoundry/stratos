@@ -49,7 +49,7 @@ import type { StServiceCredentialBinding } from '../../../services/endpoint-data
               </span>
               @if (binding.serviceInstance.type) {
                 <span data-test="binding-type"
-                      class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                      class="text-xs px-2 py-0.5 rounded bg-content-secondary text-content-text">
                   {{ binding.serviceInstance.type }}
                 </span>
               }

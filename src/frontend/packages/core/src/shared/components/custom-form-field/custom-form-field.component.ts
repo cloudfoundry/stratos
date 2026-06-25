@@ -454,7 +454,7 @@ export class MatLabelComponent {
 @Component({
   selector: "app-error",
   template:
-    '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
+    '<div class="mat-error text-xs text-danger mt-1"><ng-content></ng-content></div>',
   styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
@@ -464,7 +464,7 @@ export class AppErrorComponent {}
 @Component({
   selector: "mat-error",
   template:
-    '<div class="mat-error text-xs text-red-600 dark:text-red-400 mt-1"><ng-content></ng-content></div>',
+    '<div class="mat-error text-xs text-danger mt-1"><ng-content></ng-content></div>',
   styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,

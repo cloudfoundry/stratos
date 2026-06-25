@@ -10,7 +10,7 @@
               (click)="$event.stopPropagation()"
               (input)="editRowName.set($any($event.target).value)" />
             <button id="kube-config-name-edit-done" type="button" title="Save"
-              class="inline-flex items-center justify-center p-0.5 text-green-600 hover:text-green-700 dark:text-green-400"
+              class="inline-flex items-center justify-center p-0.5 text-success hover:text-success/80"
               (click)="$event.stopPropagation(); saveEdit(row)">
               <span class="material-icons text-base leading-none">done</span>
             </button>

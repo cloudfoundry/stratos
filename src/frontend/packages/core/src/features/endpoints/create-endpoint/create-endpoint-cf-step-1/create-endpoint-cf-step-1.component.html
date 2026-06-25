@@ -53,7 +53,7 @@
             (!registerForm.value.createSystemEndpointField &&
               (existingPersonalEndpoints | async)?.urls?.includes(registerForm.value.urlField)))
         ) {
-          <div class="text-yellow-600 dark:text-yellow-400 text-sm mt-1" role="status">
+          <div class="text-warning text-sm mt-1" role="status">
             An endpoint at this URL is already registered. Registration may still succeed in another scope.
           </div>
         }

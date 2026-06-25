@@ -5,11 +5,11 @@
 }
 
 .tab-header {
-  border-bottom: 1px solid #e0e0e0;
-  background-color: white;
+  border-bottom: 1px solid var(--content-border);
+  background-color: var(--content-bg);
 
   &[data-background-color="accent"] {
-    background-color: #f5f5f5;
+    background-color: var(--content-secondary);
   }
 }
 
@@ -23,33 +23,33 @@
   cursor: pointer;
   user-select: none;
   border-bottom: 2px solid transparent;
-  color: #666;
+  color: var(--content-muted);
   transition: all 0.2s ease;
   white-space: nowrap;
   font-weight: 500;
 
   &:hover:not(.disabled) {
-    color: #333;
+    color: var(--content-text);
     background-color: rgba(0, 0, 0, 0.04);
   }
 
   &.active {
-    color: #2196f3;
-    border-bottom-color: #2196f3;
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
 
     &[data-color="accent"] {
-      color: #ff4081;
-      border-bottom-color: #ff4081;
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
     }
 
     &[data-color="warn"] {
-      color: #f44336;
-      border-bottom-color: #f44336;
+      color: var(--color-danger);
+      border-bottom-color: var(--color-danger);
     }
   }
 
   &.disabled {
-    color: #ccc;
+    color: var(--content-border);
     cursor: not-allowed;
     pointer-events: none;
   }

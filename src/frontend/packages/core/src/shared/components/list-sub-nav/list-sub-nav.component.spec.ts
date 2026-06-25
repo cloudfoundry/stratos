@@ -190,11 +190,11 @@ describe('ListSubNavComponent — action buttons', () => {
     const primaryBtn     = html().querySelector('[data-test="btn-primary"]')     as HTMLButtonElement;
     const defaultBtn     = html().querySelector('[data-test="btn-default"]')     as HTMLButtonElement;
 
-    expect(destructiveBtn.className).toContain('bg-red-600');
+    expect(destructiveBtn.className).toContain('bg-danger');
     expect(primaryBtn.className).toContain('bg-primary');
     expect(defaultBtn.className).toContain('border');
-    // default should NOT have red background
-    expect(defaultBtn.className).not.toContain('bg-red-600');
+    // default should NOT have danger background
+    expect(defaultBtn.className).not.toContain('bg-danger');
     expect(defaultBtn.className).not.toContain('bg-primary');
   });
 
@@ -298,7 +298,7 @@ describe('ListSubNavComponent — action buttons', () => {
     expect(addBtn).toBeTruthy();
     expect(addBtn.className).toContain('bg-primary');
     expect(removeBtn).toBeTruthy();
-    expect(removeBtn.className).toContain('bg-red-600');
+    expect(removeBtn.className).toContain('bg-danger');
   });
 
   // ── Test 7: regression — no actions/selectedCount renders as before ───────

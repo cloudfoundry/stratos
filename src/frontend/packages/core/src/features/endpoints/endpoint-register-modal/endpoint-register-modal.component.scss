@@ -50,12 +50,14 @@
 
 /* Custom button hover effects */
 .btn-primary {
-  @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white;
+  @apply text-white;
+  background-image: linear-gradient(to right, var(--color-primary), var(--color-secondary));
   transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  @apply from-blue-700 to-blue-800 shadow-lg;
+  @apply shadow-lg;
+  background-image: linear-gradient(to right, var(--color-secondary), var(--color-primary));
   transform: translateY(-1px);
 }
 

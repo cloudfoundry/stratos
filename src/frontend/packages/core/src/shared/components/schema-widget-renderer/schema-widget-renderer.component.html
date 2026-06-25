@@ -2,7 +2,7 @@
   @for (f of fields(); track f.pointer) {
     <div class="form-group">
       <label [for]="f.pointer" class="block text-sm font-medium text-content-text mb-1">
-        {{ f.title }}@if (f.required) { <span class="text-red-500 dark:text-red-400">*</span> }
+        {{ f.title }}@if (f.required) { <span class="text-danger">*</span> }
       </label>
 
       @switch (f.kind) {
@@ -31,7 +31,7 @@
                   </div>
                 }
                 <button type="button" [attr.data-remove]="f.pointer" (click)="removeItem(f.pointer, $index)"
-                  class="px-2 py-1 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">−</button>
+                  class="px-2 py-1 text-danger hover:text-danger/80">−</button>
                 <button type="button" [attr.data-move-up]="f.pointer" (click)="moveItem(f.pointer, $index, -1)"
                   class="px-2 py-1 text-content-muted hover:text-content-text">↑</button>
                 <button type="button" [attr.data-move-down]="f.pointer" (click)="moveItem(f.pointer, $index, 1)"
@@ -67,7 +67,7 @@
                   </div>
                 }
                 <button type="button" [attr.data-map-remove]="f.pointer" (click)="removeMapKey(f.pointer, row.id)"
-                  class="px-2 py-1 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">−</button>
+                  class="px-2 py-1 text-danger hover:text-danger/80">−</button>
               </div>
             }
             <button type="button" [attr.data-map-add]="f.pointer" (click)="addMapKey(f.pointer, f)"
@@ -179,8 +179,10 @@
         @case ('enum') {
           <select [id]="f.pointer" [attr.data-path]="f.pointer"
             (change)="setScalar(f, $event)"
-            [class.border-amber-400]="hasWarning(f.pointer)"
-            class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary">
+            [class.border-warning-400]="hasWarning(f.pointer)"
+            [class.text-content-muted]="(valueAt(f.pointer) ?? '') === ''"
+            [class.text-content-text]="(valueAt(f.pointer) ?? '') !== ''"
+            class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg focus:ring-1 focus:ring-primary focus:border-primary">
             <option value="" [selected]="(valueAt(f.pointer) ?? '') === ''">Select an option</option>
             @for (o of f.schema.enum; track o) {
               <option [value]="o" [selected]="o === valueAt(f.pointer)">{{ o }}</option>
@@ -190,7 +192,7 @@
         @case ('boolean') {
           <input type="checkbox" [attr.data-path]="f.pointer"
             [checked]="valueAt(f.pointer) === true" (change)="setBool(f, $event)"
-            [class.border-amber-400]="hasWarning(f.pointer)"
+            [class.border-warning-400]="hasWarning(f.pointer)"
             class="h-4 w-4 rounded border-content-border" />
         }
         @case ('unknown') {
@@ -198,14 +200,13 @@
             [value]="jsonTextAt(f.pointer)"
             (input)="onJsonInput(f.pointer, $event)"
             rows="4"
-            [class.border-amber-400]="hasWarning(f.pointer)"
+            [class.border-warning-400]="hasWarning(f.pointer)"
             class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text font-mono text-sm focus:ring-1 focus:ring-primary focus:border-primary"></textarea>
         }
         @default {
           <input [id]="f.pointer" [attr.data-path]="f.pointer" [type]="inputType(f)"
             [value]="valueAt(f.pointer) ?? ''" (input)="setScalar(f, $event)"
-            [placeholder]="f.description ?? ''"
-            [class.border-amber-400]="hasWarning(f.pointer)"
+            [class.border-warning-400]="hasWarning(f.pointer)"
             class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
         }
       }

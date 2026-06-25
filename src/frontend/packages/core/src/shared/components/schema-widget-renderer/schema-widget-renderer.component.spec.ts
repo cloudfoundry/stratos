@@ -230,7 +230,7 @@ describe('SchemaWidgetRenderer unknown fallback + warning highlight', () => {
     f.componentRef.setInput('warnings', [{ path:'/size', message:'must be integer' }]);
     f.detectChanges();
     const input:HTMLInputElement = f.nativeElement.querySelector('input[data-path="/size"]');
-    expect(input.classList.contains('border-amber-400')).toBe(true);
+    expect(input.classList.contains('border-warning-400')).toBe(true);
   });
 
   it('marks an unknown fallback textarea whose pointer matches a warning', () => {
@@ -238,7 +238,7 @@ describe('SchemaWidgetRenderer unknown fallback + warning highlight', () => {
     f.componentRef.setInput('warnings', [{ path:'/weird', message:'invalid' }]);
     f.detectChanges();
     const ta:HTMLTextAreaElement = f.nativeElement.querySelector('textarea[data-json="/weird"]');
-    expect(ta.classList.contains('border-amber-400')).toBe(true);
+    expect(ta.classList.contains('border-warning-400')).toBe(true);
   });
 });
 

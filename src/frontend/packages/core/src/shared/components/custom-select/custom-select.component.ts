@@ -16,8 +16,8 @@ export interface MatSelectChange {
     [class.selected]="selected"
     [class.disabled]="disabled"
     [ngClass]="{
-      'bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-400': selected,
-      'text-content-text dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-700': !selected,
+      'bg-info-50 dark:bg-info-900/40 text-primary': selected,
+      'text-content-text hover:bg-content-secondary': !selected,
       'opacity-50 cursor-not-allowed hover:bg-transparent': disabled
     }"
     ><ng-content></ng-content></div>`,

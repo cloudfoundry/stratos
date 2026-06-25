@@ -508,13 +508,15 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     const max = entity.chartMaxValue;
     const remaining = max - current;
 
+    const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
     return {
       labels: ['Current', 'Remaining'],
       datasets: [{
         data: [current, remaining],
         backgroundColor: [
-          entity.latest.colorTarget?.[0] || '#2196F3', // Fallback color if missing
-          '#E0E0E0'
+          entity.latest.colorTarget?.[0] || cssVar('--color-info'), // Fallback color if missing
+          cssVar('--content-border')
         ]
       }]
     };

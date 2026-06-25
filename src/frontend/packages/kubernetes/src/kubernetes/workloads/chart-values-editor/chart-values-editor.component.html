@@ -3,7 +3,7 @@
     <div class="absolute inset-0 flex items-center justify-center z-[100]">
       <div>
         <div class="text-center">Loading ...</div>
-        <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden mt-2.5 min-w-[120px]">
+        <div class="progress-bar w-full h-1 bg-content-secondary rounded overflow-hidden mt-2.5 min-w-[120px]">
           <div class="progress-bar-fill h-full bg-brand-500 animate-pulse"></div>
         </div>
       </div>
@@ -11,7 +11,7 @@
   }
   <div class="toolbar editor-toolbar">
     @if (schema) {
-      <div class="flex bg-gray-100 rounded-lg p-1" role="group" aria-label="Edit Mode">
+      <div class="flex bg-content-secondary rounded-lg p-1" role="group" aria-label="Edit Mode">
         <button class="btn btn-toggle"
           [class.btn-toggle-active]="mode === 'form'"
           (click)="editModeChanged({value: 'form'})"
@@ -35,20 +35,20 @@
           <span class="material-icons">arrow_drop_down</span>
         </button>
         @if (menuOpen) {
-          <div class="absolute top-full right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 min-w-48"
+          <div class="absolute top-full right-0 bg-content-bg border border-content-border rounded-md shadow-lg z-10 min-w-48"
             #appMenu>
-            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyValues(); closeMenu()">Copy from chart values</button>
+            <button class="block w-full text-left px-4 py-2 hover:bg-content-secondary" (click)="copyValues(); closeMenu()">Copy from chart values</button>
             @if (releaseValues) {
-              <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="copyReleaseValues(); closeMenu()">Copy from release values</button>
+              <button class="block w-full text-left px-4 py-2 hover:bg-content-secondary" (click)="copyReleaseValues(); closeMenu()">Copy from release values</button>
             }
             @if (mode === 'editor') {
-              <div class="border-t border-gray-200 my-1"></div>
+              <div class="border-t border-content-border my-1"></div>
             }
             @if (mode === 'editor') {
-              <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="diff(); closeMenu()">Diff with chart values</button>
+              <button class="block w-full text-left px-4 py-2 hover:bg-content-secondary" (click)="diff(); closeMenu()">Diff with chart values</button>
             }
-            <div class="border-t border-gray-200 my-1"></div>
-            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" (click)="clearFormValues(); closeMenu()">Clear</button>
+            <div class="border-t border-content-border my-1"></div>
+            <button class="block w-full text-left px-4 py-2 hover:bg-content-secondary" (click)="clearFormValues(); closeMenu()">Clear</button>
           </div>
         }
       </div>

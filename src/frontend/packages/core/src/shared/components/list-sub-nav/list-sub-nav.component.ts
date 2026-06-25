@@ -57,8 +57,8 @@ const ACTION_BASE =
 /** Variant-specific Tailwind additions. */
 const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> = {
   primary:     'bg-primary text-white hover:bg-primary/90',
-  destructive: 'bg-red-600 text-white hover:bg-red-700 border border-red-600',
-  default:     'border border-content-border bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700',
+  destructive: 'bg-danger text-white hover:bg-danger/90 border border-danger',
+  default:     'border border-content-border bg-content-bg text-content-text hover:bg-content-secondary',
 };
 
 /**

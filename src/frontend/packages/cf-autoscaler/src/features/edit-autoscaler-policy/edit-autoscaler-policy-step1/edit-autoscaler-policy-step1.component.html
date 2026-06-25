@@ -10,7 +10,7 @@
           placeholder="Minimum Instance Count">
         @if (editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')) {
           <div
-            class="text-red-600 text-sm mt-1">
+            class="text-danger text-sm mt-1">
             {{policyAlert.alertInvalidPolicyMinimumRange}}
           </div>
         }
@@ -22,7 +22,7 @@
           placeholder="Maximum Instance Count">
         @if (editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')) {
           <div
-            class="text-red-600 text-sm mt-1">
+            class="text-danger text-sm mt-1">
             {{policyAlert.alertInvalidPolicyMaximumRange}}
           </div>
         }

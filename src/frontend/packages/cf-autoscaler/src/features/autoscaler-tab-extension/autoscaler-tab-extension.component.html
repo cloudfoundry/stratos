@@ -86,32 +86,32 @@
                 <app-card-content>
                   <div class="block pb-2">
                     <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
+                      <table class="min-w-full divide-y divide-content-border">
+                        <thead class="bg-content-secondary">
                           <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Metric
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Condition
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Action
                             </th>
                           </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-content-bg divide-y divide-content-border">
                           @for (element of policy?.scaling_rules_form; track element) {
                             <tr
-                              class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              class="hover:bg-content-secondary transition-colors">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.metric_type}}
                               </td>
-                              <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 text-sm text-content-text">
                                 {{element.operator}}{{element.threshold}}{{getMetricUnit(element.metric_type, element.unit)}} for
                                 {{element.breach_duration_secs}} secs.
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.adjustment}} instances
                               </td>
                             </tr>
@@ -120,7 +120,7 @@
                       </table>
                     </div>
                     @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length === 0) {
-                      <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
+                      <div class="mt-2 text-center py-8 text-content-muted"
                         >No scaling rules.
                       </div>
                     }
@@ -143,43 +143,43 @@
                 <app-card-content>
                   <div class="block pb-2 autoscaler-table-policy-specific">
                     <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
+                      <table class="min-w-full divide-y divide-content-border">
+                        <thead class="bg-content-secondary">
                           <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               From
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               To
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Initial
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Min
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Max
                             </th>
                           </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-content-bg divide-y divide-content-border">
                           @for (element of policy?.schedules?.specific_date; track element) {
                             <tr
-                              class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              class="hover:bg-content-secondary transition-colors">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.start_date_time}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.end_date_time}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.instance_min_count}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.instance_max_count}}
                               </td>
                             </tr>
@@ -188,7 +188,7 @@
                       </table>
                     </div>
                     @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length === 0) {
-                      <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
+                      <div class="mt-2 text-center py-8 text-content-muted"
                         >
                       No specific date schedule.</div>
                     }
@@ -196,55 +196,55 @@
                   <br />
                   <div class="block pb-2 autoscaler-table-policy-recurring">
                     <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
+                      <table class="min-w-full divide-y divide-content-border">
+                        <thead class="bg-content-secondary">
                           <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Effective Duration
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Repeats On
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               From
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               To
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Initial
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Min
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                               Max
                             </th>
                           </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="bg-content-bg divide-y divide-content-border">
                           @for (element of policy?.schedules?.recurring_schedule; track element) {
                             <tr
-                              class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                              <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                              class="hover:bg-content-secondary transition-colors">
+                              <td class="px-6 py-4 text-sm text-content-text">
                                 {{ element.start_date? element.start_date + ' ~ ' + element.end_date : 'Always'}}
                               </td>
-                              <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 text-sm text-content-text">
                                 {{element.days_of_month}} {{element.days_of_week}} of the {{element.days_of_week? 'week': 'month'}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.start_time}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.end_time}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.initial_min_instance_count?element.initial_min_instance_count:'-'}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.instance_min_count}}
                               </td>
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                                 {{element.instance_max_count}}
                               </td>
                             </tr>
@@ -253,7 +253,7 @@
                       </table>
                     </div>
                     @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length === 0) {
-                      <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
+                      <div class="mt-2 text-center py-8 text-content-muted"
                         >
                       No recurring schedule.</div>
                     }
@@ -281,37 +281,37 @@
               <app-card-content>
                 <div class="block pb-2">
                   <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead class="bg-gray-50 dark:bg-gray-800">
+                    <table class="min-w-full divide-y divide-content-border">
+                      <thead class="bg-content-secondary">
                         <tr>
-                          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                             Event
                           </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                             Trigger
                           </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                             Date
                           </th>
-                          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <th class="px-6 py-3 text-left text-xs font-medium text-content-muted uppercase tracking-wider">
                             Error
                           </th>
                         </tr>
                       </thead>
-                      <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                      <tbody class="bg-content-bg divide-y divide-content-border">
                         @for (element of scalingHistory; track element) {
                           <tr
-                            class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                            class="hover:bg-content-secondary transition-colors">
+                            <td class="px-6 py-4 text-sm text-content-text">
                               Instances scaled {{element.old_instances > element.new_instances? 'down' : 'up'}} from {{element.old_instances}} to {{element.new_instances}}
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                            <td class="px-6 py-4 text-sm text-content-text">
                               {{element.reason}} {{element.message}}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-content-text">
                               {{element.timestamp / 1000000 | date:'medium'}}
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                            <td class="px-6 py-4 text-sm text-content-text">
                               {{element.error}}
                             </td>
                           </tr>
@@ -320,7 +320,7 @@
                     </table>
                   </div>
                   @if (scalingHistory.length === 0) {
-                    <div class="mt-2 text-center py-8 text-gray-500 dark:text-gray-400"
+                    <div class="mt-2 text-center py-8 text-content-muted"
                       >
                     No events.</div>
                   }

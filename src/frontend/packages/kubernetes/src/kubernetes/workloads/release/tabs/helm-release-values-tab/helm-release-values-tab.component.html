@@ -1,6 +1,6 @@
 <app-page-sub-nav>
 
-  <div class="flex bg-gray-100 rounded-lg p-1 toolbar" role="group" aria-label="View">
+  <div class="flex bg-content-secondary rounded-lg p-1 toolbar" role="group" aria-label="View">
     <button class="btn btn-toggle"
             [class.btn-toggle-active]="(viewType$ | async) === 'user'"
             (click)="viewTypeChange('user')"

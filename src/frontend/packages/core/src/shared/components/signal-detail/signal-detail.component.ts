@@ -132,7 +132,7 @@ export class SignalDetailComponent {
     if (act.primary) {
       return `${base} bg-accent border-accent text-white hover:bg-accent/90`;
     }
-    return `${base} bg-content-bg border-content-border text-content-text hover:bg-gray-100 dark:hover:bg-gray-700`;
+    return `${base} bg-content-bg border-content-border text-content-text hover:bg-content-secondary`;
   }
 
   // Tabs ---------------------------------------------------------------
@@ -154,7 +154,7 @@ export class SignalDetailComponent {
       case 'success': return `${base} bg-success-shade-100 text-success-shade-800 dark:bg-success-shade-900/30 dark:text-success-shade-200`;
       case 'warning': return `${base} bg-warning-shade-100 text-warning-shade-800 dark:bg-warning-shade-900/30 dark:text-warning-shade-200`;
       case 'danger':  return `${base} bg-danger-shade-100 text-danger-shade-800 dark:bg-danger-shade-900/30 dark:text-danger-shade-200`;
-      default:        return `${base} bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200`;
+      default:        return `${base} bg-content-secondary text-content-text`;
     }
   }
 

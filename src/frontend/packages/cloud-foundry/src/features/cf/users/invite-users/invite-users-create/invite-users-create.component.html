@@ -15,7 +15,7 @@
         @for (season of spaceRoles; track season) {
           <label class="flex items-center gap-2 cursor-pointer" [attr.for]="'spaceRole-' + season.value">
             <input [attr.id]="'spaceRole-' + season.value" type="radio" name="spaceRole" [value]="season.value" [(ngModel)]="spaceRole"
-              class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+              class="w-4 h-4 accent-primary focus:ring-primary border-content-border">
             <span>{{season.label}}</span>
           </label>
         }
