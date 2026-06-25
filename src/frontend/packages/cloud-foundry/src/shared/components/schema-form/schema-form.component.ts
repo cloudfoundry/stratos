@@ -79,6 +79,7 @@ export class SchemaFormComponent {
   }
 
   private _destroyed = false;
+  private _jsonEditor: any = null;
 
   constructor() {
     effect(() => this.dataChange.emit(this.data()));
@@ -112,6 +113,12 @@ export class SchemaFormComponent {
       this.formInitialData = this.data() ?? undefined; // JSON → form
     } else {
       this.setJsonText(this.data() ? JSON.stringify(this.data()) : ''); // form → JSON
+      // Push the updated text into a mounted editor so it shows immediately.
+      // Guard against the onDidChangeModelContent feedback loop: only setValue
+      // when the editor does not already hold the correct value.
+      if (this._jsonEditor && this._jsonEditor.getValue() !== this.jsonText) {
+        this._jsonEditor.setValue(this.jsonText);
+      }
     }
   }
 
@@ -135,6 +142,13 @@ export class SchemaFormComponent {
   }
 
   onMonacoInit(editor: any) {
+    this._jsonEditor = editor;
+    // Seed the editor with the current text: the [model].value binding is read-once
+    // at construction, so a freshly-mounted editor may be stale if jsonText was
+    // written after the previous view was destroyed (e.g. Form→JSON toggle).
+    if (editor.getValue() !== this.jsonText) {
+      editor.setValue(this.jsonText);
+    }
     editor.onDidChangeModelContent(() => this.setJsonText(editor.getValue()));
     // advisory squiggles; we never gate on these — only on parseValid
     (window as any).monaco?.languages?.json?.jsonDefaults?.setDiagnosticsOptions({
