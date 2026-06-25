@@ -2,7 +2,7 @@
   @for (f of fields(); track f.pointer) {
     <div class="form-group">
       <label [for]="f.pointer" class="block text-sm font-medium text-content-text mb-1">
-        {{ f.title }}@if (f.required) { <span class="text-red-500">*</span> }
+        {{ f.title }}@if (f.required) { <span class="text-red-500 dark:text-red-400">*</span> }
       </label>
 
       @switch (f.kind) {
@@ -31,7 +31,7 @@
                   </div>
                 }
                 <button type="button" [attr.data-remove]="f.pointer" (click)="removeItem(f.pointer, $index)"
-                  class="px-2 py-1 text-red-500 hover:text-red-700">−</button>
+                  class="px-2 py-1 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">−</button>
                 <button type="button" [attr.data-move-up]="f.pointer" (click)="moveItem(f.pointer, $index, -1)"
                   class="px-2 py-1 text-content-muted hover:text-content-text">↑</button>
                 <button type="button" [attr.data-move-down]="f.pointer" (click)="moveItem(f.pointer, $index, 1)"
@@ -67,7 +67,7 @@
                   </div>
                 }
                 <button type="button" [attr.data-map-remove]="f.pointer" (click)="removeMapKey(f.pointer, row.id)"
-                  class="px-2 py-1 text-red-500 hover:text-red-700">−</button>
+                  class="px-2 py-1 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">−</button>
               </div>
             }
             <button type="button" [attr.data-map-add]="f.pointer" (click)="addMapKey(f.pointer, f)"
