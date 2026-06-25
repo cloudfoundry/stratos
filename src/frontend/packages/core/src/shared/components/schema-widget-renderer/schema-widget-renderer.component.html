@@ -9,7 +9,7 @@
         @case ('object') {
           <div class="pl-4 border-l border-content-border">
             <json-schema-form [schema]="f.schema" [data]="valueAt(f.pointer)"
-              [_basePointer]="f.pointer"
+              [_basePointer]="f.pointer" [warnings]="warnings"
               (changes)="onChild(f.pointer, $event)"></json-schema-form>
           </div>
         }
@@ -26,7 +26,7 @@
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="itemSchema(f)"
                       [data]="valueAt(itemPointer(f.pointer, $index))"
-                      [_basePointer]="itemPointer(f.pointer, $index)"
+                      [_basePointer]="itemPointer(f.pointer, $index)" [warnings]="warnings"
                       (changes)="onChild(itemPointer(f.pointer, $index), $event)"></json-schema-form>
                   </div>
                 }
@@ -62,7 +62,7 @@
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="mapValueSchema(f)"
                       [data]="row.value"
-                      [_basePointer]="itemPointer(f.pointer, row.id)"
+                      [_basePointer]="itemPointer(f.pointer, row.id)" [warnings]="warnings"
                       (changes)="onMapChildChange(f.pointer, row.id, $event)"></json-schema-form>
                   </div>
                 }
@@ -90,7 +90,7 @@
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="itemSch"
                       [data]="valueAt(itemPointer(f.pointer, $index))"
-                      [_basePointer]="itemPointer(f.pointer, $index)"
+                      [_basePointer]="itemPointer(f.pointer, $index)" [warnings]="warnings"
                       (changes)="onChild(itemPointer(f.pointer, $index), $event)"></json-schema-form>
                   </div>
                 }
@@ -147,7 +147,7 @@
               <div class="pl-4 border-l border-content-border">
                 <json-schema-form [schema]="branchNode.schema"
                   [data]="valueAt(f.pointer)"
-                  [_basePointer]="f.pointer"
+                  [_basePointer]="f.pointer" [warnings]="warnings"
                   (changes)="onChild(f.pointer, $event)"></json-schema-form>
               </div>
             }
@@ -170,7 +170,7 @@
               <div class="pl-4 border-l border-content-border">
                 <json-schema-form [schema]="mergedAnyOf(f.pointer, f.schema.anyOf)"
                   [data]="valueAt(f.pointer)"
-                  [_basePointer]="f.pointer"
+                  [_basePointer]="f.pointer" [warnings]="warnings"
                   (changes)="onChild(f.pointer, $event)"></json-schema-form>
               </div>
             }
@@ -179,6 +179,7 @@
         @case ('enum') {
           <select [id]="f.pointer" [attr.data-path]="f.pointer"
             (change)="setScalar(f, $event)"
+            [class.border-amber-400]="hasWarning(f.pointer)"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
             <option value="" [selected]="(valueAt(f.pointer) ?? '') === ''">Select an option</option>
             @for (o of f.schema.enum; track o) {
@@ -189,12 +190,20 @@
         @case ('boolean') {
           <input type="checkbox" [attr.data-path]="f.pointer"
             [checked]="valueAt(f.pointer) === true" (change)="setBool(f, $event)"
+            [class.border-amber-400]="hasWarning(f.pointer)"
             class="h-4 w-4 rounded border-gray-300" />
+        }
+        @case ('unknown') {
+          <textarea [attr.data-json]="f.pointer"
+            (input)="setFallbackJson(f.pointer, $event)"
+            rows="4"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md font-mono text-sm">{{ valueAt(f.pointer) != null ? (valueAt(f.pointer) | json) : '' }}</textarea>
         }
         @default {
           <input [id]="f.pointer" [attr.data-path]="f.pointer" [type]="inputType(f)"
             [value]="valueAt(f.pointer) ?? ''" (input)="setScalar(f, $event)"
             [placeholder]="f.description ?? ''"
+            [class.border-amber-400]="hasWarning(f.pointer)"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
         }
       }

@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { classifyNode, mergeAllOf } from './schema-resolve.util';
 import { JsonSchema, NodeKind, ResolvedNode } from './schema-node.model';
+import { SchemaWarning } from './schema-validate.util';
 
 export interface FieldDescriptor {
   pointer: string;
@@ -50,6 +51,34 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    * wrapper (SchemaFormComponent); kept here only for contract compatibility.
    */
   @Output() validationErrors = new EventEmitter<any[]>();
+
+  /**
+   * Advisory warnings from the wrapper's schema validation pass.
+   * Each warning carries an absolute JSON Pointer (`path`) that maps 1:1 to
+   * a field's `pointer`. Forwarded to recursive children so nested fields can
+   * also highlight. Never blocks or disables — display only.
+   */
+  @Input() warnings: SchemaWarning[] = [];
+
+  /** Returns true when a warning targets this pointer — drives the amber border. */
+  hasWarning(pointer: string): boolean {
+    return this.warnings.some(w => w.path === pointer);
+  }
+
+  /**
+   * Handles `input` events on the fallback JSON textarea for `unknown` nodes.
+   * Parses the raw text; if valid JSON, writes and emits. If invalid, holds
+   * (does not emit garbage) so the last valid emitted value is preserved.
+   */
+  setFallbackJson(pointer: string, event: Event): void {
+    const raw = (event.target as HTMLTextAreaElement).value;
+    try {
+      const parsed = JSON.parse(raw);
+      this._setAt(pointer, parsed);
+    } catch {
+      // Invalid JSON — hold: do not emit, keep last valid state.
+    }
+  }
 
   /** Working copy of data — never mutate @Input() data directly. */
   private readonly _working = signal<any>({});
