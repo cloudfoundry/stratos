@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { SchemaFormComponent } from './schema-form.component';
@@ -73,12 +73,15 @@ describe('SchemaFormComponent render error fallback', () => {
   beforeEach(() => {
     snackBarSpy = { error: vi.fn() };
     TestBed.configureTestingModule({
+      imports: [SchemaFormComponent],
       providers: [
         provideZonelessChangeDetection(),
         { provide: TailwindSnackBarService, useValue: snackBarSpy },
       ],
     });
   });
+
+  afterEach(() => TestBed.resetTestingModule());
 
   it('auto-switches to JSON view, sets renderError, and calls snackbar on onRenderError()', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
