@@ -8,7 +8,7 @@
   &--warning-background { background-color: color-mix(in srgb, var(--color-warning) 20%, transparent); }
   &--danger { background-color: var(--color-danger); }
   &--danger-background { background-color: color-mix(in srgb, var(--color-danger) 20%, transparent); }
-  &--unknown { background-color: #9ca3af; }
+  &--unknown { background-color: var(--color-content-muted); }
 }
 
 .simple-graph {
