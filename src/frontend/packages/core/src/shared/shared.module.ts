@@ -104,7 +104,6 @@ import { TailwindPaginatorService } from './services/tailwind-paginator.service'
 import { TailwindSnackBarService } from './services/tailwind-snackbar.service';
 import { TailwindDialogService } from './services/tailwind-dialog.service';
 import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
-import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
 import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 import { DisableRouterLinkDirective } from '../core/disable-router-link.directive';
@@ -389,7 +388,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TailwindErrorStateMatcher,
     TailwindDefaultErrorStateMatcher,
     TailwindShowOnDirtyErrorStateMatcher,
-    TailwindJsonSchemaFormService
   ]
 })
 export class SharedModule { }

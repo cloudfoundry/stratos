@@ -60,11 +60,4 @@ export {
   TailwindPageEvent as PageEvent
 } from './tailwind-paginator.service';
 
-export {
-  TailwindJsonSchemaFormComponent as StratosJsonSchemaFormComponent,
-  TailwindJsonSchemaFormService as StratosJsonSchemaFormService,
-  JsonSchemaFormData as StratosJsonSchemaFormData,
-  JsonSchemaFormConfig as StratosJsonSchemaFormConfig
-} from './tailwind-json-schema-form.service';
-
 // Factory removed - use TailwindDialogService.open() instead

@@ -14,7 +14,7 @@
     </div>
     @if (schemaView === 'schemaForm') {
       <div class="schema-form__form">
-        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (changes)="onFormChange($event)">
+        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" [warnings]="warnings()" (changes)="onFormChange($event)">
         </json-schema-form>
         @if (warnings().length) {
           <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
