@@ -10,21 +10,25 @@ export function resolveRef(node: JsonSchema, root: JsonSchema, seen: Set<string>
   }
   seen.add(ref);
 
+  // Strip $ref from the node on any unresolvable/non-fragment ref so a caller
+  // can't re-resolve the returned node back into a loop.
+  const { $ref, ...rest } = node;
+
   // Parse JSON Pointer fragment: #/definitions/X or #/$defs/X
   const fragment = ref.startsWith('#/') ? ref.slice(2) : null;
   if (!fragment) {
-    return node;
+    return rest;
   }
   const parts = fragment.split('/');
   let resolved: any = root;
   for (const part of parts) {
     if (resolved == null || typeof resolved !== 'object') {
-      return node;
+      return rest;
     }
     resolved = resolved[part];
   }
   if (resolved == null) {
-    return node;
+    return rest;
   }
   // Recursively resolve if the target also has a $ref
   return resolveRef(resolved, root, seen);
@@ -107,6 +111,8 @@ function pickKind(schema: JsonSchema): NodeKind {
     if (Array.isArray(items)) {
       return 'tuple';
     }
+    // uniqueItems gates multiselect: no-duplicates => fixed checkbox group.
+    // An enum array WITHOUT uniqueItems is a repeatable dropdown => array.
     if (items && items.enum && schema.uniqueItems) {
       return 'multiselect';
     }
