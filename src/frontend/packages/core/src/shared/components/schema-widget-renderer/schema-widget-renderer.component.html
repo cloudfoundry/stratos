@@ -195,9 +195,11 @@
         }
         @case ('unknown') {
           <textarea [attr.data-json]="f.pointer"
-            (input)="setFallbackJson(f.pointer, $event)"
+            [value]="jsonTextAt(f.pointer)"
+            (input)="onJsonInput(f.pointer, $event)"
             rows="4"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md font-mono text-sm">{{ valueAt(f.pointer) != null ? (valueAt(f.pointer) | json) : '' }}</textarea>
+            [class.border-amber-400]="hasWarning(f.pointer)"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md font-mono text-sm"></textarea>
         }
         @default {
           <input [id]="f.pointer" [attr.data-path]="f.pointer" [type]="inputType(f)"
