@@ -113,21 +113,22 @@
   .endpoint-tile-selector ::ng-deep .tile:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-color: #3b82f6;
+    border-color: var(--color-primary);
   }
 
+  /* dark mode adapts border via --color-primary; only the shadow needs a darker variant */
   :host-context(.dark) .endpoint-tile-selector ::ng-deep .tile:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    border-color: #60a5fa;
   }
 
   .endpoint-tile-selector ::ng-deep .tile.selected {
-    border-color: #3b82f6;
+    border-color: var(--color-primary);
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   }
 
+  /* decorative selected-tile tint — kept as an explicit light/dark gradient pair
+     (no adaptive single-stop token); border adapts via --color-primary above */
   :host-context(.dark) .endpoint-tile-selector ::ng-deep .tile.selected {
-    border-color: #60a5fa;
     background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
   }
 

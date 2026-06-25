@@ -68,7 +68,7 @@ export class TailwindSnackBarService {
     return this.open(message, action, {
       duration: 0,
       ...(config ?? {}),
-      panelClass: ['snackbar-error', '!bg-red-700']
+      panelClass: ['snackbar-error', '!bg-danger']
         .concat(config?.panelClass ? (Array.isArray(config.panelClass) ? config.panelClass : [config.panelClass]) : []),
     });
   }
@@ -138,6 +138,11 @@ export class TailwindSnackBarService {
     // and the operator could not read what action was in flight. Switching
     // to a wider container with proper wrapping lets multi-line messages
     // render in full while keeping short ones on a single line.
+    //
+    // ponytail: bg-gray-800/text-white is a deliberate INVERSE overlay, not a
+    // theme surface — a toast stays dark in both light and dark mode. Kept raw
+    // (no content-* token) so the #5494 sweep doesn't flip it to a light-on-light
+    // surface and break the white action/close text + the !bg-danger error variant.
     let classes = [
       'fixed', 'bottom-4', 'left-1/2', 'transform', '-translate-x-1/2',
       'bg-gray-800', 'text-white', 'px-6', 'py-3', 'rounded-lg', 'shadow-lg',
@@ -169,7 +174,7 @@ export class TailwindSnackBarService {
     if (action) {
       const actionButton = document.createElement('button');
       actionButton.textContent = action;
-      actionButton.className = 'snackbar-action text-blue-400 hover:text-blue-300 font-medium';
+      actionButton.className = 'snackbar-action text-primary hover:text-primary/80 font-medium';
       snackbar.appendChild(actionButton);
     }
 

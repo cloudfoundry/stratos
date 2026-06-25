@@ -529,10 +529,10 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   pillClasses(color: SignalListPillColor): string {
     switch (color) {
-      case 'success': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
-      case 'warning': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
-      case 'danger':  return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200';
-      default:        return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+      case 'success': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-success-50 text-success-900 dark:bg-success-900/40 dark:text-success-100';
+      case 'warning': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100';
+      case 'danger':  return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100';
+      default:        return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-content-secondary text-content-text';
     }
   }
 
@@ -541,10 +541,10 @@ export class SignalListComponent<T> implements AfterViewInit {
   // app-wall ("● Deployed - Online", "● Incomplete", etc.).
   dotClasses(color: SignalListPillColor): string {
     switch (color) {
-      case 'success': return 'inline-block h-2.5 w-2.5 rounded-full bg-green-500';
-      case 'warning': return 'inline-block h-2.5 w-2.5 rounded-full bg-yellow-500';
-      case 'danger':  return 'inline-block h-2.5 w-2.5 rounded-full bg-red-500';
-      default:        return 'inline-block h-2.5 w-2.5 rounded-full bg-gray-400';
+      case 'success': return 'inline-block h-2.5 w-2.5 rounded-full bg-success';
+      case 'warning': return 'inline-block h-2.5 w-2.5 rounded-full bg-warning';
+      case 'danger':  return 'inline-block h-2.5 w-2.5 rounded-full bg-danger';
+      default:        return 'inline-block h-2.5 w-2.5 rounded-full bg-tentative';
     }
   }
 
@@ -552,10 +552,10 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Returns a Tailwind bg-* class matching the pill palette.
   accentBarClass(color: SignalListPillColor): string {
     switch (color) {
-      case 'success': return 'bg-green-500';
-      case 'warning': return 'bg-yellow-500';
-      case 'danger':  return 'bg-red-500';
-      default:        return 'bg-gray-400';
+      case 'success': return 'bg-success';
+      case 'warning': return 'bg-warning';
+      case 'danger':  return 'bg-danger';
+      default:        return 'bg-tentative';
     }
   }
 
@@ -895,9 +895,9 @@ export class SignalListComponent<T> implements AfterViewInit {
     const s = this.rowStateOf(row);
     if (!s) return '';
     const dim = (s.blocked || s.deleting || s.disabled) ? ' opacity-60 pointer-events-none' : '';
-    if (s.error)   return 'bg-red-50 dark:bg-red-900/20 border-l-2 border-red-500' + dim;
-    if (s.warning) return 'bg-yellow-50 dark:bg-yellow-900/20 border-l-2 border-yellow-500' + dim;
-    if (s.info)    return 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500' + dim;
+    if (s.error)   return 'bg-danger-50 dark:bg-danger-900/30 border-l-2 border-danger-300 dark:border-danger-700' + dim;
+    if (s.warning) return 'bg-warning-50 dark:bg-warning-900/30 border-l-2 border-warning-300 dark:border-warning-700' + dim;
+    if (s.info)    return 'bg-info-50 dark:bg-info-900/30 border-l-2 border-info-300 dark:border-info-700' + dim;
     if (s.highlighted) return 'bg-accent/5' + dim;
     return dim.trim();
   }
@@ -936,9 +936,9 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Text color for the message icon, matching severity.
   rowMessageIconClass(row: T): string {
     const s = this.rowStateOf(row);
-    if (s?.error)   return 'text-red-600 dark:text-red-400';
-    if (s?.warning) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-blue-600 dark:text-blue-400';
+    if (s?.error)   return 'text-danger';
+    if (s?.warning) return 'text-warning';
+    return 'text-info';
   }
 
   // Normalize string | segments into a segment array for uniform rendering.
@@ -957,9 +957,9 @@ export class SignalListComponent<T> implements AfterViewInit {
   segmentClass(seg: SignalListMessageSegment): string {
     const weight = seg.bold ? 'font-semibold ' : '';
     switch (seg.tone) {
-      case 'success': return weight + 'text-green-700 dark:text-green-300';
-      case 'warning': return weight + 'text-yellow-700 dark:text-yellow-300';
-      case 'danger':  return weight + 'text-red-700 dark:text-red-300';
+      case 'success': return weight + 'text-success';
+      case 'warning': return weight + 'text-warning';
+      case 'danger':  return weight + 'text-danger';
       case 'neutral': return weight + 'text-content-muted';
       default:        return weight.trim();
     }

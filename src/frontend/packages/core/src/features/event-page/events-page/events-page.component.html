@@ -10,34 +10,34 @@
 </app-page-header>
 <div class="event-page">
   @if (hasReadEvents$ | async) {
-    <div class="event-page__filter inline-flex rounded-lg border border-gray-300 bg-white p-1 shadow-sm mt-4 mb-2"
+    <div class="event-page__filter inline-flex rounded-lg border border-content-border bg-content-bg p-1 shadow-sm mt-4 mb-2"
       role="group" aria-label="filter">
       <button type="button"
         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
-        [class.bg-blue-600]="selectedFilterSignal() === filterValues.UNREAD"
+        [class.bg-primary]="selectedFilterSignal() === filterValues.UNREAD"
         [class.text-white]="selectedFilterSignal() === filterValues.UNREAD"
         [class.text-content-text]="selectedFilterSignal() !== filterValues.UNREAD"
-        [class.hover:bg-gray-100]="selectedFilterSignal() !== filterValues.UNREAD"
+        [class.hover:bg-content-secondary]="selectedFilterSignal() !== filterValues.UNREAD"
         (click)="selectFilter(filterValues.UNREAD)"
         [attr.aria-pressed]="selectedFilterSignal() === filterValues.UNREAD">
         Unread
       </button>
       <button type="button"
         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
-        [class.bg-blue-600]="selectedFilterSignal() === filterValues.READ"
+        [class.bg-primary]="selectedFilterSignal() === filterValues.READ"
         [class.text-white]="selectedFilterSignal() === filterValues.READ"
         [class.text-content-text]="selectedFilterSignal() !== filterValues.READ"
-        [class.hover:bg-gray-100]="selectedFilterSignal() !== filterValues.READ"
+        [class.hover:bg-content-secondary]="selectedFilterSignal() !== filterValues.READ"
         (click)="selectFilter(filterValues.READ)"
         [attr.aria-pressed]="selectedFilterSignal() === filterValues.READ">
         Read
       </button>
       <button type="button"
         class="px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
-        [class.bg-blue-600]="selectedFilterSignal() === filterValues.ALL"
+        [class.bg-primary]="selectedFilterSignal() === filterValues.ALL"
         [class.text-white]="selectedFilterSignal() === filterValues.ALL"
         [class.text-content-text]="selectedFilterSignal() !== filterValues.ALL"
-        [class.hover:bg-gray-100]="selectedFilterSignal() !== filterValues.ALL"
+        [class.hover:bg-content-secondary]="selectedFilterSignal() !== filterValues.ALL"
         (click)="selectFilter(filterValues.ALL)"
         [attr.aria-pressed]="selectedFilterSignal() === filterValues.ALL">
         All

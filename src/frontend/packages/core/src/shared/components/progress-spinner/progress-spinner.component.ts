@@ -59,7 +59,7 @@ import {
             [attr.cy]="diameter / 2"
             [attr.r]="radius"
             fill="none"
-            class="stroke-gray-200"
+            class="stroke-content-border"
             [attr.stroke-width]="strokeWidth"
           ></circle>
           <!-- Progress arc -->

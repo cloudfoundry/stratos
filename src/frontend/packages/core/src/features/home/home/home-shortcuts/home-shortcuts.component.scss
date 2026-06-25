@@ -2,11 +2,7 @@
   &__title {
     margin-bottom: 10px;
     margin-top: 20px;
-    color: rgb(17 24 39); // gray-900
-
-    :host-context(.dark) & {
-      color: rgb(243 244 246); // gray-100
-    }
+    color: var(--content-text);
   }
   &__item {
     align-items: center;
@@ -15,11 +11,7 @@
     margin-left: 12px;
 
     a {
-      color: rgb(37 99 235); // blue-600
-
-      :host-context(.dark) & {
-        color: rgb(96 165 250); // blue-400
-      }
+      color: var(--color-primary);
     }
 
     mat-icon {

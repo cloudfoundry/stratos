@@ -88,27 +88,27 @@
                     </form>
                     <div class="space-y-1">
                       @if (editTriggerForm.get('metric_type').hasError('required')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           Metric type is required
                         </div>
                       }
                       @if (editTriggerForm.get('metric_type').hasError('alertInvalidPolicyTriggerMetricName')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerMetricName}}
                         </div>
                       }
                       @if (editTriggerForm.get('threshold').hasError('required')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           Threshold is required
                         </div>
                       }
                       @if (editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThreshold100')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerThreshold100}}
                         </div>
                       }
                       @if (editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThresholdRange')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           @if (editScaleType==='upper') {
                             <span>
                               {{policyAlert.alertInvalidPolicyTriggerUpperThresholdRange}}
@@ -122,17 +122,17 @@
                         </div>
                       }
                       @if (editTriggerForm.get('breach_duration_secs').hasError('min') || editTriggerForm.get('breach_duration_secs').hasError('max')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerBreachDurationRange}}
                         </div>
                       }
                       @if (editTriggerForm.get('adjustment').hasError('required')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           Adjustment is required
                         </div>
                       }
                       @if (editTriggerForm.get('adjustment').hasError('alertInvalidPolicyTriggerStepRange')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           @if (editAdjustmentType==='value') {
                             <span>
                               {{policyAlert.alertInvalidPolicyTriggerStepRange}}
@@ -146,7 +146,7 @@
                         </div>
                       }
                       @if (editTriggerForm.get('cool_down_secs').hasError('min') || editTriggerForm.get('cool_down_secs').hasError('max')) {
-                        <div class="text-red-600 text-sm">
+                        <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerCooldownRange}}
                         </div>
                       }
@@ -163,12 +163,12 @@
                 }
                 @if (editIndex === index) {
                   <button id="autoscaler-policy-edit-done" (click)="finishTrigger()"
-                    [disabled]="editTriggerForm.invalid" class="btn-icon text-green-600" title="Done">
+                    [disabled]="editTriggerForm.invalid" class="btn-icon text-success" title="Done">
                     <span class="material-icons">done</span>
                   </button>
                 }
                 <button id="autoscaler-policy-edit-delete" (click)="removeTrigger(index)"
-                  class="btn-icon text-red-600" title="Delete">
+                  class="btn-icon text-danger" title="Delete">
                   <span class="material-icons">delete</span>
                 </button>
               </div>

@@ -33,7 +33,7 @@ import { CommonModule } from "@angular/common";
       aria-valuemax="100"
     >
       <!-- Background track -->
-      <div class="absolute inset-0 bg-gray-200 dark:bg-gray-800"></div>
+      <div class="absolute inset-0 bg-content-secondary"></div>
 
       <!-- Indeterminate animation (two bars for Material Design effect) -->
       @if (mode === "indeterminate") {
@@ -71,7 +71,7 @@ import { CommonModule } from "@angular/common";
       <!-- Buffer mode (shows two bars) -->
       @if (mode === "buffer") {
         <div
-          class="absolute h-full transition-all duration-300 ease-out bg-gray-300"
+          class="absolute h-full transition-all duration-300 ease-out bg-content-border"
           [style.width.%]="bufferValue"
         ></div>
         <div

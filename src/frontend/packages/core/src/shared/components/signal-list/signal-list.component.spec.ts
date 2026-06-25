@@ -885,7 +885,7 @@ describe('SignalListComponent rowState', () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.detectChanges();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
-    expect(rows[0].className).toContain('border-yellow-500');
+    expect(rows[0].className).toContain('border-warning-300');
     const icon = fixture.nativeElement.querySelector('[data-test="row-message"] .material-icons');
     expect(icon.textContent).toContain('warning');
   });
@@ -896,7 +896,7 @@ describe('SignalListComponent rowState', () => {
     fixture.componentInstance.states['two'].set({ error: true, message: 'bad' });
     fixture.detectChanges();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
-    expect(rows[1].className).toContain('border-red-500');
+    expect(rows[1].className).toContain('border-danger-300');
     const icons = fixture.nativeElement.querySelectorAll('[data-test="row-message"] .material-icons');
     expect(icons[0].textContent).toContain('info');
     expect(icons[1].textContent).toContain('warning'); // error → warning glyph
@@ -936,7 +936,7 @@ describe('SignalListComponent rowState', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('[data-test="row-message"]').length).toBe(0);
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
-    expect(rows[0].className).not.toContain('border-yellow-500');
+    expect(rows[0].className).not.toContain('border-warning-300');
   });
 });
 

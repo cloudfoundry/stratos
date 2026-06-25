@@ -52,13 +52,13 @@
                         @if (gitMode === 'enterprise') {
                           <div class="form-field">
                             <label class="block text-sm text-content-muted mb-1" for="githubEnterpriseUrl">
-                              {{ sourceType.id === DEPLOY_TYPES_IDS.GITLAB ? 'GitLab base URL' : 'GitHub Enterprise URL' }} <span class="text-red-500">*</span>
+                              {{ sourceType.id === DEPLOY_TYPES_IDS.GITLAB ? 'GitLab base URL' : 'GitHub Enterprise URL' }} <span class="text-danger">*</span>
                             </label>
                             <input id="githubEnterpriseUrl" type="text" class="input" [(ngModel)]="githubEnterpriseUrl"
                               placeholder="https://github.mycorp.com" name="githubEnterpriseUrl"
                               [disabled]="isRedeploy" required>
                             @if (isInvalidGithubEnterpriseUrl) {
-                              <div class="text-red-500 text-sm mt-1">
+                              <div class="text-danger text-sm mt-1">
                                 The base URL is not valid
                               </div>
                             }
@@ -67,7 +67,7 @@
                         @if (gitMode !== 'public') {
                           <div class="form-field">
                             <label class="block text-sm text-content-muted mb-1" for="githubAccessToken">
-                              Access token <span class="text-red-500">*</span>
+                              Access token <span class="text-danger">*</span>
                             </label>
                             <input id="githubAccessToken" type="password" class="input" [(ngModel)]="accessToken"
                               placeholder="Personal access token" name="githubAccessToken"
@@ -76,7 +76,7 @@
                         }
                         <div class="form-field">
                           <label class="block text-sm text-content-muted mb-1" for="projectName">
-                            Project <span class="text-red-500">*</span>
+                            Project <span class="text-danger">*</span>
                           </label>
                           <input id="projectName" type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
                             placeholder="owner/repo" name="projectName"
@@ -93,13 +93,13 @@
                           }
                         </datalist>
                         @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
-                          <div class="text-red-500 text-sm mt-1"
+                          <div class="text-danger text-sm mt-1"
                             >
                             Project does not exist
                           </div>
                         }
                         @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
-                          <div class="text-red-500 text-sm mt-1">
+                          <div class="text-danger text-sm mt-1">
                             {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
                           </div>
                         }
@@ -123,7 +123,7 @@
                     </div>
                     <div class="form-field">
                       <label class="block text-sm text-content-muted mb-1" for="repositoryBranch">
-                        Branch <span class="text-red-500">*</span>
+                        Branch <span class="text-danger">*</span>
                       </label>
                       <select id="repositoryBranch" class="input"
                         [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
@@ -166,11 +166,11 @@
               @if (sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
                 <div>
                   <div class="form-field">
-                    <label class="block text-sm text-content-muted mb-1" for="gitUrl">Git URL <span class="text-red-500">*</span></label>
+                    <label class="block text-sm text-content-muted mb-1" for="gitUrl">Git URL <span class="text-danger">*</span></label>
                     <input id="gitUrl" class="input" [disabled]="isRedeploy" [(ngModel)]="gitUrl" placeholder="https://github.com/owner/repo.git" name="gitUrl" required>
                   </div>
                   <div class="form-field">
-                    <label class="block text-sm text-content-muted mb-1" for="urlBranchName">Branch or tag <span class="text-red-500">*</span></label>
+                    <label class="block text-sm text-content-muted mb-1" for="urlBranchName">Branch or tag <span class="text-danger">*</span></label>
                     <input id="urlBranchName" class="input" [(ngModel)]="gitUrlBranchName" placeholder="main" name="urlBranchName" required>
                   </div>
                 </div>
@@ -180,26 +180,26 @@
           @if (sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
             <div>
               <div class="form-field">
-                <label class="block text-sm text-content-muted mb-1" for="dockerAppName">Application name <span class="text-red-500">*</span></label>
+                <label class="block text-sm text-content-muted mb-1" for="dockerAppName">Application name <span class="text-danger">*</span></label>
                 <input id="dockerAppName" class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="my-app"
                   name="dockerAppName" required>
                 @if (sourceSelectionForm.controls.dockerAppName?.errors?.required) {
-                  <div class="text-red-500 text-sm mt-1">
+                  <div class="text-danger text-sm mt-1">
                     Application name is required
                   </div>
                 }
               </div>
               <div class="form-field">
-                <label class="block text-sm text-content-muted mb-1" for="dockerImg">Docker image <span class="text-red-500">*</span></label>
+                <label class="block text-sm text-content-muted mb-1" for="dockerImg">Docker image <span class="text-danger">*</span></label>
                 <input id="dockerImg" class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="repo/image:tag" name="dockerImg"
                   required>
                 @if (sourceSelectionForm.controls.dockerImg?.errors?.required) {
-                  <div class="text-red-500 text-sm mt-1">
+                  <div class="text-danger text-sm mt-1">
                     Image is required
                   </div>
                 }
                 @if (sourceSelectionForm.controls.dockerImg?.errors?.dockerImageInvalid) {
-                  <div class="text-red-500 text-sm mt-1">
+                  <div class="text-danger text-sm mt-1">
                     Invalid Image
                   </div>
                 }

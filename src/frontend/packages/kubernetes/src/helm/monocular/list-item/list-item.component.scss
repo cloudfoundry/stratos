@@ -1,7 +1,9 @@
 @reference 'tailwindcss';
 
 .list-item {
-  @apply rounded-lg overflow-hidden border border-gray-300 bg-gray-100 transition-transform duration-200;
+  @apply rounded-lg overflow-hidden border transition-transform duration-200;
+  border-color: var(--content-border);
+  background-color: var(--content-secondary);
 }
 
 .list-item:hover {
@@ -13,15 +15,18 @@
 }
 
 .list-item-content {
-  @apply w-full flex flex-col text-gray-800 h-[200px];
+  @apply w-full flex flex-col h-[200px];
+  color: var(--content-text);
 }
 
 .list-item-logo {
-  @apply w-full flex items-center justify-center bg-white h-[110px];
+  @apply w-full flex items-center justify-center h-[110px];
+  background-color: var(--content-bg);
 }
 
 .list-item-info {
-  @apply relative flex-1 px-4 flex flex-col justify-center break-words text-center border-t border-gray-300;
+  @apply relative flex-1 px-4 flex flex-col justify-center break-words text-center border-t;
+  border-top-color: var(--content-border);
 }
 
 .list-item__auto-height {

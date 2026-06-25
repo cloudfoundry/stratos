@@ -29,6 +29,8 @@ import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
 
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
 interface Colors {
   bg: string;
   fg: string;
@@ -198,14 +200,13 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   private alertLevelToColor(level: ResourceAlertLevel) {
-    // These colours need to come from theme - #420
     switch (level) {
       case ResourceAlertLevel.Info:
-        return '#42a5f5';
+        return cssVar('--color-info');
       case ResourceAlertLevel.Warning:
-        return '#ff9800';
+        return cssVar('--color-warning');
       case ResourceAlertLevel.Error:
-        return '#f44336';
+        return cssVar('--color-danger');
     }
   }
 
@@ -248,22 +249,22 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'error':
         return {
-          bg: 'red',
+          bg: cssVar('--color-danger'),
           fg: 'white'
         };
       case 'ok':
         return {
-          bg: 'green',
+          bg: cssVar('--color-success'),
           fg: 'white'
         };
       case 'warn':
         return {
-          bg: 'orange',
+          bg: cssVar('--color-warning'),
           fg: 'white'
         };
       default:
         return {
-          bg: '#5a9cb0',
+          bg: cssVar('--content-muted'),
           fg: 'white'
         };
     }

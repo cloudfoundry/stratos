@@ -13,7 +13,7 @@
       </label>
     </div>
     @if (renderError()) {
-      <div data-testid="render-error-notice" class="mb-3 p-3 rounded-md border border-amber-400 bg-amber-50 text-amber-800 text-sm dark:bg-amber-900/30 dark:text-amber-300">
+      <div data-testid="render-error-notice" class="mb-3 p-3 rounded-md border border-warning-400 dark:border-warning-600 bg-warning-50 dark:bg-warning-900/30 text-warning-900 dark:text-warning-100 text-sm">
         @if (schemaTitle) {
           <strong class="block font-semibold mb-1">{{ schemaTitle }}</strong>
         }
@@ -28,7 +28,7 @@
         <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" [warnings]="warnings()" (changes)="onFormChange($event)" (renderError)="onRenderError($event)">
         </json-schema-form>
         @if (warnings().length) {
-          <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
+          <ul class="mt-2 text-sm text-warning list-disc pl-5">
             @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
           </ul>
         }
@@ -40,7 +40,7 @@
         (editorInit)="onMonacoInit($event)">
       </app-monaco-editor>
       @if (warnings().length) {
-        <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
+        <ul class="mt-2 text-sm text-warning list-disc pl-5">
           @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
         </ul>
       }
@@ -53,7 +53,7 @@
     (editorInit)="onMonacoInit($event)">
   </app-monaco-editor>
   @if (warnings().length) {
-    <ul class="mt-2 text-sm text-amber-600 dark:text-amber-400 list-disc pl-5">
+    <ul class="mt-2 text-sm text-warning list-disc pl-5">
       @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
     </ul>
   }

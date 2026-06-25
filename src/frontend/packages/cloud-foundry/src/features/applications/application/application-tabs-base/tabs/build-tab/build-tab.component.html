@@ -27,8 +27,8 @@
       @if (detail.build?.error; as errorMsg) {
         <app-tile-group class="tile-group-1-cols">
           <app-tile>
-            <div class="card bg-yellow-50 border-yellow-400 border-l-4 items-center flex">
-              <span class="material-icons text-yellow-500">warning</span>
+            <div class="card bg-warning-50 dark:bg-warning-900/30 border-warning-400 dark:border-warning-600 border-l-4 items-center flex">
+              <span class="material-icons text-warning">warning</span>
               <div>{{ errorMsg }}</div>
             </div>
           </app-tile>

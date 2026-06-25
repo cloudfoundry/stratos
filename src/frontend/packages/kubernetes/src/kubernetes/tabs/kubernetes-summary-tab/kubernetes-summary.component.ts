@@ -22,6 +22,8 @@ import { KubeNamespaceDataService } from '../../../services/domain-data/kube-nam
 import { KubernetesNode, KubernetesPod } from '../../store/kube.types';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
 interface IEndpointDetails {
   // imagePath/label derive from the endpoint definition's optional
   // logoUrl/label fields, so both may legitimately be absent.
@@ -51,11 +53,18 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public nodeCount$!: Observable<number | null>;
   public namespaceCount$!: Observable<number | null>;
 
+  // Resolve adaptive theme colors once at construction. These feed
+  // SimpleUsageChart domains; the component is not rebuilt on a live theme
+  // toggle, so the colors reflect the theme active when this view loaded.
+  private successColor = cssVar('--color-success');
+  private successTint = `color-mix(in srgb, ${this.successColor} 18%, transparent)`;
+  private neutralTrack = `color-mix(in srgb, ${cssVar('--content-text')} 15%, transparent)`;
+
   public highUsageColors = {
-    domain: ['#00000026', '#00af00']
+    domain: [this.neutralTrack, this.successColor]
   };
   public normalUsageColors = {
-    domain: ['#00af00', '#00af002e']
+    domain: [this.successColor, this.successTint]
   };
   public chartHeight = '150px';
 

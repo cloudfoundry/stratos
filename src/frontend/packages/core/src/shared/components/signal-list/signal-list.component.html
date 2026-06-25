@@ -60,7 +60,7 @@
         [disabled]="!hasActiveFilter()"
         title="Clear filters and sort"
         aria-label="Clear filters and sort"
-        class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+        class="px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed">
         <span class="material-icons text-base leading-5">highlight_off</span>
       </button>
     }
@@ -80,7 +80,7 @@
           (click)="toggleSortDirection()"
           [title]="config.sort!().direction === 'asc' ? 'Ascending' : 'Descending'"
           [attr.aria-label]="config.sort!().direction === 'asc' ? 'Sort ascending' : 'Sort descending'"
-          class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+          class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary">
           <span class="material-icons text-base leading-5" [class.rotate-180]="config.sort!().direction === 'asc'">sort</span>
         </button>
         <button
@@ -108,7 +108,7 @@
         (click)="setViewMode(config.viewMode!() === 'table' ? 'card' : 'table')"
         [title]="config.viewMode!() === 'table' ? 'Card view' : 'Table view'"
         [attr.aria-label]="config.viewMode!() === 'table' ? 'Switch to card view' : 'Switch to table view'"
-        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700">
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary">
         <span class="material-icons text-base leading-5">{{ config.viewMode!() === 'table' ? 'grid_on' : 'list' }}</span>
       </button>
     }
@@ -124,7 +124,7 @@
           [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
             (act.primary
               ? 'border-primary-shade-700 bg-primary text-white hover:bg-primary-shade-700'
-              : 'border-content-border bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700')">
+              : 'border-content-border bg-content-bg text-content-text hover:bg-content-secondary')">
           @if (act.icon) {
             <span class="material-icons text-base leading-5">{{ act.icon }}</span>
           }
@@ -147,7 +147,7 @@
         [disabled]="(config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() > 0"
         [attr.data-test]="((config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() > 0) ? 'refresh-loading' : 'refresh'"
         [title]="((config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() > 0) ? 'Refreshing…' : 'Refresh'"
-        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-100">
+        class="px-2 py-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-100">
         <!--
           Fixed h-5 w-5 (20×20) slot for the icon/spinner so peer toolbar
           items don't shift horizontally each refresh cycle. The material-
@@ -193,8 +193,8 @@
           [attr.data-test]="act.dataTest ?? ('bulk-action-' + act.label)"
           [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +
             (act.danger
-              ? 'border-red-600 bg-red-600 text-white hover:bg-red-700'
-              : 'border-content-border bg-content-bg text-content-text hover:bg-gray-100 dark:hover:bg-gray-700')">
+              ? 'border-danger bg-danger text-white hover:bg-danger/90'
+              : 'border-content-border bg-content-bg text-content-text hover:bg-content-secondary')">
           @if (act.icon) {
             <span class="material-icons text-base leading-5">{{ act.icon }}</span>
           }
@@ -305,9 +305,8 @@
                                   type="button"
                                   [disabled]="act.disabled"
                                   (click)="invokeAction(act, row, $event)"
-                                  class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                                  [class.text-red-600]="act.danger"
-                                  [class.dark:text-red-400]="act.danger">
+                                  class="w-full text-left px-3 py-1.5 text-sm hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                                  [class.text-danger]="act.danger">
                                   @if (act.icon) {
                                     <span class="material-icons text-base leading-none">{{ act.icon }}</span>
                                   }
@@ -438,7 +437,7 @@
             }
           }
         </colgroup>
-        <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 border-b border-content-border">
+        <thead class="sticky top-0 bg-content-secondary z-10 border-b border-content-border">
           <tr>
             @if (favoriteColumn() || actionsColumn()) {
               <th class="text-left px-3 py-2 font-semibold text-sm text-content-text whitespace-nowrap"></th>
@@ -484,7 +483,7 @@
             <tr data-test="row"
                 [routerLink]="rowStateBlocksNav(row) ? null : rowLink(row)"
                 [queryParams]="rowLinkQueryParams(row)"
-                [class]="'border-b border-content-border hover:bg-gray-50 dark:hover:bg-gray-900 ' +
+                [class]="'border-b border-content-border hover:bg-content-secondary ' +
                   (rowLink(row) && !rowStateBlocksNav(row) ? 'cursor-pointer ' : '') + rowStateRowClass(row)">
               @if (favoriteColumn() || actionsColumn()) {
                 <td class="px-2 py-2 align-top overflow-visible whitespace-nowrap">
@@ -525,9 +524,8 @@
                                 type="button"
                                 [disabled]="act.disabled"
                                 (click)="invokeAction(act, row, $event)"
-                                class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                                [class.text-red-600]="act.danger"
-                                [class.dark:text-red-400]="act.danger">
+                                class="w-full text-left px-3 py-1.5 text-sm hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                                [class.text-danger]="act.danger">
                                 @if (act.icon) {
                                   <span class="material-icons text-base leading-none">{{ act.icon }}</span>
                                 }
@@ -625,9 +623,8 @@
                               type="button"
                               [disabled]="act.disabled"
                               (click)="invokeAction(act, row, $event)"
-                              class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                              [class.text-red-600]="act.danger"
-                              [class.dark:text-red-400]="act.danger">
+                              class="w-full text-left px-3 py-1.5 text-sm hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                              [class.text-danger]="act.danger">
                               @if (act.icon) {
                                 <span class="material-icons text-base leading-none">{{ act.icon }}</span>
                               }
@@ -681,7 +678,7 @@
                   <div class="flex items-center gap-2 text-xs text-content-muted">
                     <span>Deleting…</span>
                     <span class="inline-block h-1 flex-1 rounded bg-content-border overflow-hidden">
-                      <span class="block h-full w-1/3 bg-red-400 animate-pulse"></span>
+                      <span class="block h-full w-1/3 bg-danger animate-pulse"></span>
                     </span>
                   </div>
                 </td>
@@ -755,7 +752,7 @@
     <div class="flex items-center gap-1">
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() === 0"
         (click)="config.pageIndex.set(0)"
         title="First page">
@@ -763,7 +760,7 @@
       </button>
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() === 0"
         (click)="config.pageIndex.set(config.pageIndex() - 1)"
         title="Previous page">
@@ -771,7 +768,7 @@
       </button>
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() + 1 >= Math.max(1, config.totalPages())"
         (click)="config.pageIndex.set(config.pageIndex() + 1)"
         title="Next page">
@@ -779,7 +776,7 @@
       </button>
       <button
         type="button"
-        class="p-1 border border-content-border rounded bg-content-bg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="p-1 border border-content-border rounded bg-content-bg hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="config.pageIndex() + 1 >= Math.max(1, config.totalPages())"
         (click)="config.pageIndex.set(Math.max(0, config.totalPages() - 1))"
         title="Last page">

@@ -63,7 +63,7 @@ describe('SignalDetailComponent', () => {
       status: signal({ label: 'Unknown' }).asReadonly(),
     });
     const pill = fixture.nativeElement.querySelector('[data-test="signal-detail-status"]');
-    expect(pill.className).toContain('bg-gray-100');
+    expect(pill.className).toContain('bg-content-secondary');
   });
 
   it('renders header action buttons with optional icon, primary emphasis class', () => {
