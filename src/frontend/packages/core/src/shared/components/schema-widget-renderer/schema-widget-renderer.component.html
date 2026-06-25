@@ -60,16 +60,38 @@
         @case ('oneOf') {
           <div class="space-y-2">
             <select [attr.data-branch]="f.pointer"
-              [value]="activeOneOf(f.pointer)"
               (change)="selectBranch(f.pointer, +$any($event.target).value)"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
               @for (branch of f.schema.oneOf; track $index) {
-                <option [value]="$index">{{ branchLabel(branch, $index) }}</option>
+                <option [value]="$index"
+                  [selected]="$index === activeOneOf(f.pointer)">{{ branchLabel(branch, $index) }}</option>
               }
             </select>
-            @if (f.schema.oneOf[activeOneOf(f.pointer)]; as activeBranch) {
+            @let branchNode = activeOneOfNode(f);
+            @if (isScalarBranch(branchNode.kind)) {
+              @if (branchNode.kind === 'boolean') {
+                <input type="checkbox" [attr.data-path]="f.pointer"
+                  [checked]="valueAt(f.pointer) === true"
+                  (change)="setBranchScalar(f.pointer, branchNode.kind, $event)"
+                  class="h-4 w-4 rounded border-gray-300" />
+              } @else if (branchNode.kind === 'enum') {
+                <select [attr.data-path]="f.pointer"
+                  (change)="setBranchScalar(f.pointer, branchNode.kind, $event)"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
+                  <option value="">Select an option</option>
+                  @for (o of branchNode.schema.enum; track o) {
+                    <option [value]="o" [selected]="o === valueAt(f.pointer)">{{ o }}</option>
+                  }
+                </select>
+              } @else {
+                <input [attr.data-path]="f.pointer" [type]="branchInputType(branchNode.kind)"
+                  [value]="valueAt(f.pointer) ?? ''"
+                  (input)="setBranchScalar(f.pointer, branchNode.kind, $event)"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md" />
+              }
+            } @else {
               <div class="pl-4 border-l border-content-border">
-                <json-schema-form [schema]="activeBranch"
+                <json-schema-form [schema]="branchNode.schema"
                   [data]="valueAt(f.pointer)"
                   [_basePointer]="f.pointer"
                   (changes)="onChild(f.pointer, $event)"></json-schema-form>
@@ -84,7 +106,7 @@
                 <label class="flex items-center gap-2 text-sm">
                   <input type="checkbox" [attr.data-anyof]="f.pointer"
                     [checked]="selectedAnyOf(f.pointer).includes($index)"
-                    (change)="toggleAnyOf(f.pointer, $index, $any($event.target).checked)"
+                    (change)="toggleAnyOf(f.pointer, $index, $any($event.target).checked, f.schema.anyOf)"
                     class="h-4 w-4 rounded border-gray-300" />
                   {{ branchLabel(branch, $index) }}
                 </label>
@@ -102,10 +124,12 @@
         }
         @case ('enum') {
           <select [id]="f.pointer" [attr.data-path]="f.pointer"
-            [value]="valueAt(f.pointer) ?? ''" (change)="setScalar(f, $event)"
+            (change)="setScalar(f, $event)"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md">
-            <option value="">Select an option</option>
-            @for (o of f.schema.enum; track o) { <option [value]="o">{{ o }}</option> }
+            <option value="" [selected]="(valueAt(f.pointer) ?? '') === ''">Select an option</option>
+            @for (o of f.schema.enum; track o) {
+              <option [value]="o" [selected]="o === valueAt(f.pointer)">{{ o }}</option>
+            }
           </select>
         }
         @case ('boolean') {
