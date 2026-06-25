@@ -1,8 +1,9 @@
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MonacoEditorComponent,
+  TailwindSnackBarService,
   safeStringToObj,
 } from '@stratosui/core';
 import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
@@ -34,7 +35,9 @@ export class SchemaFormConfig {
 export class SchemaFormComponent {
 
   mode!: 'JSON' | 'schema';
-  schemaView: 'schemaForm' | 'schemaJson' = 'schemaForm';
+  readonly schemaView = signal<'schemaForm' | 'schemaJson'>('schemaForm');
+  readonly renderError = signal<string | null>(null);
+  private readonly snackBar = inject(TailwindSnackBarService);
   private schema: object | undefined;
 
   @Input()
@@ -94,11 +97,21 @@ export class SchemaFormComponent {
   }
 
   onSchemaViewChanged() {
-    if (this.schemaView === 'schemaForm') {
+    if (this.schemaView() === 'schemaForm') {
       this.formInitialData = this.data() ?? undefined; // JSON → form
     } else {
       this.setJsonText(this.data() ? JSON.stringify(this.data()) : ''); // form → JSON
     }
+  }
+
+  /** Called by the renderer's `(renderError)` output. Deferred via queueMicrotask
+   *  to avoid re-entrancy when the emit arrives mid change-detection (during child ngOnInit). */
+  onRenderError(message: string): void {
+    queueMicrotask(() => {
+      this.renderError.set(message);
+      this.schemaView.set('schemaJson');   // auto-fallback to JSON view
+      this.snackBar.error(message);
+    });
   }
 
   onMonacoInit(editor: any) {

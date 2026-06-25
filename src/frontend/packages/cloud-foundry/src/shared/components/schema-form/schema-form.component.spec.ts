@@ -2,10 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { SchemaFormComponent } from './schema-form.component';
+import { TailwindSnackBarService } from '@stratosui/core';
 
 describe('SchemaFormComponent', () => {
   let component: SchemaFormComponent;
@@ -63,5 +64,42 @@ describe('SchemaFormComponent advisory validity', () => {
     c.setJsonText('{ not json');
     await fixture.whenStable();
     expect(lastValid).toBe(false);
+  });
+});
+
+describe('SchemaFormComponent render error fallback', () => {
+  let snackBarSpy: { error: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    snackBarSpy = { error: vi.fn() };
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: TailwindSnackBarService, useValue: snackBarSpy },
+      ],
+    });
+  });
+
+  it('auto-switches to JSON view, sets renderError, and calls snackbar on onRenderError()', async () => {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    // Set schema mode so the schema-form branch is active
+    c.config = { schema: { type: 'object', properties: { x: { type: 'string' } } } };
+    fixture.detectChanges();
+
+    const msg = 'This plan\'s parameter schema could not be rendered as a form (boom). Edit the parameters directly as JSON below — the broker validates them on submit.';
+    c.onRenderError(msg);
+    // flush the queueMicrotask
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(c.schemaView()).toBe('schemaJson');
+    expect(c.renderError()).toContain('Edit the parameters directly as JSON');
+    expect(snackBarSpy.error).toHaveBeenCalledWith(msg);
+
+    // inline notice renders in the DOM
+    const notice = fixture.nativeElement.querySelector('[data-testid="render-error-notice"]');
+    expect(notice).toBeTruthy();
+    expect(notice.textContent).toContain('Edit the parameters directly as JSON');
   });
 });

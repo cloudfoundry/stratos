@@ -47,6 +47,13 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   @Output() changes = new EventEmitter<any>();
 
   /**
+   * Emitted when `_buildFields()` throws during schema parsing. Carries an
+   * actionable message that the wrapper (SchemaFormComponent) can display inline
+   * and via snackbar, and uses to auto-switch to JSON view.
+   */
+  @Output() renderError = new EventEmitter<string>();
+
+  /**
    * Emitted as [] on every edit — validity is advisory and surfaced by the
    * wrapper (SchemaFormComponent); kept here only for contract compatibility.
    */
@@ -146,7 +153,16 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     this._mapRows.set({});
     this._mapRowIdCounter = 0;
     this._working.set(structuredClone(this.data ?? {}));
-    this.fields.set(this._buildFields());
+    try {
+      this.fields.set(this._buildFields());
+    } catch (e: any) {
+      this.fields.set([]);
+      this.renderError.emit(
+        `This plan's parameter schema could not be rendered as a form` +
+        (e?.message ? ` (${e.message})` : '') +
+        `. Edit the parameters directly as JSON below — the broker validates them on submit.`
+      );
+    }
     this._seedMapRows();
     this._seedJsonText();
   }
