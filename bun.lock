@@ -16,6 +16,7 @@
         "@angular/router": "22.0.1",
         "@cfstratos/monaco-yaml": "2.5.0",
         "@swimlane/ngx-graph": "11.0.0",
+        "ajv": "^8.20.0",
         "chart.js": "^4.5.1",
         "core-js": "3.45.0",
         "date-fns": "^4.3.0",
