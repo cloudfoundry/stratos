@@ -20,6 +20,14 @@
       "locator": { "role": "textbox", "name": "Username" } },
     { "selector": ".btn-primary", "snapshotId": "auth.login.sign-in",
       "tokens": [{ "name": "--color-brand-500" }],
-      "locator": { "role": "button", "name": "Sign in" } }
+      "locator": { "role": "button", "name": "Sign in" } },
+    { "selector": ".login-bg", "snapshotId": "auth.login.background", "tokens": [],
+      "locator": { "role": "img", "name": "background image for the login page" } },
+    { "selector": ".login-logo", "snapshotId": "auth.login.logo", "tokens": [],
+      "locator": { "role": "img", "name": "logo image for the login page" } },
+    { "selector": ".login-subtitle", "snapshotId": "auth.login.subtitle", "tokens": [],
+      "locator": { "role": "paragraph", "name": "subtitle" } },
+    { "selector": ".login-message", "snapshotId": "auth.login.message", "tokens": [],
+      "locator": { "role": "note", "name": "custom message" } }
   ]
 }
