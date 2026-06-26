@@ -106,7 +106,7 @@ describe('CloudFoundrySpaceUserServiceInstancesSignalComponent', () => {
     } as any)).toBe('cnsi-1:si-2');
   });
 
-  it('Name column links to the legacy /services/user-provided/:cnsi/:siGuid detail page', () => {
+  it('Name column links to the /services/user-service/:cnsi/:siGuid detail page', () => {
     const cfg = component.listConfig();
     const nameCol = cfg!.columns.find(c => c.key === 'name');
     expect(nameCol).toBeDefined();
@@ -114,7 +114,7 @@ describe('CloudFoundrySpaceUserServiceInstancesSignalComponent', () => {
       cnsiGuid: 'cnsi-1', guid: 'si-2', name: 'legacy-db', type: 'user-provided',
       tags: [], createdAt: '',
     } as any);
-    expect(link).toEqual(['/services', 'user-provided', 'cnsi-1', 'si-2']);
+    expect(link).toEqual(['/services', 'user-service', 'cnsi-1', 'si-2']);
   });
 
   it('Add UPS opens the user-provided wizard pre-selecting this CF', () => {
