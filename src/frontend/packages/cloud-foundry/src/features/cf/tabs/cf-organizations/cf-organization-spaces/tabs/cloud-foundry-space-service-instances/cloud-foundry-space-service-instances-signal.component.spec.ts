@@ -125,7 +125,7 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     expect(serviceCol!.render!(managed)).toBe('redis');
   });
 
-  it('Name column links to the legacy /services/managed/:cnsi/:siGuid detail page', () => {
+  it('Name column links to the /services/service/:cnsi/:siGuid detail page', () => {
     const cfg = component.listConfig();
     const nameCol = cfg!.columns.find(c => c.key === 'name');
     expect(nameCol).toBeDefined();
@@ -133,7 +133,7 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
       cnsiGuid: 'cnsi-1', guid: 'si-1', name: 'cache', type: 'managed',
       tags: [], createdAt: '',
     } as any);
-    expect(link).toEqual(['/services', 'managed', 'cnsi-1', 'si-1']);
+    expect(link).toEqual(['/services', 'service', 'cnsi-1', 'si-1']);
   });
 
   it('Add Service Instance opens the managed wizard pre-selecting this CF', () => {
