@@ -157,9 +157,13 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
-          // Same legacy detail-page route as the wall — that detail page
-          // stays untouched in this migration.
-          link: (si: StServiceInstance) => ['/services', 'user-provided', si.cnsiGuid, si.guid],
+          // Per-instance detail page (#5370), uniform with the services wall.
+          // This is the user-provided tab, so the :type segment is always
+          // 'user-service'; derived from the row kind to match the wall.
+          link: (si: StServiceInstance) => {
+            const siType = si.type === 'user-provided' ? 'user-service' : 'service';
+            return ['/services', siType, si.cnsiGuid, si.guid];
+          },
           render: (si: StServiceInstance) => si.name,
           widthHint: '14rem',
         },
