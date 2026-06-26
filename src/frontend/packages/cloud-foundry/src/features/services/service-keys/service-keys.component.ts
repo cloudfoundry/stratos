@@ -4,12 +4,13 @@ import { ChangeDetectionStrategy, Component, Signal, computed, effect, inject, s
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { CopyToClipboardComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
+import { IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
+import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 
@@ -19,50 +20,6 @@ interface KeyDetailsResponse {
 
 interface OfferingBindableResponse {
   bindable?: boolean;
-}
-
-// One displayable credential entry. `sensitive` drives on-screen masking;
-// `value` always holds the real value so copy works even while masked;
-// `displayMasked` is what to show while hidden — a full bullet mask for plain
-// secrets, or a URL with only its password redacted so the host/port/db stay
-// readable.
-export interface CredentialField {
-  key: string;
-  value: string;
-  sensitive: boolean;
-  displayMasked: string;
-}
-
-// Mask credential keys that look like secrets. We iterate every field (rather
-// than hardcoding username/password/url) so the list survives broker key-name
-// changes; only the display is masked, never the copied value.
-const SENSITIVE_KEY = /pass|secret|token|private|key|cred/i;
-// Connection strings frequently embed the password as scheme://user:pass@host
-// (e.g. a postgres `uri`). Mask by VALUE too so these don't leak even though
-// the key ("uri"/"read_uri") looks innocuous; a plain URL without credentials
-// stays visible.
-const EMBEDDED_CREDENTIAL = /:\/\/[^/\s:@]+:[^/\s@]+@/;
-const FULL_MASK = '••••••••';
-
-// Redact only the password run in a scheme://user:pass@host URL, leaving the
-// scheme, user, host, port and path readable. Non-URL values (or URLs without
-// embedded credentials) pass through unchanged.
-function redactEmbeddedCredential(value: string): string {
-  return value.replace(/(:\/\/[^/\s:@]+:)[^/\s@]+(@)/, '$1<redacted>$2');
-}
-
-export function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
-  return Object.entries(creds).map(([key, raw]) => {
-    const value = typeof raw === 'string' ? raw : JSON.stringify(raw);
-    const embedsCredential = EMBEDDED_CREDENTIAL.test(value);
-    const sensitive = SENSITIVE_KEY.test(key) || embedsCredential;
-    return {
-      key,
-      value,
-      sensitive,
-      displayMasked: embedsCredential ? redactEmbeddedCredential(value) : FULL_MASK,
-    };
-  });
 }
 
 // ServiceKeysComponent — per-instance Service Keys page, reached via the
@@ -77,7 +34,7 @@ export function toCredentialFields(creds: Record<string, unknown>): CredentialFi
   templateUrl: './service-keys.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, PageHeaderComponent, CopyToClipboardComponent, ListSubNavComponent],
+  imports: [DatePipe, PageHeaderComponent, ListSubNavComponent, MaskedCredentialsComponent],
 })
 export class ServiceKeysComponent {
   private http = inject(HttpClient);
@@ -169,8 +126,6 @@ export class ServiceKeysComponent {
   private credsByGuid = signal<Record<string, Record<string, unknown>>>({});
   private credsLoadingByGuid = signal<Record<string, boolean>>({});
   private credsErrorByGuid = signal<Record<string, string>>({});
-  // Revealed sensitive fields, keyed `${guid}::${fieldKey}`.
-  private shownFields = signal<ReadonlySet<string>>(new Set<string>());
   // Per-key delete status.
   private statusByGuid = signal<Record<string, RowStatus>>({});
   // Transient "Copied" feedback for the header Copy-all button, by key guid.
@@ -184,9 +139,6 @@ export class ServiceKeysComponent {
     const creds = this.credsByGuid()[guid];
     return creds ? toCredentialFields(creds) : [];
   };
-  fieldShown = (guid: string, key: string): boolean => this.shownFields().has(`${guid}::${key}`);
-  displayValue = (guid: string, field: CredentialField): string =>
-    field.sensitive && !this.fieldShown(guid, field.key) ? field.displayMasked : field.value;
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -217,15 +169,6 @@ export class ServiceKeysComponent {
     if (opening && this.credsByGuid()[guid] === undefined && !this.credsLoading(guid)) {
       void this.loadCredentials(guid);
     }
-  }
-
-  toggleField(guid: string, key: string): void {
-    const id = `${guid}::${key}`;
-    this.shownFields.update(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
-      return next;
-    });
   }
 
   // Header "Copy all (JSON)" — works without expanding the panel: loads the
