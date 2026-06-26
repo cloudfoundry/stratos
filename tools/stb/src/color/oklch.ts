@@ -56,3 +56,22 @@ export function oklchToHex(o: Oklch): string {
   const b = linearToSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s);
   return rgbToHex(r, g, b);
 }
+
+// ponytail: fixed lightness ramp, constant chroma. Tuning knob: taper chroma at
+// the light/dark ends and run a contrast pass once the a11y milestone lands.
+const SCALE_LIGHTNESS: Record<string, number> = {
+  '50': 0.97, '100': 0.93, '200': 0.85, '300': 0.75, '400': 0.65,
+  '500': 0.55, '600': 0.48, '700': 0.40, '800': 0.32, '900': 0.22,
+};
+
+export function scaleFromOklch(base: Oklch): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [step, l] of Object.entries(SCALE_LIGHTNESS)) {
+    out[step] = oklchToHex({ l, c: base.c, h: base.h });
+  }
+  return out;
+}
+
+export function rotateHue(base: Oklch, deg: number): Oklch {
+  return { l: base.l, c: base.c, h: (base.h + deg) % 360 };
+}
