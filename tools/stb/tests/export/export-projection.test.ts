@@ -1,0 +1,20 @@
+import { describe, it, expect } from 'vitest';
+import { exportInputs } from '@/ui/export-dialog';
+import type { BrandingModel } from '@/metadata/types';
+
+const model: BrandingModel = { scene: 'login', nodes: [
+  { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title', value: { kind: 'content', text: 'Hi' } },
+  { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn', value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
+] };
+const routing = { containers: { 'auth.login': 'login' }, elements: {
+  'auth.login.title': { config: 'title' }, 'auth.login.sign-in': { token: '--color-brand-500' },
+} };
+
+describe('exportInputs', () => {
+  it('merges projected tokens over root and includes companyConfig', () => {
+    const out = exportInputs(model, routing, new Map([['--color-brand-50', '#eee']]), new Map(), []);
+    expect(out.companyConfig).toMatchObject({ login: { title: 'Hi' } });
+    expect(out.root.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/); // projected
+    expect(out.root.get('--color-brand-50')).toBe('#eee');               // preserved
+  });
+});
