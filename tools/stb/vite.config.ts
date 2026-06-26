@@ -37,8 +37,17 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: 'integration-node',
+          environment: 'node',
+          include: ['tests/integration/login-projection.test.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: 'integration-chromium',
           include: ['tests/integration/**/*.test.ts'],
+          exclude: ['tests/integration/login-projection.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),
@@ -52,6 +61,7 @@ export default defineConfig({
         test: {
           name: 'integration-firefox',
           include: ['tests/integration/**/*.test.ts'],
+          exclude: ['tests/integration/login-projection.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),
@@ -65,6 +75,7 @@ export default defineConfig({
         test: {
           name: 'integration-webkit',
           include: ['tests/integration/**/*.test.ts'],
+          exclude: ['tests/integration/login-projection.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),
