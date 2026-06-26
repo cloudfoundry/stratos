@@ -68,8 +68,11 @@ export function openExportDialog(): void {
         path: a.name === 'favicon' ? 'assets/favicon.svg' : `assets/${a.filename}`,
         blob: a.blob!,
       }));
-    const routingRes = await fetch(`/snapshots/v1/${activeSceneId.value}/routing.json`);
-    const routing: RoutingMap = await routingRes.json();
+    let routing: RoutingMap = { elements: {} };
+    try {
+      const res = await fetch(`/snapshots/v1/${activeSceneId.value}/routing.json`);
+      if (res.ok) routing = await res.json();
+    } catch { /* no routing → export tokens/assets only, no company-config */ }
     const bundle = buildBundle({
       name, id, description: '',
       ...exportInputs(brandingModel.value, routing, rootValues.value, darkValues.value, assetInputs),
