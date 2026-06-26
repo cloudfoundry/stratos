@@ -45,9 +45,12 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     panel.querySelector<HTMLInputElement>('.stb-lever-color')!
       .addEventListener('input', (e) => opts.onChange(colorValueFromHex((e.target as HTMLInputElement).value)));
   } else if (v.kind === 'content') {
-    panel.innerHTML = `<textarea class="stb-lever-text" rows="2">${v.text}</textarea>`;
-    panel.querySelector<HTMLTextAreaElement>('.stb-lever-text')!
-      .addEventListener('input', (e) => opts.onChange(contentValue((e.target as HTMLTextAreaElement).value)));
+    const ta = document.createElement('textarea');
+    ta.className = 'stb-lever-text';
+    ta.rows = 2;
+    ta.value = v.text;
+    ta.addEventListener('input', (e) => opts.onChange(contentValue((e.target as HTMLTextAreaElement).value)));
+    panel.appendChild(ta);
   } else if (v.kind === 'visibility') {
     panel.innerHTML = `<label><input type="checkbox" class="stb-lever-toggle" ${v.shown ? 'checked' : ''} /> shown</label>`;
     panel.querySelector<HTMLInputElement>('.stb-lever-toggle')!
