@@ -136,5 +136,70 @@
         </table>
       }
     </section>
+
+    @if (v.isManaged) {
+      <!-- Parameters — managed only (CF's /parameters queries the broker, which
+           a UPS has none of). Lazy, click-to-expand; fetched on first expand so
+           a broker that doesn't support parameter retrieval errors only here. -->
+      <section class="mt-6">
+        <button type="button"
+          class="flex items-center gap-2 text-left hover:opacity-80"
+          [attr.aria-expanded]="isParamsOpen()" (click)="toggleParams()">
+          <svg class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+            [class.rotate-90]="isParamsOpen()" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+          </svg>
+          <h2 class="text-lg font-semibold text-content-text">Parameters</h2>
+        </button>
+        @if (isParamsOpen()) {
+          <div class="mt-2">
+            @if (paramsLoading()) {
+              <p class="flex items-center gap-2 text-content-muted">
+                <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+                  aria-hidden="true"></span>
+                Loading parameters…
+              </p>
+            } @else if (paramsUnavailable()) {
+              <p class="text-content-muted">Parameters are not available for this service.</p>
+            } @else if (paramsEmpty()) {
+              <p class="text-content-muted">No configured parameters.</p>
+            } @else if (params(); as p) {
+              <app-json-viewer [json]="p" root="parameters"></app-json-viewer>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <!-- Credentials — UPS only. Lazy + masked: nothing is fetched from CF
+           until the user expands, and values stay masked until revealed. -->
+      <section class="mt-6">
+        <button type="button"
+          class="flex items-center gap-2 text-left hover:opacity-80"
+          [attr.aria-expanded]="isCredsOpen()" (click)="toggleCreds()">
+          <svg class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+            [class.rotate-90]="isCredsOpen()" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+          </svg>
+          <h2 class="text-lg font-semibold text-content-text">Credentials</h2>
+        </button>
+        @if (isCredsOpen()) {
+          <div class="mt-2">
+            @if (credsLoading()) {
+              <p class="flex items-center gap-2 text-content-muted">
+                <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+                  aria-hidden="true"></span>
+                Loading credentials…
+              </p>
+            } @else if (credsError()) {
+              <p class="text-danger">Could not load credentials for this service instance.</p>
+            } @else if (credentialFields().length === 0) {
+              <p class="text-content-muted">No credentials are set on this service instance.</p>
+            } @else {
+              <app-masked-credentials [fields]="credentialFields()"></app-masked-credentials>
+            }
+          </div>
+        }
+      </section>
+    }
   }
 </div>

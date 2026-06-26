@@ -29,11 +29,17 @@ import {
 } from '@stratosui/core';
 import { of } from 'rxjs';
 
+import { JsonViewerComponent } from '../../../../../core/src/shared/components/json-viewer/json-viewer.component';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import {
+  CredentialField,
+  MaskedCredentialsComponent,
+  toCredentialFields,
+} from '../../../shared/components/masked-credentials/masked-credentials.component';
 import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
@@ -75,11 +81,13 @@ interface InstanceView {
  * type: managed shows plan/offering/broker/dashboard, UPS shows the route-
  * service and syslog-drain URLs.
  *
- * Phase 1+2 (this commit): route shell + metadata card. Still to come:
- * bindings list + unbind (Phase 3), action bar (Phase 4), uniform card
- * linking (Phase 5), read-only parameters (Phase 6, needs a backend fetch).
- * UPS credentials metadata is an open question and is deliberately omitted
- * for now.
+ * Sections: metadata card, bound-applications list with unbind, a header
+ * action bar, and two lazily-fetched expandable sections — Parameters
+ * (managed + UPS, read-only json-viewer) and Credentials (UPS only, masked
+ * with per-field reveal). Both expandable sections fetch only on expand: a
+ * deliberate choice so credentials never hit CF until the user explicitly
+ * asks, and so a broker that doesn't support parameter retrieval errors only
+ * the section, not the page.
  */
 @Component({
   selector: 'app-service-instance-summary',
@@ -95,6 +103,8 @@ interface InstanceView {
     MetaCardKeyComponent,
     MetaCardValueComponent,
     AppChipsComponent,
+    JsonViewerComponent,
+    MaskedCredentialsComponent,
   ],
 })
 export class ServiceInstanceSummaryComponent implements OnDestroy {
@@ -174,6 +184,54 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
         isOfferingBindable: () => undefined,
       }).filter(a => a.label !== 'Detach');
     });
+  }
+
+  // Parameters section — lazy, click-to-expand. Managed and UPS both expose
+  // CF's GET .../parameters; the source is created on first expand so the page
+  // load stays light and a broker that errors only fails this section.
+  private readonly paramsOpen = signal(false);
+  private readonly paramsSource = signal<SignalSource<Record<string, unknown> | null> | null>(null);
+  readonly isParamsOpen = computed(() => this.paramsOpen());
+  readonly paramsLoading = computed(() => this.paramsSource()?.isLoading() ?? false);
+  // An error here means the broker doesn't support parameter retrieval — a
+  // normal condition for many services, shown as "not available" rather than
+  // an error, and kept distinct from an empty object ("no parameters").
+  readonly paramsUnavailable = computed(() => this.paramsSource()?.error() != null);
+  readonly params = computed(() => this.paramsSource()?.value() ?? null);
+  readonly paramsEmpty = computed(() => {
+    const p = this.params();
+    return p != null && Object.keys(p).length === 0;
+  });
+
+  // Credentials section — UPS only, lazy, click-to-expand. Sensitive, so the
+  // fetch is deferred until the user opens the section; values are masked by
+  // default in the rendered MaskedCredentialsComponent.
+  private readonly credsOpen = signal(false);
+  private readonly credsSource = signal<SignalSource<Record<string, unknown> | null> | null>(null);
+  readonly isCredsOpen = computed(() => this.credsOpen());
+  readonly credsLoading = computed(() => this.credsSource()?.isLoading() ?? false);
+  readonly credsError = computed(() => this.credsSource()?.error() != null);
+  readonly credentialFields = computed<CredentialField[]>(() => {
+    const c = this.credsSource()?.value();
+    return c ? toCredentialFields(c) : [];
+  });
+
+  /** Expand/collapse the Parameters section; fetch lazily on first expand. */
+  toggleParams(): void {
+    const opening = !this.paramsOpen();
+    this.paramsOpen.set(opening);
+    if (opening && this.paramsSource() == null) {
+      this.paramsSource.set(this.serviceCatalog.serviceInstanceParameters(this.cfGuid, this.siGuid));
+    }
+  }
+
+  /** Expand/collapse the Credentials section; fetch lazily on first expand. */
+  toggleCreds(): void {
+    const opening = !this.credsOpen();
+    this.credsOpen.set(opening);
+    if (opening && this.credsSource() == null) {
+      this.credsSource.set(this.serviceCatalog.userProvidedCredentials(this.cfGuid, this.siGuid));
+    }
   }
 
   ngOnDestroy(): void {
