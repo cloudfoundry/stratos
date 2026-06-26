@@ -1,7 +1,7 @@
 import { effect } from '@preact/signals-core';
 import { rootValues, darkValues } from '@/state/tokens';
 import { activeSceneId, previewDark } from '@/state/scene';
-import { brandingModel } from '@/state/branding';
+import { brandingModel, loadBrandingModel } from '@/state/branding';
 import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages';
 import type { BrandingModel } from '@/metadata/types';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
@@ -81,7 +81,9 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       window.addEventListener('message', onMessage);
 
       effect(() => {
-        loadScene(activeSceneId.value);
+        const scene = activeSceneId.value;
+        loadScene(scene);
+        void loadBrandingModel(scene);
       });
 
       effect(() => {
