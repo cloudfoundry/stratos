@@ -1,0 +1,13 @@
+{
+  "containers": {
+    "auth.login": "login"
+  },
+  "elements": {
+    "auth.login.title": {
+      "config": "title"
+    },
+    "auth.login.sign-in": {
+      "token": "--color-brand-500"
+    }
+  }
+}
