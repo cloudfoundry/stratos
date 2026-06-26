@@ -5,6 +5,7 @@ interface WorklistRow {
   line: number;
   dataTest: string;
   suggestedId: string;
+  suggestedConfig: string;
 }
 
 // area from a *.component.html filename: 'cf-users.component.html' -> 'cf.users'
@@ -26,7 +27,14 @@ export function buildWorklist(html: string, file: string): WorklistRow[] {
     const dt = DATA_TEST_RE.exec(attrs);
     if (!dt || HAS_SID_RE.test(attrs)) continue;
     const line = html.slice(0, m.index).split('\n').length;
-    rows.push({ file, line, dataTest: dt[1]!, suggestedId: `${area}.${dt[1]!}` });
+    const leaf = dt[1]!.split('-').pop() || dt[1]!;
+    rows.push({
+      file,
+      line,
+      dataTest: dt[1]!,
+      suggestedId: `${area}.${dt[1]!}`,
+      suggestedConfig: leaf,
+    });
   }
   return rows;
 }
@@ -35,6 +43,7 @@ export function buildWorklist(html: string, file: string): WorklistRow[] {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const files = process.argv.slice(2);
   const rows = files.flatMap((f) => buildWorklist(readFileSync(f, 'utf8'), f));
-  for (const r of rows) console.log(`${r.file}:${r.line}\t${r.dataTest}\t-> ${r.suggestedId}`);
+  for (const r of rows)
+    console.log(`${r.file}:${r.line}\t${r.dataTest}\t-> ${r.suggestedId}\t[config: ${r.suggestedConfig}]`);
   console.log(`\n${rows.length} element(s) to instrument.`);
 }
