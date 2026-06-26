@@ -4,6 +4,10 @@ import { project } from '@/projection/projector';
 import { brandingModel, setNodeValue } from '@/state/branding';
 import { setRootValue } from '@/state/tokens';
 
+export function companionVisibilityId(snapshotId: string): string {
+  return snapshotId.replace(/\.([^.]+)$/, '.show-$1');
+}
+
 export function applyEdit(snapshotId: string, value: LeverValue, routing: RoutingMap): void {
   setNodeValue(snapshotId, value);
   const m = brandingModel.value;
