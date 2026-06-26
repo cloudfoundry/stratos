@@ -12,6 +12,7 @@ export interface BuildBundleInput {
   root: Map<string, string>;
   dark: Map<string, string>;
   assets: AssetInput[];
+  companyConfig?: Record<string, unknown>;
 }
 
 export interface Bundle {
@@ -32,6 +33,9 @@ export function buildBundle(input: BuildBundleInput): Bundle {
     2,
   );
   files['theme.css'] = emitCss(input.root, input.dark);
+  if (input.companyConfig && Object.keys(input.companyConfig).length > 0) {
+    files['company-config.json'] = JSON.stringify(input.companyConfig, null, 2);
+  }
   const assetBlobs = new Map<string, Blob>();
   for (const a of input.assets) assetBlobs.set(a.path, a.blob);
   return { files, assetBlobs };
