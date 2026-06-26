@@ -19,123 +19,131 @@
   } @else if (error()) {
     <p class="text-danger">Could not load this service instance.</p>
   } @else if (view(); as v) {
-    <app-meta-card>
-      <app-meta-card-title>
-        <div>{{ v.name }}</div>
-      </app-meta-card-title>
+    <!-- Two-column header: a compact, content-sized metadata card on the left,
+         bound applications on the right. Replaces the shared MetaCard here (its
+         full-width, right-aligned, height:100% layout wasted space and pushed
+         the sections off-screen) with a left-aligned definition list. -->
+    <div class="flex flex-wrap gap-6 items-start">
+      <div class="w-96 max-w-full self-start">
+        <app-meta-card>
+          <app-meta-card-title>
+            <div class="text-lg font-semibold text-content-text">{{ v.name }}</div>
+          </app-meta-card-title>
 
-      <app-meta-card-item>
-        <app-meta-card-key>Type</app-meta-card-key>
-        <app-meta-card-value>{{ v.typeLabel }}</app-meta-card-value>
-      </app-meta-card-item>
+          <app-meta-card-item>
+            <app-meta-card-key>Type</app-meta-card-key>
+            <app-meta-card-value>{{ v.typeLabel }}</app-meta-card-value>
+          </app-meta-card-item>
 
-      @if (v.status) {
-        <app-meta-card-item>
-          <app-meta-card-key>Status</app-meta-card-key>
-          <app-meta-card-value>
-            {{ v.status }}@if (v.statusDetail) { — {{ v.statusDetail }} }
-          </app-meta-card-value>
-        </app-meta-card-item>
-      }
+          @if (v.status) {
+            <app-meta-card-item>
+              <app-meta-card-key>Status</app-meta-card-key>
+              <app-meta-card-value>
+                {{ v.status }}@if (v.statusDetail) { — {{ v.statusDetail }} }
+              </app-meta-card-value>
+            </app-meta-card-item>
+          }
 
-      @if (v.isManaged) {
-        @if (v.plan) {
+          @if (v.isManaged) {
+            @if (v.plan) {
+              <app-meta-card-item>
+                <app-meta-card-key>Plan</app-meta-card-key>
+                <app-meta-card-value>{{ v.plan }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.offering) {
+              <app-meta-card-item>
+                <app-meta-card-key>Service</app-meta-card-key>
+                <app-meta-card-value>{{ v.offering }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.broker) {
+              <app-meta-card-item>
+                <app-meta-card-key>Broker</app-meta-card-key>
+                <app-meta-card-value>{{ v.broker }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.dashboardUrl) {
+              <app-meta-card-item>
+                <app-meta-card-key>Dashboard</app-meta-card-key>
+                <app-meta-card-value>
+                  <a [href]="v.dashboardUrl" target="_blank" rel="noopener" class="text-accent">
+                    <span class="material-icons align-middle">launch</span>
+                  </a>
+                </app-meta-card-value>
+              </app-meta-card-item>
+            }
+          } @else {
+            @if (v.routeServiceUrl) {
+              <app-meta-card-item customStyle="long-text">
+                <app-meta-card-key>Route Service URL</app-meta-card-key>
+                <app-meta-card-value>{{ v.routeServiceUrl }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.syslogDrainUrl) {
+              <app-meta-card-item customStyle="long-text">
+                <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
+                <app-meta-card-value>{{ v.syslogDrainUrl }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+          }
+
+          @if (v.space) {
+            <app-meta-card-item>
+              <app-meta-card-key>Space</app-meta-card-key>
+              <app-meta-card-value>{{ v.space }}@if (v.org) { ({{ v.org }}) }</app-meta-card-value>
+            </app-meta-card-item>
+          }
+
           <app-meta-card-item>
-            <app-meta-card-key>Plan</app-meta-card-key>
-            <app-meta-card-value>{{ v.plan }}</app-meta-card-value>
+            <app-meta-card-key>Created</app-meta-card-key>
+            <app-meta-card-value>{{ v.createdAt | date:'medium' }}</app-meta-card-value>
           </app-meta-card-item>
-        }
-        @if (v.offering) {
-          <app-meta-card-item>
-            <app-meta-card-key>Service</app-meta-card-key>
-            <app-meta-card-value>{{ v.offering }}</app-meta-card-value>
-          </app-meta-card-item>
-        }
-        @if (v.broker) {
-          <app-meta-card-item>
-            <app-meta-card-key>Broker</app-meta-card-key>
-            <app-meta-card-value>{{ v.broker }}</app-meta-card-value>
-          </app-meta-card-item>
-        }
-        @if (v.dashboardUrl) {
-          <app-meta-card-item>
-            <app-meta-card-key>Dashboard</app-meta-card-key>
+
+          @if (v.updatedAt) {
+            <app-meta-card-item>
+              <app-meta-card-key>Updated</app-meta-card-key>
+              <app-meta-card-value>{{ v.updatedAt | date:'medium' }}</app-meta-card-value>
+            </app-meta-card-item>
+          }
+
+          <app-meta-card-item customStyle="column">
+            <app-meta-card-key>Tags</app-meta-card-key>
             <app-meta-card-value>
-              <a [href]="v.dashboardUrl" target="_blank" rel="noopener" class="text-accent">
-                <span class="material-icons align-middle">launch</span>
-              </a>
+              <app-chips [chips]="v.tags"></app-chips>
             </app-meta-card-value>
           </app-meta-card-item>
-        }
-      } @else {
-        @if (v.routeServiceUrl) {
-          <app-meta-card-item customStyle="long-text">
-            <app-meta-card-key>Route Service URL</app-meta-card-key>
-            <app-meta-card-value>{{ v.routeServiceUrl }}</app-meta-card-value>
-          </app-meta-card-item>
-        }
-        @if (v.syslogDrainUrl) {
-          <app-meta-card-item customStyle="long-text">
-            <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
-            <app-meta-card-value>{{ v.syslogDrainUrl }}</app-meta-card-value>
-          </app-meta-card-item>
-        }
-      }
+        </app-meta-card>
+      </div>
 
-      @if (v.space) {
-        <app-meta-card-item>
-          <app-meta-card-key>Space</app-meta-card-key>
-          <app-meta-card-value>{{ v.space }}@if (v.org) { ({{ v.org }}) }</app-meta-card-value>
-        </app-meta-card-item>
-      }
-
-      <app-meta-card-item>
-        <app-meta-card-key>Created</app-meta-card-key>
-        <app-meta-card-value>{{ v.createdAt | date:'medium' }}</app-meta-card-value>
-      </app-meta-card-item>
-
-      @if (v.updatedAt) {
-        <app-meta-card-item>
-          <app-meta-card-key>Updated</app-meta-card-key>
-          <app-meta-card-value>{{ v.updatedAt | date:'medium' }}</app-meta-card-value>
-        </app-meta-card-item>
-      }
-
-      <app-meta-card-item customStyle="column">
-        <app-meta-card-key>Tags</app-meta-card-key>
-        <app-meta-card-value>
-          <app-chips [chips]="v.tags"></app-chips>
-        </app-meta-card-value>
-      </app-meta-card-item>
-    </app-meta-card>
-
-    <section class="mt-6">
-      <h2 class="text-lg font-semibold text-content-text mb-2">Bound Applications</h2>
-      @if (bindingsLoading()) {
-        <p class="text-content-muted">Loading bindings…</p>
-      } @else if (bindings().length === 0) {
-        <p class="text-content-muted">No applications are bound to this service instance.</p>
-      } @else {
-        <table class="w-full text-left">
-          <thead>
-            <tr class="border-b border-content-border text-sm uppercase tracking-wide text-content-muted">
-              <th class="py-2">Application</th>
-              <th class="py-2 w-24 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (b of bindings(); track b.guid) {
-              <tr class="border-b border-content-border">
-                <td class="py-2 text-content-text">{{ b.appName }}</td>
-                <td class="py-2 text-right">
-                  <button type="button" class="btn btn-secondary btn-sm" (click)="unbind(b)">Unbind</button>
-                </td>
+      <section class="flex-1 min-w-[20rem]">
+        <h2 class="text-lg font-semibold text-content-text mb-2">Bound Applications</h2>
+        @if (bindingsLoading()) {
+          <p class="text-content-muted">Loading bindings…</p>
+        } @else if (bindings().length === 0) {
+          <p class="text-content-muted">No applications are bound to this service instance.</p>
+        } @else {
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-content-border text-sm uppercase tracking-wide text-content-muted">
+                <th class="py-2">Application</th>
+                <th class="py-2 w-24 text-right">Action</th>
               </tr>
-            }
-          </tbody>
-        </table>
-      }
-    </section>
+            </thead>
+            <tbody>
+              @for (b of bindings(); track b.guid) {
+                <tr class="border-b border-content-border">
+                  <td class="py-2 text-content-text">{{ b.appName }}</td>
+                  <td class="py-2 text-right">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="unbind(b)">Unbind</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+    </div>
 
     @if (v.isManaged) {
       <!-- Parameters — managed only (CF's /parameters queries the broker, which
