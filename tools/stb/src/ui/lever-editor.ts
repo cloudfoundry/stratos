@@ -7,6 +7,7 @@ export interface OpenLeverEditorOptions {
   value: LeverValue;
   onChange: (next: LeverValue) => void;
   onClose?: () => void;
+  visibilityCompanion?: { shown: boolean; onChange: (shown: boolean) => void };
 }
 
 export function colorValueFromHex(hex: string): LeverValue {
@@ -64,6 +65,20 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
         setAsset('logo', file, file.name); // ponytail: assets signal currently keys logo/favicon; login bg reuses the blob path by filename
         opts.onChange(assetValue(file.name));
       });
+  }
+
+  if (opts.visibilityCompanion) {
+    const c = opts.visibilityCompanion;
+    const label = document.createElement('label');
+    label.className = 'stb-lever-companion';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'stb-lever-companion-toggle';
+    cb.checked = c.shown;
+    cb.addEventListener('change', (e) => c.onChange((e.target as HTMLInputElement).checked));
+    label.appendChild(cb);
+    label.append(' show');
+    panel.appendChild(label);
   }
 
   const close = document.createElement('button');

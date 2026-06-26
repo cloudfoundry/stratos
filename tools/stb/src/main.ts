@@ -12,8 +12,8 @@ import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
 import { nodeFor } from '@/state/branding';
-import { openLeverEditor } from '@/ui/lever-editor';
-import { applyEdit } from '@/ui/element-edit';
+import { openLeverEditor, visibilityValue } from '@/ui/lever-editor';
+import { applyEdit, companionVisibilityId } from '@/ui/element-edit';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
 import { restoreSession, startAutoSave } from '@/state/persistence';
@@ -90,10 +90,17 @@ async function main() {
       const node = nodeFor(snapshotId);
       if (!node) return;
       const previewHost = app.querySelector('.stb-preview-host') as HTMLElement;
+      const showId = companionVisibilityId(snapshotId);
+      const showNode = nodeFor(showId);
+      const companion =
+        showNode && showNode.value.kind === 'visibility'
+          ? { visibilityCompanion: { shown: showNode.value.shown, onChange: (shown: boolean) => applyEdit(showId, visibilityValue(shown), routing) } }
+          : {};
       openLeverEditor({
         anchor: previewHost,
         value: node.value,
         onChange: (next) => applyEdit(snapshotId, next, routing),
+        ...companion,
       });
     },
   });
