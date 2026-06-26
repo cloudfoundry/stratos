@@ -1,0 +1,29 @@
+{
+  "scene": "login",
+  "nodes": [
+    {
+      "snapshotId": "auth.login.title",
+      "role": "heading",
+      "name": "Sign in to Stratos",
+      "description": "title for the login page",
+      "value": {
+        "kind": "content",
+        "text": "Sign in to Stratos"
+      }
+    },
+    {
+      "snapshotId": "auth.login.sign-in",
+      "role": "button",
+      "name": "Sign in",
+      "description": "sign-in button for the login page",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.55,
+          "c": 0.15,
+          "h": 250
+        }
+      }
+    }
+  ]
+}
