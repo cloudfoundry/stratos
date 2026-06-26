@@ -98,6 +98,7 @@ async function main() {
           : {};
       openLeverEditor({
         anchor: previewHost,
+        snapshotId,
         value: node.value,
         onChange: (next) => applyEdit(snapshotId, next, routing),
         ...companion,

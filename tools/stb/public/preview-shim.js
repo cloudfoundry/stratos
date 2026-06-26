@@ -68,9 +68,11 @@
       var e = document.querySelector('[data-stratos-snapshot-id="' + p.snapshotId + '"]');
       if (!e) continue;
       if (p.kind === 'content' && p.text !== undefined) e.textContent = p.text;
-      if (p.kind === 'asset' && p.ref !== undefined) {
-        if (e.tagName === 'IMG') e.setAttribute('src', p.ref);
-        else e.style.backgroundImage = 'url(' + p.ref + ')';
+      if (p.kind === 'asset') {
+        var src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // ponytail: object URL not revoked
+        if (src === undefined) continue;
+        if (e.tagName === 'IMG') e.setAttribute('src', src);
+        else e.style.backgroundImage = 'url(' + src + ')';
       }
     }
   }
