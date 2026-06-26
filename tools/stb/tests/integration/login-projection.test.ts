@@ -27,4 +27,22 @@ describe('login projection end-to-end', () => {
     expect(bundle.files['theme.css']).toMatch(/--color-brand-500: #[0-9a-f]{6};/);
     expect(r.unmapped).toEqual([]);
   });
+
+  it('projects the FULL login lever set into company-config + a token', () => {
+    const r = project(model, routing);
+    expect(r.companyConfig).toMatchObject({
+      login: {
+        title: 'Sign in to Stratos',
+        subtitle: 'Multi-cloud management',
+        customMessage: 'Authorized users only',
+        showLogo: true,
+        showTitle: true,
+        backgroundColor: expect.stringMatching(/^#[0-9a-f]{6}$/),
+        cardBackground: expect.stringMatching(/^#[0-9a-f]{6}$/),
+      },
+      logos: { main: 'logo.png', loginBackground: 'login-bg.jpg' },
+    });
+    expect(r.tokens.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
+    expect(r.unmapped).toEqual([]);
+  });
 });

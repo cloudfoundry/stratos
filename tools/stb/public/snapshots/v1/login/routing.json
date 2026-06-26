@@ -1,13 +1,15 @@
 {
-  "containers": {
-    "auth.login": "login"
-  },
+  "containers": { "auth.login": "login" },
   "elements": {
-    "auth.login.title": {
-      "config": "title"
-    },
-    "auth.login.sign-in": {
-      "token": "--color-brand-500"
-    }
+    "auth.login.page":        { "config": "backgroundColor" },
+    "auth.login.card":        { "config": "cardBackground" },
+    "auth.login.title":       { "config": "title" },
+    "auth.login.subtitle":    { "config": "subtitle" },
+    "auth.login.message":     { "config": "customMessage" },
+    "auth.login.show-logo":   { "config": "showLogo" },
+    "auth.login.show-title":  { "config": "showTitle" },
+    "auth.login.logo":        { "config": "logos.main" },
+    "auth.login.background":  { "config": "logos.loginBackground" },
+    "auth.login.sign-in":     { "token": "--color-brand-500" }
   }
 }

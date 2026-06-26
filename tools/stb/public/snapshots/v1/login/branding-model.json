@@ -1,29 +1,35 @@
 {
   "scene": "login",
   "nodes": [
-    {
-      "snapshotId": "auth.login.title",
-      "role": "heading",
-      "name": "Sign in to Stratos",
+    { "snapshotId": "auth.login.page", "role": "region", "name": "Login page",
+      "description": "background color for the login page",
+      "value": { "kind": "color", "oklch": { "l": 0.97, "c": 0.01, "h": 250 } } },
+    { "snapshotId": "auth.login.card", "role": "region", "name": "Login card",
+      "description": "card background for the login page",
+      "value": { "kind": "color", "oklch": { "l": 1, "c": 0, "h": 0 } } },
+    { "snapshotId": "auth.login.title", "role": "heading", "name": "Sign in to Stratos",
       "description": "title for the login page",
-      "value": {
-        "kind": "content",
-        "text": "Sign in to Stratos"
-      }
-    },
-    {
-      "snapshotId": "auth.login.sign-in",
-      "role": "button",
-      "name": "Sign in",
-      "description": "sign-in button for the login page",
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.55,
-          "c": 0.15,
-          "h": 250
-        }
-      }
-    }
+      "value": { "kind": "content", "text": "Sign in to Stratos" } },
+    { "snapshotId": "auth.login.subtitle", "role": "paragraph", "name": "Subtitle",
+      "description": "subtitle for the login page",
+      "value": { "kind": "content", "text": "Multi-cloud management" } },
+    { "snapshotId": "auth.login.message", "role": "note", "name": "Custom message",
+      "description": "custom message for the login page",
+      "value": { "kind": "content", "text": "Authorized users only" } },
+    { "snapshotId": "auth.login.show-logo", "role": "img", "name": "Logo visibility",
+      "description": "whether the logo shows on the login page",
+      "value": { "kind": "visibility", "shown": true } },
+    { "snapshotId": "auth.login.show-title", "role": "heading", "name": "Title visibility",
+      "description": "whether the title shows on the login page",
+      "value": { "kind": "visibility", "shown": true } },
+    { "snapshotId": "auth.login.logo", "role": "img", "name": "Logo",
+      "description": "logo image for the login page",
+      "value": { "kind": "asset", "ref": "logo.png" } },
+    { "snapshotId": "auth.login.background", "role": "img", "name": "Background",
+      "description": "background image for the login page",
+      "value": { "kind": "asset", "ref": "login-bg.jpg" } },
+    { "snapshotId": "auth.login.sign-in", "role": "button", "name": "Sign in",
+      "description": "sign-in button color for the login page",
+      "value": { "kind": "color", "oklch": { "l": 0.55, "c": 0.15, "h": 250 } } }
   ]
 }
