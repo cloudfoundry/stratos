@@ -175,10 +175,14 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
+          // Per-instance detail page (#5370), uniform with the services wall.
+          // Previously linked to the offering's marketplace summary and returned
+          // null for user-provided instances (no offering) — leaving UPS names
+          // dead, the dead-link the issue set out to fix. :type is the route
+          // segment 'service' (managed) / 'user-service' (user-provided).
           link: (si: StServiceInstance) => {
-            const offeringGuid = si.servicePlan?.serviceOffering?.guid;
-            if (!offeringGuid) return null;
-            return ['/marketplace', si.cnsiGuid, offeringGuid, 'summary'];
+            const siType = si.type === 'user-provided' ? 'user-service' : 'service';
+            return ['/services', siType, si.cnsiGuid, si.guid];
           },
           render: (si: StServiceInstance) => si.name,
           widthHint: '14rem',
