@@ -1,9 +1,10 @@
 import type { LeverValue } from '@/metadata/types';
 import { toOklch, oklchToHex } from '@/color/oklch';
-import { setAsset } from '@/state/assets';
+import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 
 export interface OpenLeverEditorOptions {
   anchor: HTMLElement;
+  snapshotId: string;
   value: LeverValue;
   onChange: (next: LeverValue) => void;
   onClose?: () => void;
@@ -62,8 +63,8 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       .addEventListener('change', (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) return;
-        setAsset('logo', file, file.name); // ponytail: assets signal currently keys logo/favicon; login bg reuses the blob path by filename
-        opts.onChange(assetValue(file.name));
+        setBrandingAsset(opts.snapshotId, file, file.name);
+        opts.onChange(assetValue(assetRefFor(file.name)));
       });
   }
 

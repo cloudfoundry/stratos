@@ -3,6 +3,7 @@ import { findMissing } from '@/parse/completeness';
 import { buildBundle, type AssetInput, type BuildBundleInput } from '@/export/bundle-builder';
 import { bundleToZip, triggerDownload } from '@/export/zip';
 import { assets } from '@/state/assets';
+import { brandingAssets, brandingAssetInputs } from '@/state/branding-assets';
 import { project, type RoutingMap } from '@/projection/projector';
 import type { BrandingModel } from '@/metadata/types';
 import { brandingModel } from '@/state/branding';
@@ -62,12 +63,13 @@ export function openExportDialog(): void {
   dialog.querySelector('#stb-confirm-export')!.addEventListener('click', async () => {
     const name = (dialog.querySelector('#stb-export-name') as HTMLInputElement).value || 'theme';
     const id = (dialog.querySelector('#stb-export-id') as HTMLInputElement).value || 'theme';
-    const assetInputs = assets.value
-      .filter((a) => a.blob)
-      .map((a) => ({
+    const assetInputs = [
+      ...assets.value.filter((a) => a.blob).map((a) => ({
         path: a.name === 'favicon' ? 'assets/favicon.svg' : `assets/${a.filename}`,
         blob: a.blob!,
-      }));
+      })),
+      ...brandingAssetInputs(brandingAssets.value),
+    ];
     let routing: RoutingMap = { elements: {} };
     try {
       const res = await fetch(`/snapshots/v1/${activeSceneId.value}/routing.json`);

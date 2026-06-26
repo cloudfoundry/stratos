@@ -5,6 +5,7 @@ import { brandingModel, loadBrandingModel } from '@/state/branding';
 import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages';
 import type { BrandingModel } from '@/metadata/types';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
+import { attachAssetBlobs, brandingAssets } from '@/state/branding-assets';
 
 export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
   const out: LeverPatch[] = [];
@@ -47,7 +48,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   function applyLeversToPreview(): void {
     const m = brandingModel.value;
     if (!m) return;
-    send({ type: 'STB_APPLY_LEVERS', levers: leverPatchesFor(m) });
+    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m), brandingAssets.value) });
   }
 
   function onMessage(event: MessageEvent): void {
