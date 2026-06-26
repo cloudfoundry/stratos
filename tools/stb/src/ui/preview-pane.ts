@@ -1,7 +1,20 @@
 import { effect } from '@preact/signals-core';
 import { rootValues, darkValues } from '@/state/tokens';
 import { activeSceneId, previewDark } from '@/state/scene';
+import { brandingModel } from '@/state/branding';
 import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages';
+import type { BrandingModel } from '@/metadata/types';
+import type { LeverPatch } from '@/iframe-bridge/apply-levers';
+
+export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
+  const out: LeverPatch[] = [];
+  for (const n of model.nodes) {
+    if (n.value.kind === 'content') out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.value.text });
+    else if (n.value.kind === 'asset') out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.value.ref });
+    else if (n.value.kind === 'visibility') out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.value.shown });
+  }
+  return out;
+}
 
 export interface PreviewPaneOptions {
   onElementSelected?: (selector: string, tokens: string[], snapshotId: string | null) => void;
@@ -31,6 +44,12 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
     send({ type: 'STB_SET_DARK', dark: previewDark.value });
   }
 
+  function applyLeversToPreview(): void {
+    const m = brandingModel.value;
+    if (!m) return;
+    send({ type: 'STB_APPLY_LEVERS', levers: leverPatchesFor(m) });
+  }
+
   function onMessage(event: MessageEvent): void {
     const msg = event.data as PreviewToParent | undefined;
     if (!msg || typeof msg !== 'object') return;
@@ -38,6 +57,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       ready = true;
       applyTokens();
       applyDark();
+      applyLeversToPreview();
     } else if (msg.type === 'STB_ELEMENT_SELECTED') {
       opts.onElementSelected?.(msg.selector, msg.tokens, msg.snapshotId);
     }
@@ -74,6 +94,11 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       effect(() => {
         void previewDark.value;
         if (ready) applyDark();
+      });
+
+      effect(() => {
+        void brandingModel.value;
+        if (ready) applyLeversToPreview();
       });
     },
 
