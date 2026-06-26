@@ -16,4 +16,10 @@ describe('buildWorklist', () => {
   it('skips elements that already have data-stratos-snapshot-id', () => {
     expect(rows.find((r) => r.dataTest === 'already-done')).toBeUndefined();
   });
+
+  it('suggests a leaf config field from the data-test value', () => {
+    const html = '<h1 data-test="login-title">Hi</h1>';
+    const rows = buildWorklist(html, 'login-page.component.html');
+    expect(rows[0]!.suggestedConfig).toBe('title');
+  });
 });
