@@ -1,5 +1,5 @@
-import type { BrandingModel, ElementNode, LeverValue } from '@/metadata/types';
-import { oklchToHex } from '@/color/oklch';
+import type { BrandingModel, LeverValue } from '@/metadata/types';
+import { oklchToHex, scaleFromOklch } from '@/color/oklch';
 
 export interface RoutingEntry {
   config?: string;
@@ -22,6 +22,10 @@ function leafValue(v: LeverValue): unknown {
     case 'content': return v.text;
     case 'asset': return v.ref;
     case 'visibility': return v.shown;
+    default: {
+      const _exhaustive: never = v;
+      return _exhaustive;
+    }
   }
 }
 
@@ -61,7 +65,14 @@ export function project(model: BrandingModel, routing: RoutingMap): ProjectionRe
       continue;
     }
     if (entry.token && node.value.kind === 'color') {
-      tokens.set(entry.token, oklchToHex(node.value.oklch));
+      if (entry.oklchRole === 'scale') {
+        const scale = scaleFromOklch(node.value.oklch);
+        for (const [step, hex] of Object.entries(scale)) {
+          tokens.set(entry.token.replace(/\d+$/, step), hex);
+        }
+      } else {
+        tokens.set(entry.token, oklchToHex(node.value.oklch));
+      }
     }
     if (entry.config) {
       const ns = entry.config.includes('.') ? null : namespaceFor(node.snapshotId, containers);

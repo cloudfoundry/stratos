@@ -40,4 +40,28 @@ describe('project', () => {
     const r = project(model, routing);
     expect(r.unmapped).toContain('auth.login.orphan');
   });
+
+  it('expands a scale-role color entry across the brand scale', () => {
+    const m = { scene: 'login', nodes: [
+      { snapshotId: 'app.shell.brand', role: 'img', name: null,
+        description: 'brand color',
+        value: { kind: 'color' as const, oklch: { l: 0.55, c: 0.15, h: 250 } } },
+    ] };
+    const r = project(m, { elements: { 'app.shell.brand': { token: '--color-brand-500', oklchRole: 'scale' } } });
+    expect(r.tokens.get('--color-brand-50')).toMatch(/^#[0-9a-f]{6}$/);
+    expect(r.tokens.get('--color-brand-900')).toMatch(/^#[0-9a-f]{6}$/);
+    expect(r.tokens.size).toBe(10);
+  });
+
+  it('picks the longest matching container prefix', () => {
+    const m = { scene: 'x', nodes: [
+      { snapshotId: 'auth.login.title', role: 'heading', name: 'T',
+        description: 'title', value: { kind: 'content' as const, text: 'Hi' } },
+    ] };
+    const r = project(m, {
+      containers: { 'auth': 'a', 'auth.login': 'login' },
+      elements: { 'auth.login.title': { config: 'title' } },
+    });
+    expect(r.companyConfig).toMatchObject({ login: { title: 'Hi' } });
+  });
 });
