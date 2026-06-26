@@ -10,7 +10,11 @@ import { openExportDialog } from '@/ui/export-dialog';
 import { mountStatusBar } from '@/ui/status-bar';
 import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
-import { previewDark } from '@/state/scene';
+import { previewDark, activeSceneId } from '@/state/scene';
+import { nodeFor } from '@/state/branding';
+import { openLeverEditor } from '@/ui/lever-editor';
+import { applyEdit } from '@/ui/element-edit';
+import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
 import { restoreSession, startAutoSave } from '@/state/persistence';
 
@@ -72,11 +76,25 @@ async function main() {
   const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
 
+  // keep routing in sync with the active scene so applyEdit can re-project
+  let routing: import('@/projection/projector').RoutingMap = { elements: {} };
+  effect(() => {
+    const scene = activeSceneId.value;
+    fetch(`/snapshots/v1/${scene}/routing.json`).then((r) => r.json()).then((j) => { routing = j; });
+  });
+
   const preview = createPreviewPane({
-    onElementSelected: (_selector, tokens) => {
-      if (tokens.length === 0) return;
-      wiring.scrollSidebarToToken(sidebarHost, tokens[0]!);
-      wiring.flashSidebarRows(sidebarHost, tokens);
+    onElementSelected: (_selector, tokens, snapshotId) => {
+      if (tokens.length) { wiring.scrollSidebarToToken(sidebarHost, tokens[0]!); wiring.flashSidebarRows(sidebarHost, tokens); }
+      if (!snapshotId) return;
+      const node = nodeFor(snapshotId);
+      if (!node) return;
+      const previewHost = app.querySelector('.stb-preview-host') as HTMLElement;
+      openLeverEditor({
+        anchor: previewHost,
+        value: node.value,
+        onChange: (next) => applyEdit(snapshotId, next, routing),
+      });
     },
   });
   preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
