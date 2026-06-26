@@ -1,8 +1,31 @@
 import { rootValues, darkValues, requiredTokens } from '@/state/tokens';
 import { findMissing } from '@/parse/completeness';
-import { buildBundle } from '@/export/bundle-builder';
+import { buildBundle, type AssetInput, type BuildBundleInput } from '@/export/bundle-builder';
 import { bundleToZip, triggerDownload } from '@/export/zip';
 import { assets } from '@/state/assets';
+import { project, type RoutingMap } from '@/projection/projector';
+import type { BrandingModel } from '@/metadata/types';
+import { brandingModel } from '@/state/branding';
+import { activeSceneId } from '@/state/scene';
+
+export function exportInputs(
+  model: BrandingModel | null,
+  routing: RoutingMap,
+  root: Map<string, string>,
+  dark: Map<string, string>,
+  assets: AssetInput[],
+): Omit<BuildBundleInput, 'name' | 'id' | 'description'> {
+  const merged = new Map(root);
+  let companyConfig: Record<string, unknown> | undefined;
+  if (model) {
+    const r = project(model, routing);
+    for (const [k, v] of r.tokens) merged.set(k, v);
+    companyConfig = r.companyConfig;
+  }
+  return companyConfig !== undefined
+    ? { root: merged, dark, assets, companyConfig }
+    : { root: merged, dark, assets };
+}
 
 export function openExportDialog(): void {
   const existing = document.getElementById('stb-export-dialog');
@@ -45,11 +68,11 @@ export function openExportDialog(): void {
         path: a.name === 'favicon' ? 'assets/favicon.svg' : `assets/${a.filename}`,
         blob: a.blob!,
       }));
+    const routingRes = await fetch(`/snapshots/v1/${activeSceneId.value}/routing.json`);
+    const routing: RoutingMap = await routingRes.json();
     const bundle = buildBundle({
       name, id, description: '',
-      root: rootValues.value,
-      dark: darkValues.value,
-      assets: assetInputs,
+      ...exportInputs(brandingModel.value, routing, rootValues.value, darkValues.value, assetInputs),
     });
     const zip = await bundleToZip(bundle);
     triggerDownload(zip, `${id}.zip`);
