@@ -1,3 +1,5 @@
+import type { Oklch } from '@/color/oklch';
+
 export interface Locator {
   role: string;
   name: string | null;
@@ -26,3 +28,30 @@ export interface SceneMetadata {
 }
 
 export type CuratedDescriptions = Record<string, string>;  // ref key (a shared snapshotId) -> description text
+
+export type LeverKind = 'color' | 'content' | 'asset' | 'visibility';
+
+export type LeverValue =
+  | { kind: 'color'; oklch: Oklch }
+  | { kind: 'content'; text: string }
+  | { kind: 'asset'; ref: string }
+  | { kind: 'visibility'; shown: boolean };
+
+export interface ElementNode {
+  snapshotId: string;
+  role: string;
+  name: string | null;
+  description: string;
+  value: LeverValue;
+}
+
+export interface BrandingModel {
+  scene: string;
+  nodes: ElementNode[];
+}
+
+export function isColorNode(
+  n: ElementNode,
+): n is ElementNode & { value: { kind: 'color'; oklch: Oklch } } {
+  return n.value.kind === 'color';
+}
