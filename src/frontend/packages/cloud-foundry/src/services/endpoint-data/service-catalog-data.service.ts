@@ -213,6 +213,35 @@ export class ServiceCatalogDataService {
     );
   }
 
+  // Managed-instance parameters — CF v3 GET .../parameters, proxied by the
+  // native handler, returning the bare params object the broker was
+  // provisioned with. No catchAs404Null: brokers that don't enable
+  // instances_retrievable make CF error here, and the section needs to tell
+  // "not available" (error) apart from "no parameters" (an empty object), so
+  // the failure must surface on `.error` rather than collapse to null. Lazy —
+  // the detail page calls this only when the Parameters section is expanded.
+  serviceInstanceParameters(cnsiGuid: string, instanceGuid: string): SignalSource<Record<string, unknown> | null> {
+    return this.signalize(
+      this.http.get<Record<string, unknown>>(
+        `/pp/v1/cf/service_instances/${cnsiGuid}/${instanceGuid}/parameters`,
+      ),
+      null,
+    );
+  }
+
+  // User-provided instance credentials — CF v3 GET .../credentials, proxied by
+  // the native handler. Sensitive: the caller fetches this only on an explicit
+  // reveal action (never on page load) and the UI masks the values by default.
+  // UPS-only — CF errors for a managed instance, surfaced via `.error`.
+  userProvidedCredentials(cnsiGuid: string, instanceGuid: string): SignalSource<Record<string, unknown> | null> {
+    return this.signalize(
+      this.http.get<Record<string, unknown>>(
+        `/pp/v1/cf/service_instances/${cnsiGuid}/${instanceGuid}/credentials`,
+      ),
+      null,
+    );
+  }
+
   // Service keys for a single instance — credential bindings with type=key
   // (filtered server-side by GH#4301's native handler). Maps the raw v3
   // binding resources to a small view model the keys page renders. The keys
