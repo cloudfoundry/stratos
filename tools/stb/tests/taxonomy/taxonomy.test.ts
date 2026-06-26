@@ -21,4 +21,10 @@ describe('extractTerms', () => {
   it('dedupes repeats', () => {
     expect(extractTerms('login login title', tax)).toEqual(['login', 'title']);
   });
+
+  it('matches a hyphenated term as one token, not its fragments', () => {
+    const tax = { terms: [{ term: 'sign-in', label: 'Sign-in button' }] };
+    expect(extractTerms('the sign-in button', tax)).toEqual(['sign-in']);
+    expect(extractTerms('please sign in here', tax)).toEqual([]);
+  });
 });

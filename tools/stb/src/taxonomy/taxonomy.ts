@@ -10,10 +10,12 @@ export interface Taxonomy {
 // Deterministic term-extraction: whole-word match only, NOT fuzzy/semantic.
 export function extractTerms(description: string, taxonomy: Taxonomy): string[] {
   const words = description.toLowerCase().split(/[^a-z0-9-]+/).filter(Boolean);
-  const present = new Set(words);
+  const registered = new Set(taxonomy.terms.map((t) => t.term));
+  const seen = new Set<string>();
   const out: string[] = [];
   for (const w of words) {
-    if (present.has(w) && taxonomy.terms.some((t) => t.term === w) && !out.includes(w)) {
+    if (registered.has(w) && !seen.has(w)) {
+      seen.add(w);
       out.push(w);
     }
   }
