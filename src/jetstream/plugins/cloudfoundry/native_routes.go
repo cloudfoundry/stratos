@@ -60,6 +60,8 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	nativeGroup.GET("/cf/service_instances/:cnsiGuid", c.getNativeServiceInstances)
 	nativeGroup.GET("/cf/service_instances/:cnsiGuid/:instanceGuid", c.getNativeServiceInstanceDetail)
 	nativeGroup.GET("/cf/service_instances/:cnsiGuid/:instanceGuid/service_bindings", c.getServiceInstanceServiceBindings)
+	nativeGroup.GET("/cf/service_instances/:cnsiGuid/:instanceGuid/parameters", c.getNativeServiceInstanceParameters)
+	nativeGroup.GET("/cf/service_instances/:cnsiGuid/:instanceGuid/credentials", c.getNativeUserProvidedCredentials)
 	nativeGroup.DELETE("/cf/service_instances/:cnsiGuid/:siGuid", c.deleteServiceInstance)
 	nativeGroup.GET("/cf/users/:cnsiGuid", c.getNativeUsers)
 	nativeGroup.GET("/cf/users/:cnsiGuid/:userGuid", c.getNativeUserDetail)

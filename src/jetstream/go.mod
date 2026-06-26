@@ -22,6 +22,14 @@ replace (
 	github.com/vito/go-interact => github.com/vito/go-interact v1.0.0
 )
 
+// Fork-staging replace for #5370 Phase 6: ServiceInstances.GetCredentials +
+// the parameters wire-format fix. Points at the fw-capi fork pre-release until
+// the change lands upstream. The /v3-suffix trick: the path carries /v3 (the
+// fork's go.mod declares module .../capi/v3) and the tag is a v3 semver
+// pre-release, satisfying Go's path-major + version checks. Drop this and bump
+// the require line once Wayne tags the upstream release.
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.222.3-svc-creds.1
+
 require (
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1

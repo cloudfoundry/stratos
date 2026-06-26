@@ -805,3 +805,95 @@ func TestGetNativeServiceInstancesForSpace_TypeFilterLayered_List(t *testing.T) 
 	assert.Equal(t, []string{"space-A"}, capture.InstancesSpaceGUIDs)
 	assert.Equal(t, "user-provided", capture.InstancesType)
 }
+
+// CF returns parameters as a bare object ({"key":"val"}), not wrapped — the
+// handler passes that object straight through.
+func TestGetNativeServiceInstanceParameters(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/service_instances/si-1/parameters" && r.Method == http.MethodGet:
+			_, _ = w.Write([]byte(`{"max_connections":100,"enable_ssl":true}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-1/parameters", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "instanceGuid")
+	ctx.SetParamValues("cnsi-1", "si-1")
+
+	require.NoError(t, newServiceInstancesPlugin(srv.URL).getNativeServiceInstanceParameters(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.InDelta(t, float64(100), resp["max_connections"], 0)
+	assert.Equal(t, true, resp["enable_ssl"])
+}
+
+// A broker that doesn't support parameter retrieval makes CF error; the handler
+// surfaces it (handleCapiError) rather than returning 200 with empty params, so
+// the UI can show "not available" instead of "no parameters".
+func TestGetNativeServiceInstanceParameters_BrokerError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/service_instances/si-1/parameters" && r.Method == http.MethodGet:
+			w.WriteHeader(http.StatusBadGateway)
+			_, _ = w.Write([]byte(`{"errors":[{"detail":"This service does not support fetching parameters."}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-1/parameters", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "instanceGuid")
+	ctx.SetParamValues("cnsi-1", "si-1")
+
+	err := newServiceInstancesPlugin(srv.URL).getNativeServiceInstanceParameters(ctx)
+	// Either an echo error or a non-2xx recorded status — never a 200 with an
+	// empty body that the UI would misread as "no parameters".
+	if err == nil {
+		assert.NotEqual(t, http.StatusOK, rec.Code)
+	}
+}
+
+// CF returns UPS credentials as a bare object ({"username":..., ...}); the
+// handler passes that object straight through for the UI to mask.
+func TestGetNativeUserProvidedCredentials(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.URL.Path == "/v3/service_instances/si-1/credentials" && r.Method == http.MethodGet:
+			_, _ = w.Write([]byte(`{"username":"my-username","password":"super-secret"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-1/credentials", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "instanceGuid")
+	ctx.SetParamValues("cnsi-1", "si-1")
+
+	require.NoError(t, newServiceInstancesPlugin(srv.URL).getNativeUserProvidedCredentials(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "my-username", resp["username"])
+	assert.Equal(t, "super-secret", resp["password"])
+}

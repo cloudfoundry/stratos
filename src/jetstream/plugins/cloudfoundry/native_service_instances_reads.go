@@ -676,3 +676,73 @@ func mapLastOperation(lo *capi.ServiceInstanceLastOperation) *StLastOperation {
 	}
 	return out
 }
+
+// getNativeServiceInstanceParameters handles
+// GET /pp/v1/cf/service_instances/{cnsiGuid}/{instanceGuid}/parameters.
+//
+// Proxies CF's v3 GET .../parameters for a managed instance and returns the
+// bare parameters object the broker was provisioned with. Read-only.
+//
+// Many brokers don't enable instances_retrievable, so CF returns an error here
+// for a perfectly healthy instance — that propagates via handleCapiError and
+// the UI distinguishes "not available" from "no parameters" (an empty object).
+func (c *CloudFoundrySpecification) getNativeServiceInstanceParameters(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	instanceGUID := ctx.Param("instanceGuid")
+	if cnsiGUID == "" || instanceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and instanceGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	reqCtx := ctx.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	params, paramErr := cfClient.ServiceInstances().GetParameters(reqCtx, instanceGUID)
+	if paramErr != nil {
+		return handleCapiError(ctx, paramErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, params.Parameters)
+}
+
+// getNativeUserProvidedCredentials handles
+// GET /pp/v1/cf/service_instances/{cnsiGuid}/{instanceGuid}/credentials.
+//
+// Proxies CF's v3 GET .../credentials, which returns the credentials a
+// user-provided instance was created with. UPS-only — CF rejects it for a
+// managed instance, surfaced via handleCapiError. The values are sensitive;
+// the UI masks them by default and reveals per-field on explicit request.
+func (c *CloudFoundrySpecification) getNativeUserProvidedCredentials(ctx echo.Context) error {
+	cnsiGUID := ctx.Param("cnsiGuid")
+	instanceGUID := ctx.Param("instanceGuid")
+	if cnsiGUID == "" || instanceGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and instanceGuid are required")
+	}
+
+	userGUID, err := c.getUserGUID(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+
+	reqCtx := ctx.Request().Context()
+	cfClient, err := newCapiClient(reqCtx, c.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+
+	creds, credErr := cfClient.ServiceInstances().GetCredentials(reqCtx, instanceGUID)
+	if credErr != nil {
+		return handleCapiError(ctx, credErr)
+	}
+
+	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return ctx.JSON(http.StatusOK, creds.Credentials)
+}
