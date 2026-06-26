@@ -39,7 +39,7 @@ export default defineConfig({
         test: {
           name: 'integration-node',
           environment: 'node',
-          include: ['tests/integration/login-projection.test.ts'],
+          include: ['tests/integration/login-projection.test.ts', 'tests/integration/login-branding-e2e.test.ts'],
         },
       },
       {
@@ -47,7 +47,7 @@ export default defineConfig({
         test: {
           name: 'integration-chromium',
           include: ['tests/integration/**/*.test.ts'],
-          exclude: ['tests/integration/login-projection.test.ts'],
+          exclude: ['tests/integration/login-projection.test.ts', 'tests/integration/login-branding-e2e.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),
@@ -61,7 +61,7 @@ export default defineConfig({
         test: {
           name: 'integration-firefox',
           include: ['tests/integration/**/*.test.ts'],
-          exclude: ['tests/integration/login-projection.test.ts'],
+          exclude: ['tests/integration/login-projection.test.ts', 'tests/integration/login-branding-e2e.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),
@@ -75,7 +75,7 @@ export default defineConfig({
         test: {
           name: 'integration-webkit',
           include: ['tests/integration/**/*.test.ts'],
-          exclude: ['tests/integration/login-projection.test.ts'],
+          exclude: ['tests/integration/login-projection.test.ts', 'tests/integration/login-branding-e2e.test.ts'],
           browser: {
             enabled: true,
             provider: playwright(),
