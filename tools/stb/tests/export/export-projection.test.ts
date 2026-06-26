@@ -17,4 +17,10 @@ describe('exportInputs', () => {
     expect(out.root.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/); // projected
     expect(out.root.get('--color-brand-50')).toBe('#eee');               // preserved
   });
+
+  it('null model preserves root and omits companyConfig key', () => {
+    const out = exportInputs(null, routing, new Map([['--x', '#000']]), new Map(), []);
+    expect(out.root.get('--x')).toBe('#000');        // preserved
+    expect('companyConfig' in out).toBe(false);      // key absent, no empty company-config.json
+  });
 });
