@@ -56,6 +56,25 @@
     document.head.appendChild(el);
   }
 
+  function applyLeversInShim(levers) {
+    for (var i = 0; i < (levers || []).length; i++) {
+      var p = levers[i];
+      if (p.kind === 'visibility') {
+        var tid = p.snapshotId.replace(/\.show-/, '.');
+        var ve = document.querySelector('[data-stratos-snapshot-id="' + tid + '"]');
+        if (ve) ve.style.display = p.shown ? '' : 'none';
+        continue;
+      }
+      var e = document.querySelector('[data-stratos-snapshot-id="' + p.snapshotId + '"]');
+      if (!e) continue;
+      if (p.kind === 'content' && p.text !== undefined) e.textContent = p.text;
+      if (p.kind === 'asset' && p.ref !== undefined) {
+        if (e.tagName === 'IMG') e.setAttribute('src', p.ref);
+        else e.style.backgroundImage = 'url(' + p.ref + ')';
+      }
+    }
+  }
+
   function tokensForElement(el) {
     if (!metadata) return [];
     const out = new Set();
@@ -85,19 +104,20 @@
       case 'STB_HIGHLIGHT_TOKEN':
         highlightToken(msg.token);
         break;
+      case 'STB_APPLY_LEVERS':
+        applyLeversInShim(msg.levers);
+        break;
     }
   });
 
   document.addEventListener('click', (e) => {
-    if (!metadata) return;
     const target = e.target;
     if (!(target instanceof Element)) return;
-    const tokens = tokensForElement(target);
-    if (tokens.length === 0) return;
-    const el = target.closest('[data-stratos-snapshot-id]') || target;
+    const el = target.closest('[data-stratos-snapshot-id]');
+    if (!el) return;
     const snapshotId = el.getAttribute('data-stratos-snapshot-id');
     const selector = bestSelector(el);
-    window.parent.postMessage({ type: 'STB_ELEMENT_SELECTED', selector, tokens, snapshotId }, '*');
+    window.parent.postMessage({ type: 'STB_ELEMENT_SELECTED', selector, tokens: tokensForElement(target), snapshotId }, '*');
   });
 
   function bestSelector(el) {
