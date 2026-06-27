@@ -24,10 +24,10 @@
       "value": { "kind": "visibility", "shown": true } },
     { "snapshotId": "auth.login.logo", "role": "img", "name": "Logo",
       "description": "logo image for the login page",
-      "value": { "kind": "asset", "ref": "logo.png" } },
+      "value": { "kind": "asset", "ref": "logo.svg" } },
     { "snapshotId": "auth.login.background", "role": "img", "name": "Background",
       "description": "background image for the login page",
-      "value": { "kind": "asset", "ref": "login-bg.jpg" } },
+      "value": { "kind": "asset", "ref": "login-bg.svg" } },
     { "snapshotId": "auth.login.sign-in", "role": "button", "name": "Sign in",
       "description": "sign-in button color for the login page",
       "value": { "kind": "color", "oklch": { "l": 0.55, "c": 0.15, "h": 250 } } }

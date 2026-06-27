@@ -40,7 +40,7 @@ describe('login projection end-to-end', () => {
         backgroundColor: expect.stringMatching(/^#[0-9a-f]{6}$/),
         cardBackground: expect.stringMatching(/^#[0-9a-f]{6}$/),
       },
-      logos: { main: 'logo.png', loginBackground: 'login-bg.jpg' },
+      logos: { main: 'logo.svg', loginBackground: 'login-bg.svg' },
     });
     expect(r.tokens.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
     expect(r.unmapped).toEqual([]);
