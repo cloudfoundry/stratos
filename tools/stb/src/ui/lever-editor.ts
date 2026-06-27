@@ -58,7 +58,7 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     panel.querySelector<HTMLInputElement>('.stb-lever-toggle')!
       .addEventListener('change', (e) => opts.onChange(visibilityValue((e.target as HTMLInputElement).checked)));
   } else {
-    panel.innerHTML = `<input type="file" accept="image/*" class="stb-lever-asset" />`;
+    panel.innerHTML = `<label class="stb-lever-asset-label">Upload image <input type="file" accept="image/*" class="stb-lever-asset" /></label>`;
     panel.querySelector<HTMLInputElement>('.stb-lever-asset')!
       .addEventListener('change', (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
