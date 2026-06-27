@@ -20,7 +20,7 @@ export function applyLevers(doc: Document, levers: LeverPatch[]): void {
     if (!el) continue;
     if (p.kind === 'content' && p.text !== undefined) el.textContent = p.text;
     if (p.kind === 'asset') {
-      const src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // ponytail: object URL not revoked; revoke-prev if preview leaks
+      const src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // NOTE: object URL not revoked; revoke-prev if preview leaks
       if (src === undefined) continue;
       if (el instanceof HTMLImageElement) el.setAttribute('src', src);
       else el.style.backgroundImage = `url(${src})`;
