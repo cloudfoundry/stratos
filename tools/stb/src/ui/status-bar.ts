@@ -15,7 +15,7 @@ export function mountStatusBar(host: HTMLElement, opts: StatusBarOptions = {}): 
       <select id="stb-color-format">
         <option value="hex">hex</option>
         <option value="rgb">rgb</option>
-        <!-- ponytail: shown-but-disabled on purpose — signals the planned OKLCH
+        <!-- NOTE: shown-but-disabled on purpose — signals the planned OKLCH
              direction while formatColor() has no rgb→oklch math yet (see color/format.ts).
              Re-enable when perceptual conversion lands (pairs with the a11y/contrast work). -->
         <option value="oklch" disabled title="Planned — needs perceptual (OKLCH) conversion; not implemented yet">oklch (planned)</option>

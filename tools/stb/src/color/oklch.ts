@@ -57,7 +57,7 @@ export function oklchToHex(o: Oklch): string {
   return rgbToHex(r, g, b);
 }
 
-// ponytail: fixed lightness ramp, constant chroma. Tuning knob: taper chroma at
+// NOTE: fixed lightness ramp, constant chroma. Tuning knob: taper chroma at
 // the light/dark ends and run a contrast pass once the a11y milestone lands.
 const SCALE_LIGHTNESS: Record<string, number> = {
   '50': 0.97, '100': 0.93, '200': 0.85, '300': 0.75, '400': 0.65,

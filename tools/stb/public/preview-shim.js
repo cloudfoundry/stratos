@@ -69,7 +69,7 @@
       if (!e) continue;
       if (p.kind === 'content' && p.text !== undefined) e.textContent = p.text;
       if (p.kind === 'asset') {
-        var src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // ponytail: object URL not revoked
+        var src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // NOTE: object URL not revoked
         if (src === undefined) continue;
         if (e.tagName === 'IMG') e.setAttribute('src', src);
         else e.style.backgroundImage = 'url(' + src + ')';
