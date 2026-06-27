@@ -4,8 +4,20 @@ import type { BrandingModel, ElementNode, LeverValue } from '@/metadata/types';
 export const brandingModel = signal<BrandingModel | null>(null);
 
 export async function loadBrandingModel(scene: string): Promise<void> {
-  const res = await fetch(`/snapshots/v1/${scene}/branding-model.json`);
-  brandingModel.value = (await res.json()) as BrandingModel;
+  // A scene may ship no branding-model.json; the dev server then answers with a
+  // 404 page or the SPA HTML fallback. Guard so a missing/non-JSON model clears
+  // the signal instead of throwing and leaving the previous scene's model loaded.
+  try {
+    const res = await fetch(`/snapshots/v1/${scene}/branding-model.json`);
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!res.ok || !contentType.includes('json')) {
+      brandingModel.value = null;
+      return;
+    }
+    brandingModel.value = (await res.json()) as BrandingModel;
+  } catch {
+    brandingModel.value = null;
+  }
 }
 
 export function nodeFor(snapshotId: string): ElementNode | undefined {
