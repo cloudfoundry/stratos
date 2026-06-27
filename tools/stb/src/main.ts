@@ -107,6 +107,16 @@ async function main() {
   });
   preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
 
+  const leverToggle = document.createElement('label');
+  leverToggle.className = 'stb-lever-toggle-action';
+  leverToggle.style.marginLeft = '0.5rem';
+  const leverCb = document.createElement('input');
+  leverCb.type = 'checkbox';
+  leverCb.addEventListener('change', () => preview.showLevers(leverCb.checked));
+  leverToggle.appendChild(leverCb);
+  leverToggle.append(' Show editable regions');
+  actionsHost.appendChild(leverToggle);
+
   mountTokenSidebar(sidebarHost, {
     onSwatchClick: (token) => {
       const dark = previewDark.value;

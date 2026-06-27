@@ -24,6 +24,7 @@ export interface PreviewPaneOptions {
 export interface PreviewPane {
   mount(host: HTMLElement): void;
   highlightToken(token: string | null): void;
+  showLevers(on: boolean): void;
 }
 
 export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
@@ -49,6 +50,8 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
     const m = brandingModel.value;
     if (!m) return;
     send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m), brandingAssets.value) });
+    // tell the shim which elements are editable so it can show a click affordance
+    send({ type: 'STB_SET_LEVERS', ids: m.nodes.map((n) => n.snapshotId) });
   }
 
   function onMessage(event: MessageEvent): void {
@@ -107,6 +110,10 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
 
     highlightToken(token) {
       send({ type: 'STB_HIGHLIGHT_TOKEN', token });
+    },
+
+    showLevers(on) {
+      send({ type: 'STB_SET_LEVER_OUTLINE', on });
     },
   };
 }

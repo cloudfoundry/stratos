@@ -77,6 +77,31 @@
     }
   }
 
+  function markLevers(ids) {
+    document.querySelectorAll('[data-stb-lever]').forEach((el) => el.removeAttribute('data-stb-lever'));
+    for (const id of ids || []) {
+      const el = document.querySelector('[data-stratos-snapshot-id="' + id + '"]');
+      if (el) el.setAttribute('data-stb-lever', '');
+    }
+    ensureLeverStyles();
+  }
+
+  function setLeverOutline(on) {
+    document.documentElement.toggleAttribute('data-stb-show-levers', !!on);
+    ensureLeverStyles();
+  }
+
+  function ensureLeverStyles() {
+    if (document.getElementById('stb-lever-style')) return;
+    const el = document.createElement('style');
+    el.id = 'stb-lever-style';
+    el.textContent =
+      '[data-stb-lever] { cursor: pointer; }' +
+      '[data-stb-lever]:hover { outline: 2px dashed #3b82f6 !important; outline-offset: 2px; }' +
+      '[data-stb-show-levers] [data-stb-lever] { outline: 2px dashed #3b82f6 !important; outline-offset: 2px; }';
+    document.head.appendChild(el);
+  }
+
   function tokensForElement(el) {
     if (!metadata) return [];
     const out = new Set();
@@ -108,6 +133,12 @@
         break;
       case 'STB_APPLY_LEVERS':
         applyLeversInShim(msg.levers);
+        break;
+      case 'STB_SET_LEVERS':
+        markLevers(msg.ids);
+        break;
+      case 'STB_SET_LEVER_OUTLINE':
+        setLeverOutline(msg.on);
         break;
     }
   });
