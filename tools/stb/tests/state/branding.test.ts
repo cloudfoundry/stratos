@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { brandingModel, nodeFor, setNodeValue } from '@/state/branding';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { brandingModel, nodeFor, setNodeValue, loadBrandingModel } from '@/state/branding';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
@@ -25,5 +25,31 @@ describe('branding state', () => {
     expect(nodeFor('auth.login.title')?.value).toEqual({ kind: 'content', text: 'Welcome' });
     expect(brandingModel.value).not.toBe(before); // new reference → reactivity
     expect(nodeFor('auth.login.sign-in')?.value).toEqual({ kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } });
+  });
+});
+
+describe('loadBrandingModel', () => {
+  beforeEach(() => { brandingModel.value = null; });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('sets the model on a valid JSON response', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      { ok: true, headers: { get: () => 'application/json' }, json: async () => model } as unknown as Response));
+    await loadBrandingModel('login');
+    expect(brandingModel.value?.scene).toBe('login');
+  });
+
+  it('sets null without throwing when the scene has no model (HTML fallback)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      { ok: true, headers: { get: () => 'text/html' },
+        json: async () => { throw new Error('Unexpected token <'); } } as unknown as Response));
+    await expect(loadBrandingModel('app-list')).resolves.toBeUndefined();
+    expect(brandingModel.value).toBeNull();
+  });
+
+  it('sets null without throwing when fetch rejects', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
+    await expect(loadBrandingModel('whatever')).resolves.toBeUndefined();
+    expect(brandingModel.value).toBeNull();
   });
 });
