@@ -10,6 +10,6 @@
     "auth.login.show-title":  { "config": "showTitle" },
     "auth.login.logo":        { "config": "logos.main" },
     "auth.login.background":  { "config": "logos.loginBackground" },
-    "auth.login.sign-in":     { "token": "--color-brand-500" }
+    "auth.login.sign-in":     { "config": "theme.primary" }
   }
 }
