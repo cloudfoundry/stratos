@@ -48,11 +48,21 @@
     ensureHighlightStyles();
   }
 
+  function highlightElement(snapshotId) {
+    document.querySelectorAll('[data-stb-highlight]').forEach((el) => el.removeAttribute('data-stb-highlight'));
+    if (!snapshotId) return;
+    const el = document.querySelector('[data-stratos-snapshot-id="' + snapshotId + '"]');
+    if (el) el.setAttribute('data-stb-highlight', '');
+    ensureHighlightStyles();
+  }
+
   function ensureHighlightStyles() {
     if (document.getElementById('stb-highlight-style')) return;
     const el = document.createElement('style');
     el.id = 'stb-highlight-style';
-    el.textContent = '[data-stb-highlight] { outline: 2px solid #ff8c00 !important; outline-offset: 2px; }';
+    // negative offset draws the outline just *inside* the element so full-bleed
+    // elements (page, background) stay visible instead of clipping past the frame edge
+    el.textContent = '[data-stb-highlight] { outline: 2px solid #ff8c00 !important; outline-offset: -2px; }';
     document.head.appendChild(el);
   }
 
@@ -130,6 +140,9 @@
         break;
       case 'STB_HIGHLIGHT_TOKEN':
         highlightToken(msg.token);
+        break;
+      case 'STB_HIGHLIGHT_ELEMENT':
+        highlightElement(msg.snapshotId);
         break;
       case 'STB_APPLY_LEVERS':
         applyLeversInShim(msg.levers);

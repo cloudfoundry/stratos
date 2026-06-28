@@ -31,3 +31,25 @@ body {
 .stb-status-bar { display: flex; padding: 0.4rem 0.75rem; border-top: 1px solid var(--border, #ddd); border-bottom: 1px solid var(--border, #ddd); background: var(--card, white); font-size: 0.85rem; gap: 1rem; align-items: center; }
 .stb-status-spacer { flex: 1; }
 .stb-status-completeness.warn { color: var(--warning, #d97706); }
+
+/* sidebar view flip: meaningful element tree vs raw token list */
+.stb-view-toggle { display: flex; gap: 0; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border, #e5e7eb); position: sticky; top: 0; background: var(--card, #fff); z-index: 1; }
+.stb-view-btn { flex: 1; padding: 0.25rem 0.5rem; border: 1px solid var(--border, #d1d5db); background: none; cursor: pointer; font: inherit; font-size: 0.8rem; color: var(--text-muted, #64748b); }
+.stb-view-btn:first-child { border-radius: 4px 0 0 4px; }
+.stb-view-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+.stb-view-btn.active { background: var(--color-primary, #2196f3); color: #fff; border-color: var(--color-primary, #2196f3); }
+
+.stb-tree { padding: 0.25rem 0; }
+.stb-tree-empty { padding: 1rem; color: var(--text-muted, #94a3b8); font-style: italic; }
+.stb-tree-group-name { margin: 0.5rem 0.5rem 0.15rem; font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted, #94a3b8); }
+.stb-tree-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.6rem; cursor: pointer; font-size: 0.82rem; }
+.stb-tree-row:hover { background: color-mix(in srgb, var(--color-primary, #2196f3) 12%, transparent); }
+.stb-tree-swatch { width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid var(--border, #d1d5db); flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--text-muted, #64748b); }
+.stb-tree-swatch-kind { background: var(--content-secondary, #f1f5f9); }
+.stb-tree-name { flex: 1; color: var(--foreground, #1e293b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stb-tree-val { color: var(--text-muted, #94a3b8); font-family: ui-monospace, monospace; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 8rem; }
+
+/* token view: lead with the authored meaning, raw id as secondary detail */
+.stb-token-name { display: flex; flex-direction: column; align-items: flex-start; gap: 0; border: none; background: none; cursor: pointer; font: inherit; padding: 0; text-align: left; }
+.stb-token-label { font-size: 0.82rem; color: var(--foreground, #1e293b); }
+.stb-token-id { font-family: ui-monospace, monospace; font-size: 0.68rem; color: var(--text-muted, #94a3b8); }
