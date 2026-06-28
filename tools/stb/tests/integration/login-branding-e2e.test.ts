@@ -26,6 +26,6 @@ describe('login branding end-to-end (authoring)', () => {
 
     expect(cfg.login.title).toBe('Welcome to Acme Cloud');
     expect(cfg.login.showLogo).toBe(false);
-    expect(bundle.files['theme.css']).toMatch(/--color-brand-500: #[0-9a-f]{6};/);
+    expect(cfg.theme.primary).toMatch(/^#[0-9a-f]{6}$/);
   });
 });

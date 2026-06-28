@@ -24,7 +24,6 @@ describe('login projection end-to-end', () => {
       companyConfig: r.companyConfig,
     });
     expect(bundle.files['company-config.json']).toContain('"title": "Sign in to Stratos"');
-    expect(bundle.files['theme.css']).toMatch(/--color-brand-500: #[0-9a-f]{6};/);
     expect(r.unmapped).toEqual([]);
   });
 
@@ -41,8 +40,8 @@ describe('login projection end-to-end', () => {
         cardBackground: expect.stringMatching(/^#[0-9a-f]{6}$/),
       },
       logos: { main: 'logo.svg', loginBackground: 'login-bg.svg' },
+      theme: { primary: expect.stringMatching(/^#[0-9a-f]{6}$/) },
     });
-    expect(r.tokens.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
     expect(r.unmapped).toEqual([]);
   });
 });
