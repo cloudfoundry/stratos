@@ -26,16 +26,20 @@
     >
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
-      <img
-        class="login-logo h-12 w-12 shrink-0"
-        [src]="themeLogo()"
-        [alt]="themeDisplayName() || 'Logo'"
-        data-stratos-snapshot-id="auth.login.logo"
-        />
+      @if (showLogo()) {
+        <img
+          class="login-logo h-12 w-12 shrink-0"
+          [src]="themeLogo()"
+          [alt]="themeDisplayName() || 'Logo'"
+          data-stratos-snapshot-id="auth.login.logo"
+          />
+      }
       <div class="login-title-section flex-1">
-        <h1 class="login-title text-xl font-bold text-content-text mb-1" data-stratos-snapshot-id="auth.login.title">
-          {{ themeDisplayName() || themeTitle() || 'Stratos' }}
-        </h1>
+        @if (showTitle()) {
+          <h1 class="login-title text-xl font-bold text-content-text mb-1" data-stratos-snapshot-id="auth.login.title">
+            {{ themeDisplayName() || themeTitle() || 'Stratos' }}
+          </h1>
+        }
         @if (themeSubtitle()) {
           <p class="login-subtitle text-sm text-content-muted" data-stratos-snapshot-id="auth.login.subtitle">
             {{ themeSubtitle() }}
