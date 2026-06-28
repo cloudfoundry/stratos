@@ -138,10 +138,13 @@ async function main() {
     });
   }
 
+  // forward-declared so onElementSelected can drive the columns (bidirectional select)
+  let columnsApi: import('@/ui/element-columns').ElementColumnsApi | null = null;
+
   const preview = createPreviewPane({
     onElementSelected: (_selector, tokens, snapshotId) => {
       if (tokens.length) { wiring.scrollSidebarToToken(sidebarHost, tokens[0]!); wiring.flashSidebarRows(sidebarHost, tokens); }
-      if (snapshotId) selectElement(snapshotId);
+      if (snapshotId) { selectElement(snapshotId); columnsApi?.jumpTo(snapshotId); } // render → columns (R1/§2.6)
     },
   });
   preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
@@ -161,7 +164,7 @@ async function main() {
     onSelect: (id) => selectElement(id),
   });
 
-  mountElementColumns(columnsView, {
+  columnsApi = mountElementColumns(columnsView, {
     // hover only highlights when the node belongs to the scene on screen
     onHover: (id, scene) => { if (id && scene === activeSceneId.value) preview.highlightElement(id); else preview.highlightElement(null); },
     onSelect: (id, scene) => {
