@@ -8,21 +8,36 @@ const model: BrandingModel = {
     { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title',
       value: { kind: 'content', text: 'Hi' } },
     { snapshotId: 'auth.login.logo', role: 'img', name: 'L', description: 'logo',
-      value: { kind: 'asset', ref: 'logo.png' } },
-    { snapshotId: 'auth.login.show-logo', role: 'img', name: 'V', description: 'show logo',
-      value: { kind: 'visibility', shown: false } },
+      value: { kind: 'asset', ref: 'logo.png' }, visibility: false },
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
       value: { kind: 'color', oklch: { l: 0.5, c: 0.1, h: 250 } } },
   ],
 };
 
 describe('leverPatchesFor', () => {
-  it('maps content/asset/visibility nodes to patches and skips colors', () => {
+  it('maps content and asset nodes to patches and skips colors', () => {
     const patches = leverPatchesFor(model);
-    expect(patches).toEqual([
-      { snapshotId: 'auth.login.title', kind: 'content', text: 'Hi' },
-      { snapshotId: 'auth.login.logo', kind: 'asset', ref: 'logo.png' },
-      { snapshotId: 'auth.login.show-logo', kind: 'visibility', shown: false },
-    ]);
+    expect(patches).toContainEqual({ snapshotId: 'auth.login.title', kind: 'content', text: 'Hi' });
+    expect(patches).toContainEqual({ snapshotId: 'auth.login.logo', kind: 'asset', ref: 'logo.png' });
+    // color node (sign-in) produces no patch; total patches = 3 (title content, logo asset, logo visibility)
+    expect(patches.filter((p) => p.snapshotId === 'auth.login.sign-in')).toHaveLength(0);
+  });
+
+  it('emits a visibility patch from the node visibility field', () => {
+    const patches = leverPatchesFor(model);
+    expect(patches).toContainEqual({ snapshotId: 'auth.login.logo', kind: 'visibility', shown: false });
+  });
+
+  it('emits both asset and visibility patches for a node with both', () => {
+    const patches = leverPatchesFor(model);
+    const logo = patches.filter((p) => p.snapshotId === 'auth.login.logo');
+    expect(logo).toContainEqual({ snapshotId: 'auth.login.logo', kind: 'asset', ref: 'logo.png' });
+    expect(logo).toContainEqual({ snapshotId: 'auth.login.logo', kind: 'visibility', shown: false });
+  });
+
+  it('omits a visibility patch for a node without the visibility field', () => {
+    const patches = leverPatchesFor(model);
+    const vis = patches.filter((p) => p.kind === 'visibility');
+    expect(vis.every((p) => p.snapshotId === 'auth.login.logo')).toBe(true);
   });
 });

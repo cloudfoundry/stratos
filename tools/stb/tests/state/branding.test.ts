@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { brandingModel, nodeFor, setNodeValue, loadBrandingModel } from '@/state/branding';
+import { brandingModel, nodeFor, setNodeValue, setNodeVisibility, loadBrandingModel } from '@/state/branding';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
@@ -25,6 +25,20 @@ describe('branding state', () => {
     expect(nodeFor('auth.login.title')?.value).toEqual({ kind: 'content', text: 'Welcome' });
     expect(brandingModel.value).not.toBe(before); // new reference → reactivity
     expect(nodeFor('auth.login.sign-in')?.value).toEqual({ kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } });
+  });
+
+  it('setNodeVisibility updates the node visibility immutably', () => {
+    brandingModel.value = {
+      scene: 'login',
+      nodes: [
+        { snapshotId: 'auth.login.logo', role: 'img', name: 'L', description: 'logo',
+          value: { kind: 'asset', ref: 'logo.svg' }, visibility: true },
+      ],
+    };
+    const before = brandingModel.value;
+    setNodeVisibility('auth.login.logo', false);
+    expect(nodeFor('auth.login.logo')?.visibility).toBe(false);
+    expect(brandingModel.value).not.toBe(before); // new reference → reactivity
   });
 });
 
