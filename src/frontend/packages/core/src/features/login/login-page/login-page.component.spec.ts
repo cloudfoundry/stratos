@@ -154,3 +154,46 @@ describe('LoginPageComponent — login-scoped input branding', () => {
     expect(card.style.getPropertyValue('--input-border')).toBe('#ff0000');
   });
 });
+
+describe('LoginPageComponent — snapshot-id instrumentation', () => {
+  let fixture: ComponentFixture<LoginPageComponent>;
+
+  beforeEach(async () => {
+    const themeState = signal<StratosTheme>({
+      ...defaultTheme,
+      branding: {
+        ...defaultTheme.branding,
+        loginSubtitle: 'Multi-cloud management',
+      },
+    });
+
+    const brandingStub = {
+      theme: themeState.asReadonly(),
+    } as unknown as StratosBrandingService;
+
+    await TestBed.configureTestingModule({
+      imports: [
+        RouterTestingModule,
+        NoopAnimationsModule,
+        createBasicStoreModule(),
+        LoginPageComponent,
+      ],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: StratosBrandingService, useValue: brandingStub },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginPageComponent);
+  });
+
+  it('instruments the login background and subtitle for harvest', () => {
+    fixture.detectChanges();
+    const el = fixture.nativeElement;
+    expect(el.querySelector('[data-stratos-snapshot-id="auth.login.background"]')).not.toBeNull();
+    expect(el.querySelector('[data-stratos-snapshot-id="auth.login.subtitle"]')).not.toBeNull();
+  });
+});
