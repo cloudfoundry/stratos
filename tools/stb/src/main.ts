@@ -14,6 +14,7 @@ import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
 import { nodeFor } from '@/state/branding';
+import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
 import { effect } from '@preact/signals-core';
@@ -55,6 +56,10 @@ async function main() {
   const restored = restoreSession();
   if (!restored) await loadBuiltInPreset('stratos-default');
   startAutoSave();
+
+  // Global navigator aggregate — every scene's branding-model merged into one
+  // drilldown (R3). Independent of the active-scene model the preview/editor use.
+  void loadGlobalModel();
 
   await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
   const actionsHost = app.querySelector('.stb-actions-host') as HTMLElement;
@@ -150,8 +155,13 @@ async function main() {
   });
 
   mountElementColumns(columnsView, {
-    onHover: (id) => preview.highlightElement(id),
-    onSelect: (id) => selectElement(id),
+    // hover only highlights when the node belongs to the scene on screen
+    onHover: (id, scene) => { if (id && scene === activeSceneId.value) preview.highlightElement(id); else preview.highlightElement(null); },
+    onSelect: (id, scene) => {
+      // global navigator: switch the preview to the node's scene, then edit
+      if (scene !== activeSceneId.value) { activeSceneId.value = scene; }
+      selectElement(id);
+    },
   });
 
   mountTokenSidebar(tokensView, {

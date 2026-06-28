@@ -1,27 +1,27 @@
 import { effect, signal } from '@preact/signals-core';
-import { brandingModel } from '@/state/branding';
+import { globalModel, type GlobalModel, type GlobalNode } from '@/state/global-branding';
 import { oklchToHex } from '@/color/oklch';
-import type { ElementNode, BrandingModel } from '@/metadata/types';
 
 // R3 PROTOTYPE — Miller columns (Finder-style left→right drilldown) over the
-// branding-model snapshotId hierarchy, with collapse-to-rail. Purpose: measure
-// how many columns fit a normal window before horizontal-scroll pain, and prove
-// the rail/breadcrumb mechanic. Throwaway: no tests, lives beside element-tree.
+// GLOBAL branding aggregate (all scenes merged by their snapshotId prefix), with
+// collapse-to-rail. Purpose: measure how many columns fit a normal window before
+// horizontal-scroll pain, and prove the rail/breadcrumb mechanic. Throwaway: no
+// tests, lives beside element-tree.
 
 export interface ElementColumnsOptions {
-  onHover?: (snapshotId: string | null) => void;
-  onSelect?: (snapshotId: string) => void;
+  onHover?: (snapshotId: string | null, scene: string | null) => void;
+  onSelect?: (snapshotId: string, scene: string) => void;
 }
 
 // A node in the path tree built from dot-delimited snapshotIds.
 interface PathNode {
   segment: string;
   fullPath: string;            // dot path from root to here
-  node?: ElementNode;          // set when this path is an actual leaf element
+  node?: GlobalNode;           // set when this path is an actual leaf element
   children: Map<string, PathNode>;
 }
 
-function buildTree(model: BrandingModel): PathNode {
+function buildTree(model: GlobalModel): PathNode {
   const root: PathNode = { segment: '', fullPath: '', children: new Map() };
   for (const n of model.nodes) {
     const segs = n.snapshotId.split('.');
@@ -65,7 +65,7 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
   }
 
   function render(): void {
-    const model = brandingModel.value;
+    const model = globalModel.value;
     host.innerHTML = '';
     if (!model || model.nodes.length === 0) {
       host.innerHTML = '<p class="stb-tree-empty">No elements in this scene</p>';
@@ -127,11 +127,11 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
         }
 
         const childSegs = [...sel.slice(0, i), child.segment];
-        row.addEventListener('mouseenter', () => opts.onHover?.(child.node?.snapshotId ?? null));
-        row.addEventListener('mouseleave', () => opts.onHover?.(null));
+        row.addEventListener('mouseenter', () => opts.onHover?.(child.node?.snapshotId ?? null, child.node?.scene ?? null));
+        row.addEventListener('mouseleave', () => opts.onHover?.(null, null));
         row.addEventListener('click', () => {
           path.value = childSegs;               // drill (opens next column or marks leaf)
-          if (child.node) opts.onSelect?.(child.node.snapshotId);
+          if (child.node) opts.onSelect?.(child.node.snapshotId, child.node.scene);
         });
         colEl.appendChild(row);
       }
@@ -145,5 +145,5 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
     host.appendChild(crumb);
   }
 
-  effect(() => { void brandingModel.value; void path.value; render(); });
+  effect(() => { void globalModel.value; void path.value; render(); });
 }
