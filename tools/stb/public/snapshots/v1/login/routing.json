@@ -10,6 +10,7 @@
     "auth.login.show-title":  { "config": "showTitle" },
     "auth.login.logo":        { "config": "logos.main" },
     "auth.login.background":  { "config": "logos.loginBackground" },
-    "auth.login.sign-in":     { "config": "theme.primary" }
+    "auth.login.sign-in":     { "config": "theme.primary" },
+    "auth.login.error":       { "config": "theme.danger" }
   }
 }

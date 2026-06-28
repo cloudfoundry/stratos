@@ -30,6 +30,9 @@
       "value": { "kind": "asset", "ref": "login-bg.svg" } },
     { "snapshotId": "auth.login.sign-in", "role": "button", "name": "Sign in",
       "description": "sign-in button color for the login page",
-      "value": { "kind": "color", "oklch": { "l": 0.55, "c": 0.15, "h": 250 } } }
+      "value": { "kind": "color", "oklch": { "l": 0.55, "c": 0.15, "h": 250 } } },
+    { "snapshotId": "auth.login.error", "role": "alert", "name": "Error message",
+      "description": "error/failure message color for the login page",
+      "value": { "kind": "color", "oklch": { "l": 0.63, "c": 0.23, "h": 25 } } }
   ]
 }
