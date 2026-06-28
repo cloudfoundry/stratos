@@ -112,7 +112,14 @@ async function main() {
   let routing: import('@/projection/projector').RoutingMap = { elements: {} };
   effect(() => {
     const scene = activeSceneId.value;
-    fetch(`/snapshots/v1/${scene}/routing.json`).then((r) => r.json()).then((j) => { routing = j; });
+    // A scene may ship no routing.json (e.g. app-list); guard so the dev-server
+    // HTML fallback doesn't throw a JSON parse error and leave stale routing.
+    fetch(`/snapshots/v1/${scene}/routing.json`)
+      .then(async (r) => {
+        const ct = r.headers.get('content-type') ?? '';
+        routing = r.ok && ct.includes('json') ? await r.json() : { elements: {} };
+      })
+      .catch(() => { routing = { elements: {} }; });
   });
 
   function selectElement(snapshotId: string): void {
