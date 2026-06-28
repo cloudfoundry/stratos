@@ -32,3 +32,12 @@ export function setNodeValue(snapshotId: string, value: LeverValue): void {
     nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, value } : n)),
   };
 }
+
+export function setNodeVisibility(snapshotId: string, shown: boolean): void {
+  const m = brandingModel.value;
+  if (!m) return;
+  brandingModel.value = {
+    ...m,
+    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, visibility: shown } : n)),
+  };
+}

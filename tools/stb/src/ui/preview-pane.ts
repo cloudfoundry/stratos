@@ -12,7 +12,7 @@ export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
   for (const n of model.nodes) {
     if (n.value.kind === 'content') out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.value.text });
     else if (n.value.kind === 'asset') out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.value.ref });
-    else if (n.value.kind === 'visibility') out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.value.shown });
+    if (n.visibility !== undefined) out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.visibility });
   }
   return out;
 }
