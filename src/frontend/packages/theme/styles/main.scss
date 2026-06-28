@@ -395,6 +395,15 @@ router-outlet + * {
     }
   }
 
+  /* Alert / failure surface — derives the entire surface from one semantic state
+     token so a single brand color re-skins every failure surface that adopts it.
+     Mirror for warning/success/info when those surfaces need branding. */
+  .alert-danger {
+    background-color: color-mix(in srgb, var(--color-danger) 12%, var(--card-bg));
+    border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 75%, var(--content-text));
+  }
+
   /* Info Button */
   .btn-info {
     @apply text-white shadow-sm;
