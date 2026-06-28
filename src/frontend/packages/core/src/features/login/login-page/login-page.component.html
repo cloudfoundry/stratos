@@ -49,6 +49,13 @@
     </div>
 
     <div class="login-body">
+      @if (customMessage()) {
+        <p class="login-message text-sm text-content-muted mb-4"
+           role="note"
+           data-stratos-snapshot-id="auth.login.message">
+          {{ customMessage() }}
+        </p>
+      }
       <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
         <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
           @if ((ssoLogin$ | async) === false) {

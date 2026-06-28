@@ -71,6 +71,7 @@ export class LoginPageComponent implements OnInit {
 
   public showLogo = computed(() => this.branding.theme()?.login?.showLogo ?? true);
   public showTitle = computed(() => this.branding.theme()?.login?.showTitle ?? true);
+  public customMessage = computed(() => this.branding.theme()?.login?.customMessage || '');
 
   // Form state
   loginForm!: NgForm;

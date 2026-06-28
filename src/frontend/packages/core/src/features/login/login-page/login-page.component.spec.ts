@@ -244,3 +244,76 @@ describe('LoginPageComponent — snapshot-id instrumentation', () => {
     expect(el.querySelector('[data-stratos-snapshot-id="auth.login.subtitle"]')).not.toBeNull();
   });
 });
+
+describe('LoginPageComponent — before-login notice', () => {
+  let fixture: ComponentFixture<LoginPageComponent>;
+
+  beforeEach(async () => {
+    const themeState = signal<StratosTheme>({
+      ...defaultTheme,
+      login: {
+        ...defaultTheme.login,
+        customMessage: 'Authorized users only',
+      },
+    });
+
+    const brandingStub = {
+      theme: themeState.asReadonly(),
+    } as unknown as StratosBrandingService;
+
+    await TestBed.configureTestingModule({
+      imports: [
+        RouterTestingModule,
+        NoopAnimationsModule,
+        createBasicStoreModule(),
+        LoginPageComponent,
+      ],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: StratosBrandingService, useValue: brandingStub },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginPageComponent);
+  });
+
+  it('renders the before-login notice when a custom message is set', () => {
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.message"]');
+    expect(el).not.toBeNull();
+    expect(el.textContent).toContain('Authorized users only');
+  });
+});
+
+describe('LoginPageComponent — before-login notice hidden when empty', () => {
+  let fixture: ComponentFixture<LoginPageComponent>;
+
+  beforeEach(async () => {
+    const themeState = signal<StratosTheme>({
+      ...defaultTheme,
+      login: { ...defaultTheme.login, customMessage: '' },
+    });
+    const brandingStub = { theme: themeState.asReadonly() } as unknown as StratosBrandingService;
+
+    await TestBed.configureTestingModule({
+      imports: [RouterTestingModule, NoopAnimationsModule, createBasicStoreModule(), LoginPageComponent],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: StratosBrandingService, useValue: brandingStub },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginPageComponent);
+  });
+
+  it('hides the before-login notice when customMessage is empty', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.message"]')).toBeNull();
+  });
+});
