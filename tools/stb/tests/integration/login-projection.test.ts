@@ -38,6 +38,7 @@ describe('login projection end-to-end', () => {
         showTitle: true,
         backgroundColor: expect.stringMatching(/^#[0-9a-f]{6}$/),
         cardBackground: expect.stringMatching(/^#[0-9a-f]{6}$/),
+        inputBorder: expect.stringMatching(/^#[0-9a-f]{6}$/),
       },
       logos: { main: 'logo.svg', loginBackground: 'login-bg.svg' },
       theme: { primary: expect.stringMatching(/^#[0-9a-f]{6}$/), danger: expect.stringMatching(/^#[0-9a-f]{6}$/) },

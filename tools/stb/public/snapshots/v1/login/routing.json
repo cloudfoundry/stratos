@@ -11,6 +11,8 @@
     "auth.login.logo":        { "config": "logos.main" },
     "auth.login.background":  { "config": "logos.loginBackground" },
     "auth.login.sign-in":     { "config": "theme.primary" },
-    "auth.login.error":       { "config": "theme.danger" }
+    "auth.login.error":       { "config": "theme.danger" },
+    "auth.login.username":    { "config": "inputBorder" },
+    "auth.login.password":    { "config": "inputBorder" }
   }
 }
