@@ -50,6 +50,9 @@ export class LoginPageComponent implements OnInit {
     this.branding.theme()?.login?.cardBackground || '#ffffff'
   );
 
+  public inputBackground = computed(() => this.branding.theme()?.login?.inputBackground || null);
+  public inputBorder = computed(() => this.branding.theme()?.login?.inputBorder || null);
+
   public themeLogo = computed(() =>
     this.branding.theme()?.branding?.logo || '/core/assets/logo.png'
   );

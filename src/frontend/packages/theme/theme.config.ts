@@ -56,6 +56,8 @@ export interface StratosTheme {
     backgroundColor?: string;
     cardBackground?: string;
     customMessage?: string;
+    inputBackground?: string;
+    inputBorder?: string;
   };
 }
 
