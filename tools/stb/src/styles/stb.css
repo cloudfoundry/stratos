@@ -28,6 +28,6 @@ body {
 
 .stb-flash { background-color: var(--warning, #ffeaa7); transition: background-color 0.3s; }
 
-.stb-status-bar { display: flex; padding: 0.4rem 0.75rem; border-top: 1px solid var(--border, #ddd); background: var(--card, white); font-size: 0.85rem; gap: 1rem; align-items: center; }
+.stb-status-bar { display: flex; padding: 0.4rem 0.75rem; border-top: 1px solid var(--border, #ddd); border-bottom: 1px solid var(--border, #ddd); background: var(--card, white); font-size: 0.85rem; gap: 1rem; align-items: center; }
 .stb-status-spacer { flex: 1; }
 .stb-status-completeness.warn { color: var(--warning, #d97706); }
