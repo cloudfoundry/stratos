@@ -1,6 +1,7 @@
 import { mountEditorPane } from '@/ui/editor-pane';
 import { mountTokenSidebar } from '@/ui/token-sidebar';
 import { mountElementTree } from '@/ui/element-tree';
+import { mountElementColumns } from '@/ui/element-columns';
 import { mountSceneTabs } from '@/ui/scene-tabs';
 import { createPreviewPane } from '@/ui/preview-pane';
 import { openColorPicker } from '@/ui/color-picker';
@@ -77,23 +78,28 @@ async function main() {
   const wiring = createHighlightWiring();
   const sidebarHost = app.querySelector('.stb-sidebar-host') as HTMLElement;
 
-  // The sidebar flips between the meaningful element tree and the raw token list.
+  // The sidebar flips between the meaningful element tree, the Miller-column
+  // navigator (R3 prototype), and the raw token list.
   sidebarHost.innerHTML = `
     <div class="stb-view-toggle">
       <button class="stb-view-btn active" data-view="tree">Tree</button>
+      <button class="stb-view-btn" data-view="columns">Columns</button>
       <button class="stb-view-btn" data-view="tokens">Tokens</button>
     </div>
-    <div class="stb-view stb-view-tree"></div>
-    <div class="stb-view stb-view-tokens" hidden></div>
+    <div class="stb-view stb-view-tree" data-view="tree"></div>
+    <div class="stb-view stb-view-columns" data-view="columns" hidden></div>
+    <div class="stb-view stb-view-tokens" data-view="tokens" hidden></div>
   `;
   const treeView = sidebarHost.querySelector('.stb-view-tree') as HTMLElement;
+  const columnsView = sidebarHost.querySelector('.stb-view-columns') as HTMLElement;
   const tokensView = sidebarHost.querySelector('.stb-view-tokens') as HTMLElement;
   sidebarHost.querySelectorAll<HTMLButtonElement>('.stb-view-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const view = btn.dataset.view;
       sidebarHost.querySelectorAll('.stb-view-btn').forEach((b) => b.classList.toggle('active', b === btn));
-      treeView.hidden = view !== 'tree';
-      tokensView.hidden = view !== 'tokens';
+      sidebarHost.querySelectorAll<HTMLElement>('.stb-view').forEach((v) => { v.hidden = v.dataset.view !== view; });
+      // R3: the columns navigator needs real horizontal room — widen the sidebar while it's shown
+      sidebarHost.style.width = view === 'columns' ? '720px' : '280px';
     });
   });
 
@@ -139,6 +145,11 @@ async function main() {
   actionsHost.appendChild(leverToggle);
 
   mountElementTree(treeView, {
+    onHover: (id) => preview.highlightElement(id),
+    onSelect: (id) => selectElement(id),
+  });
+
+  mountElementColumns(columnsView, {
     onHover: (id) => preview.highlightElement(id),
     onSelect: (id) => selectElement(id),
   });
