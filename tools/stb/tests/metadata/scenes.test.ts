@@ -31,8 +31,6 @@ describe('real scene metadata', () => {
     const html = readFileSync(`${base}/login/index.html`, 'utf8');
     const model = JSON.parse(readFileSync(`${base}/login/branding-model.json`, 'utf8'));
     for (const node of model.nodes) {
-      // visibility levers (show-logo/show-title) are abstract toggles, not DOM nodes — skip
-      if (node.value.kind === 'visibility') continue;
       expect(html, `missing snapshot-id for ${node.snapshotId}`).toContain(`data-stratos-snapshot-id="${node.snapshotId}"`);
     }
   });
