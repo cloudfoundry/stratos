@@ -1,6 +1,10 @@
 import { effect } from '@preact/signals-core';
 import { tokenMetadata, effectiveValue, type TokenSpec } from '@/state/tokens';
 import { previewDark } from '@/state/scene';
+import tokenMeanings from '@/data/token-meanings.json';
+
+type TokenMeaning = { label: string; description: string };
+const meanings = tokenMeanings as unknown as Record<string, TokenMeaning>;
 
 export interface TokenSidebarOptions {
   onSwatchClick?: (token: TokenSpec) => void;
@@ -31,10 +35,22 @@ export function mountTokenSidebar(host: HTMLElement, opts: TokenSidebarOptions =
       swatch.dataset.token = token.name;
       row.appendChild(swatch);
 
+      // lead with the authored meaning; keep the raw id as secondary detail
+      const meaning = meanings[token.name];
       const name = document.createElement('button');
       name.className = 'stb-token-name';
-      name.textContent = token.name;
       name.dataset.token = token.name;
+      if (meaning?.description) name.title = meaning.description;
+      const label = document.createElement('span');
+      label.className = 'stb-token-label';
+      label.textContent = meaning?.label ?? token.name;
+      name.appendChild(label);
+      if (meaning) {
+        const id = document.createElement('span');
+        id.className = 'stb-token-id';
+        id.textContent = token.name;
+        name.appendChild(id);
+      }
       row.appendChild(name);
 
       const valueEl = document.createElement('span');

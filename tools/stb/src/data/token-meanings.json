@@ -1,0 +1,24 @@
+{
+  "_note": "Durable, stb-only alias layer: friendly meaning for each token id. Decoupled from the Stratos token definitions — editing names here changes nothing in the Stratos codebase. Export still emits the real ids.",
+
+  "--color-brand-50":  { "label": "Brand tint (lightest)", "description": "Faintest brand shade. Subtle backgrounds and hover fills." },
+  "--color-brand-100": { "label": "Brand tint (very light)", "description": "Very light brand shade. Quiet surfaces, selected rows." },
+  "--color-brand-200": { "label": "Brand tint (light)", "description": "Light brand shade. Soft fills and borders." },
+  "--color-brand-300": { "label": "Brand tint", "description": "Light-mid brand shade. Borders, disabled accents." },
+  "--color-brand-400": { "label": "Brand (soft)", "description": "Mid-light brand shade approaching the core color." },
+  "--color-brand-500": { "label": "Brand core", "description": "The main brand color — anchor of the shade ramp." },
+  "--color-brand-600": { "label": "Brand (strong)", "description": "Darker brand shade. Hover/active on brand surfaces." },
+  "--color-brand-700": { "label": "Brand (stronger)", "description": "Strong brand shade for emphasis and pressed states." },
+  "--color-brand-800": { "label": "Brand (deep)", "description": "Deep brand shade. High-emphasis accents." },
+  "--color-brand-900": { "label": "Brand (darkest)", "description": "Darkest brand shade. Brand-tinted text on light surfaces." },
+
+  "--color-primary": { "label": "Primary action color", "description": "Main interactive color. Primary buttons, links, focus rings, active states." },
+  "--color-success": { "label": "Success color", "description": "Positive / confirmation states. Success badges, valid inputs." },
+  "--color-warning": { "label": "Warning color", "description": "Caution states. Warning badges and non-blocking alerts." },
+  "--color-danger":  { "label": "Error / danger color", "description": "Error and destructive states. This is the SEED color: the alert surface derives a light background and dark text from it so they stay readable. Do not use it directly as both background and text — same color on both has no contrast." },
+  "--color-info":    { "label": "Info color", "description": "Informational / neutral notices." },
+
+  "--nav-bg":         { "label": "Navigation background", "description": "Background of the side navigation and app chrome." },
+  "--nav-text":       { "label": "Navigation text", "description": "Primary text and icons on the navigation background." },
+  "--nav-text-muted": { "label": "Navigation muted text", "description": "Secondary / inactive labels in the navigation." }
+}

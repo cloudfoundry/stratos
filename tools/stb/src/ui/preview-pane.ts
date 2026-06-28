@@ -24,6 +24,7 @@ export interface PreviewPaneOptions {
 export interface PreviewPane {
   mount(host: HTMLElement): void;
   highlightToken(token: string | null): void;
+  highlightElement(snapshotId: string | null): void;
   showLevers(on: boolean): void;
 }
 
@@ -110,6 +111,10 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
 
     highlightToken(token) {
       send({ type: 'STB_HIGHLIGHT_TOKEN', token });
+    },
+
+    highlightElement(snapshotId) {
+      send({ type: 'STB_HIGHLIGHT_ELEMENT', snapshotId });
     },
 
     showLevers(on) {
