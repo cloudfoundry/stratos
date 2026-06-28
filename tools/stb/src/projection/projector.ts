@@ -5,6 +5,7 @@ export interface RoutingEntry {
   config?: string;
   token?: string;
   oklchRole?: 'primary' | 'scale';
+  visibilityConfig?: string;
 }
 export interface RoutingMap {
   containers?: Record<string, string>;
@@ -78,6 +79,11 @@ export function project(model: BrandingModel, routing: RoutingMap): ProjectionRe
       const ns = entry.config.includes('.') ? null : namespaceFor(node.snapshotId, containers);
       const path = ns ? `${ns}.${entry.config}` : entry.config;
       setPath(companyConfig, path, leafValue(node.value));
+    }
+    if (entry.visibilityConfig && node.visibility !== undefined) {
+      const ns = entry.visibilityConfig.includes('.') ? null : namespaceFor(node.snapshotId, containers);
+      const path = ns ? `${ns}.${entry.visibilityConfig}` : entry.visibilityConfig;
+      setPath(companyConfig, path, node.visibility);
     }
   }
   return { tokens, companyConfig, unmapped };

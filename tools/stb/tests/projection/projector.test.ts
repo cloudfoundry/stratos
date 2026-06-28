@@ -64,4 +64,15 @@ describe('project', () => {
     });
     expect(r.companyConfig).toMatchObject({ login: { title: 'Hi' } });
   });
+
+  it('projects element visibility into its routed show-field', () => {
+    const model = { scene: 'login', nodes: [
+      { snapshotId: 'auth.login.logo', role: 'img', name: null,
+        description: '', value: { kind: 'asset' as const, ref: 'logo.svg' }, visibility: false },
+    ]};
+    const routing = { containers: { 'auth.login': 'login' },
+      elements: { 'auth.login.logo': { config: 'logos.main', visibilityConfig: 'showLogo' } } };
+    const r = project(model as any, routing as any);
+    expect(r.companyConfig).toMatchObject({ logos: { main: 'logo.svg' }, login: { showLogo: false } });
+  });
 });
