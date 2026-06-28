@@ -49,6 +49,21 @@ body {
 .stb-tree-name { flex: 1; color: var(--foreground, #1e293b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stb-tree-val { color: var(--text-muted, #94a3b8); font-family: ui-monospace, monospace; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 8rem; }
 
+/* R3 PROTOTYPE — Miller columns (Finder drilldown) with collapse-to-rail */
+.stb-cols { display: flex; align-items: stretch; gap: 0; overflow-x: auto; height: 100%; }
+.stb-col { flex: 0 0 170px; border-right: 1px solid var(--border, #e5e7eb); overflow-y: auto; }
+.stb-col-row { display: flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.5rem; cursor: pointer; font-size: 0.82rem; }
+.stb-col-row:hover { background: color-mix(in srgb, var(--color-primary, #2196f3) 12%, transparent); }
+.stb-col-row.active { background: color-mix(in srgb, var(--color-primary, #2196f3) 22%, transparent); }
+.stb-col-swatch { width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid var(--border, #d1d5db); flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--text-muted, #64748b); }
+.stb-col-swatch-glyph { background: var(--content-secondary, #f1f5f9); }
+.stb-col-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--foreground, #1e293b); }
+.stb-col-caret { color: var(--text-muted, #94a3b8); flex: 0 0 auto; }
+/* collapsed rail: thin vertical strip = breadcrumb; click to re-expand */
+.stb-col-rail { flex: 0 0 1.6rem; border-right: 1px solid var(--border, #e5e7eb); writing-mode: vertical-rl; text-orientation: mixed; padding: 0.4rem 0.1rem; cursor: pointer; font-size: 0.72rem; color: var(--text-muted, #64748b); background: var(--content-secondary, #f8fafc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stb-col-rail:hover { color: var(--color-primary, #2196f3); }
+.stb-col-crumb { position: sticky; bottom: 0; flex: 0 0 100%; align-self: flex-end; padding: 0.2rem 0.5rem; font-size: 0.68rem; color: var(--text-muted, #94a3b8); background: var(--card, #fff); border-top: 1px solid var(--border, #eee); }
+
 /* token view: lead with the authored meaning, raw id as secondary detail */
 .stb-token-name { display: flex; flex-direction: column; align-items: flex-start; gap: 0; border: none; background: none; cursor: pointer; font: inherit; padding: 0; text-align: left; }
 .stb-token-label { font-size: 0.82rem; color: var(--foreground, #1e293b); }
