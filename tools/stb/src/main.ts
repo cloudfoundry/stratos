@@ -122,12 +122,24 @@ async function main() {
       .catch(() => { routing = { elements: {} }; });
   });
 
+  // Anchor the editor to a VISIBLE row in whichever navigator is showing. A
+  // hidden view's rows report a 0,0 rect, which would dump the editor in the
+  // top-left corner — so skip any zero-size candidate.
+  function visibleAnchor(snapshotId: string): HTMLElement {
+    const candidates: (HTMLElement | null)[] = [
+      [...columnsView.querySelectorAll<HTMLElement>('.stb-col-row.active')].pop() ?? null,
+      treeView.querySelector<HTMLElement>(`.stb-tree-row[data-snapshot-id="${snapshotId}"]`),
+    ];
+    for (const el of candidates) {
+      if (el) { const r = el.getBoundingClientRect(); if (r.width || r.height) return el; }
+    }
+    return app.querySelector('.stb-preview-host') as HTMLElement;
+  }
+
   function selectElement(snapshotId: string): void {
     const node = nodeFor(snapshotId);
     if (!node) return;
-    // anchor the editor to the element's tree row (not below the preview)
-    const row = treeView.querySelector<HTMLElement>(`.stb-tree-row[data-snapshot-id="${snapshotId}"]`);
-    const anchor = row ?? (app.querySelector('.stb-preview-host') as HTMLElement);
+    const anchor = visibleAnchor(snapshotId);
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
     openLeverEditor({
       anchor,
@@ -144,7 +156,8 @@ async function main() {
   const preview = createPreviewPane({
     onElementSelected: (_selector, tokens, snapshotId) => {
       if (tokens.length) { wiring.scrollSidebarToToken(sidebarHost, tokens[0]!); wiring.flashSidebarRows(sidebarHost, tokens); }
-      if (snapshotId) { selectElement(snapshotId); columnsApi?.jumpTo(snapshotId); } // render → columns (R1/§2.6)
+      // jump the columns FIRST so the active row exists, then anchor the editor to it
+      if (snapshotId) { columnsApi?.jumpTo(snapshotId); selectElement(snapshotId); } // render → columns (R1/§2.6)
     },
   });
   preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
