@@ -17,7 +17,14 @@ describe('login branding end-to-end (authoring)', () => {
   it('edits flow into the exported company-config.json', () => {
     brandingModel.value = JSON.parse(JSON.stringify(model));
     applyEdit('auth.login.title', { kind: 'content', text: 'Welcome to Acme Cloud' }, routing);
-    applyEdit('auth.login.show-logo', { kind: 'visibility', shown: false }, routing);
+    // Set logo visibility to false by modifying the node directly
+    const m = brandingModel.value;
+    if (m) {
+      brandingModel.value = {
+        ...m,
+        nodes: m.nodes.map((n) => (n.snapshotId === 'auth.login.logo' ? { ...n, visibility: false } : n)),
+      };
+    }
     applyEdit('auth.login.sign-in', { kind: 'color', oklch: { l: 0.6, c: 0.18, h: 20 } }, routing);
 
     const inputs = exportInputs(brandingModel.value, routing, new Map(), new Map(), []);
