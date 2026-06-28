@@ -35,14 +35,14 @@ async function main() {
   app.innerHTML = `
     <div class="stb-scene-tabs-host"></div>
     <div class="stb-actions-host" style="padding:0.5rem;border-bottom:1px solid #ddd"></div>
-    <div class="stb-main" style="display:flex;flex:1;overflow:hidden">
-      <div class="stb-left" style="display:flex">
+    <div class="stb-statusbar-host"></div>
+    <div class="stb-main" style="display:flex;flex:1;min-height:0;overflow:hidden">
+      <div class="stb-left" style="display:flex;min-height:0">
         <div class="stb-sidebar-host" style="width:280px;overflow:auto"></div>
         <div class="stb-editor-host" style="flex:1"></div>
       </div>
       <div class="stb-preview-host"></div>
     </div>
-    <div class="stb-statusbar-host"></div>
   `;
 
   setColumnStyles(
