@@ -17,9 +17,6 @@ export function colorValueFromHex(hex: string): LeverValue {
 export function contentValue(text: string): LeverValue {
   return { kind: 'content', text };
 }
-export function visibilityValue(shown: boolean): LeverValue {
-  return { kind: 'visibility', shown };
-}
 export function assetValue(filename: string): LeverValue {
   return { kind: 'asset', ref: filename };
 }
@@ -53,10 +50,6 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     ta.value = v.text;
     ta.addEventListener('input', (e) => opts.onChange(contentValue((e.target as HTMLTextAreaElement).value)));
     panel.appendChild(ta);
-  } else if (v.kind === 'visibility') {
-    panel.innerHTML = `<label><input type="checkbox" class="stb-lever-toggle" ${v.shown ? 'checked' : ''} /> shown</label>`;
-    panel.querySelector<HTMLInputElement>('.stb-lever-toggle')!
-      .addEventListener('change', (e) => opts.onChange(visibilityValue((e.target as HTMLInputElement).checked)));
   } else {
     panel.innerHTML = `<label class="stb-lever-asset-label">Upload image <input type="file" accept="image/*" class="stb-lever-asset" /></label>`;
     panel.querySelector<HTMLInputElement>('.stb-lever-asset')!

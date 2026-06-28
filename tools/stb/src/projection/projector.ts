@@ -22,7 +22,6 @@ function leafValue(v: LeverValue): unknown {
     case 'color': return oklchToHex(v.oklch);
     case 'content': return v.text;
     case 'asset': return v.ref;
-    case 'visibility': return v.shown;
     default: {
       const _exhaustive: never = v;
       return _exhaustive;

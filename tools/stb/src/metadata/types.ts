@@ -29,13 +29,12 @@ export interface SceneMetadata {
 
 export type CuratedDescriptions = Record<string, string>;  // ref key (a shared snapshotId) -> description text
 
-export type LeverKind = 'color' | 'content' | 'asset' | 'visibility';
+export type LeverKind = 'color' | 'content' | 'asset';
 
 export type LeverValue =
   | { kind: 'color'; oklch: Oklch }
   | { kind: 'content'; text: string }
-  | { kind: 'asset'; ref: string }
-  | { kind: 'visibility'; shown: boolean };
+  | { kind: 'asset'; ref: string };
 
 export interface ElementNode {
   snapshotId: string;

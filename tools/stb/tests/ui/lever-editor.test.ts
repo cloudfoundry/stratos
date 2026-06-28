@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { colorValueFromHex, contentValue, visibilityValue, assetValue, initialColorHex } from '@/ui/lever-editor';
+import { colorValueFromHex, contentValue, assetValue, initialColorHex } from '@/ui/lever-editor';
 
 describe('lever-editor value helpers', () => {
   it('colorValueFromHex round-trips through OKLCH', () => {
@@ -7,9 +7,8 @@ describe('lever-editor value helpers', () => {
     expect(v.kind).toBe('color');
     if (v.kind === 'color') expect(initialColorHex(v)).toBe('#2196f3');
   });
-  it('contentValue / visibilityValue / assetValue shape the union', () => {
+  it('contentValue / assetValue shape the union', () => {
     expect(contentValue('Hi')).toEqual({ kind: 'content', text: 'Hi' });
-    expect(visibilityValue(false)).toEqual({ kind: 'visibility', shown: false });
     expect(assetValue('logo.png')).toEqual({ kind: 'asset', ref: 'logo.png' });
   });
   it('initialColorHex falls back for non-color values', () => {
