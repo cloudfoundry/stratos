@@ -18,9 +18,9 @@
   <!-- Login Form Card -->
   <div
     class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg relative z-10"
-    [ngStyle]="{
-      'background-color': loginCardBackground()
-    }"
+    [ngStyle]="{ 'background-color': loginCardBackground() }"
+    [style.--input-bg]="inputBackground()"
+    [style.--input-border]="inputBorder()"
     data-stratos-snapshot-id="auth.login.card"
     >
     <!-- Logo and Display Name Header -->

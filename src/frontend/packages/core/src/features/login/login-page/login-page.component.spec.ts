@@ -8,6 +8,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import { AuthDataService } from '@stratosui/store';
 import type { AuthState } from '@stratosui/store';
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
+import { StratosTheme, defaultTheme } from '../../../../../theme/theme.config';
 
 import { LoginPageComponent } from './login-page.component';
 
@@ -106,5 +108,49 @@ describe('LoginPageComponent — error banner branding', () => {
     expect(banner).not.toBeNull();
     expect(banner.classList).toContain('alert-danger');
     expect(banner.className).not.toContain('bg-danger-50');
+  });
+});
+
+describe('LoginPageComponent — login-scoped input branding', () => {
+  let fixture: ComponentFixture<LoginPageComponent>;
+
+  beforeEach(async () => {
+    const themeState = signal<StratosTheme>({
+      ...defaultTheme,
+      login: {
+        ...defaultTheme.login,
+        inputBackground: '#222222',
+        inputBorder: '#ff0000',
+      }
+    });
+
+    const brandingStub = {
+      theme: themeState.asReadonly(),
+    } as unknown as StratosBrandingService;
+
+    await TestBed.configureTestingModule({
+      imports: [
+        RouterTestingModule,
+        NoopAnimationsModule,
+        createBasicStoreModule(),
+        LoginPageComponent,
+      ],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: StratosBrandingService, useValue: brandingStub },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginPageComponent);
+  });
+
+  it('applies login input branding scoped to the login card', () => {
+    fixture.detectChanges();
+    const card = fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.card"]');
+    expect(card.style.getPropertyValue('--input-bg')).toBe('#222222');
+    expect(card.style.getPropertyValue('--input-border')).toBe('#ff0000');
   });
 });

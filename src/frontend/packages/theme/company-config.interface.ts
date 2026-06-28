@@ -52,6 +52,8 @@ export interface CompanyConfig {
     backgroundColor?: string; // Login page background color
     cardBackground?: string;  // Login card background color
     customMessage?: string;   // Custom message on login page
+    inputBackground?: string; // Login input background (scoped to login card)
+    inputBorder?: string;     // Login input border color (scoped to login card)
   };
 
   // Footer/copyright
