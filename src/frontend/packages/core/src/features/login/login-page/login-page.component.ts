@@ -69,6 +69,9 @@ export class LoginPageComponent implements OnInit {
     this.branding.theme()?.branding?.loginSubtitle || ''
   );
 
+  public showLogo = computed(() => this.branding.theme()?.login?.showLogo ?? true);
+  public showTitle = computed(() => this.branding.theme()?.login?.showTitle ?? true);
+
   // Form state
   loginForm!: NgForm;
   username = '';

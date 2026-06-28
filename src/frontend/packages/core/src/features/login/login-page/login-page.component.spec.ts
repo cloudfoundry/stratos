@@ -155,6 +155,53 @@ describe('LoginPageComponent — login-scoped input branding', () => {
   });
 });
 
+describe('LoginPageComponent — logo and title visibility', () => {
+  let fixture: ComponentFixture<LoginPageComponent>;
+
+  beforeEach(async () => {
+    const themeState = signal<StratosTheme>({
+      ...defaultTheme,
+      login: {
+        ...defaultTheme.login,
+        showLogo: false,
+        showTitle: false,
+      }
+    });
+
+    const brandingStub = {
+      theme: themeState.asReadonly(),
+    } as unknown as StratosBrandingService;
+
+    await TestBed.configureTestingModule({
+      imports: [
+        RouterTestingModule,
+        NoopAnimationsModule,
+        createBasicStoreModule(),
+        LoginPageComponent,
+      ],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: StratosBrandingService, useValue: brandingStub },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LoginPageComponent);
+  });
+
+  it('hides the login logo when showLogo is false', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.logo"]')).toBeNull();
+  });
+
+  it('hides the login title when showTitle is false', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.title"]')).toBeNull();
+  });
+});
+
 describe('LoginPageComponent — snapshot-id instrumentation', () => {
   let fixture: ComponentFixture<LoginPageComponent>;
 
