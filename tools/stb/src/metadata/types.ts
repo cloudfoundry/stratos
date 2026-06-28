@@ -43,6 +43,7 @@ export interface ElementNode {
   name: string | null;
   description: string;
   value: LeverValue;
+  visibility?: boolean; // optional show/hide on THIS element; undefined = shown
 }
 
 export interface BrandingModel {
