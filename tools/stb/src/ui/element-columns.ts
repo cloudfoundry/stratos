@@ -53,7 +53,13 @@ function swatchFor(p: PathNode): { color?: string; glyph?: string } {
   return { glyph: '·' };
 }
 
-export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptions = {}): void {
+export interface ElementColumnsApi {
+  // jump the navigator to a node's full path (bidirectional select / who-uses-me /
+  // chip click). R1: this sets a *real* walk-back-able path, not an out-of-band jump.
+  jumpTo(snapshotId: string): void;
+}
+
+export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptions = {}): ElementColumnsApi {
   host.classList.add('stb-cols');
   // selected path = the chain of segments the user has drilled into
   const path = signal<string[]>([]);
@@ -146,4 +152,6 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
   }
 
   effect(() => { void globalModel.value; void path.value; render(); });
+
+  return { jumpTo(snapshotId) { path.value = snapshotId.split('.'); } };
 }
