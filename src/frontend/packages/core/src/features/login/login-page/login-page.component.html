@@ -3,6 +3,7 @@
   class="login-page min-h-screen flex items-center justify-center relative"
   [ngClass]="{'opacity-50 pointer-events-none': busy$ | async }"
   stb-snapshot-id="auth.login.page"
+  stb-kind="page"
   >
   <!-- Full-screen background -->
   <div
@@ -14,7 +15,7 @@
       'background-position': 'center',
       'background-repeat': 'no-repeat'
     }"
-    stb-snapshot-id="auth.login.background"
+    stb-snapshot-id="auth.login.page.background"
   ></div>
   <!-- Login Form Card -->
   <div
@@ -22,7 +23,7 @@
     [ngStyle]="{ 'background-color': loginCardBackground() }"
     [style.--input-bg]="inputBackground()"
     [style.--input-border]="inputBorder()"
-    stb-snapshot-id="auth.login.card"
+    stb-snapshot-id="auth.login.page.card"
     >
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
@@ -31,17 +32,17 @@
           class="login-logo h-12 w-12 shrink-0"
           [src]="themeLogo()"
           [alt]="themeDisplayName() || 'Logo'"
-          stb-snapshot-id="auth.login.logo"
+          stb-snapshot-id="auth.login.page.card.logo"
           />
       }
       <div class="login-title-section flex-1">
         @if (showTitle()) {
-          <h1 class="login-title text-xl font-bold text-content-text mb-1" stb-snapshot-id="auth.login.title">
+          <h1 class="login-title text-xl font-bold text-content-text mb-1" stb-snapshot-id="auth.login.page.card.title">
             {{ themeDisplayName() || themeTitle() || 'Stratos' }}
           </h1>
         }
         @if (themeSubtitle()) {
-          <p class="login-subtitle text-sm text-content-muted" stb-snapshot-id="auth.login.subtitle">
+          <p class="login-subtitle text-sm text-content-muted" stb-snapshot-id="auth.login.page.card.subtitle">
             {{ themeSubtitle() }}
           </p>
         }
@@ -52,7 +53,7 @@
       @if (customMessage()) {
         <p class="login-message text-sm text-content-muted mb-4"
            role="note"
-           stb-snapshot-id="auth.login.message">
+           stb-snapshot-id="auth.login.page.card.message">
           {{ customMessage() }}
         </p>
       }
@@ -70,7 +71,7 @@
                 placeholder="Username"
                 type="text"
                 autocomplete="username"
-                stb-snapshot-id="auth.login.username"
+                stb-snapshot-id="auth.login.page.card.username"
                 >
             </div>
           }
@@ -87,7 +88,7 @@
                 name="password"
                 placeholder="Password"
                 autocomplete="current-password"
-                stb-snapshot-id="auth.login.password"
+                stb-snapshot-id="auth.login.page.card.password"
                 >
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                 <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
@@ -100,7 +101,7 @@
               class="btn btn-primary w-full py-3"
               type="submit"
               [disabled]="(ssoLogin$ | async) === false && !loginForm.valid"
-              stb-snapshot-id="auth.login.sign-in"
+              stb-snapshot-id="auth.login.page.card.sign-in"
               >
               Sign In
             </button>
@@ -127,7 +128,7 @@
         '-translate-y-full opacity-0': !displayMessage
       }"
       role="alert"
-      stb-snapshot-id="auth.login.error"
+      stb-snapshot-id="auth.login.page.error"
       >
       <span class="material-icons text-danger shrink-0">error_outline</span>
       <span>{{ displayMessage }}</span>
