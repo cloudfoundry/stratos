@@ -73,12 +73,12 @@ async function main() {
   // navigator (R3 prototype), and the raw token list.
   sidebarHost.innerHTML = `
     <div class="stb-view-toggle">
-      <button class="stb-view-btn active" data-view="tree">Tree</button>
-      <button class="stb-view-btn" data-view="columns">Columns</button>
+      <button class="stb-view-btn" data-view="tree">Tree</button>
+      <button class="stb-view-btn active" data-view="columns">Columns</button>
       <button class="stb-view-btn" data-view="tokens">Tokens</button>
     </div>
-    <div class="stb-view stb-view-tree" data-view="tree"></div>
-    <div class="stb-view stb-view-columns" data-view="columns" hidden></div>
+    <div class="stb-view stb-view-tree" data-view="tree" hidden></div>
+    <div class="stb-view stb-view-columns" data-view="columns"></div>
     <div class="stb-view stb-view-tokens" data-view="tokens" hidden></div>
   `;
   const treeView = sidebarHost.querySelector('.stb-view-tree') as HTMLElement;
