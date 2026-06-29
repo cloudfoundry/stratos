@@ -1,6 +1,6 @@
-<div class="p-6">
+<div class="p-6" stb-snapshot-id="shared.confirm-dialog" stb-kind="dialog">
   <h1 class="confirm-dialog__header text-lg font-semibold mb-4 flex items-center justify-between text-content-text">
-    <span class="confirm-dialog__header-title">{{data.title}}</span>
+    <span class="confirm-dialog__header-title" stb-snapshot-id="shared.confirm-dialog.title">{{data.title}}</span>
     @if (data.critical || textToMatch) {
       <span class="material-icons confirm-dialog__warn-icon text-warning-shade-500">warning</span>
     }
@@ -20,7 +20,7 @@
   <div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
     <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
     @if (data.confirm) {
-      <button class="confirm-dialog__confirm"
+      <button class="confirm-dialog__confirm" stb-snapshot-id="shared.confirm-dialog.confirm"
         [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
         (click)="dialogRef.close(true)"
         [disabled]="textToMatch && textToMatch !== matchValue">{{
