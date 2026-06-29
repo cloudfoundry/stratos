@@ -2,10 +2,6 @@ import { signal } from '@preact/signals-core';
 import type { BrandingModel } from '@/metadata/types';
 import type { NavNode } from '@/navigator/column-model';
 
-// Re-export NavNode under the legacy name so existing consumers (element-columns)
-// continue to compile without changes.
-export type { NavNode as GlobalNode };
-
 export interface GlobalModel {
   nodes: NavNode[];
 }
