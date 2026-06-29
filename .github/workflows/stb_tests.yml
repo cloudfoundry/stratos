@@ -49,9 +49,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      # NOTE: `npm run lint` (eslint) is intentionally not gated yet — the
-      # eslint config is missing DOM globals for tests/, so it currently
-      # reports preexisting errors. Add it here once that config is fixed.
+      - name: Lint
+        run: npm run lint
+
       - name: Unit + integration tests
         run: npm test
 

@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 
@@ -11,27 +12,8 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        window: 'readonly',
-        document: 'readonly',
-        console: 'readonly',
-        localStorage: 'readonly',
-        sessionStorage: 'readonly',
-        Storage: 'readonly',
-        fetch: 'readonly',
-        Blob: 'readonly',
-        URL: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        confirm: 'readonly',
-        prompt: 'readonly',
-        HTMLElement: 'readonly',
-        HTMLIFrameElement: 'readonly',
-        HTMLInputElement: 'readonly',
-        HTMLButtonElement: 'readonly',
-        HTMLSelectElement: 'readonly',
-        MessageEvent: 'readonly',
-        MouseEvent: 'readonly',
-        Node: 'readonly',
+        ...globals.browser,
+        ...globals.node,
       },
     },
     plugins: {
