@@ -51,10 +51,16 @@ is settled. The destination is DOM-only:
 by prefix so accessibility and theming stay separate concerns even where one
 semantic feeds both:
 
-- **`stba-*`** — mimics ARIA and is intended to **become genuine ARIA**.
-  Authoring `stba-*` is an a11y on-ramp: the same instrumentation pass that
-  drives theming also gives Stratos a real accessibility footing, and `stba-*`
-  promotes to real `aria-*`/`role` as an element matures.
+- **`stba-*`** — a strict **1-1 ARIA mirror**: every `stba-X` corresponds to a
+  real ARIA attribute (`stba-role`↔`role`, `stba-label`↔`aria-label`,
+  `stba-roledescription`↔`aria-roledescription`) and **must adhere to ARIA
+  conventions** (valid role vocabulary; identity in the ARIA-correct slot). The
+  tool reads **either** namespace — real `aria-*`/`role` *or* `stba-*` — and
+  **`stba-*` takes precedence** when both are present (`stba-X ?? aria-X`). So
+  `stba-*` is stb's curated override and real ARIA is the fallback the tool
+  consumes when no `stba-*` is supplied. Because it mirrors ARIA, the same
+  instrumentation is also an a11y on-ramp: `stba-*` can later **promote** to
+  real `aria-*`/`role` (the phased outbound direction, below).
 - **`stb-*`** — pure theming, zero ARIA meaning (`stb-snapshot-id` is just
   type-agnostic identity; future colour/asset/visibility carriers live here).
 - **`stbx-*`** — a genuinely shared *semantic* concept that projects to **both**
@@ -62,26 +68,33 @@ semantic feeds both:
   One upstream truth, two independent projections — not mixing. *(Not in use
   yet; reserved by the scheme.)*
 
-**ARIA projection (the a11y on-ramp) — deferred (futurism).** The `stba-*`
-attributes are *shaped* to mirror ARIA so they can later be mechanically
-converted (`stba-role`→`role`, `stba-roledescription`→`aria-roledescription`).
-But the actual projection is **deliberately deferred**, not the next build —
-designing it before we have real instrumentation data (especially how many
-`stbx-*` shared-semantic cases exist) would be speculative over-build.
+**ARIA projection — two directions.** The `stba-*` correspondence runs both
+ways, and the two directions have different status:
 
-This is **safe to defer**: `stba-*`/`stb-*` are a **private namespace, not live
-ARIA**, so a wrong annotation only produces a theming mistake — never an
-accessibility regression (a screen reader never sees these attributes). The
-careful a11y-correctness work all lives in the future projection. So instrument
-freely now; the worst case is a branding bug fixed in the tool.
+- **Inbound (read) — in use now.** Model-generation ingests an element's
+  semantic identity from **either** real `aria-*`/`role` **or** `stba-*`, with
+  `stba-*` winning. This is a present tool requirement, not deferred. A useful
+  consequence: elements that already carry real ARIA (the login message
+  `role="note"`, the error `role="alert"`) need **no duplicate `stba-role`** —
+  the tool reads the real one — so the old `role`-dedup worry dissolves into the
+  precedence rule. You author `stba-*` only to override or to fill a gap.
+- **Outbound (emit) — phased.** Mechanically *writing* `stba-*` back out as real
+  `aria-*`/`role` into the **shipped Stratos DOM** (the actual accessibility
+  improvement) is deliberately later, not the next build. Designing it before we
+  have real instrumentation data — especially how many `stbx-*` shared-semantic
+  cases exist — would be speculative, and this is the direction where a wrong
+  annotation *would* be an a11y regression, so it wants real care.
 
-When the projector is eventually built, two things get decided there: how to
-**dedup** `role` where an element already carries real ARIA (the login message
-is already `role="note"`, the error already `role="alert"`), and exactly which
-descriptions become real `aria-*`. The **`aria-roledescription` unlock** is why
-the container "kind" rides on `roledescription`: ARIA's `role` vocabulary is a
-fixed closed set (no `role="stepper"`), so a stepper stays a valid
-`role="group"` *named* "stepper" via `aria-roledescription`.
+While `stba-*` stays inbound-only it is a **private namespace, not live ARIA**:
+a wrong annotation produces a theming mistake, never an accessibility regression
+(a screen reader never sees it). So instrument freely now; the a11y-correctness
+discipline attaches when the outbound emission is built. Because `stba-*` is held
+to ARIA conventions today, that later emission stays mechanical.
+
+The **`aria-roledescription` unlock** is why the container "kind" rides on
+`roledescription`: ARIA's `role` vocabulary is a fixed closed set (no
+`role="stepper"`), so a stepper stays a valid `role="group"` *named* "stepper"
+via `aria-roledescription`.
 
 **Descriptions — the composite shape (resolved authoring direction).** The
 opaque, theming-worded `stba-description` ("background color for the login page")
