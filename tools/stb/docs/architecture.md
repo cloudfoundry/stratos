@@ -14,10 +14,86 @@ boot. stb never runs inside Stratos; it reads snapshots of it.
 
 The distinguishing idea: theming is driven by an **element-semantic model**,
 not raw CSS tokens. Brandable elements in Stratos templates are tagged with a
-stable identity (`stb-snapshot-id`) and an optional container kind
-(`stb-kind`). stb harvests those, presents them as a navigable model
-("the Sign-in button", "the confirmation dialog"), and projects edits back
-down to concrete config + CSS.
+stable identity (`stb-snapshot-id`) and a small set of ARIA-mimicking `stba-*`
+attributes (role, roledescription, description). stb harvests those off the
+DOM, presents them as a navigable model ("the Sign-in button", "the
+confirmation dialog"), and projects edits back down to concrete config + CSS.
+
+## Source of truth and direction
+
+Read this before the pipeline — it explains *why* the data lives where it does.
+
+**The instrumented Stratos DOM is the single source of truth.** Branding and
+theming knowledge is meant to live on the real elements as HTML structure, CSS,
+and ARIA-like attributes. There is no parallel artifact that can drift: when the
+template changes, the semantics are right there on the element to update in
+place. Every page change is otherwise a chance for an out-of-band spec to rot
+("forgot to update the spec"), so the semantics travel *with* the element.
+
+**The model is generated, not authored.** `scripts/generate-model.ts` harvests
+the `stb-snapshot-id` + `stba-*` attributes out of a scene's `index.html` and
+emits its `branding-model.json`. That JSON is a **build artifact** — a test
+asserts the committed file equals a fresh regenerate (see *Testing*).
+
+**The `.json` files are transitional scaffolding, named as temporary on
+purpose.** They are stepping stones that carry knowledge we cannot *yet* express
+on the DOM, kept so we don't churn the Stratos templates before the vocabulary
+is settled. The destination is DOM-only:
+
+| File | Why it exists today | Where it's headed |
+|------|--------------------|-------------------|
+| `branding-model.json` | so the running app can `fetch()` the model | already pure-derived; generated, not a source |
+| `values.json` | the still-authored bits: friendly `name`, editable `value`, default `visibility` | `name` → DOM `aria-label`; `value` → computed-style capture; then the sidecar shrinks toward nothing |
+| `routing.json` | maps snapshot-id → Stratos config key for projection | ideally also moves onto the DOM — **undecided** until more scenes are converted and we see the shape |
+| captured snapshots | a shortcut to learn whether/how stb works | the end state themes the **real components**; snapshots are the learning vehicle |
+
+**The `stba`/`stb`/`stbx` prefix scheme.** The instrumentation namespace is split
+by prefix so accessibility and theming stay separate concerns even where one
+semantic feeds both:
+
+- **`stba-*`** — mimics ARIA and is intended to **become genuine ARIA**.
+  Authoring `stba-*` is an a11y on-ramp: the same instrumentation pass that
+  drives theming also gives Stratos a real accessibility footing, and `stba-*`
+  promotes to real `aria-*`/`role` as an element matures.
+- **`stb-*`** — pure theming, zero ARIA meaning (`stb-snapshot-id` is just
+  type-agnostic identity; future colour/asset/visibility carriers live here).
+- **`stbx-*`** — a genuinely shared *semantic* concept that projects to **both**
+  layers (e.g. a `severity` that drives both alert urgency and a danger colour).
+  One upstream truth, two independent projections — not mixing. *(Not in use
+  yet; reserved by the scheme.)*
+
+**ARIA projection (the a11y on-ramp) — designed, not yet wired.** The `stba-*`
+attributes mirror ARIA 1:1 so they can be mechanically converted:
+
+| authoring attr (DOM) | projects to | model field |
+|----------------------|-------------|-------------|
+| `stb-snapshot-id` | — (identity only) | `snapshotId` |
+| `stba-role` | `role` | `role` |
+| `stba-roledescription` | `aria-roledescription` | `roledescription` |
+| `stba-description` | `aria-description` | `description` |
+
+Two non-obvious points:
+- Projection is **not a pure strip**: `stba-role` drops the prefix to `role`, but
+  the other two *gain* the `aria-` prefix. A 3-entry projector table.
+- **`aria-roledescription` is the unlock.** ARIA's `role` vocabulary is a fixed
+  closed set — there is no `role="stepper"` or `role="page"`. So a stepper stays
+  a valid `role="group"` and is *named* "stepper" via `aria-roledescription`.
+  That is why the container "kind" rides on `roledescription`.
+
+The projector itself isn't built yet. When it is, two things get decided there:
+which descriptions become real `aria-description` (theming-note wording like
+"background color for the login page" is poor screen-reader text), and how to
+**dedup** `role` where an element already carries real ARIA (the login message
+is already `role="note"`, the error already `role="alert"`).
+
+**This is experimental.** Repurposing ARIA-shaped attributes as a theming
+vocabulary is a research direction — no existing standard covers the
+element-semantic layer stb occupies, and nobody has driven branding off ARIA
+this way. The stance is ARIA-first (reach for real ARIA where it fits) with a
+private `stb-*` fallback where ARIA doesn't fit or would pollute the
+accessibility tree (colour and brand-visibility have no ARIA equivalent — the
+clearest proof stb must *extend* ARIA, not just reuse it). Treat the vocabulary
+as provisional and validated by use, not a closed design.
 
 ## The pipeline (end to end)
 
@@ -25,10 +101,11 @@ down to concrete config + CSS.
   Stratos templates                 capture                 tools/stb
   ─────────────────                 ───────                 ─────────
   <button stb-snapshot-id=          harvest +               public/snapshots/v1/<scene>/
-    "auth.login.sign-in"      ──►   snapshot      ──►          index.html        (rendered DOM)
-    stb-kind="dialog">              pack                       branding-model.json (the model)
-                                                               routing.json      (id → config)
-                                                               metadata.json, styles.css, assets
+    "auth.login.sign-in"      ──►   snapshot      ──►          index.html        (instrumented DOM)
+    stba-role="button"              pack                       values.json       (authored: name/value)
+    stba-roledescription=                                      branding-model.json (GENERATED)
+    "dialog">                                                  routing.json      (id → config)
+                                                               styles.css, assets
                                                                       │
                                                                       ▼
                                                           ┌─ navigator (columns/tree)
@@ -47,12 +124,15 @@ down to concrete config + CSS.
 ```
 
 1. **Instrument** — Stratos templates carry `stb-snapshot-id` (a stable
-   dot-path identity, e.g. `auth.login.sign-in`) and, on containers,
-   `stb-kind` (`page` | `dialog` | `stepper` | `panel`). These are plain
-   static attributes; they have no runtime effect in Stratos.
+   dot-path identity, e.g. `auth.login.sign-in`) and the ARIA-mimicking
+   `stba-role` / `stba-roledescription` / `stba-description` attributes
+   (see *Source of truth and direction* above). These are plain static
+   attributes; they have no runtime effect in Stratos today.
 2. **Harvest / capture** — tooling reads the instrumented DOM into a
-   **snapshot pack** under `public/snapshots/v1/<scene>/`. `scripts/harvest-login.ts`
-   is the reader that extracts ids/kinds and lint-checks them against routing.
+   **snapshot pack** under `public/snapshots/v1/<scene>/`.
+   `scripts/harvest-login.ts` extracts the ids/attributes and lint-checks them
+   against routing; `scripts/generate-model.ts` combines that harvest with the
+   `values.json` sidecar to (re)build `branding-model.json`.
 3. **Load** — at startup the app loads the snapshot pack into signals (see
    *State* below).
 4. **Navigate / edit** — the operator drills the navigator, the preview
@@ -67,9 +147,14 @@ down to concrete config + CSS.
   brandable element. A dot-path: `<area>.<container>.<element>`
   (`auth.login.sign-in`). It is the join key across the whole pipeline:
   template ↔ snapshot HTML ↔ model node ↔ routing entry.
-- **container kind** (`stb-kind`) — marks *what kind of container* a node is
-  (page/dialog/stepper/panel). Rendered as a glyph at every navigator level,
-  so a dialog reads as a dialog wherever it appears.
+- **container kind** (`stba-roledescription`) — marks *what kind of container*
+  a node is (page/dialog/stepper/panel). It rides on `roledescription` precisely
+  because ARIA's `role` set is closed (no `role="stepper"`); it projects to
+  `aria-roledescription`. Rendered as a glyph at every navigator level, so a
+  dialog reads as a dialog wherever it appears.
+- **role / description** (`stba-role` / `stba-description`) — the element's ARIA
+  role and a human description, harvested off the DOM and carried on the model
+  node. They project to real `role` / `aria-description` (see above).
 - **scene** — one captured screen (`login`, `app-list`, `shared`). Listed in
   `manifest.json`. In the navigator, scenes are the top-level **area**.
 - **lever** — a single editable property on an element. A node's `value` is
@@ -92,16 +177,18 @@ down to concrete config + CSS.
 
 | File | Purpose |
 |------|---------|
-| `index.html` | the rendered, instrumented DOM shown in the preview iframe |
-| `branding-model.json` | `{ scene, nodes[] }` — the element-semantic model (each node: snapshotId, role, name, description, `value`, optional `visibility`, optional `containerKind`) |
+| `index.html` | the rendered, instrumented DOM shown in the preview iframe — **the source of truth** for identity/role/roledescription/description |
+| `values.json` | the still-authored sidecar: `{ "<snapshotId>": { name, value, visibility? } }` (see *Source of truth and direction*) |
+| `branding-model.json` | **generated** `{ scene, nodes[] }` — `generate-model.ts` merges the harvested DOM with `values.json`. A build artifact, not hand-edited |
 | `routing.json` | snapshot-id → Stratos config mapping (+ `containers`) |
-| `metadata.json` | element locators + curated descriptions |
 | `styles.css` | the scene's CSS, linked by `index.html` |
 | assets (`*.svg`, …) | images referenced by the scene |
 
 `manifest.json` (pack root) lists scenes: `{ id, name, archetype, thumbnail }`.
 A scene with no `branding-model.json` simply contributes nothing to the
 navigator; a missing `routing.json` is tolerated (edits just don't project).
+An instrumented element with no `values.json` entry is skipped by the generator
+(it's a label, not a lever).
 
 ## State (signals)
 
@@ -124,7 +211,12 @@ signal updates → effect re-renders / posts `STB_*` messages to the iframe shim
 - `main.ts` — composition root: builds the layout, mounts every view, wires
   selection between navigator ↔ preview ↔ editor.
 - `metadata/` — model **types** (`types.ts`: `ElementNode`, `LeverValue`,
-  `ContainerKind`, …), description resolution, visibility helpers.
+  `BrandingModel`, …) and visibility helpers (`visibility.ts`). An
+  `ElementNode` is `{ snapshotId, role, roledescription?, name, description,
+  value, visibility? }` — every field except `name`/`value`/`visibility` is
+  DOM-sourced.
+- `data/` — static reference data: `token-meanings.json`, `token-metadata.json`,
+  and bundled `presets/`.
 - `navigator/column-model.ts` — **pure** Miller-column model: scene-rooted path
   tree, prefix derivation, LIFO drill stack, collapse-to-rail, kind glyphs,
   snapshot-id → tree-address index. (Heavily unit-tested; DOM-free.)
@@ -148,7 +240,9 @@ signal updates → effect re-renders / posts `STB_*` messages to the iframe shim
 - `export/` — `bundle-builder.ts` (assembles `preset.json` + `theme.css` +
   optional `company-config.json` + assets) and `zip.ts`.
 - `taxonomy/taxonomy.ts` — term/role taxonomy helpers.
-- `scripts/` — `harvest-login.ts` (template reader + routing lint),
+- `scripts/` — `harvest-login.ts` (DOM reader: extracts `stb-snapshot-id` +
+  `stba-*` per element, + routing drift lint), `generate-model.ts`
+  (`buildModel(scene, html, values)` → rebuilds `branding-model.json`),
   `seed-worklist.ts`.
 
 ## Export bundle
@@ -176,13 +270,20 @@ npm test           # unit + integration (Vitest)
 npm run typecheck  # tsc --noEmit
 ```
 
+**Regenerate a scene's model** (after editing its `index.html` or `values.json`):
+```bash
+npx tsx scripts/generate-model.ts <scene>   # rewrites branding-model.json
+```
+
 **Add a brandable element to a scene:**
 1. Add `stb-snapshot-id="<area>.<container>.<element>"` to the Stratos template
-   (and `stb-kind` if it's a container).
-2. Add a matching node to the scene's `branding-model.json` (with a `value`).
+   (and the `stba-role` / `stba-roledescription` / `stba-description` attributes
+   as they apply). Mirror the same attributes into the snapshot `index.html`.
+2. Add a `values.json` entry keyed by that snapshot-id with the authored bits
+   (`name`, `value`, optional `visibility`).
 3. Add a `routing.json` entry mapping the id to its Stratos config key.
-4. Ensure the snapshot `index.html` carries the same attribute (the scene test
-   asserts every model node has a snapshot-id in the HTML).
+4. Regenerate the model (above). Don't hand-edit `branding-model.json` — the
+   scene test asserts it equals a fresh regenerate.
 
 **Add a new scene/area:**
 1. Add an entry to `manifest.json` (`id`, `name`, `archetype`).
@@ -197,3 +298,8 @@ Vitest, split by concern under `tests/`. Logic lives in pure modules
 unit-tested directly; `tests/integration/` exercises the iframe shim + lever
 application in a real DOM. Prefer adding logic to a pure module and testing it
 there rather than in a view.
+
+One guard worth knowing: `tests/metadata/scenes.test.ts` asserts each committed
+`branding-model.json` deep-equals a fresh `buildModel(html, values)` — so if you
+edit a snapshot DOM or `values.json` and forget to regenerate, the test fails
+with "out of sync".
