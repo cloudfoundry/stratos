@@ -1,0 +1,118 @@
+{
+  "cf.applications.page": {
+    "name": "Applications page",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.97,
+        "c": 0.01,
+        "h": 250
+      }
+    }
+  },
+  "cf.applications.nav": {
+    "name": "Navigation bar",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.22,
+        "c": 0.01,
+        "h": 250
+      }
+    }
+  },
+  "cf.applications.heading": {
+    "name": "Page heading",
+    "value": {
+      "kind": "content",
+      "text": "Applications"
+    }
+  },
+  "cf.applications.app-card-1": {
+    "name": "App card 1",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      }
+    }
+  },
+  "cf.applications.app-card-1.heading": {
+    "name": "App name",
+    "value": {
+      "kind": "content",
+      "text": "Demo App 1"
+    }
+  },
+  "cf.applications.app-card-1.status": {
+    "name": "Status (running)",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.7,
+        "c": 0.17,
+        "h": 145
+      }
+    }
+  },
+  "cf.applications.app-card-2": {
+    "name": "App card 2",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      }
+    }
+  },
+  "cf.applications.app-card-2.heading": {
+    "name": "App name",
+    "value": {
+      "kind": "content",
+      "text": "Demo App 2"
+    }
+  },
+  "cf.applications.app-card-2.status": {
+    "name": "Status (stopped)",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.8,
+        "c": 0.16,
+        "h": 85
+      }
+    }
+  },
+  "cf.applications.app-card-3": {
+    "name": "App card 3",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      }
+    }
+  },
+  "cf.applications.app-card-3.heading": {
+    "name": "App name",
+    "value": {
+      "kind": "content",
+      "text": "Demo App 3"
+    }
+  },
+  "cf.applications.app-card-3.status": {
+    "name": "Status (crashed)",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.63,
+        "c": 0.23,
+        "h": 25
+      }
+    }
+  }
+}

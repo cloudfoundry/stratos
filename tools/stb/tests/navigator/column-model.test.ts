@@ -52,6 +52,7 @@ describe('kindGlyph', () => {
     expect(kindGlyph('dialog')).toBe('⊞');
     expect(kindGlyph('stepper')).toBe('⋯');
     expect(kindGlyph('page')).toBe('▭');
+    expect(kindGlyph('region')).toBeNull();   // not a container "kind" → no glyph
     expect(kindGlyph(undefined)).toBeNull();
   });
 });

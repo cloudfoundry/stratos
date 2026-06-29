@@ -96,12 +96,12 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
 
         row.append(swEl, nameEl);
         // §2.1a — mark container kind (dialog/stepper/…) at every level, not just leaves
-        const kg = kindGlyph(child.node?.containerKind);
+        const kg = kindGlyph(child.node?.roledescription);
         if (kg) {
           const kindEl = document.createElement('span');
           kindEl.className = 'stb-col-kind';
           kindEl.textContent = kg;
-          kindEl.title = child.node!.containerKind!;
+          kindEl.title = child.node!.roledescription!;
           row.appendChild(kindEl);
         }
         if (child.children.size > 0) {

@@ -1,0 +1,64 @@
+{
+  "shared.confirm-dialog": {
+    "name": "Confirm dialog",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      }
+    }
+  },
+  "shared.confirm-dialog.title": {
+    "name": "Dialog title",
+    "value": {
+      "kind": "content",
+      "text": "Are you sure?"
+    }
+  },
+  "shared.confirm-dialog.confirm": {
+    "name": "Confirm button",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.55,
+        "c": 0.15,
+        "h": 250
+      }
+    }
+  },
+  "shared.stepper": {
+    "name": "Stepper",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.98,
+        "c": 0.005,
+        "h": 250
+      }
+    }
+  },
+  "shared.stepper.previous": {
+    "name": "Previous button",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.86,
+        "c": 0.01,
+        "h": 250
+      }
+    }
+  },
+  "shared.stepper.next": {
+    "name": "Next button",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.55,
+        "c": 0.15,
+        "h": 250
+      }
+    }
+  }
+}

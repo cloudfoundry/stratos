@@ -19,7 +19,7 @@ export function mergeScenes(perScene: { scene: string; model: BrandingModel }[])
   const nodes: NavNode[] = [];
   for (const { scene, model } of perScene) {
     for (const n of model.nodes) {
-      nodes.push({ snapshotId: n.snapshotId, scene, name: n.name, description: n.description, value: n.value, ...(n.containerKind ? { containerKind: n.containerKind } : {}) });
+      nodes.push({ snapshotId: n.snapshotId, scene, name: n.name, description: n.description, value: n.value, ...(n.role ? { role: n.role } : {}), ...(n.roledescription ? { roledescription: n.roledescription } : {}) });
     }
   }
   return nodes;

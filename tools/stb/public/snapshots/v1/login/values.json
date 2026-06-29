@@ -1,0 +1,105 @@
+{
+  "auth.login.page": {
+    "name": "Login page",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.97,
+        "c": 0.01,
+        "h": 250
+      }
+    }
+  },
+  "auth.login.page.card": {
+    "name": "Login card",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 1,
+        "c": 0,
+        "h": 0
+      }
+    }
+  },
+  "auth.login.page.card.title": {
+    "name": "Welcome message",
+    "value": {
+      "kind": "content",
+      "text": "Sign in to Stratos"
+    },
+    "visibility": true
+  },
+  "auth.login.page.card.subtitle": {
+    "name": "Subtitle",
+    "value": {
+      "kind": "content",
+      "text": "Multi-cloud management"
+    }
+  },
+  "auth.login.page.card.message": {
+    "name": "Custom message",
+    "value": {
+      "kind": "content",
+      "text": "Authorized users only"
+    }
+  },
+  "auth.login.page.card.logo": {
+    "name": "Logo",
+    "value": {
+      "kind": "asset",
+      "ref": "logo.svg"
+    },
+    "visibility": true
+  },
+  "auth.login.page.background": {
+    "name": "Background",
+    "value": {
+      "kind": "asset",
+      "ref": "login-bg.svg"
+    }
+  },
+  "auth.login.page.card.sign-in": {
+    "name": "Sign in",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.55,
+        "c": 0.15,
+        "h": 250
+      }
+    }
+  },
+  "auth.login.page.error": {
+    "name": "Error message",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.63,
+        "c": 0.23,
+        "h": 25
+      }
+    }
+  },
+  "auth.login.page.card.username": {
+    "name": "Username field",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.86,
+        "c": 0.01,
+        "h": 250
+      }
+    }
+  },
+  "auth.login.page.card.password": {
+    "name": "Password field",
+    "value": {
+      "kind": "color",
+      "oklch": {
+        "l": 0.86,
+        "c": 0.01,
+        "h": 250
+      }
+    }
+  }
+}
