@@ -2,7 +2,6 @@ import { mountEditorPane } from '@/ui/editor-pane';
 import { mountTokenSidebar } from '@/ui/token-sidebar';
 import { mountElementTree } from '@/ui/element-tree';
 import { mountElementColumns } from '@/ui/element-columns';
-import { mountSceneTabs } from '@/ui/scene-tabs';
 import { createPreviewPane } from '@/ui/preview-pane';
 import { openColorPicker } from '@/ui/color-picker';
 import { createHighlightWiring } from '@/ui/highlight';
@@ -13,7 +12,7 @@ import { mountStatusBar } from '@/ui/status-bar';
 import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
-import { nodeFor } from '@/state/branding';
+import { nodeFor, loadBrandingModel } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
@@ -27,7 +26,6 @@ const colorFormat: ColorFormatState = { value: 'hex' };
 async function main() {
   const app = document.getElementById('app')!;
   app.innerHTML = `
-    <div class="stb-scene-tabs-host"></div>
     <div class="stb-topbar">
       <div class="stb-actions-host"></div>
       <div class="stb-statusbar-host"></div>
@@ -47,7 +45,6 @@ async function main() {
   // drilldown (R3). Independent of the active-scene model the preview/editor use.
   void loadGlobalModel();
 
-  await mountSceneTabs(app.querySelector('.stb-scene-tabs-host') as HTMLElement);
   const actionsHost = app.querySelector('.stb-actions-host') as HTMLElement;
   mountLightDarkActions(actionsHost);
   const presetsHost = document.createElement('div');
@@ -153,9 +150,12 @@ async function main() {
   columnsApi = mountElementColumns(columnsView, {
     // hover only highlights when the node belongs to the scene on screen
     onHover: (id, scene) => { if (id && scene === activeSceneId.value) preview.highlightElement(id); else preview.highlightElement(null); },
-    onSelect: (id, scene) => {
-      // global navigator: switch the preview to the node's scene, then edit
+    onSelect: async (id, scene) => {
+      // global navigator: switch the preview to the node's scene, then edit.
+      // Await the scene's model so the editor opens against the right scene on
+      // the first cross-scene click (not the previous scene's stale model).
       if (scene !== activeSceneId.value) { activeSceneId.value = scene; }
+      await loadBrandingModel(scene);
       selectElement(id);
     },
   });

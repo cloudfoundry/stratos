@@ -4,6 +4,7 @@ import type { NavNode } from '@/navigator/column-model';
 
 export interface GlobalModel {
   nodes: NavNode[];
+  sceneNames: Record<string, string>; // scene id → friendly name (the area label)
 }
 
 // The whole-UI aggregate: every scene's branding-model merged into one set, so
@@ -18,21 +19,23 @@ export function mergeScenes(perScene: { scene: string; model: BrandingModel }[])
   const nodes: NavNode[] = [];
   for (const { scene, model } of perScene) {
     for (const n of model.nodes) {
-      nodes.push({ snapshotId: n.snapshotId, scene, name: n.name, description: n.description, value: n.value });
+      nodes.push({ snapshotId: n.snapshotId, scene, name: n.name, description: n.description, value: n.value, ...(n.containerKind ? { containerKind: n.containerKind } : {}) });
     }
   }
   return nodes;
 }
 
-interface Manifest { scenes: { id: string }[] }
+interface Manifest { scenes: { id: string; name: string }[] }
 
 export async function loadGlobalModel(): Promise<void> {
   try {
     const manRes = await fetch('/snapshots/v1/manifest.json');
     if (!manRes.ok) { globalModel.value = null; return; }
     const manifest = (await manRes.json()) as Manifest;
+    const sceneNames: Record<string, string> = {};
     const perScene: { scene: string; model: BrandingModel }[] = [];
     for (const s of manifest.scenes) {
+      sceneNames[s.id] = s.name;
       try {
         const res = await fetch(`/snapshots/v1/${s.id}/branding-model.json`);
         const ct = res.headers.get('content-type') ?? '';
@@ -41,7 +44,7 @@ export async function loadGlobalModel(): Promise<void> {
         perScene.push({ scene: s.id, model: m });
       } catch { /* skip a scene whose model fails to load */ }
     }
-    globalModel.value = { nodes: mergeScenes(perScene) };
+    globalModel.value = { nodes: mergeScenes(perScene), sceneNames };
   } catch {
     globalModel.value = null;
   }
