@@ -6,10 +6,16 @@ on:
       - master
       - develop
       - 'angular**'
+    # tools/stb is a standalone project with its own gate (stb_tests.yml);
+    # don't run the full frontend/backend suite for stb-only changes.
+    paths-ignore:
+      - 'tools/stb/**'
   push:
     branches:
       - develop
       - master
+    paths-ignore:
+      - 'tools/stb/**'
 
 env:
   NODE_OPTIONS: --max-old-space-size=5500

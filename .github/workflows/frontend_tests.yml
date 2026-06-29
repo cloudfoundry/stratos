@@ -5,6 +5,10 @@ on:
     branches:
       - develop
       - master
+    # tools/stb has its own gate (stb_tests.yml); skip the frontend suite
+    # for stb-only changes.
+    paths-ignore:
+      - 'tools/stb/**'
 
 env:
   NODE_OPTIONS: --max-old-space-size=5500
