@@ -241,9 +241,10 @@ signal updates → effect re-renders / posts `STB_*` messages to the iframe shim
   optional `company-config.json` + assets) and `zip.ts`.
 - `taxonomy/taxonomy.ts` — term/role taxonomy helpers.
 - `scripts/` — `harvest-login.ts` (DOM reader: extracts `stb-snapshot-id` +
-  `stba-*` per element, + routing drift lint), `generate-model.ts`
-  (`buildModel(scene, html, values)` → rebuilds `branding-model.json`),
-  `seed-worklist.ts`.
+  `stba-*` per element, + login routing drift lint), `lint-templates.ts`
+  (asserts a scene's live-template ids exist in its snapshot — currently the
+  shared scene), `generate-model.ts` (`buildModel(scene, html, values)` →
+  rebuilds `branding-model.json`), `seed-worklist.ts`.
 
 ## Export bundle
 
