@@ -1,13 +1,13 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { harvestElements } from './harvest-login';
-import type { BrandingModel, ElementNode, LeverValue } from '../src/metadata/types';
+import type { BrandingModel, ElementNode, LeverValue, ScopedBlock } from '../src/metadata/types';
 
 // The branding model is GENERATED from the snapshot DOM: identity, role,
 // roledescription (the "kind") and description are harvested off the stba-*
 // attributes; the only still-authored bits — the editable value, friendly name,
 // and default visibility — come from a values.json sidecar keyed by snapshotId.
 // (Next steps move name onto the DOM via aria-label and value via capture.)
-export interface ValueEntry { name: string | null; value: LeverValue; visibility?: boolean }
+export interface ValueEntry { name: string | null; value: LeverValue; visibility?: boolean; scopedBlock?: ScopedBlock }
 export type ValuesSidecar = Record<string, ValueEntry>;
 
 export function buildModel(scene: string, html: string, values: ValuesSidecar): BrandingModel {
@@ -24,6 +24,7 @@ export function buildModel(scene: string, html: string, values: ValuesSidecar): 
     };
     if (el.roledescription) node.roledescription = el.roledescription;
     if (v.visibility !== undefined) node.visibility = v.visibility;
+    if (v.scopedBlock) node.scopedBlock = v.scopedBlock;
     nodes.push(node);
   }
   return { scene, nodes };
