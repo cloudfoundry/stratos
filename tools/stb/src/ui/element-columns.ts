@@ -50,7 +50,7 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
     const model = globalModel.value;
     host.innerHTML = '';
     if (!model || model.nodes.length === 0) {
-      host.innerHTML = '<p class="stb-tree-empty">No elements in this scene</p>';
+      host.innerHTML = '<p class="stb-tree-empty">No elements modelled yet</p>';
       return;
     }
 
