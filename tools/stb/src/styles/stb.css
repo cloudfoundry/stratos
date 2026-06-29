@@ -30,11 +30,15 @@ body {
   gap: 0.5rem;
 }
 
-/* Status bar inside topbar: strip standalone borders/background, push to right */
+/* Status bar inside topbar: strip standalone borders/background */
 .stb-topbar .stb-status-bar {
   border: none;
   padding: 0;
   background: transparent;
+}
+
+/* Push the status host to the right edge (it is the topbar's flex child) */
+.stb-topbar .stb-statusbar-host {
   margin-left: auto;
 }
 
