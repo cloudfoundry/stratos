@@ -1,7 +1,8 @@
 import { parseColor, formatColor, type ColorFormat } from '@/color/format';
+import { positionInPreviewGutter } from '@/ui/popover';
 
 export interface OpenColorPickerOptions {
-  anchor: HTMLElement;
+  previewHost: HTMLElement;
   initial: string;
   format: ColorFormat;
   onChange: (newValue: string) => void;
@@ -14,11 +15,6 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
   const panel = document.createElement('div');
   panel.className = 'stb-color-picker';
   panel.id = 'stb-color-picker-active';
-
-  const rect = opts.anchor.getBoundingClientRect();
-  panel.style.position = 'absolute';
-  panel.style.top = `${rect.bottom + window.scrollY + 4}px`;
-  panel.style.left = `${rect.left + window.scrollX}px`;
 
   const initialParsed = parseColor(opts.initial);
   const initialHex = initialParsed ? formatColor(initialParsed, 'hex') : '#000000';
@@ -34,6 +30,7 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
   `;
 
   document.body.appendChild(panel);
+  positionInPreviewGutter(panel, opts.previewHost);
 
   const native = panel.querySelector<HTMLInputElement>('.stb-color-native')!;
   const text = panel.querySelector<HTMLInputElement>('.stb-color-text')!;
@@ -65,7 +62,7 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
 
   function outsideClickHandler(e: MouseEvent) {
     if (!(e.target instanceof Node)) return;
-    if (panel.contains(e.target) || opts.anchor.contains(e.target)) return;
+    if (panel.contains(e.target)) return;
     closeOpenPicker();
     opts.onClose?.();
     document.removeEventListener('click', outsideClickHandler);
