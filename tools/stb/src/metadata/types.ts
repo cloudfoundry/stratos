@@ -7,6 +7,10 @@ export type LeverValue =
   | { kind: 'content'; text: string }
   | { kind: 'asset'; ref: string };
 
+// Raw element-scoped CSS declaration body — the R1 facet escape hatch.
+// Emitted as `[stb-snapshot-id="…"] { <ScopedBlock> }`.
+export type ScopedBlock = string;
+
 export interface ElementNode {
   snapshotId: string;
   role: string;            // ARIA role (DOM stba-role) — projects to `role`
@@ -15,6 +19,7 @@ export interface ElementNode {
   description: string;     // DOM stba-description → ARIA aria-description
   value: LeverValue;
   visibility?: boolean;    // optional show/hide on THIS element; undefined = shown
+  scopedBlock?: ScopedBlock; // optional raw element-scoped CSS (R1 facet escape hatch)
 }
 
 export interface BrandingModel {
