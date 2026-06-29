@@ -5,6 +5,10 @@ on:
     branches:
       - develop
       - master
+    # tools/stb has its own gate (stb_tests.yml); skip the backend suite
+    # for stb-only changes.
+    paths-ignore:
+      - 'tools/stb/**'
 
 env:
   GO_VERSION: '1.26'
