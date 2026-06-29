@@ -23,18 +23,21 @@ Open http://localhost:5173.
 
 ## Architecture
 
-See `docs/superpowers/specs/2026-05-22-stratos-theme-tool-design.md` for the full design spec.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full picture — the model, the
+capture→edit→export pipeline, the module map, and common tasks.
 
-Three signals drive the app:
-- `rootValues` — Map of `--token` -> value for the `:root` block
-- `darkValues` — same for `.dark-theme`
-- `activeSceneId` — currently displayed preview scene
-
-Editor change → debounced parse → signals update → effects propagate to iframe via postMessage.
+In short: brandable elements carry a stable `stb-snapshot-id` (and optional
+`stb-kind`); stb loads captured snapshots into signals, lets you edit elements
+against a live preview iframe, and projects edits to a theme bundle. The token
+layer is two signals — `rootValues` (`:root`) and `darkValues` (`.dark-theme`) —
+with `activeSceneId` selecting the previewed scene. Editor change → pure setter
+→ signal update → effects re-render / postMessage the iframe.
 
 ## Snapshot pack
 
-Place snapshot packs under `public/snapshots/v1/` matching the format documented in the spec (Section 4.5). The bundled stub pack is for development only; production builds include a real pack from `tools/snapshots/`.
+Place snapshot packs under `public/snapshots/v1/` (format in
+[ARCHITECTURE.md](ARCHITECTURE.md#snapshot-pack-format)). The bundled stub pack
+is for development only; production builds include a real captured pack.
 
 ## Export
 
