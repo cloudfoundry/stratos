@@ -106,27 +106,16 @@ async function main() {
       .catch(() => { routing = { elements: {} }; });
   });
 
-  // Anchor the editor to a VISIBLE row in whichever navigator is showing. A
-  // hidden view's rows report a 0,0 rect, which would dump the editor in the
-  // top-left corner — so skip any zero-size candidate.
-  function visibleAnchor(snapshotId: string): HTMLElement {
-    const candidates: (HTMLElement | null)[] = [
-      [...columnsView.querySelectorAll<HTMLElement>('.stb-col-row.active')].pop() ?? null,
-      treeView.querySelector<HTMLElement>(`.stb-tree-row[data-snapshot-id="${snapshotId}"]`),
-    ];
-    for (const el of candidates) {
-      if (el) { const r = el.getBoundingClientRect(); if (r.width || r.height) return el; }
-    }
-    return app.querySelector('.stb-preview-host') as HTMLElement;
-  }
+  // The editor opens as one consistent popover centred in the left-of-preview
+  // gutter, independent of which view selected the node (design §2.4a (A)).
+  const previewHost = app.querySelector('.stb-preview-host') as HTMLElement;
 
   function selectElement(snapshotId: string): void {
     const node = nodeFor(snapshotId);
     if (!node) return;
-    const anchor = visibleAnchor(snapshotId);
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
     openLeverEditor({
-      anchor,
+      previewHost,
       snapshotId,
       value: node.value,
       onChange: (next) => applyEdit(snapshotId, next, routing),
@@ -140,7 +129,7 @@ async function main() {
   const preview = createPreviewPane({
     onElementSelected: (_selector, tokens, snapshotId) => {
       if (tokens.length) { wiring.scrollSidebarToToken(sidebarHost, tokens[0]!); wiring.flashSidebarRows(sidebarHost, tokens); }
-      // jump the columns FIRST so the active row exists, then anchor the editor to it
+      // jump the columns so the selection is reflected there (bidirectional), then edit
       if (snapshotId) { columnsApi?.jumpTo(snapshotId); selectElement(snapshotId); } // render → columns (R1/§2.6)
     },
   });
@@ -175,12 +164,8 @@ async function main() {
     onSwatchClick: (token) => {
       const dark = previewDark.value;
       const current = effectiveValue(token.name, dark);
-      const anchor = sidebarHost.querySelector<HTMLElement>(
-        `.stb-swatch[data-token="${token.name}"]`,
-      );
-      if (!anchor) return;
       openColorPicker({
-        anchor,
+        previewHost,
         initial: current,
         format: colorFormat.value,
         onChange: (value) => {

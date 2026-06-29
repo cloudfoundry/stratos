@@ -1,9 +1,10 @@
 import type { LeverValue } from '@/metadata/types';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
+import { positionInPreviewGutter } from '@/ui/popover';
 
 export interface OpenLeverEditorOptions {
-  anchor: HTMLElement;
+  previewHost: HTMLElement;
   snapshotId: string;
   value: LeverValue;
   onChange: (next: LeverValue) => void;
@@ -33,10 +34,6 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   closeOpen();
   const panel = document.createElement('div');
   panel.className = 'stb-lever-editor';
-  const rect = opts.anchor.getBoundingClientRect();
-  panel.style.position = 'absolute';
-  panel.style.top = `${rect.bottom + window.scrollY + 4}px`;
-  panel.style.left = `${rect.left + window.scrollX}px`;
 
   const v = opts.value;
   if (v.kind === 'color') {
@@ -46,7 +43,7 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   } else if (v.kind === 'content') {
     const ta = document.createElement('textarea');
     ta.className = 'stb-lever-text';
-    ta.rows = 2;
+    ta.rows = 5;
     ta.value = v.text;
     ta.addEventListener('input', (e) => opts.onChange(contentValue((e.target as HTMLTextAreaElement).value)));
     panel.appendChild(ta);
@@ -82,5 +79,6 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   panel.appendChild(close);
 
   document.body.appendChild(panel);
+  positionInPreviewGutter(panel, opts.previewHost);
   openPanel = panel;
 }

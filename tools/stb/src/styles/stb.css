@@ -86,11 +86,16 @@ body {
 .stb-token-name { background: none; border: none; padding: 0; cursor: pointer; font: inherit; font-family: var(--font-mono, monospace); font-size: 0.78rem; text-align: left; color: inherit; }
 .stb-token-value { font-family: var(--font-mono, monospace); font-size: 0.75rem; color: var(--muted-foreground, #666); }
 
-.stb-color-picker {
-  background: var(--card, white); border: 1px solid var(--border, #ccc);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 0.5rem; border-radius: 6px;
-  z-index: 1000; min-width: 220px;
+/* One consistent editor popover surface for both element levers and tokens:
+   opaque + firm border + strong shadow so it never blends into the light
+   nav-band / preview; stretchable for larger / multi-paragraph content. */
+.stb-lever-editor, .stb-color-picker {
+  background: var(--card, #fff); border: 1px solid var(--border, #cbd5e1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); padding: 0.6rem; border-radius: 8px;
+  z-index: 1000; min-width: 240px; max-width: 90vw; max-height: 80vh;
+  resize: both; overflow: auto;
 }
+.stb-lever-text { display: block; width: 100%; min-height: 5rem; resize: vertical; box-sizing: border-box; font: inherit; }
 .stb-color-picker__row { display: flex; gap: 0.5rem; align-items: center; margin: 0.25rem 0; }
 .stb-color-native { width: 3rem; height: 2rem; padding: 0; border: 1px solid var(--border, #ccc); }
 .stb-color-text { flex: 1; padding: 0.25rem; font-family: var(--font-mono, monospace); }
