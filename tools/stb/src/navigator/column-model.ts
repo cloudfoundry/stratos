@@ -1,4 +1,4 @@
-import type { LeverValue, ContainerKind } from '@/metadata/types';
+import type { LeverValue } from '@/metadata/types';
 
 export interface NavNode {
   snapshotId: string;
@@ -6,7 +6,8 @@ export interface NavNode {
   name: string | null;
   description: string;
   value: LeverValue;
-  containerKind?: ContainerKind;
+  role?: string;
+  roledescription?: string; // the navigator "kind" (page/dialog/stepper/…), from ARIA aria-roledescription
 }
 
 export interface PathNode {
@@ -77,12 +78,13 @@ export function indexBySnapshotId(root: PathNode): Map<string, string[]> {
   return out;
 }
 
-// Container kind marker (§2.1a) — read at every level, not just leaves.
-const KIND_GLYPH: Record<ContainerKind, string> = {
+// Container kind marker (§2.1a) — read at every level, not just leaves. Keyed on
+// the role's name (aria-roledescription), which is the human "kind" of container.
+const KIND_GLYPH: Record<string, string> = {
   page: '▭', dialog: '⊞', stepper: '⋯', panel: '▥',
 };
-export function kindGlyph(kind?: ContainerKind): string | null {
-  return kind ? KIND_GLYPH[kind] : null;
+export function kindGlyph(roledescription?: string): string | null {
+  return roledescription ? KIND_GLYPH[roledescription] ?? null : null;
 }
 
 export function nodeAt(root: PathNode, segs: string[]): PathNode | null {

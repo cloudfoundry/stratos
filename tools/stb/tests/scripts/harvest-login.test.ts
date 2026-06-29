@@ -17,14 +17,17 @@ describe('harvestElements', () => {
     ]);
   });
 
-  it('captures stb-kind as the container kind when present', () => {
+  it('captures stba-role, stba-roledescription and stba-description when present', () => {
     const html = `
-<div stb-snapshot-id="shared.confirm-dialog" stb-kind="dialog">
-  <span stb-snapshot-id="shared.confirm-dialog.title"></span>
+<div stb-snapshot-id="shared.confirm-dialog" stba-role="dialog" stba-roledescription="dialog" stba-description="the confirm dialog">
+  <span stb-snapshot-id="shared.confirm-dialog.title" stba-role="heading"></span>
 </div>`;
     const els = harvestElements(html);
-    expect(els[0]).toEqual({ snapshotId: 'shared.confirm-dialog', tag: 'div', line: 2, containerKind: 'dialog' });
-    expect(els[1]!.containerKind).toBeUndefined();
+    expect(els[0]).toEqual({
+      snapshotId: 'shared.confirm-dialog', tag: 'div', line: 2,
+      role: 'dialog', roledescription: 'dialog', description: 'the confirm dialog',
+    });
+    expect(els[1]).toEqual({ snapshotId: 'shared.confirm-dialog.title', tag: 'span', line: 3, role: 'heading' });
   });
 });
 

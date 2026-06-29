@@ -1,41 +1,157 @@
 {
   "scene": "app-list",
   "nodes": [
-    { "snapshotId": "cf.applications.page", "role": "region", "name": "Applications page",
+    {
+      "snapshotId": "cf.applications.page",
+      "role": "region",
+      "name": "Applications page",
       "description": "background color for the applications list page",
-      "value": { "kind": "color", "oklch": { "l": 0.97, "c": 0.01, "h": 250 } } },
-    { "snapshotId": "cf.applications.nav", "role": "navigation", "name": "Navigation bar",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.97,
+          "c": 0.01,
+          "h": 250
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.nav",
+      "role": "navigation",
+      "name": "Navigation bar",
       "description": "top navigation bar background for the applications page",
-      "value": { "kind": "color", "oklch": { "l": 0.22, "c": 0.01, "h": 250 } } },
-    { "snapshotId": "cf.applications.heading", "role": "heading", "name": "Page heading",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.22,
+          "c": 0.01,
+          "h": 250
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.heading",
+      "role": "heading",
+      "name": "Page heading",
       "description": "page title text for the applications page",
-      "value": { "kind": "content", "text": "Applications" } },
-    { "snapshotId": "cf.applications.app-card-1", "role": "region", "name": "App card 1",
+      "value": {
+        "kind": "content",
+        "text": "Applications"
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-1",
+      "role": "region",
+      "name": "App card 1",
       "description": "card background for an application tile",
-      "value": { "kind": "color", "oklch": { "l": 1, "c": 0, "h": 0 } } },
-    { "snapshotId": "cf.applications.app-card-1.heading", "role": "heading", "name": "App name",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 1,
+          "c": 0,
+          "h": 0
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-1.heading",
+      "role": "heading",
+      "name": "App name",
       "description": "application name heading on a card",
-      "value": { "kind": "content", "text": "Demo App 1" } },
-    { "snapshotId": "cf.applications.app-card-1.status", "role": "status", "name": "Status (running)",
+      "value": {
+        "kind": "content",
+        "text": "Demo App 1"
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-1.status",
+      "role": "status",
+      "name": "Status (running)",
       "description": "status badge color for a running application",
-      "value": { "kind": "color", "oklch": { "l": 0.7, "c": 0.17, "h": 145 } } },
-    { "snapshotId": "cf.applications.app-card-2", "role": "region", "name": "App card 2",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.7,
+          "c": 0.17,
+          "h": 145
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-2",
+      "role": "region",
+      "name": "App card 2",
       "description": "card background for an application tile",
-      "value": { "kind": "color", "oklch": { "l": 1, "c": 0, "h": 0 } } },
-    { "snapshotId": "cf.applications.app-card-2.heading", "role": "heading", "name": "App name",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 1,
+          "c": 0,
+          "h": 0
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-2.heading",
+      "role": "heading",
+      "name": "App name",
       "description": "application name heading on a card",
-      "value": { "kind": "content", "text": "Demo App 2" } },
-    { "snapshotId": "cf.applications.app-card-2.status", "role": "status", "name": "Status (stopped)",
+      "value": {
+        "kind": "content",
+        "text": "Demo App 2"
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-2.status",
+      "role": "status",
+      "name": "Status (stopped)",
       "description": "status badge color for a stopped application",
-      "value": { "kind": "color", "oklch": { "l": 0.8, "c": 0.16, "h": 85 } } },
-    { "snapshotId": "cf.applications.app-card-3", "role": "region", "name": "App card 3",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.8,
+          "c": 0.16,
+          "h": 85
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-3",
+      "role": "region",
+      "name": "App card 3",
       "description": "card background for an application tile",
-      "value": { "kind": "color", "oklch": { "l": 1, "c": 0, "h": 0 } } },
-    { "snapshotId": "cf.applications.app-card-3.heading", "role": "heading", "name": "App name",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 1,
+          "c": 0,
+          "h": 0
+        }
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-3.heading",
+      "role": "heading",
+      "name": "App name",
       "description": "application name heading on a card",
-      "value": { "kind": "content", "text": "Demo App 3" } },
-    { "snapshotId": "cf.applications.app-card-3.status", "role": "status", "name": "Status (crashed)",
+      "value": {
+        "kind": "content",
+        "text": "Demo App 3"
+      }
+    },
+    {
+      "snapshotId": "cf.applications.app-card-3.status",
+      "role": "status",
+      "name": "Status (crashed)",
       "description": "status badge color for a crashed application",
-      "value": { "kind": "color", "oklch": { "l": 0.63, "c": 0.23, "h": 25 } } }
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.63,
+          "c": 0.23,
+          "h": 25
+        }
+      }
+    }
   ]
 }

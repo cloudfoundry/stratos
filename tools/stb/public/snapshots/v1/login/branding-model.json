@@ -1,41 +1,142 @@
 {
   "scene": "login",
   "nodes": [
-    { "snapshotId": "auth.login.page", "role": "region", "name": "Login page",
-      "containerKind": "page",
+    {
+      "snapshotId": "auth.login.page",
+      "role": "region",
+      "name": "Login page",
       "description": "background color for the login page",
-      "value": { "kind": "color", "oklch": { "l": 0.97, "c": 0.01, "h": 250 } } },
-    { "snapshotId": "auth.login.page.card", "role": "region", "name": "Login card",
-      "description": "card background for the login page",
-      "value": { "kind": "color", "oklch": { "l": 1, "c": 0, "h": 0 } } },
-    { "snapshotId": "auth.login.page.card.title", "role": "heading", "name": "Welcome message",
-      "description": "welcome / company greeting heading for the login page",
-      "value": { "kind": "content", "text": "Sign in to Stratos" },
-      "visibility": true },
-    { "snapshotId": "auth.login.page.card.subtitle", "role": "paragraph", "name": "Subtitle",
-      "description": "subtitle for the login page",
-      "value": { "kind": "content", "text": "Multi-cloud management" } },
-    { "snapshotId": "auth.login.page.card.message", "role": "note", "name": "Custom message",
-      "description": "custom message for the login page",
-      "value": { "kind": "content", "text": "Authorized users only" } },
-    { "snapshotId": "auth.login.page.card.logo", "role": "img", "name": "Logo",
-      "description": "logo image for the login page",
-      "value": { "kind": "asset", "ref": "logo.svg" },
-      "visibility": true },
-    { "snapshotId": "auth.login.page.background", "role": "img", "name": "Background",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.97,
+          "c": 0.01,
+          "h": 250
+        }
+      },
+      "roledescription": "page"
+    },
+    {
+      "snapshotId": "auth.login.page.background",
+      "role": "img",
+      "name": "Background",
       "description": "background image for the login page",
-      "value": { "kind": "asset", "ref": "login-bg.svg" } },
-    { "snapshotId": "auth.login.page.card.sign-in", "role": "button", "name": "Sign in",
-      "description": "sign-in button color for the login page",
-      "value": { "kind": "color", "oklch": { "l": 0.55, "c": 0.15, "h": 250 } } },
-    { "snapshotId": "auth.login.page.error", "role": "alert", "name": "Error message",
+      "value": {
+        "kind": "asset",
+        "ref": "login-bg.svg"
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card",
+      "role": "region",
+      "name": "Login card",
+      "description": "card background for the login page",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 1,
+          "c": 0,
+          "h": 0
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.logo",
+      "role": "img",
+      "name": "Logo",
+      "description": "logo image for the login page",
+      "value": {
+        "kind": "asset",
+        "ref": "logo.svg"
+      },
+      "visibility": true
+    },
+    {
+      "snapshotId": "auth.login.page.card.title",
+      "role": "heading",
+      "name": "Welcome message",
+      "description": "welcome / company greeting heading for the login page",
+      "value": {
+        "kind": "content",
+        "text": "Sign in to Stratos"
+      },
+      "visibility": true
+    },
+    {
+      "snapshotId": "auth.login.page.card.subtitle",
+      "role": "paragraph",
+      "name": "Subtitle",
+      "description": "subtitle for the login page",
+      "value": {
+        "kind": "content",
+        "text": "Multi-cloud management"
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.message",
+      "role": "note",
+      "name": "Custom message",
+      "description": "custom message for the login page",
+      "value": {
+        "kind": "content",
+        "text": "Authorized users only"
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.error",
+      "role": "alert",
+      "name": "Error message",
       "description": "error/failure message color for the login page",
-      "value": { "kind": "color", "oklch": { "l": 0.63, "c": 0.23, "h": 25 } } },
-    { "snapshotId": "auth.login.page.card.username", "role": "textbox", "name": "Username field",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.63,
+          "c": 0.23,
+          "h": 25
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.username",
+      "role": "textbox",
+      "name": "Username field",
       "description": "input border color for the login fields",
-      "value": { "kind": "color", "oklch": { "l": 0.86, "c": 0.01, "h": 250 } } },
-    { "snapshotId": "auth.login.page.card.password", "role": "textbox", "name": "Password field",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.86,
+          "c": 0.01,
+          "h": 250
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.password",
+      "role": "textbox",
+      "name": "Password field",
       "description": "input border color for the login fields",
-      "value": { "kind": "color", "oklch": { "l": 0.86, "c": 0.01, "h": 250 } } }
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.86,
+          "c": 0.01,
+          "h": 250
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.sign-in",
+      "role": "button",
+      "name": "Sign in",
+      "description": "sign-in button color for the login page",
+      "value": {
+        "kind": "color",
+        "oklch": {
+          "l": 0.55,
+          "c": 0.15,
+          "h": 250
+        }
+      }
+    }
   ]
 }

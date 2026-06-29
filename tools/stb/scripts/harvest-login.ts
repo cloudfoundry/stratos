@@ -1,26 +1,42 @@
 import { readFileSync } from 'node:fs';
 import type { RoutingMap } from '../src/projection/projector';
 
-export interface HarvestedElement { snapshotId: string; tag: string; line: number; containerKind?: string }
+export interface HarvestedElement {
+  snapshotId: string;
+  tag: string;
+  line: number;
+  role?: string;            // stba-role  → projects to ARIA `role`
+  roledescription?: string; // stba-roledescription → ARIA `aria-roledescription`; the navigator "kind"
+  description?: string;     // stba-description → ARIA `aria-description`
+}
 export interface DriftReport { phantoms: string[]; orphans: string[] }
 
 // Matches a start tag and captures tag name + its attribute text.
 const TAG_RE = /<([a-zA-Z][\w-]*)\b([^>]*)>/g;
 const SID_RE = /stb-snapshot-id\s*=\s*"([^"]*)"/;
-const KIND_RE = /stb-kind\s*=\s*"([^"]*)"/;
+const ROLE_RE = /stba-role\s*=\s*"([^"]*)"/;
+const ROLEDESC_RE = /stba-roledescription\s*=\s*"([^"]*)"/;
+const DESC_RE = /stba-description\s*=\s*"([^"]*)"/;
+
+const unescape = (s: string) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
 
 export function harvestElements(html: string): HarvestedElement[] {
   const out: HarvestedElement[] = [];
   let m: RegExpExecArray | null;
   while ((m = TAG_RE.exec(html)) !== null) {
-    const sid = SID_RE.exec(m[2]!);
+    const attrs = m[2]!;
+    const sid = SID_RE.exec(attrs);
     if (!sid) continue;
-    const kind = KIND_RE.exec(m[2]!);
+    const role = ROLE_RE.exec(attrs);
+    const roledesc = ROLEDESC_RE.exec(attrs);
+    const desc = DESC_RE.exec(attrs);
     out.push({
       snapshotId: sid[1]!,
       tag: m[1]!.toLowerCase(),
       line: html.slice(0, m.index).split('\n').length,
-      ...(kind ? { containerKind: kind[1]! } : {}),
+      ...(role ? { role: role[1]! } : {}),
+      ...(roledesc ? { roledescription: unescape(roledesc[1]!) } : {}),
+      ...(desc ? { description: unescape(desc[1]!) } : {}),
     });
   }
   return out;

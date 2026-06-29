@@ -1,37 +1,42 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { resolveDescription } from '@/metadata/resolve';
-import type { SceneMetadata, CuratedDescriptions } from '@/metadata/types';
+import { buildModel, type ValuesSidecar } from '../../scripts/generate-model';
+import type { BrandingModel } from '@/metadata/types';
 
 const base = 'public/snapshots/v1';
-const curated = JSON.parse(readFileSync(`${base}/curated-descriptions.json`, 'utf8')) as CuratedDescriptions;
-const scenes = ['login', 'app-list'].map(
-  (id) => JSON.parse(readFileSync(`${base}/${id}/metadata.json`, 'utf8')) as SceneMetadata,
-);
+const scenes = ['login', 'app-list', 'shared'];
 
-describe('real scene metadata', () => {
-  it('every mapping resolves to a non-empty description', () => {
+function load(scene: string) {
+  return {
+    html: readFileSync(`${base}/${scene}/index.html`, 'utf8'),
+    values: JSON.parse(readFileSync(`${base}/${scene}/values.json`, 'utf8')) as ValuesSidecar,
+    model: JSON.parse(readFileSync(`${base}/${scene}/branding-model.json`, 'utf8')) as BrandingModel,
+  };
+}
+
+describe('branding model is generated from the DOM', () => {
+  it('committed branding-model.json matches a fresh generate from index.html + values.json', () => {
     for (const scene of scenes) {
-      expect(scene.version).toBe(2);
-      for (const mapping of scene.mappings) {
-        const desc = resolveDescription(mapping, curated);
-        expect(desc, `${scene.id}/${mapping.snapshotId}`).toBeTruthy();
+      const { html, values, model } = load(scene);
+      expect(buildModel(scene, html, values), `${scene} is out of sync — re-run generate-model`).toEqual(model);
+    }
+  });
+
+  it('every node carries an stba-description (harvested from the DOM)', () => {
+    for (const scene of scenes) {
+      const { model } = load(scene);
+      for (const node of model.nodes) {
+        expect(node.description, `${scene}/${node.snapshotId}`).toBeTruthy();
       }
     }
   });
 
-  it('snapshotIds are unique within each scene', () => {
+  it('every model node has a snapshot-id in the scene html', () => {
     for (const scene of scenes) {
-      const ids = scene.mappings.map((m) => m.snapshotId);
-      expect(new Set(ids).size).toBe(ids.length);
-    }
-  });
-
-  it('login scene html carries a snapshot-id for every branding-model node', () => {
-    const html = readFileSync(`${base}/login/index.html`, 'utf8');
-    const model = JSON.parse(readFileSync(`${base}/login/branding-model.json`, 'utf8'));
-    for (const node of model.nodes) {
-      expect(html, `missing snapshot-id for ${node.snapshotId}`).toContain(`stb-snapshot-id="${node.snapshotId}"`);
+      const { html, model } = load(scene);
+      for (const node of model.nodes) {
+        expect(html, `missing snapshot-id for ${node.snapshotId}`).toContain(`stb-snapshot-id="${node.snapshotId}"`);
+      }
     }
   });
 });

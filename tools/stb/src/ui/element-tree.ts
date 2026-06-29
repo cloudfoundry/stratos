@@ -52,12 +52,12 @@ export function mountElementTree(host: HTMLElement, opts: ElementTreeOptions = {
     value.textContent = vp.text;
 
     row.append(swatch, name, value);
-    const kg = kindGlyph(n?.containerKind);
+    const kg = kindGlyph(n?.roledescription);
     if (kg) {
       const kindEl = document.createElement('span');
       kindEl.className = 'stb-col-kind';
       kindEl.textContent = kg;
-      kindEl.title = n!.containerKind!;
+      kindEl.title = n!.roledescription!;
       row.appendChild(kindEl);
     }
 
