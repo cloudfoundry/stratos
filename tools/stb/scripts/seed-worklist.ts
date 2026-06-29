@@ -16,7 +16,7 @@ function areaFromFile(file: string): string {
 
 const TAG_RE = /<([a-zA-Z][\w-]*)\b([^>]*)>/g;
 const DATA_TEST_RE = /data-test\s*=\s*"([^"]*)"/;
-const HAS_SID_RE = /data-stratos-snapshot-id\s*=/;
+const HAS_SID_RE = /stb-snapshot-id\s*=/;
 
 export function buildWorklist(html: string, file: string): WorklistRow[] {
   const area = areaFromFile(file);

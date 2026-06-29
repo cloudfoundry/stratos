@@ -12,11 +12,11 @@ export function applyLevers(doc: Document, levers: LeverPatch[]): void {
     if (p.kind === 'visibility') {
       // a show-<x> lever toggles the element whose snapshotId is the parent area + <x>
       const targetId = p.snapshotId.replace(/\.show-/, '.');
-      const el = doc.querySelector<HTMLElement>(`[data-stratos-snapshot-id="${targetId}"]`);
+      const el = doc.querySelector<HTMLElement>(`[stb-snapshot-id="${targetId}"]`);
       if (el) el.style.display = p.shown ? '' : 'none';
       continue;
     }
-    const el = doc.querySelector<HTMLElement>(`[data-stratos-snapshot-id="${p.snapshotId}"]`);
+    const el = doc.querySelector<HTMLElement>(`[stb-snapshot-id="${p.snapshotId}"]`);
     if (!el) continue;
     if (p.kind === 'content' && p.text !== undefined) el.textContent = p.text;
     if (p.kind === 'asset') {

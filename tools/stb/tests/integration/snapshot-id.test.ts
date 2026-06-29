@@ -17,7 +17,7 @@ describe('shim reports snapshotId', () => {
         if (e.data?.type === 'STB_ELEMENT_SELECTED') { window.removeEventListener('message', onSel); res(e.data); }
       });
     });
-    const btn = iframe.contentDocument!.querySelector('[data-stratos-snapshot-id="auth.login.sign-in"]') as HTMLElement;
+    const btn = iframe.contentDocument!.querySelector('[stb-snapshot-id="auth.login.sign-in"]') as HTMLElement;
     btn.click();
     const msg = await got;
     expect(msg.snapshotId).toBe('auth.login.sign-in');

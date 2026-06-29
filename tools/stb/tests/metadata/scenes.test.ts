@@ -31,7 +31,7 @@ describe('real scene metadata', () => {
     const html = readFileSync(`${base}/login/index.html`, 'utf8');
     const model = JSON.parse(readFileSync(`${base}/login/branding-model.json`, 'utf8'));
     for (const node of model.nodes) {
-      expect(html, `missing snapshot-id for ${node.snapshotId}`).toContain(`data-stratos-snapshot-id="${node.snapshotId}"`);
+      expect(html, `missing snapshot-id for ${node.snapshotId}`).toContain(`stb-snapshot-id="${node.snapshotId}"`);
     }
   });
 });

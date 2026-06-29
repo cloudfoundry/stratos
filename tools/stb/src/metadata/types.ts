@@ -14,7 +14,7 @@ export type CuratedRef = { ref: string };
 
 export interface ElementMapping {
   selector: string;            // fallback anchor
-  snapshotId: string;          // primary anchor (data-stratos-snapshot-id value)
+  snapshotId: string;          // primary anchor (stb-snapshot-id value)
   tokens: TokenRole[];
   locator?: Locator;           // harvested live (Component 1); may be absent
   description?: string | CuratedRef;  // curated: inline text or pointer
