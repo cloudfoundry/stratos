@@ -57,6 +57,15 @@ body {
   overflow: auto;
 }
 
+/* Persistent scrollbar so tall views (Tokens/Tree) read as scrollable —
+   macOS overlay scrollbars auto-hide and made the lower rows look clipped. */
+.stb-nav-band .stb-sidebar-host::-webkit-scrollbar { width: 10px; }
+.stb-nav-band .stb-sidebar-host::-webkit-scrollbar-thumb {
+  background: var(--border, #cbd5e1); border-radius: 5px;
+  border: 2px solid var(--card, #fff);
+}
+.stb-nav-band .stb-sidebar-host::-webkit-scrollbar-track { background: transparent; }
+
 .stb-nav-band .stb-editor-host {
   flex: 0 0 400px;
   overflow: auto;
@@ -98,6 +107,10 @@ body {
 .stb-status-completeness.warn { color: var(--warning, #d97706); }
 
 /* sidebar view flip: meaningful element tree vs raw token list */
+/* A hidden view must stay hidden: .stb-cols sets display:flex, which ties
+   specificity with [hidden] and would otherwise win — so the columns view
+   never hid and overlapped the others. .stb-view[hidden] (2 selectors) wins. */
+.stb-view[hidden] { display: none; }
 .stb-view-toggle { display: flex; gap: 0; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border, #e5e7eb); position: sticky; top: 0; background: var(--card, #fff); z-index: 1; }
 .stb-view-btn { flex: 1; padding: 0.25rem 0.5rem; border: 1px solid var(--border, #d1d5db); background: none; cursor: pointer; font: inherit; font-size: 0.8rem; color: var(--text-muted, #64748b); }
 .stb-view-btn:first-child { border-radius: 4px 0 0 4px; }
