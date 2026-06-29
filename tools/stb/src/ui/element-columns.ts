@@ -1,41 +1,23 @@
 import { effect, signal } from '@preact/signals-core';
-import { globalModel, type GlobalModel, type GlobalNode } from '@/state/global-branding';
+import { globalModel } from '@/state/global-branding';
 import { oklchToHex } from '@/color/oklch';
+import {
+  buildPathTree,
+  computeColumns,
+  push,
+  truncate,
+  jumpTo as jumpToPath,
+  type PathNode,
+} from '@/navigator/column-model';
 
-// R3 PROTOTYPE — Miller columns (Finder-style left→right drilldown) over the
-// GLOBAL branding aggregate (all scenes merged by their snapshotId prefix), with
-// collapse-to-rail. Purpose: measure how many columns fit a normal window before
-// horizontal-scroll pain, and prove the rail/breadcrumb mechanic. Throwaway: no
-// tests, lives beside element-tree.
+// Miller columns (Finder-style left→right drilldown) over the GLOBAL branding
+// aggregate (all scenes merged by snapshotId prefix), with collapse-to-rail.
+// Tree/column logic is now delegated to the pure tested model in
+// @/navigator/column-model; this module handles only DOM rendering.
 
 export interface ElementColumnsOptions {
   onHover?: (snapshotId: string | null, scene: string | null) => void;
   onSelect?: (snapshotId: string, scene: string) => void;
-}
-
-// A node in the path tree built from dot-delimited snapshotIds.
-interface PathNode {
-  segment: string;
-  fullPath: string;            // dot path from root to here
-  node?: GlobalNode;           // set when this path is an actual leaf element
-  children: Map<string, PathNode>;
-}
-
-function buildTree(model: GlobalModel): PathNode {
-  const root: PathNode = { segment: '', fullPath: '', children: new Map() };
-  for (const n of model.nodes) {
-    const segs = n.snapshotId.split('.');
-    let cur = root;
-    let path = '';
-    for (const seg of segs) {
-      path = path ? `${path}.${seg}` : seg;
-      let child = cur.children.get(seg);
-      if (!child) { child = { segment: seg, fullPath: path, children: new Map() }; cur.children.set(seg, child); }
-      cur = child;
-    }
-    cur.node = n; // attach the element at its leaf path
-  }
-  return root;
 }
 
 function label(p: PathNode): string {
@@ -64,12 +46,6 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
   // selected path = the chain of segments the user has drilled into
   const path = signal<string[]>([]);
 
-  function nodeAt(root: PathNode, segs: string[]): PathNode | null {
-    let cur: PathNode | undefined = root;
-    for (const s of segs) { cur = cur?.children.get(s); if (!cur) return null; }
-    return cur ?? null;
-  }
-
   function render(): void {
     const model = globalModel.value;
     host.innerHTML = '';
@@ -77,35 +53,24 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
       host.innerHTML = '<p class="stb-tree-empty">No elements in this scene</p>';
       return;
     }
-    const root = buildTree(model);
+
+    const root = buildPathTree(model.nodes);
     const sel = path.value;
-
-    // Columns: column 0 = roots; column k = children of sel[0..k-1].
-    // Render one column per drilled level, plus one more showing the children
-    // of the deepest selection (if it has any).
-    const columns: { parent: PathNode; activeSeg: string | null }[] = [];
-    columns.push({ parent: root, activeSeg: sel[0] ?? null });
-    for (let k = 0; k < sel.length; k++) {
-      const parent = nodeAt(root, sel.slice(0, k + 1));
-      if (!parent || parent.children.size === 0) break; // leaf — no further column
-      columns.push({ parent, activeSeg: sel[k + 1] ?? null });
-    }
-
-    // Collapse rule: keep the last two columns full-width; everything left = rail.
-    const fullFrom = Math.max(0, columns.length - 2);
+    const columns = computeColumns(root, sel);
 
     columns.forEach((col, i) => {
-      if (i < fullFrom) {
+      if (col.collapsed) {
         // rail: a thin strip showing the chosen child, click to re-expand here
         const rail = document.createElement('div');
         rail.className = 'stb-col-rail';
         const chosen = col.activeSeg ? col.parent.children.get(col.activeSeg) : undefined;
         rail.textContent = chosen ? label(chosen) : col.parent.segment || 'root';
         rail.title = 'Back to this level';
-        rail.addEventListener('click', () => { path.value = sel.slice(0, i); });
+        rail.addEventListener('click', () => { path.value = truncate(sel, i); });
         host.appendChild(rail);
         return;
       }
+
       const colEl = document.createElement('div');
       colEl.className = 'stb-col';
       for (const child of col.parent.children.values()) {
@@ -132,11 +97,10 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
           row.appendChild(caret);
         }
 
-        const childSegs = [...sel.slice(0, i), child.segment];
         row.addEventListener('mouseenter', () => opts.onHover?.(child.node?.snapshotId ?? null, child.node?.scene ?? null));
         row.addEventListener('mouseleave', () => opts.onHover?.(null, null));
         row.addEventListener('click', () => {
-          path.value = childSegs;               // drill (opens next column or marks leaf)
+          path.value = push(sel.slice(0, i), child.segment);
           if (child.node) opts.onSelect?.(child.node.snapshotId, child.node.scene);
         });
         colEl.appendChild(row);
@@ -153,5 +117,5 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
 
   effect(() => { void globalModel.value; void path.value; render(); });
 
-  return { jumpTo(snapshotId) { path.value = snapshotId.split('.'); } };
+  return { jumpTo(snapshotId) { path.value = jumpToPath(snapshotId); } };
 }
