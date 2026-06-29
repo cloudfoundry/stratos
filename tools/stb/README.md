@@ -23,7 +23,7 @@ Open http://localhost:5173.
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full picture — the model, the
+See [the architecture doc](docs/architecture.md) for the full picture — the model, the
 capture→edit→export pipeline, the module map, and common tasks.
 
 In short: brandable elements carry a stable `stb-snapshot-id` (and optional
@@ -36,7 +36,7 @@ with `activeSceneId` selecting the previewed scene. Editor change → pure sette
 ## Snapshot pack
 
 Place snapshot packs under `public/snapshots/v1/` (format in
-[ARCHITECTURE.md](ARCHITECTURE.md#snapshot-pack-format)). The bundled stub pack
+[the architecture doc](docs/architecture.md#snapshot-pack-format)). The bundled stub pack
 is for development only; production builds include a real captured pack.
 
 ## Export

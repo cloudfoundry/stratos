@@ -1,7 +1,7 @@
 # stb Architecture
 
 Onboarding guide to the Stratos Theme Builder (`tools/stb`). Read this after
-the [README](README.md) quick start. It explains the model, the data pipeline,
+the [README](../README.md) quick start. It explains the model, the data pipeline,
 and where each piece lives, so you can find your way around and make a change.
 
 ## What stb is
