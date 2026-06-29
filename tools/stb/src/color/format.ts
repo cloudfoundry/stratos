@@ -1,3 +1,5 @@
+import { toOklch, oklchToHex } from '@/color/oklch';
+
 export type ColorFormat = 'hex' | 'rgb' | 'oklch';
 
 export interface ColorValue {
@@ -13,7 +15,7 @@ const HEX6 = /^#([0-9a-f]{6})$/i;
 const HEX3 = /^#([0-9a-f]{3})$/i;
 const RGB_SPACE = /^rgb\(\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*\)$/i;
 const RGB_COMMA = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i;
-const OKLCH = /^oklch\(\s*[\d.]+\s+[\d.]+\s+[\d.]+\s*(\/\s*[\d.]+\s*)?\)$/i;
+const OKLCH = /^oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*([\d.]+)\s*)?\)$/i;
 
 export function parseColor(input: string): ColorValue | null {
   const s = input.trim();
@@ -54,24 +56,32 @@ export function parseColor(input: string): ColorValue | null {
     };
   }
 
-  if (OKLCH.test(s)) {
-    return { format: 'oklch', raw: s, r: 0, g: 0, b: 0, a: 1 };
+  const ok = OKLCH.exec(s);
+  if (ok) {
+    const l = ok[1]!.endsWith('%') ? parseFloat(ok[1]!) / 100 : parseFloat(ok[1]!);
+    const hex = oklchToHex({ l, c: parseFloat(ok[2]!), h: parseFloat(ok[3]!) });
+    return {
+      format: 'oklch', raw: s,
+      r: parseInt(hex.slice(1, 3), 16),
+      g: parseInt(hex.slice(3, 5), 16),
+      b: parseInt(hex.slice(5, 7), 16),
+      a: ok[4] != null ? parseFloat(ok[4]) : 1,
+    };
   }
 
   return null;
 }
 
 export function formatColor(c: ColorValue, target: ColorFormat): string {
-  if (target === 'oklch' && c.format === 'oklch') return c.raw;
-  if (target === 'hex') {
-    const h = (n: number) => n.toString(16).padStart(2, '0');
-    return `#${h(c.r)}${h(c.g)}${h(c.b)}`;
-  }
-  if (target === 'rgb') {
-    return `rgb(${c.r} ${c.g} ${c.b})`;
-  }
-  // Asked for oklch but we only have RGB — return raw (no math in MVP #1)
-  return c.raw;
+  const h = (n: number) => n.toString(16).padStart(2, '0');
+  const hex = `#${h(c.r)}${h(c.g)}${h(c.b)}`;
+  if (target === 'hex') return hex;
+  if (target === 'rgb') return `rgb(${c.r} ${c.g} ${c.b})`;
+  // oklch — preserve what the user typed, else derive from rgb
+  if (c.format === 'oklch') return c.raw;
+  const o = toOklch(hex);
+  const round = (n: number, p: number) => Number(n.toFixed(p));
+  return `oklch(${round(o.l, 4)} ${round(o.c, 4)} ${round(o.h, 2)})`;
 }
 
 function clampByte(s: string): number {

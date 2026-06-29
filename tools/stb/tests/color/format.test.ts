@@ -55,4 +55,19 @@ describe('formatColor', () => {
     expect(c).not.toBeNull();
     expect(formatColor(c!, 'oklch')).toBe(input);
   });
+
+  it('converts hex to a valid oklch() string', () => {
+    const c = parseColor('#3b82f6')!;
+    const out = formatColor(c, 'oklch');
+    expect(out).toMatch(/^oklch\([\d.]+ [\d.]+ [\d.]+\)$/);
+    // round-trips back to (approximately) the same colour
+    expect(formatColor(parseColor(out)!, 'hex')).toBe('#3b82f6');
+  });
+
+  it('decodes oklch back into rgb channels (so the native swatch works)', () => {
+    const oklchStr = formatColor(parseColor('#3b82f6')!, 'oklch');
+    const c = parseColor(oklchStr)!;
+    expect(c.format).toBe('oklch');
+    expect(formatColor(c, 'hex')).toBe('#3b82f6');  // r/g/b populated, not 0,0,0
+  });
 });
