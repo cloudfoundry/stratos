@@ -1,14 +1,13 @@
 import { signal } from '@preact/signals-core';
-import type { BrandingModel, ElementNode } from '@/metadata/types';
+import type { BrandingModel } from '@/metadata/types';
+import type { NavNode } from '@/navigator/column-model';
 
-// A node tagged with the scene it came from, so the global navigator can route
-// a selection back to the right preview scene.
-export interface GlobalNode extends ElementNode {
-  scene: string;
-}
+// Re-export NavNode under the legacy name so existing consumers (element-columns)
+// continue to compile without changes.
+export type { NavNode as GlobalNode };
 
 export interface GlobalModel {
-  nodes: GlobalNode[];
+  nodes: NavNode[];
 }
 
 // The whole-UI aggregate: every scene's branding-model merged into one set, so
@@ -17,6 +16,18 @@ export interface GlobalModel {
 // branding-model.json yet simply contribute nothing.
 export const globalModel = signal<GlobalModel | null>(null);
 
+// Pure helper — flatten an array of per-scene models into scene-tagged NavNodes.
+// Extracted for testability; loadGlobalModel delegates its merge to this.
+export function mergeScenes(perScene: { scene: string; model: BrandingModel }[]): NavNode[] {
+  const nodes: NavNode[] = [];
+  for (const { scene, model } of perScene) {
+    for (const n of model.nodes) {
+      nodes.push({ snapshotId: n.snapshotId, scene, name: n.name, description: n.description, value: n.value });
+    }
+  }
+  return nodes;
+}
+
 interface Manifest { scenes: { id: string }[] }
 
 export async function loadGlobalModel(): Promise<void> {
@@ -24,17 +35,17 @@ export async function loadGlobalModel(): Promise<void> {
     const manRes = await fetch('/snapshots/v1/manifest.json');
     if (!manRes.ok) { globalModel.value = null; return; }
     const manifest = (await manRes.json()) as Manifest;
-    const nodes: GlobalNode[] = [];
+    const perScene: { scene: string; model: BrandingModel }[] = [];
     for (const s of manifest.scenes) {
       try {
         const res = await fetch(`/snapshots/v1/${s.id}/branding-model.json`);
         const ct = res.headers.get('content-type') ?? '';
         if (!res.ok || !ct.includes('json')) continue; // scene not modelled yet
         const m = (await res.json()) as BrandingModel;
-        for (const n of m.nodes) nodes.push({ ...n, scene: s.id });
+        perScene.push({ scene: s.id, model: m });
       } catch { /* skip a scene whose model fails to load */ }
     }
-    globalModel.value = { nodes };
+    globalModel.value = { nodes: mergeScenes(perScene) };
   } catch {
     globalModel.value = null;
   }
