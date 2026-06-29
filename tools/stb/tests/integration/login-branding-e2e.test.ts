@@ -16,16 +16,16 @@ const routing = JSON.parse(readFileSync(resolve(dir, 'routing.json'), 'utf8')) a
 describe('login branding end-to-end (authoring)', () => {
   it('edits flow into the exported company-config.json', () => {
     brandingModel.value = JSON.parse(JSON.stringify(model));
-    applyEdit('auth.login.title', { kind: 'content', text: 'Welcome to Acme Cloud' }, routing);
+    applyEdit('auth.login.page.card.title', { kind: 'content', text: 'Welcome to Acme Cloud' }, routing);
     // Set logo visibility to false by modifying the node directly
     const m = brandingModel.value;
     if (m) {
       brandingModel.value = {
         ...m,
-        nodes: m.nodes.map((n) => (n.snapshotId === 'auth.login.logo' ? { ...n, visibility: false } : n)),
+        nodes: m.nodes.map((n) => (n.snapshotId === 'auth.login.page.card.logo' ? { ...n, visibility: false } : n)),
       };
     }
-    applyEdit('auth.login.sign-in', { kind: 'color', oklch: { l: 0.6, c: 0.18, h: 20 } }, routing);
+    applyEdit('auth.login.page.card.sign-in', { kind: 'color', oklch: { l: 0.6, c: 0.18, h: 20 } }, routing);
 
     const inputs = exportInputs(brandingModel.value, routing, new Map(), new Map(), []);
     const bundle = buildBundle({ name: 'Acme', id: 'acme', description: '', ...inputs });

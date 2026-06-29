@@ -2,15 +2,15 @@
   "containers": { "auth.login": "login" },
   "elements": {
     "auth.login.page":        { "config": "backgroundColor" },
-    "auth.login.card":        { "config": "cardBackground" },
-    "auth.login.title":       { "config": "title", "visibilityConfig": "showTitle" },
-    "auth.login.subtitle":    { "config": "subtitle" },
-    "auth.login.message":     { "config": "customMessage" },
-    "auth.login.logo":        { "config": "logos.main", "visibilityConfig": "showLogo" },
-    "auth.login.background":  { "config": "logos.loginBackground" },
-    "auth.login.sign-in":     { "config": "theme.primary" },
-    "auth.login.error":       { "config": "theme.danger" },
-    "auth.login.username":    { "config": "inputBorder" },
-    "auth.login.password":    { "config": "inputBorder" }
+    "auth.login.page.card":        { "config": "cardBackground" },
+    "auth.login.page.card.title":       { "config": "title", "visibilityConfig": "showTitle" },
+    "auth.login.page.card.subtitle":    { "config": "subtitle" },
+    "auth.login.page.card.message":     { "config": "customMessage" },
+    "auth.login.page.card.logo":        { "config": "logos.main", "visibilityConfig": "showLogo" },
+    "auth.login.page.background":  { "config": "logos.loginBackground" },
+    "auth.login.page.card.sign-in":     { "config": "theme.primary" },
+    "auth.login.page.error":       { "config": "theme.danger" },
+    "auth.login.page.card.username":    { "config": "inputBorder" },
+    "auth.login.page.card.password":    { "config": "inputBorder" }
   }
 }
