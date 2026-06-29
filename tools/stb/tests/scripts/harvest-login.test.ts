@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { harvestElements, lintRouting } from '../../scripts/harvest-login';
 
 const HTML = `
-<div data-stratos-snapshot-id="auth.login.page">
-  <img data-stratos-snapshot-id="auth.login.logo" />
-  <input data-stratos-snapshot-id="auth.login.username" />
+<div stb-snapshot-id="auth.login.page">
+  <img stb-snapshot-id="auth.login.logo" />
+  <input stb-snapshot-id="auth.login.username" />
 </div>`;
 
 describe('harvestElements', () => {

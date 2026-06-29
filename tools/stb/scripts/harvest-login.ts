@@ -6,7 +6,7 @@ export interface DriftReport { phantoms: string[]; orphans: string[] }
 
 // Matches a start tag and captures tag name + its attribute text.
 const TAG_RE = /<([a-zA-Z][\w-]*)\b([^>]*)>/g;
-const SID_RE = /data-stratos-snapshot-id\s*=\s*"([^"]*)"/;
+const SID_RE = /stb-snapshot-id\s*=\s*"([^"]*)"/;
 
 export function harvestElements(html: string): HarvestedElement[] {
   const out: HarvestedElement[] = [];

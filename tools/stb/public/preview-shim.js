@@ -51,7 +51,7 @@
   function highlightElement(snapshotId) {
     document.querySelectorAll('[data-stb-highlight]').forEach((el) => el.removeAttribute('data-stb-highlight'));
     if (!snapshotId) return;
-    const el = document.querySelector('[data-stratos-snapshot-id="' + snapshotId + '"]');
+    const el = document.querySelector('[stb-snapshot-id="' + snapshotId + '"]');
     if (el) el.setAttribute('data-stb-highlight', '');
     ensureHighlightStyles();
   }
@@ -71,11 +71,11 @@
       var p = levers[i];
       if (p.kind === 'visibility') {
         var tid = p.snapshotId.replace(/\.show-/, '.');
-        var ve = document.querySelector('[data-stratos-snapshot-id="' + tid + '"]');
+        var ve = document.querySelector('[stb-snapshot-id="' + tid + '"]');
         if (ve) ve.style.display = p.shown ? '' : 'none';
         continue;
       }
-      var e = document.querySelector('[data-stratos-snapshot-id="' + p.snapshotId + '"]');
+      var e = document.querySelector('[stb-snapshot-id="' + p.snapshotId + '"]');
       if (!e) continue;
       if (p.kind === 'content' && p.text !== undefined) e.textContent = p.text;
       if (p.kind === 'asset') {
@@ -90,7 +90,7 @@
   function markLevers(ids) {
     document.querySelectorAll('[data-stb-lever]').forEach((el) => el.removeAttribute('data-stb-lever'));
     for (const id of ids || []) {
-      const el = document.querySelector('[data-stratos-snapshot-id="' + id + '"]');
+      const el = document.querySelector('[stb-snapshot-id="' + id + '"]');
       if (el) el.setAttribute('data-stb-lever', '');
     }
     ensureLeverStyles();
@@ -159,16 +159,16 @@
   document.addEventListener('click', (e) => {
     const target = e.target;
     if (!(target instanceof Element)) return;
-    const el = target.closest('[data-stratos-snapshot-id]');
+    const el = target.closest('[stb-snapshot-id]');
     if (!el) return;
-    const snapshotId = el.getAttribute('data-stratos-snapshot-id');
+    const snapshotId = el.getAttribute('stb-snapshot-id');
     const selector = bestSelector(el);
     window.parent.postMessage({ type: 'STB_ELEMENT_SELECTED', selector, tokens: tokensForElement(target), snapshotId }, '*');
   });
 
   function bestSelector(el) {
-    const id = el.getAttribute('data-stratos-snapshot-id');
-    if (id) return `[data-stratos-snapshot-id="${id}"]`;
+    const id = el.getAttribute('stb-snapshot-id');
+    if (id) return `[stb-snapshot-id="${id}"]`;
     return el.tagName.toLowerCase();
   }
 

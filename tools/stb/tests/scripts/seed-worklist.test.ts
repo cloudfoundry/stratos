@@ -13,7 +13,7 @@ describe('buildWorklist', () => {
     expect(row!.suggestedId).toBe('cf.users.add-user');
   });
 
-  it('skips elements that already have data-stratos-snapshot-id', () => {
+  it('skips elements that already have stb-snapshot-id', () => {
     expect(rows.find((r) => r.dataTest === 'already-done')).toBeUndefined();
   });
 

@@ -104,7 +104,7 @@ describe('LoginPageComponent — error banner branding', () => {
     fixture.detectChanges();
     flushEffects();
     fixture.detectChanges();
-    const banner = fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.error"]');
+    const banner = fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.error"]');
     expect(banner).not.toBeNull();
     expect(banner.classList).toContain('alert-danger');
     expect(banner.className).not.toContain('bg-danger-50');
@@ -149,7 +149,7 @@ describe('LoginPageComponent — login-scoped input branding', () => {
 
   it('applies login input branding scoped to the login card', () => {
     fixture.detectChanges();
-    const card = fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.card"]');
+    const card = fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.card"]');
     expect(card.style.getPropertyValue('--input-bg')).toBe('#222222');
     expect(card.style.getPropertyValue('--input-border')).toBe('#ff0000');
   });
@@ -193,12 +193,12 @@ describe('LoginPageComponent — logo and title visibility', () => {
 
   it('hides the login logo when showLogo is false', () => {
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.logo"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.logo"]')).toBeNull();
   });
 
   it('hides the login title when showTitle is false', () => {
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.title"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.title"]')).toBeNull();
   });
 });
 
@@ -240,8 +240,8 @@ describe('LoginPageComponent — snapshot-id instrumentation', () => {
   it('instruments the login background and subtitle for harvest', () => {
     fixture.detectChanges();
     const el = fixture.nativeElement;
-    expect(el.querySelector('[data-stratos-snapshot-id="auth.login.background"]')).not.toBeNull();
-    expect(el.querySelector('[data-stratos-snapshot-id="auth.login.subtitle"]')).not.toBeNull();
+    expect(el.querySelector('[stb-snapshot-id="auth.login.background"]')).not.toBeNull();
+    expect(el.querySelector('[stb-snapshot-id="auth.login.subtitle"]')).not.toBeNull();
   });
 });
 
@@ -282,7 +282,7 @@ describe('LoginPageComponent — before-login notice', () => {
 
   it('renders the before-login notice when a custom message is set', () => {
     fixture.detectChanges();
-    const el = fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.message"]');
+    const el = fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.message"]');
     expect(el).not.toBeNull();
     expect(el.textContent).toContain('Authorized users only');
   });
@@ -314,6 +314,6 @@ describe('LoginPageComponent — before-login notice hidden when empty', () => {
 
   it('hides the before-login notice when customMessage is empty', () => {
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-stratos-snapshot-id="auth.login.message"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.message"]')).toBeNull();
   });
 });
