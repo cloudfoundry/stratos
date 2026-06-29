@@ -24,34 +24,20 @@ import { restoreSession, startAutoSave } from '@/state/persistence';
 interface ColorFormatState { value: 'hex' | 'rgb' | 'oklch'; }
 const colorFormat: ColorFormatState = { value: 'hex' };
 
-function setColumnStyles(left: HTMLElement, right: HTMLElement): void {
-  left.style.display = 'flex';
-  left.style.flexDirection = 'row';
-  left.style.flex = '0 0 50%';
-  left.style.minWidth = '500px';
-  right.style.flex = '1';
-  right.style.position = 'relative';
-}
-
 async function main() {
   const app = document.getElementById('app')!;
   app.innerHTML = `
     <div class="stb-scene-tabs-host"></div>
-    <div class="stb-actions-host" style="padding:0.5rem;border-bottom:1px solid #ddd"></div>
-    <div class="stb-statusbar-host"></div>
-    <div class="stb-main" style="display:flex;flex:1;min-height:0;overflow:hidden">
-      <div class="stb-left" style="display:flex;min-height:0">
-        <div class="stb-sidebar-host" style="width:280px;overflow:auto"></div>
-        <div class="stb-editor-host" style="flex:1"></div>
-      </div>
-      <div class="stb-preview-host"></div>
+    <div class="stb-topbar">
+      <div class="stb-actions-host"></div>
+      <div class="stb-statusbar-host"></div>
     </div>
+    <div class="stb-nav-band">
+      <div class="stb-sidebar-host"></div>
+      <div class="stb-editor-host"></div>
+    </div>
+    <div class="stb-preview-host"></div>
   `;
-
-  setColumnStyles(
-    app.querySelector('.stb-left') as HTMLElement,
-    app.querySelector('.stb-preview-host') as HTMLElement,
-  );
 
   const restored = restoreSession();
   if (!restored) await loadBuiltInPreset('stratos-default');
@@ -103,8 +89,6 @@ async function main() {
       const view = btn.dataset.view;
       sidebarHost.querySelectorAll('.stb-view-btn').forEach((b) => b.classList.toggle('active', b === btn));
       sidebarHost.querySelectorAll<HTMLElement>('.stb-view').forEach((v) => { v.hidden = v.dataset.view !== view; });
-      // R3: the columns navigator needs real horizontal room — widen the sidebar while it's shown
-      sidebarHost.style.width = view === 'columns' ? '720px' : '280px';
     });
   });
 

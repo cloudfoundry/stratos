@@ -1,7 +1,68 @@
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
-  padding: 1rem;
+  padding: 0;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Top bar: status line + global ops (dark toggle, presets, export, assets, format) */
+.stb-topbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  flex-shrink: 0;
+}
+
+/* Actions host flows its controls inline within the topbar */
+.stb-light-dark-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Status bar inside topbar: strip standalone borders/background, push to right */
+.stb-topbar .stb-status-bar {
+  border: none;
+  padding: 0;
+  background: transparent;
+  margin-left: auto;
+}
+
+/* Navigator band: full-width, bounded height, navigator + CSS editor side by side */
+.stb-nav-band {
+  display: flex;
+  overflow: hidden;
+  max-height: 40vh;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  flex-shrink: 0;
+}
+
+.stb-nav-band .stb-sidebar-host {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+.stb-nav-band .stb-editor-host {
+  flex: 0 0 400px;
+  overflow: auto;
+  border-left: 1px solid var(--border, #e5e7eb);
+}
+
+/* Preview takes all remaining height */
+.stb-preview-host {
+  flex: 1;
+  min-height: 0;
 }
 
 .stb-sidebar { padding: 0.5rem; overflow-y: auto; border-right: 1px solid var(--border, #ddd); }
