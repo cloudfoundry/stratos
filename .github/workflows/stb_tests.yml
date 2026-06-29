@@ -1,0 +1,60 @@
+name: STB Tests
+
+# Gate for the Stratos Theme Builder (tools/stb). It is a standalone npm
+# project outside the Angular workspace, so the frontend/backend workflows
+# never exercise it. Runs only when stb itself changes, or when one of the
+# Stratos templates stb is instrumented against changes — a template edit can
+# break the snapshot-id <-> routing correspondence the harvest lint checks.
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+      - 'angular**'
+    paths:
+      - 'tools/stb/**'
+      # Instrumented templates (stb-snapshot-id / stba-*). Add new ones here
+      # as more scenes are converted; the harvest lint currently covers login.
+      - 'src/frontend/packages/core/src/features/login/login-page/login-page.component.html'
+      - 'src/frontend/packages/core/src/shared/components/stepper/steppers/steppers.component.html'
+      - 'src/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.html'
+      - 'src/frontend/packages/cloud-foundry/src/features/applications/application-wall/application-wall.component.html'
+  push:
+    branches:
+      - develop
+      - master
+    paths:
+      - 'tools/stb/**'
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  test:
+    name: STB Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/stb
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # No package-lock.json in tools/stb, so install (not ci).
+      - run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # NOTE: `npm run lint` (eslint) is intentionally not gated yet — the
+      # eslint config is missing DOM globals for tests/, so it currently
+      # reports preexisting errors. Add it here once that config is fixed.
+      - name: Unit + integration tests
+        run: npm test
+
+      # Drift check: live Stratos template ids vs the snapshot routing map.
+      - name: Harvest lint (template <-> routing drift)
+        run: npm run lint:harvest
