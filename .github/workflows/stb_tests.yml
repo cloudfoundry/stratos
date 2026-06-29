@@ -46,6 +46,13 @@ jobs:
       # No package-lock.json in tools/stb, so install (not ci).
       - run: npm install
 
+      # The integration suite runs in real browsers (vite.config.ts defines
+      # integration-chromium/firefox/webkit projects); CI has no browser
+      # binaries by default. NOTE: installs all three to keep CI == local
+      # `npm test`; narrow to chromium if the gate gets slow.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Typecheck
         run: npm run typecheck
 
