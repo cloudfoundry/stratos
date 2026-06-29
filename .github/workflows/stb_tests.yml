@@ -55,6 +55,12 @@ jobs:
       - name: Unit + integration tests
         run: npm test
 
-      # Drift check: live Stratos template ids vs the snapshot routing map.
-      - name: Harvest lint (template <-> routing drift)
+      # Drift check: login live template ids vs the snapshot routing map.
+      - name: Harvest lint (login template <-> routing drift)
         run: npm run lint:harvest
+
+      # Drift check: the shared scene's live template ids (stepper +
+      # dialog-confirm) must exist in its captured snapshot. (login is covered
+      # by lint:harvest above; app-list is a mock with no static correspondence.)
+      - name: Template lint (shared live templates <-> snapshot drift)
+        run: npm run lint:templates
