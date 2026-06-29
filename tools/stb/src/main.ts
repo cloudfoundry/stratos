@@ -120,6 +120,15 @@ async function main() {
     });
   }
 
+  // Cross-scene select from a global navigator (columns or tree): switch the
+  // previewed scene and await its model so the editor opens against the right
+  // scene on the first click, not the previous scene's stale model.
+  async function selectFromNav(snapshotId: string, scene: string): Promise<void> {
+    if (scene !== activeSceneId.value) { activeSceneId.value = scene; }
+    await loadBrandingModel(scene);
+    selectElement(snapshotId);
+  }
+
   // forward-declared so onElementSelected can drive the columns (bidirectional select)
   let columnsApi: import('@/ui/element-columns').ElementColumnsApi | null = null;
 
@@ -142,22 +151,20 @@ async function main() {
   leverToggle.append(' Show editable regions');
   actionsHost.appendChild(leverToggle);
 
+  // hover only highlights when the node belongs to the scene on screen
+  const navHover = (id: string | null, scene: string | null) => {
+    if (id && scene === activeSceneId.value) preview.highlightElement(id);
+    else preview.highlightElement(null);
+  };
+
   mountElementTree(treeView, {
-    onHover: (id) => preview.highlightElement(id),
-    onSelect: (id) => selectElement(id),
+    onHover: navHover,
+    onSelect: (id, scene) => { void selectFromNav(id, scene); },
   });
 
   columnsApi = mountElementColumns(columnsView, {
-    // hover only highlights when the node belongs to the scene on screen
-    onHover: (id, scene) => { if (id && scene === activeSceneId.value) preview.highlightElement(id); else preview.highlightElement(null); },
-    onSelect: async (id, scene) => {
-      // global navigator: switch the preview to the node's scene, then edit.
-      // Await the scene's model so the editor opens against the right scene on
-      // the first cross-scene click (not the previous scene's stale model).
-      if (scene !== activeSceneId.value) { activeSceneId.value = scene; }
-      await loadBrandingModel(scene);
-      selectElement(id);
-    },
+    onHover: navHover,
+    onSelect: (id, scene) => { void selectFromNav(id, scene); },
   });
 
   mountTokenSidebar(tokensView, {
