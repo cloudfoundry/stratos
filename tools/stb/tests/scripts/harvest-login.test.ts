@@ -16,6 +16,16 @@ describe('harvestElements', () => {
       { snapshotId: 'auth.login.username', tag: 'input', line: 4 },
     ]);
   });
+
+  it('captures stb-kind as the container kind when present', () => {
+    const html = `
+<div stb-snapshot-id="shared.confirm-dialog" stb-kind="dialog">
+  <span stb-snapshot-id="shared.confirm-dialog.title"></span>
+</div>`;
+    const els = harvestElements(html);
+    expect(els[0]).toEqual({ snapshotId: 'shared.confirm-dialog', tag: 'div', line: 2, containerKind: 'dialog' });
+    expect(els[1]!.containerKind).toBeUndefined();
+  });
 });
 
 describe('lintRouting', () => {

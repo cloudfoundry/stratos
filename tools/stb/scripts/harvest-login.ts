@@ -1,12 +1,13 @@
 import { readFileSync } from 'node:fs';
 import type { RoutingMap } from '../src/projection/projector';
 
-export interface HarvestedElement { snapshotId: string; tag: string; line: number }
+export interface HarvestedElement { snapshotId: string; tag: string; line: number; containerKind?: string }
 export interface DriftReport { phantoms: string[]; orphans: string[] }
 
 // Matches a start tag and captures tag name + its attribute text.
 const TAG_RE = /<([a-zA-Z][\w-]*)\b([^>]*)>/g;
 const SID_RE = /stb-snapshot-id\s*=\s*"([^"]*)"/;
+const KIND_RE = /stb-kind\s*=\s*"([^"]*)"/;
 
 export function harvestElements(html: string): HarvestedElement[] {
   const out: HarvestedElement[] = [];
@@ -14,10 +15,12 @@ export function harvestElements(html: string): HarvestedElement[] {
   while ((m = TAG_RE.exec(html)) !== null) {
     const sid = SID_RE.exec(m[2]!);
     if (!sid) continue;
+    const kind = KIND_RE.exec(m[2]!);
     out.push({
       snapshotId: sid[1]!,
       tag: m[1]!.toLowerCase(),
       line: html.slice(0, m.index).split('\n').length,
+      ...(kind ? { containerKind: kind[1]! } : {}),
     });
   }
   return out;

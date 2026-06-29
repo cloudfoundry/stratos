@@ -4,9 +4,10 @@ import { oklchToHex } from '@/color/oklch';
 import {
   buildPathTree,
   computeColumns,
+  indexBySnapshotId,
+  kindGlyph,
   push,
   truncate,
-  jumpTo as jumpToPath,
   type PathNode,
 } from '@/navigator/column-model';
 
@@ -21,6 +22,7 @@ export interface ElementColumnsOptions {
 }
 
 function label(p: PathNode): string {
+  if (p.displayName) return p.displayName;      // area (scene) node
   if (p.node?.name) return p.node.name;
   // intermediate segment → Title Case the raw segment
   return p.segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -45,6 +47,8 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
   host.classList.add('stb-cols');
   // selected path = the chain of segments the user has drilled into
   const path = signal<string[]>([]);
+  // snapshotId → tree address, rebuilt each render so jumpTo lands on a real path
+  let index = new Map<string, string[]>();
 
   function render(): void {
     const model = globalModel.value;
@@ -54,7 +58,8 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
       return;
     }
 
-    const root = buildPathTree(model.nodes);
+    const root = buildPathTree(model.nodes, model.sceneNames);
+    index = indexBySnapshotId(root);
     const sel = path.value;
     const columns = computeColumns(root, sel);
 
@@ -90,6 +95,15 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
         nameEl.textContent = label(child);
 
         row.append(swEl, nameEl);
+        // §2.1a — mark container kind (dialog/stepper/…) at every level, not just leaves
+        const kg = kindGlyph(child.node?.containerKind);
+        if (kg) {
+          const kindEl = document.createElement('span');
+          kindEl.className = 'stb-col-kind';
+          kindEl.textContent = kg;
+          kindEl.title = child.node!.containerKind!;
+          row.appendChild(kindEl);
+        }
         if (child.children.size > 0) {
           const caret = document.createElement('span');
           caret.className = 'stb-col-caret';
@@ -117,5 +131,5 @@ export function mountElementColumns(host: HTMLElement, opts: ElementColumnsOptio
 
   effect(() => { void globalModel.value; void path.value; render(); });
 
-  return { jumpTo(snapshotId) { path.value = jumpToPath(snapshotId); } };
+  return { jumpTo(snapshotId) { const segs = index.get(snapshotId); if (segs) path.value = segs; } };
 }

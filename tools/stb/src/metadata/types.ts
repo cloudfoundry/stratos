@@ -31,6 +31,9 @@ export type CuratedDescriptions = Record<string, string>;  // ref key (a shared 
 
 export type LeverKind = 'color' | 'content' | 'asset';
 
+// What kind of container a node is (§2.1a). Absent = a plain element/page leaf.
+export type ContainerKind = 'page' | 'dialog' | 'stepper' | 'panel';
+
 export type LeverValue =
   | { kind: 'color'; oklch: Oklch }
   | { kind: 'content'; text: string }
@@ -43,6 +46,7 @@ export interface ElementNode {
   description: string;
   value: LeverValue;
   visibility?: boolean; // optional show/hide on THIS element; undefined = shown
+  containerKind?: ContainerKind; // §2.1a — marks a dialog/stepper/panel/page container
 }
 
 export interface BrandingModel {
