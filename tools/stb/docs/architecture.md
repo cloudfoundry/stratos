@@ -62,38 +62,49 @@ semantic feeds both:
   One upstream truth, two independent projections — not mixing. *(Not in use
   yet; reserved by the scheme.)*
 
-**ARIA projection (the a11y on-ramp) — designed, not yet wired.** The `stba-*`
-attributes mirror ARIA 1:1 so they can be mechanically converted:
+**ARIA projection (the a11y on-ramp) — deferred (futurism).** The `stba-*`
+attributes are *shaped* to mirror ARIA so they can later be mechanically
+converted (`stba-role`→`role`, `stba-roledescription`→`aria-roledescription`).
+But the actual projection is **deliberately deferred**, not the next build —
+designing it before we have real instrumentation data (especially how many
+`stbx-*` shared-semantic cases exist) would be speculative over-build.
 
-| authoring attr (DOM) | projects to | model field |
-|----------------------|-------------|-------------|
-| `stb-snapshot-id` | — (identity only) | `snapshotId` |
-| `stba-role` | `role` | `role` |
-| `stba-roledescription` | `aria-roledescription` | `roledescription` |
-| `stba-description` | `aria-description` | `description` |
+This is **safe to defer**: `stba-*`/`stb-*` are a **private namespace, not live
+ARIA**, so a wrong annotation only produces a theming mistake — never an
+accessibility regression (a screen reader never sees these attributes). The
+careful a11y-correctness work all lives in the future projection. So instrument
+freely now; the worst case is a branding bug fixed in the tool.
 
-Two non-obvious points:
-- Projection is **not a pure strip**: `stba-role` drops the prefix to `role`, but
-  the other two *gain* the `aria-` prefix. A 3-entry projector table.
-- **`aria-roledescription` is the unlock.** ARIA's `role` vocabulary is a fixed
-  closed set — there is no `role="stepper"` or `role="page"`. So a stepper stays
-  a valid `role="group"` and is *named* "stepper" via `aria-roledescription`.
-  That is why the container "kind" rides on `roledescription`.
-
-The projector itself isn't built yet. When it is, two things get decided there:
-which descriptions become real `aria-description` (theming-note wording like
-"background color for the login page" is poor screen-reader text), and how to
+When the projector is eventually built, two things get decided there: how to
 **dedup** `role` where an element already carries real ARIA (the login message
-is already `role="note"`, the error already `role="alert"`).
+is already `role="note"`, the error already `role="alert"`), and exactly which
+descriptions become real `aria-*`. The **`aria-roledescription` unlock** is why
+the container "kind" rides on `roledescription`: ARIA's `role` vocabulary is a
+fixed closed set (no `role="stepper"`), so a stepper stays a valid
+`role="group"` *named* "stepper" via `aria-roledescription`.
+
+**Descriptions — the composite shape (resolved authoring direction).** The
+opaque, theming-worded `stba-description` ("background color for the login page")
+is being replaced by two explicit pieces the tool composes:
+- **Identity (the subject)** lives in `stba-*` as *ARIA-correct* terms. Its slot
+  **varies per element** — `roledescription` for a custom-named container
+  ("login" group, "stepper"), the accessible **name** for a field (a `textbox`
+  is identified by its name "Username", *not* `roledescription`, which would
+  wrongly override the spoken role), text for a heading.
+- **Theming aspect** lives in **`stb-facet`** (e.g. `stb-facet="background
+  color"`) — the brandable property, which has no ARIA equivalent, so it is pure
+  `stb-`. ("facet" is a coined term; design-token taxonomy has no single word for
+  this bundle, and `stb-property` would collide with its loaded meaning.)
+- The tool **composes** the description, default `"{facet} for {subject}"` →
+  "background color for login". An `stb-composite-order` attribute overrides the
+  order, added only when a real case breaks "x for y".
 
 **This is experimental.** Repurposing ARIA-shaped attributes as a theming
 vocabulary is a research direction — no existing standard covers the
-element-semantic layer stb occupies, and nobody has driven branding off ARIA
-this way. The stance is ARIA-first (reach for real ARIA where it fits) with a
-private `stb-*` fallback where ARIA doesn't fit or would pollute the
-accessibility tree (colour and brand-visibility have no ARIA equivalent — the
-clearest proof stb must *extend* ARIA, not just reuse it). Treat the vocabulary
-as provisional and validated by use, not a closed design.
+element-semantic layer stb occupies. The stance is ARIA-first (reach for real
+ARIA where it fits) with a private `stb-*` supplement where ARIA doesn't fit
+(colour and brand-visibility have no ARIA equivalent). Treat the vocabulary as
+provisional and validated by use, not a closed design.
 
 ## The pipeline (end to end)
 
