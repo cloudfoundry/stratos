@@ -20,3 +20,26 @@ export function positionInPreviewGutter(panel: HTMLElement, previewHost: HTMLEle
   panel.style.left = `${Math.max(8, left) + window.scrollX}px`;
   panel.style.top = `${Math.max(8, top) + window.scrollY}px`;
 }
+
+// Let the user drag the popover by a handle, overriding the auto-placement.
+// Position stays clamped to the viewport so it can't be dragged off-screen.
+export function makeDraggable(panel: HTMLElement, handle: HTMLElement): void {
+  handle.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    const rect = panel.getBoundingClientRect();
+    const dx = e.clientX - rect.left;
+    const dy = e.clientY - rect.top;
+    const onMove = (ev: MouseEvent) => {
+      const left = Math.min(Math.max(0, ev.clientX - dx), window.innerWidth - panel.offsetWidth);
+      const top = Math.min(Math.max(0, ev.clientY - dy), window.innerHeight - panel.offsetHeight);
+      panel.style.left = `${left + window.scrollX}px`;
+      panel.style.top = `${top + window.scrollY}px`;
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+}

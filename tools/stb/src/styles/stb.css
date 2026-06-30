@@ -95,7 +95,18 @@ body {
   z-index: 1000; min-width: 240px; max-width: 90vw; max-height: 80vh;
   resize: both; overflow: auto;
 }
-.stb-lever-text { display: block; width: 100%; min-height: 5rem; resize: vertical; box-sizing: border-box; font: inherit; }
+/* drag handle: a grab bar spanning the popover top, overrides auto-placement */
+.stb-lever-drag {
+  cursor: move; user-select: none; text-align: center; line-height: 1;
+  color: var(--text-muted, #94a3b8); padding: 2px 0 4px;
+  margin: -0.6rem -0.6rem 0.4rem; border-bottom: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px 8px 0 0;
+}
+.stb-lever-text { display: block; width: 100%; min-height: 5rem; resize: both; box-sizing: border-box; font: inherit; }
+/* the scoped-CSS editor fills the popover width and grows with it (resize: both) */
+.stb-lever-scoped-block { width: 100%; }
+.stb-lever-scoped-block-label { font-size: 0.8rem; color: var(--text-muted, #64748b); margin: 0.3rem 0 0.2rem; }
+.stb-lever-scoped-block .cm-editor { width: 100%; max-height: 12rem; border: 1px solid var(--border, #cbd5e1); border-radius: 4px; }
 .stb-color-picker__row { display: flex; gap: 0.5rem; align-items: center; margin: 0.25rem 0; }
 .stb-color-native { width: 3rem; height: 2rem; padding: 0; border: 1px solid var(--border, #ccc); }
 .stb-color-text { flex: 1; padding: 0.25rem; font-family: var(--font-mono, monospace); }

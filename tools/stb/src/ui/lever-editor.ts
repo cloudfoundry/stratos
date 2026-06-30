@@ -3,7 +3,7 @@ import type { EditorView } from 'codemirror';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { mountCssEditor } from '@/ui/css-editor';
-import { positionInPreviewGutter } from '@/ui/popover';
+import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
 
 export interface OpenLeverEditorOptions {
   previewHost: HTMLElement;
@@ -97,7 +97,14 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   close.addEventListener('click', () => { closeOpen(); opts.onClose?.(); });
   panel.appendChild(close);
 
+  const drag = document.createElement('div');
+  drag.className = 'stb-lever-drag';
+  drag.textContent = '⠿';
+  drag.title = 'Drag to move';
+  panel.prepend(drag);
+
   document.body.appendChild(panel);
   positionInPreviewGutter(panel, opts.previewHost);
+  makeDraggable(panel, drag);
   openPanel = panel;
 }
