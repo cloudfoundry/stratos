@@ -32,3 +32,17 @@ export function isColorNode(
 ): n is ElementNode & { value: { kind: 'color'; oklch: Oklch } } {
   return n.value.kind === 'color';
 }
+
+export type FacetValue = { token: string } | { literal: Oklch | string };
+
+export interface TextFacet { color?: FacetValue; fontFamily?: FacetValue; fontSize?: FacetValue; fontWeight?: FacetValue; lineHeight?: FacetValue; }
+export interface SurfaceFacet { background?: FacetValue; border?: FacetValue; borderRadius?: FacetValue; }
+export interface SpacingFacet { padding?: FacetValue; margin?: FacetValue; gap?: FacetValue; }
+
+export interface Facets {
+  content?: { text: string };
+  asset?: { ref: string };
+  text?: TextFacet;
+  surface?: SurfaceFacet;
+  spacing?: SpacingFacet;
+}
