@@ -18,7 +18,7 @@ function label(p: PathNode): string {
 // A short value preview + optional colour swatch for a node row.
 export function valuePreview(node: NavNode): { swatch?: string; text: string; kind: string } {
   const f = node.facets;
-  if (f?.content) return { text: `”${f.content.text}”`, kind: 'text' };
+  if (f?.content) return { text: `“${f.content.text}”`, kind: 'text' };
   if (f?.asset) return { text: f.asset.ref, kind: 'image' };
   if (node.value.kind === 'color') { const hex = oklchToHex(node.value.oklch); return { swatch: hex, text: hex, kind: 'color' }; }
   return { text: '', kind: '' };
