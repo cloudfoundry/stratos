@@ -1,6 +1,8 @@
 import type { LeverValue } from '@/metadata/types';
+import type { EditorView } from 'codemirror';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
+import { mountCssEditor } from '@/ui/css-editor';
 import { positionInPreviewGutter } from '@/ui/popover';
 
 export interface OpenLeverEditorOptions {
@@ -10,6 +12,8 @@ export interface OpenLeverEditorOptions {
   onChange: (next: LeverValue) => void;
   onClose?: () => void;
   visibilityCompanion?: { shown: boolean; onChange: (shown: boolean) => void };
+  scopedBlock?: string | undefined;
+  onScopedBlockChange?: (css: string) => void;
 }
 
 export function colorValueFromHex(hex: string): LeverValue {
@@ -26,7 +30,9 @@ export function initialColorHex(v: LeverValue): string {
 }
 
 let openPanel: HTMLElement | null = null;
+let openScopedEditor: EditorView | null = null;
 function closeOpen(): void {
+  if (openScopedEditor) { openScopedEditor.destroy(); openScopedEditor = null; }
   if (openPanel) { openPanel.remove(); openPanel = null; }
 }
 
@@ -70,6 +76,19 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     label.appendChild(cb);
     label.append(' show');
     panel.appendChild(label);
+  }
+
+  if (opts.onScopedBlockChange) {
+    const section = document.createElement('div');
+    section.className = 'stb-lever-scoped-block';
+    const label = document.createElement('div');
+    label.className = 'stb-lever-scoped-block-label';
+    label.textContent = 'Scoped CSS';
+    section.appendChild(label);
+    const editorHost = document.createElement('div');
+    section.appendChild(editorHost);
+    panel.appendChild(section);
+    openScopedEditor = mountCssEditor(editorHost, opts.scopedBlock ?? '', opts.onScopedBlockChange);
   }
 
   const close = document.createElement('button');

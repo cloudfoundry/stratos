@@ -1,5 +1,5 @@
 import { signal } from '@preact/signals-core';
-import type { BrandingModel, ElementNode, LeverValue } from '@/metadata/types';
+import type { BrandingModel, ElementNode, LeverValue, ScopedBlock } from '@/metadata/types';
 
 export const brandingModel = signal<BrandingModel | null>(null);
 
@@ -39,5 +39,14 @@ export function setNodeVisibility(snapshotId: string, shown: boolean): void {
   brandingModel.value = {
     ...m,
     nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, visibility: shown } : n)),
+  };
+}
+
+export function setNodeScopedBlock(snapshotId: string, scopedBlock: ScopedBlock): void {
+  const m = brandingModel.value;
+  if (!m) return;
+  brandingModel.value = {
+    ...m,
+    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, scopedBlock } : n)),
   };
 }
