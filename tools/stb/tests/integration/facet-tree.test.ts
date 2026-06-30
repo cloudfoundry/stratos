@@ -63,7 +63,17 @@ it('collapse-all hides leaves; expand-all shows them', () => {
   mountFacetTree(host, { facets: { text: {}, surface: {} }, previewHost, onEdit: () => {} });
   (host.querySelector('.stb-facet-collapse-all') as HTMLButtonElement).click();
   expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(2);
+  expect([...host.querySelectorAll('.stb-facet-leaves')].every((el) => (el as HTMLElement).hidden)).toBe(true);
   (host.querySelector('.stb-facet-expand-all') as HTMLButtonElement).click();
+  expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(0);
+  expect([...host.querySelectorAll('.stb-facet-leaves')].every((el) => !(el as HTMLElement).hidden)).toBe(true);
+});
+
+it('isolate with no prior focus collapses nothing', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  mountFacetTree(host, { facets: { text: {}, surface: {} }, previewHost, onEdit: () => {} });
+  (host.querySelector('.stb-facet-isolate') as HTMLButtonElement).click();
   expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(0);
 });
 

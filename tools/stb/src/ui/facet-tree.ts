@@ -142,8 +142,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       }
 
       // Track focused group for isolate
-      const capturedGroup = g;
-      leaf.addEventListener('focusin', () => { focusedGroup = capturedGroup; });
+      leaf.addEventListener('focusin', () => { focusedGroup = g; });
 
       leavesEl.appendChild(leaf);
     }
