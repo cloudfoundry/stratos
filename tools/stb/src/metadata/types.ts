@@ -18,7 +18,6 @@ export interface ElementNode {
   name: string | null;
   description: string;     // DOM stba-description → ARIA aria-description
   facets: Facets;
-  value: LeverValue;
   visibility?: boolean;    // optional show/hide on THIS element; undefined = shown
   scopedBlock?: ScopedBlock; // optional raw element-scoped CSS (R1 facet escape hatch)
 }
@@ -28,10 +27,11 @@ export interface BrandingModel {
   nodes: ElementNode[];
 }
 
-export function isColorNode(
-  n: ElementNode,
-): n is ElementNode & { value: { kind: 'color'; oklch: Oklch } } {
-  return n.value.kind === 'color';
+/** True when the node's primary lever is a color (text.color or surface.background literal). */
+export function isColorNode(n: ElementNode): boolean {
+  if (n.facets.content || n.facets.asset) return false;
+  const c = n.facets.text?.color ?? n.facets.surface?.background;
+  return !!(c && 'literal' in c && typeof c.literal === 'object');
 }
 
 export type FacetValue = { token: string } | { literal: Oklch | string };

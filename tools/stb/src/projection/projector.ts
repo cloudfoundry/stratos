@@ -1,4 +1,4 @@
-import type { BrandingModel, Facets, LeverValue } from '@/metadata/types';
+import type { BrandingModel, Facets } from '@/metadata/types';
 import { oklchToHex, scaleFromOklch, type Oklch } from '@/color/oklch';
 
 export interface RoutingEntry {
@@ -17,39 +17,20 @@ export interface ProjectionResult {
   unmapped: string[];
 }
 
-function leafValue(v: LeverValue): unknown {
-  switch (v.kind) {
-    case 'color': return oklchToHex(v.oklch);
-    case 'content': return v.text;
-    case 'asset': return v.ref;
-    default: {
-      const _exhaustive: never = v;
-      return _exhaustive;
-    }
-  }
-}
-
-/** Read an Oklch color from facets first; fall back to back-compat value. */
-function colorOf(node: { facets: Facets; value: LeverValue }): Oklch | null {
+/** Read an Oklch color from facets (text.color > surface.background). */
+function colorOf(node: { facets: Facets }): Oklch | null {
   const c = node.facets.text?.color ?? node.facets.surface?.background;
   if (c && 'literal' in c && typeof c.literal === 'object') return c.literal as Oklch;
-  if (node.value.kind === 'color') return node.value.oklch;
   return null;
 }
 
-/** Derive the leaf value (hex/text/ref) from facets first for color; then value for content/asset
- * (applyEdit updates node.value but not node.facets for content/asset edits). */
-function leafValueOf(node: { facets: Facets; value: LeverValue }): unknown {
-  // Color: prefer facets literal (new facets-primary path)
+/** Derive the leaf projection value from facets: color → hex, content → text, asset → ref. */
+function leafValueOf(node: { facets: Facets }): unknown {
   const color = colorOf(node);
   if (color) return oklchToHex(color);
-  // Content/asset: prefer value (applyEdit writes node.value, not node.facets)
-  if (node.value.kind === 'content') return node.value.text;
-  if (node.value.kind === 'asset') return node.value.ref;
-  // Facets content/asset as final fallback (facets-only nodes with no back-compat value)
   if (node.facets.content) return node.facets.content.text;
   if (node.facets.asset) return node.facets.asset.ref;
-  return leafValue(node.value);
+  return null;
 }
 
 function namespaceFor(snapshotId: string, containers: Record<string, string>): string | null {

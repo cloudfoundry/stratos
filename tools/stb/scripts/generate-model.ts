@@ -1,8 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { harvestElements } from './harvest-login';
 import type { BrandingModel, ElementNode, ScopedBlock, Facets } from '../src/metadata/types';
-import { primaryValue } from '../src/metadata/facets';
-
 // The branding model is GENERATED from the snapshot DOM: identity, role,
 // roledescription (the "kind") and description are harvested off the stba-*
 // attributes; the only still-authored bits — the editable value, friendly name,
@@ -24,7 +22,6 @@ export function buildModel(scene: string, html: string, values: ValuesSidecar): 
       name: v.name,
       description: el.description ?? '',
       facets: v.facets,
-      value: primaryValue(v.facets),
     };
     if (el.roledescription) node.roledescription = el.roledescription;
     if (v.visibility !== undefined) node.visibility = v.visibility;

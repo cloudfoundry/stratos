@@ -5,10 +5,10 @@ import {
 } from '@/navigator/column-model';
 
 const nodes: NavNode[] = [
-  { snapshotId: 'auth.login.page', scene: 'login', name: 'Login page', description: '', value: { kind: 'color', oklch: { l: 0.97, c: 0.01, h: 250 } } },
-  { snapshotId: 'auth.login.sign-in', scene: 'login', name: 'Sign in', description: '', value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
-  { snapshotId: 'cf.applications.heading', scene: 'app-list', name: 'Heading', description: '', value: { kind: 'content', text: 'Applications' } },
-  { snapshotId: 'cf.applications.app-card-1.status', scene: 'app-list', name: 'Status', description: '', value: { kind: 'color', oklch: { l: 0.7, c: 0.17, h: 145 } } },
+  { snapshotId: 'auth.login.page', scene: 'login', name: 'Login page', description: '' },
+  { snapshotId: 'auth.login.sign-in', scene: 'login', name: 'Sign in', description: '' },
+  { snapshotId: 'cf.applications.heading', scene: 'app-list', name: 'Heading', description: '' },
+  { snapshotId: 'cf.applications.app-card-1.status', scene: 'app-list', name: 'Status', description: '' },
 ];
 const names = { login: 'Login', 'app-list': 'App list' };
 

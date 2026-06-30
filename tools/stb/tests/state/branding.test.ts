@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { brandingModel, nodeFor, setNodeValue, setNodeVisibility, setNodeScopedBlock, loadBrandingModel } from '@/state/branding';
+import { brandingModel, nodeFor, setNodeFacets, setNodeVisibility, setNodeScopedBlock, loadBrandingModel } from '@/state/branding';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
   scene: 'login',
   nodes: [
     { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title',
-      facets: {}, value: { kind: 'content', text: 'Sign in to Stratos' } },
+      facets: { content: { text: 'Sign in to Stratos' } } },
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
-      facets: {}, value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
+      facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } } },
   ],
 };
 
@@ -16,15 +16,16 @@ describe('branding state', () => {
   beforeEach(() => { brandingModel.value = JSON.parse(JSON.stringify(model)); });
 
   it('nodeFor returns the node by snapshotId', () => {
-    expect(nodeFor('auth.login.title')?.value).toEqual({ kind: 'content', text: 'Sign in to Stratos' });
+    expect(nodeFor('auth.login.title')?.facets.content?.text).toBe('Sign in to Stratos');
   });
 
-  it('setNodeValue replaces one node value immutably', () => {
+  it('setNodeFacets replaces one node facets immutably', () => {
     const before = brandingModel.value;
-    setNodeValue('auth.login.title', { kind: 'content', text: 'Welcome' });
-    expect(nodeFor('auth.login.title')?.value).toEqual({ kind: 'content', text: 'Welcome' });
+    setNodeFacets('auth.login.title', { content: { text: 'Welcome' } });
+    expect(nodeFor('auth.login.title')?.facets.content?.text).toBe('Welcome');
     expect(brandingModel.value).not.toBe(before); // new reference → reactivity
-    expect(nodeFor('auth.login.sign-in')?.value).toEqual({ kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } });
+    // other node untouched
+    expect(nodeFor('auth.login.sign-in')?.facets.text?.color).toBeDefined();
   });
 
   it('setNodeVisibility updates the node visibility immutably', () => {
@@ -32,7 +33,7 @@ describe('branding state', () => {
       scene: 'login',
       nodes: [
         { snapshotId: 'auth.login.logo', role: 'img', name: 'L', description: 'logo',
-          facets: {}, value: { kind: 'asset', ref: 'logo.svg' }, visibility: true },
+          facets: { asset: { ref: 'logo.svg' } }, visibility: true },
       ],
     };
     const before = brandingModel.value;

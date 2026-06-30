@@ -1,7 +1,7 @@
 import { effect } from '@preact/signals-core';
 import { globalModel } from '@/state/global-branding';
 import { buildPathTree, kindGlyph, type NavNode, type PathNode } from '@/navigator/column-model';
-import { oklchToHex } from '@/color/oklch';
+import { oklchToHex, type Oklch } from '@/color/oklch';
 
 export interface ElementTreeOptions {
   onHover?: (snapshotId: string | null, scene: string | null) => void;
@@ -18,9 +18,13 @@ function label(p: PathNode): string {
 // A short value preview + optional colour swatch for a node row.
 export function valuePreview(node: NavNode): { swatch?: string; text: string; kind: string } {
   const f = node.facets;
-  if (f?.content) return { text: `“${f.content.text}”`, kind: 'text' };
+  if (f?.content) return { text: `”${f.content.text}”`, kind: 'text' };
   if (f?.asset) return { text: f.asset.ref, kind: 'image' };
-  if (node.value.kind === 'color') { const hex = oklchToHex(node.value.oklch); return { swatch: hex, text: hex, kind: 'color' }; }
+  const colorFacet = f?.text?.color ?? f?.surface?.background;
+  if (colorFacet && 'literal' in colorFacet && typeof colorFacet.literal === 'object') {
+    const hex = oklchToHex(colorFacet.literal as Oklch);
+    return { swatch: hex, text: hex, kind: 'color' };
+  }
   return { text: '', kind: '' };
 }
 
