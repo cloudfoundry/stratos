@@ -1,8 +1,8 @@
 import type { Facets, FacetValue, LeverValue } from '@/metadata/types';
 import type { RoutingMap } from '@/projection/projector';
-import { project } from '@/projection/projector';
+import { project, projectDark } from '@/projection/projector';
 import { brandingModel, setNodeFacets, setNodeVisibility } from '@/state/branding';
-import { setRootValue } from '@/state/tokens';
+import { setRootValue, setDarkValue } from '@/state/tokens';
 
 export function buildVisibilityCompanion(
   snapshotId: string,
@@ -36,6 +36,21 @@ export function reprojectNodeTokens(snapshotId: string, facets: Facets, routing:
   if (!node) return;
   const { tokens } = project({ scene: m.scene, nodes: [{ ...node, facets }] }, routing);
   for (const [k, v] of tokens) setRootValue(k, v);
+}
+
+/** Dark-mode mirror of reprojectNodeTokens: routes node.facetsDark through projectDark
+ *  and writes the resulting tokens into the .dark-theme block via setDarkValue. */
+export function reprojectNodeTokensDark(
+  snapshotId: string,
+  facetsDark: Facets,
+  routing: RoutingMap,
+): void {
+  const m = brandingModel.value;
+  if (!m) return;
+  const node = m.nodes.find((n) => n.snapshotId === snapshotId);
+  if (!node) return;
+  const tokens = projectDark({ scene: m.scene, nodes: [{ ...node, facetsDark }] }, routing);
+  for (const [k, v] of tokens) setDarkValue(k, v);
 }
 
 export function applyEdit(snapshotId: string, value: LeverValue, routing: RoutingMap): void {
