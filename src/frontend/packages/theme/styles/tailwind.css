@@ -327,6 +327,7 @@
   --ease-in-out-cubic:        cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in-cubic:            cubic-bezier(0.4, 0, 1, 1);
   --ease-out-cubic:           cubic-bezier(0, 0, 0.2, 1);
+  --ease-out-expo:            cubic-bezier(0.16, 1, 0.3, 1);
   --ease-material-standard:     cubic-bezier(0.4, 0.0, 0.2, 1);
   --ease-material-deceleration: cubic-bezier(0.0, 0.0, 0.2, 1);
   --ease-material-acceleration: cubic-bezier(0.4, 0.0, 1, 1);
@@ -341,6 +342,7 @@
   --animate-slide-right: slideRight 0.3s ease-out;
   --animate-scale-in:    scaleIn 0.2s ease-out;
   --animate-scale-out:   scaleOut 0.2s ease-in;
+  --animate-scale-pop-in: scalePopIn 0.5s var(--ease-out-expo);
   --animate-spin-slow:   spin 3s linear infinite;
   --animate-pulse-slow:  pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-dialog-enter:           dialogEnter 0.25s cubic-bezier(0.0, 0.0, 0.2, 1);
@@ -368,6 +370,7 @@
 @keyframes slideRight { 0% { transform: translateX(-10px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 @keyframes scaleIn    { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes scaleOut   { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.95); opacity: 0; } }
+@keyframes scalePopIn { 0% { transform: scale(0.2); } 100% { transform: scale(1); } }
 @keyframes dialogEnter { 0% { opacity: 0; transform: scale(0.9) translateY(-20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes dialogExit  { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0.9) translateY(-20px); } }
 @keyframes backdropEnter { 0% { opacity: 0; } 100% { opacity: 1; } }
