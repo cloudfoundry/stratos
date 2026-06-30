@@ -1,6 +1,5 @@
 import type { LeverValue, Facets, FacetValue } from '@/metadata/types';
 import type { EditorView } from 'codemirror';
-import { toOklch, oklchToHex } from '@/color/oklch';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
@@ -9,13 +8,12 @@ import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
 export interface OpenLeverEditorOptions {
   previewHost: HTMLElement;
   snapshotId: string;
-  value: LeverValue;
   onChange: (next: LeverValue) => void;
   onClose?: () => void;
   visibilityCompanion?: { shown: boolean; onChange: (shown: boolean) => void };
   scopedBlock?: string | undefined;
   onScopedBlockChange?: (css: string) => void;
-  facets?: Facets;
+  facets: Facets;
   onFacetEdit?: (key: string, value: FacetValue) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
@@ -23,17 +21,11 @@ export interface OpenLeverEditorOptions {
   resolveLiteral?: (key: string, token: string) => FacetValue;
 }
 
-export function colorValueFromHex(hex: string): LeverValue {
-  return { kind: 'color', oklch: toOklch(hex) };
-}
 export function contentValue(text: string): LeverValue {
   return { kind: 'content', text };
 }
 export function assetValue(filename: string): LeverValue {
   return { kind: 'asset', ref: filename };
-}
-export function initialColorHex(v: LeverValue): string {
-  return v.kind === 'color' ? oklchToHex(v.oklch) : '#000000';
 }
 
 let openPanel: HTMLElement | null = null;
@@ -49,29 +41,6 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   closeOpen();
   const panel = document.createElement('div');
   panel.className = 'stb-lever-editor';
-
-  const v = opts.value;
-  if (v.kind === 'color') {
-    panel.innerHTML = `<input type="color" class="stb-lever-color" value="${initialColorHex(v)}" />`;
-    panel.querySelector<HTMLInputElement>('.stb-lever-color')!
-      .addEventListener('input', (e) => opts.onChange(colorValueFromHex((e.target as HTMLInputElement).value)));
-  } else if (v.kind === 'content') {
-    const ta = document.createElement('textarea');
-    ta.className = 'stb-lever-text';
-    ta.rows = 5;
-    ta.value = v.text;
-    ta.addEventListener('input', (e) => opts.onChange(contentValue((e.target as HTMLTextAreaElement).value)));
-    panel.appendChild(ta);
-  } else {
-    panel.innerHTML = `<label class="stb-lever-asset-label">Upload image <input type="file" accept="image/*" class="stb-lever-asset" /></label>`;
-    panel.querySelector<HTMLInputElement>('.stb-lever-asset')!
-      .addEventListener('change', (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (!file) return;
-        setBrandingAsset(opts.snapshotId, file, file.name);
-        opts.onChange(assetValue(assetRefFor(file.name)));
-      });
-  }
 
   if (opts.visibilityCompanion) {
     const c = opts.visibilityCompanion;
@@ -100,19 +69,19 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     openScopedEditor = mountCssEditor(editorHost, opts.scopedBlock ?? '', opts.onScopedBlockChange);
   }
 
-  if (opts.facets) {
-    const treeHost = document.createElement('div');
-    panel.appendChild(treeHost);
-    openFacetTree = mountFacetTree(treeHost, {
-      facets: opts.facets,
-      previewHost: opts.previewHost,
-      onEdit: opts.onFacetEdit ?? (() => {}),
-      ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
-      ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
-      ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
-      ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
-    });
-  }
+  const treeHost = document.createElement('div');
+  panel.appendChild(treeHost);
+  openFacetTree = mountFacetTree(treeHost, {
+    facets: opts.facets,
+    previewHost: opts.previewHost,
+    onEdit: opts.onFacetEdit ?? (() => {}),
+    ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
+    ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
+    ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
+    ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
+    onContentEdit: (text) => opts.onChange(contentValue(text)),
+    onAssetEdit: (file) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
+  });
 
   const close = document.createElement('button');
   close.className = 'stb-lever-close';

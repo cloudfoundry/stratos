@@ -29,6 +29,15 @@ function leverValueToFacets(value: LeverValue, existing: Facets): Facets {
   return { ...existing, surface: { ...existing.surface, background: colorFacet } };
 }
 
+export function reprojectNodeTokens(snapshotId: string, facets: Facets, routing: RoutingMap): void {
+  const m = brandingModel.value;
+  if (!m) return;
+  const node = m.nodes.find((n) => n.snapshotId === snapshotId);
+  if (!node) return;
+  const { tokens } = project({ scene: m.scene, nodes: [{ ...node, facets }] }, routing);
+  for (const [k, v] of tokens) setRootValue(k, v);
+}
+
 export function applyEdit(snapshotId: string, value: LeverValue, routing: RoutingMap): void {
   const m = brandingModel.value;
   if (!m) return;
@@ -38,6 +47,5 @@ export function applyEdit(snapshotId: string, value: LeverValue, routing: Routin
   const updatedFacets = leverValueToFacets(value, node.facets);
   setNodeFacets(snapshotId, updatedFacets);
   // re-project only the edited node so color levers update their bound token
-  const { tokens } = project({ scene: m.scene, nodes: [{ ...node, facets: updatedFacets }] }, routing);
-  for (const [k, v] of tokens) setRootValue(k, v);
+  reprojectNodeTokens(snapshotId, updatedFacets, routing);
 }

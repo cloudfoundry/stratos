@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { brandingModel, nodeFor } from '@/state/branding';
 import { rootValues } from '@/state/tokens';
-import { applyEdit } from '@/ui/element-edit';
+import { applyEdit, reprojectNodeTokens } from '@/ui/element-edit';
 import type { BrandingModel } from '@/metadata/types';
 
 const routing = { containers: { 'auth.login': 'login' }, elements: {
@@ -22,6 +22,19 @@ describe('applyEdit', () => {
   });
   it('color edit re-projects to the bound token', () => {
     applyEdit('auth.login.sign-in', { kind: 'color', oklch: { l: 0.6, c: 0.12, h: 200 } }, routing);
+    expect(rootValues.value.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
+  });
+});
+
+describe('reprojectNodeTokens', () => {
+  beforeEach(() => { brandingModel.value = JSON.parse(JSON.stringify(model)); rootValues.value = new Map(); });
+
+  it('re-projects a color edit from facets to the bound CSS token', () => {
+    reprojectNodeTokens(
+      'auth.login.sign-in',
+      { surface: { background: { literal: { l: 0.6, c: 0.12, h: 200 } } } },
+      routing,
+    );
     expect(rootValues.value.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
   });
 });
