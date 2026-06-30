@@ -9,8 +9,6 @@ import type { BrandingModel, ElementNode, ScopedBlock, Facets } from '../src/met
 export interface ValueEntry { name: string | null; facets: Facets; visibility?: boolean; scopedBlock?: ScopedBlock }
 export type ValuesSidecar = Record<string, ValueEntry>;
 
-export { primaryValue } from '../src/metadata/facets';
-
 export function buildModel(scene: string, html: string, values: ValuesSidecar): BrandingModel {
   const nodes: ElementNode[] = [];
   for (const el of harvestElements(html)) {
