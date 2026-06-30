@@ -19,4 +19,12 @@ describe('mergeScenes', () => {
   it('returns [] for no scenes', () => {
     expect(mergeScenes([])).toEqual([]);
   });
+  it('propagates facets from the source node to the merged NavNode', () => {
+    const withFacets: BrandingModel = { scene: 'login', nodes: [
+      { snapshotId: 'auth.login.logo', role: 'img', name: 'Logo', description: '', facets: { content: { text: 'X' } }, value: { kind: 'color', oklch: { l: 0.5, c: 0.1, h: 250 } } },
+    ] };
+    const merged = mergeScenes([{ scene: 'login', model: withFacets }]);
+    expect(merged).toHaveLength(1);
+    expect(merged.find((n) => n.snapshotId === 'auth.login.logo')?.facets).toEqual({ content: { text: 'X' } });
+  });
 });
