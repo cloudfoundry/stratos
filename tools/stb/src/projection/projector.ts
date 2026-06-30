@@ -61,6 +61,31 @@ function setPath(obj: Record<string, unknown>, path: string, value: unknown): vo
   cur[parts[parts.length - 1]!] = value;
 }
 
+/** Project per-property `{token}`-routed color facets into the token map.
+ *  Shared by project() (light, node.facets) and projectDark() (dark, node.facetsDark) —
+ *  same routing rules, different facet source. */
+function projectColorTokens(
+  facets: Facets,
+  properties: Record<string, PropertyRoute>,
+  tokens: Map<string, string>,
+): void {
+  for (const d of facetDeclarations(facets)) {
+    const pr = properties[d.key];
+    if (!pr) continue;
+    if (pr.token && d.spec.isColor && 'literal' in d.value && typeof d.value.literal === 'object') {
+      const color = d.value.literal as Oklch;
+      if (pr.oklchRole === 'scale') {
+        const scale = scaleFromOklch(color);
+        for (const [step, hex] of Object.entries(scale)) {
+          tokens.set(pr.token.replace(/\d+$/, step), hex);
+        }
+      } else {
+        tokens.set(pr.token, oklchToHex(color));
+      }
+    }
+  }
+}
+
 export function project(model: BrandingModel, routing: RoutingMap): ProjectionResult {
   const tokens = new Map<string, string>();
   const companyConfig: Record<string, unknown> = {};
@@ -97,20 +122,10 @@ export function project(model: BrandingModel, routing: RoutingMap): ProjectionRe
 
     // Property-level routing via nested properties map (back-compat: legacy path above still runs first)
     if (entry.properties) {
+      projectColorTokens(node.facets, entry.properties, tokens);
       for (const d of facetDeclarations(node.facets)) {
         const pr = entry.properties[d.key];
         if (!pr) continue;
-        if (pr.token && d.spec.isColor && 'literal' in d.value && typeof d.value.literal === 'object') {
-          const color = d.value.literal as Oklch;
-          if (pr.oklchRole === 'scale') {
-            const scale = scaleFromOklch(color);
-            for (const [step, hex] of Object.entries(scale)) {
-              tokens.set(pr.token.replace(/\d+$/, step), hex);
-            }
-          } else {
-            tokens.set(pr.token, oklchToHex(color));
-          }
-        }
         const cssVal = facetLiteralCss(d.spec, d.value);
         if (pr.config && cssVal !== null) {
           const ns = pr.config.includes('.') ? null : namespaceFor(node.snapshotId, containers);
@@ -128,4 +143,17 @@ export function project(model: BrandingModel, routing: RoutingMap): ProjectionRe
     }
   }
   return { tokens, companyConfig, unmapped };
+}
+
+/** Project dark-mode facet overrides (node.facetsDark) into a dark token map only —
+ *  same per-property {token} color routing as project(), no companyConfig/unmapped
+ *  (dark is values-only). A node with no facetsDark contributes nothing. */
+export function projectDark(model: BrandingModel, routing: RoutingMap): Map<string, string> {
+  const tokens = new Map<string, string>();
+  for (const node of model.nodes) {
+    const entry = routing.elements[node.snapshotId];
+    if (!entry?.properties || !node.facetsDark) continue;
+    projectColorTokens(node.facetsDark, entry.properties, tokens);
+  }
+  return tokens;
 }
