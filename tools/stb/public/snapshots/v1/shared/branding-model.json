@@ -6,6 +6,17 @@
       "role": "dialog",
       "name": "Confirm dialog",
       "description": "surface/background colour for the shared confirmation dialog",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -21,6 +32,11 @@
       "role": "heading",
       "name": "Dialog title",
       "description": "title text for the shared confirmation dialog",
+      "facets": {
+        "content": {
+          "text": "Are you sure?"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Are you sure?"
@@ -31,6 +47,17 @@
       "role": "button",
       "name": "Confirm button",
       "description": "confirm button colour for the shared confirmation dialog",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.55,
+              "c": 0.15,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -45,6 +72,17 @@
       "role": "group",
       "name": "Stepper",
       "description": "surface/background colour for the shared stepper wizard",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 0.98,
+              "c": 0.005,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -60,6 +98,17 @@
       "role": "button",
       "name": "Previous button",
       "description": "previous button colour for the shared stepper",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -74,6 +123,17 @@
       "role": "button",
       "name": "Next button",
       "description": "next/submit button colour for the shared stepper",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.55,
+              "c": 0.15,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {

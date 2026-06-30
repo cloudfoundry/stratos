@@ -8,7 +8,7 @@ import type { BrandingModel } from '@/metadata/types';
 function signInModel(scopedBlock: string): BrandingModel {
   return { scene: 'login', nodes: [
     { snapshotId: 'auth.login.page.card.sign-in', role: 'button', name: 'S', description: 'btn',
-      value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } }, scopedBlock },
+      facets: {}, value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } }, scopedBlock },
   ] };
 }
 

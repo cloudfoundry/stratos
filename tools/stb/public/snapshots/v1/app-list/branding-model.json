@@ -6,6 +6,17 @@
       "role": "region",
       "name": "Applications page",
       "description": "background color for the applications list page",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 0.97,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -20,6 +31,17 @@
       "role": "navigation",
       "name": "Navigation bar",
       "description": "top navigation bar background for the applications page",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 0.22,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -34,6 +56,11 @@
       "role": "heading",
       "name": "Page heading",
       "description": "page title text for the applications page",
+      "facets": {
+        "content": {
+          "text": "Applications"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Applications"
@@ -44,6 +71,17 @@
       "role": "region",
       "name": "App card 1",
       "description": "card background for an application tile",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -58,6 +96,11 @@
       "role": "heading",
       "name": "App name",
       "description": "application name heading on a card",
+      "facets": {
+        "content": {
+          "text": "Demo App 1"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Demo App 1"
@@ -68,6 +111,17 @@
       "role": "status",
       "name": "Status (running)",
       "description": "status badge color for a running application",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.7,
+              "c": 0.17,
+              "h": 145
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -82,6 +136,17 @@
       "role": "region",
       "name": "App card 2",
       "description": "card background for an application tile",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -96,6 +161,11 @@
       "role": "heading",
       "name": "App name",
       "description": "application name heading on a card",
+      "facets": {
+        "content": {
+          "text": "Demo App 2"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Demo App 2"
@@ -106,6 +176,17 @@
       "role": "status",
       "name": "Status (stopped)",
       "description": "status badge color for a stopped application",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.8,
+              "c": 0.16,
+              "h": 85
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -120,6 +201,17 @@
       "role": "region",
       "name": "App card 3",
       "description": "card background for an application tile",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -134,6 +226,11 @@
       "role": "heading",
       "name": "App name",
       "description": "application name heading on a card",
+      "facets": {
+        "content": {
+          "text": "Demo App 3"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Demo App 3"
@@ -144,6 +241,17 @@
       "role": "status",
       "name": "Status (crashed)",
       "description": "status badge color for a crashed application",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.63,
+              "c": 0.23,
+              "h": 25
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
