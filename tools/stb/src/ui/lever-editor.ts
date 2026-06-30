@@ -1,4 +1,4 @@
-import type { LeverValue, Facets } from '@/metadata/types';
+import type { LeverValue, Facets, FacetValue } from '@/metadata/types';
 import type { EditorView } from 'codemirror';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
@@ -16,6 +16,7 @@ export interface OpenLeverEditorOptions {
   scopedBlock?: string | undefined;
   onScopedBlockChange?: (css: string) => void;
   facets?: Facets;
+  onFacetEdit?: (key: string, value: FacetValue) => void;
 }
 
 export function colorValueFromHex(hex: string): LeverValue {
@@ -98,7 +99,11 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   if (opts.facets) {
     const treeHost = document.createElement('div');
     panel.appendChild(treeHost);
-    openFacetTree = mountFacetTree(treeHost, { facets: opts.facets, onEdit: () => {} });
+    openFacetTree = mountFacetTree(treeHost, {
+      facets: opts.facets,
+      previewHost: opts.previewHost,
+      onEdit: opts.onFacetEdit ?? (() => {}),
+    });
   }
 
   const close = document.createElement('button');
