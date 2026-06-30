@@ -4,6 +4,7 @@ import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
+import { darkView } from '@/state/facets-edit';
 
 export interface OpenLeverEditorOptions {
   previewHost: HTMLElement;
@@ -14,7 +15,9 @@ export interface OpenLeverEditorOptions {
   scopedBlock?: string | undefined;
   onScopedBlockChange?: (css: string) => void;
   facets: Facets;
+  facetsDark?: Facets;
   onFacetEdit?: (key: string, value: FacetValue) => void;
+  onFacetEditDark?: (key: string, value: FacetValue) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   tokenForKey?: (key: string) => string | null;
@@ -71,17 +74,41 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
 
   const treeHost = document.createElement('div');
   panel.appendChild(treeHost);
-  openFacetTree = mountFacetTree(treeHost, {
-    facets: opts.facets,
-    previewHost: opts.previewHost,
-    onEdit: opts.onFacetEdit ?? (() => {}),
-    ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
-    ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
-    ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
-    ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
-    onContentEdit: (text) => opts.onChange(contentValue(text)),
-    onAssetEdit: (file) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
-  });
+
+  let editTarget: 'light' | 'dark' = 'light';
+
+  const targetBar = document.createElement('div');
+  targetBar.className = 'stb-lever-target';
+  for (const mode of ['light', 'dark'] as const) {
+    const label = document.createElement('label');
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'stb-edit-target';
+    radio.value = mode;
+    radio.checked = mode === editTarget;
+    radio.addEventListener('change', () => { if (radio.checked) { editTarget = mode; renderTree(); } });
+    label.append(radio, ` ${mode}`);
+    targetBar.appendChild(label);
+  }
+  panel.appendChild(targetBar);
+
+  function renderTree(): void {
+    if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
+    const dark = editTarget === 'dark';
+    openFacetTree = mountFacetTree(treeHost, {
+      facets: dark ? darkView(opts.facets, opts.facetsDark ?? {}) : opts.facets,
+      previewHost: opts.previewHost,
+      onEdit: dark ? (opts.onFacetEditDark ?? (() => {})) : (opts.onFacetEdit ?? (() => {})),
+      // Structural edits + token promote/detach + content/asset live on the light bundle only.
+      ...(!dark && opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
+      ...(!dark && opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
+      ...(!dark && opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
+      ...(!dark && opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
+      ...(!dark ? { onContentEdit: (text: string) => opts.onChange(contentValue(text)) } : {}),
+      ...(!dark ? { onAssetEdit: (file: File) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); } } : {}),
+    });
+  }
+  renderTree();
 
   const close = document.createElement('button');
   close.className = 'stb-lever-close';
