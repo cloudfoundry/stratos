@@ -13,6 +13,7 @@ export interface BuildBundleInput {
   dark: Map<string, string>;
   assets: AssetInput[];
   companyConfig?: Record<string, unknown>;
+  scopedCss?: string; // element-scoped facet rules, appended after :root (load order)
 }
 
 export interface Bundle {
@@ -32,7 +33,7 @@ export function buildBundle(input: BuildBundleInput): Bundle {
     null,
     2,
   );
-  files['theme.css'] = emitCss(input.root, input.dark);
+  files['theme.css'] = [emitCss(input.root, input.dark), input.scopedCss].filter(Boolean).join('\n\n');
   if (input.companyConfig && Object.keys(input.companyConfig).length > 0) {
     files['company-config.json'] = JSON.stringify(input.companyConfig, null, 2);
   }

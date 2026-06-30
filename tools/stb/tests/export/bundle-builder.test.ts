@@ -46,4 +46,23 @@ describe('buildBundle', () => {
     });
     expect(bundle.files['company-config.json']).toBeUndefined();
   });
+
+  it('appends scopedCss after the :root block in theme.css', () => {
+    const bundle = buildBundle({
+      name: 'b', id: 'b', description: '',
+      root: new Map([['--color-brand-500', '#aaa']]), dark: new Map(), assets: [],
+      scopedCss: '[stb-snapshot-id="auth.login.page.card.title"] {\n  font-size: 18px\n}',
+    });
+    const css = bundle.files['theme.css']!;
+    expect(css).toContain('[stb-snapshot-id="auth.login.page.card.title"]');
+    expect(css.indexOf(':root')).toBeLessThan(css.indexOf('[stb-snapshot-id'));
+  });
+
+  it('omits scoped rules when scopedCss is absent', () => {
+    const bundle = buildBundle({
+      name: 'b', id: 'b', description: '',
+      root: new Map([['--color-brand-500', '#aaa']]), dark: new Map(), assets: [],
+    });
+    expect(bundle.files['theme.css']).not.toContain('[stb-snapshot-id');
+  });
 });

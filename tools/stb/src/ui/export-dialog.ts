@@ -5,6 +5,7 @@ import { bundleToZip, triggerDownload } from '@/export/zip';
 import { assets } from '@/state/assets';
 import { brandingAssets, brandingAssetInputs } from '@/state/branding-assets';
 import { project, type RoutingMap } from '@/projection/projector';
+import { emitScopedBlocks } from '@/parse/css-emitter';
 import type { BrandingModel } from '@/metadata/types';
 import { brandingModel } from '@/state/branding';
 import { activeSceneId } from '@/state/scene';
@@ -18,14 +19,20 @@ export function exportInputs(
 ): Omit<BuildBundleInput, 'name' | 'id' | 'description'> {
   const merged = new Map(root);
   let companyConfig: Record<string, unknown> | undefined;
+  let scopedCss: string | undefined;
   if (model) {
     const r = project(model, routing);
     for (const [k, v] of r.tokens) merged.set(k, v);
     companyConfig = r.companyConfig;
+    scopedCss = emitScopedBlocks(model.nodes) || undefined;
   }
-  return companyConfig !== undefined
-    ? { root: merged, dark, assets, companyConfig }
-    : { root: merged, dark, assets };
+  return {
+    root: merged,
+    dark,
+    assets,
+    ...(companyConfig !== undefined ? { companyConfig } : {}),
+    ...(scopedCss ? { scopedCss } : {}),
+  };
 }
 
 export function openExportDialog(): void {
