@@ -87,6 +87,18 @@
     }
   }
 
+  function applyScopedBlocks(cssText) {
+    // upsert ONE late <style> at the end of <head> so the element-scoped rules
+    // sit after the snapshot stylesheet and win the source-order tie (R1 facet)
+    var styleEl = document.getElementById('stb-scoped-blocks');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'stb-scoped-blocks';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = cssText || '';
+  }
+
   function markLevers(ids) {
     document.querySelectorAll('[data-stb-lever]').forEach((el) => el.removeAttribute('data-stb-lever'));
     for (const id of ids || []) {
@@ -146,6 +158,9 @@
         break;
       case 'STB_APPLY_LEVERS':
         applyLeversInShim(msg.levers);
+        break;
+      case 'STB_APPLY_BLOCKS':
+        applyScopedBlocks(msg.css);
         break;
       case 'STB_SET_LEVERS':
         markLevers(msg.ids);

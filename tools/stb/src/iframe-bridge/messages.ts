@@ -9,6 +9,7 @@ export type ParentToPreview =
   | { type: 'STB_HIGHLIGHT_TOKEN'; token: string | null }
   | { type: 'STB_HIGHLIGHT_ELEMENT'; snapshotId: string | null }
   | { type: 'STB_APPLY_LEVERS'; levers: LeverPatch[] }
+  | { type: 'STB_APPLY_BLOCKS'; css: string }
   | { type: 'STB_SET_LEVERS'; ids: string[] }
   | { type: 'STB_SET_LEVER_OUTLINE'; on: boolean };
 

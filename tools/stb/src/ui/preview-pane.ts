@@ -6,6 +6,7 @@ import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages'
 import type { BrandingModel } from '@/metadata/types';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
 import { attachAssetBlobs, brandingAssets } from '@/state/branding-assets';
+import { emitScopedBlocks } from '@/parse/css-emitter';
 
 export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
   const out: LeverPatch[] = [];
@@ -55,6 +56,12 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
     send({ type: 'STB_SET_LEVERS', ids: m.nodes.map((n) => n.snapshotId) });
   }
 
+  function applyScopedBlocksToPreview(): void {
+    const m = brandingModel.value;
+    // send even when empty so clearing a block removes the rule from the iframe
+    send({ type: 'STB_APPLY_BLOCKS', css: m ? emitScopedBlocks(m.nodes) : '' });
+  }
+
   function onMessage(event: MessageEvent): void {
     const msg = event.data as PreviewToParent | undefined;
     if (!msg || typeof msg !== 'object') return;
@@ -63,6 +70,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       applyTokens();
       applyDark();
       applyLeversToPreview();
+      applyScopedBlocksToPreview();
     } else if (msg.type === 'STB_ELEMENT_SELECTED') {
       opts.onElementSelected?.(msg.selector, msg.tokens, msg.snapshotId);
     }
@@ -105,7 +113,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
 
       effect(() => {
         void brandingModel.value;
-        if (ready) applyLeversToPreview();
+        if (ready) { applyLeversToPreview(); applyScopedBlocksToPreview(); }
       });
     },
 
