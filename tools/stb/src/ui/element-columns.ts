@@ -28,12 +28,12 @@ function label(p: PathNode): string {
   return p.segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function swatchFor(p: PathNode): { color?: string; glyph?: string } {
-  const v = p.node?.value;
-  if (!v) return { glyph: '▸' };
-  if (v.kind === 'color') return { color: oklchToHex(v.oklch) };
-  if (v.kind === 'asset') return { glyph: '🖼' };
-  if (v.kind === 'content') return { glyph: 'T' };
+export function swatchFor(p: PathNode): { color?: string; glyph?: string } {
+  if (!p.node) return { glyph: '▸' };
+  const f = p.node.facets;
+  if (f?.content) return { glyph: 'T' };
+  if (f?.asset) return { glyph: '🖼' };
+  if (p.node.value.kind === 'color') return { color: oklchToHex(p.node.value.oklch) };
   return { glyph: '·' };
 }
 

@@ -16,11 +16,11 @@ function label(p: PathNode): string {
 }
 
 // A short value preview + optional colour swatch for a node row.
-function valuePreview(node: NavNode): { swatch?: string; text: string; kind: string } {
-  const v = node.value;
-  if (v.kind === 'color') { const hex = oklchToHex(v.oklch); return { swatch: hex, text: hex, kind: 'color' }; }
-  if (v.kind === 'content') return { text: `“${v.text}”`, kind: 'text' };
-  if (v.kind === 'asset') return { text: v.ref, kind: 'image' };
+export function valuePreview(node: NavNode): { swatch?: string; text: string; kind: string } {
+  const f = node.facets;
+  if (f?.content) return { text: `”${f.content.text}”`, kind: 'text' };
+  if (f?.asset) return { text: f.asset.ref, kind: 'image' };
+  if (node.value.kind === 'color') { const hex = oklchToHex(node.value.oklch); return { swatch: hex, text: hex, kind: 'color' }; }
   return { text: '', kind: '' };
 }
 
