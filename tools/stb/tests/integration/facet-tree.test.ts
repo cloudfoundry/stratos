@@ -1,6 +1,7 @@
 // tests/integration/facet-tree.test.ts
 import { it, expect } from 'vitest';
 import { mountFacetTree } from '@/ui/facet-tree';
+import { deriveDarkOklch } from '@/color/derive-dark';
 
 it('renders a branch per present group and a leaf per property', () => {
   const host = document.createElement('div');
@@ -177,6 +178,160 @@ it('renders an asset leaf with a file input', () => {
   });
   const fileInput = host.querySelector('.stb-facet-leaf[data-key="asset"] input[type="file"]');
   expect(fileInput).not.toBeNull();
+});
+
+it('renders a light swatch, a dark swatch and a derive button for a color leaf', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  expect(leaf.querySelectorAll('.stb-facet-swatch').length).toBe(1);
+  expect(leaf.querySelector('.stb-facet-swatch-dark')).not.toBeNull();
+  expect(leaf.querySelector('.stb-facet-derive-dark')).not.toBeNull();
+});
+
+it('renders a non-color leaf once, with no dark field or derive button', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { fontSize: { literal: '18px' } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.fontSize"]')!;
+  expect(leaf.querySelectorAll('input').length).toBe(1);
+  expect(leaf.querySelector('.stb-facet-swatch-dark')).toBeNull();
+  expect(leaf.querySelector('.stb-facet-derive-dark')).toBeNull();
+});
+
+it('shows the light/dark header once per group that has a color leaf', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } }, fontSize: { literal: '12px' } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  expect(host.querySelectorAll('.stb-facet-dual-header').length).toBe(1);
+});
+
+it('omits the light/dark header for a group with no color leaves', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { spacing: { padding: { literal: '4px' } } },
+    onEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  expect(host.querySelector('.stb-facet-dual-header')).toBeNull();
+});
+
+it('dark swatch is neutral/empty when no dark value is set (inherits built-in dark)', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  const darkBtn = leaf.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  expect(darkBtn.classList.contains('stb-facet-swatch-empty')).toBe(true);
+  expect(darkBtn.style.backgroundColor).toBe('');
+});
+
+it('dark swatch reflects an existing dark literal', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+    darkFacets: { text: { color: { literal: { l: 0.2, c: 0.05, h: 100 } } } },
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  const darkBtn = leaf.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  expect(darkBtn.classList.contains('stb-facet-swatch-empty')).toBe(false);
+  expect(darkBtn.style.backgroundColor).not.toBe('');
+});
+
+it('editing the dark swatch invokes onDarkEdit with the picked color', () => {
+  const host = document.createElement('div');
+  const darkEdits: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: (k, v) => darkEdits.push([k, v]),
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  (leaf.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement).click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  expect(textInput).toBeTruthy();
+  textInput.value = '#112233';
+  textInput.dispatchEvent(new Event('input'));
+  expect(darkEdits.length).toBe(1);
+  expect(darkEdits[0]![0]).toBe('text.color');
+  expect(darkEdits[0]![1]).toHaveProperty('literal');
+});
+
+it('clicking the derive button calls deriveDark with the leaf key', () => {
+  const host = document.createElement('div');
+  const derived: string[] = [];
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    deriveDark: (k) => derived.push(k),
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  (leaf.querySelector('.stb-facet-derive-dark') as HTMLButtonElement).click();
+  expect(derived).toEqual(['text.color']);
+});
+
+it('derive button is disabled (no-op) when the light value has no literal Oklch', () => {
+  const host = document.createElement('div');
+  const derived: string[] = [];
+  mountFacetTree(host, {
+    facets: { text: { color: { token: 'fg' } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    deriveDark: (k) => derived.push(k),
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  const deriveBtn = leaf.querySelector('.stb-facet-derive-dark') as HTMLButtonElement;
+  expect(deriveBtn.disabled).toBe(true);
+  deriveBtn.click();
+  expect(derived).toEqual([]);
+});
+
+it('an integration-style wiring of deriveDark routes deriveDarkOklch(light) into onDarkEdit', () => {
+  const host = document.createElement('div');
+  const lightOklch = { l: 0.5, c: 0.1, h: 250 };
+  const darkEdits: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: lightOklch } } },
+    darkFacets: {},
+    onEdit: () => {},
+    onDarkEdit: (k, v) => darkEdits.push([k, v]),
+    deriveDark: (k) => darkEdits.push([k, { literal: deriveDarkOklch(lightOklch) }]),
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  (leaf.querySelector('.stb-facet-derive-dark') as HTMLButtonElement).click();
+  expect(darkEdits).toEqual([['text.color', { literal: deriveDarkOklch(lightOklch) }]]);
 });
 
 it('shows promote for a literal property with a token mapping, none without', () => {

@@ -10,11 +10,32 @@ describe('lever-editor value helpers', () => {
   });
 });
 
-describe('lever-editor light/dark target', () => {
+describe('lever-editor light+dark per-row editing (no toggle)', () => {
   beforeEach(() => { document.body.innerHTML = '<div class="host"></div>'; });
   afterEach(() => { brandingModel.value = null; });
 
-  it('switches the tree to the dark bundle when dark is selected', () => {
+  it('renders light and dark swatches for a color row simultaneously, with no radio', () => {
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    openLeverEditor({
+      previewHost,
+      snapshotId: 'x',
+      onChange: () => {},
+      facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+      facetsDark: { text: { color: { literal: { l: 0.2, c: 0.05, h: 100 } } } },
+      onFacetEdit: () => {},
+      onFacetEditDark: () => {},
+    });
+    expect(document.querySelector('input[name="stb-edit-target"]')).toBeNull(); // radio fully removed
+    const leaf = [...document.querySelectorAll('.stb-facet-leaf')]
+      .find((l) => (l as HTMLElement).dataset.key === 'text.color')!;
+    const lightBtn = leaf.querySelector('.stb-facet-swatch') as HTMLButtonElement;
+    const darkBtn = leaf.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+    expect(lightBtn).toBeTruthy();
+    expect(darkBtn).toBeTruthy();
+    expect(darkBtn.classList.contains('stb-facet-swatch-empty')).toBe(false); // dark literal is set
+  });
+
+  it('non-color rows render once and are unaffected by facetsDark', () => {
     const previewHost = document.querySelector('.host') as HTMLElement;
     openLeverEditor({
       previewHost,
@@ -25,38 +46,30 @@ describe('lever-editor light/dark target', () => {
       onFacetEdit: () => {},
       onFacetEditDark: () => {},
     });
-    const fontSizeInput = () =>
-      [...document.querySelectorAll('.stb-facet-leaf')]
-        .find((l) => (l as HTMLElement).dataset.key === 'text.fontSize')!
-        .querySelector('input[type="text"]') as HTMLInputElement;
-    expect(fontSizeInput().value).toBe('14px');               // light first
-    const darkRadio = document.querySelector('input[value="dark"]') as HTMLInputElement;
-    darkRadio.checked = true;
-    darkRadio.dispatchEvent(new Event('change'));
-    expect(fontSizeInput().value).toBe('20px');               // re-rendered from dark bundle
+    const fontSizeLeaf = [...document.querySelectorAll('.stb-facet-leaf')]
+      .find((l) => (l as HTMLElement).dataset.key === 'text.fontSize')!;
+    const inputs = fontSizeLeaf.querySelectorAll('input[type="text"]');
+    expect(inputs.length).toBe(1);
+    expect((inputs[0] as HTMLInputElement).value).toBe('14px'); // light only, dark bundle ignored
   });
 
-  it('re-renders the tree from the live model when facetsDark changes (no toggle)', () => {
+  it('re-renders the dark field from the live model when facetsDark changes (no toggle)', () => {
     const previewHost = document.querySelector('.host') as HTMLElement;
     brandingModel.value = { scene: 's', nodes: [
-      { snapshotId: 'x', role: '', name: null, description: '', facets: { text: { fontSize: { literal: '14px' } } } },
+      { snapshotId: 'x', role: '', name: null, description: '', facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
     ] } as BrandingModel;
     openLeverEditor({
       previewHost, snapshotId: 'x', onChange: () => {},
-      facets: { text: { fontSize: { literal: '14px' } } },
+      facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
       facetsDark: {},
       onFacetEdit: () => {}, onFacetEditDark: () => {},
     });
-    // switch to dark target (dark bundle is empty → input blank)
-    const darkRadio = document.querySelector('input[value="dark"]') as HTMLInputElement;
-    darkRadio.checked = true; darkRadio.dispatchEvent(new Event('change'));
-    const fontSizeInput = () =>
-      [...document.querySelectorAll('.stb-facet-leaf')]
-        .find((l) => (l as HTMLElement).dataset.key === 'text.fontSize')!
-        .querySelector('input[type="text"]') as HTMLInputElement;
-    expect(fontSizeInput().value).toBe('');               // dark empty before the edit
+    const darkBtn = () => [...document.querySelectorAll('.stb-facet-leaf')]
+      .find((l) => (l as HTMLElement).dataset.key === 'text.color')!
+      .querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+    expect(darkBtn().classList.contains('stb-facet-swatch-empty')).toBe(true); // dark empty before the edit
     // model edit arrives from outside the focused control
-    setNodeFacetsDark('x', { text: { fontSize: { literal: '20px' } } });
-    expect(fontSizeInput().value).toBe('20px');           // editor re-rendered from the live model
+    setNodeFacetsDark('x', { text: { color: { literal: { l: 0.2, c: 0.05, h: 100 } } } });
+    expect(darkBtn().classList.contains('stb-facet-swatch-empty')).toBe(false); // editor re-rendered from the live model
   });
 });

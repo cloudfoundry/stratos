@@ -16,9 +16,11 @@ import { previewDark, activeSceneId } from '@/state/scene';
 import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
-import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens } from '@/ui/element-edit';
-import { FACET_PROPS } from '@/metadata/facets';
+import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens, reprojectNodeTokensDark } from '@/ui/element-edit';
+import { FACET_PROPS, facetDeclarations } from '@/metadata/facets';
 import { setFacetProp, addGroup, removeGroup } from '@/state/facets-edit';
+import { deriveDarkOklch } from '@/color/derive-dark';
+import type { Oklch } from '@/color/oklch';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
 import { restoreSession, startAutoSave } from '@/state/persistence';
@@ -132,8 +134,22 @@ async function main() {
       facetsDark: node.facetsDark ?? {},
       onFacetEditDark: (key, value) => {
         const n = nodeFor(snapshotId);
-        if (n) setNodeFacetsDark(snapshotId, setFacetProp(n.facetsDark ?? {}, key, value));
-        // No reproject: dark facet values are scoped literals, not token-projected.
+        if (n) {
+          const facetsDark = setFacetProp(n.facetsDark ?? {}, key, value);
+          setNodeFacetsDark(snapshotId, facetsDark);
+          reprojectNodeTokensDark(snapshotId, facetsDark, routing);
+        }
+      },
+      deriveDark: (key) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        const decl = [...facetDeclarations(n.facets)].find((d) => d.key === key);
+        const v = decl?.value;
+        const lit = v && 'literal' in v && typeof v.literal === 'object' ? v.literal as Oklch : null;
+        if (!lit) return;
+        const facetsDark = setFacetProp(n.facetsDark ?? {}, key, { literal: deriveDarkOklch(lit) });
+        setNodeFacetsDark(snapshotId, facetsDark);
+        reprojectNodeTokensDark(snapshotId, facetsDark, routing);
       },
       onAddGroup: (g) => {
         const n = nodeFor(snapshotId);
