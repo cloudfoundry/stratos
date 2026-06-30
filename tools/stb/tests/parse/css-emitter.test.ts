@@ -14,6 +14,12 @@ function node(snapshotId: string, scopedBlock?: string): ElementNode {
   };
 }
 
+// The scoped rule repeats the attribute selector to reach specificity (0,3,0),
+// so it beats the snapshot's compound selectors (e.g. `.login-card h1` (0,1,1),
+// `.dark-theme .login-card h1` (0,2,1)) without `!important` — company-config
+// inline still wins. Empirically verified against the login snapshot.
+const sel = (id: string) => `[stb-snapshot-id="${id}"]`.repeat(3);
+
 describe('emitCss', () => {
   it('emits :root block when only root values present', () => {
     const root = new Map([['--color-brand-500', '#1e88e5']]);
@@ -64,7 +70,23 @@ describe('emitCss', () => {
 describe('emitScopedBlocks', () => {
   it('emits a snapshot-id-scoped rule for a node with a scoped block', () => {
     const out = emitScopedBlocks([node('auth.login.page.card.title', 'font-size: 18px')]);
-    expect(out).toBe('[stb-snapshot-id="auth.login.page.card.title"] {\n  font-size: 18px\n}');
+    expect(out).toBe(`${sel('auth.login.page.card.title')} {\n  font-size: 18px;\n}`);
+  });
+
+  it('repeats the attribute selector to out-specify compound stylesheet rules', () => {
+    const out = emitScopedBlocks([node('a.b', 'color: red')]);
+    expect(out.match(/\[stb-snapshot-id="a\.b"\]/g)).toHaveLength(3); // (0,3,0)
+  });
+
+  it('terminates each declaration line so newline-separated declarations stay valid', () => {
+    // a user naturally types one declaration per line without trailing semicolons
+    const out = emitScopedBlocks([node('a.b', 'color: crimson\nfont-size: 60px')]);
+    expect(out).toBe(`${sel('a.b')} {\n  color: crimson;\n  font-size: 60px;\n}`);
+  });
+
+  it('does not double-terminate lines that already end in a semicolon', () => {
+    const out = emitScopedBlocks([node('a.b', 'color: red;\nfont-size: 12px;')]);
+    expect(out).toBe(`${sel('a.b')} {\n  color: red;\n  font-size: 12px;\n}`);
   });
 
   it('skips nodes with no or blank scoped block', () => {
@@ -83,7 +105,7 @@ describe('emitScopedBlocks', () => {
   it('joins multiple rules with a blank line', () => {
     const out = emitScopedBlocks([node('a.one', 'color: red'), node('a.two', 'color: blue')]);
     expect(out).toBe(
-      '[stb-snapshot-id="a.one"] {\n  color: red\n}\n\n[stb-snapshot-id="a.two"] {\n  color: blue\n}',
+      `${sel('a.one')} {\n  color: red;\n}\n\n${sel('a.two')} {\n  color: blue;\n}`,
     );
   });
 });
