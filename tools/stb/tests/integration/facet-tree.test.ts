@@ -56,3 +56,37 @@ it('reflects an existing fontWeight literal as the select current value', () => 
   expect(sel).toBeTruthy();
   expect(sel.value).toBe('700');
 });
+
+it('collapse-all hides leaves; expand-all shows them', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  mountFacetTree(host, { facets: { text: {}, surface: {} }, previewHost, onEdit: () => {} });
+  (host.querySelector('.stb-facet-collapse-all') as HTMLButtonElement).click();
+  expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(2);
+  (host.querySelector('.stb-facet-expand-all') as HTMLButtonElement).click();
+  expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(0);
+});
+
+it('clicking a group branch toggles its own collapse state', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  mountFacetTree(host, { facets: { text: {} }, previewHost, onEdit: () => {} });
+  const branch = host.querySelector('.stb-facet-group') as HTMLElement;
+  branch.click();
+  expect(branch.classList.contains('stb-facet-collapsed')).toBe(true);
+  branch.click();
+  expect(branch.classList.contains('stb-facet-collapsed')).toBe(false);
+});
+
+it('isolate collapses all groups except the one with focused leaf', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  mountFacetTree(host, { facets: { text: {}, surface: {} }, previewHost, onEdit: () => {} });
+  // Focus a leaf control in the text group
+  const textLeafControl = host.querySelector('.stb-facet-leaf[data-key="text.fontSize"] input') as HTMLInputElement;
+  textLeafControl.dispatchEvent(new Event('focusin', { bubbles: true }));
+  (host.querySelector('.stb-facet-isolate') as HTMLButtonElement).click();
+  const collapsed = [...host.querySelectorAll('.stb-facet-group.stb-facet-collapsed')];
+  expect(collapsed.length).toBe(1);
+  expect(collapsed[0]!.textContent).toContain('surface');
+});
