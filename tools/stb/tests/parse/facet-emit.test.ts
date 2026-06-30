@@ -30,18 +30,23 @@ it('emits a .dark-theme scoped block from facetsDark, after the light block', ()
       { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } },
       { surface: { background: { literal: { l: 0.2, c: 0.02, h: 250 } } } }),
   ]);
-  const light = '[stb-snapshot-id="auth.login.page"][stb-snapshot-id="auth.login.page"][stb-snapshot-id="auth.login.page"]';
-  const dark = '.dark-theme ' + light;
+  const attrSel = '[stb-snapshot-id="auth.login.page"][stb-snapshot-id="auth.login.page"][stb-snapshot-id="auth.login.page"]';
+  const light = `html:not(.dark-theme) ${attrSel}`;
+  const dark = `.dark-theme ${attrSel}`;
   expect(css).toContain(`${light} {`);
   expect(css).toContain(`${dark} {`);
   expect(css.indexOf(`${light} {`)).toBeLessThan(css.indexOf(`${dark} {`)); // light before dark
+  // light block must not bleed into dark mode; dark block must not carry html:not
+  expect(css.match(/html:not/g)?.length).toBe(1); // only in the light block prefix
+  expect(css.match(/\.dark-theme \[stb/g)?.length).toBe(1); // only the dark override block
 });
 
 it('skips a node with no facetsDark (no dark block)', () => {
   const css = emitScopedBlocks([
     n('auth.login.page', { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } }),
   ]);
-  expect(css).not.toContain('.dark-theme');
+  // The light selector contains :not(.dark-theme) but no standalone dark override block should appear.
+  expect(css).not.toContain('.dark-theme [stb-snapshot-id');
 });
 
 it('skips a dark {token} value (literals only in this slice)', () => {
@@ -50,5 +55,6 @@ it('skips a dark {token} value (literals only in this slice)', () => {
       { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } },
       { surface: { background: { token: '--color-brand-900' } } }),
   ]);
-  expect(css).not.toContain('.dark-theme'); // token-dark routing is out of scope; nothing literal to emit
+  // token-dark routing is out of scope; nothing literal to emit — no standalone dark block.
+  expect(css).not.toContain('.dark-theme [stb-snapshot-id');
 });
