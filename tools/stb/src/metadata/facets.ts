@@ -55,13 +55,14 @@ export function* contentAssetDeclarations(
 }
 
 /** Derive the Phase-1 single LeverValue from a Facets bundle.
- *  Priority: content > asset > text.color > surface.background > fallback black. */
-export function primaryValue(f: Facets): LeverValue {
+ *  Priority: content > asset > text.color > surface.background > null.
+ *  Returns null for color-less nodes (typography/spacing only); callers must guard. */
+export function primaryValue(f: Facets): LeverValue | null {
   if (f.content) return { kind: 'content', text: f.content.text };
   if (f.asset) return { kind: 'asset', ref: f.asset.ref };
   const color = f.text?.color ?? f.surface?.background;
   if (color && 'literal' in color && typeof color.literal === 'object') {
     return { kind: 'color', oklch: color.literal as Oklch };
   }
-  return { kind: 'color', oklch: { l: 0, c: 0, h: 0 } };
+  return null;
 }
