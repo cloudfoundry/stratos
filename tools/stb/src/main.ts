@@ -16,8 +16,8 @@ import { previewDark, activeSceneId } from '@/state/scene';
 import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
-import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
-import { primaryValue, FACET_PROPS } from '@/metadata/facets';
+import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens } from '@/ui/element-edit';
+import { FACET_PROPS } from '@/metadata/facets';
 import { setFacetProp, addGroup, removeGroup } from '@/state/facets-edit';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
@@ -113,21 +113,21 @@ async function main() {
   function selectElement(snapshotId: string): void {
     const node = nodeFor(snapshotId);
     if (!node) return;
-    const lever = primaryValue(node.facets);
-    // NOTE: color-less node has no single-lever primary; the facet tree edits it.
-    if (!lever) return;
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
     openLeverEditor({
       previewHost,
       snapshotId,
-      value: lever,
       onChange: (next) => applyEdit(snapshotId, next, routing),
       scopedBlock: node.scopedBlock,
       onScopedBlockChange: (css) => setNodeScopedBlock(snapshotId, css),
       facets: node.facets,
       onFacetEdit: (key, value) => {
         const n = nodeFor(snapshotId);
-        if (n) setNodeFacets(snapshotId, setFacetProp(n.facets, key, value));
+        if (n) {
+          const facets = setFacetProp(n.facets, key, value);
+          setNodeFacets(snapshotId, facets);
+          reprojectNodeTokens(snapshotId, facets, routing);
+        }
       },
       onAddGroup: (g) => {
         const n = nodeFor(snapshotId);
