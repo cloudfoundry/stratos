@@ -5,9 +5,9 @@ export interface HarvestedElement {
   snapshotId: string;
   tag: string;
   line: number;
-  role?: string;            // stba-role  → projects to ARIA `role`
-  roledescription?: string; // stba-roledescription → ARIA `aria-roledescription`; the navigator "kind"
-  description?: string;     // stba-description → ARIA `aria-description`
+  role?: string;            // stba-role or real `role` (stba wins)
+  roledescription?: string; // stba-roledescription or real `aria-roledescription`; the navigator "kind"
+  description?: string;     // stba-description or real `aria-description`
 }
 export interface DriftReport { phantoms: string[]; orphans: string[] }
 
@@ -17,6 +17,12 @@ const SID_RE = /stb-snapshot-id\s*=\s*"([^"]*)"/;
 const ROLE_RE = /stba-role\s*=\s*"([^"]*)"/;
 const ROLEDESC_RE = /stba-roledescription\s*=\s*"([^"]*)"/;
 const DESC_RE = /stba-description\s*=\s*"([^"]*)"/;
+// Real-ARIA fallbacks. stba-* is a strict 1-1 mirror of ARIA; the tool reads
+// either, with stba winning (stba-X ?? aria-X). The leading (?:^|\s) on role
+// is load-bearing: it stops `role=` matching inside `stba-role=`.
+const ARIA_ROLE_RE = /(?:^|\s)role\s*=\s*"([^"]*)"/;
+const ARIA_ROLEDESC_RE = /aria-roledescription\s*=\s*"([^"]*)"/;
+const ARIA_DESC_RE = /aria-description\s*=\s*"([^"]*)"/;
 
 const unescape = (s: string) => s.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
 
@@ -27,9 +33,9 @@ export function harvestElements(html: string): HarvestedElement[] {
     const attrs = m[2]!;
     const sid = SID_RE.exec(attrs);
     if (!sid) continue;
-    const role = ROLE_RE.exec(attrs);
-    const roledesc = ROLEDESC_RE.exec(attrs);
-    const desc = DESC_RE.exec(attrs);
+    const role = ROLE_RE.exec(attrs) ?? ARIA_ROLE_RE.exec(attrs);
+    const roledesc = ROLEDESC_RE.exec(attrs) ?? ARIA_ROLEDESC_RE.exec(attrs);
+    const desc = DESC_RE.exec(attrs) ?? ARIA_DESC_RE.exec(attrs);
     out.push({
       snapshotId: sid[1]!,
       tag: m[1]!.toLowerCase(),
