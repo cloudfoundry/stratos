@@ -29,6 +29,29 @@ describe('harvestElements', () => {
     });
     expect(els[1]).toEqual({ snapshotId: 'shared.confirm-dialog.title', tag: 'span', line: 3, role: 'heading' });
   });
+
+  it('falls back to real ARIA (role/aria-roledescription/aria-description) when no stba-*', () => {
+    const html = `
+<div stb-snapshot-id="shared.confirm-dialog" role="dialog" aria-roledescription="dialog" aria-description="the confirm dialog"></div>`;
+    expect(harvestElements(html)[0]).toEqual({
+      snapshotId: 'shared.confirm-dialog', tag: 'div', line: 2,
+      role: 'dialog', roledescription: 'dialog', description: 'the confirm dialog',
+    });
+  });
+
+  it('prefers stba-* over the real ARIA attribute when both are present', () => {
+    const html = `
+<div stb-snapshot-id="x" stba-role="dialog" role="alertdialog" stba-description="from stba" aria-description="from aria"></div>`;
+    const el = harvestElements(html)[0]!;
+    expect(el.role).toBe('dialog');
+    expect(el.description).toBe('from stba');
+  });
+
+  it('does not let the role regex match inside stba-role', () => {
+    // a tag with ONLY stba-role must not also surface a phantom real `role`
+    const html = `<div stb-snapshot-id="x" stba-role="dialog"></div>`;
+    expect(harvestElements(html)[0]).toEqual({ snapshotId: 'x', tag: 'div', line: 1, role: 'dialog' });
+  });
 });
 
 describe('lintRouting', () => {
