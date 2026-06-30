@@ -1,4 +1,5 @@
 import type { ElementNode } from '@/metadata/types';
+import { facetDeclarations, facetLiteralCss } from '@/metadata/facets';
 
 export function emitCss(root: Map<string, string>, dark: Map<string, string>): string {
   const parts: string[] = [];
@@ -8,21 +9,37 @@ export function emitCss(root: Map<string, string>, dark: Map<string, string>): s
 }
 
 // R1 facet escape hatch: one `[stb-snapshot-id="…"] { … }` rule per element
-// carrying a scoped block, ordered by snapshotId so output is deterministic.
+// carrying literal facet declarations and/or a free-form scoped block, ordered
+// by snapshotId so output is deterministic.
+// {token} facet values are NOT emitted here — the projector handles those.
 // These do NOT round-trip through parseCss (it reads only :root/.dark-theme).
 export function emitScopedBlocks(nodes: ElementNode[]): string {
   return nodes
-    .filter((n) => n.scopedBlock && n.scopedBlock.trim())
     .sort((a, b) => a.snapshotId.localeCompare(b.snapshotId))
     .map((n) => {
-      // Terminate each declaration line so a user who types one declaration per
-      // line (no trailing ';') still produces valid CSS instead of one invalid
-      // run-on declaration. Forgiving, not validating — nothing is rejected.
-      const body = n.scopedBlock!.trim().split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l.length > 0)
-        .map((l) => `  ${/[;{},]$/.test(l) ? l : l + ';'}`)
-        .join('\n');
+      // Collect literal facet declarations first (token values are skipped).
+      const facetLines: string[] = [];
+      if (n.facets) {
+        for (const d of facetDeclarations(n.facets)) {
+          const css = facetLiteralCss(d.spec, d.value);
+          if (css !== null) facetLines.push(`  ${d.spec.cssProp}: ${css};`);
+        }
+      }
+
+      // Terminate each scopedBlock declaration line so a user who types one
+      // declaration per line (no trailing ';') still produces valid CSS instead
+      // of one invalid run-on declaration. Forgiving, not validating.
+      const scopedLines: string[] = n.scopedBlock
+        ? n.scopedBlock.trim().split('\n')
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0)
+          .map((l) => `  ${/[;{},]$/.test(l) ? l : l + ';'}`)
+        : [];
+
+      // Emit the rule only when the combined body is non-empty.
+      const body = [...facetLines, ...scopedLines].join('\n');
+      if (!body) return null;
+
       // Repeat the attribute selector to reach specificity (0,3,0) so the block
       // beats the snapshot's compound rules (e.g. `.login-card h1` (0,1,1),
       // `.dark-theme .login-card h1` (0,2,1)) without `!important` — keeping
@@ -30,6 +47,7 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       const selector = `[stb-snapshot-id="${n.snapshotId}"]`.repeat(3);
       return `${selector} {\n${body}\n}`;
     })
+    .filter((r): r is string => r !== null)
     .join('\n\n');
 }
 
