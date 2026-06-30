@@ -42,7 +42,7 @@ describe('live-apply pipeline', () => {
 
     const innerDoc = iframe.contentDocument!;
     const root = innerDoc.documentElement;
-    expect(root.style.getPropertyValue('--color-brand-500')).toBe('#ff0000');
+    expect(getComputedStyle(root).getPropertyValue('--color-brand-500').trim()).toBe('#ff0000');
   });
 
   it('injects a late scoped-block style that applies, upserting on change', async () => {
