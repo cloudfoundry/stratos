@@ -4,7 +4,6 @@ import type { Oklch } from '@/color/oklch';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import { FACET_PROPS } from '@/metadata/facets';
 import { openColorPicker } from '@/ui/color-picker';
-import { mountCssEditor } from '@/ui/css-editor';
 
 const GROUPS = ['text', 'surface', 'spacing'] as const;
 const propsOf = (g: string) => Object.entries(FACET_PROPS).filter(([k]) => k.startsWith(g + '.'));
@@ -13,8 +12,6 @@ export interface FacetTreeOptions {
   facets: Facets;
   previewHost: HTMLElement;
   onEdit: (key: string, value: FacetValue) => void;
-  scopedBlock?: string;
-  onScopedBlockChange?: (css: string) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   /** Returns the token name mapped to this element's property, or null if none. */
@@ -50,7 +47,6 @@ function setCollapsed(entry: GroupEntry, collapsed: boolean): void {
 export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { destroy(): void } {
   host.classList.add('stb-facet-tree');
   host.innerHTML = '';
-  let scoped: ReturnType<typeof mountCssEditor> | null = null;
   let focusedGroup: string | null = null;
 
   // Control bar — rendered first so it is the top child
@@ -230,7 +226,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         const badge = document.createElement('span');
         badge.className = 'stb-facet-shared';
         badge.textContent = 'shared';
-        badge.title = `token --${current.token} (changes everywhere)`;
+        badge.title = `token ${current.token} (changes everywhere)`;
         const detach = document.createElement('button');
         detach.type = 'button';
         detach.className = 'stb-facet-detach';
@@ -270,15 +266,5 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     }
   });
 
-  if (opts.onScopedBlockChange) {
-    const branch = document.createElement('div');
-    branch.className = 'stb-facet-group';
-    branch.textContent = 'Scoped CSS';
-    host.appendChild(branch);
-    const editorHost = document.createElement('div');
-    host.appendChild(editorHost);
-    scoped = mountCssEditor(editorHost, opts.scopedBlock ?? '', opts.onScopedBlockChange);
-  }
-
-  return { destroy() { scoped?.destroy(); host.innerHTML = ''; } };
+  return { destroy() { host.innerHTML = ''; } };
 }
