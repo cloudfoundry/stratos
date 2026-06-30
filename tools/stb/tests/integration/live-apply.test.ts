@@ -73,4 +73,54 @@ describe('live-apply pipeline', () => {
     expect(innerDoc.querySelectorAll('#stb-scoped-blocks').length).toBe(1);
     expect(getComputedStyle(el).color).toBe('rgb(0, 0, 255)');
   });
+
+  it('applies a facet literal edit to the preview live', async () => {
+    const host = document.getElementById('host')!;
+    const pane = createPreviewPane();
+    pane.mount(host);
+    const iframe = host.querySelector('iframe')!;
+    await new Promise<void>((resolve) => {
+      function listen(e: MessageEvent) {
+        if (e.data?.type === 'STB_PREVIEW_READY') { window.removeEventListener('message', listen); resolve(); }
+      }
+      window.addEventListener('message', listen);
+    });
+
+    // Set a model with a facet literal (no scopedBlock); emitScopedBlocks should
+    // emit the font-size rule from facetDeclarations, not scopedBlock.
+    brandingModel.value = {
+      scene: 'login',
+      nodes: [{
+        snapshotId: 'auth.login.page.card.sign-in',
+        role: 'button',
+        name: 'S',
+        description: 'btn',
+        facets: { text: { fontSize: { literal: '18px' } } },
+      }],
+    };
+    await new Promise((r) => setTimeout(r, 100));
+
+    const innerDoc = iframe.contentDocument!;
+    const styles = innerDoc.querySelectorAll('#stb-scoped-blocks');
+    expect(styles.length).toBe(1);
+    expect(styles[0]!.textContent).toContain('[stb-snapshot-id="auth.login.page.card.sign-in"]');
+    expect(styles[0]!.textContent).toContain('font-size: 18px');
+    const el = innerDoc.querySelector('[stb-snapshot-id="auth.login.page.card.sign-in"]')!;
+    expect(getComputedStyle(el).fontSize).toBe('18px');
+
+    // Upsert: change to 22px — must produce exactly ONE #stb-scoped-blocks
+    brandingModel.value = {
+      scene: 'login',
+      nodes: [{
+        snapshotId: 'auth.login.page.card.sign-in',
+        role: 'button',
+        name: 'S',
+        description: 'btn',
+        facets: { text: { fontSize: { literal: '22px' } } },
+      }],
+    };
+    await new Promise((r) => setTimeout(r, 100));
+    expect(innerDoc.querySelectorAll('#stb-scoped-blocks').length).toBe(1);
+    expect(getComputedStyle(el).fontSize).toBe('22px');
+  });
 });
