@@ -24,6 +24,8 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       const rules: string[] = [];
 
       // Light block: literal facet declarations first, then the free-form scopedBlock.
+      // Gated to :not(.dark-theme) so an element with no dark facet value falls through
+      // to the snapshot's built-in dark rule rather than being pinned to its light value.
       const facetLines: string[] = [];
       for (const d of facetDeclarations(node.facets)) {
         const css = facetLiteralCss(d.spec, d.value);
@@ -36,7 +38,7 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
           .map((l) => `  ${/[;{},]$/.test(l) ? l : l + ';'}`)
         : [];
       const lightBody = [...facetLines, ...scopedLines].join('\n');
-      if (lightBody) rules.push(`${selector} {\n${lightBody}\n}`);
+      if (lightBody) rules.push(`html:not(.dark-theme) ${selector} {\n${lightBody}\n}`);
 
       // Dark block: literal facetsDark declarations, gated by .dark-theme. Combined
       // selector is (0,4,0) — beats the light block (0,3,0) AND the snapshot's own
