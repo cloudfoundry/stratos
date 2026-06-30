@@ -1,4 +1,4 @@
-import type { Facets, FacetValue } from '@/metadata/types';
+import type { Facets, FacetValue, LeverValue } from '@/metadata/types';
 import { oklchToHex, type Oklch } from '@/color/oklch';
 
 export interface FacetPropSpec { cssProp: string; isColor: boolean; }
@@ -37,4 +37,16 @@ export function* facetDeclarations(
 export function facetLiteralCss(spec: FacetPropSpec, v: FacetValue): string | null {
   if ('token' in v) return null;
   return spec.isColor ? oklchToHex(v.literal as Oklch) : String(v.literal);
+}
+
+/** Derive the Phase-1 single LeverValue from a Facets bundle.
+ *  Priority: content > asset > text.color > surface.background > fallback black. */
+export function primaryValue(f: Facets): LeverValue {
+  if (f.content) return { kind: 'content', text: f.content.text };
+  if (f.asset) return { kind: 'asset', ref: f.asset.ref };
+  const color = f.text?.color ?? f.surface?.background;
+  if (color && 'literal' in color && typeof color.literal === 'object') {
+    return { kind: 'color', oklch: color.literal as Oklch };
+  }
+  return { kind: 'color', oklch: { l: 0, c: 0, h: 0 } };
 }
