@@ -1,8 +1,9 @@
-import type { LeverValue } from '@/metadata/types';
+import type { LeverValue, Facets } from '@/metadata/types';
 import type { EditorView } from 'codemirror';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { mountCssEditor } from '@/ui/css-editor';
+import { mountFacetTree } from '@/ui/facet-tree';
 import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
 
 export interface OpenLeverEditorOptions {
@@ -14,6 +15,7 @@ export interface OpenLeverEditorOptions {
   visibilityCompanion?: { shown: boolean; onChange: (shown: boolean) => void };
   scopedBlock?: string | undefined;
   onScopedBlockChange?: (css: string) => void;
+  facets?: Facets;
 }
 
 export function colorValueFromHex(hex: string): LeverValue {
@@ -31,7 +33,9 @@ export function initialColorHex(v: LeverValue): string {
 
 let openPanel: HTMLElement | null = null;
 let openScopedEditor: EditorView | null = null;
+let openFacetTree: { destroy(): void } | null = null;
 function closeOpen(): void {
+  if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
   if (openScopedEditor) { openScopedEditor.destroy(); openScopedEditor = null; }
   if (openPanel) { openPanel.remove(); openPanel = null; }
 }
@@ -89,6 +93,12 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     section.appendChild(editorHost);
     panel.appendChild(section);
     openScopedEditor = mountCssEditor(editorHost, opts.scopedBlock ?? '', opts.onScopedBlockChange);
+  }
+
+  if (opts.facets) {
+    const treeHost = document.createElement('div');
+    panel.appendChild(treeHost);
+    openFacetTree = mountFacetTree(treeHost, { facets: opts.facets, onEdit: () => {} });
   }
 
   const close = document.createElement('button');

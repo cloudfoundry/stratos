@@ -122,6 +122,7 @@ async function main() {
       onChange: (next) => applyEdit(snapshotId, next, routing),
       scopedBlock: node.scopedBlock,
       onScopedBlockChange: (css) => setNodeScopedBlock(snapshotId, css),
+      facets: node.facets,
       ...companion,
     });
   }
