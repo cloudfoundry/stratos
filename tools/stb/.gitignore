@@ -1,5 +1,6 @@
 node_modules/
 dist/
 .vite/
+.vitest-attachments/
 *.log
 .DS_Store
