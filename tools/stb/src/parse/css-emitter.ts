@@ -15,8 +15,20 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
     .filter((n) => n.scopedBlock && n.scopedBlock.trim())
     .sort((a, b) => a.snapshotId.localeCompare(b.snapshotId))
     .map((n) => {
-      const body = n.scopedBlock!.trim().split('\n').map((l) => `  ${l.trim()}`).join('\n');
-      return `[stb-snapshot-id="${n.snapshotId}"] {\n${body}\n}`;
+      // Terminate each declaration line so a user who types one declaration per
+      // line (no trailing ';') still produces valid CSS instead of one invalid
+      // run-on declaration. Forgiving, not validating — nothing is rejected.
+      const body = n.scopedBlock!.trim().split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0)
+        .map((l) => `  ${/[;{},]$/.test(l) ? l : l + ';'}`)
+        .join('\n');
+      // Repeat the attribute selector to reach specificity (0,3,0) so the block
+      // beats the snapshot's compound rules (e.g. `.login-card h1` (0,1,1),
+      // `.dark-theme .login-card h1` (0,2,1)) without `!important` — keeping
+      // company-config inline styles (the higher, runtime-faithful path) winning.
+      const selector = `[stb-snapshot-id="${n.snapshotId}"]`.repeat(3);
+      return `${selector} {\n${body}\n}`;
     })
     .join('\n\n');
 }
