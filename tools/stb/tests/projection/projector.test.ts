@@ -87,4 +87,16 @@ describe('project', () => {
     const r = project(model, routing);
     expect(r.companyConfig).toMatchObject({ logos: { main: 'logo.svg' }, login: { showLogo: false } });
   });
+
+  it('routes a facet property to its company-config key via nested properties', () => {
+    const model = { scene: 'login', nodes: [{
+      snapshotId: 'auth.login.page.card.sign-in', role: '', name: null, description: '',
+      facets: { text: { color: { literal: { l: 0.5, c: 0.2, h: 250 } } } },
+    }] };
+    const routing = { containers: { 'auth.login': 'login' }, elements: {
+      'auth.login.page.card.sign-in': { properties: { 'text.color': { config: 'theme.primary' } } },
+    } };
+    const out = project(model as any, routing as any);
+    expect((out.companyConfig as any).theme.primary).toMatch(/^#/);
+  });
 });

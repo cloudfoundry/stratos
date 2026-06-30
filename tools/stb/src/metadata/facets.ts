@@ -39,6 +39,16 @@ export function facetLiteralCss(spec: FacetPropSpec, v: FacetValue): string | nu
   return spec.isColor ? oklchToHex(v.literal as Oklch) : String(v.literal);
 }
 
+export interface ContentAssetDeclaration { key: 'content' | 'asset'; value: string; }
+
+/** Yield content/asset facet declarations for property-level routing. */
+export function* contentAssetDeclarations(
+  facets: Facets,
+): Generator<ContentAssetDeclaration> {
+  if (facets.content) yield { key: 'content', value: facets.content.text };
+  if (facets.asset) yield { key: 'asset', value: facets.asset.ref };
+}
+
 /** Derive the Phase-1 single LeverValue from a Facets bundle.
  *  Priority: content > asset > text.color > surface.background > fallback black. */
 export function primaryValue(f: Facets): LeverValue {

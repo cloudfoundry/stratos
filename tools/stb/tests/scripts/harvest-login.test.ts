@@ -68,4 +68,23 @@ describe('lintRouting', () => {
     expect(report.phantoms).toEqual(['auth.login.customMessage']);
     expect(report.orphans).toEqual(['auth.login.username']);
   });
+
+  it('treats a non-empty properties map as mapped (no phantom, no orphan)', () => {
+    const els = harvestElements('<div stb-snapshot-id="auth.login.page"></div>');
+    const routing = {
+      elements: {
+        'auth.login.page': { properties: { 'surface.background': { config: 'backgroundColor' } } },
+      },
+    };
+    const report = lintRouting(els, routing);
+    expect(report.phantoms).toEqual([]);
+    expect(report.orphans).toEqual([]);
+  });
+
+  it('treats an empty entry as unmapped (appears as orphan)', () => {
+    const els = harvestElements('<div stb-snapshot-id="auth.login.page"></div>');
+    const routing = { elements: { 'auth.login.page': {} } };
+    const report = lintRouting(els, routing);
+    expect(report.orphans).toEqual(['auth.login.page']);
+  });
 });

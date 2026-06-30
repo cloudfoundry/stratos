@@ -1,11 +1,14 @@
 import type { BrandingModel, Facets } from '@/metadata/types';
 import { oklchToHex, scaleFromOklch, type Oklch } from '@/color/oklch';
+import { facetDeclarations, facetLiteralCss, contentAssetDeclarations } from '@/metadata/facets';
 
+export interface PropertyRoute { config?: string; token?: string; oklchRole?: 'primary' | 'scale'; }
 export interface RoutingEntry {
   config?: string;
   token?: string;
   oklchRole?: 'primary' | 'scale';
   visibilityConfig?: string;
+  properties?: Record<string, PropertyRoute>;
 }
 export interface RoutingMap {
   containers?: Record<string, string>;
@@ -88,6 +91,38 @@ export function project(model: BrandingModel, routing: RoutingMap): ProjectionRe
       const ns = entry.visibilityConfig.includes('.') ? null : namespaceFor(node.snapshotId, containers);
       const path = ns ? `${ns}.${entry.visibilityConfig}` : entry.visibilityConfig;
       setPath(companyConfig, path, node.visibility);
+    }
+
+    // Property-level routing via nested properties map (back-compat: legacy path above still runs first)
+    if (entry.properties) {
+      for (const d of facetDeclarations(node.facets)) {
+        const pr = entry.properties[d.key];
+        if (!pr) continue;
+        if (pr.token && d.spec.isColor && 'literal' in d.value && typeof d.value.literal === 'object') {
+          const color = d.value.literal as Oklch;
+          if (pr.oklchRole === 'scale') {
+            const scale = scaleFromOklch(color);
+            for (const [step, hex] of Object.entries(scale)) {
+              tokens.set(pr.token.replace(/\d+$/, step), hex);
+            }
+          } else {
+            tokens.set(pr.token, oklchToHex(color));
+          }
+        }
+        const cssVal = facetLiteralCss(d.spec, d.value);
+        if (pr.config && cssVal !== null) {
+          const ns = pr.config.includes('.') ? null : namespaceFor(node.snapshotId, containers);
+          const path = ns ? `${ns}.${pr.config}` : pr.config;
+          setPath(companyConfig, path, cssVal);
+        }
+      }
+      for (const d of contentAssetDeclarations(node.facets)) {
+        const pr = entry.properties[d.key];
+        if (!pr?.config) continue;
+        const ns = pr.config.includes('.') ? null : namespaceFor(node.snapshotId, containers);
+        const path = ns ? `${ns}.${pr.config}` : pr.config;
+        setPath(companyConfig, path, d.value);
+      }
     }
   }
   return { tokens, companyConfig, unmapped };

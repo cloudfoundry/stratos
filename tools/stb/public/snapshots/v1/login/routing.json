@@ -1,16 +1,16 @@
 {
   "containers": { "auth.login": "login" },
   "elements": {
-    "auth.login.page":        { "config": "backgroundColor" },
-    "auth.login.page.card":        { "config": "cardBackground" },
-    "auth.login.page.card.title":       { "config": "title", "visibilityConfig": "showTitle" },
-    "auth.login.page.card.subtitle":    { "config": "subtitle" },
-    "auth.login.page.card.message":     { "config": "customMessage" },
-    "auth.login.page.card.logo":        { "config": "logos.main", "visibilityConfig": "showLogo" },
-    "auth.login.page.background":  { "config": "logos.loginBackground" },
-    "auth.login.page.card.sign-in":     { "config": "theme.primary" },
-    "auth.login.page.error":       { "config": "theme.danger" },
-    "auth.login.page.card.username":    { "config": "inputBorder" },
-    "auth.login.page.card.password":    { "config": "inputBorder" }
+    "auth.login.page":               { "properties": { "surface.background": { "config": "backgroundColor" } } },
+    "auth.login.page.card":          { "properties": { "surface.background": { "config": "cardBackground" } } },
+    "auth.login.page.card.title":    { "visibilityConfig": "showTitle", "properties": { "content": { "config": "title" } } },
+    "auth.login.page.card.subtitle": { "properties": { "content": { "config": "subtitle" } } },
+    "auth.login.page.card.message":  { "properties": { "content": { "config": "customMessage" } } },
+    "auth.login.page.card.logo":     { "visibilityConfig": "showLogo", "properties": { "asset": { "config": "logos.main" } } },
+    "auth.login.page.background":    { "properties": { "asset": { "config": "logos.loginBackground" } } },
+    "auth.login.page.card.sign-in":  { "properties": { "text.color": { "config": "theme.primary" } } },
+    "auth.login.page.error":         { "properties": { "text.color": { "config": "theme.danger" } } },
+    "auth.login.page.card.username": { "properties": { "text.color": { "config": "inputBorder" } } },
+    "auth.login.page.card.password": { "properties": { "text.color": { "config": "inputBorder" } } }
   }
 }
