@@ -6,7 +6,6 @@ import { brandingModel, nodeFor } from '@/state/branding';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
-import { darkView } from '@/state/facets-edit';
 
 export interface OpenLeverEditorOptions {
   previewHost: HTMLElement;
@@ -20,6 +19,8 @@ export interface OpenLeverEditorOptions {
   facetsDark?: Facets;
   onFacetEdit?: (key: string, value: FacetValue) => void;
   onFacetEditDark?: (key: string, value: FacetValue) => void;
+  /** Per-row "derive dark from light" — caller computes deriveDarkOklch and routes it through its own dark-edit path. */
+  deriveDark?: (key: string) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   tokenForKey?: (key: string) => string | null;
@@ -79,40 +80,25 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   const treeHost = document.createElement('div');
   panel.appendChild(treeHost);
 
-  let editTarget: 'light' | 'dark' = 'light';
-
-  const targetBar = document.createElement('div');
-  targetBar.className = 'stb-lever-target';
-  for (const mode of ['light', 'dark'] as const) {
-    const label = document.createElement('label');
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.name = 'stb-edit-target';
-    radio.value = mode;
-    radio.checked = mode === editTarget;
-    radio.addEventListener('change', () => { if (radio.checked) { editTarget = mode; renderTree(); } });
-    label.append(radio, ` ${mode}`);
-    targetBar.appendChild(label);
-  }
-  panel.appendChild(targetBar);
-
   function renderTree(): void {
     if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
     const node = nodeFor(opts.snapshotId);
     const liveFacets = node?.facets ?? opts.facets;
     const liveFacetsDark = node?.facetsDark ?? opts.facetsDark ?? {};
-    const dark = editTarget === 'dark';
     openFacetTree = mountFacetTree(treeHost, {
-      facets: dark ? darkView(liveFacets, liveFacetsDark) : liveFacets,
+      facets: liveFacets,
+      darkFacets: liveFacetsDark,
       previewHost: opts.previewHost,
-      onEdit: dark ? (opts.onFacetEditDark ?? (() => {})) : (opts.onFacetEdit ?? (() => {})),
+      onEdit: opts.onFacetEdit ?? (() => {}),
+      onDarkEdit: opts.onFacetEditDark ?? (() => {}),
       // Structural edits + token promote/detach + content/asset live on the light bundle only.
-      ...(!dark && opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
-      ...(!dark && opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
-      ...(!dark && opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
-      ...(!dark && opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
-      ...(!dark ? { onContentEdit: (text: string) => opts.onChange(contentValue(text)) } : {}),
-      ...(!dark ? { onAssetEdit: (file: File) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); } } : {}),
+      ...(opts.deriveDark ? { deriveDark: opts.deriveDark } : {}),
+      ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
+      ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
+      ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
+      ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
+      onContentEdit: (text: string) => opts.onChange(contentValue(text)),
+      onAssetEdit: (file: File) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });
   }
   openTreeEffect = effect(() => {

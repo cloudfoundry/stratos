@@ -10,8 +10,15 @@ const propsOf = (g: string) => Object.entries(FACET_PROPS).filter(([k]) => k.sta
 
 export interface FacetTreeOptions {
   facets: Facets;
+  /** Parallel dark-mode overrides, rendered as a second value column beside each color row. */
+  darkFacets?: Facets;
   previewHost: HTMLElement;
   onEdit: (key: string, value: FacetValue) => void;
+  /** Dark-mode counterpart of onEdit; fired when the dark swatch is edited directly. */
+  onDarkEdit?: (key: string, value: FacetValue) => void;
+  /** Fired when the per-row "derive dark from light" button is clicked. Caller computes
+   *  deriveDarkOklch and routes the result through its own dark-edit path. */
+  deriveDark?: (key: string) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   /** Returns the token name mapped to this element's property, or null if none. */
@@ -168,7 +175,21 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       setCollapsed(entry, !entry.collapsed);
     });
 
-    for (const [key, spec] of propsOf(g)) {
+    const props = propsOf(g);
+    if (props.some(([, s]) => s.isColor)) {
+      const header = document.createElement('div');
+      header.className = 'stb-facet-dual-header';
+      const lightLab = document.createElement('span');
+      lightLab.className = 'stb-facet-dual-header-light';
+      lightLab.textContent = 'light';
+      const darkLab = document.createElement('span');
+      darkLab.className = 'stb-facet-dual-header-dark';
+      darkLab.textContent = 'dark';
+      header.append(lightLab, darkLab);
+      leavesEl.appendChild(header);
+    }
+
+    for (const [key, spec] of props) {
       const leaf = document.createElement('div');
       leaf.className = 'stb-facet-leaf';
       leaf.dataset.key = key;
@@ -197,6 +218,39 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           onChange: (value) => opts.onEdit(key, { literal: toOklch(value) }),
         }));
         leaf.appendChild(btn);
+
+        // Dark counterpart, always rendered beside the light swatch (locked layout: light, dark, derive).
+        const currentDark = (opts.darkFacets?.[g] as Record<string, FacetValue | undefined>)?.[propName];
+        const litDark = currentDark && 'literal' in currentDark && typeof currentDark.literal === 'object'
+          ? currentDark.literal as Oklch
+          : null;
+        const darkBtn = document.createElement('button');
+        darkBtn.type = 'button';
+        darkBtn.className = 'stb-facet-swatch-dark';
+        if (litDark) {
+          darkBtn.style.backgroundColor = oklchToHex(litDark);
+        } else {
+          // No dark literal set — neutral empty state, NOT a computed color: means
+          // "inherits the snapshot's built-in dark", not "dark equals black/transparent".
+          darkBtn.classList.add('stb-facet-swatch-empty');
+        }
+        darkBtn.addEventListener('click', () => openColorPicker({
+          previewHost: opts.previewHost,
+          initial: litDark ? oklchToHex(litDark) : '#000000',
+          format: 'hex',
+          onChange: (value) => opts.onDarkEdit?.(key, { literal: toOklch(value) }),
+        }));
+        leaf.appendChild(darkBtn);
+
+        const deriveBtn = document.createElement('button');
+        deriveBtn.type = 'button';
+        deriveBtn.className = 'stb-facet-derive-dark';
+        deriveBtn.textContent = '↓';
+        deriveBtn.title = 'Derive dark from light';
+        // No literal Oklch on the light side (e.g. a bare token reference) — nothing to derive from.
+        deriveBtn.disabled = !lit;
+        deriveBtn.addEventListener('click', () => { if (lit) opts.deriveDark?.(key); });
+        leaf.appendChild(deriveBtn);
       } else if (key === 'text.fontFamily' || key === 'text.fontWeight') {
         const sel = document.createElement('select');
         const options = key === 'text.fontWeight' ? FONT_WEIGHTS : FONT_FAMILIES;
