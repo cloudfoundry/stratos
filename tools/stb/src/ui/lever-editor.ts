@@ -1,6 +1,8 @@
 import type { LeverValue, Facets, FacetValue } from '@/metadata/types';
 import type { EditorView } from 'codemirror';
+import { effect } from '@preact/signals-core';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
+import { brandingModel, nodeFor } from '@/state/branding';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
@@ -34,7 +36,9 @@ export function assetValue(filename: string): LeverValue {
 let openPanel: HTMLElement | null = null;
 let openScopedEditor: EditorView | null = null;
 let openFacetTree: { destroy(): void } | null = null;
+let openTreeEffect: (() => void) | null = null;
 function closeOpen(): void {
+  if (openTreeEffect) { openTreeEffect(); openTreeEffect = null; }
   if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
   if (openScopedEditor) { openScopedEditor.destroy(); openScopedEditor = null; }
   if (openPanel) { openPanel.remove(); openPanel = null; }
@@ -94,9 +98,12 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
 
   function renderTree(): void {
     if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
+    const node = nodeFor(opts.snapshotId);
+    const liveFacets = node?.facets ?? opts.facets;
+    const liveFacetsDark = node?.facetsDark ?? opts.facetsDark ?? {};
     const dark = editTarget === 'dark';
     openFacetTree = mountFacetTree(treeHost, {
-      facets: dark ? darkView(opts.facets, opts.facetsDark ?? {}) : opts.facets,
+      facets: dark ? darkView(liveFacets, liveFacetsDark) : liveFacets,
       previewHost: opts.previewHost,
       onEdit: dark ? (opts.onFacetEditDark ?? (() => {})) : (opts.onFacetEdit ?? (() => {})),
       // Structural edits + token promote/detach + content/asset live on the light bundle only.
@@ -108,7 +115,11 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(!dark ? { onAssetEdit: (file: File) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); } } : {}),
     });
   }
-  renderTree();
+  openTreeEffect = effect(() => {
+    void brandingModel.value;                         // subscribe to model changes
+    if (treeHost.contains(document.activeElement)) return; // don't yank focus from an in-flight edit
+    renderTree();
+  });
 
   const close = document.createElement('button');
   close.className = 'stb-lever-close';
