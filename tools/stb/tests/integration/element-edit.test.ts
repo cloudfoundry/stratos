@@ -9,8 +9,8 @@ const routing = { containers: { 'auth.login': 'login' }, elements: {
   'auth.login.sign-in': { token: '--color-brand-500' },
 } };
 const model: BrandingModel = { scene: 'login', nodes: [
-  { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title', value: { kind: 'content', text: 'A' } },
-  { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn', value: { kind: 'color', oklch: { l: 0.5, c: 0.1, h: 250 } } },
+  { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title', facets: {}, value: { kind: 'content', text: 'A' } },
+  { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn', facets: {}, value: { kind: 'color', oklch: { l: 0.5, c: 0.1, h: 250 } } },
 ] };
 
 describe('applyEdit', () => {

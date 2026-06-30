@@ -1,14 +1,24 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { harvestElements } from './harvest-login';
-import type { BrandingModel, ElementNode, LeverValue, ScopedBlock } from '../src/metadata/types';
+import type { BrandingModel, ElementNode, LeverValue, ScopedBlock, Facets } from '../src/metadata/types';
 
 // The branding model is GENERATED from the snapshot DOM: identity, role,
 // roledescription (the "kind") and description are harvested off the stba-*
 // attributes; the only still-authored bits — the editable value, friendly name,
 // and default visibility — come from a values.json sidecar keyed by snapshotId.
 // (Next steps move name onto the DOM via aria-label and value via capture.)
-export interface ValueEntry { name: string | null; value: LeverValue; visibility?: boolean; scopedBlock?: ScopedBlock }
+export interface ValueEntry { name: string | null; facets: Facets; visibility?: boolean; scopedBlock?: ScopedBlock }
 export type ValuesSidecar = Record<string, ValueEntry>;
+
+export function primaryValue(f: Facets): LeverValue {
+  if (f.content) return { kind: 'content', text: f.content.text };
+  if (f.asset) return { kind: 'asset', ref: f.asset.ref };
+  const color = f.text?.color ?? f.surface?.background;
+  if (color && 'literal' in color && typeof color.literal === 'object') {
+    return { kind: 'color', oklch: color.literal };
+  }
+  return { kind: 'color', oklch: { l: 0, c: 0, h: 0 } };
+}
 
 export function buildModel(scene: string, html: string, values: ValuesSidecar): BrandingModel {
   const nodes: ElementNode[] = [];
@@ -20,7 +30,8 @@ export function buildModel(scene: string, html: string, values: ValuesSidecar): 
       role: el.role ?? '',
       name: v.name,
       description: el.description ?? '',
-      value: v.value,
+      facets: v.facets,
+      value: primaryValue(v.facets),
     };
     if (el.roledescription) node.roledescription = el.roledescription;
     if (v.visibility !== undefined) node.visibility = v.visibility;

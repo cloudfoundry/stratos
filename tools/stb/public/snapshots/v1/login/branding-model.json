@@ -6,6 +6,17 @@
       "role": "region",
       "name": "Login page",
       "description": "background color for the login page",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 0.97,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -21,6 +32,11 @@
       "role": "img",
       "name": "Background",
       "description": "background image for the login page",
+      "facets": {
+        "asset": {
+          "ref": "login-bg.svg"
+        }
+      },
       "value": {
         "kind": "asset",
         "ref": "login-bg.svg"
@@ -31,6 +47,17 @@
       "role": "region",
       "name": "Login card",
       "description": "card background for the login page",
+      "facets": {
+        "surface": {
+          "background": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -45,6 +72,11 @@
       "role": "img",
       "name": "Logo",
       "description": "logo image for the login page",
+      "facets": {
+        "asset": {
+          "ref": "logo.svg"
+        }
+      },
       "value": {
         "kind": "asset",
         "ref": "logo.svg"
@@ -56,6 +88,11 @@
       "role": "heading",
       "name": "Welcome message",
       "description": "welcome / company greeting heading for the login page",
+      "facets": {
+        "content": {
+          "text": "Sign in to Stratos"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Sign in to Stratos"
@@ -67,6 +104,11 @@
       "role": "paragraph",
       "name": "Subtitle",
       "description": "subtitle for the login page",
+      "facets": {
+        "content": {
+          "text": "Multi-cloud management"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Multi-cloud management"
@@ -77,6 +119,11 @@
       "role": "note",
       "name": "Custom message",
       "description": "custom message for the login page",
+      "facets": {
+        "content": {
+          "text": "Authorized users only"
+        }
+      },
       "value": {
         "kind": "content",
         "text": "Authorized users only"
@@ -87,6 +134,17 @@
       "role": "alert",
       "name": "Error message",
       "description": "error/failure message color for the login page",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.63,
+              "c": 0.23,
+              "h": 25
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -101,6 +159,17 @@
       "role": "textbox",
       "name": "Username field",
       "description": "input border color for the login fields",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -115,6 +184,17 @@
       "role": "textbox",
       "name": "Password field",
       "description": "input border color for the login fields",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {
@@ -129,6 +209,17 @@
       "role": "button",
       "name": "Sign in",
       "description": "sign-in button color for the login page",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.55,
+              "c": 0.15,
+              "h": 250
+            }
+          }
+        }
+      },
       "value": {
         "kind": "color",
         "oklch": {

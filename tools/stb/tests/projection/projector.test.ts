@@ -7,13 +7,13 @@ const model: BrandingModel = {
   nodes: [
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in',
       description: 'sign-in button for the login page',
-      value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
+      facets: {}, value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
     { snapshotId: 'auth.login.title', role: 'heading', name: 'Sign in to Stratos',
       description: 'title for the login page',
-      value: { kind: 'content', text: 'Sign in to Stratos' } },
+      facets: {}, value: { kind: 'content', text: 'Sign in to Stratos' } },
     { snapshotId: 'auth.login.orphan', role: 'img', name: null,
       description: 'decorative flourish',
-      value: { kind: 'asset', ref: 'flourish.svg' } },
+      facets: {}, value: { kind: 'asset', ref: 'flourish.svg' } },
   ],
 };
 
@@ -45,7 +45,7 @@ describe('project', () => {
     const m = { scene: 'login', nodes: [
       { snapshotId: 'app.shell.brand', role: 'img', name: null,
         description: 'brand color',
-        value: { kind: 'color' as const, oklch: { l: 0.55, c: 0.15, h: 250 } } },
+        facets: {}, value: { kind: 'color' as const, oklch: { l: 0.55, c: 0.15, h: 250 } } },
     ] };
     const r = project(m, { elements: { 'app.shell.brand': { token: '--color-brand-500', oklchRole: 'scale' } } });
     expect(r.tokens.get('--color-brand-50')).toMatch(/^#[0-9a-f]{6}$/);
@@ -56,7 +56,7 @@ describe('project', () => {
   it('picks the longest matching container prefix', () => {
     const m = { scene: 'x', nodes: [
       { snapshotId: 'auth.login.title', role: 'heading', name: 'T',
-        description: 'title', value: { kind: 'content' as const, text: 'Hi' } },
+        description: 'title', facets: {}, value: { kind: 'content' as const, text: 'Hi' } },
     ] };
     const r = project(m, {
       containers: { 'auth': 'a', 'auth.login': 'login' },
@@ -68,7 +68,7 @@ describe('project', () => {
   it('projects element visibility into its routed show-field', () => {
     const model = { scene: 'login', nodes: [
       { snapshotId: 'auth.login.logo', role: 'img', name: null,
-        description: '', value: { kind: 'asset' as const, ref: 'logo.svg' }, visibility: false },
+        description: '', facets: {}, value: { kind: 'asset' as const, ref: 'logo.svg' }, visibility: false },
     ]};
     const routing = { containers: { 'auth.login': 'login' },
       elements: { 'auth.login.logo': { config: 'logos.main', visibilityConfig: 'showLogo' } } };

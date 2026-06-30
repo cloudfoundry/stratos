@@ -17,6 +17,7 @@ export interface ElementNode {
   roledescription?: string; // ARIA aria-roledescription (DOM stba-roledescription); the navigator "kind" (page/dialog/stepper/…)
   name: string | null;
   description: string;     // DOM stba-description → ARIA aria-description
+  facets: Facets;
   value: LeverValue;
   visibility?: boolean;    // optional show/hide on THIS element; undefined = shown
   scopedBlock?: ScopedBlock; // optional raw element-scoped CSS (R1 facet escape hatch)

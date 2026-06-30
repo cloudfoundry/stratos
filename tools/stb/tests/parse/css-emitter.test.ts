@@ -9,6 +9,7 @@ function node(snapshotId: string, scopedBlock?: string): ElementNode {
     role: '',
     name: null,
     description: '',
+    facets: {},
     value: { kind: 'content', text: '' },
     ...(scopedBlock !== undefined ? { scopedBlock } : {}),
   };
