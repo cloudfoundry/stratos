@@ -17,7 +17,7 @@ it('edits a string property through its input control', () => {
   const previewHost = document.createElement('div');
   const edits: [string, unknown][] = [];
   mountFacetTree(host, {
-    facets: { text: { fontSize: undefined } as any },
+    facets: { text: {} },
     previewHost,
     onEdit: (k, v) => edits.push([k, v]),
   });
@@ -26,4 +26,33 @@ it('edits a string property through its input control', () => {
   input.value = '20px';
   input.dispatchEvent(new Event('input'));
   expect(edits).toContainEqual(['text.fontSize', { literal: '20px' }]);
+});
+
+it('fires onEdit with the selected value when a select control changes', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  const edits: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { text: {} },
+    previewHost,
+    onEdit: (k, v) => edits.push([k, v]),
+  });
+  const sel = host.querySelector('.stb-facet-leaf[data-key="text.fontWeight"] select') as HTMLSelectElement;
+  expect(sel).toBeTruthy();
+  sel.value = 'bold';
+  sel.dispatchEvent(new Event('change'));
+  expect(edits).toContainEqual(['text.fontWeight', { literal: 'bold' }]);
+});
+
+it('reflects an existing fontWeight literal as the select current value', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { fontWeight: { literal: '700' } } },
+    previewHost,
+    onEdit: () => {},
+  });
+  const sel = host.querySelector('.stb-facet-leaf[data-key="text.fontWeight"] select') as HTMLSelectElement;
+  expect(sel).toBeTruthy();
+  expect(sel.value).toBe('700');
 });
