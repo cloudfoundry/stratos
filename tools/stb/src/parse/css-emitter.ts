@@ -16,36 +16,41 @@ export function emitCss(root: Map<string, string>, dark: Map<string, string>): s
 export function emitScopedBlocks(nodes: ElementNode[]): string {
   return nodes
     .sort((a, b) => a.snapshotId.localeCompare(b.snapshotId))
-    .map((n) => {
-      // Collect literal facet declarations first (token values are skipped).
-      const facetLines: string[] = [];
-      if (n.facets) {
-        for (const d of facetDeclarations(n.facets)) {
-          const css = facetLiteralCss(d.spec, d.value);
-          if (css !== null) facetLines.push(`  ${d.spec.cssProp}: ${css};`);
-        }
-      }
+    .map((node) => {
+      // Repeat the attribute selector to reach specificity (0,3,0) so the block
+      // beats the snapshot's compound rules (e.g. `.login-card h1` (0,1,1)) without
+      // `!important` — keeping company-config inline styles winning.
+      const selector = `[stb-snapshot-id="${node.snapshotId}"]`.repeat(3);
+      const rules: string[] = [];
 
-      // Terminate each scopedBlock declaration line so a user who types one
-      // declaration per line (no trailing ';') still produces valid CSS instead
-      // of one invalid run-on declaration. Forgiving, not validating.
-      const scopedLines: string[] = n.scopedBlock
-        ? n.scopedBlock.trim().split('\n')
+      // Light block: literal facet declarations first, then the free-form scopedBlock.
+      const facetLines: string[] = [];
+      for (const d of facetDeclarations(node.facets)) {
+        const css = facetLiteralCss(d.spec, d.value);
+        if (css !== null) facetLines.push(`  ${d.spec.cssProp}: ${css};`);
+      }
+      const scopedLines: string[] = node.scopedBlock
+        ? node.scopedBlock.trim().split('\n')
           .map((l) => l.trim())
           .filter((l) => l.length > 0)
           .map((l) => `  ${/[;{},]$/.test(l) ? l : l + ';'}`)
         : [];
+      const lightBody = [...facetLines, ...scopedLines].join('\n');
+      if (lightBody) rules.push(`${selector} {\n${lightBody}\n}`);
 
-      // Emit the rule only when the combined body is non-empty.
-      const body = [...facetLines, ...scopedLines].join('\n');
-      if (!body) return null;
+      // Dark block: literal facetsDark declarations, gated by .dark-theme. Combined
+      // selector is (0,4,0) — beats the light block (0,3,0) AND the snapshot's own
+      // `.dark-theme .x` (0,2,0). {token} dark values are skipped (projector territory).
+      if (node.facetsDark) {
+        const darkLines: string[] = [];
+        for (const d of facetDeclarations(node.facetsDark)) {
+          const css = facetLiteralCss(d.spec, d.value);
+          if (css !== null) darkLines.push(`  ${d.spec.cssProp}: ${css};`);
+        }
+        if (darkLines.length) rules.push(`.dark-theme ${selector} {\n${darkLines.join('\n')}\n}`);
+      }
 
-      // Repeat the attribute selector to reach specificity (0,3,0) so the block
-      // beats the snapshot's compound rules (e.g. `.login-card h1` (0,1,1),
-      // `.dark-theme .login-card h1` (0,2,1)) without `!important` — keeping
-      // company-config inline styles (the higher, runtime-faithful path) winning.
-      const selector = `[stb-snapshot-id="${n.snapshotId}"]`.repeat(3);
-      return `${selector} {\n${body}\n}`;
+      return rules.length ? rules.join('\n\n') : null;
     })
     .filter((r): r is string => r !== null)
     .join('\n\n');
