@@ -151,6 +151,34 @@ it('marks a token-backed property as shared and offers detach', () => {
   expect(edits[0]![1]).toHaveProperty('literal');
 });
 
+it('renders a content leaf with a textarea initialized to the content text', () => {
+  const host = document.createElement('div');
+  const collected: string[] = [];
+  mountFacetTree(host, {
+    facets: { content: { text: 'A' } },
+    onEdit: () => {},
+    previewHost: document.createElement('div'),
+    onContentEdit: (t) => collected.push(t),
+  });
+  const ta = host.querySelector('.stb-facet-leaf[data-key="content"] textarea') as HTMLTextAreaElement;
+  expect(ta).not.toBeNull();
+  expect(ta.value).toBe('A');
+  ta.value = 'B';
+  ta.dispatchEvent(new Event('input'));
+  expect(collected).toContain('B');
+});
+
+it('renders an asset leaf with a file input', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { asset: { ref: 'logo.svg' } },
+    onEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  const fileInput = host.querySelector('.stb-facet-leaf[data-key="asset"] input[type="file"]');
+  expect(fileInput).not.toBeNull();
+});
+
 it('shows promote for a literal property with a token mapping, none without', () => {
   const host = document.createElement('div');
   const edits: [string, unknown][] = [];

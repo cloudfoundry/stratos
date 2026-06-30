@@ -21,6 +21,8 @@ export interface FacetTreeOptions {
   tokenForKey?: (key: string) => string | null;
   /** Resolves the literal FacetValue to detach TO (token's current value). */
   resolveLiteral?: (key: string, token: string) => FacetValue;
+  onContentEdit?: (text: string) => void;
+  onAssetEdit?: (file: File) => void;
 }
 
 const FONT_FAMILIES = [
@@ -103,6 +105,42 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
   host.appendChild(bar);
 
   const groupEntries: GroupEntry[] = [];
+
+  // Standalone content leaf — not part of any style group
+  if (opts.facets.content) {
+    const leaf = document.createElement('div');
+    leaf.className = 'stb-facet-leaf';
+    leaf.dataset.key = 'content';
+    const lab = document.createElement('span');
+    lab.className = 'stb-facet-leaf-label';
+    lab.textContent = 'content';
+    leaf.appendChild(lab);
+    const ta = document.createElement('textarea');
+    ta.value = opts.facets.content.text;
+    ta.addEventListener('input', () => opts.onContentEdit?.(ta.value));
+    leaf.appendChild(ta);
+    host.appendChild(leaf);
+  }
+
+  // Standalone asset leaf — not part of any style group
+  if (opts.facets.asset) {
+    const leaf = document.createElement('div');
+    leaf.className = 'stb-facet-leaf';
+    leaf.dataset.key = 'asset';
+    const lab = document.createElement('span');
+    lab.className = 'stb-facet-leaf-label';
+    lab.textContent = 'asset';
+    leaf.appendChild(lab);
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (file) opts.onAssetEdit?.(file);
+    });
+    leaf.appendChild(input);
+    host.appendChild(leaf);
+  }
 
   for (const g of GROUPS) {
     if (!opts.facets[g]) continue;
