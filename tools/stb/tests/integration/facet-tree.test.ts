@@ -100,3 +100,39 @@ it('isolate collapses all groups except the one with focused leaf', () => {
   expect(collapsed.length).toBe(1);
   expect(collapsed[0]!.textContent).toContain('surface');
 });
+
+it('offers absent groups and adds one on select', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  const added: string[] = [];
+  mountFacetTree(host, { facets: { text: {} }, previewHost, onEdit: () => {}, onAddGroup: (g) => added.push(g) });
+  const add = host.querySelector('.stb-facet-add') as HTMLSelectElement;
+  expect(add).toBeTruthy();
+  expect([...add.options].map((o) => o.value)).toEqual(expect.arrayContaining(['surface', 'spacing']));
+  add.value = 'surface';
+  add.dispatchEvent(new Event('change'));
+  expect(added).toContain('surface');
+  // select resets to placeholder after selection
+  expect(add.value).toBe('');
+});
+
+it('remove button calls onRemoveGroup and does not trigger collapse', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  const removed: string[] = [];
+  mountFacetTree(host, {
+    facets: { text: {}, surface: {} },
+    previewHost,
+    onEdit: () => {},
+    onRemoveGroup: (g) => removed.push(g),
+  });
+  // Find the remove button on the text branch
+  const branches = [...host.querySelectorAll('.stb-facet-group')] as HTMLElement[];
+  const textBranch = branches.find((b) => b.textContent?.includes('text'))!;
+  const removeBtn = textBranch.querySelector('.stb-facet-remove') as HTMLButtonElement;
+  expect(removeBtn).toBeTruthy();
+  removeBtn.click();
+  expect(removed).toContain('text');
+  // stopPropagation must have prevented the branch click from toggling collapse
+  expect(textBranch.classList.contains('stb-facet-collapsed')).toBe(false);
+});

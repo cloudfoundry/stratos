@@ -17,7 +17,7 @@ import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
 import { primaryValue } from '@/metadata/facets';
-import { setFacetProp } from '@/state/facets-edit';
+import { setFacetProp, addGroup, removeGroup } from '@/state/facets-edit';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
 import { restoreSession, startAutoSave } from '@/state/persistence';
@@ -127,6 +127,18 @@ async function main() {
       onFacetEdit: (key, value) => {
         const n = nodeFor(snapshotId);
         if (n) setNodeFacets(snapshotId, setFacetProp(n.facets, key, value));
+      },
+      onAddGroup: (g) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, addGroup(n.facets, g));
+        selectElement(snapshotId);
+      },
+      onRemoveGroup: (g) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, removeGroup(n.facets, g));
+        selectElement(snapshotId);
       },
       ...companion,
     });
