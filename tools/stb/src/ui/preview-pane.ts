@@ -11,8 +11,8 @@ import { emitScopedBlocks } from '@/parse/css-emitter';
 export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
   const out: LeverPatch[] = [];
   for (const n of model.nodes) {
-    if (n.value.kind === 'content') out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.value.text });
-    else if (n.value.kind === 'asset') out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.value.ref });
+    if (n.facets.content) out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.facets.content.text });
+    else if (n.facets.asset) out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.facets.asset.ref });
     if (n.visibility !== undefined) out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.visibility });
   }
   return out;

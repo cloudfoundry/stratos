@@ -1,10 +1,11 @@
-import type { LeverValue } from '@/metadata/types';
+import type { Facets, LeverValue } from '@/metadata/types';
 
 export interface NavNode {
   snapshotId: string;
   scene: string;
   name: string | null;
   description: string;
+  facets?: Facets;
   value: LeverValue;
   role?: string;
   roledescription?: string; // the navigator "kind" (page/dialog/stepper/…), from ARIA aria-roledescription
