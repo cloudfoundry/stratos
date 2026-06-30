@@ -99,4 +99,19 @@ describe('project', () => {
     const out = project(model as any, routing as any);
     expect((out.companyConfig as any).theme.primary).toMatch(/^#/);
   });
+
+  it('expands a scale-role color via the nested properties path', () => {
+    // Exercises the properties[key].token + oklchRole:'scale' branch — previously uncovered.
+    const m = { scene: 'login', nodes: [
+      { snapshotId: 'app.shell.brand', role: 'img', name: null,
+        description: 'brand color',
+        facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } } },
+    ] };
+    const r = project(m as any, { elements: {
+      'app.shell.brand': { properties: { 'text.color': { token: '--color-brand-500', oklchRole: 'scale' } } },
+    } } as any);
+    expect(r.tokens.get('--color-brand-50')).toMatch(/^#[0-9a-f]{6}$/);
+    expect(r.tokens.get('--color-brand-900')).toMatch(/^#[0-9a-f]{6}$/);
+    expect(r.tokens.size).toBe(10);
+  });
 });

@@ -19,6 +19,9 @@ export const FACET_PROPS: Record<string, FacetPropSpec> = {
 
 const STYLE_GROUPS = ['text', 'surface', 'spacing'] as const;
 
+/** Yield typed style groups (text/surface/spacing) as FacetValue + CSS spec for property-level routing.
+ *  Structurally distinct from contentAssetDeclarations (plain string payloads, no FacetValue/isColor);
+ *  the two generators are intentionally separate, not duplicated. */
 export function* facetDeclarations(
   facets: Facets,
 ): Generator<{ key: string; spec: FacetPropSpec; value: FacetValue }> {
@@ -41,7 +44,9 @@ export function facetLiteralCss(spec: FacetPropSpec, v: FacetValue): string | nu
 
 export interface ContentAssetDeclaration { key: 'content' | 'asset'; value: string; }
 
-/** Yield content/asset facet declarations for property-level routing. */
+/** Yield content/asset facet declarations for property-level routing.
+ *  Plain string payloads only — no FacetValue wrapper or isColor flag.
+ *  Kept separate from facetDeclarations (style groups) intentionally: the two are structurally different. */
 export function* contentAssetDeclarations(
   facets: Facets,
 ): Generator<ContentAssetDeclaration> {
