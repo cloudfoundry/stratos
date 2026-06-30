@@ -4,17 +4,18 @@
   let metadata = null;
 
   function applyVars(rootVars, darkVars) {
-    const root = document.documentElement;
-    for (const [k, v] of Object.entries(rootVars || {})) root.style.setProperty(k, v);
-    // dark vars are scoped — emulate stratos by toggling .dark-theme + setting overrides as needed
-    // For MVP we apply both sets and rely on the .dark-theme selector chain in the snapshot's stylesheet
+    // Apply :root vars via a <style> block (NOT inline on documentElement): inline
+    // custom props beat any selector, which would shadow the .dark-theme overrides
+    // below and silently break dark mode. A :root rule sits at the same cascade
+    // level as .dark-theme, so dark overrides win when the class is present.
+    let rootEl = document.getElementById('stb-root-vars');
+    if (!rootEl) { rootEl = document.createElement('style'); rootEl.id = 'stb-root-vars'; document.head.appendChild(rootEl); }
+    const rootDecls = Object.entries(rootVars || {}).map(([k, v]) => `${k}: ${v};`).join(' ');
+    rootEl.textContent = `:root { ${rootDecls} }`;
+
     if (darkVars && Object.keys(darkVars).length > 0) {
       let styleEl = document.getElementById('stb-dark-overrides');
-      if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.id = 'stb-dark-overrides';
-        document.head.appendChild(styleEl);
-      }
+      if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'stb-dark-overrides'; document.head.appendChild(styleEl); }
       const decls = Object.entries(darkVars).map(([k, v]) => `${k}: ${v};`).join(' ');
       styleEl.textContent = `.dark-theme { ${decls} }`;
     }
