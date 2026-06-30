@@ -12,11 +12,12 @@ import { mountStatusBar } from '@/ui/status-bar';
 import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
-import { nodeFor, loadBrandingModel, setNodeScopedBlock } from '@/state/branding';
+import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
 import { primaryValue } from '@/metadata/facets';
+import { setFacetProp } from '@/state/facets-edit';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
 import { restoreSession, startAutoSave } from '@/state/persistence';
@@ -123,6 +124,10 @@ async function main() {
       scopedBlock: node.scopedBlock,
       onScopedBlockChange: (css) => setNodeScopedBlock(snapshotId, css),
       facets: node.facets,
+      onFacetEdit: (key, value) => {
+        const n = nodeFor(snapshotId);
+        if (n) setNodeFacets(snapshotId, setFacetProp(n.facets, key, value));
+      },
       ...companion,
     });
   }
