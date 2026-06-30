@@ -17,9 +17,10 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
   return nodes
     .sort((a, b) => a.snapshotId.localeCompare(b.snapshotId))
     .map((node) => {
-      // Repeat the attribute selector to reach specificity (0,3,0) so the block
-      // beats the snapshot's compound rules (e.g. `.login-card h1` (0,1,1)) without
-      // `!important` — keeping company-config inline styles winning.
+      // Repeat the attribute selector 3× so each block beats the snapshot's compound
+      // rules (e.g. `.login-card h1` (0,1,1)) without `!important` — keeping
+      // company-config inline styles winning. The light/dark mode prefixes below add
+      // to this base: light `html:not(.dark-theme)` → (0,4,1); dark `.dark-theme` → (0,4,0).
       const selector = `[stb-snapshot-id="${node.snapshotId}"]`.repeat(3);
       const rules: string[] = [];
 
@@ -40,9 +41,10 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       const lightBody = [...facetLines, ...scopedLines].join('\n');
       if (lightBody) rules.push(`html:not(.dark-theme) ${selector} {\n${lightBody}\n}`);
 
-      // Dark block: literal facetsDark declarations, gated by .dark-theme. Combined
-      // selector is (0,4,0) — beats the light block (0,3,0) AND the snapshot's own
-      // `.dark-theme .x` (0,2,0). {token} dark values are skipped (projector territory).
+      // Dark block: literal facetsDark declarations, gated by .dark-theme — (0,4,0).
+      // Light (`:not(.dark-theme)`) and dark (`.dark-theme`) are mutually exclusive by
+      // mode, so they never compete; each just beats the snapshot's rules in its mode
+      // (dark beats `.dark-theme .x` (0,2,0)). {token} dark values are skipped (projector territory).
       if (node.facetsDark) {
         const darkLines: string[] = [];
         for (const d of facetDeclarations(node.facetsDark)) {
