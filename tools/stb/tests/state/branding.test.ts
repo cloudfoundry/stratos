@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { brandingModel, nodeFor, setNodeFacets, setNodeVisibility, setNodeScopedBlock, loadBrandingModel } from '@/state/branding';
+import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark, setNodeVisibility, setNodeScopedBlock, loadBrandingModel } from '@/state/branding';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
@@ -40,6 +40,20 @@ describe('branding state', () => {
     setNodeVisibility('auth.login.logo', false);
     expect(nodeFor('auth.login.logo')?.visibility).toBe(false);
     expect(brandingModel.value).not.toBe(before); // new reference → reactivity
+  });
+
+  it('setNodeFacetsDark stores a parallel dark bundle without touching facets', () => {
+    brandingModel.value = {
+      scene: 'login',
+      nodes: [
+        { snapshotId: 'auth.login.page', role: 'region', name: 'P', description: 'page',
+          facets: { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } } },
+      ],
+    };
+    setNodeFacetsDark('auth.login.page', { surface: { background: { literal: { l: 0.2, c: 0.02, h: 250 } } } });
+    const n = nodeFor('auth.login.page')!;
+    expect(n.facetsDark?.surface?.background).toEqual({ literal: { l: 0.2, c: 0.02, h: 250 } });
+    expect(n.facets.surface?.background).toEqual({ literal: { l: 0.95, c: 0.02, h: 250 } }); // light untouched
   });
 
   it('setNodeScopedBlock sets the scoped block on one node immutably', () => {
