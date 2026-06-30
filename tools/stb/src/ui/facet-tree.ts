@@ -15,6 +15,8 @@ export interface FacetTreeOptions {
   onEdit: (key: string, value: FacetValue) => void;
   scopedBlock?: string;
   onScopedBlockChange?: (css: string) => void;
+  onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
 }
 
 const FONT_FAMILIES = [
@@ -67,6 +69,33 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
   bar.appendChild(btnExpandAll);
   bar.appendChild(btnCollapseAll);
   bar.appendChild(btnIsolate);
+
+  // "+ add group" select — lists only the GROUPS not yet present in facets
+  const addSelect = document.createElement('select');
+  addSelect.className = 'stb-facet-add';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '+ add group';
+  placeholder.disabled = true;
+  addSelect.appendChild(placeholder);
+  for (const g of GROUPS) {
+    if (!opts.facets[g]) {
+      const opt = document.createElement('option');
+      opt.value = g;
+      opt.textContent = g;
+      addSelect.appendChild(opt);
+    }
+  }
+  addSelect.value = '';
+  addSelect.addEventListener('change', () => {
+    const g = addSelect.value as 'text' | 'surface' | 'spacing';
+    if (g) {
+      opts.onAddGroup?.(g);
+      addSelect.value = '';
+    }
+  });
+  bar.appendChild(addSelect);
+
   host.appendChild(bar);
 
   const groupEntries: GroupEntry[] = [];
@@ -77,6 +106,17 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     const branch = document.createElement('div');
     branch.className = 'stb-facet-group';
     branch.textContent = g;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'stb-facet-remove';
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      opts.onRemoveGroup?.(g as 'text' | 'surface' | 'spacing');
+    });
+    branch.appendChild(removeBtn);
+
     host.appendChild(branch);
 
     const leavesEl = document.createElement('div');

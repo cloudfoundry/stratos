@@ -17,6 +17,8 @@ export interface OpenLeverEditorOptions {
   onScopedBlockChange?: (css: string) => void;
   facets?: Facets;
   onFacetEdit?: (key: string, value: FacetValue) => void;
+  onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
 }
 
 export function colorValueFromHex(hex: string): LeverValue {
@@ -103,6 +105,8 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       facets: opts.facets,
       previewHost: opts.previewHost,
       onEdit: opts.onFacetEdit ?? (() => {}),
+      ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
+      ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
     });
   }
 
