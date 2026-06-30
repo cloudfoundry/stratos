@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { project } from '@/projection/projector';
+import { project, projectDark } from '@/projection/projector';
+import { oklchToHex } from '@/color/oklch';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
@@ -113,5 +114,46 @@ describe('project', () => {
     expect(r.tokens.get('--color-brand-50')).toMatch(/^#[0-9a-f]{6}$/);
     expect(r.tokens.get('--color-brand-900')).toMatch(/^#[0-9a-f]{6}$/);
     expect(r.tokens.size).toBe(10);
+  });
+});
+
+describe('projectDark', () => {
+  const oklch = { l: 0.55, c: 0.15, h: 250 };
+
+  it('routes a facetsDark color node to the dark token map', () => {
+    const m: BrandingModel = {
+      scene: 'login',
+      nodes: [
+        { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in',
+          description: 'sign-in button for the login page',
+          facets: { text: { color: { literal: { l: 0.2, c: 0.05, h: 250 } } } },
+          facetsDark: { text: { color: { literal: oklch } } } },
+      ],
+    };
+    const routing = {
+      elements: {
+        'auth.login.sign-in': { properties: { 'text.color': { token: '--color-x' } } },
+      },
+    };
+    const r = projectDark(m, routing as any);
+    expect(r.get('--color-x')).toBe(oklchToHex(oklch));
+  });
+
+  it('contributes nothing for a node with no facetsDark', () => {
+    const m: BrandingModel = {
+      scene: 'login',
+      nodes: [
+        { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in',
+          description: 'sign-in button for the login page',
+          facets: { text: { color: { literal: oklch } } } },
+      ],
+    };
+    const routing = {
+      elements: {
+        'auth.login.sign-in': { properties: { 'text.color': { token: '--color-x' } } },
+      },
+    };
+    const r = projectDark(m, routing as any);
+    expect(r.size).toBe(0);
   });
 });
