@@ -17,14 +17,6 @@
           }
         }
       },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.97,
-          "c": 0.01,
-          "h": 250
-        }
-      },
       "roledescription": "page"
     },
     {
@@ -36,10 +28,6 @@
         "asset": {
           "ref": "login-bg.svg"
         }
-      },
-      "value": {
-        "kind": "asset",
-        "ref": "login-bg.svg"
       }
     },
     {
@@ -57,14 +45,6 @@
             }
           }
         }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 1,
-          "c": 0,
-          "h": 0
-        }
       }
     },
     {
@@ -76,10 +56,6 @@
         "asset": {
           "ref": "logo.svg"
         }
-      },
-      "value": {
-        "kind": "asset",
-        "ref": "logo.svg"
       },
       "visibility": true
     },
@@ -93,10 +69,6 @@
           "text": "Sign in to Stratos"
         }
       },
-      "value": {
-        "kind": "content",
-        "text": "Sign in to Stratos"
-      },
       "visibility": true
     },
     {
@@ -108,10 +80,6 @@
         "content": {
           "text": "Multi-cloud management"
         }
-      },
-      "value": {
-        "kind": "content",
-        "text": "Multi-cloud management"
       }
     },
     {
@@ -123,10 +91,6 @@
         "content": {
           "text": "Authorized users only"
         }
-      },
-      "value": {
-        "kind": "content",
-        "text": "Authorized users only"
       }
     },
     {
@@ -143,14 +107,6 @@
               "h": 25
             }
           }
-        }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.63,
-          "c": 0.23,
-          "h": 25
         }
       }
     },
@@ -169,14 +125,6 @@
             }
           }
         }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.86,
-          "c": 0.01,
-          "h": 250
-        }
       }
     },
     {
@@ -194,14 +142,6 @@
             }
           }
         }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.86,
-          "c": 0.01,
-          "h": 250
-        }
       }
     },
     {
@@ -218,14 +158,6 @@
               "h": 250
             }
           }
-        }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.55,
-          "c": 0.15,
-          "h": 250
         }
       }
     }

@@ -7,13 +7,13 @@ const model: BrandingModel = {
   nodes: [
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in',
       description: 'sign-in button for the login page',
-      facets: {}, value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
+      facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } } },
     { snapshotId: 'auth.login.title', role: 'heading', name: 'Sign in to Stratos',
       description: 'title for the login page',
-      facets: {}, value: { kind: 'content', text: 'Sign in to Stratos' } },
+      facets: { content: { text: 'Sign in to Stratos' } } },
     { snapshotId: 'auth.login.orphan', role: 'img', name: null,
       description: 'decorative flourish',
-      facets: {}, value: { kind: 'asset', ref: 'flourish.svg' } },
+      facets: { asset: { ref: 'flourish.svg' } } },
   ],
 };
 
@@ -45,7 +45,7 @@ describe('project', () => {
     const m = { scene: 'login', nodes: [
       { snapshotId: 'app.shell.brand', role: 'img', name: null,
         description: 'brand color',
-        facets: {}, value: { kind: 'color' as const, oklch: { l: 0.55, c: 0.15, h: 250 } } },
+        facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } } },
     ] };
     const r = project(m, { elements: { 'app.shell.brand': { token: '--color-brand-500', oklchRole: 'scale' } } });
     expect(r.tokens.get('--color-brand-50')).toMatch(/^#[0-9a-f]{6}$/);
@@ -56,7 +56,7 @@ describe('project', () => {
   it('picks the longest matching container prefix', () => {
     const m = { scene: 'x', nodes: [
       { snapshotId: 'auth.login.title', role: 'heading', name: 'T',
-        description: 'title', facets: {}, value: { kind: 'content' as const, text: 'Hi' } },
+        description: 'title', facets: { content: { text: 'Hi' } } },
     ] };
     const r = project(m, {
       containers: { 'auth': 'a', 'auth.login': 'login' },
@@ -65,13 +65,12 @@ describe('project', () => {
     expect(r.companyConfig).toMatchObject({ login: { title: 'Hi' } });
   });
 
-  it('reads color from facets when value carries wrong kind (facets-primary path)', () => {
+  it('reads color from facets (surface.background literal)', () => {
     const m = { scene: 'login', nodes: [{
       snapshotId: 'auth.login.page', role: '', name: null, description: '',
       facets: { surface: { background: { literal: { l: 0.97, c: 0.01, h: 250 } } } },
-      value: { kind: 'content' as const, text: 'WRONG' }, // wrong value forces read from facets
     }] };
-    const r = project(m as any, {
+    const r = project(m, {
       containers: { 'auth.login': 'login' },
       elements: { 'auth.login.page': { config: 'backgroundColor' } },
     });
@@ -81,11 +80,11 @@ describe('project', () => {
   it('projects element visibility into its routed show-field', () => {
     const model = { scene: 'login', nodes: [
       { snapshotId: 'auth.login.logo', role: 'img', name: null,
-        description: '', facets: {}, value: { kind: 'asset' as const, ref: 'logo.svg' }, visibility: false },
+        description: '', facets: { asset: { ref: 'logo.svg' } }, visibility: false },
     ]};
     const routing = { containers: { 'auth.login': 'login' },
       elements: { 'auth.login.logo': { config: 'logos.main', visibilityConfig: 'showLogo' } } };
-    const r = project(model as any, routing as any);
+    const r = project(model, routing);
     expect(r.companyConfig).toMatchObject({ logos: { main: 'logo.svg' }, login: { showLogo: false } });
   });
 });

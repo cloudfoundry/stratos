@@ -6,11 +6,11 @@ const model: BrandingModel = {
   scene: 'login',
   nodes: [
     { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title',
-      facets: { content: { text: 'Hi' } }, value: { kind: 'content', text: 'Hi' } },
+      facets: { content: { text: 'Hi' } } },
     { snapshotId: 'auth.login.logo', role: 'img', name: 'L', description: 'logo',
-      facets: { asset: { ref: 'logo.png' } }, value: { kind: 'asset', ref: 'logo.png' }, visibility: false },
+      facets: { asset: { ref: 'logo.png' } }, visibility: false },
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
-      facets: {}, value: { kind: 'color', oklch: { l: 0.5, c: 0.1, h: 250 } } },
+      facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
   ],
 };
 
@@ -44,9 +44,9 @@ describe('leverPatchesFor', () => {
   it('emits content/asset preview patches from facets', () => {
     const nodes = [
       { snapshotId: 'a', role: 'heading', name: 'A', description: '',
-        facets: { content: { text: 'Hi' } }, value: { kind: 'color' as const, oklch: { l: 0.5, c: 0, h: 0 } } },
+        facets: { content: { text: 'Hi' } } },
       { snapshotId: 'b', role: 'img', name: 'B', description: '',
-        facets: { asset: { ref: 'logo.svg' } }, value: { kind: 'color' as const, oklch: { l: 0.5, c: 0, h: 0 } } },
+        facets: { asset: { ref: 'logo.svg' } } },
     ];
     const patches = leverPatchesFor({ scene: 's', nodes } as any);
     expect(patches).toContainEqual({ snapshotId: 'a', kind: 'content', text: 'Hi' });

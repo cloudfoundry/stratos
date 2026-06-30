@@ -2,7 +2,6 @@ import type { Facets, FacetValue, LeverValue } from '@/metadata/types';
 import type { RoutingMap } from '@/projection/projector';
 import { project } from '@/projection/projector';
 import { brandingModel, setNodeFacets, setNodeVisibility } from '@/state/branding';
-import { primaryValue } from '@/metadata/facets';
 import { setRootValue } from '@/state/tokens';
 
 export function buildVisibilityCompanion(
@@ -35,10 +34,10 @@ export function applyEdit(snapshotId: string, value: LeverValue, routing: Routin
   if (!m) return;
   const node = m.nodes.find((n) => n.snapshotId === snapshotId);
   if (!node) return;
-  // Write edit into facets (primary) and keep node.value in sync.
+  // Write edit into facets (the sole brandable field).
   const updatedFacets = leverValueToFacets(value, node.facets);
-  setNodeFacets(snapshotId, updatedFacets, primaryValue(updatedFacets));
+  setNodeFacets(snapshotId, updatedFacets);
   // re-project only the edited node so color levers update their bound token
-  const { tokens } = project({ scene: m.scene, nodes: [{ ...node, value, facets: updatedFacets }] }, routing);
+  const { tokens } = project({ scene: m.scene, nodes: [{ ...node, facets: updatedFacets }] }, routing);
   for (const [k, v] of tokens) setRootValue(k, v);
 }

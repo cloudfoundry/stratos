@@ -1,5 +1,5 @@
 import { signal } from '@preact/signals-core';
-import type { BrandingModel, ElementNode, Facets, LeverValue, ScopedBlock } from '@/metadata/types';
+import type { BrandingModel, ElementNode, Facets, ScopedBlock } from '@/metadata/types';
 
 export const brandingModel = signal<BrandingModel | null>(null);
 
@@ -24,22 +24,13 @@ export function nodeFor(snapshotId: string): ElementNode | undefined {
   return brandingModel.value?.nodes.find((n) => n.snapshotId === snapshotId);
 }
 
-export function setNodeValue(snapshotId: string, value: LeverValue): void {
+/** Update node.facets in a single signal write. */
+export function setNodeFacets(snapshotId: string, facets: Facets): void {
   const m = brandingModel.value;
   if (!m) return;
   brandingModel.value = {
     ...m,
-    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, value } : n)),
-  };
-}
-
-/** Update node.facets and node.value together in a single signal write. */
-export function setNodeFacets(snapshotId: string, facets: Facets, value: LeverValue): void {
-  const m = brandingModel.value;
-  if (!m) return;
-  brandingModel.value = {
-    ...m,
-    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, facets, value } : n)),
+    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, facets } : n)),
   };
 }
 

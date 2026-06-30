@@ -7,7 +7,7 @@ const model: BrandingModel = {
   scene: 'login',
   nodes: [
     { snapshotId: 'auth.login.logo', role: 'img', name: 'L', description: 'logo',
-      facets: {}, value: { kind: 'asset', ref: 'logo.svg' }, visibility: true },
+      facets: { asset: { ref: 'logo.svg' } }, visibility: true },
   ],
 };
 

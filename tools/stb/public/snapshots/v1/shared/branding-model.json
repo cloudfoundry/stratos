@@ -17,14 +17,6 @@
           }
         }
       },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 1,
-          "c": 0,
-          "h": 0
-        }
-      },
       "roledescription": "dialog"
     },
     {
@@ -36,10 +28,6 @@
         "content": {
           "text": "Are you sure?"
         }
-      },
-      "value": {
-        "kind": "content",
-        "text": "Are you sure?"
       }
     },
     {
@@ -56,14 +44,6 @@
               "h": 250
             }
           }
-        }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.55,
-          "c": 0.15,
-          "h": 250
         }
       }
     },
@@ -83,14 +63,6 @@
           }
         }
       },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.98,
-          "c": 0.005,
-          "h": 250
-        }
-      },
       "roledescription": "stepper"
     },
     {
@@ -108,14 +80,6 @@
             }
           }
         }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.86,
-          "c": 0.01,
-          "h": 250
-        }
       }
     },
     {
@@ -132,14 +96,6 @@
               "h": 250
             }
           }
-        }
-      },
-      "value": {
-        "kind": "color",
-        "oklch": {
-          "l": 0.55,
-          "c": 0.15,
-          "h": 250
         }
       }
     }

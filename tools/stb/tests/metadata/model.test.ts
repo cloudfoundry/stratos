@@ -10,12 +10,10 @@ describe('branding model types', () => {
       nodes: [
         { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in',
           description: 'sign-in button for the login page',
-          facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } },
-          value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } } },
+          facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } } },
         { snapshotId: 'auth.login.title', role: 'heading', name: 'Sign in to Stratos',
           description: 'title for the login page',
-          facets: { content: { text: 'Sign in to Stratos' } },
-          value: { kind: 'content', text: 'Sign in to Stratos' } },
+          facets: { content: { text: 'Sign in to Stratos' } } },
       ],
     };
     expect(model.nodes.filter(isColorNode)).toHaveLength(1);
@@ -51,12 +49,11 @@ describe('buildModel carries the scoped block', () => {
 });
 
 describe('facets on ElementNode', () => {
-  it('builds facets from the values.json facet shape and a back-compat value', () => {
+  it('builds facets from the values.json facet shape', () => {
     const html = `<div stb-snapshot-id="x" stba-role="heading"></div>`;
     const values = { x: { name: 'X', facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } } };
     const model = buildModel('s', html, values as any);
     expect(model.nodes[0]!.facets.text!.color).toEqual({ literal: { l: 0.5, c: 0.1, h: 250 } });
-    expect(model.nodes[0]!.value.kind).toBe('color'); // derived primary
   });
 
   it('primaryValue prefers content, then asset, then a color', () => {

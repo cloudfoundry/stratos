@@ -2,13 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { valuePreview } from '@/ui/element-tree';
 import type { NavNode } from '@/navigator/column-model';
 
-const colorValue = { kind: 'color' as const, oklch: { l: 0.5, c: 0.1, h: 250 } };
-
 describe('valuePreview', () => {
-  it('returns text kind for a node with facets.content (facets-only, value is color)', () => {
+  it('returns text kind for a node with facets.content', () => {
     const node: NavNode = {
       snapshotId: 'x', scene: 's', name: 'X', description: '',
-      facets: { content: { text: 'Hello' } }, value: colorValue,
+      facets: { content: { text: 'Hello' } },
     };
     const vp = valuePreview(node);
     expect(vp.kind).toBe('text');
@@ -16,10 +14,10 @@ describe('valuePreview', () => {
     expect(vp.swatch).toBeUndefined();
   });
 
-  it('returns image kind for a node with facets.asset (facets-only, value is color)', () => {
+  it('returns image kind for a node with facets.asset', () => {
     const node: NavNode = {
       snapshotId: 'y', scene: 's', name: 'Y', description: '',
-      facets: { asset: { ref: 'logo.svg' } }, value: colorValue,
+      facets: { asset: { ref: 'logo.svg' } },
     };
     const vp = valuePreview(node);
     expect(vp.kind).toBe('image');
@@ -27,10 +25,10 @@ describe('valuePreview', () => {
     expect(vp.swatch).toBeUndefined();
   });
 
-  it('returns a hex swatch for a node with no content/asset facets', () => {
+  it('returns a hex swatch for a node with a color facet', () => {
     const node: NavNode = {
       snapshotId: 'z', scene: 's', name: 'Z', description: '',
-      facets: {}, value: colorValue,
+      facets: { surface: { background: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
     };
     const vp = valuePreview(node);
     expect(vp.kind).toBe('color');

@@ -1,6 +1,6 @@
 import { effect, signal } from '@preact/signals-core';
 import { globalModel } from '@/state/global-branding';
-import { oklchToHex } from '@/color/oklch';
+import { oklchToHex, type Oklch } from '@/color/oklch';
 import {
   buildPathTree,
   computeColumns,
@@ -33,7 +33,10 @@ export function swatchFor(p: PathNode): { color?: string; glyph?: string } {
   const f = p.node.facets;
   if (f?.content) return { glyph: 'T' };
   if (f?.asset) return { glyph: '🖼' };
-  if (p.node.value.kind === 'color') return { color: oklchToHex(p.node.value.oklch) };
+  const colorFacet = f?.text?.color ?? f?.surface?.background;
+  if (colorFacet && 'literal' in colorFacet && typeof colorFacet.literal === 'object') {
+    return { color: oklchToHex(colorFacet.literal as Oklch) };
+  }
   return { glyph: '·' };
 }
 
