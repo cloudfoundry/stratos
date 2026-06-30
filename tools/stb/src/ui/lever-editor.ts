@@ -19,6 +19,8 @@ export interface OpenLeverEditorOptions {
   onFacetEdit?: (key: string, value: FacetValue) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  tokenForKey?: (key: string) => string | null;
+  resolveLiteral?: (key: string, token: string) => FacetValue;
 }
 
 export function colorValueFromHex(hex: string): LeverValue {
@@ -107,6 +109,8 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       onEdit: opts.onFacetEdit ?? (() => {}),
       ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
       ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
+      ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
+      ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
     });
   }
 

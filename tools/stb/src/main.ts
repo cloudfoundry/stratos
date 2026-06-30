@@ -1,3 +1,4 @@
+import { toOklch } from '@/color/oklch';
 import { mountEditorPane } from '@/ui/editor-pane';
 import { mountTokenSidebar } from '@/ui/token-sidebar';
 import { mountElementTree } from '@/ui/element-tree';
@@ -16,7 +17,7 @@ import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets } from '@
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
-import { primaryValue } from '@/metadata/facets';
+import { primaryValue, FACET_PROPS } from '@/metadata/facets';
 import { setFacetProp, addGroup, removeGroup } from '@/state/facets-edit';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
@@ -139,6 +140,12 @@ async function main() {
         if (!n) return;
         setNodeFacets(snapshotId, removeGroup(n.facets, g));
         selectElement(snapshotId);
+      },
+      tokenForKey: (key) => routing.elements[snapshotId]?.properties?.[key]?.token ?? null,
+      resolveLiteral: (key, token) => {
+        const spec = FACET_PROPS[key];
+        const v = effectiveValue(token, previewDark.value);
+        return spec?.isColor ? { literal: toOklch(v) } : { literal: v };
       },
       ...companion,
     });
