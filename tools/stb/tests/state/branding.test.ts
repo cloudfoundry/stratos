@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { brandingModel, nodeFor, setNodeValue, setNodeVisibility, loadBrandingModel } from '@/state/branding';
+import { brandingModel, nodeFor, setNodeValue, setNodeVisibility, setNodeScopedBlock, loadBrandingModel } from '@/state/branding';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
@@ -39,6 +39,14 @@ describe('branding state', () => {
     setNodeVisibility('auth.login.logo', false);
     expect(nodeFor('auth.login.logo')?.visibility).toBe(false);
     expect(brandingModel.value).not.toBe(before); // new reference → reactivity
+  });
+
+  it('setNodeScopedBlock sets the scoped block on one node immutably', () => {
+    const before = brandingModel.value;
+    setNodeScopedBlock('auth.login.title', 'font-size: 18px');
+    expect(nodeFor('auth.login.title')?.scopedBlock).toBe('font-size: 18px');
+    expect(brandingModel.value).not.toBe(before); // new reference → reactivity
+    expect(nodeFor('auth.login.sign-in')?.scopedBlock).toBeUndefined(); // others untouched
   });
 });
 

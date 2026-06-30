@@ -1,9 +1,8 @@
-import { EditorView, basicSetup } from 'codemirror';
-import { EditorState } from '@codemirror/state';
-import { css } from '@codemirror/lang-css';
+import type { EditorView } from 'codemirror';
 import { effect } from '@preact/signals-core';
 import { parseCss } from '@/parse/css-parser';
 import { emitCss } from '@/parse/css-emitter';
+import { mountCssEditor } from '@/ui/css-editor';
 import { rootValues, darkValues } from '@/state/tokens';
 
 const DEBOUNCE_MS = 150;
@@ -27,19 +26,7 @@ export function mountEditorPane(host: HTMLElement): EditorView {
 
   const initial = emitCss(rootValues.value, darkValues.value);
 
-  const view = new EditorView({
-    parent: host,
-    state: EditorState.create({
-      doc: initial,
-      extensions: [
-        basicSetup,
-        css(),
-        EditorView.updateListener.of((u) => {
-          if (u.docChanged) onDocChange(u.state.doc.toString());
-        }),
-      ],
-    }),
-  });
+  const view = mountCssEditor(host, initial, onDocChange);
 
   effect(() => {
     const desired = emitCss(rootValues.value, darkValues.value);

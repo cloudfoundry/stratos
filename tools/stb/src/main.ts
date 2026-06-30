@@ -12,7 +12,7 @@ import { mountStatusBar } from '@/ui/status-bar';
 import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
-import { nodeFor, loadBrandingModel } from '@/state/branding';
+import { nodeFor, loadBrandingModel, setNodeScopedBlock } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
@@ -116,6 +116,8 @@ async function main() {
       snapshotId,
       value: node.value,
       onChange: (next) => applyEdit(snapshotId, next, routing),
+      scopedBlock: node.scopedBlock,
+      onScopedBlockChange: (css) => setNodeScopedBlock(snapshotId, css),
       ...companion,
     });
   }
