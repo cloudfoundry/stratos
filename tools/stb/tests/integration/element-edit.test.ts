@@ -32,6 +32,8 @@ describe('applyEdit facets write-back', () => {
       facets: { content: { text: 'A' } } },
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
       facets: { surface: { background: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
+    { snapshotId: 'auth.login.text-label', role: 'text', name: 'Label', description: 'text label',
+      facets: { text: { color: { literal: { l: 0.4, c: 0.1, h: 120 } } } } },
   ] };
   beforeEach(() => { brandingModel.value = JSON.parse(JSON.stringify(facetModel)); rootValues.value = new Map(); });
 
@@ -44,5 +46,12 @@ describe('applyEdit facets write-back', () => {
     const newOklch = { l: 0.6, c: 0.12, h: 200 };
     applyEdit('auth.login.sign-in', { kind: 'color', oklch: newOklch }, routing);
     expect(nodeFor('auth.login.sign-in')?.facets.surface?.background).toEqual({ literal: newOklch });
+  });
+
+  it('writes a color edit back into the text.color facet', () => {
+    // Exercises the text.color write-back branch — surface.background branch already covered above.
+    const newOklch = { l: 0.3, c: 0.08, h: 180 };
+    applyEdit('auth.login.text-label', { kind: 'color', oklch: newOklch }, routing);
+    expect(nodeFor('auth.login.text-label')?.facets.text?.color).toEqual({ literal: newOklch });
   });
 });

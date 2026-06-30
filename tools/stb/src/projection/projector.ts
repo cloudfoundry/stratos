@@ -8,6 +8,8 @@ export interface RoutingEntry {
   token?: string;
   oklchRole?: 'primary' | 'scale';
   visibilityConfig?: string;
+  /** Per-facet routing — current preferred form; supersedes legacy top-level config/token/oklchRole.
+   *  Do not mix both for the same element: if both are present both run (last-write-wins on company-config). */
   properties?: Record<string, PropertyRoute>;
 }
 export interface RoutingMap {
