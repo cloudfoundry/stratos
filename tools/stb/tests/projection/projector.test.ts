@@ -65,6 +65,19 @@ describe('project', () => {
     expect(r.companyConfig).toMatchObject({ login: { title: 'Hi' } });
   });
 
+  it('reads color from facets when value carries wrong kind (facets-primary path)', () => {
+    const m = { scene: 'login', nodes: [{
+      snapshotId: 'auth.login.page', role: '', name: null, description: '',
+      facets: { surface: { background: { literal: { l: 0.97, c: 0.01, h: 250 } } } },
+      value: { kind: 'content' as const, text: 'WRONG' }, // wrong value forces read from facets
+    }] };
+    const r = project(m as any, {
+      containers: { 'auth.login': 'login' },
+      elements: { 'auth.login.page': { config: 'backgroundColor' } },
+    });
+    expect((r.companyConfig as any).login.backgroundColor).toMatch(/^#/);
+  });
+
   it('projects element visibility into its routed show-field', () => {
     const model = { scene: 'login', nodes: [
       { snapshotId: 'auth.login.logo', role: 'img', name: null,
