@@ -23,4 +23,15 @@ describe('exportInputs', () => {
     expect(out.root.get('--x')).toBe('#000');        // preserved
     expect('companyConfig' in out).toBe(false);      // key absent, no empty company-config.json
   });
+
+  it('keeps token-first for a color node that also carries a scopedBlock, and exports the block', () => {
+    const m: BrandingModel = { scene: 'login', nodes: [
+      { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
+        value: { kind: 'color', oklch: { l: 0.55, c: 0.15, h: 250 } },
+        scopedBlock: 'font-size: 18px' },
+    ] };
+    const out = exportInputs(m, routing, new Map(), new Map(), []);
+    expect(out.root.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/); // token-first still wins
+    expect(out.scopedCss).toContain('[stb-snapshot-id="auth.login.sign-in"]'); // block also exported
+  });
 });
