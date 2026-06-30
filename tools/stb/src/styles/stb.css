@@ -30,16 +30,16 @@ body {
   gap: 0.5rem;
 }
 
-/* Status bar inside topbar: strip standalone borders/background */
-.stb-topbar .stb-status-bar {
-  border: none;
-  padding: 0;
-  background: transparent;
-}
-
-/* Push the status host to the right edge (it is the topbar's flex child) */
+/* Status host is its own full-width row under the actions row (flex-basis:100%
+   wraps it onto its own line). The inner .stb-status-spacer (flex:1) then spans
+   the full width: completeness message pinned left, Color-format pinned right —
+   so the message no longer drifts with the actions cluster or its own length. */
 .stb-topbar .stb-statusbar-host {
-  margin-left: auto;
+  flex-basis: 100%;
+  padding: 0.4rem 0 0;
+  border: none;
+  border-top: 1px solid var(--border, #e5e7eb);
+  background: transparent;
 }
 
 /* Navigator band: full-width, bounded height, navigator + CSS editor side by side */
