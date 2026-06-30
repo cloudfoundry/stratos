@@ -1,4 +1,4 @@
-import type { Facets, FacetValue, LeverValue } from '@/metadata/types';
+import type { Facets, FacetValue } from '@/metadata/types';
 import { oklchToHex, type Oklch } from '@/color/oklch';
 
 export interface FacetPropSpec { cssProp: string; isColor: boolean; }
@@ -52,17 +52,4 @@ export function* contentAssetDeclarations(
 ): Generator<ContentAssetDeclaration> {
   if (facets.content) yield { key: 'content', value: facets.content.text };
   if (facets.asset) yield { key: 'asset', value: facets.asset.ref };
-}
-
-/** Derive the Phase-1 single LeverValue from a Facets bundle.
- *  Priority: content > asset > text.color > surface.background > null.
- *  Returns null for color-less nodes (typography/spacing only); callers must guard. */
-export function primaryValue(f: Facets): LeverValue | null {
-  if (f.content) return { kind: 'content', text: f.content.text };
-  if (f.asset) return { kind: 'asset', ref: f.asset.ref };
-  const color = f.text?.color ?? f.surface?.background;
-  if (color && 'literal' in color && typeof color.literal === 'object') {
-    return { kind: 'color', oklch: color.literal as Oklch };
-  }
-  return null;
 }

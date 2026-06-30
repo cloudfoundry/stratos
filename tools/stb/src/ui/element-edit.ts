@@ -21,7 +21,7 @@ export function buildVisibilityCompanion(
 function leverValueToFacets(value: LeverValue, existing: Facets): Facets {
   if (value.kind === 'content') return { ...existing, content: { text: value.text } };
   if (value.kind === 'asset') return { ...existing, asset: { ref: value.ref } };
-  // color: write into the same slot primaryValue read from (text.color > surface.background)
+  // color: write into text.color if present, else surface.background
   const colorFacet: FacetValue = { literal: value.oklch };
   if (existing.text?.color !== undefined) {
     return { ...existing, text: { ...existing.text, color: colorFacet } };

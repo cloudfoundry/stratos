@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildModel, primaryValue, type ValuesSidecar } from '../../scripts/generate-model';
+import { buildModel, type ValuesSidecar } from '../../scripts/generate-model';
 
 describe('buildModel carries the scoped block', () => {
   const html =
@@ -35,16 +35,5 @@ describe('facets on ElementNode', () => {
     const values = { x: { name: 'X', facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } } };
     const model = buildModel('s', html, values as any);
     expect(model.nodes[0]!.facets.text!.color).toEqual({ literal: { l: 0.5, c: 0.1, h: 250 } });
-  });
-
-  it('primaryValue prefers content, then asset, then a color', () => {
-    expect(primaryValue({ content: { text: 'hi' }, text: { color: { literal: { l:0,c:0,h:0 } } } })!.kind).toBe('content');
-    expect(primaryValue({ asset: { ref: 'a.svg' } })!.kind).toBe('asset');
-    expect(primaryValue({ surface: { background: { literal: { l:1,c:0,h:0 } } } })!.kind).toBe('color');
-  });
-
-  it('primaryValue returns null for a color-less node (typography/spacing only)', () => {
-    expect(primaryValue({ text: { fontSize: { literal: '18px' } } })).toBeNull();
-    expect(primaryValue({})).toBeNull();
   });
 });
