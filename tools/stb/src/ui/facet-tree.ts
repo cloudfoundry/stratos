@@ -17,6 +17,10 @@ export interface FacetTreeOptions {
   onScopedBlockChange?: (css: string) => void;
   onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  /** Returns the token name mapped to this element's property, or null if none. */
+  tokenForKey?: (key: string) => string | null;
+  /** Resolves the literal FacetValue to detach TO (token's current value). */
+  resolveLiteral?: (key: string, token: string) => FacetValue;
 }
 
 const FONT_FAMILIES = [
@@ -179,6 +183,31 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         }
         input.addEventListener('input', () => opts.onEdit(key, { literal: input.value }));
         leaf.appendChild(input);
+      }
+
+      // Scope indicator: shared badge + detach for token values; promote for promotable literals
+      const defaultLiteralFor = (s: typeof spec): FacetValue =>
+        s.isColor ? { literal: { l: 0, c: 0, h: 0 } } : { literal: '' };
+      if (current && 'token' in current) {
+        const badge = document.createElement('span');
+        badge.className = 'stb-facet-shared';
+        badge.textContent = 'shared';
+        badge.title = `token --${current.token} (changes everywhere)`;
+        const detach = document.createElement('button');
+        detach.type = 'button';
+        detach.className = 'stb-facet-detach';
+        detach.textContent = 'detach';
+        detach.addEventListener('click', () =>
+          opts.onEdit(key, opts.resolveLiteral ? opts.resolveLiteral(key, current.token) : defaultLiteralFor(spec)),
+        );
+        leaf.append(badge, detach);
+      } else if (current && 'literal' in current && opts.tokenForKey?.(key)) {
+        const promote = document.createElement('button');
+        promote.type = 'button';
+        promote.className = 'stb-facet-promote';
+        promote.textContent = 'promote';
+        promote.addEventListener('click', () => opts.onEdit(key, { token: opts.tokenForKey!(key)! }));
+        leaf.appendChild(promote);
       }
 
       // Track focused group for isolate

@@ -136,3 +136,35 @@ it('remove button calls onRemoveGroup and does not trigger collapse', () => {
   // stopPropagation must have prevented the branch click from toggling collapse
   expect(textBranch.classList.contains('stb-facet-collapsed')).toBe(false);
 });
+
+it('marks a token-backed property as shared and offers detach', () => {
+  const host = document.createElement('div');
+  const edits: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { text: { color: { token: 'fg' } } },
+    onEdit: (k, v) => edits.push([k, v]),
+    previewHost: document.createElement('div'),
+  });
+  const leaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  expect(leaf.querySelector('.stb-facet-shared')).not.toBeNull();
+  (leaf.querySelector('.stb-facet-detach') as HTMLButtonElement).click();
+  expect(edits[0]![1]).toHaveProperty('literal');
+});
+
+it('shows promote for a literal property with a token mapping, none without', () => {
+  const host = document.createElement('div');
+  const edits: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { text: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+    onEdit: (k, v) => edits.push([k, v]),
+    previewHost: document.createElement('div'),
+    tokenForKey: (k) => k === 'text.color' ? 'fg' : null,
+  });
+  const colorLeaf = host.querySelector('.stb-facet-leaf[data-key="text.color"]')!;
+  expect(colorLeaf.querySelector('.stb-facet-promote')).not.toBeNull();
+  (colorLeaf.querySelector('.stb-facet-promote') as HTMLButtonElement).click();
+  expect(edits[0]).toEqual(['text.color', { token: 'fg' }]);
+  // A leaf whose key has no token mapping shows no promote button
+  const sizeLeaf = host.querySelector('.stb-facet-leaf[data-key="text.fontSize"]')!;
+  expect(sizeLeaf.querySelector('.stb-facet-promote')).toBeNull();
+});
