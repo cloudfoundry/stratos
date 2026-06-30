@@ -14,8 +14,9 @@ function node(snapshotId: string, scopedBlock?: string): ElementNode {
   };
 }
 
-// The scoped rule repeats the attribute selector to reach specificity (0,3,0),
-// so it beats the snapshot's compound selectors (e.g. `.login-card h1` (0,1,1),
+// The scoped rule repeats the attribute selector 3× and adds a mode prefix:
+// light `html:not(.dark-theme) [attr]×3` (0,4,1), dark `.dark-theme [attr]×3` (0,4,0).
+// Either beats the snapshot's compound selectors (e.g. `.login-card h1` (0,1,1),
 // `.dark-theme .login-card h1` (0,2,1)) without `!important` — company-config
 // inline still wins. Empirically verified against the login snapshot.
 const sel = (id: string) => `[stb-snapshot-id="${id}"]`.repeat(3);
