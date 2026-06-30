@@ -50,7 +50,16 @@ export function harvestElements(html: string): HarvestedElement[] {
 
 export function lintRouting(els: HarvestedElement[], routing: RoutingMap): DriftReport {
   const elementIds = new Set(els.map((e) => e.snapshotId));
-  const routingIds = new Set(Object.keys(routing.elements));
+  // An entry is "mapped" if it carries legacy config/token/visibilityConfig, or a non-empty properties map.
+  // Empty entries ({}) are treated as unmapped so suppressing drift by adding blank entries is not allowed.
+  const routingIds = new Set(
+    Object.entries(routing.elements)
+      .filter(([, e]) =>
+        e.config || e.token || e.visibilityConfig ||
+        (e.properties && Object.keys(e.properties).length > 0),
+      )
+      .map(([id]) => id),
+  );
   return {
     phantoms: [...routingIds].filter((id) => !elementIds.has(id)),
     orphans: [...elementIds].filter((id) => !routingIds.has(id)),
