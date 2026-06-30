@@ -18,6 +18,7 @@ export interface ElementNode {
   name: string | null;
   description: string;     // DOM stba-description → ARIA aria-description
   facets: Facets;
+  facetsDark?: Facets;     // optional parallel dark-mode overrides (emitter writes a .dark-theme block)
   visibility?: boolean;    // optional show/hide on THIS element; undefined = shown
   scopedBlock?: ScopedBlock; // optional raw element-scoped CSS (R1 facet escape hatch)
 }

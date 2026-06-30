@@ -34,6 +34,16 @@ export function setNodeFacets(snapshotId: string, facets: Facets): void {
   };
 }
 
+/** Update node.facetsDark (parallel dark bundle) in a single signal write. */
+export function setNodeFacetsDark(snapshotId: string, facetsDark: Facets): void {
+  const m = brandingModel.value;
+  if (!m) return;
+  brandingModel.value = {
+    ...m,
+    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? { ...n, facetsDark } : n)),
+  };
+}
+
 export function setNodeVisibility(snapshotId: string, shown: boolean): void {
   const m = brandingModel.value;
   if (!m) return;
