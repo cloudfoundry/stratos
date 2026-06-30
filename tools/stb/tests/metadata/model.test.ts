@@ -1,24 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { BrandingModel } from '@/metadata/types';
-import { isColorNode } from '@/metadata/types';
 import { buildModel, primaryValue, type ValuesSidecar } from '../../scripts/generate-model';
-
-describe('branding model types', () => {
-  it('isColorNode narrows by lever kind', () => {
-    const model: BrandingModel = {
-      scene: 'login',
-      nodes: [
-        { snapshotId: 'auth.login.sign-in', role: 'button', name: 'Sign in',
-          description: 'sign-in button for the login page',
-          facets: { text: { color: { literal: { l: 0.55, c: 0.15, h: 250 } } } } },
-        { snapshotId: 'auth.login.title', role: 'heading', name: 'Sign in to Stratos',
-          description: 'title for the login page',
-          facets: { content: { text: 'Sign in to Stratos' } } },
-      ],
-    };
-    expect(model.nodes.filter(isColorNode)).toHaveLength(1);
-  });
-});
 
 describe('buildModel carries the scoped block', () => {
   const html =
@@ -57,8 +38,13 @@ describe('facets on ElementNode', () => {
   });
 
   it('primaryValue prefers content, then asset, then a color', () => {
-    expect(primaryValue({ content: { text: 'hi' }, text: { color: { literal: { l:0,c:0,h:0 } } } }).kind).toBe('content');
-    expect(primaryValue({ asset: { ref: 'a.svg' } }).kind).toBe('asset');
-    expect(primaryValue({ surface: { background: { literal: { l:1,c:0,h:0 } } } }).kind).toBe('color');
+    expect(primaryValue({ content: { text: 'hi' }, text: { color: { literal: { l:0,c:0,h:0 } } } })!.kind).toBe('content');
+    expect(primaryValue({ asset: { ref: 'a.svg' } })!.kind).toBe('asset');
+    expect(primaryValue({ surface: { background: { literal: { l:1,c:0,h:0 } } } })!.kind).toBe('color');
+  });
+
+  it('primaryValue returns null for a color-less node (typography/spacing only)', () => {
+    expect(primaryValue({ text: { fontSize: { literal: '18px' } } })).toBeNull();
+    expect(primaryValue({})).toBeNull();
   });
 });

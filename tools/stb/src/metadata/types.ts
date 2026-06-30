@@ -27,13 +27,6 @@ export interface BrandingModel {
   nodes: ElementNode[];
 }
 
-/** True when the node's primary lever is a color (text.color or surface.background literal). */
-export function isColorNode(n: ElementNode): boolean {
-  if (n.facets.content || n.facets.asset) return false;
-  const c = n.facets.text?.color ?? n.facets.surface?.background;
-  return !!(c && 'literal' in c && typeof c.literal === 'object');
-}
-
 export type FacetValue = { token: string } | { literal: Oklch | string };
 
 export interface TextFacet { color?: FacetValue; fontFamily?: FacetValue; fontSize?: FacetValue; fontWeight?: FacetValue; lineHeight?: FacetValue; }

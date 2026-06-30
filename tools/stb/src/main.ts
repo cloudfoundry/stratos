@@ -111,11 +111,14 @@ async function main() {
   function selectElement(snapshotId: string): void {
     const node = nodeFor(snapshotId);
     if (!node) return;
+    const lever = primaryValue(node.facets);
+    // NOTE: color-less node has no single-lever primary; the facet tree edits it.
+    if (!lever) return;
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
     openLeverEditor({
       previewHost,
       snapshotId,
-      value: primaryValue(node.facets),
+      value: lever,
       onChange: (next) => applyEdit(snapshotId, next, routing),
       scopedBlock: node.scopedBlock,
       onScopedBlockChange: (css) => setNodeScopedBlock(snapshotId, css),
