@@ -1,5 +1,5 @@
-import type { BrandingModel, LeverValue } from '@/metadata/types';
-import { oklchToHex, scaleFromOklch } from '@/color/oklch';
+import type { BrandingModel, Facets, LeverValue } from '@/metadata/types';
+import { oklchToHex, scaleFromOklch, type Oklch } from '@/color/oklch';
 
 export interface RoutingEntry {
   config?: string;
@@ -27,6 +27,29 @@ function leafValue(v: LeverValue): unknown {
       return _exhaustive;
     }
   }
+}
+
+/** Read an Oklch color from facets first; fall back to back-compat value. */
+function colorOf(node: { facets: Facets; value: LeverValue }): Oklch | null {
+  const c = node.facets.text?.color ?? node.facets.surface?.background;
+  if (c && 'literal' in c && typeof c.literal === 'object') return c.literal as Oklch;
+  if (node.value.kind === 'color') return node.value.oklch;
+  return null;
+}
+
+/** Derive the leaf value (hex/text/ref) from facets first for color; then value for content/asset
+ * (applyEdit updates node.value but not node.facets for content/asset edits). */
+function leafValueOf(node: { facets: Facets; value: LeverValue }): unknown {
+  // Color: prefer facets literal (new facets-primary path)
+  const color = colorOf(node);
+  if (color) return oklchToHex(color);
+  // Content/asset: prefer value (applyEdit writes node.value, not node.facets)
+  if (node.value.kind === 'content') return node.value.text;
+  if (node.value.kind === 'asset') return node.value.ref;
+  // Facets content/asset as final fallback (facets-only nodes with no back-compat value)
+  if (node.facets.content) return node.facets.content.text;
+  if (node.facets.asset) return node.facets.asset.ref;
+  return leafValue(node.value);
 }
 
 function namespaceFor(snapshotId: string, containers: Record<string, string>): string | null {
@@ -64,20 +87,21 @@ export function project(model: BrandingModel, routing: RoutingMap): ProjectionRe
       unmapped.push(node.snapshotId);
       continue;
     }
-    if (entry.token && node.value.kind === 'color') {
+    const color = colorOf(node);
+    if (entry.token && color) {
       if (entry.oklchRole === 'scale') {
-        const scale = scaleFromOklch(node.value.oklch);
+        const scale = scaleFromOklch(color);
         for (const [step, hex] of Object.entries(scale)) {
           tokens.set(entry.token.replace(/\d+$/, step), hex);
         }
       } else {
-        tokens.set(entry.token, oklchToHex(node.value.oklch));
+        tokens.set(entry.token, oklchToHex(color));
       }
     }
     if (entry.config) {
       const ns = entry.config.includes('.') ? null : namespaceFor(node.snapshotId, containers);
       const path = ns ? `${ns}.${entry.config}` : entry.config;
-      setPath(companyConfig, path, leafValue(node.value));
+      setPath(companyConfig, path, leafValueOf(node));
     }
     if (entry.visibilityConfig && node.visibility !== undefined) {
       const ns = entry.visibilityConfig.includes('.') ? null : namespaceFor(node.snapshotId, containers);
