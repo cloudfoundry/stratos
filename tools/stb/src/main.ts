@@ -13,7 +13,7 @@ import { mountStatusBar } from '@/ui/status-bar';
 import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
-import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets } from '@/state/branding';
+import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens } from '@/ui/element-edit';
@@ -128,6 +128,12 @@ async function main() {
           setNodeFacets(snapshotId, facets);
           reprojectNodeTokens(snapshotId, facets, routing);
         }
+      },
+      facetsDark: node.facetsDark ?? {},
+      onFacetEditDark: (key, value) => {
+        const n = nodeFor(snapshotId);
+        if (n) setNodeFacetsDark(snapshotId, setFacetProp(n.facetsDark ?? {}, key, value));
+        // No reproject: dark facet values are scoped literals, not token-projected.
       },
       onAddGroup: (g) => {
         const n = nodeFor(snapshotId);
