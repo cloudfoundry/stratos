@@ -26,17 +26,70 @@ const FONT_FAMILIES = [
 ];
 const FONT_WEIGHTS = ['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
 
+interface GroupEntry {
+  group: string;
+  branch: HTMLElement;
+  leaves: HTMLElement;
+  collapsed: boolean;
+}
+
+function setCollapsed(entry: GroupEntry, collapsed: boolean): void {
+  entry.collapsed = collapsed;
+  entry.branch.classList.toggle('stb-facet-collapsed', collapsed);
+  entry.leaves.hidden = collapsed;
+}
+
 export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { destroy(): void } {
   host.classList.add('stb-facet-tree');
   host.innerHTML = '';
   let scoped: ReturnType<typeof mountCssEditor> | null = null;
+  let focusedGroup: string | null = null;
+
+  // Control bar — rendered first so it is the top child
+  const bar = document.createElement('div');
+  bar.className = 'stb-facet-bar';
+
+  const btnExpandAll = document.createElement('button');
+  btnExpandAll.type = 'button';
+  btnExpandAll.className = 'stb-facet-expand-all';
+  btnExpandAll.textContent = 'Expand all';
+
+  const btnCollapseAll = document.createElement('button');
+  btnCollapseAll.type = 'button';
+  btnCollapseAll.className = 'stb-facet-collapse-all';
+  btnCollapseAll.textContent = 'Collapse all';
+
+  const btnIsolate = document.createElement('button');
+  btnIsolate.type = 'button';
+  btnIsolate.className = 'stb-facet-isolate';
+  btnIsolate.textContent = 'Isolate';
+
+  bar.appendChild(btnExpandAll);
+  bar.appendChild(btnCollapseAll);
+  bar.appendChild(btnIsolate);
+  host.appendChild(bar);
+
+  const groupEntries: GroupEntry[] = [];
 
   for (const g of GROUPS) {
     if (!opts.facets[g]) continue;
+
     const branch = document.createElement('div');
     branch.className = 'stb-facet-group';
     branch.textContent = g;
     host.appendChild(branch);
+
+    const leavesEl = document.createElement('div');
+    leavesEl.className = 'stb-facet-leaves';
+    host.appendChild(leavesEl);
+
+    const entry: GroupEntry = { group: g, branch, leaves: leavesEl, collapsed: false };
+    groupEntries.push(entry);
+
+    branch.addEventListener('click', () => {
+      setCollapsed(entry, !entry.collapsed);
+    });
+
     for (const [key, spec] of propsOf(g)) {
       const leaf = document.createElement('div');
       leaf.className = 'stb-facet-leaf';
@@ -88,9 +141,28 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         leaf.appendChild(input);
       }
 
-      host.appendChild(leaf);
+      // Track focused group for isolate
+      const capturedGroup = g;
+      leaf.addEventListener('focusin', () => { focusedGroup = capturedGroup; });
+
+      leavesEl.appendChild(leaf);
     }
   }
+
+  btnExpandAll.addEventListener('click', () => {
+    for (const entry of groupEntries) setCollapsed(entry, false);
+  });
+
+  btnCollapseAll.addEventListener('click', () => {
+    for (const entry of groupEntries) setCollapsed(entry, true);
+  });
+
+  btnIsolate.addEventListener('click', () => {
+    if (focusedGroup === null) return;
+    for (const entry of groupEntries) {
+      setCollapsed(entry, entry.group !== focusedGroup);
+    }
+  });
 
   if (opts.onScopedBlockChange) {
     const branch = document.createElement('div');
