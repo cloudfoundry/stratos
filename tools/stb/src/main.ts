@@ -16,6 +16,7 @@ import { nodeFor, loadBrandingModel, setNodeScopedBlock } from '@/state/branding
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion } from '@/ui/element-edit';
+import { primaryValue } from '@/metadata/facets';
 import { effect } from '@preact/signals-core';
 import { loadBuiltInPreset } from '@/state/presets';
 import { restoreSession, startAutoSave } from '@/state/persistence';
@@ -114,7 +115,7 @@ async function main() {
     openLeverEditor({
       previewHost,
       snapshotId,
-      value: node.value,
+      value: primaryValue(node.facets),
       onChange: (next) => applyEdit(snapshotId, next, routing),
       scopedBlock: node.scopedBlock,
       onScopedBlockChange: (css) => setNodeScopedBlock(snapshotId, css),

@@ -1,7 +1,8 @@
-import type { LeverValue } from '@/metadata/types';
+import type { Facets, FacetValue, LeverValue } from '@/metadata/types';
 import type { RoutingMap } from '@/projection/projector';
 import { project } from '@/projection/projector';
-import { brandingModel, setNodeValue, setNodeVisibility } from '@/state/branding';
+import { brandingModel, setNodeFacets, setNodeVisibility } from '@/state/branding';
+import { primaryValue } from '@/metadata/facets';
 import { setRootValue } from '@/state/tokens';
 
 export function buildVisibilityCompanion(
@@ -17,13 +18,27 @@ export function buildVisibilityCompanion(
   };
 }
 
+/** Map a LeverValue edit back into the Facets bundle it was sourced from. */
+function leverValueToFacets(value: LeverValue, existing: Facets): Facets {
+  if (value.kind === 'content') return { ...existing, content: { text: value.text } };
+  if (value.kind === 'asset') return { ...existing, asset: { ref: value.ref } };
+  // color: write into the same slot primaryValue read from (text.color > surface.background)
+  const colorFacet: FacetValue = { literal: value.oklch };
+  if (existing.text?.color !== undefined) {
+    return { ...existing, text: { ...existing.text, color: colorFacet } };
+  }
+  return { ...existing, surface: { ...existing.surface, background: colorFacet } };
+}
+
 export function applyEdit(snapshotId: string, value: LeverValue, routing: RoutingMap): void {
-  setNodeValue(snapshotId, value);
   const m = brandingModel.value;
   if (!m) return;
-  // re-project only the edited node so color levers update their bound token
   const node = m.nodes.find((n) => n.snapshotId === snapshotId);
   if (!node) return;
-  const { tokens } = project({ scene: m.scene, nodes: [node] }, routing);
+  // Write edit into facets (primary) and keep node.value in sync.
+  const updatedFacets = leverValueToFacets(value, node.facets);
+  setNodeFacets(snapshotId, updatedFacets, primaryValue(updatedFacets));
+  // re-project only the edited node so color levers update their bound token
+  const { tokens } = project({ scene: m.scene, nodes: [{ ...node, value, facets: updatedFacets }] }, routing);
   for (const [k, v] of tokens) setRootValue(k, v);
 }

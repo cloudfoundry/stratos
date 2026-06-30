@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { harvestElements } from './harvest-login';
-import type { BrandingModel, ElementNode, LeverValue, ScopedBlock, Facets } from '../src/metadata/types';
+import type { BrandingModel, ElementNode, ScopedBlock, Facets } from '../src/metadata/types';
+import { primaryValue } from '../src/metadata/facets';
 
 // The branding model is GENERATED from the snapshot DOM: identity, role,
 // roledescription (the "kind") and description are harvested off the stba-*
@@ -10,15 +11,7 @@ import type { BrandingModel, ElementNode, LeverValue, ScopedBlock, Facets } from
 export interface ValueEntry { name: string | null; facets: Facets; visibility?: boolean; scopedBlock?: ScopedBlock }
 export type ValuesSidecar = Record<string, ValueEntry>;
 
-export function primaryValue(f: Facets): LeverValue {
-  if (f.content) return { kind: 'content', text: f.content.text };
-  if (f.asset) return { kind: 'asset', ref: f.asset.ref };
-  const color = f.text?.color ?? f.surface?.background;
-  if (color && 'literal' in color && typeof color.literal === 'object') {
-    return { kind: 'color', oklch: color.literal };
-  }
-  return { kind: 'color', oklch: { l: 0, c: 0, h: 0 } };
-}
+export { primaryValue } from '../src/metadata/facets';
 
 export function buildModel(scene: string, html: string, values: ValuesSidecar): BrandingModel {
   const nodes: ElementNode[] = [];
