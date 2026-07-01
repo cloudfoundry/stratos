@@ -18,11 +18,13 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
 
   const initialParsed = parseColor(opts.initial);
   const initialHex = initialParsed ? formatColor(initialParsed, 'hex') : '#000000';
+  // Show the text value in the user's chosen format (hex/rgb/oklch), not always hex.
+  const initialText = initialParsed ? formatColor(initialParsed, opts.format) : opts.initial;
 
   panel.innerHTML = `
     <div class="stb-color-picker__row">
       <input type="color" class="stb-color-native" value="${initialHex}" />
-      <input type="text" class="stb-color-text" value="${opts.initial}" />
+      <input type="text" class="stb-color-text" value="${initialText}" />
     </div>
     <div class="stb-color-picker__row">
       <button class="stb-close">Close</button>
