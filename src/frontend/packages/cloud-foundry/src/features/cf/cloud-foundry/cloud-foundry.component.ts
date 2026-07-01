@@ -22,6 +22,7 @@ import {
 import type { EndpointModel } from '@stratosui/store';
 
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
+import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 @Component({
@@ -34,6 +35,7 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
     PageHeaderComponent,
     SignalListComponent,
     CfEndpointsMissingComponent,
+    DuplicateUrlBannerComponent,
   ],
   providers: [CloudFoundryService],
 })
