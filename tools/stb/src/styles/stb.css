@@ -102,6 +102,7 @@ body {
   margin: -0.6rem -0.6rem 0.4rem; border-bottom: 1px solid var(--border, #e5e7eb);
   border-radius: 8px 8px 0 0;
 }
+.stb-lever-title { font-weight: 600; font-size: 0.9rem; margin: 0 0 0.4rem; color: var(--text, #0f172a); }
 .stb-lever-text { display: block; width: 100%; min-height: 5rem; resize: both; box-sizing: border-box; font: inherit; }
 /* the scoped-CSS editor fills the popover width and grows with it (resize: both) */
 .stb-lever-scoped-block { width: 100%; }
