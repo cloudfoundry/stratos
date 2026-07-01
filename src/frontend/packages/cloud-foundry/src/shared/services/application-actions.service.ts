@@ -9,6 +9,7 @@ import { AppDetailDataService } from '../../features/applications/app-detail-dat
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
+import { extractHttpErrorMessage } from '../../services/extract-error-message';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
 
@@ -255,9 +256,17 @@ export class AppApplicationActionsService {
       })
       .catch((err: any) => {
         const firstError = err?.job?.errors?.[0];
+        // A synchronous CF 4xx (e.g. 422 "Assign a droplet before starting
+        // this app.") throws a raw HttpErrorResponse with no `.job`, so the
+        // job-shaped extraction misses and the snackbar shows a generic
+        // "Operation failed". Fall back to the CF error-envelope extractor
+        // so the operator sees the real reason. (#5520)
+        const error = firstError
+          ? { code: String(firstError.code), message: String(firstError.message) }
+          : { code: '', message: extractHttpErrorMessage(err) };
         this.appendLog({
           at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
-          error: firstError ? { code: String(firstError.code), message: String(firstError.message) } : undefined,
+          error,
         });
         this.refreshAppStats();
         // Failure path may have left CF in a partial state — refresh to
