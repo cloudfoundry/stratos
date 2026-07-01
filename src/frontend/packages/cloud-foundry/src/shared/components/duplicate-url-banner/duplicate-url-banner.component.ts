@@ -23,8 +23,12 @@ import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
            style="background-color: var(--info-bg); border-color: var(--info-border); color: var(--info-text);">
         <span class="material-icons text-base leading-5">info</span>
         <span>
-          {{ dupCount }} Cloud Foundry endpoints share a URL. {{ nounPlural }} from each are shown together —
-          use the Cloud Foundry filter to view a single endpoint.
+          {{ dupCount }} Cloud Foundry endpoints share a URL.
+          @if (message) {
+            {{ message }}
+          } @else {
+            {{ nounPlural }} from each are shown together — use the Cloud Foundry filter to view a single endpoint.
+          }
         </span>
       </div>
     }
@@ -36,6 +40,11 @@ export class DuplicateUrlBannerComponent {
   // Subject noun for the banner — defaults to the original application-wall
   // wording; Marketplace and Services override via @Input.
   @Input() nounPlural: string = 'Applications and organizations';
+
+  // Full replacement for the trailing sentence, for host pages where the
+  // "shown together — use the filter" wording doesn't apply (e.g. the
+  // Cloud Foundry endpoint picker, which lists endpoints, not entities).
+  @Input() message: string = '';
 
   duplicateCount$: Observable<number | null> =
     this.cloudFoundryService.connectedCFEndpoints$.pipe(
