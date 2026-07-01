@@ -76,7 +76,7 @@
     // = every editable region at once ("Show editable regions").
     el.textContent =
       '[data-stb-reveal], [data-stb-show-levers] [data-stb-lever] { min-width: 1.5rem !important; min-height: 1.25rem !important; }' +
-      '[data-stb-reveal]:empty::before, [data-stb-show-levers] [data-stb-lever]:empty::before { content: "Abc"; opacity: 0.7; }';
+      '[data-stb-reveal]:empty::before, [data-stb-show-levers] [data-stb-lever]:empty::before { content: attr(data-stb-reveal-label); opacity: 0.7; }';
     document.head.appendChild(el);
   }
 
@@ -123,11 +123,17 @@
     styleEl.textContent = cssText || '';
   }
 
-  function markLevers(ids) {
-    document.querySelectorAll('[data-stb-lever]').forEach((el) => el.removeAttribute('data-stb-lever'));
-    for (const id of ids || []) {
-      const el = document.querySelector('[stb-snapshot-id="' + id + '"]');
-      if (el) el.setAttribute('data-stb-lever', '');
+  function markLevers(levers) {
+    document.querySelectorAll('[data-stb-lever]').forEach((el) => {
+      el.removeAttribute('data-stb-lever');
+      el.removeAttribute('data-stb-reveal-label');
+    });
+    for (const lever of levers || []) {
+      const el = document.querySelector('[stb-snapshot-id="' + lever.id + '"]');
+      if (!el) continue;
+      el.setAttribute('data-stb-lever', '');
+      // stamp the element's real name so a revealed empty element labels itself
+      if (lever.name) el.setAttribute('data-stb-reveal-label', lever.name);
     }
     ensureLeverStyles();
   }
@@ -191,7 +197,7 @@
         applyScopedBlocks(msg.css);
         break;
       case 'STB_SET_LEVERS':
-        markLevers(msg.ids);
+        markLevers(msg.levers);
         break;
       case 'STB_SET_LEVER_OUTLINE':
         setLeverOutline(msg.on);
