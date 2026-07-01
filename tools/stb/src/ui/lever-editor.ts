@@ -26,6 +26,8 @@ export interface OpenLeverEditorOptions {
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   tokenForKey?: (key: string) => string | null;
   resolveLiteral?: (key: string, token: string) => FacetValue;
+  /** Live color-format accessor, forwarded to the facet tree's color pickers. */
+  colorFormat?: () => import('@/color/format').ColorFormat;
 }
 
 export function contentValue(text: string): LeverValue {
@@ -100,6 +102,7 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
       ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
       ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
+      ...(opts.colorFormat ? { colorFormat: opts.colorFormat } : {}),
       onContentEdit: (text: string) => opts.onChange(contentValue(text)),
       onAssetEdit: (file: File) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });

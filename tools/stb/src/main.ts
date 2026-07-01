@@ -168,6 +168,7 @@ async function main() {
         setNodeFacets(snapshotId, removeGroup(n.facets, g));
         selectElement(snapshotId);
       },
+      colorFormat: () => colorFormat.value,
       tokenForKey: (key) => routing.elements[snapshotId]?.properties?.[key]?.token ?? null,
       resolveLiteral: (key, token) => {
         const spec = FACET_PROPS[key];

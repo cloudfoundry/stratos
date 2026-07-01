@@ -2,6 +2,7 @@
 import type { Facets, FacetValue } from '@/metadata/types';
 import type { Oklch } from '@/color/oklch';
 import { toOklch, oklchToHex } from '@/color/oklch';
+import type { ColorFormat } from '@/color/format';
 import { FACET_PROPS } from '@/metadata/facets';
 import { openColorPicker } from '@/ui/color-picker';
 
@@ -27,6 +28,9 @@ export interface FacetTreeOptions {
   resolveLiteral?: (key: string, token: string) => FacetValue;
   onContentEdit?: (text: string) => void;
   onAssetEdit?: (file: File) => void;
+  /** Live color-format accessor (hex/rgb/oklch), read when a color picker opens so the
+   *  picker's text field matches the format chosen in the top bar. */
+  colorFormat?: () => ColorFormat;
 }
 
 const FONT_FAMILIES = [
@@ -212,9 +216,9 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         btn.addEventListener('click', () => openColorPicker({
           previewHost: opts.previewHost,
           initial: lit ? oklchToHex(lit) : '#000000',
-          // NOTE: hex is deliberate — value is stored as Oklch regardless of picker display format,
-          // so threading the live color-format signal buys nothing here.
-          format: 'hex',
+          // Value is stored as Oklch, but the picker's text field shows the format
+          // chosen in the top bar (hex/rgb/oklch) so the editor tracks that setting.
+          format: opts.colorFormat?.() ?? 'hex',
           onChange: (value) => opts.onEdit(key, { literal: toOklch(value) }),
         }));
         leaf.appendChild(btn);
@@ -237,7 +241,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         darkBtn.addEventListener('click', () => openColorPicker({
           previewHost: opts.previewHost,
           initial: litDark ? oklchToHex(litDark) : '#000000',
-          format: 'hex',
+          format: opts.colorFormat?.() ?? 'hex',
           onChange: (value) => opts.onDarkEdit?.(key, { literal: toOklch(value) }),
         }));
         leaf.appendChild(darkBtn);
