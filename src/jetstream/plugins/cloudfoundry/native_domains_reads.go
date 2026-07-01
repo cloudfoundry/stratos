@@ -3,6 +3,7 @@ package cloudfoundry
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -68,9 +69,20 @@ func (c *CloudFoundrySpecification) getNativeDomains(ctx echo.Context) error {
 }
 
 // getNativeOrgDomains handles GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/private_domains.
-// Returns only private domains (owned by the org) — V3 collapses
-// `/v2/organizations/:guid/private_domains` into `/v3/domains?organization_guids=:guid`,
-// which mixes owned + shared. Server-side filter to OwningOrgGUID==orgGuid.
+// V3 collapses `/v2/organizations/:guid/private_domains` into
+// `/v3/domains?organization_guids=:guid`, which returns every domain
+// visible to the org: its own private domains, domains explicitly
+// shared with it, AND global shared domains (no owning org at all).
+// Despite the route's legacy "private_domains" name, all of those are
+// valid Add-Route candidates for the org, so we only exclude domains
+// privately owned by a *different* org (defensive — CF shouldn't
+// return those for this filter, but we don't rely on that).
+//
+// Regression note: an earlier version of this handler discarded
+// everything except OwningOrgGUID==orgGuid, which dropped every
+// shared/global domain. Most orgs have no private domains of their
+// own and rely entirely on the foundation's shared domain, so the
+// Add Route domain dropdown ended up empty (#5523).
 func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
@@ -104,7 +116,9 @@ func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error 
 	resources := make([]StDomain, 0, len(raw.Resources))
 	for _, d := range raw.Resources {
 		st := toStDomain(d, cnsiGUID)
-		if st.OwningOrgGUID == orgGUID {
+		ownedByOtherOrg := st.OwningOrgGUID != "" && st.OwningOrgGUID != orgGUID
+		sharedWithOrg := slices.Contains(st.SharedOrgGUIDs, orgGUID)
+		if !ownedByOtherOrg || sharedWithOrg {
 			resources = append(resources, st)
 		}
 	}

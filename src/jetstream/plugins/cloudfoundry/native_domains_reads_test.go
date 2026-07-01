@@ -104,6 +104,45 @@ func newDomainsContext(e *echo.Echo, target string) (echo.Context, *httptest.Res
 	return ctx, rec
 }
 
+func newOrgDomainsContext(e *echo.Echo, target, orgGUID string) (echo.Context, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest(http.MethodGet, target, nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid", "orgGuid")
+	ctx.SetParamValues("test-cnsi", orgGUID)
+	return ctx, rec
+}
+
+// orgDomainsTestServer mimics what CF v3 actually returns for
+// `/v3/domains?organization_guids=:orgGuid` — a mix of the org's own
+// private domain, a domain explicitly shared with the org (owned by a
+// different org), and a global shared domain (no owning org at all).
+// It also includes a domain privately owned by a different org, which
+// CF would not normally return for this filter, to prove the handler
+// still excludes it defensively.
+func orgDomainsTestServer(t *testing.T, orgGUID string) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/domains":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 4, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					domainResource("dom-global-shared", "apps.example.com", false, "", nil),
+					domainResource("dom-owned", "owned.example.com", false, orgGUID, nil),
+					domainResource("dom-shared-with-org", "shared-in.example.com", false, "org-other", []string{orgGUID}),
+					domainResource("dom-owned-other", "other-owner.example.com", false, "org-other", nil),
+				},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+}
+
 func newDomainsPlugin(serverURL string) *CloudFoundrySpecification {
 	return &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -254,4 +293,43 @@ func TestGetNativeDomains_OmitsPagingWhenAbsent(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.False(t, q.PerPagePresent)
 	assert.False(t, q.PagePresent)
+}
+
+// TestGetNativeOrgDomains_KeepsSharedAndGlobalDomains is a regression
+// test for #5523: the Add Route domain dropdown was always empty
+// because CF v3's `organization_guids` filter mixes owned + shared
+// domains, and the handler used to discard everything except domains
+// privately owned by the requested org. Most orgs have zero private
+// domains and rely entirely on a shared/global domain, so the
+// dropdown had nothing to show.
+func TestGetNativeOrgDomains_KeepsSharedAndGlobalDomains(t *testing.T) {
+	const orgGUID = "org-1"
+	ts := orgDomainsTestServer(t, orgGUID)
+	defer ts.Close()
+
+	e := echo.New()
+	ctx, rec := newOrgDomainsContext(e, "/pp/v1/cf/org/test-cnsi/"+orgGUID+"/private_domains", orgGUID)
+	plugin := newDomainsPlugin(ts.URL)
+
+	require.NoError(t, plugin.getNativeOrgDomains(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StDomain]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+
+	guids := make([]string, 0, len(resp.Resources))
+	for _, d := range resp.Resources {
+		guids = append(guids, d.GUID)
+	}
+
+	// The global shared domain and the org's own private domain must
+	// survive — this is the #5523 bug.
+	assert.Contains(t, guids, "dom-global-shared", "global shared domain (no owning org) must be kept")
+	assert.Contains(t, guids, "dom-owned", "domain owned by the requested org must be kept")
+	assert.Contains(t, guids, "dom-shared-with-org", "domain explicitly shared with the requested org must be kept")
+
+	// A domain privately owned by a *different* org must still be excluded.
+	assert.NotContains(t, guids, "dom-owned-other", "domain owned by a different org must be excluded")
+
+	assert.Len(t, resp.Resources, 3)
 }
