@@ -70,19 +70,21 @@ func (c *CloudFoundrySpecification) getNativeDomains(ctx echo.Context) error {
 
 // getNativeOrgDomains handles GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/private_domains.
 // V3 collapses `/v2/organizations/:guid/private_domains` into
-// `/v3/domains?organization_guids=:guid`, which returns every domain
-// visible to the org: its own private domains, domains explicitly
+// `/v3/organizations/:guid/domains`, which returns every domain
+// available to the org: its own private domains, domains explicitly
 // shared with it, AND global shared domains (no owning org at all).
 // Despite the route's legacy "private_domains" name, all of those are
 // valid Add-Route candidates for the org, so we only exclude domains
 // privately owned by a *different* org (defensive — CF shouldn't
-// return those for this filter, but we don't rely on that).
+// return those here, but we don't rely on that).
 //
-// Regression note: an earlier version of this handler discarded
-// everything except OwningOrgGUID==orgGuid, which dropped every
-// shared/global domain. Most orgs have no private domains of their
-// own and rely entirely on the foundation's shared domain, so the
-// Add Route domain dropdown ended up empty (#5523).
+// Regression notes (#5523, twice):
+//  1. An earlier version discarded everything except
+//     OwningOrgGUID==orgGuid, which dropped every shared/global domain.
+//  2. The first fix kept querying `/v3/domains?organization_guids=` —
+//     but that filter matches the *owning* org only, so on a real CF
+//     it returns zero rows for orgs that rely on shared/global domains
+//     (most orgs). The org-scoped endpoint is the correct source.
 func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
@@ -103,12 +105,9 @@ func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 
 	perPage, page, present := parsePerPageAndPage(ctx)
-	params := applyPagingParams(
-		capi.NewQueryParams().WithFilter("organization_guids", orgGUID),
-		perPage, page, present,
-	)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
-	raw, lerr := cfClient.Domains().List(ctx.Request().Context(), params)
+	raw, lerr := cfClient.Organizations().ListDomains(ctx.Request().Context(), orgGUID, params)
 	if lerr != nil {
 		return handleCapiError(ctx, lerr)
 	}
