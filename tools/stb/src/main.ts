@@ -18,7 +18,7 @@ import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens, reprojectNodeTokensDark } from '@/ui/element-edit';
 import { FACET_PROPS, facetDeclarations } from '@/metadata/facets';
-import { setFacetProp, addGroup, removeGroup } from '@/state/facets-edit';
+import { setFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer } from '@/state/facets-edit';
 import { deriveDarkOklch } from '@/color/derive-dark';
 import type { Oklch } from '@/color/oklch';
 import { effect } from '@preact/signals-core';
@@ -166,6 +166,36 @@ async function main() {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, removeGroup(n.facets, g));
+        selectElement(snapshotId);
+      },
+      onBackstop: (color) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, setBackstop(n.facets, color));
+        selectElement(snapshotId);
+      },
+      onAddLayer: (layer) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, addLayer(n.facets, layer));
+        selectElement(snapshotId);
+      },
+      onSetLayer: (index, layer) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, setLayer(n.facets, index, layer));
+        selectElement(snapshotId);
+      },
+      onRemoveLayer: (index) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, removeLayer(n.facets, index));
+        selectElement(snapshotId);
+      },
+      onReorderLayer: (from, to) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, reorderLayer(n.facets, from, to));
         selectElement(snapshotId);
       },
       colorFormat: () => colorFormat.value,

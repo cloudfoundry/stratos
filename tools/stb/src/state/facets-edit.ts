@@ -1,4 +1,4 @@
-import type { Facets, FacetValue } from '@/metadata/types';
+import type { Facets, FacetValue, Layer } from '@/metadata/types';
 
 type Group = 'text' | 'surface' | 'spacing';
 const groupOf = (key: string) => key.split('.')[0] as Group;
@@ -16,4 +16,32 @@ export function removeGroup(f: Facets, group: Group): Facets {
   const next = { ...f };
   delete next[group];
   return next;
+}
+
+// --- background composite: backstop color + bottom-up layer stack ---
+// Layers append on top (last index = topmost); the emitter reverses this
+// order so CSS sees topmost-first, per the bottom-up authoring model.
+const bg = (f: Facets) => f.background ?? {};
+
+export function setBackstop(f: Facets, color: FacetValue): Facets {
+  return { ...f, background: { ...bg(f), color } };
+}
+export function addLayer(f: Facets, layer: Layer): Facets {
+  return { ...f, background: { ...bg(f), layers: [...(bg(f).layers ?? []), layer] } };
+}
+export function setLayer(f: Facets, index: number, layer: Layer): Facets {
+  const layers = [...(bg(f).layers ?? [])];
+  layers[index] = layer;
+  return { ...f, background: { ...bg(f), layers } };
+}
+export function removeLayer(f: Facets, index: number): Facets {
+  const layers = [...(bg(f).layers ?? [])];
+  layers.splice(index, 1);
+  return { ...f, background: { ...bg(f), layers } };
+}
+export function reorderLayer(f: Facets, from: number, to: number): Facets {
+  const layers = [...(bg(f).layers ?? [])];
+  const [moved] = layers.splice(from, 1);
+  layers.splice(to, 0, moved!);
+  return { ...f, background: { ...bg(f), layers } };
 }

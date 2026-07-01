@@ -180,6 +180,120 @@ it('renders an asset leaf with a file input', () => {
   expect(fileInput).not.toBeNull();
 });
 
+it('does not render the standalone asset slot when a background facet is present', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { asset: { ref: 'logo.svg' }, background: { color: { literal: '#000' } } },
+    onEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  expect(host.querySelector('.stb-facet-leaf[data-key="asset"]')).toBeNull();
+});
+
+it('renders the backstop color first, then layers, for a background facet', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      color: { literal: { l: 0.4, c: 0.1, h: 250 } },
+      layers: [{ kind: 'image', ref: 'assets/hero.jpg' }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const rows = [...host.querySelectorAll('[data-stb-bg-row]')];
+  expect(rows[0]!.getAttribute('data-stb-bg-row')).toBe('color');
+  expect(rows[1]!.getAttribute('data-stb-bg-row')).toBe('layer');
+});
+
+it('renders a gradient layer as a read-only summary row with remove/move controls, no type-select', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  expect(row.querySelector('select')).toBeNull();
+  expect(row.textContent).toContain('linear-gradient');
+  expect(row.querySelector('.stb-facet-bg-remove')).not.toBeNull();
+  expect(row.querySelector('.stb-facet-bg-move-up')).not.toBeNull();
+  expect(row.querySelector('.stb-facet-bg-move-down')).not.toBeNull();
+});
+
+it('fires onBackstop when the backstop swatch color changes', () => {
+  const host = document.createElement('div');
+  const backstops: unknown[] = [];
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onBackstop: (v) => backstops.push(v),
+  });
+  const btn = host.querySelector('[data-stb-bg-row="color"] .stb-facet-swatch') as HTMLButtonElement;
+  expect(btn).toBeTruthy();
+  btn.click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  expect(textInput).toBeTruthy();
+  textInput.value = '#112233';
+  textInput.dispatchEvent(new Event('input'));
+  expect(backstops.length).toBe(1);
+  expect(backstops[0]).toHaveProperty('literal');
+});
+
+it('fires onAddLayer, onRemoveLayer and onReorderLayer for layer row controls', () => {
+  const host = document.createElement('div');
+  const added: unknown[] = [];
+  const removed: number[] = [];
+  const reordered: [number, number][] = [];
+  mountFacetTree(host, {
+    facets: { background: { layers: [
+      { kind: 'image', ref: 'a' },
+      { kind: 'image', ref: 'b' },
+    ] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onAddLayer: (l) => added.push(l),
+    onRemoveLayer: (i) => removed.push(i),
+    onReorderLayer: (from, to) => reordered.push([from, to]),
+  });
+  const rows = [...host.querySelectorAll('[data-stb-bg-row="layer"]')];
+  expect(rows.length).toBe(2);
+  // first row (index 0) has no move-up (already bottom); second has no move-down (already top)
+  expect((rows[0]!.querySelector('.stb-facet-bg-move-up') as HTMLButtonElement).disabled).toBe(true);
+  expect((rows[1]!.querySelector('.stb-facet-bg-move-down') as HTMLButtonElement).disabled).toBe(true);
+  (rows[0]!.querySelector('.stb-facet-bg-move-down') as HTMLButtonElement).click();
+  expect(reordered).toContainEqual([0, 1]);
+  (rows[1]!.querySelector('.stb-facet-bg-remove') as HTMLButtonElement).click();
+  expect(removed).toContain(1);
+  (host.querySelector('.stb-facet-bg-add-image') as HTMLButtonElement).click();
+  expect(added).toContainEqual({ kind: 'image', ref: '' });
+  // only the image footer button exists in this slice — gradient editing is next
+  expect(host.querySelector('.stb-facet-bg-add-gradient')).toBeNull();
+});
+
+it('fires onSetLayer with a stored asset ref when a file is chosen for an image layer row', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: { layers: [{ kind: 'image', ref: '' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const input = row.querySelector('input[type="file"]') as HTMLInputElement;
+  expect(input).toBeTruthy();
+  const file = new File(['x'], 'hero.jpg', { type: 'image/jpeg' });
+  Object.defineProperty(input, 'files', { value: [file] });
+  input.dispatchEvent(new Event('change'));
+  expect(setLayers).toEqual([[0, { kind: 'image', ref: 'assets/hero.jpg' }]]);
+});
+
 it('renders a light swatch, a dark swatch and a derive button for a color leaf', () => {
   const host = document.createElement('div');
   mountFacetTree(host, {

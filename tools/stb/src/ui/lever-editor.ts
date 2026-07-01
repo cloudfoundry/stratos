@@ -1,4 +1,4 @@
-import type { LeverValue, Facets, FacetValue } from '@/metadata/types';
+import type { LeverValue, Facets, FacetValue, Layer } from '@/metadata/types';
 import type { EditorView } from 'codemirror';
 import { effect } from '@preact/signals-core';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
@@ -28,6 +28,12 @@ export interface OpenLeverEditorOptions {
   resolveLiteral?: (key: string, token: string) => FacetValue;
   /** Live color-format accessor, forwarded to the facet tree's color pickers. */
   colorFormat?: () => import('@/color/format').ColorFormat;
+  /** Background composite (Task 8/9), forwarded to the facet tree's background stack editor. */
+  onBackstop?: (value: FacetValue) => void;
+  onAddLayer?: (layer: Layer) => void;
+  onSetLayer?: (index: number, layer: Layer) => void;
+  onRemoveLayer?: (index: number) => void;
+  onReorderLayer?: (from: number, to: number) => void;
 }
 
 export function contentValue(text: string): LeverValue {
@@ -112,6 +118,11 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
       ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
       ...(opts.colorFormat ? { colorFormat: opts.colorFormat } : {}),
+      ...(opts.onBackstop ? { onBackstop: opts.onBackstop } : {}),
+      ...(opts.onAddLayer ? { onAddLayer: opts.onAddLayer } : {}),
+      ...(opts.onSetLayer ? { onSetLayer: opts.onSetLayer } : {}),
+      ...(opts.onRemoveLayer ? { onRemoveLayer: opts.onRemoveLayer } : {}),
+      ...(opts.onReorderLayer ? { onReorderLayer: opts.onReorderLayer } : {}),
       onContentEdit: (text: string) => opts.onChange(contentValue(text)),
       onAssetEdit: (file: File) => { setBrandingAsset(assetRefFor(file.name), file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });
