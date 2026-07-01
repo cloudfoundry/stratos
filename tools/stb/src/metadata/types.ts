@@ -30,13 +30,30 @@ export interface BrandingModel {
 
 export type FacetValue = { token: string } | { literal: Oklch | string };
 
-export interface TextFacet { color?: FacetValue; fontFamily?: FacetValue; fontSize?: FacetValue; fontWeight?: FacetValue; lineHeight?: FacetValue; }
-export interface SurfaceFacet { background?: FacetValue; border?: FacetValue; borderRadius?: FacetValue; }
-export interface SpacingFacet { padding?: FacetValue; margin?: FacetValue; gap?: FacetValue; }
+// --- kind 1: ordered comma-list ---
+export type ColorStop = { color: FacetValue; position?: string };
+export type Gradient =
+  | { type: 'linear'; repeating?: boolean; angle?: string; stops: ColorStop[] }
+  | { type: 'radial'; repeating?: boolean; shape?: 'circle' | 'ellipse'; size?: string; position?: string; stops: ColorStop[] }
+  | { type: 'conic';  repeating?: boolean; fromAngle?: string; position?: string; stops: ColorStop[] };
+export type Layer =
+  | { kind: 'image';    ref: string }
+  | { kind: 'gradient'; gradient: Gradient };
+export interface BackgroundFacet { color?: FacetValue; layers?: Layer[]; }
+
+// --- kind 2: positional tuple ---
+export interface Sides { top?: FacetValue; right?: FacetValue; bottom?: FacetValue; left?: FacetValue; }
+export interface GapTuple { row?: FacetValue; column?: FacetValue; }
+
+// --- groups ---
+export interface TextFacet { color?: FacetValue; fontFamily?: FacetValue[]; fontSize?: FacetValue; fontWeight?: FacetValue; lineHeight?: FacetValue; }
+export interface SurfaceFacet { border?: FacetValue; borderRadius?: FacetValue; }
+export interface SpacingFacet { padding?: Sides; margin?: Sides; gap?: GapTuple; }
 
 export interface Facets {
   content?: { text: string };
   asset?: { ref: string };
+  background?: BackgroundFacet;
   text?: TextFacet;
   surface?: SurfaceFacet;
   spacing?: SpacingFacet;
