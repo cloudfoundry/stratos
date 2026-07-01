@@ -17,7 +17,11 @@
       content_copy
     </span>
   }
-  <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300"
+  <!-- pointer-events-none: this indicator shares the grid cell with (and paints
+       on top of) the copy icon; hidden via opacity it still captures clicks, so
+       without this it swallows every click meant for the icon (see #5511). It is
+       decorative, so it never needs pointer events. -->
+  <div class="col-start-1 row-start-1 justify-self-end pointer-events-none flex items-center gap-1 transition-opacity duration-300"
     [class.opacity-100]="copySuccessWait"
     [class.opacity-0]="!copySuccessWait">
     @if (showSuccessText) {
