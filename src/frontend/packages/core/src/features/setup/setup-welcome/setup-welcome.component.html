@@ -4,7 +4,7 @@
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
-    <app-steppers>
+    <app-steppers [cancel]="'/setup'" [cancelReload]="true">
       <app-step [hideNextButton]="true" [signalHandle]="signalHandle">
         <div class="text-center space-y-8">
           <app-stratos-title></app-stratos-title>
