@@ -55,6 +55,15 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   const panel = document.createElement('div');
   panel.className = 'stb-lever-editor';
 
+  // Title bar: name what's being edited (the popover is decoupled from the
+  // tree selection, so without this you can't tell which element it targets).
+  const titledNode = nodeFor(opts.snapshotId);
+  const title = document.createElement('div');
+  title.className = 'stb-lever-title';
+  title.textContent = titledNode?.name ?? opts.snapshotId;
+  if (titledNode?.description) title.title = titledNode.description;
+  panel.appendChild(title);
+
   if (opts.visibilityCompanion) {
     const c = opts.visibilityCompanion;
     const label = document.createElement('label');
