@@ -4,7 +4,7 @@
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
-    <app-steppers class="flex flex-1 my-6">
+    <app-steppers class="flex flex-1 my-6" [cancel]="'/setup'">
       <app-step title="UAA Endpoint" [signalHandle]="uaaFormStepHandle">
         <div class="space-y-6">
           <p class="text-content-text">Please enter the following information to allow <app-product-name></app-product-name> to authenticate

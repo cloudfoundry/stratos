@@ -95,10 +95,10 @@
             @if (!steps[currentIndex()].hideCloseButton && cancel) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
-                [routerLink]="cancel$ | async"
-                [queryParams]="cancelQueryParams$ | async"
+                [routerLink]="cancelReload ? null : (cancel$ | async)"
+                [queryParams]="cancelReload ? null : (cancelQueryParams$ | async)"
                 [disabled]="!canCancel(currentIndex())"
-                (click)="steps[currentIndex()].onLeave(false)">
+                (click)="onCancel(currentIndex())">
                 {{ this.getCancelButtonText(currentIndex()) }}
               </button>
             }

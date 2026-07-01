@@ -45,6 +45,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   @ContentChildren(StepComponent) stepComponents!: QueryList<StepComponent>;
 
   @Input() cancel?: string;
+  // When true the Cancel button does a full-page load to `cancel` instead of a
+  // router navigation. Needed by first-run setup, which has no in-app
+  // destination and wants Cancel to hard-refresh back to the flow's start.
+  @Input() cancelReload = false;
   @Input() nextButtonProgress = true;
   @Input() basePreviousRedirect: StepperRedirectPayload | null = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
@@ -400,6 +404,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   getCancelButtonText(currentIndex: number): string {
     return this.steps[currentIndex].cancelButtonText;
+  }
+
+  onCancel(index: number) {
+    this.steps[index].onLeave(false);
+    if (this.cancelReload && this.cancel) {
+      // Full page load restarts the wizard from a clean state; the template
+      // drops routerLink when cancelReload so this is the only navigation.
+      window.location.assign(this.cancel);
+    }
   }
   private unsubscribeNext() {
     if (this.nextSub) {

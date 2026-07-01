@@ -4,7 +4,7 @@
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
-    <app-steppers class="flex flex-1 my-6">
+    <app-steppers class="flex flex-1 my-6" [cancel]="'/setup'">
       <app-step title="Local Account Information" [signalHandle]="signalHandle">
         <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
           text="Please wait - this will take a few moments">
