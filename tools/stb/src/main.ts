@@ -115,6 +115,9 @@ async function main() {
   function selectElement(snapshotId: string): void {
     const node = nodeFor(snapshotId);
     if (!node) return;
+    // reveal the selected element so a hidden/empty target (e.g. an empty error
+    // alert) shows its color in the preview while you theme it
+    preview.revealElement(snapshotId);
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
     openLeverEditor({
       previewHost,

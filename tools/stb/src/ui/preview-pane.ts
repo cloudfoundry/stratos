@@ -26,6 +26,7 @@ export interface PreviewPane {
   mount(host: HTMLElement): void;
   highlightToken(token: string | null): void;
   highlightElement(snapshotId: string | null): void;
+  revealElement(snapshotId: string | null): void;
   showLevers(on: boolean): void;
 }
 
@@ -123,6 +124,10 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
 
     highlightElement(snapshotId) {
       send({ type: 'STB_HIGHLIGHT_ELEMENT', snapshotId });
+    },
+
+    revealElement(snapshotId) {
+      send({ type: 'STB_REVEAL', snapshotId });
     },
 
     showLevers(on) {

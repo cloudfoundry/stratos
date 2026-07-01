@@ -57,6 +57,29 @@
     ensureHighlightStyles();
   }
 
+  function revealElement(snapshotId) {
+    document.querySelectorAll('[data-stb-reveal]').forEach((el) => el.removeAttribute('data-stb-reveal'));
+    if (!snapshotId) return;
+    const el = document.querySelector('[stb-snapshot-id="' + snapshotId + '"]');
+    if (el) el.setAttribute('data-stb-reveal', '');
+    ensureRevealStyles();
+  }
+
+  function ensureRevealStyles() {
+    if (document.getElementById('stb-reveal-style')) return;
+    const el = document.createElement('style');
+    el.id = 'stb-reveal-style';
+    // Give a hidden/empty themable element enough presence that its colour renders:
+    // min-* is a no-op on already-sized elements; the ::before glyph only lands on
+    // empty ones and inherits the element's text colour, so text-colour levers show.
+    // Two triggers: [data-stb-reveal] = the selected element; [data-stb-show-levers]
+    // = every editable region at once ("Show editable regions").
+    el.textContent =
+      '[data-stb-reveal], [data-stb-show-levers] [data-stb-lever] { min-width: 1.5rem !important; min-height: 1.25rem !important; }' +
+      '[data-stb-reveal]:empty::before, [data-stb-show-levers] [data-stb-lever]:empty::before { content: "Abc"; opacity: 0.7; }';
+    document.head.appendChild(el);
+  }
+
   function ensureHighlightStyles() {
     if (document.getElementById('stb-highlight-style')) return;
     const el = document.createElement('style');
@@ -112,6 +135,7 @@
   function setLeverOutline(on) {
     document.documentElement.toggleAttribute('data-stb-show-levers', !!on);
     ensureLeverStyles();
+    ensureRevealStyles();
   }
 
   function ensureLeverStyles() {
@@ -156,6 +180,9 @@
         break;
       case 'STB_HIGHLIGHT_ELEMENT':
         highlightElement(msg.snapshotId);
+        break;
+      case 'STB_REVEAL':
+        revealElement(msg.snapshotId);
         break;
       case 'STB_APPLY_LEVERS':
         applyLeversInShim(msg.levers);
