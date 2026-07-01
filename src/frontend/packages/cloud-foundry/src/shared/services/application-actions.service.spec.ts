@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -342,6 +343,27 @@ describe('AppApplicationActionsService', () => {
     expect(failEntry).toBeDefined();
     expect(failEntry?.error?.code).toBe('CF-AppStaged');
     expect(failEntry?.error?.message).toBe('staging failed');
+  });
+
+  // #5520: starting an unstaged app throws a synchronous CF 422 with no job
+  // envelope. The fail log (and thus the snackbar's outcomeError) must show
+  // the real CF detail, not a generic "Operation failed".
+  it('surfaces the real CF detail on a synchronous 422 (no job envelope)', async () => {
+    appsStub.startApp.mockImplementationOnce(async () => {
+      throw new HttpErrorResponse({
+        status: 422,
+        statusText: 'Unprocessable Entity',
+        error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Assign a droplet before starting this app.' }] },
+      });
+    });
+
+    void svc.start();
+    await tick(8);
+
+    const failEntry = svc.log().find(e => e.event === 'fail');
+    expect(failEntry).toBeDefined();
+    expect(failEntry?.error?.message).toBe('Assign a droplet before starting this app.');
+    expect(svc.outcomeError()).toBe('Assign a droplet before starting this app.');
   });
 
   it('log() includes target info on each entry', async () => {
