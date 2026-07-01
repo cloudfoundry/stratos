@@ -171,7 +171,9 @@ async function main() {
       onBackstop: (color) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
-        setNodeFacets(snapshotId, setBackstop(n.facets, color));
+        const facets = setBackstop(n.facets, color);
+        setNodeFacets(snapshotId, facets);
+        reprojectNodeTokens(snapshotId, facets, routing);
         selectElement(snapshotId);
       },
       onAddLayer: (layer) => {

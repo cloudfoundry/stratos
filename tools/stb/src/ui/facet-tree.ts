@@ -1,9 +1,9 @@
 // src/ui/facet-tree.ts
-import type { Facets, FacetValue, Layer } from '@/metadata/types';
+import type { Facets, FacetValue, Layer, Gradient } from '@/metadata/types';
 import type { Oklch } from '@/color/oklch';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import type { ColorFormat } from '@/color/format';
-import { FACET_PROPS, gradientCss } from '@/metadata/facets';
+import { FACET_PROPS } from '@/metadata/facets';
 import { openColorPicker } from '@/ui/color-picker';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 
@@ -54,6 +54,14 @@ interface GroupEntry {
   branch: HTMLElement;
   leaves: HTMLElement;
   collapsed: boolean;
+}
+
+/** Swatch hex for a color-carrying FacetValue — literal may be a resolved Oklch
+ *  object or a raw string (gradient stops round-trip either shape). Returns
+ *  null for a token reference or a missing value (empty swatch). */
+function swatchHex(v: FacetValue | undefined): string | null {
+  if (!v || 'token' in v) return null;
+  return typeof v.literal === 'object' ? oklchToHex(v.literal as Oklch) : v.literal;
 }
 
 function setCollapsed(entry: GroupEntry, collapsed: boolean): void {
@@ -211,12 +219,111 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         });
         row.appendChild(input);
       } else {
-        // Gradient layer: read-only summary this slice — full type/angle/stop
-        // editing lands in the next slice (4b).
-        const summary = document.createElement('span');
-        summary.className = 'stb-facet-bg-gradient-summary';
-        summary.textContent = gradientCss(layer.gradient);
-        row.appendChild(summary);
+        // Gradient layer: inline editor covering what Stratos themes today —
+        // type, ONE angle/position field, and a color-stop list. Anything more
+        // exotic (shape/size/fromAngle/repeating) already round-trips through
+        // gradientCss and the model if present; it is preserved (not edited)
+        // by spreading the existing gradient and overriding only the fields
+        // these controls own — exotic values go through scopedBlock instead.
+        const gradient = layer.gradient;
+        const rebuild = (patch: Partial<Gradient>): Gradient => ({ ...gradient, ...patch }) as Gradient;
+        const setGradient = (g: Gradient) => opts.onSetLayer?.(i, { kind: 'gradient', gradient: g });
+
+        const editor = document.createElement('div');
+        editor.className = 'stb-facet-bg-gradient';
+
+        const typeSel = document.createElement('select');
+        typeSel.className = 'stb-facet-bg-gradient-type';
+        for (const t of ['linear', 'radial', 'conic'] as const) {
+          const opt = document.createElement('option');
+          opt.value = t;
+          opt.textContent = t;
+          typeSel.appendChild(opt);
+        }
+        typeSel.value = gradient.type;
+        typeSel.addEventListener('change', () => {
+          setGradient(rebuild({ type: typeSel.value as Gradient['type'] } as Partial<Gradient>));
+        });
+        editor.appendChild(typeSel);
+
+        // One angle/position field: linear owns `angle`, radial/conic own `position`.
+        const posInput = document.createElement('input');
+        posInput.type = 'text';
+        posInput.className = 'stb-facet-bg-gradient-pos';
+        posInput.placeholder = gradient.type === 'linear' ? 'angle' : 'position';
+        posInput.value = gradient.type === 'linear' ? (gradient.angle ?? '') : (gradient.position ?? '');
+        posInput.addEventListener('input', () => {
+          const patch: Partial<Gradient> = gradient.type === 'linear'
+            ? { angle: posInput.value }
+            : { position: posInput.value };
+          setGradient(rebuild(patch));
+        });
+        editor.appendChild(posInput);
+
+        const stopsEl = document.createElement('div');
+        stopsEl.className = 'stb-facet-bg-gradient-stops';
+        gradient.stops.forEach((stop, si) => {
+          const stopRow = document.createElement('div');
+          stopRow.className = 'stb-facet-bg-gradient-stop';
+
+          const stopHex = swatchHex(stop.color);
+          const swatch = document.createElement('button');
+          swatch.type = 'button';
+          swatch.className = 'stb-facet-swatch';
+          if (stopHex) swatch.style.backgroundColor = stopHex;
+          swatch.addEventListener('click', () => openColorPicker({
+            previewHost: opts.previewHost,
+            initial: stopHex ?? '#000000',
+            format: opts.colorFormat?.() ?? 'hex',
+            onChange: (value) => {
+              const stops = gradient.stops.map((s, idx) =>
+                idx === si ? { ...s, color: { literal: toOklch(value) } } : s);
+              setGradient(rebuild({ stops }));
+            },
+          }));
+          stopRow.appendChild(swatch);
+
+          const stopPos = document.createElement('input');
+          stopPos.type = 'text';
+          stopPos.className = 'stb-facet-bg-gradient-stop-pos';
+          stopPos.placeholder = 'position';
+          stopPos.value = stop.position ?? '';
+          stopPos.addEventListener('input', () => {
+            const stops = gradient.stops.map((s, idx) => {
+              if (idx !== si) return s;
+              const { position: _drop, ...rest } = s;
+              return stopPos.value ? { ...rest, position: stopPos.value } : rest;
+            });
+            setGradient(rebuild({ stops }));
+          });
+          stopRow.appendChild(stopPos);
+
+          const removeStopBtn = document.createElement('button');
+          removeStopBtn.type = 'button';
+          removeStopBtn.className = 'stb-facet-bg-gradient-stop-remove';
+          removeStopBtn.textContent = '×';
+          removeStopBtn.disabled = gradient.stops.length <= 1;
+          removeStopBtn.addEventListener('click', () => {
+            const stops = gradient.stops.filter((_, idx) => idx !== si);
+            setGradient(rebuild({ stops }));
+          });
+          stopRow.appendChild(removeStopBtn);
+
+          stopsEl.appendChild(stopRow);
+        });
+        editor.appendChild(stopsEl);
+
+        const addStopBtn = document.createElement('button');
+        addStopBtn.type = 'button';
+        addStopBtn.className = 'stb-facet-bg-gradient-add-stop';
+        addStopBtn.textContent = '+ stop';
+        addStopBtn.addEventListener('click', () => {
+          const stops = [...gradient.stops, { color: { literal: '#000000' } }];
+          setGradient(rebuild({ stops }));
+        });
+        editor.appendChild(addStopBtn);
+
+        row.appendChild(editor);
       }
 
       const upBtn = document.createElement('button');
@@ -253,6 +360,17 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     addImageBtn.textContent = '+ image';
     addImageBtn.addEventListener('click', () => opts.onAddLayer?.({ kind: 'image', ref: '' }));
     footer.appendChild(addImageBtn);
+
+    const addGradientBtn = document.createElement('button');
+    addGradientBtn.type = 'button';
+    addGradientBtn.className = 'stb-facet-bg-add-gradient';
+    addGradientBtn.textContent = '+ gradient';
+    addGradientBtn.addEventListener('click', () => opts.onAddLayer?.({
+      kind: 'gradient',
+      gradient: { type: 'linear', stops: [{ color: { literal: '#000000' } }, { color: { literal: '#ffffff' } }] },
+    }));
+    footer.appendChild(addGradientBtn);
+
     host.appendChild(footer);
   }
 
