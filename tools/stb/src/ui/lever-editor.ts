@@ -6,6 +6,7 @@ import { brandingModel, nodeFor } from '@/state/branding';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
+import { previewDark } from '@/state/scene';
 
 export interface OpenLeverEditorOptions {
   previewHost: HTMLElement;
@@ -38,7 +39,9 @@ let openPanel: HTMLElement | null = null;
 let openScopedEditor: EditorView | null = null;
 let openFacetTree: { destroy(): void } | null = null;
 let openTreeEffect: (() => void) | null = null;
+let openDarkEffect: (() => void) | null = null;
 function closeOpen(): void {
+  if (openDarkEffect) { openDarkEffect(); openDarkEffect = null; }
   if (openTreeEffect) { openTreeEffect(); openTreeEffect = null; }
   if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
   if (openScopedEditor) { openScopedEditor.destroy(); openScopedEditor = null; }
@@ -123,4 +126,9 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   positionInPreviewGutter(panel, opts.previewHost);
   makeDraggable(panel, drag);
   openPanel = panel;
+
+  // Flag the active preview mode on the panel so CSS can mute the inactive
+  // (dark) column — editing a dark value while the preview is in light mode
+  // otherwise reads as "no change".
+  openDarkEffect = effect(() => { panel.classList.toggle('stb-preview-dark', previewDark.value); });
 }

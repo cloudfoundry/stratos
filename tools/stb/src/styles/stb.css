@@ -112,6 +112,39 @@ body {
 .stb-color-text { flex: 1; padding: 0.25rem; font-family: var(--font-mono, monospace); }
 .stb-close { padding: 0.25rem 0.5rem; margin-left: auto; }
 
+/* Facet tree (element lever editor): label column + value control(s) per row.
+   Fixed-width label so the light/dark swatch columns line up across rows and
+   under the dual header. */
+.stb-facet-bar { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.4rem; }
+.stb-facet-bar button, .stb-facet-add { font-size: 0.72rem; padding: 0.15rem 0.4rem; }
+.stb-facet-group { display: flex; align-items: center; gap: 0.3rem; font-weight: 600; font-size: 0.78rem; padding: 0.35rem 0 0.15rem; cursor: pointer; color: var(--foreground, #1e293b); }
+.stb-facet-group::before { content: '▾'; font-size: 0.65rem; color: var(--text-muted, #94a3b8); }
+.stb-facet-group.stb-facet-collapsed::before { content: '▸'; }
+.stb-facet-remove { margin-left: auto; border: none; background: none; cursor: pointer; color: var(--text-muted, #94a3b8); font-size: 0.9rem; line-height: 1; padding: 0 0.2rem; }
+.stb-facet-leaves { display: flex; flex-direction: column; gap: 0.15rem; }
+.stb-facet-leaf { display: flex; align-items: center; gap: 0.35rem; padding: 0.05rem 0; }
+.stb-facet-leaf-label { flex: 0 0 5.5rem; color: var(--text-muted, #64748b); font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stb-facet-leaf select, .stb-facet-leaf input[type="text"] { flex: 1; min-width: 0; font: inherit; font-size: 0.75rem; padding: 0.1rem 0.25rem; }
+.stb-facet-leaf textarea { flex: 1; min-width: 0; min-height: 2.5rem; font: inherit; font-size: 0.75rem; }
+.stb-facet-leaf input[type="file"] { flex: 1; min-width: 0; font-size: 0.7rem; }
+/* light + dark color swatches, side by side, followed by the derive button */
+.stb-facet-swatch, .stb-facet-swatch-dark, .stb-facet-derive-dark { flex: 0 0 auto; width: 1.4rem; height: 1.4rem; padding: 0; border: 1px solid var(--border, #cbd5e1); border-radius: 3px; cursor: pointer; }
+.stb-facet-derive-dark { display: inline-flex; align-items: center; justify-content: center; line-height: 1; background: var(--content-secondary, #f8fafc); color: var(--text-muted, #64748b); font-size: 0.8rem; }
+.stb-facet-derive-dark:disabled { opacity: 0.35; cursor: default; }
+/* empty dark swatch = "inherits the snapshot's built-in dark" — a neutral hatch, not a color */
+.stb-facet-swatch-empty { background: repeating-linear-gradient(45deg, var(--card, #fff), var(--card, #fff) 3px, var(--border, #e2e8f0) 3px, var(--border, #e2e8f0) 6px); }
+/* column header aligned over the two swatches (label width + row gap) */
+.stb-facet-dual-header { display: flex; gap: 0.35rem; padding-left: 5.85rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #94a3b8); margin-bottom: 0.1rem; }
+.stb-facet-dual-header-light, .stb-facet-dual-header-dark { flex: 0 0 1.4rem; text-align: center; }
+.stb-facet-shared { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--warning, #d97706); }
+.stb-facet-detach, .stb-facet-promote { font-size: 0.68rem; padding: 0.05rem 0.3rem; cursor: pointer; }
+/* When the preview is in light mode the dark column is inactive (dark values
+   only render under Dark preview) — mute it so editing it doesn't read as
+   "no change". The panel gains .stb-preview-dark while Dark preview is on. */
+.stb-lever-editor:not(.stb-preview-dark) .stb-facet-swatch-dark,
+.stb-lever-editor:not(.stb-preview-dark) .stb-facet-derive-dark,
+.stb-lever-editor:not(.stb-preview-dark) .stb-facet-dual-header-dark { opacity: 0.4; }
+
 .stb-flash { background-color: var(--warning, #ffeaa7); transition: background-color 0.3s; }
 
 .stb-status-bar { display: flex; padding: 0.4rem 0.75rem; border-top: 1px solid var(--border, #ddd); border-bottom: 1px solid var(--border, #ddd); background: var(--card, white); font-size: 0.85rem; gap: 1rem; align-items: center; }
