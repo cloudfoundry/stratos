@@ -33,7 +33,7 @@ jobs:
   # Does this PR touch stb or an instrumented template? The gate job gates on
   # this output. Add new instrumented templates here as more scenes convert.
   changes:
-    name: Detect changes
+    name: Detect stb changes
     runs-on: ubuntu-latest
     outputs:
       stb: ${{ steps.filter.outputs.stb }}
