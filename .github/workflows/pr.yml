@@ -1,21 +1,22 @@
 name: Pull Request Tests
 
+# tools/stb is a standalone project with its own gate (stb_tests.yml). We must
+# NOT skip this workflow for stb-only changes via a trigger-level `paths`
+# filter: these jobs are REQUIRED status checks, and a required check that is
+# path-filtered at the trigger never reports — leaving stb-only PRs stuck on
+# "Expected — waiting for status". Instead we always trigger and skip each job
+# with a `changes`-gated `if:`; a job skipped by `if:` reports success and so
+# satisfies the required check without running the Stratos build. See #5528.
 on:
   pull_request:
     branches:
       - master
       - develop
       - 'angular**'
-    # tools/stb is a standalone project with its own gate (stb_tests.yml);
-    # don't run the full frontend/backend suite for stb-only changes.
-    paths-ignore:
-      - 'tools/stb/**'
   push:
     branches:
       - develop
       - master
-    paths-ignore:
-      - 'tools/stb/**'
 
 env:
   NODE_OPTIONS: --max-old-space-size=5500
@@ -24,9 +25,29 @@ env:
   BUN_VERSION: 'latest'
 
 jobs:
+  # Decide whether this PR touches anything outside tools/stb. All the real
+  # jobs below gate on `non_stb` so stb-only PRs skip them (→ success) while
+  # every other PR runs the full suite. Always runs; cheap.
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      non_stb: ${{ steps.filter.outputs.non_stb }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            non_stb:
+              - '**'
+              - '!tools/stb/**'
+
   lint:
     name: Lint Check
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.non_stb == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -63,6 +84,8 @@ jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.non_stb == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -107,6 +130,8 @@ jobs:
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.non_stb == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -151,7 +176,8 @@ jobs:
   build-check:
     name: Build Check
     runs-on: ubuntu-latest
-    needs: [lint, test-frontend, test-backend]
+    needs: [changes, lint, test-frontend, test-backend]
+    if: needs.changes.outputs.non_stb == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -230,12 +256,17 @@ jobs:
     if: always()
     steps:
       - name: Check all jobs
+        # A stb-only PR skips every job above; "skipped" is an acceptable
+        # outcome here (the Stratos suite is genuinely N/A), only "failure"
+        # or "cancelled" should fail the gate.
         run: |
-          if [ "${{ needs.lint.result }}" != "success" ] || \
-             [ "${{ needs.test-frontend.result }}" != "success" ] || \
-             [ "${{ needs.test-backend.result }}" != "success" ] || \
-             [ "${{ needs.build-check.result }}" != "success" ]; then
-            echo "❌ One or more required checks failed"
-            exit 1
-          fi
+          for res in "${{ needs.lint.result }}" \
+                     "${{ needs.test-frontend.result }}" \
+                     "${{ needs.test-backend.result }}" \
+                     "${{ needs.build-check.result }}"; do
+            if [ "$res" != "success" ] && [ "$res" != "skipped" ]; then
+              echo "❌ One or more required checks failed (result: $res)"
+              exit 1
+            fi
+          done
           echo "✅ All PR checks passed!"

@@ -2,7 +2,7 @@ name: STB Tests
 
 # Gate for the Stratos Theme Builder (tools/stb). It is a standalone npm
 # project outside the Angular workspace, so the frontend/backend workflows
-# never exercise it. The real work runs only when stb itself changes, or when
+# never exercise it. The real gate runs only when stb itself changes, or when
 # one of the Stratos templates stb is instrumented against changes — a template
 # edit can break the snapshot-id <-> routing correspondence the harvest lint
 # checks.
@@ -10,10 +10,9 @@ name: STB Tests
 # STB Tests is a REQUIRED status check on develop/main. A required check that is
 # `paths`-filtered at the trigger level never reports on PRs that don't touch
 # its paths, leaving those PRs stuck forever on "Expected — Waiting for status
-# to be reported". So this workflow triggers on every PR to the protected
-# branches and decides internally (via the paths-filter step) whether to run
-# the gate — the job still completes green when stb is untouched, satisfying
-# the required check without doing needless work.
+# to be reported". So we always trigger and gate the real work with a job-level
+# `if:`: a job skipped by `if:` reports success and satisfies the required
+# check, without spinning a runner. See #5528.
 on:
   pull_request:
     branches:
@@ -31,20 +30,17 @@ env:
   NODE_VERSION: '24'
 
 jobs:
-  test:
-    name: STB Tests
+  # Does this PR touch stb or an instrumented template? The gate job gates on
+  # this output. Add new instrumented templates here as more scenes convert.
+  changes:
+    name: Detect changes
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools/stb
+    outputs:
+      stb: ${{ steps.filter.outputs.stb }}
     steps:
       - uses: actions/checkout@v4
-
-      # Does this PR touch stb or an instrumented template? Every real step
-      # below is gated on this so the job still reports green on unrelated PRs.
-      # Add new instrumented templates here as more scenes are converted.
       - uses: dorny/paths-filter@v3
-        id: changes
+        id: filter
         with:
           filters: |
             stb:
@@ -54,47 +50,46 @@ jobs:
               - 'src/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.html'
               - 'src/frontend/packages/cloud-foundry/src/features/applications/application-wall/application-wall.component.html'
 
+  test:
+    name: STB Tests
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.stb == 'true'
+    defaults:
+      run:
+        working-directory: tools/stb
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
-        if: steps.changes.outputs.stb == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       # No package-lock.json in tools/stb, so install (not ci).
-      - if: steps.changes.outputs.stb == 'true'
-        run: npm install
+      - run: npm install
 
       # The integration suite runs in real browsers (vite.config.ts defines
       # integration-chromium/firefox/webkit projects); CI has no browser
       # binaries by default. NOTE: installs all three to keep CI == local
       # `npm test`; narrow to chromium if the gate gets slow.
       - name: Install Playwright browsers
-        if: steps.changes.outputs.stb == 'true'
         run: npx playwright install --with-deps
 
       - name: Typecheck
-        if: steps.changes.outputs.stb == 'true'
         run: npm run typecheck
 
       - name: Lint
-        if: steps.changes.outputs.stb == 'true'
         run: npm run lint
 
       - name: Unit + integration tests
-        if: steps.changes.outputs.stb == 'true'
         run: npm test
 
       # Drift check: login live template ids vs the snapshot routing map.
       - name: Harvest lint (login template <-> routing drift)
-        if: steps.changes.outputs.stb == 'true'
         run: npm run lint:harvest
 
       # Drift check: the shared scene's live template ids (stepper +
       # dialog-confirm) must exist in its captured snapshot. (login is covered
       # by lint:harvest above; app-list is a mock with no static correspondence.)
       - name: Template lint (shared live templates <-> snapshot drift)
-        if: steps.changes.outputs.stb == 'true'
         run: npm run lint:templates
-
-      - name: No stb changes — gate not needed
-        if: steps.changes.outputs.stb != 'true'
-        run: echo "No tools/stb or instrumented-template changes; STB gate satisfied."
