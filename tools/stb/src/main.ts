@@ -150,7 +150,9 @@ async function main() {
         const v = decl?.value;
         const lit = v && 'literal' in v && typeof v.literal === 'object' ? v.literal as Oklch : null;
         if (!lit) return;
-        const facetsDark = setFacetProp(n.facetsDark ?? {}, key, { literal: deriveDarkOklch(lit) });
+        // A surface fill darkens; text/borders keep their colour and lift for contrast.
+        const role = key === 'surface.background' ? 'background' : 'foreground';
+        const facetsDark = setFacetProp(n.facetsDark ?? {}, key, { literal: deriveDarkOklch(lit, { role }) });
         setNodeFacetsDark(snapshotId, facetsDark);
         reprojectNodeTokensDark(snapshotId, facetsDark, routing);
       },
