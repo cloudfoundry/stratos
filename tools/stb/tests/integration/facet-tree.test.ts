@@ -205,7 +205,7 @@ it('renders the backstop color first, then layers, for a background facet', () =
   expect(rows[1]!.getAttribute('data-stb-bg-row')).toBe('layer');
 });
 
-it('renders a gradient layer as a read-only summary row with remove/move controls, no type-select', () => {
+it('renders a gradient layer with a type select and stop swatches, plus remove/move controls', () => {
   const host = document.createElement('div');
   mountFacetTree(host, {
     facets: { background: {
@@ -218,11 +218,139 @@ it('renders a gradient layer as a read-only summary row with remove/move control
     onEdit: () => {},
   });
   const row = host.querySelector('[data-stb-bg-row="layer"]')!;
-  expect(row.querySelector('select')).toBeNull();
-  expect(row.textContent).toContain('linear-gradient');
+  const typeSel = row.querySelector('select') as HTMLSelectElement;
+  expect(typeSel).not.toBeNull();
+  expect(typeSel.value).toBe('linear');
+  expect(row.querySelectorAll('.stb-facet-swatch').length).toBe(2);
   expect(row.querySelector('.stb-facet-bg-remove')).not.toBeNull();
   expect(row.querySelector('.stb-facet-bg-move-up')).not.toBeNull();
   expect(row.querySelector('.stb-facet-bg-move-down')).not.toBeNull();
+});
+
+it('fires onSetLayer with an updated type when the gradient type select changes', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const typeSel = row.querySelector('select') as HTMLSelectElement;
+  typeSel.value = 'radial';
+  typeSel.dispatchEvent(new Event('change'));
+  expect(setLayers.length).toBe(1);
+  const [index, layer] = setLayers[0] as [number, { kind: string; gradient: { type: string } }];
+  expect(index).toBe(0);
+  expect(layer.kind).toBe('gradient');
+  expect(layer.gradient.type).toBe('radial');
+});
+
+it('fires onSetLayer with an updated angle when the linear angle/position input changes', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const angleInput = row.querySelector('.stb-facet-bg-gradient-pos') as HTMLInputElement;
+  angleInput.value = '45deg';
+  angleInput.dispatchEvent(new Event('input'));
+  expect(setLayers.length).toBe(1);
+  const [, layer] = setLayers[0] as [number, { gradient: { angle?: string } }];
+  expect(layer.gradient.angle).toBe('45deg');
+});
+
+it('fires onSetLayer with an updated stop color when a stop swatch changes', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const swatch = row.querySelectorAll('.stb-facet-swatch')[0] as HTMLButtonElement;
+  swatch.click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  expect(textInput).toBeTruthy();
+  textInput.value = '#123456';
+  textInput.dispatchEvent(new Event('input'));
+  expect(setLayers.length).toBe(1);
+  const [, layer] = setLayers[0] as [number, { gradient: { stops: Array<{ color: { literal: unknown } }> } }];
+  expect(layer.gradient.stops[0]!.color.literal).toBeTruthy();
+  expect(layer.gradient.stops[1]!.color.literal).toEqual('#000');
+});
+
+it('preserves exotic radial gradient fields (shape, size) when editing the position or a stop color', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'radial', shape: 'circle', size: '40px', position: 'center',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const posInput = row.querySelector('.stb-facet-bg-gradient-pos') as HTMLInputElement;
+  posInput.value = 'top left';
+  posInput.dispatchEvent(new Event('input'));
+  const [, layer1] = setLayers[0] as [number, { gradient: { shape?: string; size?: string; position?: string } }];
+  expect(layer1.gradient.shape).toBe('circle');
+  expect(layer1.gradient.size).toBe('40px');
+  expect(layer1.gradient.position).toBe('top left');
+
+  const swatch = row.querySelectorAll('.stb-facet-swatch')[1] as HTMLButtonElement;
+  swatch.click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  textInput.value = '#abcdef';
+  textInput.dispatchEvent(new Event('input'));
+  const [, layer2] = setLayers[1] as [number, { gradient: { shape?: string; size?: string } }];
+  expect(layer2.gradient.shape).toBe('circle');
+  expect(layer2.gradient.size).toBe('40px');
+});
+
+it('fires onAddLayer with a default linear gradient when + gradient is clicked', () => {
+  const host = document.createElement('div');
+  const added: unknown[] = [];
+  mountFacetTree(host, {
+    facets: { background: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onAddLayer: (l) => added.push(l),
+  });
+  const addGradientBtn = host.querySelector('.stb-facet-bg-add-gradient') as HTMLButtonElement;
+  expect(addGradientBtn).not.toBeNull();
+  addGradientBtn.click();
+  expect(added).toEqual([{
+    kind: 'gradient',
+    gradient: { type: 'linear', stops: [{ color: { literal: '#000000' } }, { color: { literal: '#ffffff' } }] },
+  }]);
 });
 
 it('fires onBackstop when the backstop swatch color changes', () => {
@@ -272,8 +400,7 @@ it('fires onAddLayer, onRemoveLayer and onReorderLayer for layer row controls', 
   expect(removed).toContain(1);
   (host.querySelector('.stb-facet-bg-add-image') as HTMLButtonElement).click();
   expect(added).toContainEqual({ kind: 'image', ref: '' });
-  // only the image footer button exists in this slice — gradient editing is next
-  expect(host.querySelector('.stb-facet-bg-add-gradient')).toBeNull();
+  expect(host.querySelector('.stb-facet-bg-add-gradient')).not.toBeNull();
 });
 
 it('fires onSetLayer with a stored asset ref when a file is chosen for an image layer row', () => {
