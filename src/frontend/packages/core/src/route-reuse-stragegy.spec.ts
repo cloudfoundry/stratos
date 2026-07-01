@@ -48,4 +48,21 @@ describe('CustomReuseStrategy', () => {
     const future = snap({ component: null, data: { reuseRoute: true }, params: {} });
     expect(strat.shouldReuseRoute(future, curr)).toBe(true);
   });
+
+  // The root snapshot node (and componentless path-group nodes) have
+  // component: null and no reuseRoute marker. Returning false there makes
+  // Angular recreate the whole ActivatedRoute tree, so every outlet below
+  // rebuilds and the reuseRoute markers never get a say — which is exactly
+  // how the #5519 fix stayed broken in the running app.
+  it('reuses a componentless, unmarked node (root / path group) when params match', () => {
+    const curr = snap({ component: null, data: {}, params: {} });
+    const future = snap({ component: null, data: {}, params: {} });
+    expect(strat.shouldReuseRoute(future, curr)).toBe(true);
+  });
+
+  it('does NOT reuse a componentless, unmarked node when params differ', () => {
+    const curr = snap({ component: null, data: {}, params: { endpointId: 'cf1' } });
+    const future = snap({ component: null, data: {}, params: { endpointId: 'cf2' } });
+    expect(strat.shouldReuseRoute(future, curr)).toBe(false);
+  });
 });

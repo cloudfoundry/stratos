@@ -33,9 +33,16 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
       // GUIDs — from route params at construction time, so reusing the
       // instance would leave them pinned to the previous resource and show
       // stale data. Require the node's own params to match too. (#5519)
+      //
+      // Normalize with `?? null`: componentless nodes (the ROOT node,
+      // path-group nodes) have component === null while an absent marker
+      // is undefined. Without the normalization the root node compares
+      // null === undefined -> false, Angular recreates the entire
+      // ActivatedRoute tree on every navigation, and every outlet below
+      // rebuilds — silencing every reuseRoute marker in the tree.
       reuse =
-        curr.component === curr.data.reuseRoute &&
-        future.component === future.data.reuseRoute &&
+        (curr.component ?? null) === (curr.data.reuseRoute ?? null) &&
+        (future.component ?? null) === (future.data.reuseRoute ?? null) &&
         paramsEqual(curr.params, future.params);
     }
     return isDashboard || isAppComp || reuse;
