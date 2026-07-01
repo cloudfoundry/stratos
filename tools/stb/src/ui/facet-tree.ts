@@ -1,10 +1,11 @@
 // src/ui/facet-tree.ts
-import type { Facets, FacetValue } from '@/metadata/types';
+import type { Facets, FacetValue, Layer } from '@/metadata/types';
 import type { Oklch } from '@/color/oklch';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import type { ColorFormat } from '@/color/format';
-import { FACET_PROPS } from '@/metadata/facets';
+import { FACET_PROPS, gradientCss } from '@/metadata/facets';
 import { openColorPicker } from '@/ui/color-picker';
+import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 
 const GROUPS = ['text', 'surface', 'spacing'] as const;
 const propsOf = (g: string) => Object.entries(FACET_PROPS).filter(([k]) => k.startsWith(g + '.'));
@@ -31,6 +32,12 @@ export interface FacetTreeOptions {
   /** Live color-format accessor (hex/rgb/oklch), read when a color picker opens so the
    *  picker's text field matches the format chosen in the top bar. */
   colorFormat?: () => ColorFormat;
+  /** Background composite (Task 8/9): backstop color + bottom-up layer stack. */
+  onBackstop?: (value: FacetValue) => void;
+  onAddLayer?: (layer: Layer) => void;
+  onSetLayer?: (index: number, layer: Layer) => void;
+  onRemoveLayer?: (index: number) => void;
+  onReorderLayer?: (from: number, to: number) => void;
 }
 
 const FONT_FAMILIES = [
@@ -129,8 +136,10 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     host.appendChild(leaf);
   }
 
-  // Standalone asset leaf — not part of any style group
-  if (opts.facets.asset) {
+  // Standalone asset leaf — not part of any style group. Only for genuine
+  // <img>-role elements: a background composite (below) owns asset display
+  // for anything with a background facet, superseding this slot.
+  if (opts.facets.asset && !opts.facets.background) {
     const leaf = document.createElement('div');
     leaf.className = 'stb-facet-leaf';
     leaf.dataset.key = 'asset';
@@ -147,6 +156,104 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     });
     leaf.appendChild(input);
     host.appendChild(leaf);
+  }
+
+  // Background composite — bottom-up stack rendered top-to-bottom in the DOM:
+  // the backstop color row first, then each layer in array order (last =
+  // topmost, matching the authoring model; the emitter reverses for CSS).
+  if (opts.facets.background) {
+    const background = opts.facets.background;
+    const layers = background.layers ?? [];
+
+    const colorRow = document.createElement('div');
+    colorRow.className = 'stb-facet-bg-row';
+    colorRow.dataset.stbBgRow = 'color';
+    const colorLab = document.createElement('span');
+    colorLab.className = 'stb-facet-leaf-label';
+    colorLab.textContent = 'backstop';
+    colorRow.appendChild(colorLab);
+
+    const colorLit = background.color && 'literal' in background.color && typeof background.color.literal === 'object'
+      ? background.color.literal as Oklch
+      : null;
+    const colorBtn = document.createElement('button');
+    colorBtn.type = 'button';
+    colorBtn.className = 'stb-facet-swatch';
+    if (colorLit) colorBtn.style.backgroundColor = oklchToHex(colorLit);
+    colorBtn.addEventListener('click', () => openColorPicker({
+      previewHost: opts.previewHost,
+      initial: colorLit ? oklchToHex(colorLit) : '#000000',
+      format: opts.colorFormat?.() ?? 'hex',
+      onChange: (value) => opts.onBackstop?.({ literal: toOklch(value) }),
+    }));
+    colorRow.appendChild(colorBtn);
+    host.appendChild(colorRow);
+
+    layers.forEach((layer, i) => {
+      const row = document.createElement('div');
+      row.className = 'stb-facet-bg-row';
+      row.dataset.stbBgRow = 'layer';
+
+      if (layer.kind === 'image') {
+        const lab = document.createElement('span');
+        lab.className = 'stb-facet-leaf-label';
+        lab.textContent = layer.ref || '(no image)';
+        row.appendChild(lab);
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.addEventListener('change', () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          const ref = assetRefFor(file.name);
+          setBrandingAsset(ref, file, file.name);
+          opts.onSetLayer?.(i, { kind: 'image', ref });
+        });
+        row.appendChild(input);
+      } else {
+        // Gradient layer: read-only summary this slice — full type/angle/stop
+        // editing lands in the next slice (4b).
+        const summary = document.createElement('span');
+        summary.className = 'stb-facet-bg-gradient-summary';
+        summary.textContent = gradientCss(layer.gradient);
+        row.appendChild(summary);
+      }
+
+      const upBtn = document.createElement('button');
+      upBtn.type = 'button';
+      upBtn.className = 'stb-facet-bg-move-up';
+      upBtn.textContent = '↑';
+      upBtn.disabled = i === 0;
+      upBtn.addEventListener('click', () => opts.onReorderLayer?.(i, i - 1));
+      row.appendChild(upBtn);
+
+      const downBtn = document.createElement('button');
+      downBtn.type = 'button';
+      downBtn.className = 'stb-facet-bg-move-down';
+      downBtn.textContent = '↓';
+      downBtn.disabled = i === layers.length - 1;
+      downBtn.addEventListener('click', () => opts.onReorderLayer?.(i, i + 1));
+      row.appendChild(downBtn);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'stb-facet-bg-remove';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => opts.onRemoveLayer?.(i));
+      row.appendChild(removeBtn);
+
+      host.appendChild(row);
+    });
+
+    const footer = document.createElement('div');
+    footer.className = 'stb-facet-bg-footer';
+    const addImageBtn = document.createElement('button');
+    addImageBtn.type = 'button';
+    addImageBtn.className = 'stb-facet-bg-add-image';
+    addImageBtn.textContent = '+ image';
+    addImageBtn.addEventListener('click', () => opts.onAddLayer?.({ kind: 'image', ref: '' }));
+    footer.appendChild(addImageBtn);
+    host.appendChild(footer);
   }
 
   for (const g of GROUPS) {
