@@ -66,10 +66,10 @@ describe('project', () => {
     expect(r.companyConfig).toMatchObject({ login: { title: 'Hi' } });
   });
 
-  it('reads color from facets (surface.background literal)', () => {
+  it('reads color from facets (background.color literal)', () => {
     const m = { scene: 'login', nodes: [{
       snapshotId: 'auth.login.page', role: '', name: null, description: '',
-      facets: { surface: { background: { literal: { l: 0.97, c: 0.01, h: 250 } } } },
+      facets: { background: { color: { literal: { l: 0.97, c: 0.01, h: 250 } } } },
     }] };
     const r = project(m, {
       containers: { 'auth.login': 'login' },
@@ -114,6 +114,17 @@ describe('project', () => {
     expect(r.tokens.get('--color-brand-50')).toMatch(/^#[0-9a-f]{6}$/);
     expect(r.tokens.get('--color-brand-900')).toMatch(/^#[0-9a-f]{6}$/);
     expect(r.tokens.size).toBe(10);
+  });
+
+  it('projects background.color as the element color and topmost image ref as the leaf value', () => {
+    const model = { scene: 's', nodes: [{
+      snapshotId: 'a.card', role: 'region', name: null, description: '',
+      facets: { background: { color: { literal: { l: 0.3, c: 0.1, h: 250 } as any }, layers: [{ kind: 'image', ref: 'assets/hero.jpg' }] } },
+    }] } as any;
+    const routing = { elements: { 'a.card': { token: 'card.bg', config: 'cardImage' } } } as any;
+    const { tokens, companyConfig } = project(model, routing);
+    expect(tokens.get('card.bg')).toMatch(/^#/);
+    expect(companyConfig.cardImage).toBe('assets/hero.jpg');
   });
 });
 

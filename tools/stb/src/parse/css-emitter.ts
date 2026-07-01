@@ -1,5 +1,5 @@
 import type { ElementNode } from '@/metadata/types';
-import { facetDeclarations, facetLiteralCss } from '@/metadata/facets';
+import { facetDeclarations, facetLiteralCss, backgroundCss } from '@/metadata/facets';
 
 export function emitCss(root: Map<string, string>, dark: Map<string, string>): string {
   const parts: string[] = [];
@@ -27,8 +27,12 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       // Light block: literal facet declarations first, then the free-form scopedBlock.
       // Gated to :not(.dark-theme) so an element with no dark facet value falls through
       // to the snapshot's built-in dark rule rather than being pinned to its light value.
+      const bgLines = node.facets.background ? backgroundCss(node.facets.background).map((d) => `  ${d}`) : [];
       const facetLines: string[] = [];
       for (const d of facetDeclarations(node.facets)) {
+        // backgroundCss (bgLines) owns the whole background composite; skip it
+        // here so a literal backstop color isn't emitted twice.
+        if (d.key.startsWith('background.')) continue;
         const css = facetLiteralCss(d.spec, d.value);
         if (css !== null) facetLines.push(`  ${d.spec.cssProp}: ${css};`);
       }
@@ -38,7 +42,7 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
           .filter((l) => l.length > 0)
           .map((l) => `  ${/[;{},]$/.test(l) ? l : l + ';'}`)
         : [];
-      const lightBody = [...facetLines, ...scopedLines].join('\n');
+      const lightBody = [...bgLines, ...facetLines, ...scopedLines].join('\n');
       if (lightBody) rules.push(`html:not(.dark-theme) ${selector} {\n${lightBody}\n}`);
 
       // Dark block: literal facetsDark declarations, gated by .dark-theme — (0,4,0).
@@ -47,7 +51,9 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       // (dark beats `.dark-theme .x` (0,2,0)). {token} dark values are skipped (projector territory).
       if (node.facetsDark) {
         const darkLines: string[] = [];
+        if (node.facetsDark.background) darkLines.push(...backgroundCss(node.facetsDark.background).map((d) => `  ${d}`));
         for (const d of facetDeclarations(node.facetsDark)) {
+          if (d.key.startsWith('background.')) continue; // backgroundCss owns background
           const css = facetLiteralCss(d.spec, d.value);
           if (css !== null) darkLines.push(`  ${d.spec.cssProp}: ${css};`);
         }

@@ -17,7 +17,7 @@ describe('composite facet types', () => {
       spacing: { padding: { top: { literal: '8px' } }, gap: { row: { literal: '4px' } } },
     };
     expect(f.background!.layers).toHaveLength(2);
-    expect(f.background!.layers![0].kind).toBe('image');
+    expect(f.background!.layers![0]!.kind).toBe('image');
     expect(f.text!.fontFamily).toHaveLength(2);
     expect(f.spacing!.padding!.top).toEqual({ literal: '8px' });
   });

@@ -8,6 +8,6 @@ describe('facets-edit', () => {
   });
   it('adds and removes a group', () => {
     expect(addGroup({}, 'surface').surface).toEqual({});
-    expect(removeGroup({ surface: { background: { literal: '#fff' } } }, 'surface').surface).toBeUndefined();
+    expect(removeGroup({ surface: { border: { literal: '1px' } } }, 'surface').surface).toBeUndefined();
   });
 });

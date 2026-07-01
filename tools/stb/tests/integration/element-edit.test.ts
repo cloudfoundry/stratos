@@ -32,7 +32,7 @@ describe('reprojectNodeTokens', () => {
   it('re-projects a color edit from facets to the bound CSS token', () => {
     reprojectNodeTokens(
       'auth.login.sign-in',
-      { surface: { background: { literal: { l: 0.6, c: 0.12, h: 200 } } } },
+      { background: { color: { literal: { l: 0.6, c: 0.12, h: 200 } } } },
       routing,
     );
     expect(rootValues.value.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
@@ -44,7 +44,7 @@ describe('applyEdit facets write-back', () => {
     { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title',
       facets: { content: { text: 'A' } } },
     { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
-      facets: { surface: { background: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
+      facets: { background: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
     { snapshotId: 'auth.login.text-label', role: 'text', name: 'Label', description: 'text label',
       facets: { text: { color: { literal: { l: 0.4, c: 0.1, h: 120 } } } } },
   ] };
@@ -55,14 +55,14 @@ describe('applyEdit facets write-back', () => {
     expect(nodeFor('auth.login.title')?.facets.content?.text).toEqual('B');
   });
 
-  it('writes a color edit back into the surface.background facet', () => {
+  it('writes a color edit back into the background.color facet', () => {
     const newOklch = { l: 0.6, c: 0.12, h: 200 };
     applyEdit('auth.login.sign-in', { kind: 'color', oklch: newOklch }, routing);
-    expect(nodeFor('auth.login.sign-in')?.facets.surface?.background).toEqual({ literal: newOklch });
+    expect(nodeFor('auth.login.sign-in')?.facets.background?.color).toEqual({ literal: newOklch });
   });
 
   it('writes a color edit back into the text.color facet', () => {
-    // Exercises the text.color write-back branch — surface.background branch already covered above.
+    // Exercises the text.color write-back branch — background.color branch already covered above.
     const newOklch = { l: 0.3, c: 0.08, h: 180 };
     applyEdit('auth.login.text-label', { kind: 'color', oklch: newOklch }, routing);
     expect(nodeFor('auth.login.text-label')?.facets.text?.color).toEqual({ literal: newOklch });

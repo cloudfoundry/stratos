@@ -28,7 +28,7 @@ describe('valuePreview', () => {
   it('returns a hex swatch for a node with a color facet', () => {
     const node: NavNode = {
       snapshotId: 'z', scene: 's', name: 'Z', description: '',
-      facets: { surface: { background: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
+      facets: { background: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } },
     };
     const vp = valuePreview(node);
     expect(vp.kind).toBe('color');

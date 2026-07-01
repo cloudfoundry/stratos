@@ -18,17 +18,17 @@ it('emits literal facet props into the scoped rule and skips token values', () =
 });
 
 it('merges facet declarations with a free-form scopedBlock', () => {
-  const nodes = [{ snapshotId: 'x', facets: { spacing: { padding: { literal: '8px' } } }, scopedBlock: 'opacity: 0.9' }];
+  const nodes = [{ snapshotId: 'x', facets: { surface: { borderRadius: { literal: '8px' } } }, scopedBlock: 'opacity: 0.9' }];
   const css = emitScopedBlocks(nodes as any);
-  expect(css).toContain('padding: 8px;');
+  expect(css).toContain('border-radius: 8px;');
   expect(css).toContain('opacity: 0.9;');
 });
 
 it('emits a .dark-theme scoped block from facetsDark, after the light block', () => {
   const css = emitScopedBlocks([
     n('auth.login.page',
-      { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } },
-      { surface: { background: { literal: { l: 0.2, c: 0.02, h: 250 } } } }),
+      { background: { color: { literal: { l: 0.95, c: 0.02, h: 250 } } } },
+      { background: { color: { literal: { l: 0.2, c: 0.02, h: 250 } } } }),
   ]);
   const attrSel = '[stb-snapshot-id="auth.login.page"][stb-snapshot-id="auth.login.page"][stb-snapshot-id="auth.login.page"]';
   const light = `html:not(.dark-theme) ${attrSel}`;
@@ -43,7 +43,7 @@ it('emits a .dark-theme scoped block from facetsDark, after the light block', ()
 
 it('skips a node with no facetsDark (no dark block)', () => {
   const css = emitScopedBlocks([
-    n('auth.login.page', { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } }),
+    n('auth.login.page', { background: { color: { literal: { l: 0.95, c: 0.02, h: 250 } } } }),
   ]);
   // The light selector contains :not(.dark-theme) but no standalone dark override block should appear.
   expect(css).not.toContain('.dark-theme [stb-snapshot-id');
@@ -52,9 +52,18 @@ it('skips a node with no facetsDark (no dark block)', () => {
 it('skips a dark {token} value (literals only in this slice)', () => {
   const css = emitScopedBlocks([
     n('auth.login.page',
-      { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } },
-      { surface: { background: { token: '--color-brand-900' } } }),
+      { background: { color: { literal: { l: 0.95, c: 0.02, h: 250 } } } },
+      { background: { color: { token: '--color-brand-900' } } }),
   ]);
   // token-dark routing is out of scope; nothing literal to emit — no standalone dark block.
   expect(css).not.toContain('.dark-theme [stb-snapshot-id');
+});
+
+it('emits background composite (color backstop + reversed image layer) in the light block', () => {
+  const css = emitScopedBlocks([{
+    snapshotId: 'a.card', role: 'region', name: null, description: '',
+    facets: { background: { color: { literal: '#0b3d91' }, layers: [{ kind: 'image', ref: 'assets/hero.jpg' }] } },
+  } as any]);
+  expect(css).toContain('background-color: #0b3d91;');
+  expect(css).toContain('background-image: url(assets/hero.jpg);');
 });
