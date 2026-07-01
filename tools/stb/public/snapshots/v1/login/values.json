@@ -1,11 +1,11 @@
 {
   "auth.login.page": {
     "name": "Login page",
-    "facets": { "surface": { "background": { "literal": { "l": 0.97, "c": 0.01, "h": 250 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 0.97, "c": 0.01, "h": 250 } } } }
   },
   "auth.login.page.card": {
     "name": "Login card",
-    "facets": { "surface": { "background": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
   },
   "auth.login.page.card.title": {
     "name": "Welcome message",
@@ -27,7 +27,7 @@
   },
   "auth.login.page.background": {
     "name": "Background",
-    "facets": { "asset": { "ref": "login-bg.svg" } }
+    "facets": { "background": { "layers": [{ "kind": "image", "ref": "login-bg.svg" }] } }
   },
   "auth.login.page.card.sign-in": {
     "name": "Sign in",

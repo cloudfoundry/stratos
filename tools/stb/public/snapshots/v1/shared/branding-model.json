@@ -7,8 +7,8 @@
       "name": "Confirm dialog",
       "description": "surface/background colour for the shared confirmation dialog",
       "facets": {
-        "surface": {
-          "background": {
+        "background": {
+          "color": {
             "literal": {
               "l": 1,
               "c": 0,
@@ -70,8 +70,8 @@
       "name": "Stepper",
       "description": "surface/background colour for the shared stepper wizard",
       "facets": {
-        "surface": {
-          "background": {
+        "background": {
+          "color": {
             "literal": {
               "l": 0.98,
               "c": 0.005,
