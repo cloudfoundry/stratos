@@ -114,12 +114,17 @@ func newOrgDomainsContext(e *echo.Echo, target, orgGUID string) (echo.Context, *
 }
 
 // orgDomainsTestServer mimics what CF v3 actually returns for
-// `/v3/domains?organization_guids=:orgGuid` — a mix of the org's own
-// private domain, a domain explicitly shared with the org (owned by a
-// different org), and a global shared domain (no owning org at all).
-// It also includes a domain privately owned by a different org, which
-// CF would not normally return for this filter, to prove the handler
-// still excludes it defensively.
+// `/v3/organizations/:guid/domains` — every domain available to the
+// org: its own private domain, a domain explicitly shared with the org
+// (owned by a different org), and a global shared domain (no owning
+// org at all). It also includes a domain privately owned by a
+// different org, which CF would not normally return here, to prove
+// the handler still excludes it defensively.
+//
+// It deliberately does NOT serve `/v3/domains`: querying that with an
+// `organization_guids` filter was the original #5523 mistake — the
+// filter matches *owning* org only, so on a real CF it silently
+// returns zero rows for orgs that rely on shared/global domains.
 func orgDomainsTestServer(t *testing.T, orgGUID string) *httptest.Server {
 	t.Helper()
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +132,7 @@ func orgDomainsTestServer(t *testing.T, orgGUID string) *httptest.Server {
 		switch r.URL.Path {
 		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case "/v3/domains":
+		case "/v3/organizations/" + orgGUID + "/domains":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"pagination": map[string]interface{}{"total_results": 4, "total_pages": 1},
 				"resources": []map[string]interface{}{
@@ -296,12 +301,13 @@ func TestGetNativeDomains_OmitsPagingWhenAbsent(t *testing.T) {
 }
 
 // TestGetNativeOrgDomains_KeepsSharedAndGlobalDomains is a regression
-// test for #5523: the Add Route domain dropdown was always empty
-// because CF v3's `organization_guids` filter mixes owned + shared
-// domains, and the handler used to discard everything except domains
-// privately owned by the requested org. Most orgs have zero private
-// domains and rely entirely on a shared/global domain, so the
-// dropdown had nothing to show.
+// test for #5523: the Add Route domain dropdown was always empty.
+// Two mistakes stacked up: the handler discarded everything except
+// domains privately owned by the requested org, and it queried
+// `/v3/domains?organization_guids=` — whose filter matches owning org
+// only, so shared/global domains never even arrived. The mock serves
+// only the org-scoped `/v3/organizations/:guid/domains` endpoint, so
+// this test fails if the handler regresses to the filter query.
 func TestGetNativeOrgDomains_KeepsSharedAndGlobalDomains(t *testing.T) {
 	const orgGUID = "org-1"
 	ts := orgDomainsTestServer(t, orgGUID)
