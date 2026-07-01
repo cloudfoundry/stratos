@@ -47,13 +47,13 @@ describe('branding state', () => {
       scene: 'login',
       nodes: [
         { snapshotId: 'auth.login.page', role: 'region', name: 'P', description: 'page',
-          facets: { surface: { background: { literal: { l: 0.95, c: 0.02, h: 250 } } } } },
+          facets: { background: { color: { literal: { l: 0.95, c: 0.02, h: 250 } } } } },
       ],
     };
-    setNodeFacetsDark('auth.login.page', { surface: { background: { literal: { l: 0.2, c: 0.02, h: 250 } } } });
+    setNodeFacetsDark('auth.login.page', { background: { color: { literal: { l: 0.2, c: 0.02, h: 250 } } } });
     const n = nodeFor('auth.login.page')!;
-    expect(n.facetsDark?.surface?.background).toEqual({ literal: { l: 0.2, c: 0.02, h: 250 } });
-    expect(n.facets.surface?.background).toEqual({ literal: { l: 0.95, c: 0.02, h: 250 } }); // light untouched
+    expect(n.facetsDark?.background?.color).toEqual({ literal: { l: 0.2, c: 0.02, h: 250 } });
+    expect(n.facets.background?.color).toEqual({ literal: { l: 0.95, c: 0.02, h: 250 } }); // light untouched
   });
 
   it('setNodeScopedBlock sets the scoped block on one node immutably', () => {

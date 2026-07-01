@@ -1,8 +1,8 @@
 {
   "containers": { "auth.login": "login" },
   "elements": {
-    "auth.login.page":               { "properties": { "surface.background": { "config": "backgroundColor" } } },
-    "auth.login.page.card":          { "properties": { "surface.background": { "config": "cardBackground" } } },
+    "auth.login.page":               { "properties": { "background.color": { "config": "backgroundColor" } } },
+    "auth.login.page.card":          { "properties": { "background.color": { "config": "cardBackground" } } },
     "auth.login.page.card.title":    { "visibilityConfig": "showTitle", "properties": { "content": { "config": "title" } } },
     "auth.login.page.card.subtitle": { "properties": { "content": { "config": "subtitle" } } },
     "auth.login.page.card.message":  { "properties": { "content": { "config": "customMessage" } } },

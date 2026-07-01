@@ -21,12 +21,12 @@ export function buildVisibilityCompanion(
 function leverValueToFacets(value: LeverValue, existing: Facets): Facets {
   if (value.kind === 'content') return { ...existing, content: { text: value.text } };
   if (value.kind === 'asset') return { ...existing, asset: { ref: value.ref } };
-  // color: write into text.color if present, else surface.background
+  // color: write into text.color if present, else background.color
   const colorFacet: FacetValue = { literal: value.oklch };
   if (existing.text?.color !== undefined) {
     return { ...existing, text: { ...existing.text, color: colorFacet } };
   }
-  return { ...existing, surface: { ...existing.surface, background: colorFacet } };
+  return { ...existing, background: { ...existing.background, color: colorFacet } };
 }
 
 export function reprojectNodeTokens(snapshotId: string, facets: Facets, routing: RoutingMap): void {

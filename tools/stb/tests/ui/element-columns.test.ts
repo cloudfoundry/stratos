@@ -25,7 +25,7 @@ describe('swatchFor', () => {
   });
 
   it('returns color for a node with a color facet', () => {
-    const sw = swatchFor(makePathNode({ surface: { background: { literal: { l: 0.5, c: 0.1, h: 250 } } } }));
+    const sw = swatchFor(makePathNode({ background: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } }));
     expect(sw.color).toBeDefined();
     expect(sw.glyph).toBeUndefined();
   });

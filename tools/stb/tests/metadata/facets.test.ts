@@ -7,15 +7,16 @@ describe('FACET_PROPS', () => {
     expect(FACET_PROPS['text.color']!).toEqual({ cssProp: 'color', isColor: true });
     expect(FACET_PROPS['text.fontSize']!).toEqual({ cssProp: 'font-size', isColor: false });
     expect(FACET_PROPS['surface.borderRadius']!).toEqual({ cssProp: 'border-radius', isColor: false });
-    expect(Object.keys(FACET_PROPS)).toHaveLength(11);
+    expect(FACET_PROPS['background.color']!).toEqual({ cssProp: 'background-color', isColor: true });
+    expect(Object.keys(FACET_PROPS)).toHaveLength(7);
   });
 });
 
 describe('facetDeclarations', () => {
   it('yields one entry per set group property, skipping undefined', () => {
-    const f: Facets = { text: { fontSize: { literal: '18px' } }, surface: { background: { token: 'card-bg' } } };
+    const f: Facets = { text: { fontSize: { literal: '18px' } }, surface: { borderRadius: { literal: '8px' } } };
     const out = [...facetDeclarations(f)].map((d) => d.key);
-    expect(out).toEqual(['text.fontSize', 'surface.background']);
+    expect(out).toEqual(['text.fontSize', 'surface.borderRadius']);
   });
 });
 

@@ -33,7 +33,7 @@ export function swatchFor(p: PathNode): { color?: string; glyph?: string } {
   const f = p.node.facets;
   if (f?.content) return { glyph: 'T' };
   if (f?.asset) return { glyph: '🖼' };
-  const colorFacet = f?.text?.color ?? f?.surface?.background;
+  const colorFacet = f?.text?.color ?? f?.background?.color;
   if (colorFacet && 'literal' in colorFacet && typeof colorFacet.literal === 'object') {
     return { color: oklchToHex(colorFacet.literal as Oklch) };
   }

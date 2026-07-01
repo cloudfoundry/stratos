@@ -22,20 +22,31 @@ export interface ProjectionResult {
   unmapped: string[];
 }
 
-/** Read an Oklch color from facets (text.color > surface.background). */
+/** Read an Oklch color from facets (text.color > background.color). */
 function colorOf(node: { facets: Facets }): Oklch | null {
-  const c = node.facets.text?.color ?? node.facets.surface?.background;
+  const c = node.facets.text?.color ?? node.facets.background?.color;
   if (c && 'literal' in c && typeof c.literal === 'object') return c.literal as Oklch;
   return null;
 }
 
-/** Derive the leaf projection value from facets: color → hex, content → text, asset → ref. */
+/** Read the topmost (last) image layer ref from background.layers. */
+function topmostImageRef(node: { facets: Facets }): string | null {
+  const layers = node.facets.background?.layers ?? [];
+  for (let i = layers.length - 1; i >= 0; i--) {           // last = topmost
+    const l = layers[i]!;
+    if (l.kind === 'image') return l.ref;
+  }
+  return null;
+}
+
+/** Derive the leaf projection value from facets: content → text, topmost image → ref, backstop color → hex, asset → ref. */
 function leafValueOf(node: { facets: Facets }): unknown {
+  if (node.facets.content) return node.facets.content.text;
+  const topmost = topmostImageRef(node);
+  if (topmost) return topmost;
   const color = colorOf(node);
   if (color) return oklchToHex(color);
-  if (node.facets.content) return node.facets.content.text;
-  if (node.facets.asset) return node.facets.asset.ref;
-  return null;
+  return node.facets.asset?.ref ?? null;
 }
 
 function namespaceFor(snapshotId: string, containers: Record<string, string>): string | null {

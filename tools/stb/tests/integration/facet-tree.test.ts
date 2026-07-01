@@ -225,7 +225,7 @@ it('shows the light/dark header once per group that has a color leaf', () => {
 it('omits the light/dark header for a group with no color leaves', () => {
   const host = document.createElement('div');
   mountFacetTree(host, {
-    facets: { spacing: { padding: { literal: '4px' } } },
+    facets: { spacing: { padding: { top: { literal: '4px' } } } },
     onEdit: () => {},
     previewHost: document.createElement('div'),
   });

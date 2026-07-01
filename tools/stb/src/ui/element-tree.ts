@@ -20,7 +20,7 @@ export function valuePreview(node: NavNode): { swatch?: string; text: string; ki
   const f = node.facets;
   if (f?.content) return { text: `”${f.content.text}”`, kind: 'text' };
   if (f?.asset) return { text: f.asset.ref, kind: 'image' };
-  const colorFacet = f?.text?.color ?? f?.surface?.background;
+  const colorFacet = f?.text?.color ?? f?.background?.color;
   if (colorFacet && 'literal' in colorFacet && typeof colorFacet.literal === 'object') {
     const hex = oklchToHex(colorFacet.literal as Oklch);
     return { swatch: hex, text: hex, kind: 'color' };
