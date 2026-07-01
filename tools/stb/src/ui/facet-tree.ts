@@ -227,6 +227,17 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         // these controls own — exotic values go through scopedBlock instead.
         const gradient = layer.gradient;
         const rebuild = (patch: Partial<Gradient>): Gradient => ({ ...gradient, ...patch }) as Gradient;
+        // Type switch rebuilds the gradient per target arm rather than spreading,
+        // so arm-specific fields (angle/shape/size/fromAngle) can't leak into an
+        // arm that doesn't own them. Shared fields carry: stops, repeating, and
+        // position where the target supports it (radial/conic).
+        const convertType = (g: Gradient, type: Gradient['type']): Gradient => {
+          if (type === g.type) return g;
+          const base = { stops: g.stops, ...(g.repeating !== undefined ? { repeating: g.repeating } : {}) };
+          if (type === 'linear') return { type, ...base };
+          const pos = 'position' in g && g.position !== undefined ? { position: g.position } : {};
+          return { type, ...base, ...pos };
+        };
         const setGradient = (g: Gradient) => opts.onSetLayer?.(i, { kind: 'gradient', gradient: g });
 
         const editor = document.createElement('div');
@@ -242,7 +253,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         }
         typeSel.value = gradient.type;
         typeSel.addEventListener('change', () => {
-          setGradient(rebuild({ type: typeSel.value as Gradient['type'] } as Partial<Gradient>));
+          setGradient(convertType(gradient, typeSel.value as Gradient['type']));
         });
         editor.appendChild(typeSel);
 

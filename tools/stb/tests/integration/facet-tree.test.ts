@@ -246,10 +246,39 @@ it('fires onSetLayer with an updated type when the gradient type select changes'
   typeSel.value = 'radial';
   typeSel.dispatchEvent(new Event('change'));
   expect(setLayers.length).toBe(1);
-  const [index, layer] = setLayers[0] as [number, { kind: string; gradient: { type: string } }];
+  const [index, layer] = setLayers[0] as [number, { kind: string; gradient: { type: string; angle?: string; stops: unknown[] } }];
   expect(index).toBe(0);
   expect(layer.kind).toBe('gradient');
   expect(layer.gradient.type).toBe('radial');
+  // Arm-specific fields must not leak across the union: linear's angle is
+  // not a valid radial field and would make the persisted shape schema-invalid.
+  expect('angle' in layer.gradient).toBe(false);
+  expect(layer.gradient.stops.length).toBe(2);
+});
+
+it('carries position and repeating (but drops shape/size) when switching radial to conic', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'radial', repeating: true, shape: 'circle', size: '40px', position: 'top left',
+        stops: [{ color: { literal: '#fff' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const typeSel = host.querySelector('[data-stb-bg-row="layer"] select') as HTMLSelectElement;
+  typeSel.value = 'conic';
+  typeSel.dispatchEvent(new Event('change'));
+  const [, layer] = setLayers[0] as [number, { gradient: Record<string, unknown> }];
+  expect(layer.gradient.type).toBe('conic');
+  expect(layer.gradient.repeating).toBe(true);
+  expect(layer.gradient.position).toBe('top left');
+  expect('shape' in layer.gradient).toBe(false);
+  expect('size' in layer.gradient).toBe(false);
 });
 
 it('fires onSetLayer with an updated angle when the linear angle/position input changes', () => {
@@ -333,6 +362,103 @@ it('preserves exotic radial gradient fields (shape, size) when editing the posit
   const [, layer2] = setLayers[1] as [number, { gradient: { shape?: string; size?: string } }];
   expect(layer2.gradient.shape).toBe('circle');
   expect(layer2.gradient.size).toBe('40px');
+});
+
+it('appends a stop when + stop is clicked and removes one via the stop remove button', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  (row.querySelector('.stb-facet-bg-gradient-add-stop') as HTMLButtonElement).click();
+  const [, added] = setLayers[0] as [number, { gradient: { stops: Array<{ color: unknown }> } }];
+  expect(added.gradient.stops.length).toBe(3);
+
+  const removeBtns = row.querySelectorAll('.stb-facet-bg-gradient-stop-remove');
+  (removeBtns[0] as HTMLButtonElement).click();
+  const [, removed] = setLayers[1] as [number, { gradient: { stops: Array<{ color: { literal: unknown } }> } }];
+  expect(removed.gradient.stops.length).toBe(1);
+  expect(removed.gradient.stops[0]!.color.literal).toBe('#000');
+});
+
+it('disables the stop remove button when only one stop remains', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', stops: [{ color: { literal: '#fff' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const removeBtn = host.querySelector('.stb-facet-bg-gradient-stop-remove') as HTMLButtonElement;
+  expect(removeBtn.disabled).toBe(true);
+});
+
+it('sets and clears a stop position via the stop position input', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear',
+        stops: [{ color: { literal: '#fff' }, position: '10%' }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const posInputs = row.querySelectorAll('.stb-facet-bg-gradient-stop-pos');
+  const second = posInputs[1] as HTMLInputElement;
+  second.value = '80%';
+  second.dispatchEvent(new Event('input'));
+  const [, withPos] = setLayers[0] as [number, { gradient: { stops: Array<{ position?: string }> } }];
+  expect(withPos.gradient.stops[1]!.position).toBe('80%');
+
+  const first = posInputs[0] as HTMLInputElement;
+  first.value = '';
+  first.dispatchEvent(new Event('input'));
+  const [, cleared] = setLayers[1] as [number, { gradient: { stops: Array<Record<string, unknown>> } }];
+  // Clearing removes the key entirely (exactOptionalPropertyTypes: no position: undefined).
+  expect('position' in cleared.gradient.stops[0]!).toBe(false);
+});
+
+it('edits the position field of a conic gradient', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'conic', fromAngle: '45deg', position: 'center',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const posInput = row.querySelector('.stb-facet-bg-gradient-pos') as HTMLInputElement;
+  expect(posInput.value).toBe('center');
+  posInput.value = 'top';
+  posInput.dispatchEvent(new Event('input'));
+  const [, layer] = setLayers[0] as [number, { gradient: { type: string; fromAngle?: string; position?: string } }];
+  expect(layer.gradient.type).toBe('conic');
+  expect(layer.gradient.position).toBe('top');
+  // Exotic conic field preserved by the same-arm spread.
+  expect(layer.gradient.fromAngle).toBe('45deg');
 });
 
 it('fires onAddLayer with a default linear gradient when + gradient is clicked', () => {
