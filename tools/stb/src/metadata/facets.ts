@@ -113,13 +113,32 @@ function layerCss(l: Layer): string {
   return l.kind === 'image' ? `url(${l.ref})` : gradientCss(l.gradient);
 }
 
-/** 0-2 CSS declarations for a background composite. Layers reversed: CSS wants topmost first. */
+/** Composed CSS background-image value: layers reversed to CSS topmost-first order.
+ *  undefined if no layers. Shared by backgroundCss and backgroundPatch so the two
+ *  emission paths (scoped-block CSS vs. live-preview inline style) can't drift apart. */
+function composeLayerImage(bg: BackgroundFacet): string | undefined {
+  if (!bg.layers || !bg.layers.length) return undefined;
+  return [...bg.layers].reverse().map(layerCss).join(', ');
+}
+
+/** 0-2 CSS declarations for a background composite. Layers reversed: CSS wants topmost first.
+ *  Only a literal color is emitted here — a {token} color is routed separately via
+ *  facetDeclarations/projectColorTokens to avoid emitting it twice. */
 export function backgroundCss(bg: BackgroundFacet): string[] {
   const out: string[] = [];
   if (bg.color && 'literal' in bg.color) out.push(`background-color: ${facetValueCss(bg.color, true)};`);
-  if (bg.layers && bg.layers.length) {
-    const images = [...bg.layers].reverse().map(layerCss).join(', ');
-    out.push(`background-image: ${images};`);
-  }
+  const images = composeLayerImage(bg);
+  if (images !== undefined) out.push(`background-image: ${images};`);
+  return out;
+}
+
+/** Raw-value counterpart to backgroundCss for the live-preview LeverPatch pipeline (Task 7):
+ *  no decl-string parsing, and (unlike backgroundCss) a {token} color IS included here —
+ *  this patch is inline-style-only, so there's no separate token-routed emission to collide with. */
+export function backgroundPatch(bg: BackgroundFacet): { backgroundColor?: string; backgroundImage?: string } {
+  const out: { backgroundColor?: string; backgroundImage?: string } = {};
+  if (bg.color) out.backgroundColor = facetValueCss(bg.color, true);
+  const images = composeLayerImage(bg);
+  if (images !== undefined) out.backgroundImage = images;
   return out;
 }
