@@ -309,6 +309,16 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     }
   }
 
+  // Expand/Collapse all act on the style groups (text/surface/spacing) only.
+  // The content/asset "default group" is a standalone always-on field (the
+  // element's payload), so it's deliberately excluded — it has no group header
+  // to fold into and is usually the thing you came to edit.
+  // TO INCLUDE IT: wrap the content/asset field (rendered via onContentEdit/
+  // onAssetEdit) in a collapsible GroupEntry — give it a branch header + a
+  // `leaves` container and push it into `groupEntries` — then these two loops
+  // (and Isolate) will fold it like any other group. This behaviour could also
+  // be exposed as a user preference (include default group: on/off) rather than
+  // hardcoded.
   btnExpandAll.addEventListener('click', () => {
     for (const entry of groupEntries) setCollapsed(entry, false);
   });
