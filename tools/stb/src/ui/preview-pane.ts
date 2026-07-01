@@ -7,12 +7,14 @@ import type { BrandingModel } from '@/metadata/types';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
 import { attachAssetBlobs, brandingAssets } from '@/state/branding-assets';
 import { emitScopedBlocks } from '@/parse/css-emitter';
+import { backgroundPatch } from '@/metadata/facets';
 
 export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
   const out: LeverPatch[] = [];
   for (const n of model.nodes) {
     if (n.facets.content) out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.facets.content.text });
     else if (n.facets.asset) out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.facets.asset.ref });
+    if (n.facets.background) out.push({ snapshotId: n.snapshotId, kind: 'background', ...backgroundPatch(n.facets.background) });
     if (n.visibility !== undefined) out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.visibility });
   }
   return out;

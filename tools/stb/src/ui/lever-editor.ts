@@ -113,7 +113,7 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
       ...(opts.colorFormat ? { colorFormat: opts.colorFormat } : {}),
       onContentEdit: (text: string) => opts.onChange(contentValue(text)),
-      onAssetEdit: (file: File) => { setBrandingAsset(opts.snapshotId, file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
+      onAssetEdit: (file: File) => { setBrandingAsset(assetRefFor(file.name), file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });
   }
   openTreeEffect = effect(() => {

@@ -1,10 +1,12 @@
 export interface LeverPatch {
   snapshotId: string;
-  kind: 'content' | 'asset' | 'visibility';
+  kind: 'content' | 'asset' | 'visibility' | 'background';
   text?: string;
   ref?: string;
   shown?: boolean;
   blob?: Blob;
+  backgroundColor?: string;
+  backgroundImage?: string;
 }
 
 export function applyLevers(doc: Document, levers: LeverPatch[]): void {
@@ -24,6 +26,10 @@ export function applyLevers(doc: Document, levers: LeverPatch[]): void {
       if (src === undefined) continue;
       if (el instanceof HTMLImageElement) el.setAttribute('src', src);
       else el.style.backgroundImage = `url(${src})`;
+    }
+    if (p.kind === 'background') {
+      if (p.backgroundColor) el.style.backgroundColor = p.backgroundColor;
+      if (p.backgroundImage) el.style.backgroundImage = p.backgroundImage;
     }
   }
 }

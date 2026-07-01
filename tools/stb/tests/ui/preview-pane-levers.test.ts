@@ -52,4 +52,19 @@ describe('leverPatchesFor', () => {
     expect(patches).toContainEqual({ snapshotId: 'a', kind: 'content', text: 'Hi' });
     expect(patches).toContainEqual({ snapshotId: 'b', kind: 'asset', ref: 'logo.svg' });
   });
+
+  it('emits a composed background patch (raw color + reversed-layer image) for a node with a background facet', () => {
+    const nodes = [
+      { snapshotId: 'a.card', role: 'region', name: 'Card', description: '',
+        facets: { background: {
+          color: { literal: '#0b3d91' },
+          layers: [{ kind: 'image', ref: 'assets/hero.jpg' }],
+        } } },
+    ];
+    const patches = leverPatchesFor({ scene: 's', nodes } as any);
+    expect(patches).toContainEqual({
+      snapshotId: 'a.card', kind: 'background',
+      backgroundColor: '#0b3d91', backgroundImage: 'url(assets/hero.jpg)',
+    });
+  });
 });
