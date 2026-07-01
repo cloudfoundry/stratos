@@ -46,7 +46,11 @@ export class CustomOptionComponent implements AfterViewInit {
   }
 
   get displayText(): string {
-    return this.label || this._displayText || this.value;
+    // Only fall back to `value` when it is itself a string: options may
+    // carry object values ([value]="domain"), and returning the object
+    // here crashed applyOptionFilter's .toLowerCase() the moment such an
+    // option had empty projected text.
+    return this.label || this._displayText || (typeof this.value === 'string' ? this.value : '');
   }
 }
 
