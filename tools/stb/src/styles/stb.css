@@ -123,6 +123,9 @@ body {
 .stb-facet-group.stb-facet-collapsed::before { content: '▸'; }
 .stb-facet-remove { margin-left: auto; border: none; background: none; cursor: pointer; color: var(--text-muted, #94a3b8); font-size: 0.9rem; line-height: 1; padding: 0 0.2rem; }
 .stb-facet-leaves { display: flex; flex-direction: column; gap: 0.15rem; }
+/* the flex rule above outranks [hidden]'s UA display:none, so collapse never hid
+   the leaves — this 2-selector rule wins back (same trap as .stb-view[hidden]) */
+.stb-facet-leaves[hidden] { display: none; }
 .stb-facet-leaf { display: flex; align-items: center; gap: 0.35rem; padding: 0.05rem 0; }
 .stb-facet-leaf-label { flex: 0 0 5.5rem; color: var(--text-muted, #64748b); font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stb-facet-leaf select, .stb-facet-leaf input[type="text"] { flex: 1; min-width: 0; font: inherit; font-size: 0.75rem; padding: 0.1rem 0.25rem; }
