@@ -1,7 +1,7 @@
 {
   "shared.confirm-dialog": {
     "name": "Confirm dialog",
-    "facets": { "surface": { "background": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
   },
   "shared.confirm-dialog.title": {
     "name": "Dialog title",
@@ -17,7 +17,7 @@
   },
   "shared.stepper": {
     "name": "Stepper",
-    "facets": { "surface": { "background": { "literal": { "l": 0.98, "c": 0.005, "h": 250 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 0.98, "c": 0.005, "h": 250 } } } }
   },
   "shared.stepper.cancel": {
     "name": "Cancel button",

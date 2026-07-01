@@ -7,8 +7,8 @@
       "name": "Login page",
       "description": "background color for the login page",
       "facets": {
-        "surface": {
-          "background": {
+        "background": {
+          "color": {
             "literal": {
               "l": 0.97,
               "c": 0.01,
@@ -25,8 +25,13 @@
       "name": "Background",
       "description": "background image for the login page",
       "facets": {
-        "asset": {
-          "ref": "login-bg.svg"
+        "background": {
+          "layers": [
+            {
+              "kind": "image",
+              "ref": "login-bg.svg"
+            }
+          ]
         }
       }
     },
@@ -36,8 +41,8 @@
       "name": "Login card",
       "description": "card background for the login page",
       "facets": {
-        "surface": {
-          "background": {
+        "background": {
+          "color": {
             "literal": {
               "l": 1,
               "c": 0,

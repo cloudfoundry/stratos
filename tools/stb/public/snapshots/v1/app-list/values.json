@@ -1,11 +1,11 @@
 {
   "cf.applications.page": {
     "name": "Applications page",
-    "facets": { "surface": { "background": { "literal": { "l": 0.97, "c": 0.01, "h": 250 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 0.97, "c": 0.01, "h": 250 } } } }
   },
   "cf.applications.nav": {
     "name": "Navigation bar",
-    "facets": { "surface": { "background": { "literal": { "l": 0.22, "c": 0.01, "h": 250 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 0.22, "c": 0.01, "h": 250 } } } }
   },
   "cf.applications.heading": {
     "name": "Page heading",
@@ -13,7 +13,7 @@
   },
   "cf.applications.app-card-1": {
     "name": "App card 1",
-    "facets": { "surface": { "background": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
   },
   "cf.applications.app-card-1.heading": {
     "name": "App name",
@@ -25,7 +25,7 @@
   },
   "cf.applications.app-card-2": {
     "name": "App card 2",
-    "facets": { "surface": { "background": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
   },
   "cf.applications.app-card-2.heading": {
     "name": "App name",
@@ -37,7 +37,7 @@
   },
   "cf.applications.app-card-3": {
     "name": "App card 3",
-    "facets": { "surface": { "background": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
   },
   "cf.applications.app-card-3.heading": {
     "name": "App name",
