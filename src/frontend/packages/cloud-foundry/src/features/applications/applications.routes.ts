@@ -78,6 +78,16 @@ export const APPLICATIONS_ROUTES: Routes = [
       {
         path: ':endpointId/:id',
         component: ApplicationBaseComponent,
+        // Keep the app-detail shell alive while the user switches side tabs
+        // (Summary/Logs/Variables/...). Without this the CustomReuseStrategy
+        // tears down ApplicationBaseComponent on every tab click, re-running
+        // its eager data load — including the env-vars fetch that emits an
+        // audit.app.environment.show event each time. The strategy only
+        // reuses when the route params (:endpointId/:id) also match, so
+        // navigating to a different app still rebuilds. (#5519)
+        data: {
+          reuseRoute: ApplicationBaseComponent
+        },
         children: [
           {
             path: 'delete',
@@ -110,7 +120,12 @@ export const APPLICATIONS_ROUTES: Routes = [
             path: '',
             component: ApplicationTabsBaseComponent,
             data: {
-              extensionsActionsKey: StratosActionType.Application
+              extensionsActionsKey: StratosActionType.Application,
+              // Persist the tabs shell across tab switches too (see the
+              // parent route's reuseRoute note). Its path is empty so its
+              // params never change; it rebuilds only when the parent does
+              // (i.e. on navigation to a different app). (#5519)
+              reuseRoute: ApplicationTabsBaseComponent
             },
             children: [
               // Function-form redirect so the ?breadcrumbs= query param
