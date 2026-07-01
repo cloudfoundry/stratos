@@ -28,16 +28,58 @@ export class CopyToClipboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    try {
-      this.canCopy = this.document.queryCommandSupported('copy');
-    } finally { /* intentionally empty */ }
+    // Show the button if EITHER clipboard mechanism is available. Gating solely
+    // on the deprecated queryCommandSupported hid the button entirely in
+    // browsers that have dropped it, even though the modern async Clipboard API
+    // still works — one way "the copy button stopped working".
+    this.canCopy = this.clipboardAvailable();
   }
 
-  copyToClipboard(event: MouseEvent | null = null) {
+  async copyToClipboard(event: MouseEvent | null = null): Promise<void> {
     if (event) {
       event.stopPropagation();
     }
 
+    const copied = await this.writeToClipboard(this.text || '');
+    this.copySuccessful = copied;
+    if (copied) {
+      this.copySuccessWait = true;
+      setTimeout(() => this.copySuccessWait = false, 2000);
+    }
+  }
+
+  private clipboardAvailable(): boolean {
+    if (this.asyncClipboardAvailable()) {
+      return true;
+    }
+    try {
+      return this.document.queryCommandSupported('copy');
+    } catch {
+      return false;
+    }
+  }
+
+  private asyncClipboardAvailable(): boolean {
+    const nav = this.document.defaultView?.navigator;
+    return typeof nav?.clipboard?.writeText === 'function';
+  }
+
+  // Prefer the modern async Clipboard API (matches service-keys / metadata-item
+  // / page-header, which already use it); fall back to the legacy execCommand
+  // textarea for older browsers or non-secure contexts where it's unavailable.
+  private async writeToClipboard(text: string): Promise<boolean> {
+    if (this.asyncClipboardAvailable()) {
+      try {
+        await this.document.defaultView!.navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // fall through to the legacy path
+      }
+    }
+    return this.legacyCopy(text);
+  }
+
+  private legacyCopy(text: string): boolean {
     const textArea = this.document.createElement('textarea');
 
     textArea.style.position = 'fixed';
@@ -51,21 +93,20 @@ export class CopyToClipboardComponent implements OnInit {
     textArea.style.boxShadow = 'none';
     textArea.style.background = 'transparent';
 
-    textArea.value = this.text || '';
+    textArea.value = text;
 
-    document.body.appendChild(textArea);
-
+    this.document.body.appendChild(textArea);
     textArea.select();
 
+    let copied = false;
     try {
-      this.copySuccessful = document.execCommand('copy');
-      this.copySuccessWait = true;
-      setTimeout(() => this.copySuccessWait = false, 2000);
+      copied = this.document.execCommand('copy');
     } catch (_err) {
       console.warn('Failed to copy to clipboard');
     }
 
     this.document.body.removeChild(textArea);
+    return copied;
   }
 
 }
