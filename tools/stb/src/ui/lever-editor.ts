@@ -106,7 +106,11 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   }
   openTreeEffect = effect(() => {
     void brandingModel.value;                         // subscribe to model changes
-    if (treeHost.contains(document.activeElement)) return; // don't yank focus from an in-flight edit
+    // Don't yank focus from an in-flight TYPED edit (text input / textarea).
+    // A focused button (e.g. the derive-dark ↓) must NOT suppress the re-render,
+    // or its own swatch would keep the stale value it just changed.
+    const ae = document.activeElement;
+    if (ae && treeHost.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
     renderTree();
   });
 
