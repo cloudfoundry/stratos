@@ -7,6 +7,10 @@
     "name": "Dialog title",
     "facets": { "content": { "text": "Are you sure?" } }
   },
+  "shared.confirm-dialog.cancel": {
+    "name": "Cancel button",
+    "facets": { "text": { "color": { "literal": { "l": 0.86, "c": 0.01, "h": 250 } } } }
+  },
   "shared.confirm-dialog.confirm": {
     "name": "Confirm button",
     "facets": { "text": { "color": { "literal": { "l": 0.55, "c": 0.15, "h": 250 } } } }
@@ -14,6 +18,10 @@
   "shared.stepper": {
     "name": "Stepper",
     "facets": { "surface": { "background": { "literal": { "l": 0.98, "c": 0.005, "h": 250 } } } }
+  },
+  "shared.stepper.cancel": {
+    "name": "Cancel button",
+    "facets": { "text": { "color": { "literal": { "l": 0.86, "c": 0.01, "h": 250 } } } }
   },
   "shared.stepper.previous": {
     "name": "Previous button",

@@ -31,6 +31,23 @@
       }
     },
     {
+      "snapshotId": "shared.confirm-dialog.cancel",
+      "role": "button",
+      "name": "Cancel button",
+      "description": "cancel button colour for the shared confirmation dialog",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
       "snapshotId": "shared.confirm-dialog.confirm",
       "role": "button",
       "name": "Confirm button",
@@ -64,6 +81,23 @@
         }
       },
       "roledescription": "stepper"
+    },
+    {
+      "snapshotId": "shared.stepper.cancel",
+      "role": "button",
+      "name": "Cancel button",
+      "description": "cancel button colour for the shared stepper",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
     },
     {
       "snapshotId": "shared.stepper.previous",
