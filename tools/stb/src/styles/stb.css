@@ -151,7 +151,9 @@ body {
 .stb-col-caret { color: var(--text-muted, #94a3b8); flex: 0 0 auto; }
 .stb-col-kind { flex: 0 0 auto; margin-left: auto; padding-left: 0.4rem; color: var(--text-muted, #94a3b8); font-size: 0.85em; }
 /* collapsed rail: thin vertical strip = breadcrumb; click to re-expand */
-.stb-col-rail { flex: 0 0 1.6rem; border-right: 1px solid var(--border, #e5e7eb); writing-mode: vertical-rl; text-orientation: mixed; padding: 0.4rem 0.1rem; cursor: pointer; font-size: 0.72rem; color: var(--text-muted, #64748b); background: var(--content-secondary, #f8fafc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* vertical-rl + rotate(180deg) so the label reads bottom-to-top; text-align:end
+   (under the 180° rotation) anchors the text block at the TOP of the rail. */
+.stb-col-rail { flex: 0 0 1.6rem; border-right: 1px solid var(--border, #e5e7eb); writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); text-align: end; padding: 0.4rem 0.1rem; cursor: pointer; font-size: 0.72rem; color: var(--text-muted, #64748b); background: var(--content-secondary, #f8fafc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stb-col-rail:hover { color: var(--color-primary, #2196f3); }
 .stb-col-crumb { position: sticky; bottom: 0; flex: 0 0 100%; align-self: flex-end; padding: 0.2rem 0.5rem; font-size: 0.68rem; color: var(--text-muted, #94a3b8); background: var(--card, #fff); border-top: 1px solid var(--border, #eee); }
 
