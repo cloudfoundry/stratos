@@ -11,7 +11,7 @@ export type ParentToPreview =
   | { type: 'STB_REVEAL'; snapshotId: string | null }
   | { type: 'STB_APPLY_LEVERS'; levers: LeverPatch[] }
   | { type: 'STB_APPLY_BLOCKS'; css: string }
-  | { type: 'STB_SET_LEVERS'; ids: string[] }
+  | { type: 'STB_SET_LEVERS'; levers: { id: string; name: string | null }[] }
   | { type: 'STB_SET_LEVER_OUTLINE'; on: boolean };
 
 export type PreviewToParent =

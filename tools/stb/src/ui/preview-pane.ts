@@ -53,8 +53,9 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
     const m = brandingModel.value;
     if (!m) return;
     send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m), brandingAssets.value) });
-    // tell the shim which elements are editable so it can show a click affordance
-    send({ type: 'STB_SET_LEVERS', ids: m.nodes.map((n) => n.snapshotId) });
+    // tell the shim which elements are editable (name rides along so a revealed
+    // empty element can label itself with its real name, not invented text)
+    send({ type: 'STB_SET_LEVERS', levers: m.nodes.map((n) => ({ id: n.snapshotId, name: n.name })) });
   }
 
   function applyScopedBlocksToPreview(): void {
