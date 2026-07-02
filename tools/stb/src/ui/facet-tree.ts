@@ -38,15 +38,13 @@ export interface FacetTreeOptions {
   onSetLayer?: (index: number, layer: Layer) => void;
   onRemoveLayer?: (index: number) => void;
   onReorderLayer?: (from: number, to: number) => void;
+  /** Font-family fallback list (Task 10): ordered comma-list, same kind-1 shape as background.layers. */
+  onAddFont?: (value: FacetValue) => void;
+  onSetFont?: (index: number, value: FacetValue) => void;
+  onRemoveFont?: (index: number) => void;
+  onReorderFont?: (from: number, to: number) => void;
 }
 
-const FONT_FAMILIES = [
-  'inherit',
-  'system-ui',
-  'Arial, sans-serif',
-  'Georgia, serif',
-  '"Courier New", monospace',
-];
 const FONT_WEIGHTS = ['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
 
 interface GroupEntry {
@@ -429,6 +427,59 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       leavesEl.appendChild(header);
     }
 
+    // Font-family fallback list — a kind-1 ordered comma-list (like background.layers)
+    // rather than a single FacetValue leaf, so it's not in FACET_PROPS/props and is
+    // rendered here explicitly rather than through the per-key leaf loop below.
+    if (g === 'text') {
+      const fontList = opts.facets.text?.fontFamily ?? [];
+      fontList.forEach((v, i) => {
+        const row = document.createElement('div');
+        row.className = 'stb-facet-fontfamily-row';
+        row.dataset.stbFontfamilyRow = 'font';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = 'literal' in v ? String(v.literal) : '';
+        input.addEventListener('input', () => opts.onSetFont?.(i, { literal: input.value }));
+        row.appendChild(input);
+
+        const upBtn = document.createElement('button');
+        upBtn.type = 'button';
+        upBtn.className = 'stb-facet-fontfamily-move-up';
+        upBtn.textContent = '↑';
+        upBtn.disabled = i === 0;
+        upBtn.addEventListener('click', () => opts.onReorderFont?.(i, i - 1));
+        row.appendChild(upBtn);
+
+        const downBtn = document.createElement('button');
+        downBtn.type = 'button';
+        downBtn.className = 'stb-facet-fontfamily-move-down';
+        downBtn.textContent = '↓';
+        downBtn.disabled = i === fontList.length - 1;
+        downBtn.addEventListener('click', () => opts.onReorderFont?.(i, i + 1));
+        row.appendChild(downBtn);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'stb-facet-fontfamily-remove';
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => opts.onRemoveFont?.(i));
+        row.appendChild(removeBtn);
+
+        leavesEl.appendChild(row);
+      });
+
+      const fontFooter = document.createElement('div');
+      fontFooter.className = 'stb-facet-fontfamily-footer';
+      const addFontBtn = document.createElement('button');
+      addFontBtn.type = 'button';
+      addFontBtn.className = 'stb-facet-fontfamily-add';
+      addFontBtn.textContent = '+ font';
+      addFontBtn.addEventListener('click', () => opts.onAddFont?.({ literal: '' }));
+      fontFooter.appendChild(addFontBtn);
+      leavesEl.appendChild(fontFooter);
+    }
+
     for (const [key, spec] of props) {
       const leaf = document.createElement('div');
       leaf.className = 'stb-facet-leaf';
@@ -491,9 +542,9 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         deriveBtn.disabled = !lit;
         deriveBtn.addEventListener('click', () => { if (lit) opts.deriveDark?.(key); });
         leaf.appendChild(deriveBtn);
-      } else if (key === 'text.fontFamily' || key === 'text.fontWeight') {
+      } else if (key === 'text.fontWeight') {
         const sel = document.createElement('select');
-        const options = key === 'text.fontWeight' ? FONT_WEIGHTS : FONT_FAMILIES;
+        const options = FONT_WEIGHTS;
         for (const o of options) {
           const opt = document.createElement('option');
           opt.value = o;

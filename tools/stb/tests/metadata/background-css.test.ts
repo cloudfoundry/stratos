@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { gradientCss, backgroundCss } from '@/metadata/facets';
+import { gradientCss, backgroundCss, fontFamilyCss } from '@/metadata/facets';
 
 describe('gradientCss', () => {
   it('reconstructs a linear gradient with angle and stops', () => {
@@ -44,5 +44,12 @@ describe('backgroundCss', () => {
     expect(backgroundCss({ color: { literal: '#fff' } })).toEqual(['background-color: #ffffff;']);
     expect(backgroundCss({ layers: [{ kind: 'image', ref: 'a.png' }] })).toEqual(['background-image: url(a.png);']);
     expect(backgroundCss({})).toEqual([]);
+  });
+});
+
+describe('fontFamilyCss', () => {
+  it('joins the font-family fallback list', () => {
+    expect(fontFamilyCss([{ literal: 'Inter' }, { literal: 'system-ui' }, { literal: 'sans-serif' }]))
+      .toBe('font-family: Inter, system-ui, sans-serif;');
   });
 });

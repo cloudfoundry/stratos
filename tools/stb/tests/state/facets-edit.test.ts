@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   setFacetProp, addGroup, removeGroup,
   setBackstop, addLayer, removeLayer, reorderLayer, setLayer,
+  addFont, removeFont, reorderFont, setFont,
 } from '@/state/facets-edit';
 
 describe('facets-edit', () => {
@@ -33,5 +34,27 @@ describe('facets-edit', () => {
     f = setLayer(f, 0, gradientLayer);
     expect(f.background!.layers![0]).toEqual(gradientLayer);
     expect((f.background!.layers![1] as { ref: string }).ref).toBe('b');
+  });
+
+  it('adds font-family fallbacks in order and reorders them', () => {
+    let f = addFont({}, { literal: 'Inter' });
+    f = addFont(f, { literal: 'system-ui' });
+    expect(f.text!.fontFamily).toEqual([{ literal: 'Inter' }, { literal: 'system-ui' }]);
+    f = reorderFont(f, 1, 0);
+    expect(f.text!.fontFamily).toEqual([{ literal: 'system-ui' }, { literal: 'Inter' }]);
+  });
+
+  it('sets a font-family entry at an index in place, preserving order', () => {
+    let f = addFont({}, { literal: 'Inter' });
+    f = addFont(f, { literal: 'system-ui' });
+    f = setFont(f, 0, { literal: 'Roboto' });
+    expect(f.text!.fontFamily).toEqual([{ literal: 'Roboto' }, { literal: 'system-ui' }]);
+  });
+
+  it('removes a font-family entry at an index', () => {
+    let f = addFont({}, { literal: 'Inter' });
+    f = addFont(f, { literal: 'system-ui' });
+    f = removeFont(f, 0);
+    expect(f.text!.fontFamily).toEqual([{ literal: 'system-ui' }]);
   });
 });

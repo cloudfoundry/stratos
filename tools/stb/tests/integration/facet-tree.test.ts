@@ -718,3 +718,76 @@ it('shows promote for a literal property with a token mapping, none without', ()
   const sizeLeaf = host.querySelector('.stb-facet-leaf[data-key="text.fontSize"]')!;
   expect(sizeLeaf.querySelector('.stb-facet-promote')).toBeNull();
 });
+
+it('renders a font-family row per fallback entry, in order', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { text: { fontFamily: [{ literal: 'Inter' }, { literal: 'system-ui' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const rows = [...host.querySelectorAll('[data-stb-fontfamily-row]')];
+  expect(rows.length).toBe(2);
+  const inputs = rows.map((r) => (r.querySelector('input') as HTMLInputElement).value);
+  expect(inputs).toEqual(['Inter', 'system-ui']);
+});
+
+it('fires onAddFont from the footer add button', () => {
+  const host = document.createElement('div');
+  const added: unknown[] = [];
+  mountFacetTree(host, {
+    facets: { text: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onAddFont: (v) => added.push(v),
+  });
+  (host.querySelector('.stb-facet-fontfamily-add') as HTMLButtonElement).click();
+  expect(added).toEqual([{ literal: '' }]);
+});
+
+it('fires onSetFont when a row input changes', () => {
+  const host = document.createElement('div');
+  const sets: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { text: { fontFamily: [{ literal: 'Inter' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetFont: (i, v) => sets.push([i, v]),
+  });
+  const input = host.querySelector('[data-stb-fontfamily-row] input') as HTMLInputElement;
+  input.value = 'Roboto';
+  input.dispatchEvent(new Event('input'));
+  expect(sets).toEqual([[0, { literal: 'Roboto' }]]);
+});
+
+it('fires onRemoveFont from a row remove button', () => {
+  const host = document.createElement('div');
+  const removed: number[] = [];
+  mountFacetTree(host, {
+    facets: { text: { fontFamily: [{ literal: 'Inter' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onRemoveFont: (i) => removed.push(i),
+  });
+  (host.querySelector('[data-stb-fontfamily-row] .stb-facet-fontfamily-remove') as HTMLButtonElement).click();
+  expect(removed).toEqual([0]);
+});
+
+it('fires onReorderFont from a row move button, disabling at the ends', () => {
+  const host = document.createElement('div');
+  const reorders: [number, number][] = [];
+  mountFacetTree(host, {
+    facets: { text: { fontFamily: [{ literal: 'Inter' }, { literal: 'system-ui' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onReorderFont: (from, to) => reorders.push([from, to]),
+  });
+  const rows = [...host.querySelectorAll('[data-stb-fontfamily-row]')];
+  const firstUp = rows[0]!.querySelector('.stb-facet-fontfamily-move-up') as HTMLButtonElement;
+  const firstDown = rows[0]!.querySelector('.stb-facet-fontfamily-move-down') as HTMLButtonElement;
+  const lastDown = rows[1]!.querySelector('.stb-facet-fontfamily-move-down') as HTMLButtonElement;
+  expect(firstUp.disabled).toBe(true);
+  expect(lastDown.disabled).toBe(true);
+  firstDown.click();
+  expect(reorders).toEqual([[0, 1]]);
+});

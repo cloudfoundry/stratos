@@ -45,3 +45,26 @@ export function reorderLayer(f: Facets, from: number, to: number): Facets {
   layers.splice(to, 0, moved!);
   return { ...f, background: { ...bg(f), layers } };
 }
+
+// --- font-family composite: ordered comma-list fallback stack (same kind-1 shape as background.layers) ---
+const fonts = (f: Facets) => f.text?.fontFamily ?? [];
+
+export function addFont(f: Facets, value: FacetValue): Facets {
+  return { ...f, text: { ...(f.text ?? {}), fontFamily: [...fonts(f), value] } };
+}
+export function setFont(f: Facets, index: number, value: FacetValue): Facets {
+  const fontFamily = [...fonts(f)];
+  fontFamily[index] = value;
+  return { ...f, text: { ...(f.text ?? {}), fontFamily } };
+}
+export function removeFont(f: Facets, index: number): Facets {
+  const fontFamily = [...fonts(f)];
+  fontFamily.splice(index, 1);
+  return { ...f, text: { ...(f.text ?? {}), fontFamily } };
+}
+export function reorderFont(f: Facets, from: number, to: number): Facets {
+  const fontFamily = [...fonts(f)];
+  const [moved] = fontFamily.splice(from, 1);
+  fontFamily.splice(to, 0, moved!);
+  return { ...f, text: { ...(f.text ?? {}), fontFamily } };
+}
