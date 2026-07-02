@@ -1,5 +1,5 @@
 // src/ui/facet-tree.ts
-import type { Facets, FacetValue, Layer, Gradient } from '@/metadata/types';
+import type { Facets, FacetValue, Layer, Gradient, ContentFormat } from '@/metadata/types';
 import type { Oklch } from '@/color/oklch';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import type { ColorFormat } from '@/color/format';
@@ -35,7 +35,7 @@ export interface FacetTreeOptions {
   tokenForKey?: (key: string) => string | null;
   /** Resolves the literal FacetValue to detach TO (token's current value). */
   resolveLiteral?: (key: string, token: string) => FacetValue;
-  onContentEdit?: (text: string) => void;
+  onContentEdit?: (text: string, format?: ContentFormat) => void;
   onAssetEdit?: (file: File) => void;
   /** Live color-format accessor (hex/rgb/oklch), read when a color picker opens so the
    *  picker's text field matches the format chosen in the top bar. */
@@ -150,8 +150,22 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     leaf.appendChild(lab);
     const ta = document.createElement('textarea');
     ta.value = opts.facets.content.text;
-    ta.addEventListener('input', () => opts.onContentEdit?.(ta.value));
+    // Format select (plain | formatted): 'formatted' = the closed subset grammar
+    // (src/content/subset-format.ts). Both controls report through onContentEdit
+    // so an edit always carries the currently selected format.
+    const fmt = document.createElement('select');
+    fmt.className = 'stb-facet-content-format';
+    for (const [value, label] of [['plain', 'plain'], ['subset', 'formatted']] as const) {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      fmt.appendChild(opt);
+    }
+    fmt.value = opts.facets.content.format === 'subset' ? 'subset' : 'plain';
+    ta.addEventListener('input', () => opts.onContentEdit?.(ta.value, fmt.value as ContentFormat));
+    fmt.addEventListener('change', () => opts.onContentEdit?.(ta.value, fmt.value as ContentFormat));
     leaf.appendChild(ta);
+    leaf.appendChild(fmt);
     host.appendChild(leaf);
   }
 

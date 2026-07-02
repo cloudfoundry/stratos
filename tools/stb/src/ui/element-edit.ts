@@ -19,7 +19,10 @@ export function buildVisibilityCompanion(
 
 /** Map a LeverValue edit back into the Facets bundle it was sourced from. */
 function leverValueToFacets(value: LeverValue, existing: Facets): Facets {
-  if (value.kind === 'content') return { ...existing, content: { text: value.text } };
+  if (value.kind === 'content') {
+    // 'plain'/absent stores no format key — keeps plain content byte-identical
+    return { ...existing, content: { text: value.text, ...(value.format === 'subset' ? { format: 'subset' as const } : {}) } };
+  }
   if (value.kind === 'asset') return { ...existing, asset: { ref: value.ref } };
   // color: write into text.color if present, else background.color
   const colorFacet: FacetValue = { literal: value.oklch };

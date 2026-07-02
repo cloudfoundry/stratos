@@ -31,6 +31,18 @@
       }
     },
     {
+      "snapshotId": "shared.confirm-dialog.message",
+      "role": "paragraph",
+      "name": "Dialog message",
+      "description": "message text for the shared confirmation dialog",
+      "facets": {
+        "content": {
+          "text": "This action cannot be undone.",
+          "format": "subset"
+        }
+      }
+    },
+    {
       "snapshotId": "shared.confirm-dialog.cancel",
       "role": "button",
       "name": "Cancel button",

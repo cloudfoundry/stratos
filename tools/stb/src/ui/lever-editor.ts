@@ -1,4 +1,4 @@
-import type { LeverValue, Facets, FacetValue, Layer } from '@/metadata/types';
+import type { LeverValue, Facets, FacetValue, Layer, ContentFormat } from '@/metadata/types';
 import type { EditorView } from 'codemirror';
 import { effect } from '@preact/signals-core';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
@@ -47,8 +47,9 @@ export interface OpenLeverEditorOptions {
   onSetGap?: (slot: 'row' | 'column', value: FacetValue) => void;
 }
 
-export function contentValue(text: string): LeverValue {
-  return { kind: 'content', text };
+export function contentValue(text: string, format?: ContentFormat): LeverValue {
+  // 'plain'/absent carries no format key — plain content stays byte-identical
+  return format === 'subset' ? { kind: 'content', text, format } : { kind: 'content', text };
 }
 export function assetValue(filename: string): LeverValue {
   return { kind: 'asset', ref: filename };
@@ -141,7 +142,7 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.onReorderFont ? { onReorderFont: opts.onReorderFont } : {}),
       ...(opts.onSetSide ? { onSetSide: opts.onSetSide } : {}),
       ...(opts.onSetGap ? { onSetGap: opts.onSetGap } : {}),
-      onContentEdit: (text: string) => opts.onChange(contentValue(text)),
+      onContentEdit: (text: string, format?: ContentFormat) => opts.onChange(contentValue(text, format)),
       onAssetEdit: (file: File) => { setBrandingAsset(assetRefFor(file.name), file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });
   }

@@ -2,9 +2,13 @@ import type { Oklch } from '@/color/oklch';
 
 export type LeverKind = 'color' | 'content' | 'asset';
 
+// Content text format: 'plain' (default, absent = plain, rendered via textContent)
+// or 'subset' (closed-grammar formatting — see src/content/subset-format.ts).
+export type ContentFormat = 'plain' | 'subset';
+
 export type LeverValue =
   | { kind: 'color'; oklch: Oklch }
-  | { kind: 'content'; text: string }
+  | { kind: 'content'; text: string; format?: ContentFormat }
   | { kind: 'asset'; ref: string };
 
 // Raw element-scoped CSS declaration body — the R1 facet escape hatch.
@@ -51,7 +55,7 @@ export interface SurfaceFacet { border?: FacetValue; borderRadius?: FacetValue; 
 export interface SpacingFacet { padding?: Sides; margin?: Sides; gap?: GapTuple; }
 
 export interface Facets {
-  content?: { text: string };
+  content?: { text: string; format?: ContentFormat };
   asset?: { ref: string };
   background?: BackgroundFacet;
   text?: TextFacet;

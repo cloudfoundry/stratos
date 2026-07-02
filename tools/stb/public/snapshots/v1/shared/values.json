@@ -7,6 +7,10 @@
     "name": "Dialog title",
     "facets": { "content": { "text": "Are you sure?" } }
   },
+  "shared.confirm-dialog.message": {
+    "name": "Dialog message",
+    "facets": { "content": { "text": "This action cannot be undone.", "format": "subset" } }
+  },
   "shared.confirm-dialog.cancel": {
     "name": "Cancel button",
     "facets": { "text": { "color": { "literal": { "l": 0.86, "c": 0.01, "h": 250 } } } }

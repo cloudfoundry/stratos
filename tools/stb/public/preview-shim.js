@@ -90,6 +90,55 @@
     document.head.appendChild(el);
   }
 
+  // Plain-JS mirror of the closed-grammar subset parser — reference
+  // implementation: src/content/subset-format.ts (keep the two in lockstep).
+  // Grammar v1: **bold** → <strong>, _italic_ → <em>, newline → <br>;
+  // everything else is a text node; unterminated markers render literally.
+  // DELIBERATELY DOM-construction, NOT innerHTML: this shim accepts postMessage
+  // from any origin ('*'), so an innerHTML sink here would be an XSS primitive
+  // for any window that can message the iframe. Building only strong/em/br/text
+  // nodes bounds a hostile payload to harmless formatting.
+  function renderSubsetInto(el, text) {
+    el.textContent = '';
+    appendSubsetSpan(el, String(text));
+  }
+  function appendSubsetSpan(parent, s) {
+    var doc = parent.ownerDocument;
+    var buf = '';
+    function flush() {
+      if (buf) { parent.appendChild(doc.createTextNode(buf)); buf = ''; }
+    }
+    var i = 0;
+    while (i < s.length) {
+      var ch = s[i];
+      if (ch === '\n') { flush(); parent.appendChild(doc.createElement('br')); i++; continue; }
+      if (s.slice(i, i + 2) === '**') {
+        var endB = s.indexOf('**', i + 2);
+        if (endB !== -1) {
+          flush();
+          var strong = doc.createElement('strong');
+          appendSubsetSpan(strong, s.slice(i + 2, endB));
+          parent.appendChild(strong);
+          i = endB + 2;
+          continue;
+        }
+      } else if (ch === '_') {
+        var endI = s.indexOf('_', i + 1);
+        if (endI !== -1) {
+          flush();
+          var em = doc.createElement('em');
+          appendSubsetSpan(em, s.slice(i + 1, endI));
+          parent.appendChild(em);
+          i = endI + 1;
+          continue;
+        }
+      }
+      buf += ch;
+      i++;
+    }
+    flush();
+  }
+
   function applyLeversInShim(levers) {
     for (var i = 0; i < (levers || []).length; i++) {
       var p = levers[i];
@@ -101,7 +150,10 @@
       }
       var e = document.querySelector('[stb-snapshot-id="' + p.snapshotId + '"]');
       if (!e) continue;
-      if (p.kind === 'content' && p.text !== undefined) e.textContent = p.text;
+      if (p.kind === 'content' && p.text !== undefined) {
+        if (p.format === 'subset') renderSubsetInto(e, p.text);
+        else e.textContent = p.text;
+      }
       if (p.kind === 'asset') {
         var src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // NOTE: object URL not revoked
         if (src === undefined) continue;

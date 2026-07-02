@@ -23,6 +23,19 @@ describe('leverPatchesFor', () => {
     expect(patches.filter((p) => p.snapshotId === 'auth.login.sign-in')).toHaveLength(0);
   });
 
+  it('carries format subset on the content patch, and omits format for plain content', () => {
+    const m: BrandingModel = { scene: 's', nodes: [
+      { snapshotId: 'a', role: 'paragraph', name: 'M', description: 'msg',
+        facets: { content: { text: '**b**', format: 'subset' } } },
+      { snapshotId: 'b', role: 'heading', name: 'T', description: 'title',
+        facets: { content: { text: 'Hi' } } },
+    ] };
+    const patches = leverPatchesFor(m);
+    expect(patches).toContainEqual({ snapshotId: 'a', kind: 'content', text: '**b**', format: 'subset' });
+    // plain patch is byte-identical to the pre-format shape — no format key at all
+    expect(patches.find((p) => p.snapshotId === 'b')).toEqual({ snapshotId: 'b', kind: 'content', text: 'Hi' });
+  });
+
   it('emits a visibility patch from the node visibility field', () => {
     const patches = leverPatchesFor(model);
     expect(patches).toContainEqual({ snapshotId: 'auth.login.logo', kind: 'visibility', shown: false });
