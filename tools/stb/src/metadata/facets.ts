@@ -1,4 +1,4 @@
-import type { Facets, FacetValue, BackgroundFacet, Gradient, ColorStop, Layer } from '@/metadata/types';
+import type { Facets, FacetValue, BackgroundFacet, Gradient, ColorStop, Layer, SpacingFacet } from '@/metadata/types';
 import { oklchToHex, type Oklch } from '@/color/oklch';
 
 export interface FacetPropSpec { cssProp: string; isColor: boolean; }
@@ -88,6 +88,26 @@ export function facetValueCss(v: FacetValue, isColor: boolean): string {
 /** Font-family fallback list (composite kind 1: ordered comma-list, non-color leaves). */
 export function fontFamilyCss(list: FacetValue[]): string {
   return `font-family: ${list.map((v) => facetValueCss(v, false)).join(', ')};`;
+}
+
+const SIDE_ORDER = ['top', 'right', 'bottom', 'left'] as const;
+
+/** Spacing composite (kind 2: positional tuple): per-side padding/margin longhands
+ *  plus row/column-gap, for whichever slots are set. Non-color leaves, so
+ *  facetValueCss is always called with isColor=false, same as fontFamilyCss. */
+export function spacingDeclarations(sp: SpacingFacet): string[] {
+  const out: string[] = [];
+  for (const group of ['padding', 'margin'] as const) {
+    const t = sp[group];
+    if (!t) continue;
+    for (const side of SIDE_ORDER) {
+      const v = t[side];
+      if (v) out.push(`${group}-${side}: ${facetValueCss(v, false)};`);
+    }
+  }
+  if (sp.gap?.row) out.push(`row-gap: ${facetValueCss(sp.gap.row, false)};`);
+  if (sp.gap?.column) out.push(`column-gap: ${facetValueCss(sp.gap.column, false)};`);
+  return out;
 }
 
 function stopCss(s: ColorStop): string {

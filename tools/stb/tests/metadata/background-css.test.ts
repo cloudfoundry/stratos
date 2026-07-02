@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { gradientCss, backgroundCss, fontFamilyCss } from '@/metadata/facets';
+import { gradientCss, backgroundCss, fontFamilyCss, spacingDeclarations } from '@/metadata/facets';
 
 describe('gradientCss', () => {
   it('reconstructs a linear gradient with angle and stops', () => {
@@ -51,5 +51,30 @@ describe('fontFamilyCss', () => {
   it('joins the font-family fallback list', () => {
     expect(fontFamilyCss([{ literal: 'Inter' }, { literal: 'system-ui' }, { literal: 'sans-serif' }]))
       .toBe('font-family: Inter, system-ui, sans-serif;');
+  });
+});
+
+describe('spacingDeclarations', () => {
+  it('emits per-side longhands for set spacing slots', () => {
+    expect(spacingDeclarations({
+      padding: { top: { literal: '8px' }, left: { literal: '4px' } },
+      gap: { row: { literal: '2px' } },
+    })).toEqual(['padding-top: 8px;', 'padding-left: 4px;', 'row-gap: 2px;']);
+  });
+  it('emits margin longhands in T/R/B/L order and column-gap', () => {
+    expect(spacingDeclarations({
+      margin: { top: { literal: '1px' }, right: { literal: '2px' }, bottom: { literal: '3px' }, left: { literal: '4px' } },
+      gap: { column: { literal: '6px' } },
+    })).toEqual([
+      'margin-top: 1px;', 'margin-right: 2px;', 'margin-bottom: 3px;', 'margin-left: 4px;',
+      'column-gap: 6px;',
+    ]);
+  });
+  it('emits nothing for an empty spacing facet', () => {
+    expect(spacingDeclarations({})).toEqual([]);
+  });
+  it('resolves a token slot via facetValueCss', () => {
+    expect(spacingDeclarations({ padding: { top: { token: 'space.md' } } }))
+      .toEqual(['padding-top: var(--space-md);']);
   });
 });

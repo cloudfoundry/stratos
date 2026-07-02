@@ -18,7 +18,7 @@ import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens, reprojectNodeTokensDark } from '@/ui/element-edit';
 import { FACET_PROPS, facetDeclarations } from '@/metadata/facets';
-import { setFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer, addFont, setFont, removeFont, reorderFont } from '@/state/facets-edit';
+import { setFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer, addFont, setFont, removeFont, reorderFont, setSide, setGap } from '@/state/facets-edit';
 import { deriveDarkOklch } from '@/color/derive-dark';
 import type { Oklch } from '@/color/oklch';
 import { effect } from '@preact/signals-core';
@@ -223,6 +223,18 @@ async function main() {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, reorderFont(n.facets, from, to));
+        selectElement(snapshotId);
+      },
+      onSetSide: (group, side, value) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, setSide(n.facets, group, side, value));
+        selectElement(snapshotId);
+      },
+      onSetGap: (slot, value) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, setGap(n.facets, slot, value));
         selectElement(snapshotId);
       },
       colorFormat: () => colorFormat.value,
