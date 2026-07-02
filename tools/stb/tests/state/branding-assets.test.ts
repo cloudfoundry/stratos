@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  brandingAssets, setBrandingAsset, assetRefFor, brandingAssetInputs, attachAssetBlobs, type BrandingAsset,
+  brandingAssets, setBrandingAsset, assetRefFor, brandingAssetInputs, attachAssetBlobs, rewriteAssetUrls,
+  type BrandingAsset,
 } from '@/state/branding-assets';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
 
@@ -56,24 +57,54 @@ describe('branding-assets', () => {
     expect(out[2]).toEqual(patches[2]);                       // asset w/o stored blob untouched (no blob key)
   });
 
-  it('attachAssetBlobs swaps url(<ref>) with an object URL for background patches with a stored blob', () => {
-    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob: blobA, filename: 'hero.jpg' }]]);
-    const patches: LeverPatch[] = [
-      {
-        snapshotId: 'a.card', kind: 'background', backgroundColor: '#0b3d91',
-        backgroundImage: 'linear-gradient(rgba(0,0,0,.6), transparent), url(assets/hero.jpg), url(assets/none.jpg)',
-      },
-    ];
-    // jsdom doesn't implement URL.createObjectURL — stub it locally for this assertion only.
+});
+
+describe('rewriteAssetUrls', () => {
+  const blob = new Blob(['a'], { type: 'image/jpeg' });
+
+  function stubCreateObjectURL(map: Record<string, string>): () => void {
     const orig = URL.createObjectURL;
-    URL.createObjectURL = ((b: Blob) => (b === blobA ? 'blob:mock/hero' : 'blob:mock/other')) as typeof URL.createObjectURL;
+    let n = 0;
+    const urls = Object.values(map);
+    URL.createObjectURL = (() => urls[n++] ?? `blob:mock/${n}`) as typeof URL.createObjectURL;
+    return () => { URL.createObjectURL = orig; };
+  }
+
+  it('rewrites url(<ref>) to url(<objectURL>) for a stored asset, leaves unknown refs untouched', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ hero: 'blob:mock/hero' });
     try {
-      const out = attachAssetBlobs(patches, store);
-      const img = (out[0] as LeverPatch).backgroundImage!;
-      expect(img).toContain('url(blob:mock/hero)');
-      expect(img).toContain('url(assets/none.jpg)'); // untouched ref with no stored blob
-    } finally {
-      URL.createObjectURL = orig;
-    }
+      const css = 'html .a { background-image: linear-gradient(red, blue), url(assets/hero.jpg), url(assets/none.jpg); }';
+      const out = rewriteAssetUrls(css, store, 'test-1');
+      expect(out).toContain('url(blob:mock/hero)');
+      expect(out).toContain('url(assets/none.jpg)'); // no stored blob → passed through
+    } finally { restore(); }
+  });
+
+  it('revokes the previous call\'s object URLs for the same callsite key when minting new ones', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ a: 'blob:mock/1', b: 'blob:mock/2' });
+    const revoked: string[] = [];
+    const origRevoke = URL.revokeObjectURL;
+    URL.revokeObjectURL = ((u: string) => revoked.push(u)) as typeof URL.revokeObjectURL;
+    try {
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2');
+      expect(revoked).toEqual([]); // nothing to revoke on first call
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2');
+      expect(revoked).toEqual(['blob:mock/1']); // first call's URL revoked on replace
+    } finally { restore(); URL.revokeObjectURL = origRevoke; }
+  });
+
+  it('does not revoke a different callsite key\'s URLs', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ a: 'blob:mock/1', b: 'blob:mock/2' });
+    const revoked: string[] = [];
+    const origRevoke = URL.revokeObjectURL;
+    URL.revokeObjectURL = ((u: string) => revoked.push(u)) as typeof URL.revokeObjectURL;
+    try {
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'pane-light');
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'pane-dark');
+      expect(revoked).toEqual([]); // distinct keys, nothing revoked
+    } finally { restore(); URL.revokeObjectURL = origRevoke; }
   });
 });

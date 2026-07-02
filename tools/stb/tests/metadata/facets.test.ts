@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FACET_PROPS, facetDeclarations, facetLiteralCss, backgroundPatch, contentAssetDeclarations } from '@/metadata/facets';
+import { FACET_PROPS, facetDeclarations, facetLiteralCss, contentAssetDeclarations } from '@/metadata/facets';
 import type { Facets } from '@/metadata/types';
 
 describe('FACET_PROPS', () => {
@@ -53,23 +53,5 @@ describe('contentAssetDeclarations topmost-image scan', () => {
     };
     const out = [...contentAssetDeclarations(f)];
     expect(out).toEqual([{ key: 'asset', value: 'assets/logo.png' }]);
-  });
-});
-
-describe('backgroundPatch', () => {
-  it('returns raw color + reversed-layer image values (unlike backgroundCss, a {token} color is included)', () => {
-    expect(backgroundPatch({
-      color: { literal: '#0b3d91' },
-      layers: [
-        { kind: 'image', ref: 'assets/hero.jpg' },
-        { kind: 'gradient', gradient: { type: 'linear', stops: [
-          { color: { literal: 'rgba(0,0,0,.6)' } }, { color: { literal: 'transparent' } } ] } },
-      ],
-    })).toEqual({
-      backgroundColor: '#0b3d91',
-      backgroundImage: 'linear-gradient(rgba(0,0,0,.6), transparent), url(assets/hero.jpg)',
-    });
-    expect(backgroundPatch({ color: { token: 'brand.500' } })).toEqual({ backgroundColor: 'var(--brand-500)' });
-    expect(backgroundPatch({})).toEqual({});
   });
 });

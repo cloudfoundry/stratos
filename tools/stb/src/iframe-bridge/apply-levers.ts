@@ -3,7 +3,7 @@ import type { ContentFormat } from '@/metadata/types';
 
 export interface LeverPatch {
   snapshotId: string;
-  kind: 'content' | 'asset' | 'visibility' | 'background';
+  kind: 'content' | 'asset' | 'visibility';
   text?: string;
   /** Content text format; absent = plain (textContent). 'subset' renders the
    *  closed grammar via DOM construction — see src/content/subset-format.ts. */
@@ -11,8 +11,6 @@ export interface LeverPatch {
   ref?: string;
   shown?: boolean;
   blob?: Blob;
-  backgroundColor?: string;
-  backgroundImage?: string;
 }
 
 export function applyLevers(doc: Document, levers: LeverPatch[]): void {
@@ -35,14 +33,6 @@ export function applyLevers(doc: Document, levers: LeverPatch[]): void {
       if (src === undefined) continue;
       if (el instanceof HTMLImageElement) el.setAttribute('src', src);
       else el.style.backgroundImage = `url(${src})`;
-    }
-    if (p.kind === 'background') {
-      // A background patch owns BOTH inline props: an absent component clears the
-      // previous inline value (removing the last layer must drop the stale image).
-      // When no background patch is sent at all (e.g. dark preview with no dark
-      // override), this branch never runs — scoped blocks / dark CSS keep owning it.
-      el.style.backgroundColor = p.backgroundColor ?? '';
-      el.style.backgroundImage = p.backgroundImage ?? '';
     }
   }
 }

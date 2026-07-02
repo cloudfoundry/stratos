@@ -66,49 +66,7 @@ describe('leverPatchesFor', () => {
     expect(patches).toContainEqual({ snapshotId: 'b', kind: 'asset', ref: 'logo.svg' });
   });
 
-  it('emits a composed background patch (raw color + reversed-layer image) for a node with a background facet', () => {
-    const nodes = [
-      { snapshotId: 'a.card', role: 'region', name: 'Card', description: '',
-        facets: { background: {
-          color: { literal: '#0b3d91' },
-          layers: [{ kind: 'image', ref: 'assets/hero.jpg' }],
-        } } },
-    ];
-    const patches = leverPatchesFor({ scene: 's', nodes } as any);
-    expect(patches).toContainEqual({
-      snapshotId: 'a.card', kind: 'background',
-      backgroundColor: '#0b3d91', backgroundImage: 'url(assets/hero.jpg)',
-    });
-  });
-});
-
-describe('leverPatchesFor dark-aware background', () => {
-  const bgModel = {
-    scene: 's',
-    nodes: [
-      { snapshotId: 'a.card', role: 'region', name: 'C', description: '',
-        facets: { background: { color: { literal: '#eeeeee' } } } },
-      { snapshotId: 'a.hero', role: 'region', name: 'H', description: '',
-        facets: { background: { color: { literal: '#dddddd' } } },
-        facetsDark: { background: { color: { literal: '#111111' } } } },
-    ],
-  } as any;
-
-  it('light mode composes the background patch from facets.background', () => {
-    const patches = leverPatchesFor(bgModel, false);
-    expect(patches).toContainEqual({ snapshotId: 'a.card', kind: 'background', backgroundColor: '#eeeeee' });
-    expect(patches).toContainEqual({ snapshotId: 'a.hero', kind: 'background', backgroundColor: '#dddddd' });
-  });
-
-  it('dark mode with no facetsDark.background emits NO background patch (dark CSS owns it)', () => {
-    const patches = leverPatchesFor(bgModel, true);
-    expect(patches.filter((p) => p.snapshotId === 'a.card' && p.kind === 'background')).toHaveLength(0);
-  });
-
-  it('dark mode composes the background patch from facetsDark.background when present', () => {
-    const patches = leverPatchesFor(bgModel, true);
-    expect(patches).toContainEqual({ snapshotId: 'a.hero', kind: 'background', backgroundColor: '#111111' });
-    // and never from the light bundle
-    expect(patches.filter((p) => p.kind === 'background' && (p as any).backgroundColor === '#dddddd')).toHaveLength(0);
-  });
+  // background is no longer a LeverPatch — emitScopedBlocks (css-emitter.ts) is the sole
+  // owner of preview backgrounds, light and dark alike (see tests/parse/css-emitter.test.ts
+  // and tests/ui/preview-compare.test.ts's "pinned-dark pane" scoped-blocks coverage).
 });

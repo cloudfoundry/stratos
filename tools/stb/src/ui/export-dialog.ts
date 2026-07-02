@@ -24,6 +24,9 @@ export function exportInputs(
     const r = project(model, routing);
     for (const [k, v] of r.tokens) merged.set(k, v);
     companyConfig = r.companyConfig;
+    // Deliberately NOT run through rewriteAssetUrls (preview-pane.ts's blob: URL rewrite):
+    // the exported bundle ships real asset files at their `assets/<file>` paths, so raw
+    // refs are correct here — a blob: URL would be invalid outside this session's iframe.
     scopedCss = emitScopedBlocks(model.nodes) || undefined;
   }
   return {

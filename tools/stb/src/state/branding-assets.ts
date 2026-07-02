@@ -30,16 +30,33 @@ export function attachAssetBlobs(patches: LeverPatch[], store: Map<string, Brand
       const a = store.get(p.ref);
       return a ? { ...p, blob: a.blob } : p;
     }
-    if (p.kind === 'background') {
-      if (!p.backgroundImage) return p;
-      // Substitute url(<ref>) -> url(<objectURL>) for any layer ref with an uploaded blob;
-      // leverPatchesFor stays pure (no store access), so the swap happens here instead.
-      const swapped = p.backgroundImage.replace(/url\(([^)]+)\)/g, (whole, ref: string) => {
-        const a = store.get(ref);
-        return a ? `url(${URL.createObjectURL(a.blob)})` : whole;
-      });
-      return { ...p, backgroundImage: swapped };
-    }
     return p;
   });
+}
+
+// Object URLs minted by the most recent rewriteAssetUrls call, keyed per caller (e.g. one
+// key per preview pane) so revoking one pane's stale URLs never touches another pane's
+// still-displayed blob: URLs.
+const mintedByCallsite = new Map<string, string[]>();
+
+/** Substitute url(<ref>) -> url(<objectURL>) for any asset ref in `css` with a stored blob;
+ *  unknown refs (snapshot-bundled files, not user uploads) pass through untouched. Scoped-block
+ *  CSS is the only preview-facing consumer — the export path keeps raw refs on purpose, since
+ *  the exported bundle ships real files at those paths and a blob: URL would be invalid there.
+ *
+ *  Mints a fresh object URL per call and revokes the previous call's URLs for the same
+ *  `callsiteKey`, so repeated re-renders (token/model changes) don't leak blob URLs. */
+export function rewriteAssetUrls(css: string, store: Map<string, BrandingAsset>, callsiteKey: string): string {
+  const prev = mintedByCallsite.get(callsiteKey);
+  if (prev) for (const url of prev) URL.revokeObjectURL(url);
+  const minted: string[] = [];
+  const out = css.replace(/url\(([^)]+)\)/g, (whole, ref: string) => {
+    const a = store.get(ref);
+    if (!a) return whole;
+    const url = URL.createObjectURL(a.blob);
+    minted.push(url);
+    return `url(${url})`;
+  });
+  mintedByCallsite.set(callsiteKey, minted);
+  return out;
 }
