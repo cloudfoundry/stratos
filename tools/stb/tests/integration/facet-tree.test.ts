@@ -1144,3 +1144,76 @@ it('per-stop derive is disabled for a token stop', () => {
   const deriveBtn = stopRow.querySelector('.stb-facet-derive-dark') as HTMLButtonElement;
   expect(deriveBtn.disabled).toBe(true);
 });
+
+it('forked dark layers are authoritative: a light reorder that breaks index correspondence disables that row instead of re-seeding from light', () => {
+  // Reviewed regression (#5517): dark was forked as [gradientA, imageB]. A light
+  // structural edit (add/remove/reorder) — which only ever touches light — then
+  // left light index 1 as a gradient while dark index 1 is still the image layer.
+  // Per-index correspondence is broken at that row: it must render empty/disabled,
+  // never silently re-seed from the current light gradient and clobber the real
+  // dark fork sitting at that index once main.ts's array-level onSetLayerDark
+  // writes the whole array back.
+  const host = document.createElement('div');
+  const setLayersDark: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: {
+      background: {
+        layers: [
+          { kind: 'gradient', gradient: {
+            type: 'linear', angle: '90deg',
+            stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+          } },
+          // Post-reorder: light index 1 is now a gradient (used to be at index 0,
+          // or a fresh gradient) while dark index 1 (below) is still the image
+          // layer that was forked before the reorder happened.
+          { kind: 'gradient', gradient: {
+            type: 'linear', angle: '45deg',
+            stops: [{ color: { literal: '#abcabc' } }, { color: { literal: '#defdef' } }],
+          } },
+        ],
+      },
+    },
+    darkFacets: {
+      background: {
+        layers: [
+          { kind: 'gradient', gradient: {
+            type: 'linear', angle: '90deg',
+            stops: [{ color: { literal: '#111111' } }, { color: { literal: '#222222' } }],
+          } },
+          { kind: 'image', ref: 'assets/dark-hero.jpg' },
+        ],
+      },
+    },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayerDark: (i, l) => setLayersDark.push([i, l]),
+  });
+
+  const gradientRows = host.querySelectorAll('.stb-facet-bg-gradient');
+  expect(gradientRows.length).toBe(2);
+  const mismatchedStopRows = gradientRows[1]!.querySelectorAll('.stb-facet-bg-gradient-stop');
+  expect(mismatchedStopRows.length).toBe(2);
+
+  for (const stopRow of mismatchedStopRows) {
+    const darkSwatch = stopRow.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+    const deriveBtn = stopRow.querySelector('.stb-facet-derive-dark') as HTMLButtonElement;
+
+    // Empty, not a re-seeded light color.
+    expect(darkSwatch.classList.contains('stb-facet-swatch-empty')).toBe(true);
+    // Disabled: no picker, no derive.
+    expect(darkSwatch.disabled).toBe(true);
+    expect(deriveBtn.disabled).toBe(true);
+
+    // Clicking either control must not fire onSetLayerDark with a light-seeded
+    // clobber of the real dark image layer sitting at this index.
+    darkSwatch.click();
+    deriveBtn.click();
+  }
+  expect(setLayersDark.length).toBe(0);
+
+  // The row that DOES still correspond (index 0) is unaffected and still works.
+  const okStopRow = gradientRows[0]!.querySelectorAll('.stb-facet-bg-gradient-stop')[0]!;
+  const okDarkSwatch = okStopRow.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  expect(okDarkSwatch.disabled).toBe(false);
+  expect(okDarkSwatch.classList.contains('stb-facet-swatch-empty')).toBe(false);
+});

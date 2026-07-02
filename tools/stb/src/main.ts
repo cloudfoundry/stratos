@@ -196,7 +196,11 @@ async function main() {
         // Copy-on-first-dark-edit: seed the dark background's layer array as a
         // structural copy of the light layers before the first dark layer edit.
         // After this point light and dark layer structures are independent forks —
-        // editing one never touches the other.
+        // editing one never touches the other. Once forked, dark layers are
+        // authoritative: structural light edits (add/remove/reorder) never
+        // re-propagate into dark, and the tree UI (facet-tree.ts) refuses to send
+        // a light-seeded gradient for an already-forked array, so this branch can
+        // no longer be clobbered by a light-seeded overwrite.
         const darkBg = n.facetsDark?.background;
         const seededDarkFacets = darkBg?.layers
           ? n.facetsDark!
