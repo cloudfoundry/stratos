@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { contentValue, assetValue, openLeverEditor } from '@/ui/lever-editor';
+import { contentValue, assetValue, openLeverEditor, clearRememberedPanelRect } from '@/ui/lever-editor';
 import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
 import { setSide, setLayer } from '@/state/facets-edit';
 import { previewDark, compareMode } from '@/state/scene';
@@ -14,6 +14,8 @@ const stbCss = readFileSync(resolve(cssDir, '../../src/styles/stb.css'), 'utf8')
 describe('lever-editor value helpers', () => {
   it('contentValue / assetValue shape the union', () => {
     expect(contentValue('Hi')).toEqual({ kind: 'content', text: 'Hi' });
+    expect(contentValue('Hi', 'plain')).toEqual({ kind: 'content', text: 'Hi' }); // plain carries no format key
+    expect(contentValue('**Hi**', 'subset')).toEqual({ kind: 'content', text: '**Hi**', format: 'subset' });
     expect(assetValue('logo.png')).toEqual({ kind: 'asset', ref: 'logo.png' });
   });
 });
@@ -199,5 +201,69 @@ describe('lever-editor compare-mode dark column', () => {
     });
     const panel = document.querySelector('.stb-lever-editor') as HTMLElement;
     expect(panel.classList.contains('stb-preview-dark')).toBe(false);
+  });
+});
+
+// --- panel position memory ---
+// jsdom does no layout: getBoundingClientRect is mocked on the live panel to
+// stand in for a user drag/resize; the drag handle's mousedown→mouseup pair is
+// what marks the placement as user-chosen (an undragged rebuild keeps defaults).
+describe('lever-editor position memory across teardown/rebuild', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div class="host"></div>';
+    clearRememberedPanelRect();
+    compareMode.value = false;
+  });
+  afterEach(() => { brandingModel.value = null; });
+
+  const open = () => {
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    openLeverEditor({ previewHost, snapshotId: 'x', onChange: () => {}, facets: {} });
+    return document.querySelector('.stb-lever-editor') as HTMLElement;
+  };
+  const rect = (left: number, top: number, width: number, height: number) =>
+    ({ left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}) }) as DOMRect;
+  const dragPanel = (panel: HTMLElement) => {
+    const handle = panel.querySelector('.stb-lever-drag') as HTMLElement;
+    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 10, clientY: 10 }));
+    window.dispatchEvent(new MouseEvent('mouseup'));
+  };
+
+  it('reopens at the dragged position and resized size', () => {
+    const p1 = open();
+    p1.getBoundingClientRect = () => rect(120, 80, 300, 200);
+    dragPanel(p1);
+    const p2 = open(); // rebuild (selectElement path): closeOpen captures, reopen restores
+    expect(p2.style.left).toBe('120px');
+    expect(p2.style.top).toBe('80px');
+    expect(p2.style.width).toBe('300px');   // size differed from mount-time size → resized
+    expect(p2.style.height).toBe('200px');
+  });
+
+  it('clamps a remembered rect to the viewport on reuse (window may have shrunk)', () => {
+    const p1 = open();
+    p1.getBoundingClientRect = () => rect(5000, 4000, 300, 200);
+    dragPanel(p1);
+    const p2 = open();
+    expect(p2.style.left).toBe(`${window.innerWidth - 300}px`);
+    expect(p2.style.top).toBe(`${window.innerHeight - 200}px`);
+  });
+
+  it('an undragged, unresized rebuild keeps the default placement (no false memory)', () => {
+    open();
+    const p2 = open();
+    // default gutter placement in jsdom (zero-rect host) resolves to the 8px floor
+    expect(p2.style.left).toBe('8px');
+    expect(p2.style.width).toBe('');
+  });
+
+  it('explicit Close clears the memory — next open is default-placed', () => {
+    const p1 = open();
+    p1.getBoundingClientRect = () => rect(120, 80, 300, 200);
+    dragPanel(p1);
+    (p1.querySelector('.stb-lever-close') as HTMLButtonElement).click();
+    const p2 = open();
+    expect(p2.style.left).toBe('8px');
+    expect(p2.style.width).toBe('');
   });
 });

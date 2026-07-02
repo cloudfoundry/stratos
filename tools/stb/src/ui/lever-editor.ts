@@ -60,7 +60,48 @@ let openScopedEditor: EditorView | null = null;
 let openFacetTree: { destroy(): void } | null = null;
 let openTreeEffect: (() => void) | null = null;
 let openDarkEffect: (() => void) | null = null;
+
+// --- panel placement memory ---
+// selectElement tears the panel down and rebuilds it on every selection;
+// without memory each rebuild snaps back to the computed initial position,
+// discarding the user's drag/resize. Once the user has dragged (drag-end on
+// the handle) or resized (size delta at close vs. mount), the rect is
+// remembered module-level and reused — clamped to the viewport, the window
+// may have shrunk — on the next open. Size is only re-applied when it was a
+// real user resize, so an untouched panel keeps its CSS-driven intrinsic size.
+interface RememberedRect { left: number; top: number; width?: number; height?: number }
+let rememberedRect: RememberedRect | null = null;
+let openedSize: { width: number; height: number } | null = null;
+let draggedSinceOpen = false;
+// One-line policy (pending preference — flip to false to keep memory across an
+// explicit Close): Close CLEARS the memory, so the next open is default-placed.
+const CLEAR_MEMORY_ON_CLOSE = true;
+
+/** Forget the remembered panel rect (Close policy; exported for tests). */
+export function clearRememberedPanelRect(): void { rememberedRect = null; }
+
+function capturePanelRect(): void {
+  if (!openPanel) return;
+  const r = openPanel.getBoundingClientRect();
+  const resized = openedSize !== null && (r.width !== openedSize.width || r.height !== openedSize.height);
+  if (!draggedSinceOpen && !resized) return; // no user placement intent this open — keep prior memory
+  rememberedRect = { left: r.left, top: r.top, ...(resized ? { width: r.width, height: r.height } : {}) };
+}
+
+function applyRememberedRect(panel: HTMLElement, r: RememberedRect): void {
+  panel.style.position = 'absolute';
+  if (r.width !== undefined) panel.style.width = `${r.width}px`;
+  if (r.height !== undefined) panel.style.height = `${r.height}px`;
+  const w = r.width ?? panel.offsetWidth;
+  const h = r.height ?? panel.offsetHeight;
+  const left = Math.min(Math.max(0, r.left), Math.max(0, window.innerWidth - w));
+  const top = Math.min(Math.max(0, r.top), Math.max(0, window.innerHeight - h));
+  panel.style.left = `${left + window.scrollX}px`;
+  panel.style.top = `${top + window.scrollY}px`;
+}
+
 function closeOpen(): void {
+  capturePanelRect();
   if (openDarkEffect) { openDarkEffect(); openDarkEffect = null; }
   if (openTreeEffect) { openTreeEffect(); openTreeEffect = null; }
   if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
@@ -163,7 +204,11 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   const close = document.createElement('button');
   close.className = 'stb-lever-close';
   close.textContent = 'Close';
-  close.addEventListener('click', () => { closeOpen(); opts.onClose?.(); });
+  close.addEventListener('click', () => {
+    closeOpen();
+    if (CLEAR_MEMORY_ON_CLOSE) clearRememberedPanelRect();
+    opts.onClose?.();
+  });
   panel.appendChild(close);
 
   const drag = document.createElement('div');
@@ -173,10 +218,20 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   panel.prepend(drag);
 
   document.body.appendChild(panel);
-  if (compareMode.value) positionAbovePanes(panel, opts.previewHost);
+  // Remembered rect wins over initial placement (gutter / above-panes-in-compare)
+  if (rememberedRect) applyRememberedRect(panel, rememberedRect);
+  else if (compareMode.value) positionAbovePanes(panel, opts.previewHost);
   else positionInPreviewGutter(panel, opts.previewHost);
   makeDraggable(panel, drag);
+  // Drag-end marks the placement as user-chosen; capturePanelRect reads the
+  // final rect at close-time (the dragged inline position is still live then).
+  drag.addEventListener('mousedown', () => {
+    window.addEventListener('mouseup', () => { draggedSinceOpen = true; }, { once: true });
+  });
   openPanel = panel;
+  const mounted = panel.getBoundingClientRect();
+  openedSize = { width: mounted.width, height: mounted.height };
+  draggedSinceOpen = false;
 
   // Flag the active preview mode on the panel so CSS can mute the inactive
   // (dark) column — editing a dark value while the preview is in light mode

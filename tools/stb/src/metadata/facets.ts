@@ -128,8 +128,13 @@ function stopCss(s: ColorStop): string {
   return s.position ? `${color} ${s.position}` : color;
 }
 
+// Same isBlankLiteral rule as every emit site above: a blank stop literal is a
+// mid-edit transient — skip it rather than emit a dangling empty stop
+// (`linear-gradient(, #fff)`). A gradient with no real stop emits nothing.
+const hasRealStops = (g: Gradient): boolean => g.stops.some((s) => !isBlankLiteral(s.color));
+
 export function gradientCss(g: Gradient): string {
-  const stops = g.stops.map(stopCss).join(', ');
+  const stops = g.stops.filter((s) => !isBlankLiteral(s.color)).map(stopCss).join(', ');
   const pre = g.repeating ? 'repeating-' : '';
   if (g.type === 'linear') {
     const head = g.angle ? `${g.angle}, ` : '';
@@ -156,9 +161,11 @@ function layerCss(l: Layer): string {
  *  emission paths (scoped-block CSS vs. live-preview inline style) can't drift apart. */
 function composeLayerImage(bg: BackgroundFacet): string | undefined {
   if (!bg.layers || !bg.layers.length) return undefined;
-  // An image layer with a blank ref is a mid-edit transient — skip it rather
-  // than emit `url()`; a gradient layer at the same slot always has real stops.
-  const layers = bg.layers.filter((l) => l.kind !== 'image' || !isBlankRef(l.ref));
+  // Blank layers are mid-edit transients — skip an image layer with a blank
+  // ref rather than emit `url()`, and skip a gradient layer whose stops are
+  // ALL blank rather than emit an empty gradient.
+  const layers = bg.layers.filter((l) =>
+    l.kind === 'image' ? !isBlankRef(l.ref) : hasRealStops(l.gradient));
   if (!layers.length) return undefined;
   return [...layers].reverse().map(layerCss).join(', ');
 }
