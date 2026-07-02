@@ -177,12 +177,30 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     const background = opts.facets.background;
     const layers = background.layers ?? [];
 
+    // Background is a collapsible group like text/surface/spacing, but it has
+    // no onRemoveGroup wiring (background isn't addable/removable through the
+    // add-group select), so its branch header carries no remove button.
+    const bgBranch = document.createElement('div');
+    bgBranch.className = 'stb-facet-group';
+    bgBranch.textContent = 'background';
+    host.appendChild(bgBranch);
+
+    const bgLeaves = document.createElement('div');
+    bgLeaves.className = 'stb-facet-leaves';
+    host.appendChild(bgLeaves);
+
+    const bgEntry: GroupEntry = { group: 'background', branch: bgBranch, leaves: bgLeaves, collapsed: false };
+    groupEntries.push(bgEntry);
+    bgBranch.addEventListener('click', () => setCollapsed(bgEntry, !bgEntry.collapsed));
+    // Track focused group for isolate, same as the per-leaf hook in the style-group loop below.
+    bgLeaves.addEventListener('focusin', () => { focusedGroup = 'background'; });
+
     const colorRow = document.createElement('div');
     colorRow.className = 'stb-facet-bg-row';
     colorRow.dataset.stbBgRow = 'color';
     const colorLab = document.createElement('span');
-    colorLab.className = 'stb-facet-leaf-label';
-    colorLab.textContent = 'backstop';
+    colorLab.className = 'stb-facet-bg-subtitle';
+    colorLab.textContent = 'color';
     colorRow.appendChild(colorLab);
 
     const colorLit = background.color && 'literal' in background.color && typeof background.color.literal === 'object'
@@ -232,7 +250,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     colorDeriveBtn.addEventListener('click', () => { if (colorLit) opts.deriveDark?.('background.color'); });
     colorRow.appendChild(colorDeriveBtn);
 
-    host.appendChild(colorRow);
+    bgLeaves.appendChild(colorRow);
 
     layers.forEach((layer, i) => {
       const row = document.createElement('div');
@@ -241,8 +259,8 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
 
       if (layer.kind === 'image') {
         const lab = document.createElement('span');
-        lab.className = 'stb-facet-leaf-label';
-        lab.textContent = layer.ref || '(no image)';
+        lab.className = 'stb-facet-bg-subtitle';
+        lab.textContent = `image — ${layer.ref || '(no image)'}`;
         row.appendChild(lab);
         const input = document.createElement('input');
         input.type = 'file';
@@ -313,6 +331,11 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           const stops = seed.stops.map((s, idx) => (idx === si ? { ...s, color } : s));
           opts.onSetLayerDark?.(i, { kind: 'gradient', gradient: { ...seed, stops } as Gradient });
         };
+
+        const subtitle = document.createElement('span');
+        subtitle.className = 'stb-facet-bg-subtitle';
+        subtitle.textContent = `gradient — ${gradient.type}`;
+        row.appendChild(subtitle);
 
         const editor = document.createElement('div');
         editor.className = 'stb-facet-bg-gradient';
@@ -476,7 +499,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       removeBtn.addEventListener('click', () => opts.onRemoveLayer?.(i));
       row.appendChild(removeBtn);
 
-      host.appendChild(row);
+      bgLeaves.appendChild(row);
     });
 
     const footer = document.createElement('div');
@@ -498,7 +521,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     }));
     footer.appendChild(addGradientBtn);
 
-    host.appendChild(footer);
+    bgLeaves.appendChild(footer);
   }
 
   for (const g of GROUPS) {
@@ -770,7 +793,8 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     }
   }
 
-  // Expand/Collapse all act on the style groups (text/surface/spacing) only.
+  // Expand/Collapse all act on every entry in groupEntries — the style groups
+  // (text/surface/spacing) plus background, all collapsible GroupEntry branches.
   // The content/asset "default group" is a standalone always-on field (the
   // element's payload), so it's deliberately excluded — it has no group header
   // to fold into and is usually the thing you came to edit.

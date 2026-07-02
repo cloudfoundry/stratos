@@ -89,10 +89,18 @@ body {
 /* One consistent editor popover surface for both element levers and tokens:
    opaque + firm border + strong shadow so it never blends into the light
    nav-band / preview; stretchable for larger / multi-paragraph content. */
+/* Sizes to content by default (no fixed width/height set anywhere) and grows
+   as sections are added (background layers, font fallbacks, ...), capped at
+   a viewport margin so it can never run off-screen — past that the panel
+   body scrolls instead of growing further. `resize: both` remains available
+   for a manual override; once dragged, the browser pins an inline
+   width/height on the element which then wins over further auto-growth
+   (v1: auto-grow until first manual resize — a per-drag "unpin" affordance
+   is deferred as disproportionate to this pass). */
 .stb-lever-editor, .stb-color-picker {
   background: var(--card, #fff); border: 1px solid var(--border, #cbd5e1);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); padding: 0.6rem; border-radius: 8px;
-  z-index: 1000; min-width: 240px; max-width: 90vw; max-height: 80vh;
+  z-index: 1000; min-width: 240px; max-width: min(640px, 92vw); max-height: calc(100vh - 2rem);
   resize: both; overflow: auto;
 }
 /* drag handle: a grab bar spanning the popover top, overrides auto-placement */
@@ -148,6 +156,43 @@ body {
 .stb-lever-editor:not(.stb-preview-dark) .stb-facet-swatch-dark,
 .stb-lever-editor:not(.stb-preview-dark) .stb-facet-derive-dark,
 .stb-lever-editor:not(.stb-preview-dark) .stb-facet-dual-header-dark { opacity: 0.4; }
+
+/* Background composite: each row (color base, then each layer) gets visible
+   separation — a bordered, tinted card — so the stack reads as distinct rows
+   rather than a run-on list. Layer rows are indented + left-rule to show they
+   sit ON TOP of the color base, matching the bottom-up authoring order. */
+.stb-facet-bg-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
+  padding: 0.3rem 0.4rem; margin: 0.2rem 0; border-radius: 4px;
+  border: 1px solid var(--border, #e5e7eb); background: var(--content-secondary, #f8fafc);
+}
+.stb-facet-bg-row[data-stb-bg-row="layer"] {
+  margin-left: 0.85rem; border-left: 3px solid var(--border, #cbd5e1);
+}
+/* Kind label ("color" / "image — ..." / "gradient — ...") — same visual
+   weight as a leaf label, but not width-locked to the leaf grid since
+   gradient/image subtitles run longer than a css-prop name. */
+.stb-facet-bg-subtitle {
+  flex: 1 1 100%; color: var(--text-muted, #64748b); font-size: 0.74rem;
+  font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stb-facet-bg-row[data-stb-bg-row="color"] .stb-facet-bg-subtitle { flex: 0 0 5.5rem; }
+.stb-facet-bg-gradient {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; flex: 1 1 100%; min-width: 0;
+}
+.stb-facet-bg-gradient-type, .stb-facet-bg-gradient-pos { font-size: 0.75rem; padding: 0.1rem 0.25rem; }
+.stb-facet-bg-gradient-stops {
+  display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 100%; margin-top: 0.15rem;
+}
+.stb-facet-bg-gradient-stop {
+  display: flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.3rem;
+  border-radius: 3px; background: var(--card, #fff); border: 1px solid var(--border, #e5e7eb);
+}
+.stb-facet-bg-gradient-stop-pos { flex: 1; min-width: 0; font-size: 0.72rem; padding: 0.1rem 0.25rem; }
+.stb-facet-bg-footer { display: flex; gap: 0.35rem; margin: 0.2rem 0 0.4rem; }
+.stb-facet-bg-footer button, .stb-facet-bg-add-stop,
+.stb-facet-bg-move-up, .stb-facet-bg-move-down, .stb-facet-bg-remove,
+.stb-facet-bg-gradient-stop-remove { font-size: 0.72rem; padding: 0.1rem 0.35rem; }
 
 .stb-flash { background-color: var(--warning, #ffeaa7); transition: background-color 0.3s; }
 

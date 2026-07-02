@@ -532,6 +532,98 @@ it('fires onAddLayer, onRemoveLayer and onReorderLayer for layer row controls', 
   expect(host.querySelector('.stb-facet-bg-add-gradient')).not.toBeNull();
 });
 
+// --- background as a collapsible group ---
+
+it('renders background as a collapsible group branch, like text/surface/spacing', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } }, text: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const branches = [...host.querySelectorAll('.stb-facet-group')] as HTMLElement[];
+  const bgBranch = branches.find((b) => b.textContent?.includes('background'))!;
+  expect(bgBranch).toBeTruthy();
+  // No remove affordance: background isn't addable/removable via onRemoveGroup.
+  expect(bgBranch.querySelector('.stb-facet-remove')).toBeNull();
+  bgBranch.click();
+  expect(bgBranch.classList.contains('stb-facet-collapsed')).toBe(true);
+  const bgRow = host.querySelector('[data-stb-bg-row="color"]') as HTMLElement;
+  expect(bgRow.closest('.stb-facet-leaves')?.hasAttribute('hidden')).toBe(true);
+  bgBranch.click();
+  expect(bgBranch.classList.contains('stb-facet-collapsed')).toBe(false);
+});
+
+it('collapse-all/expand-all fold and unfold the background group alongside style groups', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } }, text: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  (host.querySelector('.stb-facet-collapse-all') as HTMLButtonElement).click();
+  expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(2);
+  (host.querySelector('.stb-facet-expand-all') as HTMLButtonElement).click();
+  expect(host.querySelectorAll('.stb-facet-group.stb-facet-collapsed').length).toBe(0);
+});
+
+it('isolate collapses text but not background when a background control is focused', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } }, text: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const bgSwatch = host.querySelector('[data-stb-bg-row="color"] .stb-facet-swatch') as HTMLElement;
+  bgSwatch.dispatchEvent(new Event('focusin', { bubbles: true }));
+  (host.querySelector('.stb-facet-isolate') as HTMLButtonElement).click();
+  const collapsed = [...host.querySelectorAll('.stb-facet-group.stb-facet-collapsed')];
+  expect(collapsed.length).toBe(1);
+  expect(collapsed[0]!.textContent).toContain('text');
+});
+
+// --- background row subtitles ---
+
+it('labels the color row "color"', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  const subtitle = row.querySelector('.stb-facet-bg-subtitle') as HTMLElement;
+  expect(subtitle.textContent).toBe('color');
+});
+
+it('labels an image layer row with its ref, or "(no image)" when empty', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { layers: [{ kind: 'image', ref: 'assets/hero.jpg' }, { kind: 'image', ref: '' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const rows = [...host.querySelectorAll('[data-stb-bg-row="layer"]')];
+  expect((rows[0]!.querySelector('.stb-facet-bg-subtitle') as HTMLElement).textContent)
+    .toBe('image — assets/hero.jpg');
+  expect((rows[1]!.querySelector('.stb-facet-bg-subtitle') as HTMLElement).textContent)
+    .toBe('image — (no image)');
+});
+
+it('labels a gradient layer row with its type', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { layers: [{ kind: 'gradient', gradient: {
+      type: 'radial', stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+    } }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const subtitle = row.querySelector('.stb-facet-bg-subtitle') as HTMLElement;
+  expect(subtitle.textContent).toBe('gradient — radial');
+});
+
 it('fires onSetLayer with a stored asset ref when a file is chosen for an image layer row', () => {
   const host = document.createElement('div');
   const setLayers: [number, unknown][] = [];
