@@ -9,6 +9,10 @@ import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { deriveDarkOklch } from '@/color/derive-dark';
 
 const GROUPS = ['text', 'surface', 'spacing'] as const;
+// Offered by the add-group select — GROUPS plus 'background', which is
+// addable (empty composite) but not part of the style-group render loop
+// below (it has its own dedicated block, guarded by opts.facets.background).
+const ADDABLE_GROUPS = ['background', ...GROUPS] as const;
 const propsOf = (g: string) => Object.entries(FACET_PROPS).filter(([k]) => k.startsWith(g + '.'));
 
 export interface FacetTreeOptions {
@@ -22,7 +26,10 @@ export interface FacetTreeOptions {
   /** Fired when the per-row "derive dark from light" button is clicked. Caller computes
    *  deriveDarkOklch and routes the result through its own dark-edit path. */
   deriveDark?: (key: string) => void;
-  onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  /** Widened over onRemoveGroup: 'background' is addable (creates an empty
+   *  background facet) but deliberately not removable — see AddableGroup in
+   *  facets-edit.ts. */
+  onAddGroup?: (g: 'text' | 'surface' | 'spacing' | 'background') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   /** Returns the token name mapped to this element's property, or null if none. */
   tokenForKey?: (key: string) => string | null;
@@ -110,7 +117,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
   placeholder.textContent = '+ add group';
   placeholder.disabled = true;
   addSelect.appendChild(placeholder);
-  for (const g of GROUPS) {
+  for (const g of ADDABLE_GROUPS) {
     if (!opts.facets[g]) {
       const opt = document.createElement('option');
       opt.value = g;
@@ -120,7 +127,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
   }
   addSelect.value = '';
   addSelect.addEventListener('change', () => {
-    const g = addSelect.value as 'text' | 'surface' | 'spacing';
+    const g = addSelect.value as 'text' | 'surface' | 'spacing' | 'background';
     if (g) {
       opts.onAddGroup?.(g);
       addSelect.value = '';
@@ -177,9 +184,10 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     const background = opts.facets.background;
     const layers = background.layers ?? [];
 
-    // Background is a collapsible group like text/surface/spacing, but it has
-    // no onRemoveGroup wiring (background isn't addable/removable through the
-    // add-group select), so its branch header carries no remove button.
+    // Background is a collapsible group like text/surface/spacing. It IS
+    // addable through the add-group select (ADDABLE_GROUPS, above), but has
+    // no onRemoveGroup wiring — removal isn't sanctioned — so its branch
+    // header carries no remove button.
     const bgBranch = document.createElement('div');
     bgBranch.className = 'stb-facet-group';
     bgBranch.textContent = 'background';
@@ -337,11 +345,35 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         subtitle.textContent = `gradient — ${gradient.type}`;
         row.appendChild(subtitle);
 
+        // One MDN help link per gradient layer — points at the current
+        // gradient function's page (linear-gradient/radial-gradient/
+        // conic-gradient), refreshed on type switch. No custom prose: the
+        // CSS spec is the source of truth, not a paraphrase we'd have to
+        // keep in sync.
+        const MDN_GRADIENT_BASE = 'https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/';
+        const helpLink = document.createElement('a');
+        helpLink.className = 'stb-facet-bg-gradient-help';
+        helpLink.textContent = '?';
+        helpLink.target = '_blank';
+        helpLink.rel = 'noopener';
+        const updateHelpLink = () => {
+          helpLink.href = `${MDN_GRADIENT_BASE}${gradient.type}-gradient`;
+          helpLink.title = `MDN reference for ${gradient.type}-gradient()`;
+        };
+        updateHelpLink();
+        row.appendChild(helpLink);
+
         const editor = document.createElement('div');
         editor.className = 'stb-facet-bg-gradient';
 
+        const typeLab = document.createElement('span');
+        typeLab.className = 'stb-facet-bg-gradient-field-label';
+        typeLab.textContent = 'type';
+        editor.appendChild(typeLab);
+
         const typeSel = document.createElement('select');
         typeSel.className = 'stb-facet-bg-gradient-type';
+        typeSel.title = 'Gradient function: linear-gradient, radial-gradient, or conic-gradient';
         for (const t of ['linear', 'radial', 'conic'] as const) {
           const opt = document.createElement('option');
           opt.value = t;
@@ -351,14 +383,21 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         typeSel.value = gradient.type;
         typeSel.addEventListener('change', () => {
           setGradient(convertType(gradient, typeSel.value as Gradient['type']));
+          updateHelpLink();
         });
         editor.appendChild(typeSel);
 
         // One angle/position field: linear owns `angle`, radial/conic own `position`.
+        const posLab = document.createElement('span');
+        posLab.className = 'stb-facet-bg-gradient-field-label';
         const posInput = document.createElement('input');
         posInput.type = 'text';
         posInput.className = 'stb-facet-bg-gradient-pos';
-        posInput.placeholder = gradient.type === 'linear' ? 'angle' : 'position';
+        const isAngle = gradient.type === 'linear';
+        posLab.textContent = isAngle ? 'angle' : 'position';
+        posInput.title = isAngle
+          ? 'CSS <angle>, e.g. 45deg'
+          : 'CSS <position>, e.g. center or top left';
         posInput.value = gradient.type === 'linear' ? (gradient.angle ?? '') : (gradient.position ?? '');
         posInput.addEventListener('input', () => {
           const patch: Partial<Gradient> = gradient.type === 'linear'
@@ -366,10 +405,21 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
             : { position: posInput.value };
           setGradient(rebuild(patch));
         });
+        editor.appendChild(posLab);
         editor.appendChild(posInput);
 
         const stopsEl = document.createElement('div');
         stopsEl.className = 'stb-facet-bg-gradient-stops';
+        if (gradient.stops.length > 0) {
+          const stopsHeader = document.createElement('div');
+          stopsHeader.className = 'stb-facet-bg-gradient-stops-header';
+          const posHeaderLab = document.createElement('span');
+          posHeaderLab.className = 'stb-facet-bg-gradient-stops-header-pos';
+          posHeaderLab.textContent = 'position';
+          posHeaderLab.title = 'CSS <length-percentage>, e.g. 25%';
+          stopsHeader.appendChild(posHeaderLab);
+          stopsEl.appendChild(stopsHeader);
+        }
         gradient.stops.forEach((stop, si) => {
           const stopRow = document.createElement('div');
           stopRow.className = 'stb-facet-bg-gradient-stop';
@@ -437,6 +487,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           stopPos.type = 'text';
           stopPos.className = 'stb-facet-bg-gradient-stop-pos';
           stopPos.placeholder = 'position';
+          stopPos.title = 'CSS <length-percentage>, e.g. 25%';
           stopPos.value = stop.position ?? '';
           stopPos.addEventListener('input', () => {
             const stops = gradient.stops.map((s, idx) => {
@@ -468,7 +519,10 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         addStopBtn.className = 'stb-facet-bg-gradient-add-stop';
         addStopBtn.textContent = '+ stop';
         addStopBtn.addEventListener('click', () => {
-          const stops = [...gradient.stops, { color: { literal: '#000000' } }];
+          // Oklch object, not a raw hex string: string literals round-trip fine
+          // (swatchHex handles both), but only an Oklch literal drives per-stop
+          // dark derive — a fresh stop should have that available immediately.
+          const stops = [...gradient.stops, { color: { literal: toOklch('#000000') } }];
           setGradient(rebuild({ stops }));
         });
         editor.appendChild(addStopBtn);
@@ -517,7 +571,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     addGradientBtn.textContent = '+ gradient';
     addGradientBtn.addEventListener('click', () => opts.onAddLayer?.({
       kind: 'gradient',
-      gradient: { type: 'linear', stops: [{ color: { literal: '#000000' } }, { color: { literal: '#ffffff' } }] },
+      gradient: { type: 'linear', stops: [{ color: { literal: toOklch('#000000') } }, { color: { literal: toOklch('#ffffff') } }] },
     }));
     footer.appendChild(addGradientBtn);
 

@@ -2,6 +2,7 @@
 import { it, expect } from 'vitest';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { deriveDarkOklch } from '@/color/derive-dark';
+import { toOklch } from '@/color/oklch';
 
 it('renders a branch per present group and a leaf per property', () => {
   const host = document.createElement('div');
@@ -117,6 +118,26 @@ it('offers absent groups and adds one on select', () => {
   expect(add.value).toBe('');
 });
 
+it('offers background in the add-group select for a node without one, and fires onAddGroup', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  const added: string[] = [];
+  mountFacetTree(host, { facets: { text: {} }, previewHost, onEdit: () => {}, onAddGroup: (g) => added.push(g) });
+  const add = host.querySelector('.stb-facet-add') as HTMLSelectElement;
+  expect([...add.options].map((o) => o.value)).toContain('background');
+  add.value = 'background';
+  add.dispatchEvent(new Event('change'));
+  expect(added).toContain('background');
+});
+
+it('does not offer background in the add-group select when one is already present', () => {
+  const host = document.createElement('div');
+  const previewHost = document.createElement('div');
+  mountFacetTree(host, { facets: { background: {}, text: {} }, previewHost, onEdit: () => {} });
+  const add = host.querySelector('.stb-facet-add') as HTMLSelectElement;
+  expect([...add.options].map((o) => o.value)).not.toContain('background');
+});
+
 it('remove button calls onRemoveGroup and does not trigger collapse', () => {
   const host = document.createElement('div');
   const previewHost = document.createElement('div');
@@ -225,6 +246,106 @@ it('renders a gradient layer with a type select and stop swatches, plus remove/m
   expect(row.querySelector('.stb-facet-bg-remove')).not.toBeNull();
   expect(row.querySelector('.stb-facet-bg-move-up')).not.toBeNull();
   expect(row.querySelector('.stb-facet-bg-move-down')).not.toBeNull();
+});
+
+it('gives the gradient type and angle fields visible inline labels and CSS-value tooltips', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const labels = [...row.querySelectorAll('.stb-facet-bg-gradient-field-label')].map((l) => l.textContent);
+  expect(labels).toContain('type');
+  expect(labels).toContain('angle');
+  const angleInput = row.querySelector('.stb-facet-bg-gradient-pos') as HTMLInputElement;
+  expect(angleInput.title).toMatch(/angle/i);
+  expect(angleInput.title).toMatch(/45deg/);
+});
+
+it('relabels the angle field as position for radial/conic gradients, with a length-percentage-free position hint', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'radial', position: 'center',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const labels = [...row.querySelectorAll('.stb-facet-bg-gradient-field-label')].map((l) => l.textContent);
+  expect(labels).toContain('position');
+  expect(labels).not.toContain('angle');
+});
+
+it('carries a position tooltip and a labeled column header for the gradient stop list', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' }, position: '25%' }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const header = row.querySelector('.stb-facet-bg-gradient-stops-header-pos');
+  expect(header?.textContent).toBe('position');
+  const stopPosInput = row.querySelector('.stb-facet-bg-gradient-stop-pos') as HTMLInputElement;
+  expect(stopPosInput.title).toMatch(/length-percentage/i);
+  expect(stopPosInput.title).toMatch(/25%/);
+});
+
+it('renders one MDN gradient help link per gradient layer, targeting the current type', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'radial', position: 'center',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const help = row.querySelector('.stb-facet-bg-gradient-help') as HTMLAnchorElement;
+  expect(help).not.toBeNull();
+  expect(help.href).toBe('https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/radial-gradient');
+  expect(help.target).toBe('_blank');
+  expect(help.rel).toBe('noopener');
+});
+
+it('updates the MDN help link href when the gradient type select changes', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear', angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  const typeSel = row.querySelector('select') as HTMLSelectElement;
+  const help = row.querySelector('.stb-facet-bg-gradient-help') as HTMLAnchorElement;
+  expect(help.href).toBe('https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient');
+  typeSel.value = 'conic';
+  typeSel.dispatchEvent(new Event('change'));
+  expect(help.href).toBe('https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/conic-gradient');
 });
 
 it('fires onSetLayer with an updated type when the gradient type select changes', () => {
@@ -390,7 +511,10 @@ it('appends a stop when + stop is clicked and removes one via the stop remove bu
   const [, removed] = setLayers[1] as [number, { gradient: { stops: Array<{ color: { literal: unknown } }> } }];
   expect(removed.gradient.stops.length).toBe(2);
   expect(removed.gradient.stops[0]!.color.literal).toBe('#000');
-  expect(removed.gradient.stops[1]!.color.literal).toBe('#000000');
+  // A fresh stop carries an Oklch object literal, not a raw hex string — matching
+  // the shape produced by every other stop edit — so per-stop dark derive is
+  // enabled immediately rather than disabled until the user first edits the color.
+  expect(removed.gradient.stops[1]!.color.literal).toEqual(toOklch('#000000'));
 });
 
 it('disables the stop remove button when only one stop remains', () => {
@@ -476,9 +600,14 @@ it('fires onAddLayer with a default linear gradient when + gradient is clicked',
   const addGradientBtn = host.querySelector('.stb-facet-bg-add-gradient') as HTMLButtonElement;
   expect(addGradientBtn).not.toBeNull();
   addGradientBtn.click();
+  // Oklch object literals, not raw hex strings — same normalization as + stop,
+  // so a freshly added gradient's stops support dark derive immediately.
   expect(added).toEqual([{
     kind: 'gradient',
-    gradient: { type: 'linear', stops: [{ color: { literal: '#000000' } }, { color: { literal: '#ffffff' } }] },
+    gradient: {
+      type: 'linear',
+      stops: [{ color: { literal: toOklch('#000000') } }, { color: { literal: toOklch('#ffffff') } }],
+    },
   }]);
 });
 

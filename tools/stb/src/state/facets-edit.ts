@@ -1,6 +1,12 @@
 import type { Facets, FacetValue, Layer } from '@/metadata/types';
 
 type Group = 'text' | 'surface' | 'spacing';
+// addGroup additionally accepts 'background' — a node without one can gain an
+// empty background composite from the add-group select. removeGroup does NOT
+// widen to match: background removal isn't sanctioned (consistent with the
+// background branch's no-remove-button treatment in facet-tree.ts), so this
+// is a deliberate asymmetry, not an oversight.
+type AddableGroup = Group | 'background';
 const groupOf = (key: string) => key.split('.')[0] as Group;
 const propOf  = (key: string) => key.split('.')[1]!;
 
@@ -8,7 +14,7 @@ export function setFacetProp(f: Facets, key: string, value: FacetValue): Facets 
   const g = groupOf(key);
   return { ...f, [g]: { ...(f[g] ?? {}), [propOf(key)]: value } };
 }
-export function addGroup(f: Facets, group: Group): Facets {
+export function addGroup(f: Facets, group: AddableGroup): Facets {
   return f[group] ? f : { ...f, [group]: {} };
 }
 export function removeGroup(f: Facets, group: Group): Facets {
