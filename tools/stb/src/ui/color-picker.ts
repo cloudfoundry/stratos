@@ -1,5 +1,6 @@
 import { parseColor, formatColor, type ColorFormat } from '@/color/format';
-import { positionInPreviewGutter } from '@/ui/popover';
+import { positionInPreviewGutter, positionAbovePanes } from '@/ui/popover';
+import { compareMode } from '@/state/scene';
 
 export interface OpenColorPickerOptions {
   previewHost: HTMLElement;
@@ -32,7 +33,11 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
   `;
 
   document.body.appendChild(panel);
-  positionInPreviewGutter(panel, opts.previewHost);
+  // Same compare-mode branch as the lever editor (positionAbovePanes): with two
+  // full-width panes there's no left gutter, so the gutter placement would
+  // fall back to overlaying the light pane dead-centre.
+  if (compareMode.value) positionAbovePanes(panel, opts.previewHost);
+  else positionInPreviewGutter(panel, opts.previewHost);
 
   const native = panel.querySelector<HTMLInputElement>('.stb-color-native')!;
   const text = panel.querySelector<HTMLInputElement>('.stb-color-text')!;

@@ -5,7 +5,7 @@ import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { brandingModel, nodeFor } from '@/state/branding';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
-import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
+import { positionInPreviewGutter, positionAbovePanes, makeDraggable } from '@/ui/popover';
 import { previewDark, compareMode } from '@/state/scene';
 
 export interface OpenLeverEditorOptions {
@@ -179,20 +179,11 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
 
   // Flag the active preview mode on the panel so CSS can mute the inactive
   // (dark) column — editing a dark value while the preview is in light mode
-  // otherwise reads as "no change".
-  openDarkEffect = effect(() => { panel.classList.toggle('stb-preview-dark', previewDark.value); });
-}
-
-// Compare-mode initial placement. With two panes splitting the full preview
-// width there is NO left gutter at typical widths — the gutter placement would
-// fall back to overlaying the light pane dead-centre. So the editor opens
-// ABOVE the panes (over the nav band, left-aligned) instead: "left of the
-// panes" (the primary choice) degenerates to covering a pane, so the fallback
-// position won. Still draggable, as always.
-function positionAbovePanes(panel: HTMLElement, previewHost: HTMLElement): void {
-  const host = previewHost.getBoundingClientRect();
-  const top = Math.max(8, host.top - panel.offsetHeight - 8);
-  panel.style.position = 'absolute';
-  panel.style.left = `${8 + window.scrollX}px`;
-  panel.style.top = `${top + window.scrollY}px`;
+  // otherwise reads as "no change". In compare mode previewDark is pinned
+  // false (the live dark pane sits alongside the light one), so gate on
+  // compareMode too — otherwise the dark column reads as inactive when a
+  // dark pane is visibly on-screen.
+  openDarkEffect = effect(() => {
+    panel.classList.toggle('stb-preview-dark', previewDark.value || compareMode.value);
+  });
 }

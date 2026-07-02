@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { contentValue, assetValue, openLeverEditor } from '@/ui/lever-editor';
 import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
 import { setSide, setLayer } from '@/state/facets-edit';
+import { previewDark, compareMode } from '@/state/scene';
 import type { BrandingModel } from '@/metadata/types';
 
 const cssDir = dirname(fileURLToPath(import.meta.url));
@@ -169,5 +170,34 @@ describe('lever-editor popover sizing', () => {
     // No fixed width/height in the rule — sizing stays intrinsic to content until capped.
     expect(rule).not.toMatch(/(?<!max-|min-)\bheight:/);
     expect(rule).not.toMatch(/(?<!max-|min-)\bwidth:/);
+  });
+});
+
+describe('lever-editor compare-mode dark column', () => {
+  beforeEach(() => { document.body.innerHTML = '<div class="host"></div>'; });
+  afterEach(() => { brandingModel.value = null; previewDark.value = false; compareMode.value = false; });
+
+  it('adds stb-preview-dark when compare mode is on, even though previewDark is pinned false', () => {
+    compareMode.value = true;
+    previewDark.value = false;
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    openLeverEditor({
+      previewHost, snapshotId: 'x', onChange: () => {},
+      facets: { text: { fontSize: { literal: '18px' } } },
+    });
+    const panel = document.querySelector('.stb-lever-editor') as HTMLElement;
+    expect(panel.classList.contains('stb-preview-dark')).toBe(true);
+  });
+
+  it('has no stb-preview-dark outside compare mode when previewDark is false', () => {
+    compareMode.value = false;
+    previewDark.value = false;
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    openLeverEditor({
+      previewHost, snapshotId: 'x', onChange: () => {},
+      facets: { text: { fontSize: { literal: '18px' } } },
+    });
+    const panel = document.querySelector('.stb-lever-editor') as HTMLElement;
+    expect(panel.classList.contains('stb-preview-dark')).toBe(false);
   });
 });

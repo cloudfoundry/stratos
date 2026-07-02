@@ -45,12 +45,36 @@ describe('backgroundCss', () => {
     expect(backgroundCss({ layers: [{ kind: 'image', ref: 'a.png' }] })).toEqual(['background-image: url(a.png);']);
     expect(backgroundCss({})).toEqual([]);
   });
+  it('skips a blank/whitespace literal color (no dangling background-color:;)', () => {
+    expect(backgroundCss({ color: { literal: '' } })).toEqual([]);
+    expect(backgroundCss({ color: { literal: '   ' } })).toEqual([]);
+  });
+  it('skips an empty-ref image layer, keeping other layers', () => {
+    expect(backgroundCss({ layers: [{ kind: 'image', ref: '' }] })).toEqual([]);
+    expect(backgroundCss({
+      layers: [
+        { kind: 'image', ref: 'a.png' },
+        { kind: 'image', ref: '   ' },
+      ],
+    })).toEqual(['background-image: url(a.png);']);
+  });
 });
 
 describe('fontFamilyCss', () => {
   it('joins the font-family fallback list', () => {
     expect(fontFamilyCss([{ literal: 'Inter' }, { literal: 'system-ui' }, { literal: 'sans-serif' }]))
       .toBe('font-family: Inter, system-ui, sans-serif;');
+  });
+  it('returns null when every entry is a blank/whitespace-only literal', () => {
+    expect(fontFamilyCss([{ literal: '' }, { literal: '   ' }])).toBeNull();
+  });
+  it('skips blank entries but keeps real ones, with clean commas', () => {
+    expect(fontFamilyCss([{ literal: '' }, { literal: 'Inter' }, { literal: '  ' }, { literal: 'sans-serif' }]))
+      .toBe('font-family: Inter, sans-serif;');
+  });
+  it('never treats a token entry as blank', () => {
+    expect(fontFamilyCss([{ token: 'font.brand' }, { literal: '' }]))
+      .toBe('font-family: var(--font-brand);');
   });
 });
 
@@ -74,6 +98,16 @@ describe('spacingDeclarations', () => {
     expect(spacingDeclarations({})).toEqual([]);
   });
   it('resolves a token slot via facetValueCss', () => {
+    expect(spacingDeclarations({ padding: { top: { token: 'space.md' } } }))
+      .toEqual(['padding-top: var(--space-md);']);
+  });
+  it('skips a blank literal side while emitting set siblings (no dangling padding-top:;)', () => {
+    expect(spacingDeclarations({
+      padding: { top: { literal: '' }, left: { literal: '4px' } },
+      gap: { row: { literal: '   ' } },
+    })).toEqual(['padding-left: 4px;']);
+  });
+  it('never treats a token slot as blank', () => {
     expect(spacingDeclarations({ padding: { top: { token: 'space.md' } } }))
       .toEqual(['padding-top: var(--space-md);']);
   });

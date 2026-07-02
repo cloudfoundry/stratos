@@ -31,7 +31,11 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       const facetLines: string[] = [];
       // font-family is a kind-1 ordered comma-list, not in FACET_PROPS (no single
       // FacetValue leaf to route) — emitted here explicitly, same shape as background.
-      if (node.facets.text?.fontFamily?.length) facetLines.push(`  ${fontFamilyCss(node.facets.text.fontFamily)}`);
+      // fontFamilyCss returns null when nothing survives the blank-literal guard.
+      if (node.facets.text?.fontFamily?.length) {
+        const fontFamily = fontFamilyCss(node.facets.text.fontFamily);
+        if (fontFamily) facetLines.push(`  ${fontFamily}`);
+      }
       // spacing is a kind-2 positional tuple (per-side longhands), not in FACET_PROPS
       // (no single FacetValue leaf to route) — emitted here explicitly, same shape as font-family.
       if (node.facets.spacing) facetLines.push(...spacingDeclarations(node.facets.spacing).map((d) => `  ${d}`));
@@ -55,6 +59,9 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       // Light (`:not(.dark-theme)`) and dark (`.dark-theme`) are mutually exclusive by
       // mode, so they never compete; each just beats the snapshot's rules in its mode
       // (dark beats `.dark-theme .x` (0,2,0)). {token} dark values are skipped (projector territory).
+      // Design rule (decided 2026-07-01): the dark axis is a COLOR axis — a font
+      // choice (e.g. font-family) is never mode-dependent by design, so there is
+      // deliberately no dark fontFamilyCss call here, unlike backgroundCss/spacingDeclarations.
       if (node.facetsDark) {
         const darkLines: string[] = [];
         if (node.facetsDark.background) darkLines.push(...backgroundCss(node.facetsDark.background).map((d) => `  ${d}`));

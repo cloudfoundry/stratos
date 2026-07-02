@@ -21,6 +21,21 @@ export function positionInPreviewGutter(panel: HTMLElement, previewHost: HTMLEle
   panel.style.top = `${Math.max(8, top) + window.scrollY}px`;
 }
 
+// Compare-mode placement, shared by every popover that opens over the preview
+// (lever editor, color picker, …). With two panes splitting the full preview
+// width there is NO left gutter at typical widths — positionInPreviewGutter
+// would fall back to overlaying the light pane dead-centre. So the popover
+// opens ABOVE the panes (over the nav band, left-aligned) instead: "left of
+// the panes" (the primary choice) degenerates to covering a pane, so the
+// fallback position won. Still draggable, as always.
+export function positionAbovePanes(panel: HTMLElement, previewHost: HTMLElement): void {
+  const host = previewHost.getBoundingClientRect();
+  const top = Math.max(8, host.top - panel.offsetHeight - 8);
+  panel.style.position = 'absolute';
+  panel.style.left = `${8 + window.scrollX}px`;
+  panel.style.top = `${top + window.scrollY}px`;
+}
+
 // Let the user drag the popover by a handle, overriding the auto-placement.
 // Position stays clamped to the viewport so it can't be dragged off-screen.
 export function makeDraggable(panel: HTMLElement, handle: HTMLElement): void {

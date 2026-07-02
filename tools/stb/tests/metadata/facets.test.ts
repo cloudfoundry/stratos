@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FACET_PROPS, facetDeclarations, facetLiteralCss, backgroundPatch } from '@/metadata/facets';
+import { FACET_PROPS, facetDeclarations, facetLiteralCss, backgroundPatch, contentAssetDeclarations } from '@/metadata/facets';
 import type { Facets } from '@/metadata/types';
 
 describe('FACET_PROPS', () => {
@@ -25,6 +25,34 @@ describe('facetLiteralCss', () => {
     expect(facetLiteralCss(FACET_PROPS['text.fontSize']!, { literal: '18px' })).toBe('18px');
     expect(facetLiteralCss(FACET_PROPS['text.color']!, { literal: { l: 0, c: 0, h: 0 } })).toMatch(/^#/);
     expect(facetLiteralCss(FACET_PROPS['text.color']!, { token: 'x' })).toBeNull();
+  });
+  it('returns null for a blank/whitespace-only string literal (unset, emit nothing)', () => {
+    expect(facetLiteralCss(FACET_PROPS['text.fontSize']!, { literal: '' })).toBeNull();
+    expect(facetLiteralCss(FACET_PROPS['text.fontSize']!, { literal: '   ' })).toBeNull();
+  });
+});
+
+describe('contentAssetDeclarations topmost-image scan', () => {
+  it('skips an empty-ref topmost image layer and keeps scanning down to a real one', () => {
+    const f: Facets = {
+      background: {
+        layers: [
+          { kind: 'image', ref: 'assets/lower.png' },
+          { kind: 'image', ref: '   ' },
+        ],
+      },
+    };
+    const out = [...contentAssetDeclarations(f)];
+    expect(out).toEqual([{ key: 'asset', value: 'assets/lower.png' }]);
+  });
+
+  it('falls back to facets.asset when every layer image ref is blank', () => {
+    const f: Facets = {
+      background: { layers: [{ kind: 'image', ref: '' }] },
+      asset: { ref: 'assets/logo.png' },
+    };
+    const out = [...contentAssetDeclarations(f)];
+    expect(out).toEqual([{ key: 'asset', value: 'assets/logo.png' }]);
   });
 });
 
