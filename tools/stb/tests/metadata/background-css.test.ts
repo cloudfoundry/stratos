@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { gradientCss, backgroundCss, fontFamilyCss, spacingDeclarations } from '@/metadata/facets';
+import { gradientCss, backgroundCss, backgroundPatch, fontFamilyCss, spacingDeclarations } from '@/metadata/facets';
 
 describe('gradientCss', () => {
   it('reconstructs a linear gradient with angle and stops', () => {
@@ -17,6 +17,14 @@ describe('gradientCss', () => {
     expect(gradientCss({ type: 'conic', fromAngle: '90deg', position: 'center', stops: [
       { color: { literal: '#fff' } }, { color: { literal: '#000' } },
     ] })).toBe('conic-gradient(from 90deg at center, #ffffff, #000000)');
+  });
+  it('skips blank stop literals — no dangling comma or empty stop', () => {
+    expect(gradientCss({ type: 'linear', stops: [
+      { color: { literal: '  ' } }, { color: { literal: '#fff' } },
+    ] })).toBe('linear-gradient(#ffffff)');
+    expect(gradientCss({ type: 'linear', angle: '45deg', stops: [
+      { color: { literal: '#fff' } }, { color: { literal: '' }, position: '50%' }, { color: { literal: '#000' } },
+    ] })).toBe('linear-gradient(45deg, #ffffff, #000000)');
   });
   it('emits a var() for a fully-prefixed token stop without doubling the dashes', () => {
     expect(gradientCss({ type: 'linear', stops: [
@@ -57,6 +65,31 @@ describe('backgroundCss', () => {
         { kind: 'image', ref: '   ' },
       ],
     })).toEqual(['background-image: url(a.png);']);
+  });
+  it('skips a gradient layer whose stops are ALL blank (mid-edit transient)', () => {
+    const allBlank = { type: 'linear' as const, stops: [{ color: { literal: '' } }, { color: { literal: '  ' } }] };
+    expect(backgroundCss({ layers: [{ kind: 'gradient', gradient: allBlank }] })).toEqual([]);
+    expect(backgroundCss({
+      layers: [
+        { kind: 'image', ref: 'a.png' },
+        { kind: 'gradient', gradient: allBlank },
+      ],
+    })).toEqual(['background-image: url(a.png);']);
+  });
+  it('keeps a gradient layer with at least one real stop, dropping only the blank stops', () => {
+    expect(backgroundCss({
+      layers: [{ kind: 'gradient', gradient: { type: 'linear', stops: [
+        { color: { literal: '' } }, { color: { literal: '#fff' } },
+      ] } }],
+    })).toEqual(['background-image: linear-gradient(#ffffff);']);
+  });
+});
+
+describe('backgroundPatch blank-layer guard (live-preview leg)', () => {
+  it('omits backgroundImage when the only gradient layer has all-blank stops', () => {
+    expect(backgroundPatch({
+      layers: [{ kind: 'gradient', gradient: { type: 'linear', stops: [{ color: { literal: '' } }] } }],
+    })).toEqual({});
   });
 });
 
