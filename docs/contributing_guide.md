@@ -96,7 +96,7 @@ Browse [open issues](https://github.com/cloudfoundry/stratos/issues):
 ### 2. Create a Feature Branch
 
 All changes go to feature branches off `develop`. Never push directly to
-`develop` or `master`.
+`develop` or `main`.
 
 ```bash
 git checkout develop

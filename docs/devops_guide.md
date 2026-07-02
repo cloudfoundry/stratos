@@ -882,7 +882,7 @@ kubectl -n stratos run -it --rm debug --image=curlimages/curl --restart=Never --
 
 ### Documentation
 - [Official Docs](https://stratos.app/docs)
-- [Helm Chart](https://github.com/cloudfoundry/stratos/tree/master/deploy/kubernetes)
+- [Helm Chart](https://github.com/cloudfoundry/stratos/tree/main/deploy/kubernetes)
 - [Troubleshooting Guide](deploy/troubleshooting.md)
 
 ### Community
