@@ -1,6 +1,6 @@
 import { effect } from '@preact/signals-core';
 import { rootValues, darkValues } from '@/state/tokens';
-import { activeSceneId, previewDark } from '@/state/scene';
+import { activeSceneId, previewDark, compareMode } from '@/state/scene';
 import { brandingModel, loadBrandingModel } from '@/state/branding';
 import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages';
 import type { BrandingModel } from '@/metadata/types';
@@ -27,6 +27,13 @@ export function leverPatchesFor(model: BrandingModel, dark = false): LeverPatch[
 
 export interface PreviewPaneOptions {
   onElementSelected?: (selector: string, tokens: string[], snapshotId: string | null) => void;
+  /**
+   * Which mode this pane renders. 'follow-global' (default) tracks the
+   * previewDark signal — today's single-pane behavior. 'light'/'dark' pin the
+   * pane regardless of the global signal (the compare panes), so the dark pane
+   * stays dark while previewDark is false.
+   */
+  mode?: 'light' | 'dark' | 'follow-global';
 }
 
 export interface PreviewPane {
@@ -40,6 +47,8 @@ export interface PreviewPane {
 export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   let iframe: HTMLIFrameElement | null = null;
   let ready = false;
+  const mode = opts.mode ?? 'follow-global';
+  const isDark = (): boolean => (mode === 'follow-global' ? previewDark.value : mode === 'dark');
 
   function send(msg: ParentToPreview): void {
     if (!iframe || !iframe.contentWindow || !ready) return;
@@ -53,13 +62,13 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   }
 
   function applyDark(): void {
-    send({ type: 'STB_SET_DARK', dark: previewDark.value });
+    send({ type: 'STB_SET_DARK', dark: isDark() });
   }
 
   function applyLeversToPreview(): void {
     const m = brandingModel.value;
     if (!m) return;
-    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m, previewDark.value), brandingAssets.value) });
+    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m, isDark()), brandingAssets.value) });
     // tell the shim which elements are editable (name rides along so a revealed
     // empty element can label itself with its real name, not invented text)
     send({ type: 'STB_SET_LEVERS', levers: m.nodes.map((n) => ({ id: n.snapshotId, name: n.name })) });
@@ -72,6 +81,10 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   }
 
   function onMessage(event: MessageEvent): void {
+    // Pane-scoped: with two live panes every instance hears every iframe's
+    // messages on window — without this filter pane B would mark itself ready
+    // on pane A's READY and a click would select through BOTH panes.
+    if (!iframe || event.source !== iframe.contentWindow) return;
     const msg = event.data as PreviewToParent | undefined;
     if (!msg || typeof msg !== 'object') return;
     if (msg.type === 'STB_PREVIEW_READY') {
@@ -116,7 +129,8 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       });
 
       effect(() => {
-        void previewDark.value;
+        // pinned panes never react to the global toggle — their mode is fixed
+        if (mode === 'follow-global') void previewDark.value;
         if (ready) applyDark();
       });
 
@@ -125,7 +139,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
         // applyLeversToPreview read) so a dark toggle re-sends the mode-aware
         // background patches even if the model hasn't changed since ready.
         void brandingModel.value;
-        void previewDark.value;
+        if (mode === 'follow-global') void previewDark.value;
         if (ready) { applyLeversToPreview(); applyScopedBlocksToPreview(); }
       });
     },
@@ -146,4 +160,53 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       send({ type: 'STB_SET_LEVER_OUTLINE', on });
     },
   };
+}
+
+export interface CompareToggleOptions {
+  /** `.stb-preview-host` — gains `.stb-compare` while compare is on. */
+  panesHost: HTMLElement;
+  /** The second (pinned-dark) pane's container; hidden while compare is off. */
+  darkPaneHost: HTMLElement;
+  /** The global "Dark preview" checkbox — made inert (disabled) during compare. */
+  darkToggle?: HTMLInputElement | null;
+  /** Lazy dark-pane creation: fires exactly once, on the first enable. */
+  onFirstEnable?: () => void;
+}
+
+/**
+ * The "Compare" mode switch. OFF (default): today's single follow-global pane +
+ * Dark preview checkbox, unchanged. ON: two panes pinned light|dark; the global
+ * Dark preview is forced off and DISABLED (not hidden — it stays discoverable
+ * and visibly "managed by compare" rather than silently missing), and restored
+ * to its prior state when compare turns off. The full single-source-of-truth
+ * mode redesign is deliberately deferred (design doc, "Open / deferred").
+ */
+export function mountCompareToggle(host: HTMLElement, opts: CompareToggleOptions): void {
+  const label = document.createElement('label');
+  label.className = 'stb-compare-toggle';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.id = 'stb-compare-mode';
+  label.appendChild(cb);
+  label.append(' Compare');
+  host.appendChild(label);
+
+  let created = false;
+  let savedDark = false;
+  cb.addEventListener('change', () => {
+    compareMode.value = cb.checked;
+    if (cb.checked) {
+      savedDark = previewDark.value;
+      previewDark.value = false; // primary pane renders light; dark is the second pane's job
+      if (opts.darkToggle) { opts.darkToggle.checked = false; opts.darkToggle.disabled = true; }
+      opts.darkPaneHost.hidden = false;
+      opts.panesHost.classList.add('stb-compare');
+      if (!created) { created = true; opts.onFirstEnable?.(); }
+    } else {
+      previewDark.value = savedDark;
+      if (opts.darkToggle) { opts.darkToggle.checked = savedDark; opts.darkToggle.disabled = false; }
+      opts.darkPaneHost.hidden = true;
+      opts.panesHost.classList.remove('stb-compare');
+    }
+  });
 }

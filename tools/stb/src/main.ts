@@ -3,7 +3,8 @@ import { mountEditorPane } from '@/ui/editor-pane';
 import { mountTokenSidebar } from '@/ui/token-sidebar';
 import { mountElementTree } from '@/ui/element-tree';
 import { mountElementColumns } from '@/ui/element-columns';
-import { createPreviewPane } from '@/ui/preview-pane';
+import { createPreviewPane, mountCompareToggle } from '@/ui/preview-pane';
+import type { PreviewPane } from '@/ui/preview-pane';
 import { openColorPicker } from '@/ui/color-picker';
 import { createHighlightWiring } from '@/ui/highlight';
 import { mountLightDarkActions } from '@/ui/light-dark-actions';
@@ -39,7 +40,10 @@ async function main() {
       <div class="stb-sidebar-host"></div>
       <div class="stb-editor-host"></div>
     </div>
-    <div class="stb-preview-host"></div>
+    <div class="stb-preview-host">
+      <div class="stb-preview-pane" data-stb-pane="primary"></div>
+      <div class="stb-preview-pane" data-stb-pane="dark" hidden></div>
+    </div>
   `;
 
   const restored = restoreSession();
@@ -116,8 +120,9 @@ async function main() {
     const node = nodeFor(snapshotId);
     if (!node) return;
     // reveal the selected element so a hidden/empty target (e.g. an empty error
-    // alert) shows its color in the preview while you theme it
-    preview.revealElement(snapshotId);
+    // alert) shows its color in the preview while you theme it — in compare
+    // mode both panes reveal, so light and dark stay structurally identical
+    forEachPane((p) => p.revealElement(snapshotId));
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
     openLeverEditor({
       previewHost,
@@ -270,29 +275,52 @@ async function main() {
   // forward-declared so onElementSelected can drive the columns (bidirectional select)
   let columnsApi: import('@/ui/element-columns').ElementColumnsApi | null = null;
 
-  const preview = createPreviewPane({
-    onElementSelected: (_selector, tokens, snapshotId) => {
-      if (tokens.length) { wiring.scrollSidebarToToken(sidebarHost, tokens[0]!); wiring.flashSidebarRows(sidebarHost, tokens); }
-      // jump the columns so the selection is reflected there (bidirectional), then edit
-      if (snapshotId) { columnsApi?.jumpTo(snapshotId); selectElement(snapshotId); } // render → columns (R1/§2.6)
-    },
-  });
-  preview.mount(app.querySelector('.stb-preview-host') as HTMLElement);
+  // ONE select pipeline for every pane — a click in either compare pane lands
+  // in the same editor (messages are pane-scoped, so exactly one pane fires).
+  const onPreviewElementSelected = (_selector: string, tokens: string[], snapshotId: string | null) => {
+    if (tokens.length) { wiring.scrollSidebarToToken(sidebarHost, tokens[0]!); wiring.flashSidebarRows(sidebarHost, tokens); }
+    // jump the columns so the selection is reflected there (bidirectional), then edit
+    if (snapshotId) { columnsApi?.jumpTo(snapshotId); selectElement(snapshotId); } // render → columns (R1/§2.6)
+  };
+
+  const preview = createPreviewPane({ onElementSelected: onPreviewElementSelected });
+  preview.mount(previewHost.querySelector('[data-stb-pane="primary"]') as HTMLElement);
+
+  // The pinned-dark compare pane is created lazily on first Compare enable and
+  // then kept (hidden host when compare is off) — panes have no unmount, so
+  // create-once avoids stacking effects/listeners across toggles.
+  let darkPane: PreviewPane | null = null;
+  const forEachPane = (fn: (p: PreviewPane) => void): void => { fn(preview); if (darkPane) fn(darkPane); };
+  const darkPaneHost = previewHost.querySelector('[data-stb-pane="dark"]') as HTMLElement;
 
   const leverToggle = document.createElement('label');
   leverToggle.className = 'stb-lever-toggle-action';
   leverToggle.style.marginLeft = '0.5rem';
   const leverCb = document.createElement('input');
   leverCb.type = 'checkbox';
-  leverCb.addEventListener('change', () => preview.showLevers(leverCb.checked));
+  leverCb.addEventListener('change', () => forEachPane((p) => p.showLevers(leverCb.checked)));
   leverToggle.appendChild(leverCb);
   leverToggle.append(' Show editable regions');
   actionsHost.appendChild(leverToggle);
 
+  const compareHost = document.createElement('span');
+  (actionsHost.querySelector('.stb-mode-toggle') as HTMLElement).after(compareHost);
+  mountCompareToggle(compareHost, {
+    panesHost: previewHost,
+    darkPaneHost,
+    darkToggle: actionsHost.querySelector<HTMLInputElement>('#stb-preview-dark'),
+    onFirstEnable: () => {
+      darkPane = createPreviewPane({ mode: 'dark', onElementSelected: onPreviewElementSelected });
+      darkPane.mount(darkPaneHost);
+      // parity with the primary pane's transient UI state (outline toggle)
+      darkPane.showLevers(leverCb.checked);
+    },
+  });
+
   // hover only highlights when the node belongs to the scene on screen
   const navHover = (id: string | null, scene: string | null) => {
-    if (id && scene === activeSceneId.value) preview.highlightElement(id);
-    else preview.highlightElement(null);
+    if (id && scene === activeSceneId.value) forEachPane((p) => p.highlightElement(id));
+    else forEachPane((p) => p.highlightElement(null));
   };
 
   mountElementTree(treeView, {
@@ -319,7 +347,7 @@ async function main() {
         },
       });
     },
-    onHover: (tokenName) => preview.highlightToken(tokenName),
+    onHover: (tokenName) => forEachPane((p) => p.highlightToken(tokenName)),
   });
 
   mountEditorPane(app.querySelector('.stb-editor-host') as HTMLElement);
