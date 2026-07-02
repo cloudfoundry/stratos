@@ -18,33 +18,38 @@
   h4 { @apply text-base font-semibold; }
 }
 
-/* Icon font styles - supports both material-icons and custom icon fonts */
-.material-icons,
-.custom-icon,
-.icon {
-  font-family: 'Material Icons' !important;
-  font-feature-settings: 'liga';
-  -webkit-font-feature-settings: 'liga';
-  -moz-font-feature-settings: 'liga';
-  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
-  word-wrap: normal;
-  direction: ltr;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* Icon font styles - supports both material-icons and custom icon fonts.
+ * In @layer base so text-size utilities (@layer utilities) can override
+ * the default 24px glyph size; unlayered these rules would beat every
+ * utility regardless of specificity (see docs/tailwind-usage.md). */
+@layer base {
+  .material-icons,
+  .custom-icon,
+  .icon {
+    font-family: 'Material Icons' !important;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -moz-font-feature-settings: 'liga';
+    @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+    word-wrap: normal;
+    direction: ltr;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-.stratos-icons {
-  font-family: 'stratos-icons' !important;
-  font-feature-settings: 'liga';
-  -webkit-font-feature-settings: 'liga';
-  -moz-font-feature-settings: 'liga';
-  @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
-  word-wrap: normal;
-  direction: ltr;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  .stratos-icons {
+    font-family: 'stratos-icons' !important;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -moz-font-feature-settings: 'liga';
+    @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+    word-wrap: normal;
+    direction: ltr;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 /* CSS Custom Properties for theme customization.
