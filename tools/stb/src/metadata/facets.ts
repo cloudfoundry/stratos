@@ -157,8 +157,7 @@ function layerCss(l: Layer): string {
 }
 
 /** Composed CSS background-image value: layers reversed to CSS topmost-first order.
- *  undefined if no layers. Shared by backgroundCss and backgroundPatch so the two
- *  emission paths (scoped-block CSS vs. live-preview inline style) can't drift apart. */
+ *  undefined if no layers. Used by backgroundCss (scoped-block CSS emission). */
 function composeLayerImage(bg: BackgroundFacet): string | undefined {
   if (!bg.layers || !bg.layers.length) return undefined;
   // Blank layers are mid-edit transients — skip an image layer with a blank

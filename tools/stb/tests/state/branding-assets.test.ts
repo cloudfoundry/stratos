@@ -4,6 +4,8 @@ import {
   type BrandingAsset,
 } from '@/state/branding-assets';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
+import { emitScopedBlocks } from '@/parse/css-emitter';
+import type { ElementNode } from '@/metadata/types';
 
 const blobA = new Blob(['a'], { type: 'image/png' });
 const blobB = new Blob(['b'], { type: 'image/jpeg' });
@@ -81,17 +83,19 @@ describe('rewriteAssetUrls', () => {
     } finally { restore(); }
   });
 
-  it('revokes the previous call\'s object URLs for the same callsite key when minting new ones', () => {
+  it('double-buffers: keeps the last TWO batches alive, revokes only the batch two calls back', () => {
     const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
-    const restore = stubCreateObjectURL({ a: 'blob:mock/1', b: 'blob:mock/2' });
+    const restore = stubCreateObjectURL({ a: 'blob:mock/1', b: 'blob:mock/2', c: 'blob:mock/3' });
     const revoked: string[] = [];
     const origRevoke = URL.revokeObjectURL;
     URL.revokeObjectURL = ((u: string) => revoked.push(u)) as typeof URL.revokeObjectURL;
     try {
-      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2');
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2'); // mints blob:mock/1
       expect(revoked).toEqual([]); // nothing to revoke on first call
-      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2');
-      expect(revoked).toEqual(['blob:mock/1']); // first call's URL revoked on replace
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2'); // mints blob:mock/2
+      expect(revoked).toEqual([]); // still nothing — call 1's URL is what the iframe is currently painting
+      rewriteAssetUrls('url(assets/hero.jpg)', store, 'test-2'); // mints blob:mock/3
+      expect(revoked).toEqual(['blob:mock/1']); // only the batch from TWO calls back is revoked
     } finally { restore(); URL.revokeObjectURL = origRevoke; }
   });
 
@@ -106,5 +110,71 @@ describe('rewriteAssetUrls', () => {
       rewriteAssetUrls('url(assets/hero.jpg)', store, 'pane-dark');
       expect(revoked).toEqual([]); // distinct keys, nothing revoked
     } finally { restore(); URL.revokeObjectURL = origRevoke; }
+  });
+
+  it('rewrites a single-quoted url() ref (user-authored scopedBlock CSS convention)', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ hero: 'blob:mock/hero' });
+    try {
+      const out = rewriteAssetUrls("background-image: url('assets/hero.jpg');", store, 'test-quote-1');
+      expect(out).toBe('background-image: url(blob:mock/hero);');
+    } finally { restore(); }
+  });
+
+  it('rewrites a double-quoted url() ref', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ hero: 'blob:mock/hero' });
+    try {
+      const out = rewriteAssetUrls('background-image: url("assets/hero.jpg");', store, 'test-quote-2');
+      expect(out).toBe('background-image: url(blob:mock/hero);');
+    } finally { restore(); }
+  });
+
+  it('rewrites a whitespace-padded url() ref', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ hero: 'blob:mock/hero' });
+    try {
+      const out = rewriteAssetUrls('background-image: url(  assets/hero.jpg  );', store, 'test-quote-3');
+      expect(out).toBe('background-image: url(blob:mock/hero);');
+    } finally { restore(); }
+  });
+
+  it('leaves an unknown quoted ref completely untouched (original text, quotes and all)', () => {
+    const store = new Map<string, BrandingAsset>();
+    const css = "background-image: url('assets/unknown.jpg');";
+    const out = rewriteAssetUrls(css, store, 'test-quote-4');
+    expect(out).toBe(css);
+  });
+
+  it('mints one object URL per distinct ref within a single call, even if it appears N times', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    let calls = 0;
+    const orig = URL.createObjectURL;
+    URL.createObjectURL = (() => { calls++; return `blob:mock/${calls}`; }) as typeof URL.createObjectURL;
+    try {
+      const css = 'a { background-image: url(assets/hero.jpg); } b { background-image: url(assets/hero.jpg); }';
+      const out = rewriteAssetUrls(css, store, 'test-dedupe');
+      expect(calls).toBe(1); // one mint for two occurrences of the same ref
+      expect(out).toBe('a { background-image: url(blob:mock/1); } b { background-image: url(blob:mock/1); }');
+    } finally { URL.createObjectURL = orig; }
+  });
+
+  it('end-to-end: a quoted asset ref inside a scopedBlock (the R1 escape hatch) resolves through emitScopedBlocks + rewriteAssetUrls, matching applyScopedBlocksToPreview\'s path', () => {
+    const store = new Map<string, BrandingAsset>([['assets/hero.jpg', { blob, filename: 'hero.jpg' }]]);
+    const restore = stubCreateObjectURL({ hero: 'blob:mock/hero' });
+    try {
+      const nodes: ElementNode[] = [{
+        snapshotId: 'auth.login.card',
+        role: '',
+        name: null,
+        description: '',
+        facets: {},
+        scopedBlock: "background-image: url('assets/hero.jpg')",
+      }];
+      const css = emitScopedBlocks(nodes);
+      const out = rewriteAssetUrls(css, store, 'test-e2e');
+      expect(out).toContain('background-image: url(blob:mock/hero);');
+      expect(out).not.toContain("assets/hero.jpg");
+    } finally { restore(); }
   });
 });
