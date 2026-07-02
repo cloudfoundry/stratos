@@ -888,3 +888,259 @@ it('consecutive edits to two gradient fields both survive without a re-mount (no
   expect(last.gradient.angle).toBe('45deg');       // first edit survives
   expect(last.gradient.stops[0]!.position).toBe('10%'); // second edit applied
 });
+
+// --- background backstop dark axis ---
+
+it('renders a dark swatch and derive button beside the backstop light swatch', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onDarkEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  expect(row.querySelectorAll('.stb-facet-swatch').length).toBe(1);
+  expect(row.querySelector('.stb-facet-swatch-dark')).not.toBeNull();
+  expect(row.querySelector('.stb-facet-derive-dark')).not.toBeNull();
+});
+
+it('backstop dark swatch is neutral/empty when no dark backstop is set', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onDarkEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  const darkBtn = row.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  expect(darkBtn.classList.contains('stb-facet-swatch-empty')).toBe(true);
+  expect(darkBtn.style.backgroundColor).toBe('');
+});
+
+it('backstop dark swatch reflects an existing dark literal', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    darkFacets: { background: { color: { literal: { l: 0.2, c: 0.05, h: 100 } } } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onDarkEdit: () => {},
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  const darkBtn = row.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  expect(darkBtn.classList.contains('stb-facet-swatch-empty')).toBe(false);
+  expect(darkBtn.style.backgroundColor).not.toBe('');
+});
+
+it('editing the backstop dark swatch invokes onDarkEdit with background.color', () => {
+  const host = document.createElement('div');
+  const darkEdits: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onDarkEdit: (k, v) => darkEdits.push([k, v]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  (row.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement).click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  expect(textInput).toBeTruthy();
+  textInput.value = '#112233';
+  textInput.dispatchEvent(new Event('input'));
+  expect(darkEdits.length).toBe(1);
+  expect(darkEdits[0]![0]).toBe('background.color');
+  expect(darkEdits[0]![1]).toHaveProperty('literal');
+});
+
+it('clicking the backstop derive button calls deriveDark with background.color', () => {
+  const host = document.createElement('div');
+  const derived: string[] = [];
+  mountFacetTree(host, {
+    facets: { background: { color: { literal: { l: 0.4, c: 0.1, h: 250 } } } },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    deriveDark: (k) => derived.push(k),
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  (row.querySelector('.stb-facet-derive-dark') as HTMLButtonElement).click();
+  expect(derived).toEqual(['background.color']);
+});
+
+it('backstop derive button is disabled when the light backstop has no literal Oklch', () => {
+  const host = document.createElement('div');
+  const derived: string[] = [];
+  mountFacetTree(host, {
+    facets: { background: {} },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onDarkEdit: () => {},
+    deriveDark: (k) => derived.push(k),
+  });
+  const row = host.querySelector('[data-stb-bg-row="color"]')!;
+  const deriveBtn = row.querySelector('.stb-facet-derive-dark') as HTMLButtonElement;
+  expect(deriveBtn.disabled).toBe(true);
+  deriveBtn.click();
+  expect(derived).toEqual([]);
+});
+
+// --- gradient stop dark axis ---
+
+function gradientLayerFacets() {
+  return {
+    background: {
+      layers: [{ kind: 'gradient' as const, gradient: {
+        type: 'linear' as const, angle: '90deg',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    },
+  };
+}
+
+it('renders a dark swatch and per-stop derive button for each gradient stop', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: gradientLayerFacets(),
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const stopRows = host.querySelectorAll('.stb-facet-bg-gradient-stop');
+  expect(stopRows.length).toBe(2);
+  for (const row of stopRows) {
+    expect(row.querySelectorAll('.stb-facet-swatch').length).toBe(1);
+    expect(row.querySelector('.stb-facet-swatch-dark')).not.toBeNull();
+    expect(row.querySelector('.stb-facet-derive-dark')).not.toBeNull();
+  }
+});
+
+it('gradient stop dark swatch is empty when no dark gradient layer exists yet', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: gradientLayerFacets(),
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const stopRow = host.querySelectorAll('.stb-facet-bg-gradient-stop')[0]!;
+  const darkSwatch = stopRow.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  expect(darkSwatch.classList.contains('stb-facet-swatch-empty')).toBe(true);
+});
+
+it('editing a gradient stop dark swatch seeds the dark gradient from the light structure (copy-on-first-edit)', () => {
+  const host = document.createElement('div');
+  const setLayersDark: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: gradientLayerFacets(),
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayerDark: (i, l) => setLayersDark.push([i, l]),
+  });
+  const stopRow = host.querySelectorAll('.stb-facet-bg-gradient-stop')[0]!;
+  const darkSwatch = stopRow.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  darkSwatch.click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  expect(textInput).toBeTruthy();
+  textInput.value = '#101010';
+  textInput.dispatchEvent(new Event('input'));
+  expect(setLayersDark.length).toBe(1);
+  const [index, layer] = setLayersDark[0] as [number, { kind: string; gradient: { angle?: string; stops: Array<{ color: { literal?: unknown } }> } }];
+  expect(index).toBe(0);
+  // Copy-on-first-edit: the seeded gradient carries the light gradient's
+  // structure (angle, stop count) with only stop 0's color replaced.
+  expect(layer.gradient.angle).toBe('90deg');
+  expect(layer.gradient.stops.length).toBe(2);
+  expect(layer.gradient.stops[0]!.color.literal).toBeTruthy();
+  expect(layer.gradient.stops[1]!.color).toEqual({ literal: '#000' });
+});
+
+it('a second dark stop edit builds on the existing dark layers, not a fresh seed from light', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: gradientLayerFacets(),
+    darkFacets: { background: { layers: [{ kind: 'gradient', gradient: {
+      type: 'linear', angle: '180deg',
+      stops: [{ color: { literal: '#111111' } }, { color: { literal: '#222222' } }],
+    } }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayerDark: () => {},
+  });
+  const stopRow = host.querySelectorAll('.stb-facet-bg-gradient-stop')[1]!;
+  const darkSwatch = stopRow.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  // The existing dark stop 1 color (#222222) is reflected, not empty — proving
+  // the render read from darkFacets rather than re-seeding from light.
+  expect(darkSwatch.classList.contains('stb-facet-swatch-empty')).toBe(false);
+});
+
+it('a dark gradient edit builds on the pre-existing dark layer angle, not the light angle', () => {
+  const host = document.createElement('div');
+  const setLayersDark: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: gradientLayerFacets(),
+    darkFacets: { background: { layers: [{ kind: 'gradient', gradient: {
+      type: 'linear', angle: '180deg',
+      stops: [{ color: { literal: '#111111' } }, { color: { literal: '#222222' } }],
+    } }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayerDark: (i, l) => setLayersDark.push([i, l]),
+  });
+  const stopRow = host.querySelectorAll('.stb-facet-bg-gradient-stop')[1]!;
+  const darkSwatch = stopRow.querySelector('.stb-facet-swatch-dark') as HTMLButtonElement;
+  darkSwatch.click();
+  const textInput = document.querySelector('.stb-color-text') as HTMLInputElement;
+  textInput.value = '#303030';
+  textInput.dispatchEvent(new Event('input'));
+  const [, layer] = setLayersDark[0] as [number, { gradient: { angle?: string; stops: Array<{ color: { literal?: unknown } }> } }];
+  // Fork pinned: the pre-existing dark angle (180deg) survives, not the light one (90deg).
+  expect(layer.gradient.angle).toBe('180deg');
+  expect(layer.gradient.stops[0]!.color).toEqual({ literal: '#111111' });
+});
+
+it('per-stop derive produces a dark literal distinct from the light stop and calls onSetLayerDark', () => {
+  const host = document.createElement('div');
+  const setLayersDark: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: { layers: [{ kind: 'gradient', gradient: {
+      type: 'linear', angle: '90deg',
+      stops: [{ color: { literal: { l: 0.3, c: 0.1, h: 250 } } }, { color: { literal: '#000' } }],
+    } }] } },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayerDark: (i, l) => setLayersDark.push([i, l]),
+  });
+  const stopRow = host.querySelectorAll('.stb-facet-bg-gradient-stop')[0]!;
+  const deriveBtn = stopRow.querySelector('.stb-facet-derive-dark') as HTMLButtonElement;
+  expect(deriveBtn.disabled).toBe(false);
+  deriveBtn.click();
+  expect(setLayersDark.length).toBe(1);
+  const [, layer] = setLayersDark[0] as [number, { gradient: { stops: Array<{ color: { literal?: unknown } }> } }];
+  expect(layer.gradient.stops[0]!.color.literal).not.toEqual({ l: 0.3, c: 0.1, h: 250 });
+});
+
+it('per-stop derive is disabled for a token stop', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: { layers: [{ kind: 'gradient', gradient: {
+      type: 'linear', angle: '90deg',
+      stops: [{ color: { token: 'brand' } }, { color: { literal: '#000' } }],
+    } }] } },
+    darkFacets: {},
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayerDark: () => {},
+  });
+  const stopRow = host.querySelectorAll('.stb-facet-bg-gradient-stop')[0]!;
+  const deriveBtn = stopRow.querySelector('.stb-facet-derive-dark') as HTMLButtonElement;
+  expect(deriveBtn.disabled).toBe(true);
+});

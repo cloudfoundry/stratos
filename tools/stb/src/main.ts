@@ -190,6 +190,19 @@ async function main() {
         if (!n) return;
         setNodeFacets(snapshotId, setLayer(n.facets, index, layer));
       },
+      onSetLayerDark: (index, layer) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        // Copy-on-first-dark-edit: seed the dark background's layer array as a
+        // structural copy of the light layers before the first dark layer edit.
+        // After this point light and dark layer structures are independent forks —
+        // editing one never touches the other.
+        const darkBg = n.facetsDark?.background;
+        const seededDarkFacets = darkBg?.layers
+          ? n.facetsDark!
+          : { ...(n.facetsDark ?? {}), background: { ...darkBg, layers: JSON.parse(JSON.stringify(n.facets.background?.layers ?? [])) } };
+        setNodeFacetsDark(snapshotId, setLayer(seededDarkFacets, index, layer));
+      },
       onRemoveLayer: (index) => {
         const n = nodeFor(snapshotId);
         if (!n) return;

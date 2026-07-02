@@ -111,4 +111,27 @@ describe('emitScopedBlocks', () => {
       `${lightSel('a.one')} {\n  color: red;\n}\n\n${lightSel('a.two')} {\n  color: blue;\n}`,
     );
   });
+
+  it('emits a dark gradient layer stack in the .dark-theme block for a node with facetsDark.background', () => {
+    const n: ElementNode = {
+      snapshotId: 'a.hero',
+      role: '',
+      name: null,
+      description: '',
+      facets: {},
+      facetsDark: {
+        background: {
+          layers: [{ kind: 'gradient', gradient: {
+            type: 'linear', angle: '90deg',
+            stops: [{ color: { literal: '#111111' } }, { color: { literal: '#222222' } }],
+          } }],
+        },
+      },
+    };
+    const out = emitScopedBlocks([n]);
+    const darkSel = `.dark-theme ${sel('a.hero')}`;
+    expect(out).toContain(`${darkSel} {`);
+    expect(out).toContain('background-image: linear-gradient(90deg, #111111, #222222);');
+    expect(out).not.toContain('html:not(.dark-theme)'); // no light block: facets is empty
+  });
 });
