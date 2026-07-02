@@ -170,7 +170,7 @@ This prevents stale config from persisting across upgrades.
 | `src/frontend/packages/theme/theme-transitions.scss` | FOUC prevention, reduced-motion support |
 | `src/frontend/packages/store/src/effects/auth.effects.ts` | Calls `activateUserPreferences()` post-auth |
 | `src/frontend/packages/core/src/core/customizations.types.ts` | `CustomizationService` (extension slots only) |
-| `tailwind.config.js` | Maps CSS variables to semantic Tailwind tokens |
+| `src/frontend/packages/theme/styles/tailwind.css` | `@theme` block maps CSS variables to semantic Tailwind tokens |
 
 ## CSS Custom Properties
 
