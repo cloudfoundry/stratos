@@ -177,12 +177,31 @@ body {
   font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .stb-facet-bg-row[data-stb-bg-row="color"] .stb-facet-bg-subtitle { flex: 0 0 5.5rem; }
+/* MDN help link — one per gradient layer, sits beside the subtitle. */
+.stb-facet-bg-gradient-help {
+  flex: 0 0 auto; font-size: 0.7rem; line-height: 1; width: 1.1rem; height: 1.1rem;
+  display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+  border: 1px solid var(--border, #cbd5e1); color: var(--text-muted, #64748b); text-decoration: none;
+}
 .stb-facet-bg-gradient {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; flex: 1 1 100%; min-width: 0;
+}
+/* Inline field labels ("type" / "angle" / "position") — visible text, not
+   placeholder-only, so the label survives once the control is filled. */
+.stb-facet-bg-gradient-field-label {
+  font-size: 0.7rem; color: var(--text-muted, #64748b); white-space: nowrap;
 }
 .stb-facet-bg-gradient-type, .stb-facet-bg-gradient-pos { font-size: 0.75rem; padding: 0.1rem 0.25rem; }
 .stb-facet-bg-gradient-stops {
   display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 100%; margin-top: 0.15rem;
+}
+/* Column header for the stops list — one labeled header rather than a label
+   per row; aligned to the stop-position input via the same trailing flex slot. */
+.stb-facet-bg-gradient-stops-header {
+  display: flex; justify-content: flex-end; padding: 0 0.3rem;
+}
+.stb-facet-bg-gradient-stops-header-pos {
+  flex: 1; min-width: 0; font-size: 0.68rem; color: var(--text-muted, #64748b);
 }
 .stb-facet-bg-gradient-stop {
   display: flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.3rem;

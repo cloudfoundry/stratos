@@ -22,7 +22,8 @@ export interface OpenLeverEditorOptions {
   onFacetEditDark?: (key: string, value: FacetValue) => void;
   /** Per-row "derive dark from light" — caller computes deriveDarkOklch and routes it through its own dark-edit path. */
   deriveDark?: (key: string) => void;
-  onAddGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  /** 'background' is addable but deliberately not removable — see the matching note in facet-tree.ts. */
+  onAddGroup?: (g: 'text' | 'surface' | 'spacing' | 'background') => void;
   onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
   tokenForKey?: (key: string) => string | null;
   resolveLiteral?: (key: string, token: string) => FacetValue;
