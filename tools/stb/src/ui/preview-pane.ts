@@ -9,12 +9,17 @@ import { attachAssetBlobs, brandingAssets } from '@/state/branding-assets';
 import { emitScopedBlocks } from '@/parse/css-emitter';
 import { backgroundPatch } from '@/metadata/facets';
 
-export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
+export function leverPatchesFor(model: BrandingModel, dark = false): LeverPatch[] {
   const out: LeverPatch[] = [];
   for (const n of model.nodes) {
     if (n.facets.content) out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.facets.content.text });
     else if (n.facets.asset) out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.facets.asset.ref });
-    if (n.facets.background) out.push({ snapshotId: n.snapshotId, kind: 'background', ...backgroundPatch(n.facets.background) });
+    // The inline background leg is mode-aware: in dark preview it composes from
+    // the dark bundle only. A light-bundle inline style would override the
+    // snapshot's .dark-theme rules AND the emitted dark scoped block; with no
+    // dark override we send no patch at all and let that CSS own the background.
+    const bg = dark ? n.facetsDark?.background : n.facets.background;
+    if (bg) out.push({ snapshotId: n.snapshotId, kind: 'background', ...backgroundPatch(bg) });
     if (n.visibility !== undefined) out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.visibility });
   }
   return out;
@@ -54,7 +59,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   function applyLeversToPreview(): void {
     const m = brandingModel.value;
     if (!m) return;
-    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m), brandingAssets.value) });
+    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m, previewDark.value), brandingAssets.value) });
     // tell the shim which elements are editable (name rides along so a revealed
     // empty element can label itself with its real name, not invented text)
     send({ type: 'STB_SET_LEVERS', levers: m.nodes.map((n) => ({ id: n.snapshotId, name: n.name })) });
@@ -116,7 +121,11 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
       });
 
       effect(() => {
+        // previewDark is subscribed unconditionally (not just via the guarded
+        // applyLeversToPreview read) so a dark toggle re-sends the mode-aware
+        // background patches even if the model hasn't changed since ready.
         void brandingModel.value;
+        void previewDark.value;
         if (ready) { applyLeversToPreview(); applyScopedBlocksToPreview(); }
       });
     },

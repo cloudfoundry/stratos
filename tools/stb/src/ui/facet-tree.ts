@@ -226,7 +226,12 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         // gradientCss and the model if present; it is preserved (not edited)
         // by spreading the existing gradient and overriding only the fields
         // these controls own — exotic values go through scopedBlock instead.
-        const gradient = layer.gradient;
+        // Held in a `let` updated by every setGradient call: re-render is
+        // suppressed while a text input is focused, so consecutive edits to two
+        // different gradient fields land on the SAME mounted row — each patch
+        // must build on the latest written gradient, not the mount-time snapshot,
+        // or the second edit clobbers the first.
+        let gradient = layer.gradient;
         const rebuild = (patch: Partial<Gradient>): Gradient => ({ ...gradient, ...patch }) as Gradient;
         // Type switch rebuilds the gradient per target arm rather than spreading,
         // so arm-specific fields (angle/shape/size/fromAngle) can't leak into an
@@ -239,7 +244,10 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           const pos = 'position' in g && g.position !== undefined ? { position: g.position } : {};
           return { type, ...base, ...pos };
         };
-        const setGradient = (g: Gradient) => opts.onSetLayer?.(i, { kind: 'gradient', gradient: g });
+        const setGradient = (g: Gradient) => {
+          gradient = g;
+          opts.onSetLayer?.(i, { kind: 'gradient', gradient: g });
+        };
 
         const editor = document.createElement('div');
         editor.className = 'stb-facet-bg-gradient';

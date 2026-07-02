@@ -37,4 +37,24 @@ describe('applyLevers', () => {
     // the ref substring rather than the exact unquoted form so this isn't jsdom-quirk-fragile.
     expect(el.style.backgroundImage).toContain('assets/hero.jpg');
   });
+  it('clears a previously applied inline background-image when the patch omits it (last layer removed)', () => {
+    const d = doc('<div stb-snapshot-id="a.card"></div>');
+    const el = d.querySelector('[stb-snapshot-id="a.card"]') as HTMLElement;
+    applyLevers(d, [{ snapshotId: 'a.card', kind: 'background', backgroundColor: '#0b3d91', backgroundImage: 'url(assets/hero.jpg)' }]);
+    expect(el.style.backgroundImage).toContain('assets/hero.jpg');
+    // last layer removed: the background patch is still present but has no image component
+    applyLevers(d, [{ snapshotId: 'a.card', kind: 'background', backgroundColor: '#0b3d91' }]);
+    expect(el.style.backgroundImage).toBe('');
+    expect(el.style.backgroundColor).toBeTruthy();
+  });
+  it('leaves inline background untouched when no background patch is present (scoped/dark CSS owns it)', () => {
+    const d = doc('<div stb-snapshot-id="a.card">x</div>');
+    const el = d.querySelector('[stb-snapshot-id="a.card"]') as HTMLElement;
+    applyLevers(d, [{ snapshotId: 'a.card', kind: 'background', backgroundColor: '#0b3d91', backgroundImage: 'url(assets/hero.jpg)' }]);
+    // a later batch WITHOUT a background patch (e.g. dark mode with no dark override)
+    // must not clear what it did not set
+    applyLevers(d, [{ snapshotId: 'a.card', kind: 'content', text: 'y' }]);
+    expect(el.style.backgroundImage).toContain('assets/hero.jpg');
+    expect(el.style.backgroundColor).toBeTruthy();
+  });
 });

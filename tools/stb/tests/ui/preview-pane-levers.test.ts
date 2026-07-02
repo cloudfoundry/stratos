@@ -68,3 +68,34 @@ describe('leverPatchesFor', () => {
     });
   });
 });
+
+describe('leverPatchesFor dark-aware background', () => {
+  const bgModel = {
+    scene: 's',
+    nodes: [
+      { snapshotId: 'a.card', role: 'region', name: 'C', description: '',
+        facets: { background: { color: { literal: '#eeeeee' } } } },
+      { snapshotId: 'a.hero', role: 'region', name: 'H', description: '',
+        facets: { background: { color: { literal: '#dddddd' } } },
+        facetsDark: { background: { color: { literal: '#111111' } } } },
+    ],
+  } as any;
+
+  it('light mode composes the background patch from facets.background', () => {
+    const patches = leverPatchesFor(bgModel, false);
+    expect(patches).toContainEqual({ snapshotId: 'a.card', kind: 'background', backgroundColor: '#eeeeee' });
+    expect(patches).toContainEqual({ snapshotId: 'a.hero', kind: 'background', backgroundColor: '#dddddd' });
+  });
+
+  it('dark mode with no facetsDark.background emits NO background patch (dark CSS owns it)', () => {
+    const patches = leverPatchesFor(bgModel, true);
+    expect(patches.filter((p) => p.snapshotId === 'a.card' && p.kind === 'background')).toHaveLength(0);
+  });
+
+  it('dark mode composes the background patch from facetsDark.background when present', () => {
+    const patches = leverPatchesFor(bgModel, true);
+    expect(patches).toContainEqual({ snapshotId: 'a.hero', kind: 'background', backgroundColor: '#111111' });
+    // and never from the light bundle
+    expect(patches.filter((p) => p.kind === 'background' && (p as any).backgroundColor === '#dddddd')).toHaveLength(0);
+  });
+});
