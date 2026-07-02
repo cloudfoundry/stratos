@@ -1,7 +1,13 @@
+import { renderSubsetInto } from '@/content/subset-format';
+import type { ContentFormat } from '@/metadata/types';
+
 export interface LeverPatch {
   snapshotId: string;
   kind: 'content' | 'asset' | 'visibility' | 'background';
   text?: string;
+  /** Content text format; absent = plain (textContent). 'subset' renders the
+   *  closed grammar via DOM construction — see src/content/subset-format.ts. */
+  format?: ContentFormat;
   ref?: string;
   shown?: boolean;
   blob?: Blob;
@@ -20,7 +26,10 @@ export function applyLevers(doc: Document, levers: LeverPatch[]): void {
     }
     const el = doc.querySelector<HTMLElement>(`[stb-snapshot-id="${p.snapshotId}"]`);
     if (!el) continue;
-    if (p.kind === 'content' && p.text !== undefined) el.textContent = p.text;
+    if (p.kind === 'content' && p.text !== undefined) {
+      if (p.format === 'subset') renderSubsetInto(el, p.text);
+      else el.textContent = p.text;
+    }
     if (p.kind === 'asset') {
       const src = p.blob ? URL.createObjectURL(p.blob) : p.ref; // NOTE: object URL not revoked; revoke-prev if preview leaks
       if (src === undefined) continue;

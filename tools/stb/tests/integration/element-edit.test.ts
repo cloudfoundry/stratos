@@ -20,6 +20,14 @@ describe('applyEdit', () => {
     applyEdit('auth.login.title', { kind: 'content', text: 'B' }, routing);
     expect(nodeFor('auth.login.title')?.facets.content?.text).toBe('B');
   });
+  it('content edit with format subset stores the format on the facet', () => {
+    applyEdit('auth.login.title', { kind: 'content', text: '**B**', format: 'subset' }, routing);
+    expect(nodeFor('auth.login.title')?.facets.content).toEqual({ text: '**B**', format: 'subset' });
+  });
+  it('plain content edit stores no format key (byte-identical to pre-format shape)', () => {
+    applyEdit('auth.login.title', { kind: 'content', text: 'B' }, routing);
+    expect(nodeFor('auth.login.title')?.facets.content).toEqual({ text: 'B' });
+  });
   it('color edit re-projects to the bound token', () => {
     applyEdit('auth.login.sign-in', { kind: 'color', oklch: { l: 0.6, c: 0.12, h: 200 } }, routing);
     expect(rootValues.value.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);

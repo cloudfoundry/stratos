@@ -190,6 +190,38 @@ it('renders a content leaf with a textarea initialized to the content text', () 
   expect(collected).toContain('B');
 });
 
+it('content leaf format select defaults to plain and reports edits with the chosen format', () => {
+  const host = document.createElement('div');
+  const collected: [string, string | undefined][] = [];
+  mountFacetTree(host, {
+    facets: { content: { text: 'A' } },
+    onEdit: () => {},
+    previewHost: document.createElement('div'),
+    onContentEdit: (t, f) => collected.push([t, f]),
+  });
+  const sel = host.querySelector('.stb-facet-leaf[data-key="content"] select.stb-facet-content-format') as HTMLSelectElement;
+  expect(sel).not.toBeNull();
+  expect(sel.value).toBe('plain');
+  const ta = host.querySelector('.stb-facet-leaf[data-key="content"] textarea') as HTMLTextAreaElement;
+  ta.value = 'B';
+  ta.dispatchEvent(new Event('input'));
+  expect(collected).toContainEqual(['B', 'plain']);
+  sel.value = 'subset';
+  sel.dispatchEvent(new Event('change'));
+  expect(collected).toContainEqual(['B', 'subset']);
+});
+
+it('content leaf format select reflects an existing subset format', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { content: { text: 'A', format: 'subset' } },
+    onEdit: () => {},
+    previewHost: document.createElement('div'),
+  });
+  const sel = host.querySelector('.stb-facet-leaf[data-key="content"] select.stb-facet-content-format') as HTMLSelectElement;
+  expect(sel.value).toBe('subset');
+});
+
 it('renders an asset leaf with a file input', () => {
   const host = document.createElement('div');
   mountFacetTree(host, {

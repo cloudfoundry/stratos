@@ -12,7 +12,13 @@ import { backgroundPatch } from '@/metadata/facets';
 export function leverPatchesFor(model: BrandingModel, dark = false): LeverPatch[] {
   const out: LeverPatch[] = [];
   for (const n of model.nodes) {
-    if (n.facets.content) out.push({ snapshotId: n.snapshotId, kind: 'content', text: n.facets.content.text });
+    if (n.facets.content) {
+      out.push({
+        snapshotId: n.snapshotId, kind: 'content', text: n.facets.content.text,
+        // plain content stays byte-identical to the pre-format patch shape
+        ...(n.facets.content.format === 'subset' ? { format: 'subset' as const } : {}),
+      });
+    }
     else if (n.facets.asset) out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.facets.asset.ref });
     // The inline background leg is mode-aware: in dark preview it composes from
     // the dark bundle only. A light-bundle inline style would override the
