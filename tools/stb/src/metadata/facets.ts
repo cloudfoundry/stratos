@@ -33,8 +33,17 @@ export function* facetDeclarations(
   }
 }
 
+// Systemic blank-value guard: a blank literal (empty/whitespace-only string) means
+// "unset, emit nothing" at every emit site below. Only literal strings are ever
+// "blank" — a {token} entry, or a literal Oklch color object, never is.
+const isBlankLiteral = (v: FacetValue): boolean =>
+  'literal' in v && typeof v.literal === 'string' && v.literal.trim() === '';
+
+const isBlankRef = (ref: string): boolean => ref.trim() === '';
+
 export function facetLiteralCss(spec: FacetPropSpec, v: FacetValue): string | null {
   if ('token' in v) return null;
+  if (isBlankLiteral(v)) return null;
   return spec.isColor ? oklchToHex(v.literal as Oklch) : String(v.literal);
 }
 
@@ -53,7 +62,9 @@ export function* contentAssetDeclarations(
   const layers = facets.background?.layers ?? [];
   for (let i = layers.length - 1; i >= 0; i--) {
     const l = layers[i]!;
-    if (l.kind === 'image') {
+    // A blank ref (mid-edit transient) doesn't count as "topmost" — keep
+    // scanning downward instead of masking a real lower image.
+    if (l.kind === 'image' && !isBlankRef(l.ref)) {
       topmost = l.ref;
       break;
     }
@@ -85,9 +96,11 @@ export function facetValueCss(v: FacetValue, isColor: boolean): string {
   return isColor ? normalizeHex(lit) : lit;
 }
 
-/** Font-family fallback list (composite kind 1: ordered comma-list, non-color leaves). */
-export function fontFamilyCss(list: FacetValue[]): string {
-  return `font-family: ${list.map((v) => facetValueCss(v, false)).join(', ')};`;
+/** Font-family fallback list (composite kind 1: ordered comma-list, non-color leaves).
+ *  Blank literal entries are skipped (no dangling commas); null if nothing is left to emit. */
+export function fontFamilyCss(list: FacetValue[]): string | null {
+  const parts = list.filter((v) => !isBlankLiteral(v)).map((v) => facetValueCss(v, false));
+  return parts.length ? `font-family: ${parts.join(', ')};` : null;
 }
 
 const SIDE_ORDER = ['top', 'right', 'bottom', 'left'] as const;
@@ -102,11 +115,11 @@ export function spacingDeclarations(sp: SpacingFacet): string[] {
     if (!t) continue;
     for (const side of SIDE_ORDER) {
       const v = t[side];
-      if (v) out.push(`${group}-${side}: ${facetValueCss(v, false)};`);
+      if (v && !isBlankLiteral(v)) out.push(`${group}-${side}: ${facetValueCss(v, false)};`);
     }
   }
-  if (sp.gap?.row) out.push(`row-gap: ${facetValueCss(sp.gap.row, false)};`);
-  if (sp.gap?.column) out.push(`column-gap: ${facetValueCss(sp.gap.column, false)};`);
+  if (sp.gap?.row && !isBlankLiteral(sp.gap.row)) out.push(`row-gap: ${facetValueCss(sp.gap.row, false)};`);
+  if (sp.gap?.column && !isBlankLiteral(sp.gap.column)) out.push(`column-gap: ${facetValueCss(sp.gap.column, false)};`);
   return out;
 }
 
@@ -143,7 +156,11 @@ function layerCss(l: Layer): string {
  *  emission paths (scoped-block CSS vs. live-preview inline style) can't drift apart. */
 function composeLayerImage(bg: BackgroundFacet): string | undefined {
   if (!bg.layers || !bg.layers.length) return undefined;
-  return [...bg.layers].reverse().map(layerCss).join(', ');
+  // An image layer with a blank ref is a mid-edit transient — skip it rather
+  // than emit `url()`; a gradient layer at the same slot always has real stops.
+  const layers = bg.layers.filter((l) => l.kind !== 'image' || !isBlankRef(l.ref));
+  if (!layers.length) return undefined;
+  return [...layers].reverse().map(layerCss).join(', ');
 }
 
 /** 0-2 CSS declarations for a background composite. Layers reversed: CSS wants topmost first.
@@ -151,7 +168,7 @@ function composeLayerImage(bg: BackgroundFacet): string | undefined {
  *  facetDeclarations/projectColorTokens to avoid emitting it twice. */
 export function backgroundCss(bg: BackgroundFacet): string[] {
   const out: string[] = [];
-  if (bg.color && 'literal' in bg.color) out.push(`background-color: ${facetValueCss(bg.color, true)};`);
+  if (bg.color && 'literal' in bg.color && !isBlankLiteral(bg.color)) out.push(`background-color: ${facetValueCss(bg.color, true)};`);
   const images = composeLayerImage(bg);
   if (images !== undefined) out.push(`background-image: ${images};`);
   return out;

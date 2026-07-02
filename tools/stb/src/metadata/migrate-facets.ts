@@ -1,3 +1,6 @@
+// One-shot fixture/migration tooling. Models load pre-migrated committed JSON,
+// so this module has no production callers by design — do NOT wire it into any
+// runtime loader; it exists to convert legacy fixtures once, by hand, offline.
 import type { Facets, FacetValue, Sides, GapTuple, BackgroundFacet } from '@/metadata/types';
 
 const isFacetValue = (v: unknown): v is FacetValue =>

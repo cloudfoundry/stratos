@@ -80,6 +80,11 @@ it('omits font-family entirely when the list is empty or absent', () => {
   expect(emitScopedBlocks([n('a.card', { text: {} })])).not.toContain('font-family');
 });
 
+it('omits font-family entirely when every entry is a blank literal (no dangling font-family: ;)', () => {
+  const css = emitScopedBlocks([n('a.card', { text: { fontFamily: [{ literal: '' }, { literal: '  ' }] } })]);
+  expect(css).not.toContain('font-family');
+});
+
 it('emits spacing per-side longhands in the light block (not in FACET_PROPS)', () => {
   const css = emitScopedBlocks([
     n('a.card', { spacing: { padding: { top: { literal: '8px' }, left: { literal: '4px' } }, gap: { row: { literal: '2px' } } } }),
