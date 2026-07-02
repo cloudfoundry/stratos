@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { gradientCss, backgroundCss, backgroundPatch, fontFamilyCss, spacingDeclarations } from '@/metadata/facets';
+import { gradientCss, backgroundCss, fontFamilyCss, spacingDeclarations } from '@/metadata/facets';
 
 describe('gradientCss', () => {
   it('reconstructs a linear gradient with angle and stops', () => {
@@ -82,14 +82,6 @@ describe('backgroundCss', () => {
         { color: { literal: '' } }, { color: { literal: '#fff' } },
       ] } }],
     })).toEqual(['background-image: linear-gradient(#ffffff);']);
-  });
-});
-
-describe('backgroundPatch blank-layer guard (live-preview leg)', () => {
-  it('omits backgroundImage when the only gradient layer has all-blank stops', () => {
-    expect(backgroundPatch({
-      layers: [{ kind: 'gradient', gradient: { type: 'linear', stops: [{ color: { literal: '' } }] } }],
-    })).toEqual({});
   });
 });
 

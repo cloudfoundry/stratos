@@ -180,14 +180,3 @@ export function backgroundCss(bg: BackgroundFacet): string[] {
   if (images !== undefined) out.push(`background-image: ${images};`);
   return out;
 }
-
-/** Raw-value counterpart to backgroundCss for the live-preview LeverPatch pipeline (Task 7):
- *  no decl-string parsing, and (unlike backgroundCss) a {token} color IS included here —
- *  this patch is inline-style-only, so there's no separate token-routed emission to collide with. */
-export function backgroundPatch(bg: BackgroundFacet): { backgroundColor?: string; backgroundImage?: string } {
-  const out: { backgroundColor?: string; backgroundImage?: string } = {};
-  if (bg.color) out.backgroundColor = facetValueCss(bg.color, true);
-  const images = composeLayerImage(bg);
-  if (images !== undefined) out.backgroundImage = images;
-  return out;
-}

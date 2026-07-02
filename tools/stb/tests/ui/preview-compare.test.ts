@@ -65,14 +65,17 @@ describe('pinned-mode preview pane', () => {
     expect(sent(post, 'STB_SET_DARK')).toContainEqual({ type: 'STB_SET_DARK', dark: true });
   });
 
-  it('pinned-dark pane composes lever patches from the dark bundle', async () => {
+  it('pinned-dark pane gets dark background CSS via scoped blocks (background is blocks-only, not a lever patch)', async () => {
     const { iframe, post } = mountPane(document.getElementById('p1')!, { mode: 'dark' });
     await tick();
     brandingModel.value = bgModel;
     dispatchFrom(iframe, { type: 'STB_PREVIEW_READY' });
+    const css = sent(post, 'STB_APPLY_BLOCKS').at(-1)!.css as string;
+    expect(css).toContain('.dark-theme');
+    expect(css).toContain('#111111');
+    // and no background LeverPatch — the blocks leg is the sole owner
     const levers = sent(post, 'STB_APPLY_LEVERS').at(-1)!.levers;
-    expect(levers).toContainEqual({ snapshotId: 'a.hero', kind: 'background', backgroundColor: '#111111' });
-    expect(levers.filter((p: any) => p.backgroundColor === '#dddddd')).toHaveLength(0);
+    expect(levers.filter((p: any) => p.kind === 'background')).toHaveLength(0);
   });
 
   it('follow-global pane (default) still follows previewDark', async () => {

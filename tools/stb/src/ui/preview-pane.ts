@@ -5,11 +5,15 @@ import { brandingModel, loadBrandingModel } from '@/state/branding';
 import type { ParentToPreview, PreviewToParent } from '@/iframe-bridge/messages';
 import type { BrandingModel } from '@/metadata/types';
 import type { LeverPatch } from '@/iframe-bridge/apply-levers';
-import { attachAssetBlobs, brandingAssets } from '@/state/branding-assets';
+import { attachAssetBlobs, brandingAssets, rewriteAssetUrls } from '@/state/branding-assets';
 import { emitScopedBlocks } from '@/parse/css-emitter';
-import { backgroundPatch } from '@/metadata/facets';
 
-export function leverPatchesFor(model: BrandingModel, dark = false): LeverPatch[] {
+// Background is no longer patched here: the scoped-blocks CSS (emitScopedBlocks, sent via
+// STB_APPLY_BLOCKS) is the sole owner of preview backgrounds, light and dark alike — see
+// applyScopedBlocksToPreview below. Keeping a single leg avoids the two legs drifting apart
+// and lets uploaded background images resolve (raw asset refs get rewritten to blob: URLs
+// there; an inline-style leg would need the same rewrite duplicated).
+export function leverPatchesFor(model: BrandingModel): LeverPatch[] {
   const out: LeverPatch[] = [];
   for (const n of model.nodes) {
     if (n.facets.content) {
@@ -20,12 +24,6 @@ export function leverPatchesFor(model: BrandingModel, dark = false): LeverPatch[
       });
     }
     else if (n.facets.asset) out.push({ snapshotId: n.snapshotId, kind: 'asset', ref: n.facets.asset.ref });
-    // The inline background leg is mode-aware: in dark preview it composes from
-    // the dark bundle only. A light-bundle inline style would override the
-    // snapshot's .dark-theme rules AND the emitted dark scoped block; with no
-    // dark override we send no patch at all and let that CSS own the background.
-    const bg = dark ? n.facetsDark?.background : n.facets.background;
-    if (bg) out.push({ snapshotId: n.snapshotId, kind: 'background', ...backgroundPatch(bg) });
     if (n.visibility !== undefined) out.push({ snapshotId: n.snapshotId, kind: 'visibility', shown: n.visibility });
   }
   return out;
@@ -50,11 +48,17 @@ export interface PreviewPane {
   showLevers(on: boolean): void;
 }
 
+let paneCounter = 0;
+
 export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   let iframe: HTMLIFrameElement | null = null;
   let ready = false;
   const mode = opts.mode ?? 'follow-global';
   const isDark = (): boolean => (mode === 'follow-global' ? previewDark.value : mode === 'dark');
+  // Distinct key per pane instance so rewriteAssetUrls's revoke-on-replace never
+  // clobbers another live pane's still-displayed blob: URLs (e.g. compare mode's
+  // light + pinned-dark panes both hold scoped-block CSS with rewritten refs).
+  const assetUrlKey = `preview-pane-${paneCounter++}`;
 
   function send(msg: ParentToPreview): void {
     if (!iframe || !iframe.contentWindow || !ready) return;
@@ -74,7 +78,7 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
   function applyLeversToPreview(): void {
     const m = brandingModel.value;
     if (!m) return;
-    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m, isDark()), brandingAssets.value) });
+    send({ type: 'STB_APPLY_LEVERS', levers: attachAssetBlobs(leverPatchesFor(m), brandingAssets.value) });
     // tell the shim which elements are editable (name rides along so a revealed
     // empty element can label itself with its real name, not invented text)
     send({ type: 'STB_SET_LEVERS', levers: m.nodes.map((n) => ({ id: n.snapshotId, name: n.name })) });
@@ -82,8 +86,11 @@ export function createPreviewPane(opts: PreviewPaneOptions = {}): PreviewPane {
 
   function applyScopedBlocksToPreview(): void {
     const m = brandingModel.value;
-    // send even when empty so clearing a block removes the rule from the iframe
-    send({ type: 'STB_APPLY_BLOCKS', css: m ? emitScopedBlocks(m.nodes) : '' });
+    const css = m ? emitScopedBlocks(m.nodes) : '';
+    // send even when empty so clearing a block removes the rule from the iframe;
+    // rewrite user-uploaded asset refs to blob: URLs so they resolve inside the iframe
+    // (snapshot-bundled refs pass through untouched — no stored blob for those).
+    send({ type: 'STB_APPLY_BLOCKS', css: css ? rewriteAssetUrls(css, brandingAssets.value, assetUrlKey) : '' });
   }
 
   function onMessage(event: MessageEvent): void {
