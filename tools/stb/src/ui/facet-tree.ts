@@ -6,6 +6,7 @@ import type { ColorFormat } from '@/color/format';
 import { FACET_PROPS } from '@/metadata/facets';
 import { openColorPicker } from '@/ui/color-picker';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
+import { deriveDarkOklch } from '@/color/derive-dark';
 
 const GROUPS = ['text', 'surface', 'spacing'] as const;
 const propsOf = (g: string) => Object.entries(FACET_PROPS).filter(([k]) => k.startsWith(g + '.'));
@@ -36,6 +37,8 @@ export interface FacetTreeOptions {
   onBackstop?: (value: FacetValue) => void;
   onAddLayer?: (layer: Layer) => void;
   onSetLayer?: (index: number, layer: Layer) => void;
+  /** Dark-mode counterpart of onSetLayer, for gradient stop dark-swatch/derive edits. */
+  onSetLayerDark?: (index: number, layer: Layer) => void;
   onRemoveLayer?: (index: number) => void;
   onReorderLayer?: (from: number, to: number) => void;
   /** Font-family fallback list (Task 10): ordered comma-list, same kind-1 shape as background.layers. */
@@ -196,6 +199,39 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       onChange: (value) => opts.onBackstop?.({ literal: toOklch(value) }),
     }));
     colorRow.appendChild(colorBtn);
+
+    // Dark counterpart, mirroring the leaf color-loop's light/dark/derive pattern
+    // (locked layout: light, dark, derive) — routes through onDarkEdit/deriveDark
+    // keyed on 'background.color', same as any other FACET_PROPS color leaf.
+    const colorDark = opts.darkFacets?.background?.color;
+    const colorLitDark = colorDark && 'literal' in colorDark && typeof colorDark.literal === 'object'
+      ? colorDark.literal as Oklch
+      : null;
+    const colorDarkBtn = document.createElement('button');
+    colorDarkBtn.type = 'button';
+    colorDarkBtn.className = 'stb-facet-swatch-dark';
+    if (colorLitDark) {
+      colorDarkBtn.style.backgroundColor = oklchToHex(colorLitDark);
+    } else {
+      colorDarkBtn.classList.add('stb-facet-swatch-empty');
+    }
+    colorDarkBtn.addEventListener('click', () => openColorPicker({
+      previewHost: opts.previewHost,
+      initial: colorLitDark ? oklchToHex(colorLitDark) : '#000000',
+      format: opts.colorFormat?.() ?? 'hex',
+      onChange: (value) => opts.onDarkEdit?.('background.color', { literal: toOklch(value) }),
+    }));
+    colorRow.appendChild(colorDarkBtn);
+
+    const colorDeriveBtn = document.createElement('button');
+    colorDeriveBtn.type = 'button';
+    colorDeriveBtn.className = 'stb-facet-derive-dark';
+    colorDeriveBtn.textContent = '↓';
+    colorDeriveBtn.title = 'Derive dark from light';
+    colorDeriveBtn.disabled = !colorLit;
+    colorDeriveBtn.addEventListener('click', () => { if (colorLit) opts.deriveDark?.('background.color'); });
+    colorRow.appendChild(colorDeriveBtn);
+
     host.appendChild(colorRow);
 
     layers.forEach((layer, i) => {
@@ -247,6 +283,24 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         const setGradient = (g: Gradient) => {
           gradient = g;
           opts.onSetLayer?.(i, { kind: 'gradient', gradient: g });
+        };
+
+        // Dark counterpart of this layer, if one has been forked already (copy-on-
+        // first-dark-edit, applied in main.ts). Read fresh on every mount so it
+        // tracks state changes the same way the light `gradient` local does.
+        const darkLayer = opts.darkFacets?.background?.layers?.[i];
+        const darkGradient = darkLayer?.kind === 'gradient' ? darkLayer.gradient : null;
+        // Seed for the first dark edit: the existing dark gradient if this layer has
+        // already been forked, otherwise a structural copy of the CURRENT light
+        // gradient (so the fork starts from what's on screen, not the mount-time
+        // snapshot). Once forked, light and dark gradients are independent — later
+        // edits to one never touch the other.
+        const seedDarkGradient = (): Gradient =>
+          darkGradient ?? (JSON.parse(JSON.stringify(gradient)) as Gradient);
+        const setDarkStop = (si: number, color: FacetValue) => {
+          const seed = seedDarkGradient();
+          const stops = seed.stops.map((s, idx) => (idx === si ? { ...s, color } : s));
+          opts.onSetLayerDark?.(i, { kind: 'gradient', gradient: { ...seed, stops } as Gradient });
         };
 
         const editor = document.createElement('div');
@@ -302,6 +356,43 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
             },
           }));
           stopRow.appendChild(swatch);
+
+          // Dark counterpart of this stop, mirroring the leaf color-loop's
+          // light/dark/derive layout.
+          const darkStop = darkGradient?.stops[si];
+          const darkStopHex = swatchHex(darkStop?.color);
+          const darkSwatch = document.createElement('button');
+          darkSwatch.type = 'button';
+          darkSwatch.className = 'stb-facet-swatch-dark';
+          if (darkStopHex) {
+            darkSwatch.style.backgroundColor = darkStopHex;
+          } else {
+            darkSwatch.classList.add('stb-facet-swatch-empty');
+          }
+          darkSwatch.addEventListener('click', () => openColorPicker({
+            previewHost: opts.previewHost,
+            initial: darkStopHex ?? '#000000',
+            format: opts.colorFormat?.() ?? 'hex',
+            onChange: (value) => setDarkStop(si, { literal: toOklch(value) }),
+          }));
+          stopRow.appendChild(darkSwatch);
+
+          // Per-stop derive: only meaningful when the light stop resolves to a
+          // literal Oklch — a token stop has nothing to derive from.
+          const stopOklch: Oklch | null = stop.color && !('token' in stop.color)
+            ? (typeof stop.color.literal === 'object' ? stop.color.literal as Oklch : toOklch(stop.color.literal))
+            : null;
+          const stopDeriveBtn = document.createElement('button');
+          stopDeriveBtn.type = 'button';
+          stopDeriveBtn.className = 'stb-facet-derive-dark';
+          stopDeriveBtn.textContent = '↓';
+          stopDeriveBtn.title = 'Derive dark from light';
+          stopDeriveBtn.disabled = !stopOklch;
+          stopDeriveBtn.addEventListener('click', () => {
+            if (!stopOklch) return;
+            setDarkStop(si, { literal: deriveDarkOklch(stopOklch, { role: 'background' }) });
+          });
+          stopRow.appendChild(stopDeriveBtn);
 
           const stopPos = document.createElement('input');
           stopPos.type = 'text';

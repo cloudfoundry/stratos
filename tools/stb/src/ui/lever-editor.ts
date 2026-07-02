@@ -32,6 +32,8 @@ export interface OpenLeverEditorOptions {
   onBackstop?: (value: FacetValue) => void;
   onAddLayer?: (layer: Layer) => void;
   onSetLayer?: (index: number, layer: Layer) => void;
+  /** Dark-mode counterpart of onSetLayer, forwarded to the facet tree's gradient-stop dark axis. */
+  onSetLayerDark?: (index: number, layer: Layer) => void;
   onRemoveLayer?: (index: number) => void;
   onReorderLayer?: (from: number, to: number) => void;
   /** Font-family fallback list (Task 10), forwarded to the facet tree's ordered-list editor. */
@@ -129,6 +131,7 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.onBackstop ? { onBackstop: opts.onBackstop } : {}),
       ...(opts.onAddLayer ? { onAddLayer: opts.onAddLayer } : {}),
       ...(opts.onSetLayer ? { onSetLayer: opts.onSetLayer } : {}),
+      ...(opts.onSetLayerDark ? { onSetLayerDark: opts.onSetLayerDark } : {}),
       ...(opts.onRemoveLayer ? { onRemoveLayer: opts.onRemoveLayer } : {}),
       ...(opts.onReorderLayer ? { onReorderLayer: opts.onReorderLayer } : {}),
       ...(opts.onAddFont ? { onAddFont: opts.onAddFont } : {}),
