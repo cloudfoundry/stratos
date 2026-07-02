@@ -6,7 +6,7 @@ import { brandingModel, nodeFor } from '@/state/branding';
 import { mountCssEditor } from '@/ui/css-editor';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { positionInPreviewGutter, makeDraggable } from '@/ui/popover';
-import { previewDark } from '@/state/scene';
+import { previewDark, compareMode } from '@/state/scene';
 
 export interface OpenLeverEditorOptions {
   previewHost: HTMLElement;
@@ -172,7 +172,8 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   panel.prepend(drag);
 
   document.body.appendChild(panel);
-  positionInPreviewGutter(panel, opts.previewHost);
+  if (compareMode.value) positionAbovePanes(panel, opts.previewHost);
+  else positionInPreviewGutter(panel, opts.previewHost);
   makeDraggable(panel, drag);
   openPanel = panel;
 
@@ -180,4 +181,18 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
   // (dark) column — editing a dark value while the preview is in light mode
   // otherwise reads as "no change".
   openDarkEffect = effect(() => { panel.classList.toggle('stb-preview-dark', previewDark.value); });
+}
+
+// Compare-mode initial placement. With two panes splitting the full preview
+// width there is NO left gutter at typical widths — the gutter placement would
+// fall back to overlaying the light pane dead-centre. So the editor opens
+// ABOVE the panes (over the nav band, left-aligned) instead: "left of the
+// panes" (the primary choice) degenerates to covering a pane, so the fallback
+// position won. Still draggable, as always.
+function positionAbovePanes(panel: HTMLElement, previewHost: HTMLElement): void {
+  const host = previewHost.getBoundingClientRect();
+  const top = Math.max(8, host.top - panel.offsetHeight - 8);
+  panel.style.position = 'absolute';
+  panel.style.left = `${8 + window.scrollX}px`;
+  panel.style.top = `${top + window.scrollY}px`;
 }
