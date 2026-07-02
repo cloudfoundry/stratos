@@ -73,9 +73,11 @@ interface RememberedRect { left: number; top: number; width?: number; height?: n
 let rememberedRect: RememberedRect | null = null;
 let openedSize: { width: number; height: number } | null = null;
 let draggedSinceOpen = false;
-// One-line policy (pending preference — flip to false to keep memory across an
-// explicit Close): Close CLEARS the memory, so the next open is default-placed.
-const CLEAR_MEMORY_ON_CLOSE = true;
+// One-line policy (Norm 2026-07-01): the dragged position persists across an
+// explicit Close — re-placing the editor every time would irritate. Broader
+// editor-session memory (open/isolated groups, unsaved values, …) is deferred
+// until it demonstrably bothers users; position is just its first property.
+const CLEAR_MEMORY_ON_CLOSE = false;
 
 /** Forget the remembered panel rect (Close policy; exported for tests). */
 export function clearRememberedPanelRect(): void { rememberedRect = null; }

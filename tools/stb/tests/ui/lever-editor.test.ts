@@ -257,13 +257,13 @@ describe('lever-editor position memory across teardown/rebuild', () => {
     expect(p2.style.width).toBe('');
   });
 
-  it('explicit Close clears the memory — next open is default-placed', () => {
+  it('dragged position persists across an explicit Close (policy: no re-placing)', () => {
     const p1 = open();
     p1.getBoundingClientRect = () => rect(120, 80, 300, 200);
     dragPanel(p1);
     (p1.querySelector('.stb-lever-close') as HTMLButtonElement).click();
     const p2 = open();
-    expect(p2.style.left).toBe('8px');
-    expect(p2.style.width).toBe('');
+    expect(p2.style.left).toBe('120px');
+    expect(p2.style.top).toBe('80px');
   });
 });
