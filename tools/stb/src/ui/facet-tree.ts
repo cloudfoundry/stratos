@@ -288,16 +288,27 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         // Dark counterpart of this layer, if one has been forked already (copy-on-
         // first-dark-edit, applied in main.ts). Read fresh on every mount so it
         // tracks state changes the same way the light `gradient` local does.
-        const darkLayer = opts.darkFacets?.background?.layers?.[i];
+        const darkLayers = opts.darkFacets?.background?.layers;
+        const isDarkForked = !!darkLayers;
+        const darkLayer = darkLayers?.[i];
         const darkGradient = darkLayer?.kind === 'gradient' ? darkLayer.gradient : null;
-        // Seed for the first dark edit: the existing dark gradient if this layer has
-        // already been forked, otherwise a structural copy of the CURRENT light
-        // gradient (so the fork starts from what's on screen, not the mount-time
-        // snapshot). Once forked, light and dark gradients are independent — later
-        // edits to one never touch the other.
+        // Once the dark array is forked, the dark side is authoritative. If a
+        // structural light edit (add/remove/reorder) has since broken index
+        // correspondence — this index is missing or not a gradient on the dark
+        // side — there is no correct dark value to show or seed from: re-seeding
+        // from the CURRENT light gradient would silently clobber whatever real
+        // dark fork exists elsewhere in the array once main.ts's array-level
+        // setLayer writes it back. Surface the mismatch instead of guessing.
+        const darkMismatch = isDarkForked && !darkGradient;
+        // Seed for the first dark edit: the existing dark gradient if this layer
+        // has already been forked, otherwise (unforked case only) a structural
+        // copy of the CURRENT light gradient so the fork starts from what's on
+        // screen, not the mount-time snapshot. Once forked, light and dark
+        // gradients are independent — later edits to one never touch the other.
         const seedDarkGradient = (): Gradient =>
           darkGradient ?? (JSON.parse(JSON.stringify(gradient)) as Gradient);
         const setDarkStop = (si: number, color: FacetValue) => {
+          if (darkMismatch) return;
           const seed = seedDarkGradient();
           const stops = seed.stops.map((s, idx) => (idx === si ? { ...s, color } : s));
           opts.onSetLayerDark?.(i, { kind: 'gradient', gradient: { ...seed, stops } as Gradient });
@@ -369,12 +380,17 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           } else {
             darkSwatch.classList.add('stb-facet-swatch-empty');
           }
-          darkSwatch.addEventListener('click', () => openColorPicker({
-            previewHost: opts.previewHost,
-            initial: darkStopHex ?? '#000000',
-            format: opts.colorFormat?.() ?? 'hex',
-            onChange: (value) => setDarkStop(si, { literal: toOklch(value) }),
-          }));
+          // Forked-but-mismatched rows are disabled, not re-seeded: see darkMismatch above.
+          darkSwatch.disabled = darkMismatch;
+          darkSwatch.addEventListener('click', () => {
+            if (darkMismatch) return;
+            openColorPicker({
+              previewHost: opts.previewHost,
+              initial: darkStopHex ?? '#000000',
+              format: opts.colorFormat?.() ?? 'hex',
+              onChange: (value) => setDarkStop(si, { literal: toOklch(value) }),
+            });
+          });
           stopRow.appendChild(darkSwatch);
 
           // Per-stop derive: only meaningful when the light stop resolves to a
@@ -387,9 +403,9 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           stopDeriveBtn.className = 'stb-facet-derive-dark';
           stopDeriveBtn.textContent = '↓';
           stopDeriveBtn.title = 'Derive dark from light';
-          stopDeriveBtn.disabled = !stopOklch;
+          stopDeriveBtn.disabled = !stopOklch || darkMismatch;
           stopDeriveBtn.addEventListener('click', () => {
-            if (!stopOklch) return;
+            if (!stopOklch || darkMismatch) return;
             setDarkStop(si, { literal: deriveDarkOklch(stopOklch, { role: 'background' }) });
           });
           stopRow.appendChild(stopDeriveBtn);
