@@ -85,6 +85,11 @@ export function facetValueCss(v: FacetValue, isColor: boolean): string {
   return isColor ? normalizeHex(lit) : lit;
 }
 
+/** Font-family fallback list (composite kind 1: ordered comma-list, non-color leaves). */
+export function fontFamilyCss(list: FacetValue[]): string {
+  return `font-family: ${list.map((v) => facetValueCss(v, false)).join(', ')};`;
+}
+
 function stopCss(s: ColorStop): string {
   const color = facetValueCss(s.color, true);
   return s.position ? `${color} ${s.position}` : color;

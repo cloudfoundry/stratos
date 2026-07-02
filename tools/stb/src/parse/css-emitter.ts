@@ -1,5 +1,5 @@
 import type { ElementNode } from '@/metadata/types';
-import { facetDeclarations, facetLiteralCss, backgroundCss } from '@/metadata/facets';
+import { facetDeclarations, facetLiteralCss, backgroundCss, fontFamilyCss } from '@/metadata/facets';
 
 export function emitCss(root: Map<string, string>, dark: Map<string, string>): string {
   const parts: string[] = [];
@@ -29,6 +29,9 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       // to the snapshot's built-in dark rule rather than being pinned to its light value.
       const bgLines = node.facets.background ? backgroundCss(node.facets.background).map((d) => `  ${d}`) : [];
       const facetLines: string[] = [];
+      // font-family is a kind-1 ordered comma-list, not in FACET_PROPS (no single
+      // FacetValue leaf to route) — emitted here explicitly, same shape as background.
+      if (node.facets.text?.fontFamily?.length) facetLines.push(`  ${fontFamilyCss(node.facets.text.fontFamily)}`);
       for (const d of facetDeclarations(node.facets)) {
         // backgroundCss (bgLines) owns the whole background composite; skip it
         // here so a literal backstop color isn't emitted twice.

@@ -18,7 +18,7 @@ import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens, reprojectNodeTokensDark } from '@/ui/element-edit';
 import { FACET_PROPS, facetDeclarations } from '@/metadata/facets';
-import { setFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer } from '@/state/facets-edit';
+import { setFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer, addFont, setFont, removeFont, reorderFont } from '@/state/facets-edit';
 import { deriveDarkOklch } from '@/color/derive-dark';
 import type { Oklch } from '@/color/oklch';
 import { effect } from '@preact/signals-core';
@@ -199,6 +199,30 @@ async function main() {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, reorderLayer(n.facets, from, to));
+        selectElement(snapshotId);
+      },
+      onAddFont: (value) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, addFont(n.facets, value));
+        selectElement(snapshotId);
+      },
+      onSetFont: (index, value) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, setFont(n.facets, index, value));
+        selectElement(snapshotId);
+      },
+      onRemoveFont: (index) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, removeFont(n.facets, index));
+        selectElement(snapshotId);
+      },
+      onReorderFont: (from, to) => {
+        const n = nodeFor(snapshotId);
+        if (!n) return;
+        setNodeFacets(snapshotId, reorderFont(n.facets, from, to));
         selectElement(snapshotId);
       },
       colorFormat: () => colorFormat.value,

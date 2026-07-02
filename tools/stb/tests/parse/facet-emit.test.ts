@@ -67,3 +67,15 @@ it('emits background composite (color backstop + reversed image layer) in the li
   expect(css).toContain('background-color: #0b3d91;');
   expect(css).toContain('background-image: url(assets/hero.jpg);');
 });
+
+it('emits the font-family fallback list in the light block (not in FACET_PROPS)', () => {
+  const css = emitScopedBlocks([
+    n('a.card', { text: { fontFamily: [{ literal: 'Inter' }, { literal: 'system-ui' }] } }),
+  ]);
+  expect(css).toContain('font-family: Inter, system-ui;');
+});
+
+it('omits font-family entirely when the list is empty or absent', () => {
+  expect(emitScopedBlocks([n('a.card', { text: { fontFamily: [] } })])).not.toContain('font-family');
+  expect(emitScopedBlocks([n('a.card', { text: {} })])).not.toContain('font-family');
+});

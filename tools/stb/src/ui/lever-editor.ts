@@ -34,6 +34,11 @@ export interface OpenLeverEditorOptions {
   onSetLayer?: (index: number, layer: Layer) => void;
   onRemoveLayer?: (index: number) => void;
   onReorderLayer?: (from: number, to: number) => void;
+  /** Font-family fallback list (Task 10), forwarded to the facet tree's ordered-list editor. */
+  onAddFont?: (value: FacetValue) => void;
+  onSetFont?: (index: number, value: FacetValue) => void;
+  onRemoveFont?: (index: number) => void;
+  onReorderFont?: (from: number, to: number) => void;
 }
 
 export function contentValue(text: string): LeverValue {
@@ -123,6 +128,10 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.onSetLayer ? { onSetLayer: opts.onSetLayer } : {}),
       ...(opts.onRemoveLayer ? { onRemoveLayer: opts.onRemoveLayer } : {}),
       ...(opts.onReorderLayer ? { onReorderLayer: opts.onReorderLayer } : {}),
+      ...(opts.onAddFont ? { onAddFont: opts.onAddFont } : {}),
+      ...(opts.onSetFont ? { onSetFont: opts.onSetFont } : {}),
+      ...(opts.onRemoveFont ? { onRemoveFont: opts.onRemoveFont } : {}),
+      ...(opts.onReorderFont ? { onReorderFont: opts.onReorderFont } : {}),
       onContentEdit: (text: string) => opts.onChange(contentValue(text)),
       onAssetEdit: (file: File) => { setBrandingAsset(assetRefFor(file.name), file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });
