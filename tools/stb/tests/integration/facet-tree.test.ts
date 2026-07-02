@@ -791,3 +791,67 @@ it('fires onReorderFont from a row move button, disabling at the ends', () => {
   firstDown.click();
   expect(reorders).toEqual([[0, 1]]);
 });
+
+it('renders T/R/B/L inputs for padding and margin, and row/column inputs for gap, populated from existing values', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: {
+      spacing: {
+        padding: { top: { literal: '8px' }, left: { literal: '4px' } },
+        gap: { row: { literal: '2px' } },
+      },
+    },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const paddingRow = host.querySelector('[data-stb-spacing-group="padding"]')!;
+  const paddingInputs = [...paddingRow.querySelectorAll('.stb-facet-spacing-side')] as HTMLInputElement[];
+  expect(paddingInputs.length).toBe(4);
+  expect(paddingInputs.map((i) => i.value)).toEqual(['8px', '', '', '4px']);
+
+  const marginRow = host.querySelector('[data-stb-spacing-group="margin"]')!;
+  expect(marginRow.querySelectorAll('.stb-facet-spacing-side').length).toBe(4);
+
+  const gapRow = host.querySelector('[data-stb-spacing-group="gap"]')!;
+  const gapInputs = [...gapRow.querySelectorAll('.stb-facet-spacing-gap')] as HTMLInputElement[];
+  expect(gapInputs.length).toBe(2);
+  expect(gapInputs.map((i) => i.value)).toEqual(['2px', '']);
+});
+
+it('fires onSetSide with (group, side, value) when a padding/margin input changes', () => {
+  const host = document.createElement('div');
+  const sets: [string, string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { spacing: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetSide: (group, side, value) => sets.push([group, side, value]),
+  });
+  const paddingRow = host.querySelector('[data-stb-spacing-group="padding"]')!;
+  const topInput = paddingRow.querySelector('[data-stb-side="top"]') as HTMLInputElement;
+  topInput.value = '10px';
+  topInput.dispatchEvent(new Event('input'));
+  expect(sets).toEqual([['padding', 'top', { literal: '10px' }]]);
+
+  const marginRow = host.querySelector('[data-stb-spacing-group="margin"]')!;
+  const bottomInput = marginRow.querySelector('[data-stb-side="bottom"]') as HTMLInputElement;
+  bottomInput.value = '5px';
+  bottomInput.dispatchEvent(new Event('input'));
+  expect(sets).toEqual([['padding', 'top', { literal: '10px' }], ['margin', 'bottom', { literal: '5px' }]]);
+});
+
+it('fires onSetGap with (slot, value) when a gap input changes', () => {
+  const host = document.createElement('div');
+  const sets: [string, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { spacing: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetGap: (slot, value) => sets.push([slot, value]),
+  });
+  const gapRow = host.querySelector('[data-stb-spacing-group="gap"]')!;
+  const colInput = gapRow.querySelector('[data-stb-slot="column"]') as HTMLInputElement;
+  colInput.value = '6px';
+  colInput.dispatchEvent(new Event('input'));
+  expect(sets).toEqual([['column', { literal: '6px' }]]);
+});

@@ -39,6 +39,9 @@ export interface OpenLeverEditorOptions {
   onSetFont?: (index: number, value: FacetValue) => void;
   onRemoveFont?: (index: number) => void;
   onReorderFont?: (from: number, to: number) => void;
+  /** Spacing composite (Task 11), forwarded to the facet tree's T/R/B/L + row/column tuple editor. */
+  onSetSide?: (group: 'padding' | 'margin', side: 'top' | 'right' | 'bottom' | 'left', value: FacetValue) => void;
+  onSetGap?: (slot: 'row' | 'column', value: FacetValue) => void;
 }
 
 export function contentValue(text: string): LeverValue {
@@ -132,6 +135,8 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       ...(opts.onSetFont ? { onSetFont: opts.onSetFont } : {}),
       ...(opts.onRemoveFont ? { onRemoveFont: opts.onRemoveFont } : {}),
       ...(opts.onReorderFont ? { onReorderFont: opts.onReorderFont } : {}),
+      ...(opts.onSetSide ? { onSetSide: opts.onSetSide } : {}),
+      ...(opts.onSetGap ? { onSetGap: opts.onSetGap } : {}),
       onContentEdit: (text: string) => opts.onChange(contentValue(text)),
       onAssetEdit: (file: File) => { setBrandingAsset(assetRefFor(file.name), file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
     });

@@ -68,3 +68,15 @@ export function reorderFont(f: Facets, from: number, to: number): Facets {
   fontFamily.splice(to, 0, moved!);
   return { ...f, text: { ...(f.text ?? {}), fontFamily } };
 }
+
+// --- spacing composite: positional tuples (T/R/B/L padding/margin, row/column gap) ---
+const spacing = (f: Facets) => f.spacing ?? {};
+
+export function setSide(f: Facets, group: 'padding' | 'margin', side: 'top' | 'right' | 'bottom' | 'left', value: FacetValue): Facets {
+  const sp = spacing(f);
+  return { ...f, spacing: { ...sp, [group]: { ...(sp[group] ?? {}), [side]: value } } };
+}
+export function setGap(f: Facets, slot: 'row' | 'column', value: FacetValue): Facets {
+  const sp = spacing(f);
+  return { ...f, spacing: { ...sp, gap: { ...(sp.gap ?? {}), [slot]: value } } };
+}

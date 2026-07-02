@@ -3,6 +3,7 @@ import {
   setFacetProp, addGroup, removeGroup,
   setBackstop, addLayer, removeLayer, reorderLayer, setLayer,
   addFont, removeFont, reorderFont, setFont,
+  setSide, setGap,
 } from '@/state/facets-edit';
 
 describe('facets-edit', () => {
@@ -56,5 +57,34 @@ describe('facets-edit', () => {
     f = addFont(f, { literal: 'system-ui' });
     f = removeFont(f, 0);
     expect(f.text!.fontFamily).toEqual([{ literal: 'system-ui' }]);
+  });
+
+  it('sets a spacing side into an absent group, creating it', () => {
+    const f = setSide({}, 'padding', 'top', { literal: '8px' });
+    expect(f.spacing!.padding).toEqual({ top: { literal: '8px' } });
+  });
+
+  it('sets a spacing side alongside an existing sibling side', () => {
+    let f = setSide({}, 'padding', 'top', { literal: '8px' });
+    f = setSide(f, 'padding', 'left', { literal: '4px' });
+    expect(f.spacing!.padding).toEqual({ top: { literal: '8px' }, left: { literal: '4px' } });
+  });
+
+  it('sets padding and margin sides independently', () => {
+    let f = setSide({}, 'padding', 'top', { literal: '8px' });
+    f = setSide(f, 'margin', 'bottom', { literal: '2px' });
+    expect(f.spacing!.padding).toEqual({ top: { literal: '8px' } });
+    expect(f.spacing!.margin).toEqual({ bottom: { literal: '2px' } });
+  });
+
+  it('sets a gap slot into an absent group, creating it', () => {
+    const f = setGap({}, 'row', { literal: '2px' });
+    expect(f.spacing!.gap).toEqual({ row: { literal: '2px' } });
+  });
+
+  it('sets a gap slot alongside an existing sibling slot', () => {
+    let f = setGap({}, 'row', { literal: '2px' });
+    f = setGap(f, 'column', { literal: '6px' });
+    expect(f.spacing!.gap).toEqual({ row: { literal: '2px' }, column: { literal: '6px' } });
   });
 });

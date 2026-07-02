@@ -79,3 +79,28 @@ it('omits font-family entirely when the list is empty or absent', () => {
   expect(emitScopedBlocks([n('a.card', { text: { fontFamily: [] } })])).not.toContain('font-family');
   expect(emitScopedBlocks([n('a.card', { text: {} })])).not.toContain('font-family');
 });
+
+it('emits spacing per-side longhands in the light block (not in FACET_PROPS)', () => {
+  const css = emitScopedBlocks([
+    n('a.card', { spacing: { padding: { top: { literal: '8px' }, left: { literal: '4px' } }, gap: { row: { literal: '2px' } } } }),
+  ]);
+  expect(css).toContain('padding-top: 8px;');
+  expect(css).toContain('padding-left: 4px;');
+  expect(css).toContain('row-gap: 2px;');
+});
+
+it('emits dark spacing per-side longhands in the .dark-theme block', () => {
+  const css = emitScopedBlocks([
+    n('a.card',
+      { spacing: { padding: { top: { literal: '8px' } } } },
+      { spacing: { padding: { top: { literal: '4px' } } } }),
+  ]);
+  const attrSel = '[stb-snapshot-id="a.card"][stb-snapshot-id="a.card"][stb-snapshot-id="a.card"]';
+  const darkBlock = css.slice(css.indexOf(`.dark-theme ${attrSel}`));
+  expect(darkBlock).toContain('padding-top: 4px;');
+});
+
+it('omits spacing entirely when the group is present but empty', () => {
+  expect(emitScopedBlocks([n('a.card', { spacing: {} })])).not.toContain('padding');
+  expect(emitScopedBlocks([n('a.card', { spacing: {} })])).not.toContain('gap');
+});

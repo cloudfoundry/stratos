@@ -43,6 +43,9 @@ export interface FacetTreeOptions {
   onSetFont?: (index: number, value: FacetValue) => void;
   onRemoveFont?: (index: number) => void;
   onReorderFont?: (from: number, to: number) => void;
+  /** Spacing composite (Task 11): T/R/B/L padding/margin + row/column gap positional tuples. */
+  onSetSide?: (group: 'padding' | 'margin', side: 'top' | 'right' | 'bottom' | 'left', value: FacetValue) => void;
+  onSetGap?: (slot: 'row' | 'column', value: FacetValue) => void;
 }
 
 const FONT_WEIGHTS = ['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
@@ -478,6 +481,62 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       addFontBtn.addEventListener('click', () => opts.onAddFont?.({ literal: '' }));
       fontFooter.appendChild(addFontBtn);
       leavesEl.appendChild(fontFooter);
+    }
+
+    // Spacing tuples — a kind-2 positional tuple (T/R/B/L padding/margin, row/column
+    // gap) rather than a single FacetValue leaf, so it's not in FACET_PROPS/props and
+    // is rendered here explicitly rather than through the per-key leaf loop below.
+    if (g === 'spacing') {
+      const spacingFacet = opts.facets.spacing ?? {};
+
+      const sideRow = (group: 'padding' | 'margin', label: string) => {
+        const row = document.createElement('div');
+        row.className = 'stb-facet-spacing-row';
+        row.dataset.stbSpacingGroup = group;
+        const lab = document.createElement('span');
+        lab.className = 'stb-facet-leaf-label';
+        lab.textContent = label;
+        row.appendChild(lab);
+        const sides = ['top', 'right', 'bottom', 'left'] as const;
+        for (const side of sides) {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'stb-facet-spacing-side';
+          input.dataset.stbSide = side;
+          input.placeholder = side[0]!.toUpperCase();
+          const current = spacingFacet[group]?.[side];
+          if (current && 'literal' in current && typeof current.literal === 'string') {
+            input.value = current.literal;
+          }
+          input.addEventListener('input', () => opts.onSetSide?.(group, side, { literal: input.value }));
+          row.appendChild(input);
+        }
+        leavesEl.appendChild(row);
+      };
+      sideRow('padding', 'padding');
+      sideRow('margin', 'margin');
+
+      const gapRow = document.createElement('div');
+      gapRow.className = 'stb-facet-spacing-row';
+      gapRow.dataset.stbSpacingGroup = 'gap';
+      const gapLab = document.createElement('span');
+      gapLab.className = 'stb-facet-leaf-label';
+      gapLab.textContent = 'gap';
+      gapRow.appendChild(gapLab);
+      for (const slot of ['row', 'column'] as const) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'stb-facet-spacing-gap';
+        input.dataset.stbSlot = slot;
+        input.placeholder = slot[0]!.toUpperCase();
+        const current = spacingFacet.gap?.[slot];
+        if (current && 'literal' in current && typeof current.literal === 'string') {
+          input.value = current.literal;
+        }
+        input.addEventListener('input', () => opts.onSetGap?.(slot, { literal: input.value }));
+        gapRow.appendChild(input);
+      }
+      leavesEl.appendChild(gapRow);
     }
 
     for (const [key, spec] of props) {

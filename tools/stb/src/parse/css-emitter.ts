@@ -1,5 +1,5 @@
 import type { ElementNode } from '@/metadata/types';
-import { facetDeclarations, facetLiteralCss, backgroundCss, fontFamilyCss } from '@/metadata/facets';
+import { facetDeclarations, facetLiteralCss, backgroundCss, fontFamilyCss, spacingDeclarations } from '@/metadata/facets';
 
 export function emitCss(root: Map<string, string>, dark: Map<string, string>): string {
   const parts: string[] = [];
@@ -32,6 +32,9 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       // font-family is a kind-1 ordered comma-list, not in FACET_PROPS (no single
       // FacetValue leaf to route) — emitted here explicitly, same shape as background.
       if (node.facets.text?.fontFamily?.length) facetLines.push(`  ${fontFamilyCss(node.facets.text.fontFamily)}`);
+      // spacing is a kind-2 positional tuple (per-side longhands), not in FACET_PROPS
+      // (no single FacetValue leaf to route) — emitted here explicitly, same shape as font-family.
+      if (node.facets.spacing) facetLines.push(...spacingDeclarations(node.facets.spacing).map((d) => `  ${d}`));
       for (const d of facetDeclarations(node.facets)) {
         // backgroundCss (bgLines) owns the whole background composite; skip it
         // here so a literal backstop color isn't emitted twice.
@@ -55,6 +58,7 @@ export function emitScopedBlocks(nodes: ElementNode[]): string {
       if (node.facetsDark) {
         const darkLines: string[] = [];
         if (node.facetsDark.background) darkLines.push(...backgroundCss(node.facetsDark.background).map((d) => `  ${d}`));
+        if (node.facetsDark.spacing) darkLines.push(...spacingDeclarations(node.facetsDark.spacing).map((d) => `  ${d}`));
         for (const d of facetDeclarations(node.facetsDark)) {
           if (d.key.startsWith('background.')) continue; // backgroundCss owns background
           const css = facetLiteralCss(d.spec, d.value);
