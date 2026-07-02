@@ -1,8 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { contentValue, assetValue, openLeverEditor } from '@/ui/lever-editor';
 import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
 import { setSide, setLayer } from '@/state/facets-edit';
 import type { BrandingModel } from '@/metadata/types';
+
+const cssDir = dirname(fileURLToPath(import.meta.url));
+const stbCss = readFileSync(resolve(cssDir, '../../src/styles/stb.css'), 'utf8');
 
 describe('lever-editor value helpers', () => {
   it('contentValue / assetValue shape the union', () => {
@@ -118,7 +124,50 @@ describe('lever-editor composite-edit focus survival', () => {
     // as after a native file dialog: focus sits on the file input when the write lands.
     // A file input carries no in-flight typed text, so it must NOT suppress the re-render.
     setNodeFacets('x', setLayer(nodeFor('x')!.facets, 0, { kind: 'image', ref: 'assets/new-logo.png' }));
-    const label = document.querySelector('[data-stb-bg-row="layer"] .stb-facet-leaf-label') as HTMLElement;
-    expect(label.textContent).toBe('assets/new-logo.png');
+    const label = document.querySelector('[data-stb-bg-row="layer"] .stb-facet-bg-subtitle') as HTMLElement;
+    expect(label.textContent).toBe('image — assets/new-logo.png');
+  });
+});
+
+// Popover growth is CSS-driven (no fixed width/height, resize:both, a viewport-margin
+// max-height cap) — jsdom doesn't lay out or paint, so pixel sizing can't be asserted
+// here. These tests assert the structural hooks: no inline size is ever hardcoded at
+// mount time (nothing pins the box before a manual resize), the drag handle and the
+// resizable class both survive, and the stylesheet itself carries the intended cap.
+// Visual growth (adding a background group and watching the panel expand) is deferred
+// to the user's live poke.
+describe('lever-editor popover sizing', () => {
+  beforeEach(() => { document.body.innerHTML = '<div class="host"></div>'; });
+  afterEach(() => { brandingModel.value = null; });
+
+  it('mounts with no inline width/height — sizing is left to CSS (content-driven, not pinned)', () => {
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    openLeverEditor({
+      previewHost, snapshotId: 'x', onChange: () => {},
+      facets: { text: { fontSize: { literal: '18px' } } },
+    });
+    const panel = document.querySelector('.stb-lever-editor') as HTMLElement;
+    expect(panel).toBeTruthy();
+    expect(panel.style.width).toBe('');
+    expect(panel.style.height).toBe('');
+  });
+
+  it('keeps the drag handle mounted alongside the resizable panel class', () => {
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    openLeverEditor({
+      previewHost, snapshotId: 'x', onChange: () => {},
+      facets: { text: { fontSize: { literal: '18px' } } },
+    });
+    expect(document.querySelector('.stb-lever-drag')).not.toBeNull();
+    expect(document.querySelector('.stb-lever-editor')).not.toBeNull();
+  });
+
+  it('the stylesheet caps popover growth at a viewport margin and keeps manual resize', () => {
+    const rule = stbCss.match(/\.stb-lever-editor,\s*\.stb-color-picker\s*\{[^}]*\}/)?.[0] ?? '';
+    expect(rule).toContain('max-height: calc(100vh - 2rem)');
+    expect(rule).toContain('resize: both');
+    // No fixed width/height in the rule — sizing stays intrinsic to content until capped.
+    expect(rule).not.toMatch(/(?<!max-|min-)\bheight:/);
+    expect(rule).not.toMatch(/(?<!max-|min-)\bwidth:/);
   });
 });
