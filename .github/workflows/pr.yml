@@ -10,13 +10,13 @@ name: Pull Request Tests
 on:
   pull_request:
     branches:
-      - master
+      - main
       - develop
       - 'angular**'
   push:
     branches:
       - develop
-      - master
+      - main
 
 env:
   NODE_OPTIONS: --max-old-space-size=5500

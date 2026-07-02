@@ -17,7 +17,7 @@ install:
 filter_secrets: false
 branches:
   only:
-    - master
+    - main
     - v2-master
     - e2e-tests
 cache:

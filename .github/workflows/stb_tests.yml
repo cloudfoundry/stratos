@@ -16,13 +16,13 @@ name: STB Tests
 on:
   pull_request:
     branches:
-      - master
+      - main
       - develop
       - 'angular**'
   push:
     branches:
       - develop
-      - master
+      - main
     paths:
       - 'tools/stb/**'
 
