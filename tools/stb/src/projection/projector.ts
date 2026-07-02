@@ -39,7 +39,10 @@ function topmostImageRef(node: { facets: Facets }): string | null {
   return null;
 }
 
-/** Derive the leaf projection value from facets: content → text, topmost image → ref, backstop color → hex, asset → ref. */
+/** Derive the leaf projection value from facets: content → text, topmost image → ref, backstop color → hex, asset → ref.
+ *  This precedence IS the CSS cascade/paint order (content over topmost image over backstop color) — deliberate,
+ *  per the resolved leafValueOf precedence decision. Color deliberately sits below the image: background color is
+ *  also token-routed (projectColorTokens), so letting it win here would emit the same color twice. */
 function leafValueOf(node: { facets: Facets }): unknown {
   if (node.facets.content) return node.facets.content.text;
   const topmost = topmostImageRef(node);

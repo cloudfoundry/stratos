@@ -28,8 +28,12 @@ export function applyLevers(doc: Document, levers: LeverPatch[]): void {
       else el.style.backgroundImage = `url(${src})`;
     }
     if (p.kind === 'background') {
-      if (p.backgroundColor) el.style.backgroundColor = p.backgroundColor;
-      if (p.backgroundImage) el.style.backgroundImage = p.backgroundImage;
+      // A background patch owns BOTH inline props: an absent component clears the
+      // previous inline value (removing the last layer must drop the stale image).
+      // When no background patch is sent at all (e.g. dark preview with no dark
+      // override), this branch never runs — scoped blocks / dark CSS keep owning it.
+      el.style.backgroundColor = p.backgroundColor ?? '';
+      el.style.backgroundImage = p.backgroundImage ?? '';
     }
   }
 }

@@ -157,17 +157,21 @@ async function main() {
         setNodeFacetsDark(snapshotId, facetsDark);
         reprojectNodeTokensDark(snapshotId, facetsDark, routing);
       },
+      // Composite handlers below NEVER call selectElement: rebuilding the popover
+      // mid-edit tears down the control being typed into (one character per click).
+      // The lever editor's model-change effect re-renders the facet tree instead —
+      // suppressed only while a text-entry control is focused, so structural clicks
+      // (add/remove/reorder, backstop pick, file choose) still refresh. Each handler
+      // re-reads the node via nodeFor so writes always build on current state.
       onAddGroup: (g) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, addGroup(n.facets, g));
-        selectElement(snapshotId);
       },
       onRemoveGroup: (g) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, removeGroup(n.facets, g));
-        selectElement(snapshotId);
       },
       onBackstop: (color) => {
         const n = nodeFor(snapshotId);
@@ -175,67 +179,56 @@ async function main() {
         const facets = setBackstop(n.facets, color);
         setNodeFacets(snapshotId, facets);
         reprojectNodeTokens(snapshotId, facets, routing);
-        selectElement(snapshotId);
       },
       onAddLayer: (layer) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, addLayer(n.facets, layer));
-        selectElement(snapshotId);
       },
       onSetLayer: (index, layer) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, setLayer(n.facets, index, layer));
-        selectElement(snapshotId);
       },
       onRemoveLayer: (index) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, removeLayer(n.facets, index));
-        selectElement(snapshotId);
       },
       onReorderLayer: (from, to) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, reorderLayer(n.facets, from, to));
-        selectElement(snapshotId);
       },
       onAddFont: (value) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, addFont(n.facets, value));
-        selectElement(snapshotId);
       },
       onSetFont: (index, value) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, setFont(n.facets, index, value));
-        selectElement(snapshotId);
       },
       onRemoveFont: (index) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, removeFont(n.facets, index));
-        selectElement(snapshotId);
       },
       onReorderFont: (from, to) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, reorderFont(n.facets, from, to));
-        selectElement(snapshotId);
       },
       onSetSide: (group, side, value) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, setSide(n.facets, group, side, value));
-        selectElement(snapshotId);
       },
       onSetGap: (slot, value) => {
         const n = nodeFor(snapshotId);
         if (!n) return;
         setNodeFacets(snapshotId, setGap(n.facets, slot, value));
-        selectElement(snapshotId);
       },
       colorFormat: () => colorFormat.value,
       tokenForKey: (key) => routing.elements[snapshotId]?.properties?.[key]?.token ?? null,

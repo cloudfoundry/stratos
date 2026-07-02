@@ -145,9 +145,13 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     void brandingModel.value;                         // subscribe to model changes
     // Don't yank focus from an in-flight TYPED edit (text input / textarea).
     // A focused button (e.g. the derive-dark ↓) must NOT suppress the re-render,
-    // or its own swatch would keep the stale value it just changed.
+    // or its own swatch would keep the stale value it just changed. Same for a
+    // file input: it holds no in-flight text but keeps focus after the native
+    // dialog, and its row label must refresh with the chosen ref.
     const ae = document.activeElement;
-    if (ae && treeHost.contains(ae) && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+    const typing = ae && treeHost.contains(ae) &&
+      (ae.tagName === 'TEXTAREA' || (ae.tagName === 'INPUT' && (ae as HTMLInputElement).type !== 'file'));
+    if (typing) return;
     renderTree();
   });
 

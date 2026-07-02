@@ -385,9 +385,12 @@ it('appends a stop when + stop is clicked and removes one via the stop remove bu
 
   const removeBtns = row.querySelectorAll('.stb-facet-bg-gradient-stop-remove');
   (removeBtns[0] as HTMLButtonElement).click();
+  // sequential edits compose: remove acts on the 3-stop result of the add
+  // (current gradient state), not on the mount-time 2-stop snapshot
   const [, removed] = setLayers[1] as [number, { gradient: { stops: Array<{ color: { literal: unknown } }> } }];
-  expect(removed.gradient.stops.length).toBe(1);
+  expect(removed.gradient.stops.length).toBe(2);
   expect(removed.gradient.stops[0]!.color.literal).toBe('#000');
+  expect(removed.gradient.stops[1]!.color.literal).toBe('#000000');
 });
 
 it('disables the stop remove button when only one stop remains', () => {
@@ -854,4 +857,34 @@ it('fires onSetGap with (slot, value) when a gap input changes', () => {
   colInput.value = '6px';
   colInput.dispatchEvent(new Event('input'));
   expect(sets).toEqual([['column', { literal: '6px' }]]);
+});
+
+it('consecutive edits to two gradient fields both survive without a re-mount (no stale-closure clobber)', () => {
+  const host = document.createElement('div');
+  const setLayers: [number, unknown][] = [];
+  mountFacetTree(host, {
+    facets: { background: {
+      layers: [{ kind: 'gradient', gradient: {
+        type: 'linear',
+        stops: [{ color: { literal: '#fff' } }, { color: { literal: '#000' } }],
+      } }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    onSetLayer: (i, l) => setLayers.push([i, l]),
+  });
+  const row = host.querySelector('[data-stb-bg-row="layer"]')!;
+  // Re-render is suppressed while an input is focused, so the tree stays
+  // mounted across BOTH edits — the second must build on the first, not on
+  // the mount-time gradient snapshot.
+  const angleInput = row.querySelector('.stb-facet-bg-gradient-pos') as HTMLInputElement;
+  angleInput.value = '45deg';
+  angleInput.dispatchEvent(new Event('input'));
+  const stopPos = row.querySelector('.stb-facet-bg-gradient-stop-pos') as HTMLInputElement;
+  stopPos.value = '10%';
+  stopPos.dispatchEvent(new Event('input'));
+  const [, last] = setLayers[setLayers.length - 1] as
+    [number, { gradient: { angle?: string; stops: { position?: string }[] } }];
+  expect(last.gradient.angle).toBe('45deg');       // first edit survives
+  expect(last.gradient.stops[0]!.position).toBe('10%'); // second edit applied
 });

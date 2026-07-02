@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { contentValue, assetValue, openLeverEditor } from '@/ui/lever-editor';
-import { brandingModel, setNodeFacetsDark } from '@/state/branding';
+import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
+import { setSide, setLayer } from '@/state/facets-edit';
 import type { BrandingModel } from '@/metadata/types';
 
 describe('lever-editor value helpers', () => {
@@ -71,5 +72,53 @@ describe('lever-editor light+dark per-row editing (no toggle)', () => {
     // model edit arrives from outside the focused control
     setNodeFacetsDark('x', { text: { color: { literal: { l: 0.2, c: 0.05, h: 100 } } } });
     expect(darkBtn().classList.contains('stb-facet-swatch-empty')).toBe(false); // editor re-rendered from the live model
+  });
+});
+
+describe('lever-editor composite-edit focus survival', () => {
+  beforeEach(() => { document.body.innerHTML = '<div class="host"></div>'; });
+  afterEach(() => { brandingModel.value = null; });
+
+  it('typing into a spacing input mutates the model without unmounting the input (focus survives)', () => {
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    brandingModel.value = { scene: 's', nodes: [
+      { snapshotId: 'x', role: '', name: null, description: '', facets: { spacing: {} } },
+    ] } as unknown as BrandingModel;
+    openLeverEditor({
+      previewHost, snapshotId: 'x', onChange: () => {},
+      facets: nodeFor('x')!.facets,
+      // wired the way main.ts wires it after the focus-survival fix: fresh
+      // model read + single-slot write, NO editor rebuild on a typed edit
+      onSetSide: (group, side, value) => {
+        const n = nodeFor('x')!;
+        setNodeFacets('x', setSide(n.facets, group, side, value));
+      },
+    });
+    const input = document.querySelector('.stb-facet-spacing-side[data-stb-side="top"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    input.focus();
+    input.value = '4px';
+    input.dispatchEvent(new Event('input'));
+    // the typed edit must land in the model AND leave the focused input mounted
+    expect(nodeFor('x')!.facets.spacing?.padding?.top).toEqual({ literal: '4px' });
+    expect(document.contains(input)).toBe(true);
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('re-renders an image layer row after a model update even while its file input has focus', () => {
+    const previewHost = document.querySelector('.host') as HTMLElement;
+    brandingModel.value = { scene: 's', nodes: [
+      { snapshotId: 'x', role: '', name: null, description: '',
+        facets: { background: { layers: [{ kind: 'image', ref: '' }] } } },
+    ] } as unknown as BrandingModel;
+    openLeverEditor({ previewHost, snapshotId: 'x', onChange: () => {}, facets: nodeFor('x')!.facets });
+    const fileInput = document.querySelector('[data-stb-bg-row="layer"] input[type="file"]') as HTMLInputElement;
+    expect(fileInput).toBeTruthy();
+    fileInput.focus();
+    // as after a native file dialog: focus sits on the file input when the write lands.
+    // A file input carries no in-flight typed text, so it must NOT suppress the re-render.
+    setNodeFacets('x', setLayer(nodeFor('x')!.facets, 0, { kind: 'image', ref: 'assets/new-logo.png' }));
+    const label = document.querySelector('[data-stb-bg-row="layer"] .stb-facet-leaf-label') as HTMLElement;
+    expect(label.textContent).toBe('assets/new-logo.png');
   });
 });
