@@ -1,5 +1,5 @@
 // tests/integration/facet-tree.test.ts
-import { it, expect } from 'vitest';
+import { it, expect, vi } from 'vitest';
 import { mountFacetTree } from '@/ui/facet-tree';
 import { deriveDarkOklch } from '@/color/derive-dark';
 import { toOklch } from '@/color/oklch';
@@ -339,6 +339,46 @@ it('carries a position tooltip and a labeled column header for the gradient stop
   expect(stopPosInput.title).toMatch(/25%/);
 });
 
+it('annotates the color backstop when a painting layer covers it', () => {
+  const host = document.createElement('div');
+  mountFacetTree(host, {
+    facets: { background: {
+      color: { literal: { l: 0.9, c: 0.05, h: 100 } },
+      layers: [{ kind: 'image', ref: 'bg.svg' }],
+    } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  const note = host.querySelector('[data-stb-bg-row="color"] .stb-facet-bg-covered-note');
+  expect(note).not.toBeNull();
+  expect(note!.textContent).toBe('beneath layers');
+
+  // no painting layers (blank-edit transient) → no note
+  const bare = document.createElement('div');
+  mountFacetTree(bare, {
+    facets: { background: { color: { literal: { l: 0.9, c: 0.05, h: 100 } }, layers: [{ kind: 'image', ref: '' }] } },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+  });
+  expect(bare.querySelector('.stb-facet-bg-covered-note')).toBeNull();
+});
+
+it('renders the backdrop hint with a working jump link when provided', () => {
+  const host = document.createElement('div');
+  const onJump = vi.fn();
+  mountFacetTree(host, {
+    facets: { background: {} },
+    previewHost: document.createElement('div'),
+    onEdit: () => {},
+    backdropHint: { name: 'Background', onJump },
+  });
+  const hint = host.querySelector('.stb-facet-bg-backdrop-hint');
+  expect(hint).not.toBeNull();
+  expect(hint!.textContent).toContain('painted by Background');
+  (hint!.querySelector('.stb-facet-bg-backdrop-jump') as HTMLButtonElement).click();
+  expect(onJump).toHaveBeenCalledOnce();
+});
+
 it('renders one MDN gradient help link per gradient layer, targeting the current type', () => {
   const host = document.createElement('div');
   mountFacetTree(host, {
@@ -355,8 +395,23 @@ it('renders one MDN gradient help link per gradient layer, targeting the current
   const help = row.querySelector('.stb-facet-bg-gradient-help') as HTMLAnchorElement;
   expect(help).not.toBeNull();
   expect(help.href).toBe('https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/radial-gradient');
-  expect(help.target).toBe('_blank');
   expect(help.rel).toBe('noopener');
+  // Opens as a reusable narrow popup over stb, not a new tab — a full tab
+  // hides the app and loses the user's place (MDN can't be framed, so a
+  // positioned popup is the only "help beside the app" available).
+  expect(help.target).toBe('');
+  const opened: unknown[][] = [];
+  const origOpen = window.open;
+  window.open = ((...args: unknown[]) => { opened.push(args); return null; }) as typeof window.open;
+  try {
+    help.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+  } finally {
+    window.open = origOpen;
+  }
+  expect(opened).toHaveLength(1);
+  expect(opened[0]![0]).toBe('https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/radial-gradient');
+  expect(opened[0]![1]).toBe('stb-help');
+  expect(String(opened[0]![2])).toMatch(/width=480/);
 });
 
 it('updates the MDN help link href when the gradient type select changes', () => {

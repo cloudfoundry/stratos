@@ -184,6 +184,22 @@ body {
   font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .stb-facet-bg-row[data-stb-bg-row="color"] .stb-facet-bg-subtitle { flex: 0 0 5.5rem; }
+/* Covered-backstop note — the color paints beneath the layer stack, so a color
+   edit is invisible until the layers above are removed/transparent. Say so. */
+.stb-facet-bg-covered-note {
+  flex: 0 0 auto; font-size: 0.68rem; font-style: italic;
+  color: var(--text-muted, #94a3b8); cursor: help;
+}
+/* Backdrop hint — a full-bleed child (e.g. login's Background overlay) owns
+   the page's visible background; background edits on the page are painted
+   over by it. Note + jump link at the top of the background group. */
+.stb-facet-bg-backdrop-hint {
+  font-size: 0.7rem; font-style: italic; color: var(--text-muted, #64748b);
+  padding: 0.25rem 0.4rem; margin: 0.2rem 0;
+}
+.stb-facet-bg-backdrop-jump {
+  font-size: 0.7rem; padding: 0 0.3rem; cursor: pointer;
+}
 /* MDN help link — one per gradient layer, sits beside the subtitle. */
 .stb-facet-bg-gradient-help {
   flex: 0 0 auto; font-size: 0.7rem; line-height: 1; width: 1.1rem; height: 1.1rem;
