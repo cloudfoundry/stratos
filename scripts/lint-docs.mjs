@@ -38,7 +38,10 @@ function maskCode(text) {
   const out = lines.map((line) => {
     const open = line.match(/^\s*(```+|~~~+)/)
     if (fence) {
-      if (open && open[1][0] === fence[0] && open[1].length >= fence.length) fence = null
+      // A closing fence has no info string (CommonMark): "```bash" inside
+      // an open block is content, not a close.
+      const close = line.match(/^\s*(```+|~~~+)\s*$/)
+      if (close && close[1][0] === fence[0] && close[1].length >= fence.length) fence = null
       return ''
     }
     if (open) {
@@ -71,6 +74,14 @@ function lintFile(file) {
     }
     if (/^(import\s.+\sfrom\s|export\s)/.test(line)) {
       problems.push([file, no, 'no-mdx', 'MDX import/export is not plain markdown'])
+    }
+    const expr = line.match(/\{[^}]*\}/)
+    if (expr) {
+      problems.push([file, no, 'no-mdx', `"${expr[0].slice(0, 30)}" parses as an MDX expression - wrap it in backticks`])
+    }
+    const lt = line.match(/<[0-9]/)
+    if (lt) {
+      problems.push([file, no, 'no-mdx', `bare "${lt[0]}" fails MDX parsing - escape it or reword`])
     }
     for (const html of line.matchAll(/<\/?([a-zA-Z][a-zA-Z0-9-]*)[^>]*>|<!--/g)) {
       if (/^<(https?:|mailto:)/.test(html[0])) continue
