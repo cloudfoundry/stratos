@@ -17,6 +17,7 @@
 # ── Modifier-to-flag mapping ────────────────────────────────
 $(_HIDE)FLAG_frontend    := $($(_HIDE)WANT_FRONTEND)
 $(_HIDE)FLAG_backend     := $($(_HIDE)WANT_BACKEND)
+$(_HIDE)FLAG_website     := $($(_HIDE)WANT_WEBSITE)
 $(_HIDE)FLAG_cf          := $($(_HIDE)WANT_CF)
 $(_HIDE)FLAG_github      := $($(_HIDE)WANT_GITHUB)
 $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
@@ -31,7 +32,7 @@ $(_HIDE)FLAG_summary     := $($(_HIDE)WANT_SUMMARY)
 $(_HIDE)FLAG_dependabot  := $($(_HIDE)WANT_DEPENDABOT)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions lint gate tests coverage summary dependabot
+$(_HIDE)KNOWN_MODS := frontend backend website cf github e2e dist version actions lint gate tests coverage summary dependabot
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=
