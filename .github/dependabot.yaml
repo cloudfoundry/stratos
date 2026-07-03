@@ -18,9 +18,13 @@ updates:
   
   - package-ecosystem: "npm"
     directory: "/website"
-    schedule: 
+    schedule:
       interval: "weekly"
-    open-pull-requests-limit: 0 # Website being refactored
+    open-pull-requests-limit: 2
+    groups: # one grouped PR so the site's dep tree doesn't dominate the list
+      website:
+        patterns:
+          - "*"
   
   - package-ecosystem: "gomod"
     directory: "src/jetstream/"
