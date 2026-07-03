@@ -12,10 +12,9 @@ $stratos-icons-font-path: '/core/assets/fonts/stratos' !default;
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url('#{$material-icons-font-path}/MaterialIcons-Regular.eot'); // For IE6-8
-  src: local('Material Icons'),
-    local('MaterialIcons-Regular'),
-    url('#{$material-icons-font-path}/MaterialIcons-Regular.woff2') format('woff2'),
+  // No local() sources: a user's locally-installed (possibly stale) Material
+  // Icons would shadow the bundled font and silently lose newer ligatures.
+  src: url('#{$material-icons-font-path}/MaterialIcons-Regular.woff2') format('woff2'),
     url('#{$material-icons-font-path}/MaterialIcons-Regular.woff') format('woff'),
     url('#{$material-icons-font-path}/MaterialIcons-Regular.ttf') format('truetype');
 }
