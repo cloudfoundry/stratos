@@ -245,6 +245,19 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       bgLeaves.appendChild(hint);
     }
 
+    // Live paint-stack summary: the exact CSS this group emits (topmost layer
+    // first, color always the bottom backstop). The layer ROWS list bottom-up
+    // for authoring; this is the same stack in paint order with real values —
+    // "what is actually covering what" at a glance.
+    const emittedBg = backgroundCss(background);
+    if (emittedBg.length) {
+      const stack = document.createElement('pre');
+      stack.className = 'stb-facet-bg-css';
+      stack.title = 'The CSS this background group currently emits — background-image layers paint left-to-right (first = on top), the color always paints beneath them all';
+      stack.textContent = emittedBg.join('\n');
+      bgLeaves.appendChild(stack);
+    }
+
     const colorRow = document.createElement('div');
     colorRow.className = 'stb-facet-bg-row';
     colorRow.dataset.stbBgRow = 'color';
@@ -578,6 +591,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           removeStopBtn.type = 'button';
           removeStopBtn.className = 'stb-facet-bg-gradient-stop-remove';
           removeStopBtn.textContent = '×';
+          removeStopBtn.title = 'Remove this color stop (the gradient itself stays — delete the layer with its × remove)';
           removeStopBtn.disabled = gradient.stops.length <= 1;
           removeStopBtn.addEventListener('click', () => {
             const stops = gradient.stops.filter((_, idx) => idx !== si);
@@ -609,6 +623,7 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       upBtn.type = 'button';
       upBtn.className = 'stb-facet-bg-move-up';
       upBtn.textContent = '↑';
+      upBtn.title = 'Move this layer down the paint stack (list is bottom-up: last row paints on top)';
       upBtn.disabled = i === 0;
       upBtn.addEventListener('click', () => opts.onReorderLayer?.(i, i - 1));
       row.appendChild(upBtn);
@@ -617,14 +632,20 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       downBtn.type = 'button';
       downBtn.className = 'stb-facet-bg-move-down';
       downBtn.textContent = '↓';
+      downBtn.title = 'Move this layer up the paint stack (list is bottom-up: last row paints on top)';
       downBtn.disabled = i === layers.length - 1;
       downBtn.addEventListener('click', () => opts.onReorderLayer?.(i, i + 1));
       row.appendChild(downBtn);
 
+      // Visible word, not a bare glyph: an unlabeled 12px × is where "how do I
+      // delete a layer?" went to die during the 2026-07-02 live pass.
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'stb-facet-bg-remove';
-      removeBtn.textContent = '×';
+      removeBtn.textContent = '× remove';
+      removeBtn.title = layer.kind === 'image'
+        ? 'Delete this image layer — whatever is beneath it (other layers, then the color) shows through'
+        : 'Delete this gradient layer — whatever is beneath it (other layers, then the color) shows through';
       removeBtn.addEventListener('click', () => opts.onRemoveLayer?.(i));
       row.appendChild(removeBtn);
 
