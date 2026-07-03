@@ -9,10 +9,10 @@ Frontend packages and their associated backend plugins can be removed at build t
 ## Frontend Package to Backend Plugin Dependencies
 
 Stratos NPM packages define a list of backend plugins that they require in order to function. These are found in the package's `package.json` in
-the `stratos` section `backend` property. For instance the [Stratos Cloud Foundry](https://github.com/cloudfoundry/stratos/blob/master/src/frontend/packages/cloud-foundry/package.json)
+the `stratos` section `backend` property. For instance the [Stratos Cloud Foundry](https://github.com/cloudfoundry/stratos/blob/main/src/frontend/packages/cloud-foundry/package.json)
  package depends on multiple backend plugins.
 
-If a backend package is not referenced by a package that is built and is not in the 'default' plugins [list](https://github.com/cloudfoundry/stratos/blob/master/src/jetstream/default_plugins.go)
+If a backend package is not referenced by a package that is built and is not in the 'default' plugins [list](https://github.com/cloudfoundry/stratos/blob/main/src/jetstream/default_plugins.go)
  then it will not be included in the backend build. Therefore omitting a frontend package will also most likely remove it's dependent plugins.
 
 > [!IMPORTANT]
