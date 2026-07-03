@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       non_stb: ${{ steps.filter.outputs.non_stb }}
+      docs: ${{ steps.filter.outputs.docs }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -42,6 +43,24 @@ jobs:
             non_stb:
               - '**'
               - '!tools/stb/**'
+            docs:
+              - 'docs/**'
+
+  # Enforce the GFM-intersection markdown subset on docs/ so every page
+  # renders identically on GitHub and in the website generator. Not a
+  # required check yet; job-level `if:` keeps it green-when-skipped if it
+  # ever becomes one (same pattern as the stb gate above).
+  docs-lint:
+    name: Docs Lint
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: node scripts/lint-docs.mjs
 
   lint:
     name: Lint Check
