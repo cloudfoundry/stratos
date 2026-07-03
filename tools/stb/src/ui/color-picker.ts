@@ -63,7 +63,12 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
     opts.onClose?.();
   });
 
+  // Deferred so the click that opened the picker doesn't immediately close it.
+  // Guard on isConnected: if the picker was already torn down within this tick
+  // (another picker opened), registering would leave a stale handler behind.
   setTimeout(() => {
+    if (!panel.isConnected) return;
+    activeOutsideHandler = outsideClickHandler;
     document.addEventListener('click', outsideClickHandler, { once: false });
   }, 0);
 
@@ -72,10 +77,18 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
     if (panel.contains(e.target)) return;
     closeOpenPicker();
     opts.onClose?.();
-    document.removeEventListener('click', outsideClickHandler);
   }
 }
 
+// Every close path funnels through here so the document-level outside-click
+// handler can never outlive its picker — a stale one would instantly close
+// the next picker opened (each swatch click after the first appeared dead).
+let activeOutsideHandler: ((e: MouseEvent) => void) | null = null;
+
 export function closeOpenPicker(): void {
   document.getElementById('stb-color-picker-active')?.remove();
+  if (activeOutsideHandler) {
+    document.removeEventListener('click', activeOutsideHandler);
+    activeOutsideHandler = null;
+  }
 }

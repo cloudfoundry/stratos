@@ -27,3 +27,53 @@ describe('color-picker compare-mode placement', () => {
     expect(aboveSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('color-picker outside-click handler lifecycle', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    document.body.innerHTML = '<div class="host"></div>';
+  });
+  afterEach(() => { closeOpenPicker(); vi.useRealTimers(); });
+
+  const host = () => document.querySelector('.host') as HTMLElement;
+  const open = () => openColorPicker({ previewHost: host(), initial: '#ff0000', format: 'hex', onChange: () => {} });
+  const active = () => document.getElementById('stb-color-picker-active');
+
+  it('a swatch click while a picker is open leaves the new picker open', () => {
+    open();               // picker A (swatch click #1)
+    vi.runAllTimers();    // A's outside-click handler registers
+    // swatch click #2: the swatch listener opens B, then the same click bubbles to document
+    open();               // picker B
+    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    vi.runAllTimers();
+    expect(active()).not.toBeNull();
+  });
+
+  it('closing via the Close button leaves no handler that kills the next picker', () => {
+    open();               // picker A
+    vi.runAllTimers();
+    (active()!.querySelector('.stb-close') as HTMLButtonElement).click();
+    expect(active()).toBeNull();
+    open();               // picker B
+    vi.runAllTimers();
+    // a click INSIDE B must not close it (A's stale handler would)
+    active()!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(active()).not.toBeNull();
+  });
+
+  it('reopens after an outside click closed the previous picker', () => {
+    open();
+    vi.runAllTimers();
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true })); // outside → closes
+    expect(active()).toBeNull();
+    open();
+    vi.runAllTimers();
+    expect(active()).not.toBeNull();
+    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));      // stale handler would kill it
+    vi.runAllTimers();
+    // the picker just opened by this cycle must still be closable/openable, not zombie-closed
+    open();
+    vi.runAllTimers();
+    expect(active()).not.toBeNull();
+  });
+});
