@@ -10,6 +10,8 @@ import { ChangeDetectionStrategy, AfterViewInit,
  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
+import { loadMonacoEditor } from '../../../monaco-loader';
+
 declare const monaco: typeof import('monaco-editor');
 
 export interface MonacoEditorModel {
@@ -58,12 +60,24 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
   private onTouched: () => void = () => {};
   private disabled = false;
   private resizeObserver?: ResizeObserver;
+  private destroyed = false;
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
+    try {
+      // Monaco is loaded on demand (not at bootstrap); idempotent across editors
+      await loadMonacoEditor();
+    } catch (error) {
+      console.error('Failed to load Monaco Editor:', error);
+      return;
+    }
+    if (this.destroyed) {
+      return;
+    }
     this.initMonaco();
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.destroyEditor();
   }
 
