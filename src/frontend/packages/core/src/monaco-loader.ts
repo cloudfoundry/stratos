@@ -5,7 +5,18 @@
  * This replaces the ngx-monaco-editor loader with direct monaco-editor support.
  */
 
+let monacoLoad: Promise<void> | null = null;
+
 export function loadMonacoEditor(): Promise<void> {
+  if (!monacoLoad) {
+    monacoLoad = doLoadMonacoEditor();
+    // Allow a retry after a failed load (e.g. transient network error)
+    monacoLoad.catch(() => monacoLoad = null);
+  }
+  return monacoLoad;
+}
+
+function doLoadMonacoEditor(): Promise<void> {
   return new Promise((resolve, reject) => {
     // Check if Monaco is already loaded
     if ((window as any).monaco) {
