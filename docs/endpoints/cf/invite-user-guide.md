@@ -145,7 +145,7 @@ When developing locally, we recommend using [mailcatcher](https://mailcatcher.me
 
 To install mailcatcher via docker, use the following command: `docker run -d -p 1080:80 -p 1025:25 --name mail tophfr/mailcatcher`. Once mailcatcher is installed, continue to follow the instructions below.
 
-SMTP server details can be set via rhe usual environment variable approach or, when running locally, in the `jetstream/config.properties` file (see Backend Development - Configuration in [developers-guide](../../developer/introduction)). The config settings, with example values, are as follows:
+SMTP server details can be set via rhe usual environment variable approach or, when running locally, in the `jetstream/config.properties` file (see Backend Development - Configuration in [developers-guide](../../developer/introduction.md)). The config settings, with example values, are as follows:
 
 ```
 SMTP_FROM_ADDRESS=Stratos<test@test.com>

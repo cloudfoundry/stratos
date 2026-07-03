@@ -9,12 +9,11 @@ sidebar_label: Overview
 Stratos can be deployed in the following environments:
 
 1. Cloud Foundry, as an application. See [guide](cloud-foundry/cloud-foundry.md)
-2. Kubernetes, using a Helm chart. See [guide](kubernetes)
-3. Docker, single container deploying all components. See [guide](all-in-one)
+2. Kubernetes, using a Helm chart. See [guide](kubernetes.md)
+3. Docker, single container deploying all components. See [guide](all-in-one.md)
 
-:::note
-Not all features are enabled in every environment - the Kubernetes deployment supports all features, but Cloud Foundry and Docker deployments do not support some features.
-:::
+> [!NOTE]
+> Not all features are enabled in every environment - the Kubernetes deployment supports all features, but Cloud Foundry and Docker deployments do not support some features.
 
 ### Deployed in Cloud Foundry as an application
 
@@ -38,8 +37,7 @@ This deployment is recommended only for trying out the Console and for developme
 
 ## Enable/Disable Features
 
-:::note
-Some features are marked as 'Tech Preview' and are only available if tech preview features are enabled when deploying. See the [Tech Preview](tech-preview) section for more information.
-:::
+> [!NOTE]
+> Some features are marked as 'Tech Preview' and are only available if tech preview features are enabled when deploying. See the [Tech Preview](tech-preview.md) section for more information.
 
-Frontend Packages and Backend Plugins can be removed at build time, see [here](../extensions/disable-packages) for more information.
+Frontend Packages and Backend Plugins can be removed at build time, see [here](../extensions/disable-packages.md) for more information.

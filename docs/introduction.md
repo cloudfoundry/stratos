@@ -11,7 +11,7 @@ For Cloud Foundry, it allows users and administrators to both manage application
 
 For Kubernetes, it provides Developers with views of their Kubernetes resources, the ability to view and deploy Helm Charts and view Workloads.
 
-![Stratos Application view](/images/screenshots/app-summary.png)
+![Stratos Application view](images/screenshots/app-summary.png)
 
 ## Quick Start
 
@@ -30,12 +30,12 @@ Once that has finished, you can then access Stratos by visiting https://localhos
 Stratos can be deployed in the following environments:
 
 1. Cloud Foundry, as an application. See [guide](deploy/cloud-foundry/cloud-foundry.md)
-2. Kubernetes, using a Helm chart. See [guide](deploy/kubernetes)
-3. Docker, single container deploying all components. See [guide](deploy/all-in-one)
+2. Kubernetes, using a Helm chart. See [guide](deploy/kubernetes.md)
+3. Docker, single container deploying all components. See [guide](deploy/all-in-one.md)
 
 ## Troubleshooting
 
-Please see our [Troubleshooting](deploy/troubleshooting) page.
+Please see our [Troubleshooting](deploy/troubleshooting.md) page.
 
 ## Further Reading
  
@@ -47,9 +47,9 @@ What kind of code is in Stratos? We've integrated [Code Climate](https://codecli
 
 ## Contributing
 
-We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](developer/contributing.md) for more information.
+We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](contributing_guide.md) for more information.
 
-For information to help getting started with development, please read the [Developer's Guide](developer/introduction).
+For information to help getting started with development, please read the [Developer's Guide](developer/introduction.md).
 
 ## Support and feedback
 
@@ -59,5 +59,5 @@ You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - a
 
 ## License
 
-The work done has been licensed under Apache License 2.0. The license file can be found [here](license).
+The work done has been licensed under Apache License 2.0. The license file can be found [here](license.md).
 

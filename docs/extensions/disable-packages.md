@@ -15,10 +15,9 @@ the `stratos` section `backend` property. For instance the [Stratos Cloud Foundr
 If a backend package is not referenced by a package that is built and is not in the 'default' plugins [list](https://github.com/cloudfoundry/stratos/blob/master/src/jetstream/default_plugins.go)
  then it will not be included in the backend build. Therefore omitting a frontend package will also most likely remove it's dependent plugins.
 
-:::important
-To ensure backend plugins are excluded correctly the npm target `prepare-backend` should run before building the backend the usual way with
- `build-backend`. If pushing Stratos to Cloud Foundry this step will be completed automatically after `npm install` runs within the buildpack.
-:::
+> [!IMPORTANT]
+> To ensure backend plugins are excluded correctly the npm target `prepare-backend` should run before building the backend the usual way with
+>  `build-backend`. If pushing Stratos to Cloud Foundry this step will be completed automatically after `npm install` runs within the buildpack.
 
 ## Remove via stratos.yaml
 Frontend packages can be removed from the build by adding them to the `excludes` section of `./stratos.yaml`. For example, to exclude

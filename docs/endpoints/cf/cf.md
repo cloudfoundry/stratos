@@ -22,7 +22,7 @@ The CF API address must be supplied.
 The Client ID and Client Secret can usually be left blank (by default stratos will use `cf` as the client id). If you would like Stratos
 to communicate with the cf using a specific client enter them here.
 
-To allow the user to connect to the endpoint via SSO check the box. Some of the information in the [Stratos SSO Guide](../../advanced/sso)
+To allow the user to connect to the endpoint via SSO check the box. Some of the information in the [Stratos SSO Guide](../../advanced/sso.md)
 may be helpful.
 
 ## Connecting to a Cloud Foundry Endpoint

@@ -15,7 +15,7 @@ We use Decorators to annotate components to indicate that they are Stratos exten
 
 An example illustrating the various front-end extension points of Stratos is included in the folder `src/frontend/packages/example-extensions`.
 
-To run Stratos with these customizations see [here](./introduction#acme).
+To run Stratos with these customizations see [here](./introduction.md#acme).
 
 For a walk-through of extending Stratos, see [Example: Adding a Custom Tab](#example-adding-a-custom-tab).
 
@@ -60,7 +60,7 @@ Your route should have the following metadata in the `data` field of the route:
 
 Where `<TITLE>` is the text label to show in the side navigation and `<ICON NAME>` is the icon to use.
 
-> The routing module must be, or referenced by, the core routing module as described [above](./frontend#including-modules-and-routes)
+> The routing module must be, or referenced by, the core routing module as described [above](./frontend.md#including-modules-and-routes)
 
 An example routing module would be:
 
@@ -101,11 +101,11 @@ Tabs can be added to the following views in Stratos:
 - The Cloud Foundry Org view that shows detail for a Cloud Foundry organization
 - The Cloud Foundry Space view that shows detail for a Cloud Foundry space
 
-A step by step guide on how to create a custom tab can be found [below](./frontend#example-adding-a-custom-tab).
+A step by step guide on how to create a custom tab can be found [below](./frontend.md#example-adding-a-custom-tab).
 
 For example:
 
-![Example Application tab extension](/images/extensions/app-tab-example.png)
+![Example Application tab extension](../images/extensions/app-tab-example.png)
 
 The approach for all of these is the same:
 
@@ -136,7 +136,7 @@ The approach for all of these is the same:
         <component name>,
       ])
     ```
-  > The module referencing the component, or another referencing it, must be imported by the core module as described [above](./frontend#including-modules-and-routes).
+  > The module referencing the component, or another referencing it, must be imported by the core module as described [above](./frontend.md#including-modules-and-routes).
 
 ### Custom Actions
 
@@ -151,7 +151,7 @@ Actions can be added to the following views in Stratos:
 
 An action is a icon button that appears at the top-right of a View. For example:
 
-![Example Application action extension](/images/extensions/appwall-action-example.png)
+![Example Application action extension](../images/extensions/appwall-action-example.png)
 
 The approach for all of these is the same:
 
@@ -185,7 +185,7 @@ The approach for all of these is the same:
       ])
      ```
 
-  > The module referencing the component, or another referencing it, must be imported by the core module as described in [above](./frontend#including-modules-and-routes)
+  > The module referencing the component, or another referencing it, must be imported by the core module as described in [above](./frontend.md#including-modules-and-routes)
 
 ### Loading Indicator
 
@@ -267,7 +267,7 @@ A customization service provides a number of smaller extension points.
 |Property | Description|
 |--|--|
 |appName| Product name, default is 'Stratos' but can be changed to an arbitrary string |
-|hasEula| True if there's a EULA to show. When set to true the asset `/core/eula.html` must exist. For information about custom package assets see the images section [here](./theming#new-images).  |
+|hasEula| True if there's a EULA to show. When set to true the asset `/core/eula.html` must exist. For information about custom package assets see the images section [here](../theming-architecture.md).  |
 |copyright| Text shown at the bottom of the side nav|
 |logoText| Text shown with the side nav logo|
 |aboutInfoComponent| Replace the component used in the Stratos `About` page|
@@ -455,4 +455,4 @@ export class MyExampleModule { }
 
 ### Run it
 
-You should now be able to run Stratos [locally](../developer/introduction#build--run-locally) and see this new tab on the application page for an application.
+You should now be able to run Stratos [locally](../developer/introduction.md#build--run-locally) and see this new tab on the application page for an application.

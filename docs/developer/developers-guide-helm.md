@@ -4,9 +4,8 @@ sidebar_label: Helm
 ---
 
 
-:::info
-This document is currently in progress and will be expanded in the future.
-:::
+> [!NOTE]
+> This document is currently in progress and will be expanded in the future.
 
 
 ## Building Images
@@ -25,13 +24,12 @@ Changes to these happen infrequently, so not every dev cycle requires this step.
        - `p` pushes the images to dockerhub. Replace `dockerhuborgname` with the docker hub org where test images should be pushed
    1. Wait for script to complete, this may take a while
 
-:::note
-If you receive the error ``"--squash" is only supported on a Docker daemon with experimental features enabled`` during build enable
-experimental feature by
-1. Add `"experimental": true` to ~/.docker/config.json
-1. Restart docker - `sudo systemctl restart docker`
-1. `docker version` should show client with experimental feature enabled
-:::
+> [!NOTE]
+> If you receive the error ``"--squash" is only supported on a Docker daemon with experimental features enabled`` during build enable
+> experimental feature by
+> 1. Add `"experimental": true` to ~/.docker/config.json
+> 1. Restart docker - `sudo systemctl restart docker`
+> 1. `docker version` should show client with experimental feature enabled
 
 ### All Other Images
 

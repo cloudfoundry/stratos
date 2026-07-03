@@ -27,9 +27,8 @@ you will need to edit the `src/jetstream/config.properties` file and set these t
 
 The Jetstream backend should be configured.
 
-:::note
-Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the this feature.
-:::
+> [!NOTE]
+> Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the this feature.
 
 
 ## Enabling Security Obvervability Analyzers in local development
@@ -51,6 +50,5 @@ Edit your Jetstream `config.properties` file and add the following lines:
 ANALYSIS_SERVICES_API=http://127.0.0.1:8090
 ```
 
-:::note
-Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the this feature.
-:::
+> [!NOTE]
+> Ensure you set `ENABLE_TECH_PREVIEW=true` to enable the this feature.
