@@ -384,7 +384,7 @@ export class KubeEntityCatalog {
     this.analysisReport = this.generateAnalysisReportsEntity(endpointDef);
     this.configMap = KubeResourceEntityHelper.generate<KubernetesConfigMap, KubeResourceActionBuilders>(endpointDef, {
       type: kubernetesConfigMapEntityType,
-      icon: 'config_maps',
+      icon: 'config_map',
       label: 'Config Map',
       apiVersion: '/api/v1',
       apiName: 'configmaps',
@@ -397,7 +397,7 @@ export class KubeEntityCatalog {
     });
     this.secrets = KubeResourceEntityHelper.generate<KubeAPIResource, KubeResourceActionBuilders>(endpointDef, {
       type: 'secrets',
-      icon: 'config_maps',
+      icon: 'config_map',
       label: 'Secret',
       apiVersion: '/api/v1',
       apiName: 'secrets',
