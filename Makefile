@@ -81,6 +81,7 @@ endif
 $(_HIDE)WANT_FRONTEND :=
 $(_HIDE)WANT_BACKEND  :=
 $(_HIDE)WANT_E2E      :=
+$(_HIDE)WANT_WEBSITE  :=
 
 ifneq ($(filter frontend,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
@@ -91,11 +92,14 @@ endif
 ifneq ($(filter e2e,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_E2E := yes
 endif
+ifneq ($(filter website,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_WEBSITE := yes
+endif
 
 # Default: frontend + backend when none specified (unless e2e),
 # but only for verbs that use these modifiers (not clean/dump).
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
@@ -191,8 +195,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend cf github dist version e2e actions gate tests coverage summary dependabot
-frontend backend cf github dist version e2e actions gate tests coverage summary dependabot:
+.PHONY: frontend backend website cf github dist version e2e actions gate tests coverage summary dependabot
+frontend backend website cf github dist version e2e actions gate tests coverage summary dependabot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -283,6 +287,25 @@ define dev.backend
 	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ../../$($(_HIDE)BIN_DIR)/jetstream
 endef
 $(call register, dev, backend)
+
+# ── Website (documentation site) ──────────────────────────────
+
+define build.website
+	@echo "Building documentation website..."
+	cd website && bun install --frozen-lockfile && bun run build
+	@echo "Website built: website/build/"
+endef
+$(call register, build, website)
+
+define dev.website
+	cd website && bun install --frozen-lockfile && bun run start
+endef
+$(call register, dev, website)
+
+define clean.website
+	rm -rf website/build website/.docusaurus website/node_modules
+endef
+$(call register, clean, website)
 
 # Local dev session expiry. Mirrors the cf-package deploy default
 # (`build/release-cf.sh`) so long Playwright drives don't get bounced
@@ -632,6 +655,8 @@ help:
 	@echo "Development:"
 	@echo "  make dev frontend         Start frontend dev server (port $(FRONTEND_PORT))"
 	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
+	@echo "  make dev website          Start documentation site dev server"
+	@echo "  make build website        Build the documentation website"
 	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
 	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
 	@echo ""
