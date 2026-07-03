@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  setFacetProp, addGroup, removeGroup,
+  setFacetProp, clearFacetProp, addGroup, removeGroup,
   setBackstop, addLayer, removeLayer, reorderLayer, setLayer,
   addFont, removeFont, reorderFont, setFont,
   setSide, setGap,
@@ -10,6 +10,27 @@ describe('facets-edit', () => {
   it('sets a nested property immutably', () => {
     const a = setFacetProp({}, 'text.fontSize', { literal: '18px' });
     expect(a.text!.fontSize).toEqual({ literal: '18px' });
+  });
+
+  it('clears a property back to unset, keeping the group and siblings', () => {
+    let f = setFacetProp({}, 'text.color', { literal: '#333' });
+    f = setFacetProp(f, 'text.fontSize', { literal: '18px' });
+    f = clearFacetProp(f, 'text.color');
+    expect(f.text!.color).toBeUndefined();
+    expect(f.text!.fontSize).toEqual({ literal: '18px' });
+  });
+
+  it('clears the background backstop via key background.color, keeping layers', () => {
+    let f = setBackstop({}, { literal: '#000' });
+    f = addLayer(f, { kind: 'image', ref: 'bg.svg' });
+    f = clearFacetProp(f, 'background.color');
+    expect(f.background!.color).toBeUndefined();
+    expect(f.background!.layers).toHaveLength(1);
+  });
+
+  it('clearFacetProp is a no-op on an absent group', () => {
+    const f = { text: { color: { literal: '#333' } } };
+    expect(clearFacetProp(f, 'surface.border')).toBe(f);
   });
   it('adds and removes a group', () => {
     expect(addGroup({}, 'surface').surface).toEqual({});

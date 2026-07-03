@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark, setNodeVisibility, setNodeScopedBlock, loadBrandingModel } from '@/state/branding';
+import { brandingModel, nodeFor, setNodeFacets, setNodeFacetsDark, setNodeVisibility, setNodeScopedBlock, loadBrandingModel, resetNode } from '@/state/branding';
 import type { BrandingModel } from '@/metadata/types';
 
 const model: BrandingModel = {
@@ -62,6 +62,37 @@ describe('branding state', () => {
     expect(nodeFor('auth.login.title')?.scopedBlock).toBe('font-size: 18px');
     expect(brandingModel.value).not.toBe(before); // new reference → reactivity
     expect(nodeFor('auth.login.sign-in')?.scopedBlock).toBeUndefined(); // others untouched
+  });
+});
+
+describe('resetNode', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('restores one node to the loaded pristine state, leaving other edits alone', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(model), { headers: { 'content-type': 'application/json' } })));
+    await loadBrandingModel('login');
+    setNodeFacets('auth.login.title', { content: { text: 'Edited' } });
+    setNodeFacetsDark('auth.login.title', { text: { color: { literal: 'transparent' } } });
+    setNodeScopedBlock('auth.login.title', 'color: red');
+    setNodeFacets('auth.login.sign-in', { text: {} });
+
+    const restored = resetNode('auth.login.title');
+    expect(restored?.facets.content?.text).toBe('Sign in to Stratos');
+    const n = nodeFor('auth.login.title')!;
+    expect(n.facets.content?.text).toBe('Sign in to Stratos');
+    expect(n.facetsDark).toBeUndefined();
+    expect(n.scopedBlock).toBeUndefined();
+    // sibling's edit survives — reset is per-element, not per-scene
+    expect(nodeFor('auth.login.sign-in')?.facets.text).toEqual({});
+  });
+
+  it('is a safe no-op when no pristine model is loaded', async () => {
+    // a failed load clears the pristine copy left by any earlier test
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
+    await loadBrandingModel('whatever');
+    brandingModel.value = JSON.parse(JSON.stringify(model));
+    expect(resetNode('auth.login.title')).toBeUndefined();
   });
 });
 

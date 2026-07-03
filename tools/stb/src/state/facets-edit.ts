@@ -14,6 +14,15 @@ export function setFacetProp(f: Facets, key: string, value: FacetValue): Facets 
   const g = groupOf(key);
   return { ...f, [g]: { ...(f[g] ?? {}), [propOf(key)]: value } };
 }
+/** Revert a single value to "snapshot decides": remove the prop, keep the group.
+ *  Covers the background backstop too (key 'background.color'). */
+export function clearFacetProp(f: Facets, key: string): Facets {
+  const g = groupOf(key) as keyof Facets;
+  if (!f[g]) return f;
+  const group = { ...(f[g] as Record<string, unknown>) };
+  delete group[propOf(key)];
+  return { ...f, [g]: group };
+}
 export function addGroup(f: Facets, group: AddableGroup): Facets {
   return f[group] ? f : { ...f, [group]: {} };
 }

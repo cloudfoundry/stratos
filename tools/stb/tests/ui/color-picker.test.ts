@@ -28,6 +28,37 @@ describe('color-picker compare-mode placement', () => {
   });
 });
 
+describe('color-picker clear and transparent', () => {
+  beforeEach(() => { document.body.innerHTML = '<div class="host"></div>'; });
+  afterEach(() => { closeOpenPicker(); });
+
+  const host = () => document.querySelector('.host') as HTMLElement;
+  const active = () => document.getElementById('stb-color-picker-active');
+
+  it('renders a Clear button only when onClear is provided; clicking clears and closes', () => {
+    openColorPicker({ previewHost: host(), initial: '#ff0000', format: 'hex', onChange: () => {} });
+    expect(active()!.querySelector('.stb-color-clear')).toBeNull();
+    closeOpenPicker();
+
+    const onClear = vi.fn();
+    openColorPicker({ previewHost: host(), initial: '#ff0000', format: 'hex', onChange: () => {}, onClear });
+    const btn = active()!.querySelector('.stb-color-clear') as HTMLButtonElement;
+    expect(btn).not.toBeNull();
+    btn.click();
+    expect(onClear).toHaveBeenCalledOnce();
+    expect(active()).toBeNull();
+  });
+
+  it("accepts the keyword 'transparent' in the text field", () => {
+    const onChange = vi.fn();
+    openColorPicker({ previewHost: host(), initial: '#ff0000', format: 'hex', onChange });
+    const text = active()!.querySelector('.stb-color-text') as HTMLInputElement;
+    text.value = ' Transparent ';
+    text.dispatchEvent(new Event('input'));
+    expect(onChange).toHaveBeenCalledWith('transparent');
+  });
+});
+
 describe('color-picker outside-click handler lifecycle', () => {
   beforeEach(() => {
     vi.useFakeTimers();
