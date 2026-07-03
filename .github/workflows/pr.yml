@@ -34,6 +34,7 @@ jobs:
     outputs:
       non_stb: ${{ steps.filter.outputs.non_stb }}
       docs: ${{ steps.filter.outputs.docs }}
+      website: ${{ steps.filter.outputs.website }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -45,6 +46,8 @@ jobs:
               - '!tools/stb/**'
             docs:
               - 'docs/**'
+            website:
+              - 'website/**'
 
   # Enforce the GFM-intersection markdown subset on docs/ so every page
   # renders identically on GitHub and in the website generator. Not a
@@ -61,6 +64,28 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - run: node scripts/lint-docs.mjs
+
+  # The website previously had no PR coverage on develop: documentation.yml
+  # only triggers on master, so a website change (e.g. a dependency bump
+  # with a stale bun.lock) could merge green without ever being built.
+  # Frozen-lockfile install + full build catches both.
+  website-build:
+    name: Website Build
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.website == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install dependencies
+        run: cd website && bun install --frozen-lockfile
+      - name: Build website
+        run: cd website && bun run build
 
   lint:
     name: Lint Check
@@ -271,7 +296,7 @@ jobs:
   pr-success:
     name: PR Quality Gate
     runs-on: ubuntu-latest
-    needs: [lint, test-frontend, test-backend, build-check]
+    needs: [lint, test-frontend, test-backend, build-check, website-build]
     if: always()
     steps:
       - name: Check all jobs
@@ -282,7 +307,8 @@ jobs:
           for res in "${{ needs.lint.result }}" \
                      "${{ needs.test-frontend.result }}" \
                      "${{ needs.test-backend.result }}" \
-                     "${{ needs.build-check.result }}"; do
+                     "${{ needs.build-check.result }}" \
+                     "${{ needs.website-build.result }}"; do
             if [ "$res" != "success" ] && [ "$res" != "skipped" ]; then
               echo "❌ One or more required checks failed (result: $res)"
               exit 1
