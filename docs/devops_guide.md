@@ -855,7 +855,7 @@ spec:
 
 ## 🔧 Troubleshooting
 
-See [troubleshooting.md](troubleshooting.md) for detailed troubleshooting guide.
+See [troubleshooting.md](deploy/troubleshooting.md) for detailed troubleshooting guide.
 
 **Quick Diagnostics:**
 ```bash
@@ -883,7 +883,7 @@ kubectl -n stratos run -it --rm debug --image=curlimages/curl --restart=Never --
 ### Documentation
 - [Official Docs](https://stratos.app/docs)
 - [Helm Chart](https://github.com/cloudfoundry/stratos/tree/master/deploy/kubernetes)
-- [Troubleshooting Guide](troubleshooting.md)
+- [Troubleshooting Guide](deploy/troubleshooting.md)
 
 ### Community
 - [GitHub Issues](https://github.com/cloudfoundry/stratos/issues)

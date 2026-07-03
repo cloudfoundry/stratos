@@ -15,7 +15,7 @@ In this case, the front-end web application static resources are served by the A
 
 By default, a non-persistent SQLite database is used - by automatically registering the cloud foundry endpoint and connecting to it on login, all data stored in the database can be treated as ephemeral, since it will be re-created next time a user logs in. Cloud Foundry Session Affinity is used to ensure that when scaling up the Console Application to multiple instances, the user is also directed to the instance which will know about them and their endpoints (since each Application instance will have its own local SQLite store).
 
-Alternatively, Stratos can be configured [with a persistent Cloud Foundry database service](db-migration), which enables features requiring persistence such as user favorites.
+Alternatively, Stratos can be configured [with a persistent Cloud Foundry database service](db-migration.md), which enables features requiring persistence such as user favorites.
 
 ## Deployment Steps
 
@@ -32,9 +32,9 @@ You will then be able to open a web browser and navigate to the console URL:
 
 Where `<DOMAIN>` is the default domain configured for your Cloud Foundry cluster.
 
-To login use the following credentials detailed [here](../access).
+To login use the following credentials detailed [here](../access.md).
 
-If you run into issues, please refer to the [Troubleshooting Guide](cf-troubleshooting) below.
+If you run into issues, please refer to the [Troubleshooting Guide](cf-troubleshooting.md) below.
 
 > The console will pre-configure the host Cloud Foundry endpoint. No other CF instance should be registered unless the instructions in
  the section [Associate Cloud Foundry database service](#associate-cloud-foundry-database-service) are followed.
@@ -78,12 +78,12 @@ applications:
 
 This will set the the UAA client and UAA secret used to invite users for the default CF only.
 
-See the [invite users guide](../../endpoints/cf/invite-user-guide) for more information about user invites in Stratos.
+See the [invite users guide](../../endpoints/cf/invite-user-guide.md) for more information about user invites in Stratos.
 
 #### Use of the Default Embedded SQLite Database
 
 We do not recommend deploying Stratos to a production environment using the default embedded SQLite Database. Instead we recommend creating
-and binding a database service instance to Stratos - for more information see [here](db-migration).
+and binding a database service instance to Stratos - for more information see [here](db-migration.md).
 
 ### Deploy Stratos from source
 
@@ -156,7 +156,7 @@ Alternatively cf push using a manifest
     ```
 
 ## Associate Cloud Foundry database service
-Follow instructions [here](db-migration).
+Follow instructions [here](db-migration.md).
 
 ## Use SSO Login
 
@@ -172,4 +172,4 @@ applications:
 
 When SSO Login is enabled, Stratos will also auto-connect to the Cloud Foundry it is deployed in using the token obtained during the SSO Login flow.
 
-For more information - see [Single-Sign On](../../advanced/sso).
+For more information - see [Single-Sign On](../../advanced/sso.md).

@@ -359,6 +359,30 @@ Before submitting a PR:
 
 ---
 
+## Reporting Issues
+
+If you find a problem with Stratos, report it using
+[GitHub issues](https://github.com/cloudfoundry/stratos/issues/new).
+
+Before reporting a new issue, check whether it has already been
+[reported](https://github.com/cloudfoundry/stratos/issues). If it has:
+
+- Read the comments to confirm it's the same issue you're having.
+- Subscribe to the issue rather than adding "+1" comments.
+- Comment only if you can add information not already in the discussion.
+
+When creating a new issue, include:
+
+1. As much detail as possible about your setup/environment
+2. Steps to reproduce the issue
+3. What you expected to happen
+4. What happened instead
+
+If an issue already has an assignee, contact them before starting work on
+it; for unassigned issues, add a comment so work isn't duplicated.
+
+---
+
 ## Getting Help
 
 - **GitHub Issues**: Report bugs, request features
