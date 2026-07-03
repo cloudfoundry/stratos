@@ -3,6 +3,11 @@ import type { BrandingModel, ElementNode, Facets, ScopedBlock } from '@/metadata
 
 export const brandingModel = signal<BrandingModel | null>(null);
 
+// Pristine copy of the loaded model — the "delete my edits" baseline. Close
+// puts the editor away; resetNode restores THIS. Kept outside the signal so
+// edits can never touch it.
+let pristineModel: BrandingModel | null = null;
+
 export async function loadBrandingModel(scene: string): Promise<void> {
   // A scene may ship no branding-model.json; the dev server then answers with a
   // 404 page or the SPA HTML fallback. Guard so a missing/non-JSON model clears
@@ -12,12 +17,31 @@ export async function loadBrandingModel(scene: string): Promise<void> {
     const contentType = res.headers.get('content-type') ?? '';
     if (!res.ok || !contentType.includes('json')) {
       brandingModel.value = null;
+      pristineModel = null;
       return;
     }
-    brandingModel.value = (await res.json()) as BrandingModel;
+    const model = (await res.json()) as BrandingModel;
+    pristineModel = structuredClone(model);
+    brandingModel.value = model;
   } catch {
     brandingModel.value = null;
+    pristineModel = null;
   }
+}
+
+/** Discard every edit on one element — facets, dark bundle, scoped block,
+ *  visibility — restoring the node exactly as the generated model shipped it.
+ *  Returns the restored node so callers can re-project its tokens. */
+export function resetNode(snapshotId: string): ElementNode | undefined {
+  const m = brandingModel.value;
+  const p = pristineModel?.nodes.find((n) => n.snapshotId === snapshotId);
+  if (!m || !p) return undefined;
+  const restored = structuredClone(p);
+  brandingModel.value = {
+    ...m,
+    nodes: m.nodes.map((n) => (n.snapshotId === snapshotId ? restored : n)),
+  };
+  return restored;
 }
 
 export function nodeFor(snapshotId: string): ElementNode | undefined {

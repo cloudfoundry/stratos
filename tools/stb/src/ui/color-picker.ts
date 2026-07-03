@@ -7,6 +7,10 @@ export interface OpenColorPickerOptions {
   initial: string;
   format: ColorFormat;
   onChange: (newValue: string) => void;
+  /** Revert affordance: clear the value back to "snapshot decides".
+   *  Rendered as a Clear button only when provided — gradient stops, which
+   *  must always have a color, simply don't pass it. */
+  onClear?: () => void;
   onClose?: () => void;
 }
 
@@ -28,6 +32,7 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
       <input type="text" class="stb-color-text" value="${initialText}" />
     </div>
     <div class="stb-color-picker__row">
+      ${opts.onClear ? '<button class="stb-color-clear" title="Remove this value — the snapshot\'s own style applies again">Clear</button>' : ''}
       <button class="stb-close">Close</button>
     </div>
   `;
@@ -52,10 +57,23 @@ export function openColorPicker(opts: OpenColorPickerOptions): void {
   });
 
   text.addEventListener('input', () => {
+    // `transparent` is a deliberate "paint nothing" — a valid CSS color the
+    // rgb-tuple parser can't represent, so it bypasses parseColor.
+    if (text.value.trim().toLowerCase() === 'transparent') {
+      opts.onChange('transparent');
+      return;
+    }
     const c = parseColor(text.value);
     if (!c) return;
     native.value = formatColor(c, 'hex');
     opts.onChange(text.value);
+  });
+
+  const clear = panel.querySelector<HTMLButtonElement>('.stb-color-clear');
+  clear?.addEventListener('click', () => {
+    closeOpenPicker();
+    opts.onClear?.();
+    opts.onClose?.();
   });
 
   close.addEventListener('click', () => {
