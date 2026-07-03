@@ -477,7 +477,7 @@ Thanks to everyone who contributed!
 ### External Communication
 
 **GitHub Release Notes:**
-```markdown
+````markdown
 # Stratos v5.0.0
 
 Major release with Angular 20 upgrade and new authentication features.
@@ -539,7 +539,7 @@ Thanks to all contributors who made this release possible!
 - Documentation: https://stratos.app/docs
 - Issues: https://github.com/cloudfoundry/stratos/issues
 - Discussions: https://github.com/cloudfoundry/stratos/discussions
-```
+````
 
 **Social Media:**
 ```markdown
@@ -656,7 +656,7 @@ git push origin :refs/tags/v5.0.0
 ### Track Release Success
 
 **Metrics to Monitor:**
-- Build time (target: <15 minutes)
+- Build time (target: under 15 minutes)
 - Download counts
 - Issue reports
 - Docker pull counts

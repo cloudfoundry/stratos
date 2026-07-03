@@ -198,8 +198,8 @@ This configuration is described below:
 |Parameter|Description|Default|
 |----|---|---|
 |console.service.ingress.enabled|Enables ingress|false|
-|console.service.ingress.annotations|Annotations to be added to the ingress resource.|{}|
-|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource.|{}|
+|console.service.ingress.annotations|Annotations to be added to the ingress resource.|`{}`|
+|console.service.ingress.extraLabels|Additional labels to be added to the ingress resource.|`{}`|
 |console.service.ingress.host|The host name that will be used for the Stratos service.||
 |console.service.ingress.secretName|The existing TLS secret that contains the certificate for ingress.||
 
