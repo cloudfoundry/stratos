@@ -14,12 +14,12 @@ import { mountStatusBar } from '@/ui/status-bar';
 import { mountAssetManager } from '@/ui/asset-manager';
 import { setRootValue, setDarkValue, effectiveValue } from '@/state/tokens';
 import { previewDark, activeSceneId } from '@/state/scene';
-import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets, setNodeFacetsDark } from '@/state/branding';
+import { nodeFor, loadBrandingModel, setNodeScopedBlock, setNodeFacets, setNodeFacetsDark, resetNode } from '@/state/branding';
 import { loadGlobalModel } from '@/state/global-branding';
 import { openLeverEditor } from '@/ui/lever-editor';
 import { applyEdit, buildVisibilityCompanion, reprojectNodeTokens, reprojectNodeTokensDark } from '@/ui/element-edit';
 import { FACET_PROPS, facetDeclarations } from '@/metadata/facets';
-import { setFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer, addFont, setFont, removeFont, reorderFont, setSide, setGap } from '@/state/facets-edit';
+import { setFacetProp, clearFacetProp, addGroup, removeGroup, setBackstop, addLayer, setLayer, removeLayer, reorderLayer, addFont, setFont, removeFont, reorderFont, setSide, setGap } from '@/state/facets-edit';
 import { deriveDarkOklch } from '@/color/derive-dark';
 import type { Oklch } from '@/color/oklch';
 import { effect } from '@preact/signals-core';
@@ -124,7 +124,19 @@ async function main() {
     // mode both panes reveal, so light and dark stay structurally identical
     forEachPane((p) => p.revealElement(snapshotId));
     const companion = buildVisibilityCompanion(snapshotId, node.visibility);
+    // Each page stands alone (Norm, 2026-07-02): a page's visible background
+    // may belong to a dedicated full-bleed backdrop child (harvest convention:
+    // `<id>.background`, e.g. the login scene's .login-bg overlay). Background
+    // edits on the parent are painted over by it, which reads as a broken
+    // editor — surface the backdrop with a jump link instead.
+    // ponytail: naming-convention detection; geometry-based full-bleed
+    // detection if a scene ever ships a backdrop under another name.
+    const backdrop = nodeFor(`${snapshotId}.background`);
     openLeverEditor({
+      ...(backdrop ? { backdropHint: {
+        name: backdrop.name || 'Background',
+        onJump: () => selectElement(backdrop.snapshotId),
+      } } : {}),
       previewHost,
       snapshotId,
       onChange: (next) => applyEdit(snapshotId, next, routing),
@@ -146,6 +158,29 @@ async function main() {
           const facetsDark = setFacetProp(n.facetsDark ?? {}, key, value);
           setNodeFacetsDark(snapshotId, facetsDark);
           reprojectNodeTokensDark(snapshotId, facetsDark, routing);
+        }
+      },
+      onFacetClear: (key) => {
+        const n = nodeFor(snapshotId);
+        if (n) {
+          const facets = clearFacetProp(n.facets, key);
+          setNodeFacets(snapshotId, facets);
+          reprojectNodeTokens(snapshotId, facets, routing);
+        }
+      },
+      onFacetClearDark: (key) => {
+        const n = nodeFor(snapshotId);
+        if (n) {
+          const facetsDark = clearFacetProp(n.facetsDark ?? {}, key);
+          setNodeFacetsDark(snapshotId, facetsDark);
+          reprojectNodeTokensDark(snapshotId, facetsDark, routing);
+        }
+      },
+      onResetNode: () => {
+        const restored = resetNode(snapshotId);
+        if (restored) {
+          reprojectNodeTokens(snapshotId, restored.facets, routing);
+          reprojectNodeTokensDark(snapshotId, restored.facetsDark ?? {}, routing);
         }
       },
       deriveDark: (key) => {

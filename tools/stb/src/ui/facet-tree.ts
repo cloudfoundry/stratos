@@ -3,7 +3,7 @@ import type { Facets, FacetValue, Layer, Gradient, ContentFormat } from '@/metad
 import type { Oklch } from '@/color/oklch';
 import { toOklch, oklchToHex } from '@/color/oklch';
 import type { ColorFormat } from '@/color/format';
-import { FACET_PROPS } from '@/metadata/facets';
+import { FACET_PROPS, backgroundCss } from '@/metadata/facets';
 import { openColorPicker } from '@/ui/color-picker';
 import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
 import { deriveDarkOklch } from '@/color/derive-dark';
@@ -15,6 +15,11 @@ const GROUPS = ['text', 'surface', 'spacing'] as const;
 const ADDABLE_GROUPS = ['background', ...GROUPS] as const;
 const propsOf = (g: string) => Object.entries(FACET_PROPS).filter(([k]) => k.startsWith(g + '.'));
 
+// Picker → facet value. `transparent` is a deliberate "paint nothing" with no
+// Oklch representation, so it stays a string literal (emitters pass it through).
+const colorFacetValue = (value: string): FacetValue =>
+  value === 'transparent' ? { literal: 'transparent' } : { literal: toOklch(value) };
+
 export interface FacetTreeOptions {
   facets: Facets;
   /** Parallel dark-mode overrides, rendered as a second value column beside each color row. */
@@ -23,6 +28,11 @@ export interface FacetTreeOptions {
   onEdit: (key: string, value: FacetValue) => void;
   /** Dark-mode counterpart of onEdit; fired when the dark swatch is edited directly. */
   onDarkEdit?: (key: string, value: FacetValue) => void;
+  /** Revert one value to "snapshot decides" (the picker's Clear button).
+   *  Covers the background backstop via key 'background.color'. */
+  onClearEdit?: (key: string) => void;
+  /** Dark-mode counterpart of onClearEdit — back to "inherits the snapshot's built-in dark". */
+  onClearEditDark?: (key: string) => void;
   /** Fired when the per-row "derive dark from light" button is clicked. Caller computes
    *  deriveDarkOklch and routes the result through its own dark-edit path. */
   deriveDark?: (key: string) => void;
@@ -56,6 +66,10 @@ export interface FacetTreeOptions {
   /** Spacing composite (Task 11): T/R/B/L padding/margin + row/column gap positional tuples. */
   onSetSide?: (group: 'padding' | 'margin', side: 'top' | 'right' | 'bottom' | 'left', value: FacetValue) => void;
   onSetGap?: (slot: 'row' | 'column', value: FacetValue) => void;
+  /** Each page stands alone: when a full-bleed backdrop child owns this
+   *  element's visible background, background edits here are painted over.
+   *  Rendered as a note + jump link at the top of the background group. */
+  backdropHint?: { name: string; onJump: () => void };
 }
 
 const FONT_WEIGHTS = ['normal', 'bold', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
@@ -217,6 +231,20 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     // Track focused group for isolate, same as the per-leaf hook in the style-group loop below.
     bgLeaves.addEventListener('focusin', () => { focusedGroup = 'background'; });
 
+    if (opts.backdropHint) {
+      const hint = document.createElement('div');
+      hint.className = 'stb-facet-bg-backdrop-hint';
+      hint.append(`the page's visible background is painted by ${opts.backdropHint.name} — `);
+      const jump = document.createElement('button');
+      jump.type = 'button';
+      jump.className = 'stb-facet-bg-backdrop-jump';
+      jump.textContent = 'edit it there';
+      jump.title = `${opts.backdropHint.name} covers this element edge-to-edge, so background edits made here stay hidden behind it`;
+      jump.addEventListener('click', () => opts.backdropHint!.onJump());
+      hint.appendChild(jump);
+      bgLeaves.appendChild(hint);
+    }
+
     const colorRow = document.createElement('div');
     colorRow.className = 'stb-facet-bg-row';
     colorRow.dataset.stbBgRow = 'color';
@@ -225,6 +253,18 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     colorLab.textContent = 'color';
     colorRow.appendChild(colorLab);
 
+    // An invisible edit reads as a broken editor: the backstop paints beneath
+    // every image/gradient layer, so say so whenever a real layer covers it.
+    // backgroundCss already knows which layers actually paint (blank-edit
+    // transients are skipped) — reuse it instead of re-deriving blankness.
+    if (backgroundCss({ layers }).some((d) => d.startsWith('background-image'))) {
+      const note = document.createElement('span');
+      note.className = 'stb-facet-bg-covered-note';
+      note.textContent = 'beneath layers';
+      note.title = 'The color backstop paints beneath every image/gradient layer above — it only shows through where they are transparent or removed';
+      colorRow.appendChild(note);
+    }
+
     const colorLit = background.color && 'literal' in background.color && typeof background.color.literal === 'object'
       ? background.color.literal as Oklch
       : null;
@@ -232,11 +272,16 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
     colorBtn.type = 'button';
     colorBtn.className = 'stb-facet-swatch';
     if (colorLit) colorBtn.style.backgroundColor = oklchToHex(colorLit);
+    else if (background.color && 'literal' in background.color && typeof background.color.literal === 'string') {
+      colorBtn.style.backgroundColor = background.color.literal;
+      colorBtn.title = background.color.literal;
+    }
     colorBtn.addEventListener('click', () => openColorPicker({
       previewHost: opts.previewHost,
       initial: colorLit ? oklchToHex(colorLit) : '#000000',
       format: opts.colorFormat?.() ?? 'hex',
-      onChange: (value) => opts.onBackstop?.({ literal: toOklch(value) }),
+      onChange: (value) => opts.onBackstop?.(colorFacetValue(value)),
+      onClear: () => opts.onClearEdit?.('background.color'),
     }));
     colorRow.appendChild(colorBtn);
 
@@ -259,7 +304,8 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
       previewHost: opts.previewHost,
       initial: colorLitDark ? oklchToHex(colorLitDark) : '#000000',
       format: opts.colorFormat?.() ?? 'hex',
-      onChange: (value) => opts.onDarkEdit?.('background.color', { literal: toOklch(value) }),
+      onChange: (value) => opts.onDarkEdit?.('background.color', colorFacetValue(value)),
+      onClear: () => opts.onClearEditDark?.('background.color'),
     }));
     colorRow.appendChild(colorDarkBtn);
 
@@ -368,8 +414,23 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
         const helpLink = document.createElement('a');
         helpLink.className = 'stb-facet-bg-gradient-help';
         helpLink.textContent = '?';
-        helpLink.target = '_blank';
         helpLink.rel = 'noopener';
+        // Narrow named popup, not a new tab: stb stays visible behind it (a
+        // full tab loses the user's place), MDN's responsive layout gives a
+        // readable narrow view, and the shared name means every ? reuses one
+        // window instead of accumulating tabs. MDN blocks framing (X-Frame-
+        // Options: DENY, verified 2026-07-02 — as do w3schools/W3C/css-tricks),
+        // so an in-app panel is not an option.
+        helpLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Docked to the screen's right edge so it overlays stb's right side
+          // (tokens pane) rather than the editing area — the popover and
+          // preview stay visible while the help floats above. A page cannot
+          // resize the user's own browser window, so docking the popup is the
+          // available half of "help beside the app".
+          const left = Math.max(0, (window.screen.availWidth ?? 1280) - 500);
+          window.open(helpLink.href, 'stb-help', `width=480,height=640,left=${left},top=80,noopener`);
+        });
         const updateHelpLink = () => {
           helpLink.href = `${MDN_GRADIENT_BASE}${gradient.type}-gradient`;
           helpLink.title = `MDN reference for ${gradient.type}-gradient()`;
@@ -765,13 +826,18 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           ? current.literal as Oklch
           : null;
         if (lit) btn.style.backgroundColor = oklchToHex(lit);
+        else if (current && 'literal' in current && typeof current.literal === 'string') {
+          btn.style.backgroundColor = current.literal;
+          btn.title = current.literal;
+        }
         btn.addEventListener('click', () => openColorPicker({
           previewHost: opts.previewHost,
           initial: lit ? oklchToHex(lit) : '#000000',
           // Value is stored as Oklch, but the picker's text field shows the format
           // chosen in the top bar (hex/rgb/oklch) so the editor tracks that setting.
           format: opts.colorFormat?.() ?? 'hex',
-          onChange: (value) => opts.onEdit(key, { literal: toOklch(value) }),
+          onChange: (value) => opts.onEdit(key, colorFacetValue(value)),
+          onClear: () => opts.onClearEdit?.(key),
         }));
         leaf.appendChild(btn);
 
@@ -794,7 +860,8 @@ export function mountFacetTree(host: HTMLElement, opts: FacetTreeOptions): { des
           previewHost: opts.previewHost,
           initial: litDark ? oklchToHex(litDark) : '#000000',
           format: opts.colorFormat?.() ?? 'hex',
-          onChange: (value) => opts.onDarkEdit?.(key, { literal: toOklch(value) }),
+          onChange: (value) => opts.onDarkEdit?.(key, colorFacetValue(value)),
+          onClear: () => opts.onClearEditDark?.(key),
         }));
         leaf.appendChild(darkBtn);
 

@@ -20,6 +20,13 @@ export interface OpenLeverEditorOptions {
   facetsDark?: Facets;
   onFacetEdit?: (key: string, value: FacetValue) => void;
   onFacetEditDark?: (key: string, value: FacetValue) => void;
+  /** Revert one value to "snapshot decides" (picker Clear), light / dark legs. */
+  onFacetClear?: (key: string) => void;
+  onFacetClearDark?: (key: string) => void;
+  /** Discard ALL edits on this element (Reset button) — close ≠ delete. */
+  onResetNode?: () => void;
+  /** Forwarded to the facet tree: a full-bleed backdrop child owns this element's visible background. */
+  backdropHint?: { name: string; onJump: () => void };
   /** Per-row "derive dark from light" — caller computes deriveDarkOklch and routes it through its own dark-edit path. */
   deriveDark?: (key: string) => void;
   /** 'background' is addable but deliberately not removable — see the matching note in facet-tree.ts. */
@@ -166,6 +173,9 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
       previewHost: opts.previewHost,
       onEdit: opts.onFacetEdit ?? (() => {}),
       onDarkEdit: opts.onFacetEditDark ?? (() => {}),
+      ...(opts.onFacetClear ? { onClearEdit: opts.onFacetClear } : {}),
+      ...(opts.onFacetClearDark ? { onClearEditDark: opts.onFacetClearDark } : {}),
+      ...(opts.backdropHint ? { backdropHint: opts.backdropHint } : {}),
       // Structural edits + token promote/detach + content/asset live on the light bundle only.
       ...(opts.deriveDark ? { deriveDark: opts.deriveDark } : {}),
       ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
@@ -202,6 +212,17 @@ export function openLeverEditor(opts: OpenLeverEditorOptions): void {
     if (typing) return;
     renderTree();
   });
+
+  // Close ≠ delete: Close only puts the panel away (every edit is already
+  // committed live). Reset is the delete — discard all edits on this element.
+  if (opts.onResetNode) {
+    const reset = document.createElement('button');
+    reset.className = 'stb-lever-reset';
+    reset.textContent = 'Reset';
+    reset.title = 'Discard all edits on this element — back to the snapshot defaults';
+    reset.addEventListener('click', () => opts.onResetNode?.());
+    panel.appendChild(reset);
+  }
 
   const close = document.createElement('button');
   close.className = 'stb-lever-close';
