@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
@@ -19,7 +18,6 @@ import { BUILD_INFO } from '../../../environments/build-info';
   standalone: true,
   imports: [
     CommonModule,
-    PageHeaderComponent,
     BooleanIndicatorComponent,
     CustomIconComponent,
     InfoCardComponent
@@ -40,12 +38,6 @@ export class DiagnosticsPageComponent implements OnInit {
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
   helmLastModified$!: Observable<Date>;
-
-  public breadcrumbs = [
-    {
-      breadcrumbs: [{ value: 'About', routerLink: '/about' }]
-    }
-  ];
 
   angularVersion = VERSION.full;
   buildInfo = BUILD_INFO;
