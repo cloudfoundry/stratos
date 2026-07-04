@@ -40,6 +40,10 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # A file counts only if it matches EVERY pattern — required for the
+          # '!' exclusions below; the default 'some' lets '**' match anything,
+          # making the exclusions dead letters.
+          predicate-quantifier: 'every'
           filters: |
             # non_stb = the code path: skip the heavy suite when a PR only
             # touches stb tooling, docs/, or website/ (each has its own gate).
