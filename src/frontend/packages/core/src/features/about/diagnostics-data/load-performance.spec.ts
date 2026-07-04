@@ -4,6 +4,7 @@ import {
   collectResources,
   detectTopology,
   buildLoadReport,
+  observeFcp,
   reportToMarkdown,
   reportToJson,
   LoadReport,
@@ -147,6 +148,42 @@ describe('reportToJson', () => {
     const r = sampleReport();
     const parsed = JSON.parse(reportToJson(r));
     expect(parsed).toEqual(r);
+  });
+});
+
+describe('observeFcp', () => {
+  it('resolves the first-contentful-paint time from buffered paint entries', async () => {
+    const RealObserver = globalThis.PerformanceObserver;
+    class FakeObserver {
+      constructor(private cb: (list: { getEntries: () => unknown[] }) => void) {}
+      observe(options: { type: string; buffered: boolean }) {
+        expect(options.type).toBe('paint');
+        expect(options.buffered).toBe(true);
+        this.cb({
+          getEntries: () => [
+            { name: 'first-paint', startTime: 1200 },
+            { name: 'first-contentful-paint', startTime: 1234 },
+          ],
+        });
+      }
+      disconnect() { /* noop */ }
+    }
+    (globalThis as any).PerformanceObserver = FakeObserver;
+    try {
+      expect(await observeFcp(10)).toBe(1234);
+    } finally {
+      (globalThis as any).PerformanceObserver = RealObserver;
+    }
+  });
+
+  it('resolves null when the observer is unsupported', async () => {
+    const RealObserver = globalThis.PerformanceObserver;
+    (globalThis as any).PerformanceObserver = undefined;
+    try {
+      expect(await observeFcp(10)).toBeNull();
+    } finally {
+      (globalThis as any).PerformanceObserver = RealObserver;
+    }
   });
 });
 

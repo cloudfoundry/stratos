@@ -102,6 +102,36 @@ export function observeLcp(timeoutMs = 500): Promise<{ lcpMs: number | null; lcp
   });
 }
 
+/**
+ * Observe buffered paint entries and resolve with the first-contentful-paint
+ * time after timeoutMs. A buffered observer is needed because this page can
+ * measure before the app's own first paint has happened, in which case the
+ * synchronous paint entries are still empty.
+ */
+export function observeFcp(timeoutMs = 500): Promise<number | null> {
+  return new Promise(resolve => {
+    let fcpMs: number | null = null;
+    let observer: PerformanceObserver | null = null;
+    try {
+      observer = new PerformanceObserver(list => {
+        for (const e of list.getEntries()) {
+          if (e.name === 'first-contentful-paint') {
+            fcpMs = e.startTime;
+          }
+        }
+      });
+      observer.observe({ type: 'paint', buffered: true });
+    } catch {
+      resolve(null);
+      return;
+    }
+    setTimeout(() => {
+      try { observer?.disconnect(); } catch { /* already stopped */ }
+      resolve(fcpMs);
+    }, timeoutMs);
+  });
+}
+
 /** Assemble a full load report from the Performance API and a topology probe. */
 export async function buildLoadReport(): Promise<LoadReport> {
   const nav = safeEntries<PerformanceNavigationTiming>('navigation')[0];
@@ -109,9 +139,10 @@ export async function buildLoadReport(): Promise<LoadReport> {
   const resources = collectResources(safeEntries<PerformanceResourceTiming>('resource'));
 
   const fcp = paints.find(p => p.name === 'first-contentful-paint');
-  const [{ topology, requestId }, { lcpMs, lcpElement }] = await Promise.all([
+  const [{ topology, requestId }, { lcpMs, lcpElement }, observedFcpMs] = await Promise.all([
     detectTopology(),
     observeLcp(),
+    fcp ? Promise.resolve(null) : observeFcp(),
   ]);
 
   return {
@@ -122,7 +153,7 @@ export async function buildLoadReport(): Promise<LoadReport> {
     responseStartMs: nav?.responseStart ?? 0,
     domContentLoadedMs: nav?.domContentLoadedEventEnd ?? 0,
     loadEventMs: nav?.loadEventEnd ?? 0,
-    firstContentfulPaintMs: fcp ? fcp.startTime : null,
+    firstContentfulPaintMs: fcp ? fcp.startTime : observedFcpMs,
     lcpMs,
     lcpElement,
     requestCount: resources.length,
