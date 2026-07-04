@@ -13,6 +13,17 @@ Single source of truth for building, testing, and packaging Stratos.
 | `zip` | any | CF and Windows release archives |
 | `swag` | optional | OpenAPI documentation generation |
 
+## Run make from the repository root
+
+All `make` commands must be invoked from the repository root. GNU make has no
+search path for locating its top-level makefile (`-I` only affects `include`
+directives inside makefiles), so invocations from subdirectories fail — and
+building components directly instead is unsafe: the root targets carry
+generated-file dependencies that ad-hoc builds skip. For example, running
+`go build` from `src/jetstream` omits the generated `extra_plugins.go`, which
+produces a backend without the Cloud Foundry plugin that crashes at startup
+when deployed as a Cloud Foundry application.
+
 ## Operations Reference
 
 ### Building
