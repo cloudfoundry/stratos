@@ -1,12 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ResourceRow } from '../diagnostics-data/load-performance';
+import { LoadReport, ResourceRow } from '../diagnostics-data/load-performance';
 import {
+  ResourceWaterfallComponent,
+  WATERFALL_GROUP_GAP_MS,
   WATERFALL_ROW_CAP,
   axisTicks,
   basename,
-  capRows,
   formatTick,
+  groupRows,
   milestoneLines,
   spanPercent,
   toPercent,
@@ -63,24 +67,52 @@ describe('spanPercent', () => {
   });
 });
 
-describe('capRows', () => {
-  it('returns rows ordered by start time', () => {
-    const rows = capRows([row({ startMs: 30 }), row({ startMs: 10 }), row({ startMs: 20 })]);
-    expect(rows.map(r => r.startMs)).toEqual([10, 20, 30]);
+describe('groupRows', () => {
+  it('returns no groups for no resources', () => {
+    expect(groupRows([])).toEqual([]);
   });
 
-  it('caps at the first N rows by start time', () => {
-    const many = Array.from({ length: WATERFALL_ROW_CAP + 5 }, (_, i) => row({ startMs: i }));
-    const rows = capRows(many.reverse());
-    expect(rows.length).toBe(WATERFALL_ROW_CAP);
-    expect(rows[0].startMs).toBe(0);
-    expect(rows[rows.length - 1].startMs).toBe(WATERFALL_ROW_CAP - 1);
+  it('clusters resources starting within the gap of the group anchor', () => {
+    const groups = groupRows([row({ startMs: 0 }), row({ startMs: 10 }), row({ startMs: 20 })], 25);
+    expect(groups.length).toBe(1);
+    expect(groups[0].rows.length).toBe(3);
+  });
+
+  it('starts a new group past the gap boundary, keeping the boundary inclusive', () => {
+    const groups = groupRows([row({ startMs: 0 }), row({ startMs: 25 }), row({ startMs: 26 })], 25);
+    expect(groups.map(g => g.rows.length)).toEqual([2, 1]);
+    expect(groups[1].startMs).toBe(26);
+  });
+
+  it('measures the gap from the group anchor, not the previous member', () => {
+    // 0, 20, 40: 40 is within 25ms of 20 but not of the anchor 0.
+    const groups = groupRows([row({ startMs: 0 }), row({ startMs: 20 }), row({ startMs: 40 })], 25);
+    expect(groups.map(g => g.rows.length)).toEqual([2, 1]);
+  });
+
+  it('orders groups by start time regardless of input order', () => {
+    const groups = groupRows([row({ startMs: 100 }), row({ startMs: 0 })], 25);
+    expect(groups.map(g => g.startMs)).toEqual([0, 100]);
+  });
+
+  it('aggregates span end and transfer bytes over members', () => {
+    const groups = groupRows([
+      row({ startMs: 0, durationMs: 50, transferBytes: 100 }),
+      row({ startMs: 10, durationMs: 10, transferBytes: 200 }),
+    ], 25);
+    expect(groups[0].endMs).toBe(50);
+    expect(groups[0].totalTransferBytes).toBe(300);
   });
 
   it('does not mutate its input', () => {
     const input = [row({ startMs: 2 }), row({ startMs: 1 })];
-    capRows(input);
+    groupRows(input);
     expect(input[0].startMs).toBe(2);
+  });
+
+  it('uses the exported gap by default', () => {
+    const groups = groupRows([row({ startMs: 0 }), row({ startMs: WATERFALL_GROUP_GAP_MS })]);
+    expect(groups.length).toBe(1);
   });
 });
 
@@ -147,5 +179,101 @@ describe('basename', () => {
 
   it('falls back to the path itself when there is no segment', () => {
     expect(basename('/')).toBe('/');
+  });
+});
+
+const reportWith = (resources: ResourceRow[]): LoadReport => ({
+  collectedAt: '2026-07-04T00:00:00.000Z',
+  topology: 'local/other',
+  requestId: null,
+  protocol: 'h2',
+  responseStartMs: 12,
+  domContentLoadedMs: 300,
+  loadEventMs: 500,
+  firstContentfulPaintMs: 250,
+  lcpMs: null,
+  lcpElement: null,
+  requestCount: resources.length,
+  totalTransferBytes: resources.reduce((n, r) => n + r.transferBytes, 0),
+  resources,
+});
+
+/** One resource per group: starts spaced past the gap so nothing clusters. */
+const spacedResources = (count: number): ResourceRow[] =>
+  Array.from({ length: count }, (_, i) =>
+    row({ path: `/chunk-${i}.js`, startMs: i * (WATERFALL_GROUP_GAP_MS + 1) * 2 }));
+
+describe('ResourceWaterfallComponent', () => {
+  let fixture: ComponentFixture<ResourceWaterfallComponent>;
+
+  const render = (report: LoadReport) => {
+    fixture.componentRef.setInput('report', report);
+    fixture.detectChanges();
+  };
+  const el = () => fixture.nativeElement as HTMLElement;
+  const query = <T extends HTMLElement>(selector: string) => el().querySelector<T>(selector);
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ResourceWaterfallComponent],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+    fixture = TestBed.createComponent(ResourceWaterfallComponent);
+  });
+
+  it('summarises resources and groups in the banner', () => {
+    render(reportWith(spacedResources(3)));
+    expect(query('[data-test="waterfall-summary"]')?.textContent)
+      .toMatch(/Showing 3 of 3 resources\s+in 3 of 3 groups/);
+  });
+
+  it('hides paging controls when the groups fit one page', () => {
+    render(reportWith(spacedResources(3)));
+    expect(query('[data-test="waterfall-next"]')).toBeNull();
+  });
+
+  it('pages group lines past the row cap', () => {
+    render(reportWith(spacedResources(WATERFALL_ROW_CAP + 5)));
+    const prev = query<HTMLButtonElement>('[data-test="waterfall-prev"]');
+    const next = query<HTMLButtonElement>('[data-test="waterfall-next"]');
+    expect(prev?.disabled).toBe(true);
+    expect(el().textContent).toContain(`Showing ${WATERFALL_ROW_CAP} of ${WATERFALL_ROW_CAP + 5} resources`);
+
+    next?.click();
+    fixture.detectChanges();
+    expect(el().textContent).toContain(`Showing 5 of ${WATERFALL_ROW_CAP + 5} resources`);
+    expect(query<HTMLButtonElement>('[data-test="waterfall-next"]')?.disabled).toBe(true);
+    expect(query<HTMLButtonElement>('[data-test="waterfall-prev"]')?.disabled).toBe(false);
+  });
+
+  it('collapses a start-time burst into one line and expands it on click', () => {
+    render(reportWith([
+      row({ path: '/a.js', startMs: 0 }),
+      row({ path: '/b.js', startMs: 5 }),
+      row({ path: '/late.js', startMs: 500 }),
+    ]));
+    expect(el().textContent).toContain('2 resources');
+    expect(el().textContent).not.toContain('b.js');
+
+    query<HTMLButtonElement>('[data-test="waterfall-group"]')?.click();
+    fixture.detectChanges();
+    expect(el().textContent).toContain('a.js');
+    expect(el().textContent).toContain('b.js');
+
+    query<HTMLButtonElement>('[data-test="waterfall-group"]')?.click();
+    fixture.detectChanges();
+    expect(el().textContent).not.toContain('b.js');
+  });
+
+  it('resets to the first page when a new report arrives', async () => {
+    render(reportWith(spacedResources(WATERFALL_ROW_CAP + 5)));
+    query<HTMLButtonElement>('[data-test="waterfall-next"]')?.click();
+    fixture.detectChanges();
+    expect(el().textContent).toContain('page 2 / 2');
+
+    render(reportWith(spacedResources(WATERFALL_ROW_CAP + 5)));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el().textContent).toContain('page 1 / 2');
   });
 });
