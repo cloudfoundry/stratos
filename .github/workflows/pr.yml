@@ -41,9 +41,14 @@ jobs:
         id: filter
         with:
           filters: |
+            # non_stb = the code path: skip the heavy suite when a PR only
+            # touches stb tooling, docs/, or website/ (each has its own gate).
             non_stb:
               - '**'
               - '!tools/stb/**'
+              - '!docs/**'
+              - '!website/**'
+              - '!README.md'
             docs:
               - 'docs/**'
             website:
