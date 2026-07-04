@@ -336,7 +336,27 @@ _e2e_toggle = $(if $(filter yes,$(2)),--$(1),)
 
 # ── E2E ───────────────────────────────────────────────────────
 
+# The local webServer needs a host-runnable jetstream at dist/bin/jetstream;
+# cross-compiles leave a foreign binary there (exit 126). Skipped when
+# E2E_BASE_URL targets a remote deployment (no local server started).
+define _ensure_host_backend
+	@if [ -z "$(E2E_BASE_URL)" ]; then \
+		NEED_BUILD=false; \
+		case "$$(uname -s)" in Darwin) BINFMT="Mach-O";; *) BINFMT="ELF";; esac; \
+		if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
+			NEED_BUILD=true; \
+		elif ! file $($(_HIDE)BIN_DIR)/jetstream | grep -q "$$BINFMT"; then \
+			echo "Backend binary is not for this platform - rebuilding for $($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH)..."; \
+			NEED_BUILD=true; \
+		fi; \
+		if [ "$$NEED_BUILD" = true ]; then \
+			$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
+		fi; \
+	fi
+endef
+
 define test.e2e
+	$(_ensure_host_backend)
 	@echo "Running Playwright E2E tests..."
 	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
 		$(call _e2e_browsers,$(E2E_BROWSERS)) \
@@ -381,6 +401,7 @@ endef
 $(call register, check, coverage)
 
 define check.e2e
+	$(_ensure_host_backend)
 	@echo "Running Playwright E2E core tests..."
 	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test e2e/tests/core/ \
 		$(call _e2e_browsers,$(E2E_BROWSERS)) \
