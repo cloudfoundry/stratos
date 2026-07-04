@@ -138,7 +138,13 @@ export default defineConfig({
   ...(process.env.E2E_BASE_URL ? {} : {
     webServer: [
       {
-        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 ../../dist/bin/jetstream`,
+        // Isolate the e2e database: jetstream runs from src/jetstream, where the
+        // dev stack's config.properties sets SQLITE_KEEP_DB=true — without an
+        // override the e2e server SHARES the dev sqlite and each auth.setup
+        // registers a duplicate endpoint into it (stale duplicates then fail
+        // every list page with "Request failed"). A fresh dedicated file per
+        // run keeps e2e deterministic and leaves the dev database alone.
+        command: `cd src/jetstream && mkdir -p ../../dist/e2e-db && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 SQLITE_DB_DIR=../../dist/e2e-db SQLITE_KEEP_DB=false ../../dist/bin/jetstream`,
         url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
         reuseExistingServer: true,
         ignoreHTTPSErrors: true,
