@@ -11,6 +11,7 @@ import {
   basename,
   formatTick,
   groupRows,
+  mergeMilestoneLabels,
   milestoneLines,
   spanPercent,
   toPercent,
@@ -39,6 +40,41 @@ describe('waterfallScaleMax', () => {
 
   it('never returns zero, so percent math stays finite', () => {
     expect(waterfallScaleMax(0, [])).toBeGreaterThan(0);
+  });
+
+  it('extends past the load event to cover a late milestone like LCP', () => {
+    const milestones = [{ label: 'LCP', title: 'Largest contentful paint', ms: 248 }];
+    expect(waterfallScaleMax(167, [row({ startMs: 180, durationMs: 20 })], milestones)).toBe(248);
+  });
+});
+
+describe('mergeMilestoneLabels', () => {
+  const line = (label: string, ms: number) => ({ label, title: `${label} long name`, ms });
+
+  it('merges labels that would overprint into one line', () => {
+    const merged = mergeMilestoneLabels([line('FCP', 240), line('LCP', 243)], 250);
+    expect(merged.length).toBe(1);
+    expect(merged[0].label).toBe('FCP · LCP');
+    expect(merged[0].title).toBe('FCP long name — 240 ms\nLCP long name — 243 ms');
+  });
+
+  it('keeps well-separated labels apart, with the time folded into the title', () => {
+    const merged = mergeMilestoneLabels([line('DCL', 100), line('Load', 500)], 1000);
+    expect(merged.map(m => m.label)).toEqual(['DCL', 'Load']);
+    expect(merged[0].title).toBe('DCL long name — 100 ms');
+  });
+
+  it('chains a cluster of close labels into a single merged line', () => {
+    const merged = mergeMilestoneLabels([line('DCL', 100), line('FCP', 101), line('LCP', 102)], 1000);
+    expect(merged.length).toBe(1);
+    expect(merged[0].label).toBe('DCL · FCP · LCP');
+  });
+
+  it('does not mutate its input', () => {
+    const input = [line('FCP', 240), line('LCP', 248)];
+    mergeMilestoneLabels(input, 250);
+    expect(input[0].label).toBe('FCP');
+    expect(input[0].title).toBe('FCP long name');
   });
 });
 
