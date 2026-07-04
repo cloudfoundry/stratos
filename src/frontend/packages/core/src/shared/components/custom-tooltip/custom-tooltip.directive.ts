@@ -40,6 +40,26 @@ export class CustomTooltipDirective implements OnDestroy {
     }, this.hideDelay);
   }
 
+  // Clicking the host usually opens a menu/dialog — don't leave the tooltip
+  // hanging over it.
+  @HostListener('mousedown')
+  onMouseDown() {
+    this.clearTimeouts();
+    this.hideTooltip();
+  }
+
+  // Chrome does not fire mouseleave when the hovered element moves or changes
+  // under the pointer (menu opening, layout shift), which left tooltips stuck
+  // open until the pointer happened to re-cross the host. While a tooltip is
+  // visible, watch pointer movement at the document level and hide as soon as
+  // the pointer is outside the host.
+  private onDocumentMouseMove = (event: MouseEvent) => {
+    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
+      this.clearTimeouts();
+      this.hideTooltip();
+    }
+  };
+
   private showTooltip() {
     if (this.tooltipElement) {
       this.hideTooltip();
@@ -81,11 +101,13 @@ export class CustomTooltipDirective implements OnDestroy {
 
     this.tooltipElement = el;
     this.renderer.appendChild(document.body, el);
+    document.addEventListener('mousemove', this.onDocumentMouseMove, true);
 
     this.positionTooltip();
   }
 
   private hideTooltip() {
+    document.removeEventListener('mousemove', this.onDocumentMouseMove, true);
     if (this.tooltipElement) {
       this.renderer.removeChild(document.body, this.tooltipElement);
       this.tooltipElement = null;

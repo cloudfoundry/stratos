@@ -46,6 +46,45 @@ describe('CustomTooltipDirective', () => {
     expect(tip?.textContent).toBe('roles for alice');
   });
 
+  // Chrome does not fire mouseleave when the host moves/changes under the
+  // pointer (e.g. a menu opening), which left tooltips stuck open. While a
+  // tooltip is visible, a document-level mousemove guard hides it as soon as
+  // the pointer is outside the host.
+  it('hides when the pointer moves outside the host even if mouseleave never fired', () => {
+    directive.tooltipText = 'Recent activity';
+    directive.onMouseEnter(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(300);
+    expect(document.body.querySelector('.custom-tooltip')).toBeTruthy();
+
+    // No mouseleave — pointer just shows up somewhere else
+    document.body.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+
+    expect(document.body.querySelector('.custom-tooltip')).toBeNull();
+  });
+
+  it('stays visible while the pointer moves within the host', () => {
+    directive.tooltipText = 'Recent activity';
+    directive.onMouseEnter(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(300);
+
+    const host = fixture.debugElement.query(By.directive(CustomTooltipDirective)).nativeElement;
+    host.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
+
+    expect(document.body.querySelector('.custom-tooltip')).toBeTruthy();
+  });
+
+  // Clicking the host usually opens a menu — the tooltip must not linger over it
+  it('hides immediately on mousedown', () => {
+    directive.tooltipText = 'User menu';
+    directive.onMouseEnter(new MouseEvent('mouseenter'));
+    vi.advanceTimersByTime(300);
+    expect(document.body.querySelector('.custom-tooltip')).toBeTruthy();
+
+    directive.onMouseDown();
+
+    expect(document.body.querySelector('.custom-tooltip')).toBeNull();
+  });
+
   // Tooltip text can carry untrusted values (e.g. CF usernames). The
   // sanitizer must drop scripts and event handlers while keeping the text.
   it('strips XSS vectors (scripts, event handlers) from tooltip text', () => {
