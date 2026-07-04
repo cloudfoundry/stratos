@@ -86,17 +86,39 @@ test.describe('Diagnostics', () => {
     expect(report.requestCount).toBeGreaterThan(0);
   });
 
-  test('measure again refreshes the report without breaking the page', async ({ connectedEndpointsAdminPage }) => {
+  test('the report persists across tab switches', async ({ connectedEndpointsAdminPage }) => {
     const page = connectedEndpointsAdminPage.page;
     await page.goto('/about/diagnostics/performance');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('button', { hasText: 'Measure again' })).toBeVisible({ timeout: 15000 });
-    await page.locator('button', { hasText: 'Measure again' }).click();
+    const collected = page.locator('text=/\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z/').first();
+    await expect(collected).toBeVisible({ timeout: 15000 });
+    const before = await collected.textContent();
 
-    // Report re-renders (the buffer is drained per measure, so counts may
-    // shrink — the page must still show a coherent summary).
-    await expect(page.locator('text=Summary')).toBeVisible();
-    await expect(page.locator('text=DOMContentLoaded')).toBeVisible();
+    // Soft-navigate away and back: the same report must re-display, not a
+    // fresh (and semantically wrong) re-measurement of leftover buffer.
+    await page.locator('a', { hasText: 'Entity Counts' }).click();
+    await expect(page).toHaveURL(/\/counts$/);
+    await page.locator('a', { hasText: 'Load Performance' }).click();
+    await expect(collected).toBeVisible({ timeout: 15000 });
+    expect(await collected.textContent()).toBe(before);
+  });
+
+  test('reload & measure collects a fresh report', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about/diagnostics/performance');
+    await page.waitForLoadState('networkidle');
+
+    const collected = page.locator('text=/\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z/').first();
+    await expect(collected).toBeVisible({ timeout: 15000 });
+    const before = await collected.textContent();
+
+    await page.locator('[data-test="reload-measure"]').click();
+    await page.waitForLoadState('networkidle');
+
+    // A document reload produces a new measurement with a cache verdict.
+    await expect(collected).toBeVisible({ timeout: 20000 });
+    expect(await collected.textContent()).not.toBe(before);
+    await expect(page.locator('[data-test="cache-verdict"]')).toHaveText(/(cold|warm)/);
   });
 });

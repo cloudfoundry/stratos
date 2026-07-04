@@ -9,6 +9,7 @@ import {
   LoadReport,
   ResourceRow,
   buildLoadReport,
+  classifyCache,
   reportToJson,
   reportToMarkdown,
 } from '../diagnostics-data/load-performance';
@@ -16,6 +17,16 @@ import { BytesBarComponent } from './bytes-bar.component';
 import { ResourceWaterfallComponent } from './resource-waterfall.component';
 
 const TOP_RESOURCE_COUNT = 20;
+
+// The initial-load report is immutable for a browsing session, so it survives
+// route changes here and re-displays when the user returns to this tab. A
+// hard reload resets module state and yields a fresh measurement.
+let savedReport: LoadReport | null = null;
+
+/** Test hook: clear the session-persisted report between specs. */
+export function resetSavedLoadReport(): void {
+  savedReport = null;
+}
 
 @Component({
   selector: 'app-diagnostic-performance-page',
@@ -50,15 +61,30 @@ export class DiagnosticPerformancePageComponent implements OnInit {
     this.destroyRef.onDestroy(() => clearTimeout(this.copiedTimer));
   }
 
+  /** Cold/warm verdict for the displayed report. */
+  cache = computed(() => {
+    const r = this.report();
+    return r ? classifyCache(r.resources) : null;
+  });
+
   ngOnInit() {
-    this.measure();
+    if (savedReport) {
+      this.report.set(savedReport);
+    } else {
+      this.measure();
+    }
   }
 
   async measure() {
-    this.report.set(await buildLoadReport());
-    // Drain the buffer so the next "Measure again" reports only resources
-    // fetched since this measurement, not everything since page load.
-    performance.clearResourceTimings();
+    const report = await buildLoadReport();
+    savedReport = report;
+    this.report.set(report);
+  }
+
+  /** A fresh measurement needs a fresh document load; the new report is
+   *  collected automatically when this page re-initialises after it. */
+  reload(): void {
+    location.reload();
   }
 
   ms(value: number | null): string {
