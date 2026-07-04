@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+  classifyCache,
   collectResources,
   detectTopology,
   buildLoadReport,
@@ -202,5 +203,31 @@ describe('buildLoadReport', () => {
     expect(typeof r.requestCount).toBe('number');
     expect(typeof r.totalTransferBytes).toBe('number');
     expect(Array.isArray(r.resources)).toBe(true);
+  });
+});
+
+describe('classifyCache', () => {
+  const res = (cached: boolean) => ({
+    path: '/x.js', startMs: 0, durationMs: 1, transferBytes: 1,
+    decodedBytes: 1, protocol: 'h2', cached,
+  });
+
+  it('calls an uncached load cold', () => {
+    expect(classifyCache([res(false), res(false), res(false)]))
+      .toEqual({ kind: 'cold', cachedFraction: 0 });
+  });
+
+  it('calls a mostly-cached load warm', () => {
+    const verdict = classifyCache([res(true), res(true), res(false)]);
+    expect(verdict.kind).toBe('warm');
+    expect(verdict.cachedFraction).toBeCloseTo(2 / 3);
+  });
+
+  it('puts the boundary at half cached', () => {
+    expect(classifyCache([res(true), res(false)]).kind).toBe('warm');
+  });
+
+  it('treats an empty resource list as cold', () => {
+    expect(classifyCache([]).kind).toBe('cold');
   });
 });

@@ -14,6 +14,24 @@ export interface ResourceRow {
   cached: boolean;
 }
 
+export interface CacheVerdict {
+  kind: 'cold' | 'warm';
+  cachedFraction: number;
+}
+
+/**
+ * Classify a load as cold (empty/bypassed HTTP cache) or warm (primed cache)
+ * from the fraction of resources served from cache. A genuinely cold load has
+ * near-zero cached entries; a warm one serves most static assets from cache,
+ * so the halfway mark separates them cleanly.
+ */
+export function classifyCache(resources: ResourceRow[]): CacheVerdict {
+  const cachedFraction = resources.length
+    ? resources.filter(r => r.cached).length / resources.length
+    : 0;
+  return { kind: cachedFraction >= 0.5 ? 'warm' : 'cold', cachedFraction };
+}
+
 export interface LoadReport {
   collectedAt: string;
   topology: 'cf-pushed' | 'local/other';

@@ -7,8 +7,9 @@
     <!-- Actions -->
     <div class="flex flex-wrap items-center gap-3">
       <button
+        data-test="reload-measure"
         class="px-3 py-1.5 text-sm font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
-        (click)="measure()">Measure again</button>
+        (click)="reload()">Reload &amp; measure</button>
       <button
         data-test="copy-markdown"
         class="px-3 py-1.5 text-sm font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
@@ -25,9 +26,12 @@
     <!-- Scope note -->
     <app-card>
       <div class="px-4 py-3 text-sm text-content-muted">
-        These numbers reflect this page load in this browser. For login-page numbers,
-        reload the app and open this page immediately &mdash; the performance buffer
-        persists across route changes, but not across reloads.
+        These numbers reflect this browsing session's initial page load and stay put
+        as you move around the app. Reload &amp; measure captures a fresh warm
+        (cached) load; for a cold load, hard-reload the browser with the cache
+        bypassed (&#8984;&#8679;R in Chrome/Firefox on macOS, Ctrl+Shift+R elsewhere).
+        Numbers are cleanest when this page is opened soon after the app loads &mdash;
+        background requests made before the first visit are included.
       </div>
     </app-card>
 
@@ -46,6 +50,14 @@
           <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Protocol</span>
           <span class="text-sm font-medium">{{ r.protocol || 'unknown' }}</span>
         </span>
+        @if (cache(); as c) {
+          <span class="flex gap-2 items-baseline">
+            <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Cache</span>
+            <span class="text-sm font-medium" data-test="cache-verdict">
+              {{ c.kind }} <span class="text-content-muted">({{ (c.cachedFraction * 100).toFixed(0) }}% cached)</span>
+            </span>
+          </span>
+        }
         <span class="flex gap-2 items-baseline">
           <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Requests</span>
           <span class="text-sm font-medium">{{ r.requestCount }}</span>

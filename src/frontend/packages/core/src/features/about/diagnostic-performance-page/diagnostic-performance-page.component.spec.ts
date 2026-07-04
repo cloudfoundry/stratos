@@ -9,8 +9,8 @@ import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from 
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { LoadReport, reportToJson, reportToMarkdown } from '../diagnostics-data/load-performance';
-import { DiagnosticPerformancePageComponent } from './diagnostic-performance-page.component';
+import { LoadReport, buildLoadReport, reportToJson, reportToMarkdown } from '../diagnostics-data/load-performance';
+import { DiagnosticPerformancePageComponent, resetSavedLoadReport } from './diagnostic-performance-page.component';
 
 const { fixedReport } = vi.hoisted(() => {
   const fixedReport: LoadReport = {
@@ -48,6 +48,8 @@ describe('DiagnosticPerformancePageComponent', () => {
   let writeText: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
+    resetSavedLoadReport();
+    vi.mocked(buildLoadReport).mockClear();
     writeText = vi.fn(async () => undefined);
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText },
@@ -109,10 +111,32 @@ describe('DiagnosticPerformancePageComponent', () => {
     expect(writeText).toHaveBeenCalledWith(reportToMarkdown(fixedReport));
   });
 
-  it('drains the resource-timing buffer after measuring', async () => {
-    const clear = vi.spyOn(performance, 'clearResourceTimings');
-    await component.measure();
-    expect(clear).toHaveBeenCalled();
+  it('shows the cold/warm cache verdict for the load', () => {
+    const verdict = (fixture.nativeElement as HTMLElement)
+      .querySelector('[data-test="cache-verdict"]')?.textContent ?? '';
+    // fixedReport has 1 of 2 resources cached — the warm boundary.
+    expect(verdict).toContain('warm');
+    expect(verdict).toContain('50% cached');
+  });
+
+  it('re-displays the saved report instead of re-measuring on re-entry', async () => {
+    expect(vi.mocked(buildLoadReport)).toHaveBeenCalledTimes(1);
+
+    const second = TestBed.createComponent(DiagnosticPerformancePageComponent);
+    second.detectChanges();
+    await second.whenStable();
+
+    expect(vi.mocked(buildLoadReport)).toHaveBeenCalledTimes(1);
+    expect(second.componentInstance.report()).toEqual(fixedReport);
+  });
+
+  it('wires the reload button to a document reload', () => {
+    const reload = vi.spyOn(component, 'reload').mockImplementation(() => undefined);
+    const button = (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('[data-test="reload-measure"]');
+    expect(button?.textContent).toContain('Reload & measure');
+    button?.click();
+    expect(reload).toHaveBeenCalled();
   });
 
   it('copies the JSON report to the clipboard', async () => {
