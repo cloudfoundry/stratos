@@ -29,13 +29,40 @@ export interface MilestoneLine {
   ms: number;
 }
 
-/** Scale end: whichever finishes last, the load event or the last response end. */
+/** Scale end: whichever finishes last — the load event, the last response end,
+ *  or the latest milestone (LCP can land after both; clamping it to the edge
+ *  overprints its label into unreadable fragments). */
 export function waterfallScaleMax(
   loadEventMs: number,
   resources: Pick<ResourceRow, 'startMs' | 'durationMs'>[],
+  milestones: MilestoneLine[] = [],
 ): number {
   const lastEnd = resources.reduce((max, r) => Math.max(max, r.startMs + r.durationMs), 0);
-  return Math.max(loadEventMs, lastEnd, 1);
+  const lastMilestone = milestones.reduce((max, m) => Math.max(max, m.ms), 0);
+  return Math.max(loadEventMs, lastEnd, lastMilestone, 1);
+}
+
+/** Merge milestone labels that would overprint (closer than minGapPercent on
+ *  the scale) into one combined label, e.g. "FCP · LCP". Titles come back
+ *  fully formed, one "name — time" line per merged milestone. */
+export function mergeMilestoneLabels(
+  lines: MilestoneLine[],
+  scaleMaxMs: number,
+  minGapPercent = 2,
+): MilestoneLine[] {
+  const sorted = [...lines].sort((a, b) => a.ms - b.ms);
+  const merged: MilestoneLine[] = [];
+  for (const line of sorted) {
+    const last = merged[merged.length - 1];
+    const titled = `${line.title} — ${formatTick(line.ms)}`;
+    if (last && toPercent(line.ms, scaleMaxMs) - toPercent(last.ms, scaleMaxMs) < minGapPercent) {
+      last.label = `${last.label} · ${line.label}`;
+      last.title = `${last.title}\n${titled}`;
+    } else {
+      merged.push({ ...line, title: titled });
+    }
+  }
+  return merged;
 }
 
 /** Map a millisecond offset onto the 0-100 percent range of the scale. */
@@ -166,14 +193,17 @@ export function basename(path: string): string {
         </div>
       </div>
 
-      <!-- Milestone labels -->
+      <!-- Milestone labels (merged where they would overprint) -->
       <div class="flex h-6">
         <div class="w-56 shrink-0"></div>
         <div class="relative flex-1 min-w-0">
-          @for (m of milestones(); track m.label) {
+          @for (m of labelMilestones(); track m.label) {
             <span
-              class="absolute top-0.5 pl-1 text-[10px] leading-none text-content-muted whitespace-nowrap cursor-help"
-              [title]="m.title + ' — ' + formatTick(m.ms)"
+              class="absolute top-0.5 text-[10px] leading-none text-content-muted whitespace-nowrap cursor-help"
+              [class.pl-1]="toPercent(m.ms, scaleMax()) <= 90"
+              [class.pr-1]="toPercent(m.ms, scaleMax()) > 90"
+              [style.transform]="toPercent(m.ms, scaleMax()) > 90 ? 'translateX(-100%)' : null"
+              [title]="m.title"
               [style.left.%]="toPercent(m.ms, scaleMax())">{{ m.label }}</span>
           }
         </div>
@@ -257,8 +287,10 @@ export class ResourceWaterfallComponent {
   pagedResourceCount = computed(() => this.pagedGroups().reduce((n, g) => n + g.rows.length, 0));
   expanded = signal<ReadonlySet<string>>(new Set());
 
-  scaleMax = computed(() => waterfallScaleMax(this.report().loadEventMs, this.report().resources));
   milestones = computed(() => milestoneLines(this.report()));
+  scaleMax = computed(() => waterfallScaleMax(this.report().loadEventMs, this.report().resources, this.milestones()));
+  /** Labels merged where they would overprint; the dashed lines still draw per milestone. */
+  labelMilestones = computed(() => mergeMilestoneLabels(this.milestones(), this.scaleMax()));
   ticks = computed(() => axisTicks(this.scaleMax()));
 
   toPercent = toPercent;
