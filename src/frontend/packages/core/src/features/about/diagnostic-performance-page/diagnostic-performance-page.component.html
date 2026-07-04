@@ -1,0 +1,145 @@
+@if (report(); as r) {
+  <div class="flex flex-col gap-4">
+    <!-- Actions -->
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        class="px-3 py-1.5 text-sm font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+        (click)="measure()">Measure again</button>
+      <button
+        data-test="copy-markdown"
+        class="px-3 py-1.5 text-sm font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+        (click)="copyMarkdown()">Copy as Markdown</button>
+      <button
+        data-test="copy-json"
+        class="px-3 py-1.5 text-sm font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+        (click)="copyJson()">Copy as JSON</button>
+      @if (copied(); as kind) {
+        <span class="text-sm text-content-muted">Copied {{ kind }} to clipboard</span>
+      }
+    </div>
+
+    <!-- Scope note -->
+    <app-card>
+      <div class="px-4 py-3 text-sm text-content-muted">
+        These numbers reflect this page load in this browser. For login-page numbers,
+        reload the app and open this page immediately &mdash; the performance buffer
+        persists across route changes, but not across reloads.
+      </div>
+    </app-card>
+
+    <!-- Summary -->
+    <app-info-card title="Summary">
+      <div class="flex flex-wrap gap-6 px-4 py-2 items-baseline">
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Collected</span>
+          <span class="text-sm font-medium">{{ r.collectedAt }}</span>
+        </span>
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Topology</span>
+          <span class="text-sm font-medium">{{ r.topology }}@if (r.requestId) { <span class="text-content-muted">(request-id {{ r.requestId }})</span>}</span>
+        </span>
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Protocol</span>
+          <span class="text-sm font-medium">{{ r.protocol || 'unknown' }}</span>
+        </span>
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Requests</span>
+          <span class="text-sm font-medium">{{ r.requestCount }}</span>
+        </span>
+        <span class="flex gap-2 items-baseline">
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Total transfer</span>
+          <span class="text-sm font-medium">{{ formatBytes(r.totalTransferBytes) }}</span>
+        </span>
+      </div>
+      <div class="px-4 pb-3 overflow-x-auto">
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Milestone</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="px-3 py-1.5">Response start</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.responseStartMs) }}</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-1.5">DOMContentLoaded</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.domContentLoadedMs) }}</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-1.5">Load event</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.loadEventMs) }}</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-1.5">First contentful paint</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.firstContentfulPaintMs) }}</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-1.5">Largest contentful paint@if (r.lcpElement) { <span class="text-content-muted">({{ r.lcpElement }})</span>}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.lcpMs) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </app-info-card>
+
+    <!-- Resource waterfall -->
+    <app-info-card title="Resource Waterfall">
+      <div class="px-4 pb-3">
+        <app-resource-waterfall [report]="r" />
+      </div>
+    </app-info-card>
+
+    <!-- Where the bytes go -->
+    <app-info-card title="Where the Bytes Go">
+      <div class="px-4 pb-3">
+        <app-bytes-bar [resources]="r.resources" />
+      </div>
+    </app-info-card>
+
+    <!-- Resources -->
+    <app-info-card title="Top Resources by Transfer Size">
+      @if (topResources().length < r.requestCount) {
+        <div class="px-4 pb-1 text-xs text-content-muted">
+          Showing {{ topResources().length }} of {{ r.requestCount }} resources
+        </div>
+      }
+      <div class="px-4 pb-3 overflow-x-auto">
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Path</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Start</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Duration</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Transfer</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Decoded</th>
+              <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Protocol</th>
+              <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Cached</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (res of topResources(); track res.path + res.startMs) {
+              <tr class="hover:bg-content-secondary transition-colors">
+                <td class="px-3 py-1.5 max-w-md truncate" [title]="res.path">{{ res.path }}</td>
+                <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(res.startMs) }}</td>
+                <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(res.durationMs) }}</td>
+                <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ formatBytes(res.transferBytes) }}</td>
+                <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ formatBytes(res.decodedBytes) }}</td>
+                <td class="px-3 py-1.5 whitespace-nowrap">{{ res.protocol || 'unknown' }}</td>
+                <td class="px-3 py-1.5 whitespace-nowrap">
+                  @if (res.cached) {
+                    <span class="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-content-secondary text-content-muted">cached</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-info-card>
+  </div>
+} @else {
+  <div class="px-4 py-6 text-sm text-content-muted">Measuring&hellip;</div>
+}
