@@ -1,0 +1,67 @@
+<div class="flex flex-col gap-4">
+  <div class="flex items-center justify-between gap-4">
+    <span class="text-sm text-content-muted">{{ heapLine() }}</span>
+    <button name="refresh" type="button"
+      class="px-3 py-1.5 text-sm font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+      (click)="refresh()">
+      Refresh
+    </button>
+  </div>
+
+  @if (endpointViews().length === 0) {
+    <div class="text-sm text-content-muted px-4 py-6">
+      No connected Cloud Foundry endpoints.
+    </div>
+  }
+
+  @for (endpoint of endpointViews(); track endpoint.guid) {
+    <app-info-card [title]="endpoint.name">
+      <div class="px-4 py-3 overflow-x-auto">
+        <app-heap-headroom-meter class="block mb-3" [counts]="endpoint.counts" [heap]="heap()" />
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Entity</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Count</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Est. Footprint</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of endpoint.rows; track row.key) {
+              <tr class="hover:bg-content-secondary transition-colors">
+                <td class="px-3 py-1.5 whitespace-nowrap">{{ row.label }}</td>
+                @if (row.count === null) {
+                  <td class="px-3 py-1.5 text-right text-content-muted" colspan="3">Unavailable</td>
+                } @else if (row.count === undefined) {
+                  <td class="px-3 py-1.5 text-right text-content-muted" colspan="3">Loading&hellip;</td>
+                } @else {
+                  <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ row.count | number }}</td>
+                  <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ row.footprint }}</td>
+                  <td class="px-3 py-1.5 text-right whitespace-nowrap">
+                    <span class="text-xs px-2 py-0.5 rounded-full" [ngClass]="riskChipClass(row.risk)">{{ riskLabel(row.risk) }}</span>
+                  </td>
+                }
+              </tr>
+              @if (row.key === 'user' && row.risk === 'high') {
+                <tr>
+                  <td colspan="4" class="px-3 pb-1.5 text-xs text-content-muted">
+                    Very large user lists are better served by org- or space-scoped views, or by the CF CLI.
+                  </td>
+                </tr>
+              }
+            }
+            <tr class="font-medium border-t border-content-border">
+              <td class="px-3 py-1.5 whitespace-nowrap">Total</td>
+              <td class="px-3 py-1.5"></td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ endpoint.totalFootprint }}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">
+                <span class="text-xs px-2 py-0.5 rounded-full" [ngClass]="riskChipClass(endpoint.totalRisk)">{{ riskLabel(endpoint.totalRisk) }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </app-info-card>
+  }
+</div>
