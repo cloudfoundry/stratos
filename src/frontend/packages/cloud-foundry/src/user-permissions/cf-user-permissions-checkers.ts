@@ -162,15 +162,28 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   /**
    * @param permissionConfig Single permission to be checked
    */
-  public getSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
+  public getSimpleCheck(
+    permissionConfig: PermissionConfig,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string
+  ): Observable<boolean> | undefined {
     const check$ = this.getBaseSimpleCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    if (!check$) {
+      return undefined;
+    }
     if (permissionConfig.type === CfPermissionTypes.ORGANIZATION || permissionConfig.type === CfPermissionTypes.SPACE) {
       return this.applyAdminCheck(check$, endpointGuid);
     }
     return check$;
   }
 
-  private getBaseSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
+  private getBaseSimpleCheck(
+    permissionConfig: PermissionConfig,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string
+  ): Observable<boolean> | undefined {
     switch (permissionConfig.type) {
       case (CfPermissionTypes.FEATURE_FLAG):
         return this.getFeatureFlagCheck(permissionConfig, endpointGuid);
@@ -181,8 +194,12 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       case (CfPermissionTypes.ENDPOINT_SCOPE):
         return this.getEndpointScopesCheck(permissionConfig.permission as CfScopeStrings, endpointGuid);
       default:
-        // Unknown permission type — deny rather than emit an undefined stream.
-        return of(false);
+        // Not a CF permission type: returning undefined tells
+        // CurrentUserPermissionsService this checker does not own the config.
+        // Returning a denial stream here instead makes findChecker() count two
+        // claimants for every stratos-level check and deny it app-wide (#5570,
+        // #5571).
+        return undefined;
     }
   }
 
@@ -382,9 +399,9 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): IPermissionCheckCombiner[] {
+  ): IPermissionCheckCombiner[] | null {
     const groupedChecks = this.groupConfigs(permissionConfigs);
-    return Object.keys(groupedChecks)
+    const combiners = Object.keys(groupedChecks)
       .map((permission: PermissionTypes) => {
         const configGroup = groupedChecks[permission];
         const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
@@ -394,6 +411,10 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
         return checkCombiner;
       })
       .filter((checkCombiner): checkCombiner is IPermissionCheckCombiner => !!checkCombiner);
+    // No group handled → this checker does not own the config; an empty array
+    // is truthy and would double-claim the check in findChecker() (see
+    // getBaseSimpleCheck's default case).
+    return combiners.length ? combiners : null;
   }
 
 
