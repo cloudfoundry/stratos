@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { signal, Signal } from '@angular/core';
-import { EMPTY, firstValueFrom, from, merge, Observable, of, ReplaySubject } from 'rxjs';
-import { catchError, finalize, map, mergeMap, reduce, shareReplay, switchMap, tap, timeout } from 'rxjs/operators';
+import { EMPTY, firstValueFrom, merge, Observable, of, ReplaySubject } from 'rxjs';
+import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { cascadeFor, CascadeKey, EntityKind } from '../data-sources/cascade-registry';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
+import { drainCfPages } from './drain-pages';
 import { EndpointDataShim } from './endpoint-data.shim';
 import {
   StApp,
@@ -182,10 +183,14 @@ export class EndpointDataService {
     this._isLoading.set(true);
     this._errors.set([]);
 
+    // Freshness stamps only on full success: a failed sub-request must not
+    // stamp _lastFetched, or the warm-cache short-circuit serves the broken
+    // counts until something else busts the cache.
+    let anyFailed = false;
     this._inFlightLoad = merge(
       this.http.get<{ resources: StOrg[]; totalResults: number }>(`/pp/v1/cf/orgs/${this.guid}?return=counts`).pipe(
         tap(resp => this._orgCount.set(resp.totalResults)),
-        catchError(err => { this.addError('orgs', err); return EMPTY; }),
+        catchError(err => { this.addError('orgs', err); anyFailed = true; return EMPTY; }),
       ),
       this.http.get<{ resources: StApp[]; totalResults: number }>(`/pp/v1/cf/apps/${this.guid}?return=recent`).pipe(
         tap(resp => {
@@ -193,23 +198,30 @@ export class EndpointDataService {
           this._recentApps.set(resp.resources);
           this._appCount.set(resp.totalResults);
         }),
-        catchError(err => { this.addError('apps', err); return EMPTY; }),
+        catchError(err => { this.addError('apps', err); anyFailed = true; return EMPTY; }),
       ),
       // ?return=counts hits the backend per_page=1 fast path — without it
       // we fall through to the full route list + ListDestinations path,
       // which delays the home-card route count behind the apps fetch.
       this.http.get<{ totalResults: number }>(`/pp/v1/cf/routes/${this.guid}?return=counts`).pipe(
-        tap(resp => this._routeCount.set(resp.totalResults)),
-        catchError(err => { this.addError('routes', err); return EMPTY; }),
+        tap(resp => {
+          this._routeCount.set(resp.totalResults);
+          // Route count has just been refetched — clear the cascade stale flag.
+          this._routesStale.set(false);
+        }),
+        catchError(err => { this.addError('routes', err); anyFailed = true; return EMPTY; }),
       ),
     ).pipe(
       timeout(60_000),
       map(() => undefined),
+      // A timeout (or any merged-stream error) is a failure too — it must
+      // not stamp the cache either.
+      tap({ error: () => { anyFailed = true; } }),
       finalize(() => {
         this._isLoading.set(false);
-        this._lastFetched.set(new Date());
-        // Route count has just been refetched — clear the cascade stale flag.
-        this._routesStale.set(false);
+        if (!anyFailed) {
+          this._lastFetched.set(new Date());
+        }
         // Shim write-through is intentionally NOT called here. Counts + recent
         // apps populate service signals for the home card directly; the NGRX
         // pagination store only needs the full lists, which loadDetails()
@@ -235,8 +247,13 @@ export class EndpointDataService {
   // fires the apps + spaces drains.
   loadDetails(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadDetails' });
+    // Warm-cache gate keys off the three per-domain stamps (each set only on
+    // a successful drain), NOT the orchestrator's own _detailsLastFetched —
+    // otherwise a partial failure (orgs ok, apps drain failed) would cache-hit
+    // here forever and the failed domain would never refetch.
     const anyStale = this._orgsStale() || this._appsStale() || this._spacesStale();
-    if (!anyStale && this._detailsLastFetched() !== null && this._orgs().length > 0) {
+    const allFetched = this._orgsLastFetched() !== null && this._appsLastFetched() !== null && this._spacesLastFetched() !== null;
+    if (!anyStale && allFetched && this._orgs().length > 0) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadDetails' });
       return of(undefined);
     }
@@ -266,10 +283,10 @@ export class EndpointDataService {
   }
 
   // loadOrgs() drains /pp/v1/cf/orgs/{guid} (paginated, page-1 inline +
-  // pages 2..N parallel via drainPages). Independent cache + in-flight
+  // pages 2..N parallel via drainCfPages). Independent cache + in-flight
   // guard so consumers that only read orgs() don't pay the cost of the
-  // apps + spaces drains. 500 per page; see drainPages for the
-  // pagination strategy comment.
+  // apps + spaces drains. 500 per page; see drain-pages.ts for the
+  // pagination + transient-retry strategy.
   loadOrgs(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadOrgs' });
     if (!this._orgsStale() && this._orgsLastFetched() !== null && this._orgs().length > 0) {
@@ -282,17 +299,20 @@ export class EndpointDataService {
     }
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadOrgs' });
     this._isLoadingOrgs.set(true);
-    this._inFlightLoadOrgs = this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+    this._inFlightLoadOrgs = drainCfPages<StOrg>(this.http, `/pp/v1/cf/orgs/${this.guid}`).pipe(
+      // Freshness stamp + stale-clear live on the success path, not in
+      // finalize — a failed drain must leave the cache cold and the stale
+      // flag set so the next read retries instead of serving the failure.
       tap(resp => {
         this._orgs.set(resp.resources);
         this._orgCount.set(resp.totalResults);
+        this._orgsLastFetched.set(new Date());
+        this._orgsStale.set(false);
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('orgs-full', err); return of(undefined as void); }),
       finalize(() => {
         this._isLoadingOrgs.set(false);
-        this._orgsLastFetched.set(new Date());
-        this._orgsStale.set(false);
         this._inFlightLoadOrgs = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -313,17 +333,18 @@ export class EndpointDataService {
     }
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadApps' });
     this._isLoadingApps.set(true);
-    this._inFlightLoadApps = this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
+    this._inFlightLoadApps = drainCfPages<StApp>(this.http, `/pp/v1/cf/apps/${this.guid}`).pipe(
+      // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._apps.set(resp.resources);
         this._appCount.set(resp.totalResults);
+        this._appsLastFetched.set(new Date());
+        this._appsStale.set(false);
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('apps-full', err); return of(undefined as void); }),
       finalize(() => {
         this._isLoadingApps.set(false);
-        this._appsLastFetched.set(new Date());
-        this._appsStale.set(false);
         this._inFlightLoadApps = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -347,14 +368,17 @@ export class EndpointDataService {
     }
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadSpaces' });
     this._isLoadingSpaces.set(true);
-    this._inFlightLoadSpaces = this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
-      tap(resp => this._spaces.set(resp.resources)),
+    this._inFlightLoadSpaces = drainCfPages<StSpace>(this.http, `/pp/v1/cf/spaces/${this.guid}`).pipe(
+      // Stamp on success only — see loadOrgs.
+      tap(resp => {
+        this._spaces.set(resp.resources);
+        this._spacesLastFetched.set(new Date());
+        this._spacesStale.set(false);
+      }),
       map(() => undefined as void),
       catchError(err => { this.addError('spaces-full', err); return of(undefined as void); }),
       finalize(() => {
         this._isLoadingSpaces.set(false);
-        this._spacesLastFetched.set(new Date());
-        this._spacesStale.set(false);
         this._inFlightLoadSpaces = null;
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
@@ -479,17 +503,18 @@ export class EndpointDataService {
   refreshOrgs(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshOrgs' });
     this._isLoadingOrgs.set(true);
-    return this.drainPages<StOrg>(`/pp/v1/cf/orgs/${this.guid}`).pipe(
+    return drainCfPages<StOrg>(this.http, `/pp/v1/cf/orgs/${this.guid}`).pipe(
+      // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._orgs.set(resp.resources);
         this._orgCount.set(resp.totalResults);
+        this._orgsLastFetched.set(new Date());
+        this._orgsStale.set(false);
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('orgs-full', err); return of(undefined as void); }),
       finalize(() => {
         this._isLoadingOrgs.set(false);
-        this._orgsLastFetched.set(new Date());
-        this._orgsStale.set(false);
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
@@ -498,17 +523,18 @@ export class EndpointDataService {
   refreshApps(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshApps' });
     this._isLoadingApps.set(true);
-    return this.drainPages<StApp>(`/pp/v1/cf/apps/${this.guid}`).pipe(
+    return drainCfPages<StApp>(this.http, `/pp/v1/cf/apps/${this.guid}`).pipe(
+      // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._apps.set(resp.resources);
         this._appCount.set(resp.totalResults);
+        this._appsLastFetched.set(new Date());
+        this._appsStale.set(false);
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('apps-full', err); return of(undefined as void); }),
       finalize(() => {
         this._isLoadingApps.set(false);
-        this._appsLastFetched.set(new Date());
-        this._appsStale.set(false);
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
@@ -517,14 +543,17 @@ export class EndpointDataService {
   refreshSpaces(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshSpaces' });
     this._isLoadingSpaces.set(true);
-    return this.drainPages<StSpace>(`/pp/v1/cf/spaces/${this.guid}`).pipe(
-      tap(resp => this._spaces.set(resp.resources)),
+    return drainCfPages<StSpace>(this.http, `/pp/v1/cf/spaces/${this.guid}`).pipe(
+      // Stamp on success only — see loadOrgs.
+      tap(resp => {
+        this._spaces.set(resp.resources);
+        this._spacesLastFetched.set(new Date());
+        this._spacesStale.set(false);
+      }),
       map(() => undefined as void),
       catchError(err => { this.addError('spaces-full', err); return of(undefined as void); }),
       finalize(() => {
         this._isLoadingSpaces.set(false);
-        this._spacesLastFetched.set(new Date());
-        this._spacesStale.set(false);
       }),
       shareReplay({ bufferSize: 1, refCount: false }),
     ) as Observable<void>;
@@ -550,38 +579,6 @@ export class EndpointDataService {
   }
 
   // -----------------------------------------------------------------------
-
-  // Drain all pages for a Stratos-shape list endpoint. Page 1 inline,
-  // pages 2..N in parallel (concurrency=4). Reads totalPages from the
-  // StratosPagedResponse pagination meta (stratos_paging.go:68). Reduces
-  // to a single {resources, totalResults, totalPages} envelope so the
-  // caller can populate count signals from page-1 metadata without an
-  // extra fetch. Tolerates both StratosPagedResponse and the older
-  // flat-envelope shape (totalResults at the top level) — the backend
-  // PR #5337 era still has handlers in transition.
-  private drainPages<T>(urlBase: string): Observable<{ resources: T[]; totalResults: number; totalPages: number }> {
-    const perPage = 500;
-    type Paged<U> = { resources: U[]; totalResults?: number; pagination?: { totalResults?: number; totalPages?: number } };
-    const totalResultsOf = <U>(r: Paged<U>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
-    const fetchPage = (page: number) =>
-      this.http.get<Paged<T>>(`${urlBase}?per_page=${perPage}&page=${page}`);
-    return fetchPage(1).pipe(
-      switchMap(firstResp => {
-        const totalResults = totalResultsOf(firstResp);
-        const totalPages = firstResp.pagination?.totalPages ?? 1;
-        const firstResources = firstResp.resources;
-        if (totalPages <= 1) {
-          return of({ resources: firstResources, totalResults, totalPages });
-        }
-        const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
-        return from(remainingPages).pipe(
-          mergeMap(p => fetchPage(p).pipe(map(r => r.resources)), 4 /* concurrency */),
-          reduce((acc, resources) => [...acc, ...resources], [...firstResources]),
-          map(allResources => ({ resources: allResources, totalResults, totalPages })),
-        );
-      }),
-    );
-  }
 
   // loadServicesCounts() fetches the four cnsi-scoped services-domain counts
   // in parallel via the existing `?return=counts` convention. Used by the

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -644,6 +645,95 @@ describe('EndpointDataService', () => {
       service.removeServiceInstance('si-a');
       expect(service.serviceInstances()).toEqual([]);
       expect(service.serviceInstancesCount()).toBe(0);
+    });
+  });
+
+  describe('transient retry + cold cache on failure (#5577)', () => {
+    afterEach(() => vi.useRealTimers());
+
+    const orgPage = { resources: [{ guid: 'o1', name: 'Org One', cnsiGuid: 'test-cnsi-guid' }], pagination: { totalResults: 1, totalPages: 1 } };
+    const emptyPage = { resources: [], pagination: { totalResults: 0, totalPages: 1 } };
+
+    it('loadOrgs() retries a transient 502 page fetch (500ms backoff) and succeeds', async () => {
+      vi.useFakeTimers();
+      const done = firstValueFrom(service.loadOrgs());
+      httpMock.expectOne(ORGS_FULL_URL).flush('bad gateway', { status: 502, statusText: 'Bad Gateway' });
+      await vi.advanceTimersByTimeAsync(500);
+      httpMock.expectOne(ORGS_FULL_URL).flush(orgPage);
+      await done;
+      expect(service.orgs()).toHaveLength(1);
+      expect(service.orgsLastFetched()).not.toBeNull();
+      expect(service.errors()).toEqual([]);
+    });
+
+    it('loadOrgs() does NOT retry a non-transient 404', async () => {
+      const done = firstValueFrom(service.loadOrgs());
+      httpMock.expectOne(ORGS_FULL_URL).flush('not found', { status: 404, statusText: 'Not Found' });
+      await done;
+      httpMock.expectNone(ORGS_FULL_URL);
+      expect(service.errors().some(e => e.resource === 'orgs-full')).toBeTruthy();
+      expect(service.orgsLastFetched()).toBeNull();
+    });
+
+    it('loadOrgs() gives up after 2 retries; cache stays cold and the stale flag survives', async () => {
+      vi.useFakeTimers();
+      service.markStale('orgs');
+      const done = firstValueFrom(service.loadOrgs());
+      httpMock.expectOne(ORGS_FULL_URL).flush('x', { status: 503, statusText: 'Service Unavailable' });
+      await vi.advanceTimersByTimeAsync(500);
+      httpMock.expectOne(ORGS_FULL_URL).flush('x', { status: 503, statusText: 'Service Unavailable' });
+      await vi.advanceTimersByTimeAsync(1000);
+      httpMock.expectOne(ORGS_FULL_URL).flush('x', { status: 503, statusText: 'Service Unavailable' });
+      await done;
+      expect(service.orgsLastFetched()).toBeNull();
+      expect(service.orgsStale()).toBeTruthy();
+      expect(service.errors().some(e => e.resource === 'orgs-full')).toBeTruthy();
+      // Cache is still cold — the next read refetches instead of serving the failure.
+      const again = firstValueFrom(service.loadOrgs());
+      httpMock.expectOne(ORGS_FULL_URL).flush(orgPage);
+      await again;
+      expect(service.orgsLastFetched()).not.toBeNull();
+      expect(service.orgsStale()).toBeFalsy();
+    });
+
+    it('retries when Jetstream classifies the failure unreachable, regardless of status', async () => {
+      vi.useFakeTimers();
+      const done = firstValueFrom(service.loadSpaces());
+      httpMock.expectOne(SPACES_FULL_URL).flush('route flap', {
+        status: 404, statusText: 'Not Found', headers: { 'X-Stratos-Error-Reason': 'unreachable' },
+      });
+      await vi.advanceTimersByTimeAsync(500);
+      httpMock.expectOne(SPACES_FULL_URL).flush(emptyPage);
+      await done;
+      expect(service.spacesLastFetched()).not.toBeNull();
+    });
+
+    it('loadDetails() partial failure: only the failed domain refetches on the next call', async () => {
+      const first = firstValueFrom(service.loadDetails());
+      httpMock.expectOne(ORGS_FULL_URL).flush(orgPage);
+      httpMock.expectOne(SPACES_FULL_URL).flush({ resources: [{ guid: 's1', name: 'Sp', cnsiGuid: 'test-cnsi-guid' }], pagination: { totalResults: 1, totalPages: 1 } });
+      // 500 is a real CF answer, not transient — no retry.
+      httpMock.expectOne(APPS_FULL_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+      await first;
+      expect(service.appsLastFetched()).toBeNull();
+      expect(service.orgsLastFetched()).not.toBeNull();
+
+      const second = firstValueFrom(service.loadDetails());
+      httpMock.expectNone(ORGS_FULL_URL);
+      httpMock.expectNone(SPACES_FULL_URL);
+      httpMock.expectOne(APPS_FULL_URL).flush({ resources: [{ guid: 'a1', name: 'App', cnsiGuid: 'test-cnsi-guid', state: 'STARTED' }], pagination: { totalResults: 1, totalPages: 1 } });
+      await second;
+      expect(service.appsLastFetched()).not.toBeNull();
+      expect(service.apps()).toHaveLength(1);
+    });
+
+    it('load() with a failed sub-request does not stamp lastFetched (cache stays cold)', async () => {
+      const p = firstValueFrom(service.load());
+      httpMock.expectOne(ORGS_URL).flush('x', { status: 500, statusText: 'Server Error' });
+      httpMock.expectOne(APPS_URL).flush({ resources: [], totalResults: 0 });
+      httpMock.expectOne(ROUTES_URL).flush({ totalResults: 0 });
+      await p;
+      expect(service.lastFetched()).toBeNull();
     });
   });
 });
