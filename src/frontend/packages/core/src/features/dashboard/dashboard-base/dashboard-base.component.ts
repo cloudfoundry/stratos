@@ -12,7 +12,7 @@ import {
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { delay, distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
 import { naturalCompare } from '../../../shared/utils/natural-sort';
@@ -69,8 +69,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
   public noMargin$: Observable<boolean> = of(false);
   private closeSub!: Subscription;
-  private routerSub!: Subscription;
   private mobileSub: Subscription;
+  private resizeObserver?: ResizeObserver;
+  private mutationObserver?: MutationObserver;
   private drawer: any;
   public iconModeOpen = false;
   public sideNavWidth = 54;
@@ -149,6 +150,25 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   ngAfterViewInit() {
     this.sidePanelService.setContainer(this.previewPanelContainer);
+
+    const el = this.content?.nativeElement;
+    if (!el) return;
+    this.updateScrollShadow(el);
+
+    // Viewport/container size changes shift clientHeight.
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.updateScrollShadow());
+      this.resizeObserver.observe(el);
+    }
+
+    // Route swaps, async-rendered content and native <details> toggles change
+    // scrollHeight without any scroll or resize event.
+    if (typeof MutationObserver !== 'undefined') {
+      this.mutationObserver = new MutationObserver(() => this.updateScrollShadow());
+      // attributes:true catches native <details> open-toggles, which change
+      // scrollHeight without adding or removing nodes.
+      this.mutationObserver.observe(el, { childList: true, subtree: true, attributes: true });
+    }
   }
 
   ngOnInit() {
@@ -173,12 +193,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     // Initialize user favorites - fire and forget, no subscription needed
     this.userFavorites.load();
 
-    // Re-evaluate scroll shadow after route changes (content height changes)
-    // Use delay(100) to let the new route's content render before measuring
-    this.routerSub = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      delay(100)
-    ).subscribe(() => this.updateScrollShadow());
   }
 
   ngOnDestroy() {
@@ -188,9 +202,8 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     if (this.closeSub) {
       this.closeSub.unsubscribe();
     }
-    if (this.routerSub) {
-      this.routerSub.unsubscribe();
-    }
+    this.resizeObserver?.disconnect();
+    this.mutationObserver?.disconnect();
     this.sidePanelService.unsetContainer();
   }
 
