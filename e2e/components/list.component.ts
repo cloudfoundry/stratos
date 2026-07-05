@@ -157,7 +157,8 @@ export class ListTableComponent {
  * Card view of list component
  */
 export class ListCardComponent {
-  private static cardsCss = 'app-card:not(.row-filler), mat-card:not(.row-filler)';
+  // Legacy app-list cards plus signal-list card-grid children.
+  private static cardsCss = 'app-card:not(.row-filler), mat-card:not(.row-filler), [data-test="card-grid"] > *';
   private cards: Locator;
 
   constructor(private page: Page, private listLocator: Locator) {
@@ -441,16 +442,25 @@ export class ListComponent {
     this.empty = new ListEmptyComponent(page, this.locator);
   }
 
+  // View detection covers both list generations. Legacy app-list carries a
+  // list-component__table/__cards class; signal-list renders a plain <table>
+  // for table view and a [data-test="card-grid"] for card view. Use count()
+  // (not getAttribute) so a missing legacy element returns false instead of
+  // hanging on the auto-wait.
   async isTableView(): Promise<boolean> {
-    const listElement = this.locator.locator('.list-component');
-    const className = (await listElement.getAttribute('class')) ?? '';
-    return className.includes('list-component__table');
+    const legacy = this.locator.locator('.list-component');
+    if (await legacy.count()) {
+      return ((await legacy.getAttribute('class')) ?? '').includes('list-component__table');
+    }
+    return (await this.locator.locator('table').count()) > 0;
   }
 
   async isCardsView(): Promise<boolean> {
-    const listElement = this.locator.locator('.list-component');
-    const className = (await listElement.getAttribute('class')) ?? '';
-    return className.includes('list-component__cards');
+    const legacy = this.locator.locator('.list-component');
+    if (await legacy.count()) {
+      return ((await legacy.getAttribute('class')) ?? '').includes('list-component__cards');
+    }
+    return (await this.locator.locator('[data-test="card-grid"]').count()) > 0;
   }
 
   getLoadingIndicator(): Locator {
