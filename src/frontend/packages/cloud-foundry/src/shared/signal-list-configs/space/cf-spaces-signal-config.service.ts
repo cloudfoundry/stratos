@@ -78,6 +78,12 @@ export class CfSpacesSignalConfigService {
   private readonly _hasLoadedOnce = signal(false);
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
 
+  // Last drain failure keyed by cnsi, for the signal-list error surfaces
+  // (top strip + failed-load empty state with Retry). Cleared on the next
+  // successful drain.
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+  readonly errorsByCnsi: Signal<Map<string, unknown>> = this._errorsByCnsi.asReadonly();
+
   initialize(cnsiGuid: string, orgGuid: string): void {
     // If the active scope is changing (revisiting the page for a different
     // org under the same singleton), drop the previous payload so the
@@ -181,13 +187,13 @@ export class CfSpacesSignalConfigService {
       // row, so the wire payload is self-describing — no stamping needed.
       this._orgSpaces.set(out);
       this._hasLoadedOnce.set(true);
-    } catch {
-      // Swallow — the empty list and "no spaces" message communicate the
-      // failure. A future enhancement could surface a StError; for now
-      // the symptom is identical to a legitimately empty org and the
-      // Refresh button retries.
+      this._errorsByCnsi.set(new Map());
+    } catch (err) {
+      // Surface the failure so the list renders the failed-load state with
+      // a Retry affordance instead of a misleading "no spaces" (#5577).
       if (epoch === this.fetchEpoch) {
         this._hasLoadedOnce.set(true);
+        this._errorsByCnsi.set(new Map([[this.cnsiGuid, err]]));
       }
     }
   }

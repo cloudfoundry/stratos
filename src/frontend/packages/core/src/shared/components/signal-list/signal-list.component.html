@@ -223,6 +223,22 @@
           <span class="text-lg">{{ config.loadingMessage ?? 'Loading…' }}</span>
         </div>
       </div>
+    } @else if (config.totalFilteredResults() === 0 && config.errorsByCnsi().size > 0) {
+      <!-- Failed-load state: the drain errored and automatic retries are
+           exhausted. Offer an in-page Retry (same handler as the toolbar
+           refresh) instead of a misleading "no items" (#5577). -->
+      <div data-test="empty-error" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">
+        <span class="material-icons text-6xl opacity-30 text-danger">error_outline</span>
+        <span class="text-base">{{ config.errorMessage ?? 'Failed to load — the endpoint may be temporarily unreachable' }}</span>
+        @if (config.onRefresh) {
+          <button type="button" data-test="empty-error-retry"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm bg-primary text-white hover:bg-primary/90 transition-all duration-150"
+                  (click)="invokeRefresh()">
+            <span class="material-icons text-base leading-none">refresh</span>
+            Retry
+          </button>
+        }
+      </div>
     } @else if (config.totalFilteredResults() === 0) {
       @if (hasActiveFilter()) {
         <div data-test="empty-filtered" class="flex flex-col items-center justify-center h-full gap-3 text-content-muted">

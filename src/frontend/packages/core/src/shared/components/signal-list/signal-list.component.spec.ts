@@ -119,6 +119,41 @@ describe('SignalListComponent', () => {
     expect(empty.textContent).toContain('There are no items');
   });
 
+  it('renders the failed-load state with a working Retry button when empty and errored (#5577)', async () => {
+    const onRefresh = vi.fn();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      totalFilteredResults: signal(0).asReadonly(),
+      errorsByCnsi: signal(new Map<string, unknown>([['cnsi-1', new Error('boom')]])).asReadonly(),
+      errorMessage: 'Failed to load organizations',
+      onRefresh,
+    };
+    fixture.detectChanges();
+    // Failed-load state replaces the plain empty state...
+    expect(fixture.nativeElement.querySelector('[data-test="empty"]')).toBeNull();
+    const errorState = fixture.nativeElement.querySelector('[data-test="empty-error"]');
+    expect(errorState).not.toBeNull();
+    expect(errorState.textContent).toContain('Failed to load organizations');
+    // ...and its Retry button drives the same refresh handler as the toolbar.
+    const retry = fixture.nativeElement.querySelector('[data-test="empty-error-retry"]');
+    expect(retry).not.toBeNull();
+    retry.click();
+    await fixture.whenStable();
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('prefers the plain empty state when empty without errors', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      totalFilteredResults: signal(0).asReadonly(),
+    };
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="empty-error"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="empty"]')).not.toBeNull();
+  });
+
   it('resets pageIndex to 0 when page size changes', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.pageIndex.set(3);

@@ -114,7 +114,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
       pageIndex: this.spacesConfig.pageIndex,
       pageSize: this.spacesConfig.pageSize,
       isAnyLoading: computed(() => !this.spacesConfig.hasLoadedOnce()),
-      errorsByCnsi: signal(new Map()),
+      errorsByCnsi: this.spacesConfig.errorsByCnsi,
       columns: [
         {
           header: 'Name', key: 'name', sortField: 'name',
@@ -155,6 +155,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
       emptyMessage: 'There are no spaces in this organization',
       emptyFilterMessage: 'No spaces match the current filters',
       loadingMessage: 'Loading spaces…',
+      errorMessage: 'Failed to load spaces — the endpoint may be temporarily unreachable',
       pageSizeOptions: {
         table: [10, 25, 50, 100],
         card: [6, 12, 24, 48, 96],
