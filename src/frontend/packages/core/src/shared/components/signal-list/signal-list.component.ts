@@ -568,11 +568,21 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   pageSizeOptions(): readonly number[] {
+    const mode = this.config.viewMode ? this.config.viewMode() : 'table';
+    return this.effectivePageSizeOptions(mode);
+  }
+
+  // The option set actually offered in a view mode. Card views carry the
+  // legacy app-paginator "All" (-1) option; table views deliberately don't
+  // (switching to table reverts to a concrete size via the setViewMode
+  // snap). setViewMode must validate against THIS set, not the raw config
+  // lists, or a remembered "All" gets snapped away on return to card view.
+  private effectivePageSizeOptions(mode: SignalListViewMode): readonly number[] {
     const opts = this.config.pageSizeOptions;
     if (!opts) return [5, 20, 50, 80];
     if ('table' in opts && 'card' in opts) {
-      const mode = this.config.viewMode ? this.config.viewMode() : 'table';
-      return mode === 'card' ? opts.card : opts.table;
+      const list = mode === 'card' ? opts.card : opts.table;
+      return mode === 'card' && !list.includes(-1) ? [...list, -1] : list;
     }
     return opts;
   }
@@ -581,14 +591,20 @@ export class SignalListComponent<T> implements AfterViewInit {
     const total = this.config.totalFilteredResults();
     if (total === 0) return '0 of 0';
     const size = this.config.pageSize();
+    if (size <= 0) return `1 – ${total} of ${total}`;
     const start = this.config.pageIndex() * size + 1;
     const end = Math.min(start + size - 1, total);
     return `${start} – ${end} of ${total}`;
   }
 
+  // -1 is the "All" page-size sentinel (legacy app-paginator parity).
+  pageSizeLabel(opt: number): string {
+    return opt === -1 ? 'All' : String(opt);
+  }
+
   onPageSizeChange(value: string): void {
     const n = parseInt(value, 10);
-    if (!Number.isFinite(n) || n <= 0) return;
+    if (!Number.isFinite(n) || (n <= 0 && n !== -1)) return;
     this.config.pageSize.set(n);
     this.config.pageIndex.set(0);
   }
@@ -600,7 +616,7 @@ export class SignalListComponent<T> implements AfterViewInit {
     // and the "X of Y" range would reflect a size not in the picker.
     const opts = this.config.pageSizeOptions;
     if (opts && 'table' in opts && 'card' in opts) {
-      const next = mode === 'card' ? opts.card : opts.table;
+      const next = this.effectivePageSizeOptions(mode);
       if (next.length && !next.includes(this.config.pageSize())) {
         this.config.pageSize.set(next[0]);
         this.config.pageIndex.set(0);

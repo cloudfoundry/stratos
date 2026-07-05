@@ -129,6 +129,88 @@ describe('SignalListComponent', () => {
     expect(fixture.componentInstance.pageIndex()).toBe(0);
   });
 
+  describe('"All" page size (-1)', () => {
+    function componentWith(fixture: ReturnType<typeof TestBed.createComponent<Host>>) {
+      return fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string }>;
+    }
+
+    it('appends All (-1) to card-mode options and labels it', () => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode: signal<'table' | 'card'>('card'),
+        pageSizeOptions: { table: [10, 25], card: [6, 12] },
+      };
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      expect(component.pageSizeOptions()).toEqual([6, 12, -1]);
+      expect(component.pageSizeLabel(-1)).toBe('All');
+      expect(component.pageSizeLabel(12)).toBe('12');
+    });
+
+    it('does not add All to table-mode options', () => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode: signal<'table' | 'card'>('table'),
+        pageSizeOptions: { table: [10, 25], card: [6, 12] },
+      };
+      fixture.detectChanges();
+      expect(componentWith(fixture).pageSizeOptions()).toEqual([10, 25]);
+    });
+
+    it('accepts -1 from the select and reports the full range', () => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.pageIndex.set(2);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.onPageSizeChange('-1');
+      expect(fixture.componentInstance.pageSize()).toBe(-1);
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+      expect(component.rangeText()).toBe('1 – 2 of 2');
+    });
+
+    it('still rejects zero and garbage page sizes', () => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.onPageSizeChange('0');
+      component.onPageSizeChange('bogus');
+      expect(fixture.componentInstance.pageSize()).toBe(10);
+    });
+
+    it('does not snap All away when switching to card view', () => {
+      // Regression: setViewMode must validate against the effective card
+      // options (which include -1), not the raw config list — otherwise a
+      // per-view remembered "All" is destroyed on return to card view.
+      const fixture = TestBed.createComponent(Host);
+      const viewMode = signal<'table' | 'card'>('table');
+      fixture.componentInstance.pageSize.set(-1);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode,
+        pageSizeOptions: { table: [10, 25], card: [6, 12] },
+      };
+      fixture.detectChanges();
+      componentWith(fixture).setViewMode('card');
+      expect(fixture.componentInstance.pageSize()).toBe(-1);
+    });
+
+    it('snaps All back to a concrete size when switching to table view', () => {
+      const fixture = TestBed.createComponent(Host);
+      const viewMode = signal<'table' | 'card'>('card');
+      fixture.componentInstance.pageSize.set(-1);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode,
+        pageSizeOptions: { table: [10, 25], card: [6, 12] },
+      };
+      fixture.detectChanges();
+      componentWith(fixture).setViewMode('table');
+      expect(fixture.componentInstance.pageSize()).toBe(10);
+    });
+  });
+
   it('renders a filter dropdown per config.filterDropdowns entry', () => {
     const fixture = TestBed.createComponent(Host);
     const selected = signal<string | null>(null);

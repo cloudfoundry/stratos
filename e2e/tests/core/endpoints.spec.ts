@@ -223,12 +223,15 @@ test.describe('Endpoints', () => {
           try { await snackbar.waitUntilShown(); await snackbar.close(); } catch { /* may not appear */ }
 
           expect(await endpointsPage.list.locator.isVisible()).toBeTruthy();
-          expect(await endpointsPage.list.isCardsView()).toBeTruthy();
-          const cardCount = await endpointsPage.list.cards.getCardCount();
-          expect(cardCount).toBe(1);
+          // The migrated endpoints list is table-primary by design (see
+          // EndpointsSignalConfigService — legacy defaultView 'cards' was
+          // deliberately dropped) and provides no card template.
+          expect(await endpointsPage.list.isTableView()).toBeTruthy();
+          const rowCount = await endpointsPage.list.table.getRowCount();
+          expect(rowCount).toBe(1);
         });
 
-        test('should show correct cards content', async ({ unauthenticatedPage, secrets, endpointManager, baseURL }) => {
+        test('should show correct endpoint content', async ({ unauthenticatedPage, secrets, endpointManager, baseURL }) => {
           try {
             await endpointManager.clearAllEndpoints();
           } catch {
@@ -247,13 +250,13 @@ test.describe('Endpoints', () => {
 
           const cfName = secrets.cloudFoundry[0].name;
 
-          // Verify the endpoint card is visible with the correct name
-          const card = await endpointsPage.findCardByTitle(cfName);
-          await expect(card).toBeVisible();
+          // Verify the endpoint row is visible with the correct name
+          const row = await endpointsPage.list.table.findRowByCellContent(cfName);
+          await expect(row).toBeVisible();
 
-          // Verify URL is present on the card
+          // Verify URL is present on the row
           const cfUrl = secrets.cloudFoundry[0].url;
-          await expect(card).toContainText(cfUrl.replace('https://', '').split('/')[0]);
+          await expect(row).toContainText(cfUrl.replace('https://', '').split('/')[0]);
         });
       });
     });

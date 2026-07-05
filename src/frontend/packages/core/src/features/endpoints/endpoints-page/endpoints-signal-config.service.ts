@@ -95,12 +95,18 @@ export class ViewPipeline<T> {
     });
     this.pagedItems = computed(() => {
       const size = this.pageSize();
+      // pageSize -1 = the "All" page-size option: no slicing.
+      if (size <= 0) return this.sortedItems();
       const start = this.pageIndex() * size;
       return this.sortedItems().slice(start, start + size);
     });
     this.totalItems = computed(() => this.items().length);
     this.totalFilteredResults = computed(() => this.filteredItems().length);
-    this.totalPages = computed(() => Math.ceil(this.totalFilteredResults() / this.pageSize()));
+    this.totalPages = computed(() => {
+      const size = this.pageSize();
+      if (size <= 0) return this.totalFilteredResults() > 0 ? 1 : 0;
+      return Math.ceil(this.totalFilteredResults() / size);
+    });
   }
 }
 
