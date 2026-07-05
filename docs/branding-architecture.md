@@ -272,8 +272,9 @@ decoration.
 
 Guidelines for a custom background:
 
-1. Keep it at or under ~100 kB -- comparable to the app's own lazy
-   chunks. Anything larger becomes the heaviest asset on the page.
+1. Keep it in the low hundreds of kB at most -- comparable to the
+   app's own lazy chunks. Anything larger becomes the heaviest asset
+   on the page.
 2. A background rendered behind the login card does not need full
    resolution or sharpness. 1280x720 WebP at quality 60-65 is visually
    equivalent to a 1080p JPEG in this role.
@@ -294,8 +295,8 @@ Worked example -- the previous stock background, a 1920x1080 JPEG:
 | 960x540 WebP q65 | 95 kB |
 | 1280x720 WebP q60, gaussian blur | 38 kB |
 
-The 960x540 variant ships as the current stock `login-bg.webp`
-(a 77% reduction; see issue #5550 for the measurements that motivated
+The 1280x720 q65 variant ships as the current stock `login-bg.webp`
+(a 62% reduction; see issue #5550 for the measurements that motivated
 it). To check the impact on your own foundation, the login page load
 report at About -> Diagnostics -> Load Performance shows per-resource
 timings for any deployment.

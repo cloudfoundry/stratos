@@ -21,7 +21,7 @@ const defaultCompanyConfig: CompanyConfig = {
     navigation: '/core/assets/logo.png',
     navigationIcon: '/core/assets/logo.png',
     favicon: '/favicon.ico',
-    loginBackground: '/core/assets/login-bg.jpg',
+    loginBackground: '/core/assets/login-bg.webp',
   },
   theme: {
     primary: '#3b82f6',
