@@ -128,24 +128,30 @@ func fetchWebProcessesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs [
 	}
 
 	processes := make(map[string]capi.Process, len(appGUIDs))
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["app_guids"] = appGUIDs
-		params.Filters["types"] = []string{"web"}
+	// Chunked — see native_guid_chunks.go / #5579.
+	cerr := forEachGuidChunk("app_guids", appGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["app_guids"] = chunk
+			params.Filters["types"] = []string{"web"}
 
-		raw, err := cfClient.Processes().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
-		}
-		for _, p := range raw.Resources {
-			if p.Relationships != nil && p.Relationships.App != nil {
-				processes[relationshipGUID(*p.Relationships.App)] = p
+			raw, err := cfClient.Processes().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, p := range raw.Resources {
+				if p.Relationships != nil && p.Relationships.App != nil {
+					processes[relationshipGUID(*p.Relationships.App)] = p
+				}
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
 			}
 		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if cerr != nil {
+		return nil, cerr
 	}
 	return processes, nil
 }
@@ -160,21 +166,27 @@ func fetchSpacesByGUIDs(ctx echo.Context, cfClient capi.Client, spaceGUIDs []str
 		return map[string]capi.Space{}, nil
 	}
 	spaces := make(map[string]capi.Space, len(spaceGUIDs))
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["guids"] = spaceGUIDs
+	// Chunked — see native_guid_chunks.go / #5579.
+	cerr := forEachGuidChunk("guids", spaceGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["guids"] = chunk
 
-		raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
+			raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, s := range raw.Resources {
+				spaces[s.GUID] = s
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
+			}
 		}
-		for _, s := range raw.Resources {
-			spaces[s.GUID] = s
-		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if cerr != nil {
+		return nil, cerr
 	}
 	return spaces, nil
 }
@@ -189,21 +201,27 @@ func fetchOrgsByGUIDs(ctx echo.Context, cfClient capi.Client, orgGUIDs []string)
 		return map[string]capi.Organization{}, nil
 	}
 	orgs := make(map[string]capi.Organization, len(orgGUIDs))
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["guids"] = orgGUIDs
+	// Chunked — see native_guid_chunks.go / #5579.
+	cerr := forEachGuidChunk("guids", orgGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["guids"] = chunk
 
-		raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
+			raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, o := range raw.Resources {
+				orgs[o.GUID] = o
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
+			}
 		}
-		for _, o := range raw.Resources {
-			orgs[o.GUID] = o
-		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if cerr != nil {
+		return nil, cerr
 	}
 	return orgs, nil
 }
@@ -230,31 +248,37 @@ func fetchRoutesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []strin
 	}
 
 	out := make(map[string][]StAppRoute, len(appGUIDs))
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["app_guids"] = appGUIDs
+	// Chunked — see native_guid_chunks.go / #5579.
+	cerr := forEachGuidChunk("app_guids", appGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["app_guids"] = chunk
 
-		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
-		}
-		for _, r := range raw.Resources {
-			ar := StAppRoute{GUID: r.GUID, URL: r.URL}
-			for _, d := range r.Destinations {
-				appGUID := d.App.GUID
-				if appGUID == "" {
-					continue
+			raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, r := range raw.Resources {
+				ar := StAppRoute{GUID: r.GUID, URL: r.URL}
+				for _, d := range r.Destinations {
+					appGUID := d.App.GUID
+					if appGUID == "" {
+						continue
+					}
+					if _, ok := wanted[appGUID]; !ok {
+						continue
+					}
+					out[appGUID] = append(out[appGUID], ar)
 				}
-				if _, ok := wanted[appGUID]; !ok {
-					continue
-				}
-				out[appGUID] = append(out[appGUID], ar)
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
 			}
 		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if cerr != nil {
+		return nil, cerr
 	}
 	return out, nil
 }

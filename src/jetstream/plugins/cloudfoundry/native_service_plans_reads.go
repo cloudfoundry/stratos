@@ -406,16 +406,20 @@ func batchFetchBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offer
 	if len(guids) == 0 {
 		return out
 	}
-	params := capi.NewQueryParams().WithPerPage(len(guids)).WithFilter("guids", guids...)
-	raw, err := cfClient.ServiceBrokers().List(ctx.Request().Context(), params)
-	if err != nil {
-		return out
-	}
-	for _, b := range raw.Resources {
-		if b.GUID != "" {
-			out[b.GUID] = b
+	// Chunked — see native_guid_chunks.go / #5579.
+	_ = forEachGuidChunk("guids", guids, func(chunk []string) error {
+		params := capi.NewQueryParams().WithPerPage(len(chunk)).WithFilter("guids", chunk...)
+		raw, err := cfClient.ServiceBrokers().List(ctx.Request().Context(), params)
+		if err != nil {
+			return err
 		}
-	}
+		for _, b := range raw.Resources {
+			if b.GUID != "" {
+				out[b.GUID] = b
+			}
+		}
+		return nil
+	})
 	return out
 }
 

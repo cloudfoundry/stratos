@@ -133,35 +133,41 @@ func fetchBoundAppsForServiceInstances(ctx echo.Context, cfClient capi.Client, s
 	if len(siGUIDs) == 0 {
 		return bound, nil
 	}
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest).WithInclude("app")
-		params.Page = page
-		params.Filters["service_instance_guids"] = siGUIDs
-		params.Filters["type"] = []string{"app"}
+	// Chunked — see native_guid_chunks.go / #5579.
+	cerr := forEachGuidChunk("service_instance_guids", siGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest).WithInclude("app")
+			params.Page = page
+			params.Filters["service_instance_guids"] = chunk
+			params.Filters["type"] = []string{"app"}
 
-		raw, err := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
-		}
-		_, appByGUID := bindingJoinsFromIncluded(raw)
-		for _, b := range raw.Resources {
-			siGUID := relationshipGUID(b.Relationships.ServiceInstance)
-			if siGUID == "" || b.Relationships.App == nil {
-				continue
+			raw, err := cfClient.ServiceCredentialBindings().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
 			}
-			appGUID := relationshipGUID(*b.Relationships.App)
-			if appGUID == "" {
-				continue
+			_, appByGUID := bindingJoinsFromIncluded(raw)
+			for _, b := range raw.Resources {
+				siGUID := relationshipGUID(b.Relationships.ServiceInstance)
+				if siGUID == "" || b.Relationships.App == nil {
+					continue
+				}
+				appGUID := relationshipGUID(*b.Relationships.App)
+				if appGUID == "" {
+					continue
+				}
+				ref := StAppRef{GUID: appGUID}
+				if app, ok := appByGUID[appGUID]; ok {
+					ref.Name = app.Name
+				}
+				bound[siGUID] = append(bound[siGUID], ref)
 			}
-			ref := StAppRef{GUID: appGUID}
-			if app, ok := appByGUID[appGUID]; ok {
-				ref.Name = app.Name
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
 			}
-			bound[siGUID] = append(bound[siGUID], ref)
 		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if cerr != nil {
+		return nil, cerr
 	}
 	return bound, nil
 }

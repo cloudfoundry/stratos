@@ -171,16 +171,20 @@ func batchFetchBrokerSpaces(ctx echo.Context, cfClient capi.Client, brokers []ca
 	if len(guids) == 0 {
 		return out
 	}
-	params := capi.NewQueryParams().WithPerPage(len(guids)).WithFilter("guids", guids...)
-	raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
-	if err != nil {
-		return out
-	}
-	for _, s := range raw.Resources {
-		if s.GUID != "" {
-			out[s.GUID] = s
+	// Chunked — see native_guid_chunks.go / #5579.
+	_ = forEachGuidChunk("guids", guids, func(chunk []string) error {
+		params := capi.NewQueryParams().WithPerPage(len(chunk)).WithFilter("guids", chunk...)
+		raw, err := cfClient.Spaces().List(ctx.Request().Context(), params)
+		if err != nil {
+			return err
 		}
-	}
+		for _, s := range raw.Resources {
+			if s.GUID != "" {
+				out[s.GUID] = s
+			}
+		}
+		return nil
+	})
 	return out
 }
 

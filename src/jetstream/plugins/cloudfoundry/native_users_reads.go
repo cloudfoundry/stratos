@@ -245,7 +245,30 @@ func listRolesForUsers(ctx context.Context, cfClient capi.Client, userGUIDs []st
 	if len(userGUIDs) == 0 {
 		return nil, nil, nil
 	}
+	// Chunked: every user on the CF lands in this filter (14 users ≈ 1.3KB
+	// already) — see native_guid_chunks.go / #5579.
+	var all []capi.Role
+	spaces := make(map[string]includedSpace)
+	err := forEachGuidChunk("user_guids", userGUIDs, func(chunk []string) error {
+		roles, sp, cerr := listRolesForUserChunk(ctx, cfClient, chunk)
+		if cerr != nil {
+			return cerr
+		}
+		all = append(all, roles...)
+		for k, v := range sp {
+			spaces[k] = v
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return all, spaces, nil
+}
 
+// listRolesForUserChunk is the single-chunk body of listRolesForUsers —
+// the paged, bounded-parallel drain for one guid-filter chunk.
+func listRolesForUserChunk(ctx context.Context, cfClient capi.Client, userGUIDs []string) ([]capi.Role, map[string]includedSpace, error) {
 	const perPage = 500
 	const maxConcurrency = 6
 
