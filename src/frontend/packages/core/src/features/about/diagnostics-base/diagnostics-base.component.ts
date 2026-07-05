@@ -23,5 +23,6 @@ export class DiagnosticsBaseComponent {
     { link: 'overview', label: 'Overview', icon: 'build' },
     { link: 'counts', label: 'Entity Counts', icon: 'storage' },
     { link: 'performance', label: 'Load Performance', icon: 'speed' },
+    { link: 'probes', label: 'Endpoint Probes', icon: 'network_check' },
   ];
 }
