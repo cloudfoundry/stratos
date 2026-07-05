@@ -119,14 +119,16 @@ describe('DiagnosticPerformancePageComponent', () => {
     expect(verdict).toContain('50% cached');
   });
 
-  it('re-displays the saved report instead of re-measuring on re-entry', async () => {
+  it('re-displays the saved report immediately and re-measures on re-entry', async () => {
     expect(vi.mocked(buildLoadReport)).toHaveBeenCalledTimes(1);
 
     const second = TestBed.createComponent(DiagnosticPerformancePageComponent);
     second.detectChanges();
+    // The saved report shows before the fresh measurement resolves.
+    expect(second.componentInstance.report()).toEqual(fixedReport);
     await second.whenStable();
 
-    expect(vi.mocked(buildLoadReport)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(buildLoadReport)).toHaveBeenCalledTimes(2);
     expect(second.componentInstance.report()).toEqual(fixedReport);
   });
 

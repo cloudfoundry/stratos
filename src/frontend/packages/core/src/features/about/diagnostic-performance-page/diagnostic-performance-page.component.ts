@@ -18,9 +18,11 @@ import { ResourceWaterfallComponent } from './resource-waterfall.component';
 
 const TOP_RESOURCE_COUNT = 20;
 
-// The initial-load report is immutable for a browsing session, so it survives
-// route changes here and re-displays when the user returns to this tab. A
-// hard reload resets module state and yields a fresh measurement.
+// The last report survives route changes so returning to this tab shows data
+// immediately instead of waiting out the ~500ms paint-observer window. Each
+// visit still re-measures in the background: the milestone numbers come out
+// identical (same navigation), but the waterfall picks up resources fetched
+// since the last look. A hard reload resets module state entirely.
 let savedReport: LoadReport | null = null;
 
 /** Test hook: clear the session-persisted report between specs. */
@@ -70,9 +72,8 @@ export class DiagnosticPerformancePageComponent implements OnInit {
   ngOnInit() {
     if (savedReport) {
       this.report.set(savedReport);
-    } else {
-      this.measure();
     }
+    this.measure();
   }
 
   async measure() {
