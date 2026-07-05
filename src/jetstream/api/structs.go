@@ -508,7 +508,12 @@ type RegisterEndpointParams struct {
 }
 
 type UpdateEndpointParams struct {
-	ID            string `json:"id" form:"id" query:"id"`
+	// param:"id" binds the :id from the route path (POST /endpoints/:id) —
+	// the resource being POSTed to is the resource being updated. The
+	// form/json/query bindings remain because clients also send the id in
+	// the body to correlate parallel operations; a body id, when present,
+	// overrides the path value (echo binds path params before the body).
+	ID            string `json:"id" form:"id" query:"id" param:"id"`
 	Name          string `json:"name" form:"name" query:"name"`
 	SkipSSL       string `json:"skipSSL" form:"skipSSL" query:"skipSSL"`
 	SetClientInfo string `json:"setClientInfo" form:"setClientInfo" query:"setClientInfo"`

@@ -388,7 +388,10 @@ func (p *PostgresCNSIRepository) Update(endpoint api.CNSIRecord, encryptionKey [
 		return err
 	}
 
-	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.GUID, endpoint.CACert)
+	// Arg order must match updateCNSI: ... ca_cert = $6 WHERE guid = $7.
+	// These were swapped once (guid landed in ca_cert, WHERE matched the
+	// cert) and every update failed with "no rows were updated".
+	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.CACert, endpoint.GUID)
 	if err != nil {
 		msg := "Unable to UPDATE endpoint: %v"
 		log.Debugf(msg, err)

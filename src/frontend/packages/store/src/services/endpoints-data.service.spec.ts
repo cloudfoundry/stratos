@@ -167,6 +167,29 @@ describe('EndpointsDataService', () => {
     expect(svc.disconnectedSignal()).toHaveLength(1);
   });
 
+  it('update() sends the endpoint id in the form body (backend correlation contract)', async () => {
+    const p = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await p;
+
+    const updatePromise = svc.update('cf-1', {
+      endpointType: 'cf', name: 'cf-one-renamed', skipSSL: true, setClientInfo: false,
+      clientID: '', clientSecret: '', allowSSO: false, caCert: '',
+    });
+    const req = httpMock.expectOne('/api/v1/endpoints/cf-1');
+    expect(req.request.method).toBe('POST');
+    const body = req.request.body as FormData;
+    expect(body.get('id')).toBe('cf-1');
+    expect(body.get('name')).toBe('cf-one-renamed');
+    req.flush({ guid: 'cf-1' });
+    // update() re-fetches the endpoint list on success (async callback —
+    // yield a macrotask so the GET is issued before we expect it)
+    await new Promise(resolve => setTimeout(resolve));
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    const state = await updatePromise;
+    expect(state.error).toBe(false);
+  });
+
   it('clearDisconnected resets the delta queue', async () => {
     const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
