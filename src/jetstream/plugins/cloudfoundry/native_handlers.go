@@ -522,30 +522,44 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		// V2 ngrx-pagination count helper. Mirrors the filter names CF v3 uses
 		// on /v3/apps and the same comma-split convention as the list-path
 		// space_guids filter below.
-		params := capi.NewQueryParams().WithPerPage(1)
-		if rawOrgs := ctx.QueryParam("organization_guids"); rawOrgs != "" {
-			orgs := splitNonEmpty(rawOrgs, ",")
-			if len(orgs) > 0 {
-				params = params.WithFilter("organization_guids", orgs...)
+		//
+		// The guid scoping is chunked (an org's full space list can exceed
+		// the platform's URI ceiling — #5579); counts sum across chunks
+		// since the guid sets are disjoint. Consumers read only
+		// totalResults, so Resources stays empty.
+		orgScope := splitNonEmpty(ctx.QueryParam("organization_guids"), ",")
+		spaceScope := splitNonEmpty(ctx.QueryParam("space_guids"), ",")
+		total := 0
+		runCount := func(orgChunk, spaceChunk []string) error {
+			params := capi.NewQueryParams().WithPerPage(1)
+			if len(orgChunk) > 0 {
+				params = params.WithFilter("organization_guids", orgChunk...)
 			}
-		}
-		if rawSpaces := ctx.QueryParam("space_guids"); rawSpaces != "" {
-			spaces := splitNonEmpty(rawSpaces, ",")
-			if len(spaces) > 0 {
-				params = params.WithFilter("space_guids", spaces...)
+			if len(spaceChunk) > 0 {
+				params = params.WithFilter("space_guids", spaceChunk...)
 			}
+			raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "apps.counts", func() (*capi.ListResponse[capi.App], error) {
+				return cfClient.Apps().List(ctx.Request().Context(), params)
+			})
+			if err != nil {
+				return err
+			}
+			total += raw.Pagination.TotalResults
+			return nil
 		}
-		raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "apps.counts", func() (*capi.ListResponse[capi.App], error) {
-			return cfClient.Apps().List(ctx.Request().Context(), params)
-		})
+		var err error
+		switch {
+		case len(spaceScope) > 0:
+			err = forEachGuidChunk("space_guids", spaceScope, func(chunk []string) error { return runCount(orgScope, chunk) })
+		case len(orgScope) > 0:
+			err = forEachGuidChunk("organization_guids", orgScope, func(chunk []string) error { return runCount(chunk, nil) })
+		default:
+			err = runCount(nil, nil)
+		}
 		if err != nil {
 			return err
 		}
-		apps := make([]StApp, 0, len(raw.Resources))
-		for _, r := range raw.Resources {
-			apps = append(apps, toStApp(r, cnsiGUID))
-		}
-		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: apps, TotalResults: raw.Pagination.TotalResults})
+		return ctx.JSON(http.StatusOK, StAppsResponse{Resources: []StApp{}, TotalResults: total})
 
 	case "recent":
 		params := capi.NewQueryParams().WithPerPage(10).WithOrderBy("-updated_at")

@@ -17,24 +17,31 @@ func fetchAppCountsForSpaces(ctx echo.Context, cfClient capi.Client, spaceGUIDs 
 	if len(spaceGUIDs) == 0 {
 		return counts, nil
 	}
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["space_guids"] = spaceGUIDs
+	// Chunked: a full 500-space page ≈ 19.5KB of space_guids= blows the
+	// platform's URI ceiling (414) — see native_guid_chunks.go / #5579.
+	err := forEachGuidChunk("space_guids", spaceGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["space_guids"] = chunk
 
-		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
-		}
-		for _, a := range raw.Resources {
-			sg := relationshipGUID(a.Relationships.Space)
-			if sg != "" {
-				counts[sg]++
+			raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, a := range raw.Resources {
+				sg := relationshipGUID(a.Relationships.Space)
+				if sg != "" {
+					counts[sg]++
+				}
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
 			}
 		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if err != nil {
+		return nil, err
 	}
 	return counts, nil
 }
@@ -49,24 +56,30 @@ func fetchRouteCountsForSpaces(ctx echo.Context, cfClient capi.Client, spaceGUID
 	if len(spaceGUIDs) == 0 {
 		return counts, nil
 	}
-	for page := 1; ; page++ {
-		params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
-		params.Page = page
-		params.Filters["space_guids"] = spaceGUIDs
+	// Chunked — see fetchAppCountsForSpaces.
+	err := forEachGuidChunk("space_guids", spaceGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["space_guids"] = chunk
 
-		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
-		if err != nil {
-			return nil, err
-		}
-		for _, r := range raw.Resources {
-			sg := relationshipGUID(r.Relationships.Space)
-			if sg != "" {
-				counts[sg]++
+			raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, r := range raw.Resources {
+				sg := relationshipGUID(r.Relationships.Space)
+				if sg != "" {
+					counts[sg]++
+				}
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
 			}
 		}
-		if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
-			break
-		}
+	})
+	if err != nil {
+		return nil, err
 	}
 	return counts, nil
 }

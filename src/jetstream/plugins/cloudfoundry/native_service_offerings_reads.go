@@ -279,14 +279,20 @@ func drainBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings 
 	for g := range brokerGUIDSet {
 		brokerGUIDs = append(brokerGUIDs, g)
 	}
-	brokerParams := capi.NewQueryParams().
-		WithPerPage(len(brokerGUIDs)).
-		WithFilter("guids", brokerGUIDs...)
-	if raw, berr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams); berr == nil {
+	// Chunked — see native_guid_chunks.go / #5579.
+	_ = forEachGuidChunk("guids", brokerGUIDs, func(chunk []string) error {
+		brokerParams := capi.NewQueryParams().
+			WithPerPage(len(chunk)).
+			WithFilter("guids", chunk...)
+		raw, berr := cfClient.ServiceBrokers().List(ctx.Request().Context(), brokerParams)
+		if berr != nil {
+			return berr
+		}
 		for _, b := range raw.Resources {
 			brokerByGUID[b.GUID] = b
 		}
-	}
+		return nil
+	})
 	return brokerByGUID
 }
 

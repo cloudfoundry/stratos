@@ -116,6 +116,13 @@ func classifyNativeErrors(next echo.HandlerFunc) echo.HandlerFunc {
 			log.Debugf("[diag drain] client-abort cnsi=%s path=%s err=%v", cnsiGUID, ctx.Path(), err)
 			return echo.NewHTTPError(statusClientClosedRequest, "client closed request")
 		}
+		// A 414 that escaped the chunked internal drains means a pass-through
+		// guid filter (width = whatever the frontend sent) exceeded the
+		// platform's URI ceiling — make it operator-visible (#5579).
+		if upstreamStatusOf(err) == 414 {
+			log.Warnf("request %s rejected upstream with 414 Request-URI Too Large — a guid filter exceeds what the platform chain accepts; re-run the endpoint probe on the diagnostics page and lower %s (currently %d)",
+				ctx.Path(), guidChunkEnv, guidChunkSize())
+		}
 		return nativeCFError(ctx, cnsiGUID, err)
 	}
 }
