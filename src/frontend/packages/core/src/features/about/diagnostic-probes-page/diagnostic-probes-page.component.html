@@ -1,0 +1,76 @@
+<div class="p-4 space-y-4">
+  <div class="text-sm text-content-muted max-w-3xl">
+    Measures each Cloud Foundry endpoint's effective URI-length ceiling — the minimum across every proxy
+    hop between Stratos and the CF API. Guid-list filters wider than this ceiling are rejected with
+    HTTP 414 and silently drop counts. Probes run only when you click the button
+    (~10 unauthenticated requests); nothing probes automatically.
+  </div>
+
+  @if (!hasEndpoints()) {
+    <div data-test="probes-empty" class="text-content-muted">No Cloud Foundry endpoints registered.</div>
+  }
+
+  @for (ep of cfEndpoints(); track ep.guid) {
+    <div data-test="probe-row" class="border border-content-border rounded p-4 space-y-2">
+      <div class="flex items-center gap-3">
+        <div class="font-semibold">{{ ep.name }}</div>
+        <div class="text-sm text-content-muted">{{ address(ep) }}</div>
+        <div class="flex-1"></div>
+        <button type="button" data-test="probe-run"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm bg-primary text-white hover:bg-primary/90 transition-all duration-150 disabled:opacity-50"
+                [disabled]="stateFor(ep.guid).running"
+                (click)="probe(ep.guid)">
+          @if (stateFor(ep.guid).running) {
+            <div class="spinner !h-4 !w-4 !border-2"></div>
+            Probing…
+          } @else {
+            <span class="material-icons text-base leading-none">network_check</span>
+            Probe URI limit
+          }
+        </button>
+      </div>
+
+      @if (stateFor(ep.guid).error; as err) {
+        <div data-test="probe-error" class="text-sm text-danger">{{ err }}</div>
+      }
+
+      @if (stateFor(ep.guid).result; as r) {
+        <div data-test="probe-result" class="text-sm space-y-1">
+          <div>
+            Chain accepts <span class="font-semibold">{{ r.probedLimitBytes | number }}</span> bytes
+            @if (r.cappedAtMax) { <span class="text-content-muted">(at least — search capped)</span> }
+            <span class="text-content-muted">({{ r.probeRequests }} probe requests)</span>
+          </div>
+          <div>
+            Configured budget: <span class="font-mono">STRATOS_CF_GUID_CHUNK={{ r.adaptive ? 'auto' : r.configuredChunk }}</span>
+            → {{ r.configuredBytes | number }} bytes per request
+            @if (r.adaptive && r.effectiveChunk !== r.configuredChunk) {
+              <span class="text-content-muted">(adapted to {{ r.effectiveChunk }} at runtime)</span>
+            }
+          </div>
+          @switch (verdict(r)) {
+            @case ('lower') {
+              <div data-test="probe-verdict-lower" class="text-danger">
+                <span class="material-icons text-base leading-none align-text-bottom">warning</span>
+                Configured budget exceeds what this chain accepts — set
+                <span class="font-mono">STRATOS_CF_GUID_CHUNK={{ r.recommendedChunk }}</span> or lower.
+              </div>
+            }
+            @case ('headroom') {
+              <div data-test="probe-verdict-headroom" class="text-content-muted">
+                Headroom available: <span class="font-mono">STRATOS_CF_GUID_CHUNK={{ r.recommendedChunk }}</span>
+                would use this chain's ceiling.
+              </div>
+            }
+            @case ('ok') {
+              <div data-test="probe-verdict-ok" class="text-success">
+                <span class="material-icons text-base leading-none align-text-bottom">check_circle</span>
+                Configured budget fits this chain.
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
