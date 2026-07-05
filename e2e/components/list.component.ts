@@ -57,9 +57,15 @@ export class ListTableComponent {
   }
 
   async getTableData(): Promise<TableData[]> {
-    // Read headers from app-table-cell inside each header cell to avoid sort icon text
+    // Read headers from app-table-cell inside each header cell to avoid sort icon text.
+    // Signal-list headers put the sort icon (a material-icons ligature, e.g. "sort")
+    // inside the th text, so strip icon elements before reading.
     const headerCells = await this.table.locator('.app-table__header-cell app-table-cell, th').all();
-    const headers = await Promise.all(headerCells.map(h => h.textContent().then(t => (t || '').trim())));
+    const headers = await Promise.all(headerCells.map(h => h.evaluate(el => {
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll('.material-icons, mat-icon').forEach(icon => icon.remove());
+      return (clone.textContent || '').trim();
+    })));
 
     const rows = await this.getRows().all();
 
@@ -123,12 +129,15 @@ export class ListTableComponent {
 
   async openRowActionMenuByRow(row: Locator): Promise<MenuComponent> {
     // Target the overflow menu button (more_vert btn-icon), not inline action buttons
-    const actionButton = row.locator('app-table-cell-actions button.btn-icon, button[aria-label="Actions"]').first();
+    const actionButton = row.locator(
+      'app-table-cell-actions button.btn-icon, button[aria-label="Actions"], button[data-test="row-actions"]',
+    ).first();
     await actionButton.click();
 
-    // Wait for either Angular Material menu or the custom table-cell-actions dropdown
+    // Wait for the Angular Material menu, the custom table-cell-actions
+    // dropdown, or the signal-list row-actions menu
     const matMenu = this.page.locator('.mat-menu-content, .mat-mdc-menu-content');
-    const customMenu = row.locator('.table-cell-actions-menu--open');
+    const customMenu = row.locator('.table-cell-actions-menu--open, [data-test="row-actions-menu"]');
     await Promise.any([
       matMenu.waitFor({ state: 'visible', timeout: 5000 }),
       customMenu.waitFor({ state: 'visible', timeout: 5000 }),
@@ -422,7 +431,9 @@ export class ListComponent {
   public locator: Locator;
 
   constructor(private page: Page, locator?: Locator) {
-    this.locator = locator || page.locator('app-list').first();
+    // Pages are migrating from the legacy app-list to app-signal-list; a page
+    // renders exactly one of the two, so match either.
+    this.locator = locator || page.locator('app-list, app-signal-list').first();
     this.table = new ListTableComponent(page, this.locator);
     this.cards = new ListCardComponent(page, this.locator);
     this.header = new ListHeaderComponent(page, this.locator);

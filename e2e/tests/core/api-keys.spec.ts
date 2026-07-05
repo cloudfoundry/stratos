@@ -162,7 +162,8 @@ test.describe('API Keys', () => {
 
       await apiKeysPage.list.table.openRowActionMenuByIndex(rowIndex);
       // Click Delete within the opened menu row only (not across all rows)
-      await sharedPage.locator('.table-cell-actions-menu--open button').filter({ hasText: 'Delete' }).click();
+      await sharedPage.locator('.table-cell-actions-menu--open button, [data-test="row-actions-menu"] button')
+        .filter({ hasText: 'Delete' }).click();
 
       await ConfirmDialogComponent.expectDialogAndConfirm(sharedPage, 'Delete', 'Delete Key');
 
