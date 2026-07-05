@@ -26,12 +26,18 @@
     <!-- Scope note -->
     <app-card>
       <div class="px-4 py-3 text-sm text-content-muted">
-        These numbers reflect this browsing session's initial page load and stay put
-        as you move around the app. Reload &amp; measure captures a fresh warm
-        (cached) load; for a cold load, hard-reload the browser with the cache
-        bypassed (&#8984;&#8679;R in Chrome/Firefox on macOS, Ctrl+Shift+R elsewhere).
-        Numbers are cleanest when this page is opened soon after the app loads &mdash;
-        background requests made before the first visit are included.
+        The milestone numbers reflect this browsing session's initial page load and
+        stay put as you move around the app. The waterfall and byte totals keep
+        accumulating: every fetch since the page loaded is recorded, including lazy
+        route chunks loaded as you navigate, so the timeline grows (and its scale
+        stretches from ms to s) the longer the session runs &mdash; check
+        &ldquo;Initial load only&rdquo; on the waterfall to compare like with like.
+        Recording stops silently after 500 resources. Reload &amp; measure captures
+        a fresh warm (cached) load; for a cold load, hard-reload the browser with
+        the cache bypassed (&#8984;&#8679;R in Chrome/Firefox on macOS,
+        Ctrl+Shift+R elsewhere). Numbers are cleanest when this page is opened soon
+        after the app loads &mdash; background requests made before the first visit
+        are included.
       </div>
     </app-card>
 

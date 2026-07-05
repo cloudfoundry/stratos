@@ -11,11 +11,15 @@ import {
   basename,
   formatTick,
   groupRows,
+  initialLoadResources,
   mergeMilestoneLabels,
   milestoneLines,
   spanPercent,
+  rowLabel,
   toPercent,
   waterfallScaleMax,
+  windowPercent,
+  windowTicks,
 } from './resource-waterfall.component';
 
 const row = (over: Partial<ResourceRow> = {}): ResourceRow => ({
@@ -149,6 +153,63 @@ describe('groupRows', () => {
   it('uses the exported gap by default', () => {
     const groups = groupRows([row({ startMs: 0 }), row({ startMs: WATERFALL_GROUP_GAP_MS })]);
     expect(groups.length).toBe(1);
+  });
+});
+
+describe('rowLabel', () => {
+  it('keeps a file basename bare', () => {
+    expect(rowLabel('/assets/js/main.abc123.js')).toBe('main.abc123.js');
+  });
+
+  it('prefixes an extensionless basename with its parent segment', () => {
+    expect(rowLabel('/@vite/client')).toBe('@vite/client');
+    expect(rowLabel('/pp/v1/proxy/apps/df29d654')).toBe('apps/df29d654');
+  });
+
+  it('leaves a single extensionless segment bare', () => {
+    expect(rowLabel('/info')).toBe('info');
+  });
+});
+
+describe('windowPercent', () => {
+  it('maps ms linearly onto 0-100 within the window', () => {
+    expect(windowPercent(1500, { startMs: 1000, endMs: 2000 })).toBe(50);
+  });
+
+  it('clamps values outside the window', () => {
+    expect(windowPercent(500, { startMs: 1000, endMs: 2000 })).toBe(0);
+    expect(windowPercent(2500, { startMs: 1000, endMs: 2000 })).toBe(100);
+  });
+
+  it('returns 0 for an empty window', () => {
+    expect(windowPercent(1000, { startMs: 1000, endMs: 1000 })).toBe(0);
+  });
+});
+
+describe('windowTicks', () => {
+  it('matches axisTicks for a zero-based window', () => {
+    expect(windowTicks({ startMs: 0, endMs: 1000 })).toEqual(axisTicks(1000));
+  });
+
+  it('emits round-number ticks inside a shifted window, excluding the start edge', () => {
+    expect(windowTicks({ startMs: 1000, endMs: 2000 }))
+      .toEqual([1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]);
+  });
+
+  it('returns nothing for an empty window', () => {
+    expect(windowTicks({ startMs: 1000, endMs: 1000 })).toEqual([]);
+  });
+});
+
+describe('initialLoadResources', () => {
+  it('drops resources starting after the load event, keeping the boundary inclusive', () => {
+    const rows = [row({ startMs: 100 }), row({ startMs: 500 }), row({ startMs: 501 })];
+    expect(initialLoadResources(rows, 500).map(r => r.startMs)).toEqual([100, 500]);
+  });
+
+  it('filters nothing when the load event is unknown', () => {
+    const rows = [row({ startMs: 100 }), row({ startMs: 9999 })];
+    expect(initialLoadResources(rows, 0)).toEqual(rows);
   });
 });
 
