@@ -142,6 +142,37 @@ func callWithCapiRetry[T any](
 	return res, opErr
 }
 
+// routerFlapRetries and routerFlapBackoff bound the retry loop in
+// listWithRouterFlapRetry. 2 retries at 500ms/1s covers the observed
+// transient window without holding a user-facing request much past a second.
+const routerFlapRetries = 2
+const routerFlapBackoff = 500 * time.Millisecond
+
+// listWithRouterFlapRetry runs a CAPI list read, retrying when the failure is
+// the gorouter route-flap 404 ("Requested route ... does not exist" — the
+// platform router transiently lost the CF API route, so the request never
+// reached CAPI). retryablehttp inside capi won't retry it: it's a clean 404
+// response, and 404 is a don't-retry status. Reads are idempotent so a short
+// retry here is safe; writes must NOT use this wrapper.
+func listWithRouterFlapRetry[T any](ctx context.Context, op string, fn func() (T, error)) (T, error) {
+	var res T
+	var err error
+	wait := routerFlapBackoff
+	for attempt := 0; ; attempt++ {
+		res, err = fn()
+		if err == nil || attempt >= routerFlapRetries || !isRouterRouteMissing(err) || ctx.Err() != nil {
+			return res, err
+		}
+		log.Warnf("[diag drain] router-flap retry op=%s attempt=%d wait=%s err=%v", op, attempt+1, wait, err)
+		select {
+		case <-ctx.Done():
+			return res, err
+		case <-time.After(wait):
+		}
+		wait *= 2
+	}
+}
+
 // normaliseStringMap ensures nil maps are returned as empty maps (not null in JSON).
 func normaliseStringMap(m map[string]string) map[string]string {
 	if m == nil {
@@ -360,7 +391,9 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 
 	if ctx.QueryParam("return") == "counts" {
 		params := capi.NewQueryParams().WithPerPage(1)
-		raw, err := cfClient.Organizations().List(ctx.Request().Context(), params)
+		raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "orgs.counts", func() (*capi.ListResponse[capi.Organization], error) {
+			return cfClient.Organizations().List(ctx.Request().Context(), params)
+		})
 		if err != nil {
 			return err
 		}
@@ -386,7 +419,9 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 		}
 	}
 
-	raw, lerr := cfClient.Organizations().List(ctx.Request().Context(), params)
+	raw, lerr := listWithRouterFlapRetry(ctx.Request().Context(), "orgs.page", func() (*capi.ListResponse[capi.Organization], error) {
+		return cfClient.Organizations().List(ctx.Request().Context(), params)
+	})
 	if lerr != nil {
 		return lerr
 	}
@@ -425,11 +460,17 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 	eg.Go(func() error {
 		sc, sm, err := fetchSpacesForOrgs(egCtx, cfClient, orgGUIDs)
 		spaceCounts, spaceToOrg = sc, sm
+		if err != nil {
+			log.Warnf("[diag drain] op=orgs.relations.spaces fail_kind=%s err=%v", diagFailKind(ctx.Request().Context(), err), err)
+		}
 		return err
 	})
 	eg.Go(func() error {
 		a, err := drainAppsForOrgs(egCtx, cfClient, orgGUIDs)
 		rawApps = a
+		if err != nil {
+			log.Warnf("[diag drain] op=orgs.relations.apps fail_kind=%s err=%v", diagFailKind(ctx.Request().Context(), err), err)
+		}
 		return err
 	})
 	_ = eg.Wait() // lazy-non-fatal: partial counts beat blocking the row payload
@@ -494,7 +535,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 				params = params.WithFilter("space_guids", spaces...)
 			}
 		}
-		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+		raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "apps.counts", func() (*capi.ListResponse[capi.App], error) {
+			return cfClient.Apps().List(ctx.Request().Context(), params)
+		})
 		if err != nil {
 			return err
 		}
@@ -506,7 +549,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 
 	case "recent":
 		params := capi.NewQueryParams().WithPerPage(10).WithOrderBy("-updated_at")
-		raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
+		raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "apps.recent", func() (*capi.ListResponse[capi.App], error) {
+			return cfClient.Apps().List(ctx.Request().Context(), params)
+		})
 		if err != nil {
 			return err
 		}
@@ -553,7 +598,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 	}
 
-	raw, lerr := cfClient.Apps().List(ctx.Request().Context(), params)
+	raw, lerr := listWithRouterFlapRetry(ctx.Request().Context(), "apps.page", func() (*capi.ListResponse[capi.App], error) {
+		return cfClient.Apps().List(ctx.Request().Context(), params)
+	})
 	if lerr != nil {
 		return lerr
 	}
@@ -675,7 +722,9 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 	if ctx.QueryParam("return") == "counts" {
 		params := capi.NewQueryParams().WithPerPage(1)
 		cStart := time.Now()
-		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		raw, lerr := listWithRouterFlapRetry(ctx.Request().Context(), "spaces.counts", func() (*capi.ListResponse[capi.Space], error) {
+			return cfClient.Spaces().List(ctx.Request().Context(), params)
+		})
 		cRows, cTotal := -1, -1
 		if raw != nil {
 			cRows = len(raw.Resources)
@@ -730,7 +779,9 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 	}
 
 	pStart := time.Now()
-	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+	raw, lerr := listWithRouterFlapRetry(ctx.Request().Context(), "spaces.page", func() (*capi.ListResponse[capi.Space], error) {
+		return cfClient.Spaces().List(ctx.Request().Context(), params)
+	})
 	pRows, pTotal := -1, -1
 	if raw != nil {
 		pRows = len(raw.Resources)
@@ -798,7 +849,9 @@ func listAllRoutes(ctx context.Context, cfClient capi.Client, spaceGUIDs string)
 
 	firstParams := withRouteFilters(capi.NewQueryParams().WithPerPage(fullPagePerRequest))
 	firstParams.Page = 1
-	first, err := cfClient.Routes().List(ctx, firstParams)
+	first, err := listWithRouterFlapRetry(ctx, "routes.page1", func() (*capi.ListResponse[capi.Route], error) {
+		return cfClient.Routes().List(ctx, firstParams)
+	})
 	if err != nil {
 		return nil, 0, err
 	}
@@ -818,8 +871,11 @@ func listAllRoutes(ctx context.Context, cfClient capi.Client, spaceGUIDs string)
 		g.Go(func() error {
 			params := withRouteFilters(capi.NewQueryParams().WithPerPage(fullPagePerRequest))
 			params.Page = p
-			raw, err := cfClient.Routes().List(gctx, params)
+			raw, err := listWithRouterFlapRetry(gctx, "routes.pageN", func() (*capi.ListResponse[capi.Route], error) {
+				return cfClient.Routes().List(gctx, params)
+			})
 			if err != nil {
+				log.Warnf("[diag drain] op=routes.pageN page=%d fail_kind=%s err=%v", p, diagFailKind(ctx, err), err)
 				return err
 			}
 			pageResources[p] = raw.Resources
@@ -890,7 +946,9 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 				params = params.WithFilter("space_guids", spaces...)
 			}
 		}
-		raw, err := cfClient.Routes().List(ctx.Request().Context(), params)
+		raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "routes.counts", func() (*capi.ListResponse[capi.Route], error) {
+			return cfClient.Routes().List(ctx.Request().Context(), params)
+		})
 		if err != nil {
 			return err
 		}
@@ -1007,7 +1065,9 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 		params := capi.NewQueryParams().
 			WithPerPage(1).
 			WithFilter("organization_guids", orgGUID)
-		raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+		raw, lerr := listWithRouterFlapRetry(ctx.Request().Context(), "orgSpaces.counts", func() (*capi.ListResponse[capi.Space], error) {
+			return cfClient.Spaces().List(ctx.Request().Context(), params)
+		})
 		if lerr != nil {
 			return lerr
 		}
@@ -1022,7 +1082,9 @@ func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
 		capi.NewQueryParams().WithFilter("organization_guids", orgGUID),
 		perPage, page, present,
 	)
-	raw, lerr := cfClient.Spaces().List(ctx.Request().Context(), params)
+	raw, lerr := listWithRouterFlapRetry(ctx.Request().Context(), "orgSpaces.page", func() (*capi.ListResponse[capi.Space], error) {
+		return cfClient.Spaces().List(ctx.Request().Context(), params)
+	})
 	if lerr != nil {
 		return lerr
 	}

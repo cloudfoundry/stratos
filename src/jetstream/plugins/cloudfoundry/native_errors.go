@@ -12,12 +12,25 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 // capiStatusRe matches the "(status NNN)" fragment capi.MapHTTPError embeds in
 // its error messages. capi sentinel errors don't expose the numeric HTTP
 // status via a field, so this is the only way to recover it for display.
 var capiStatusRe = regexp.MustCompile(`\(status (\d{3})\)`)
+
+// gorouterRouteMissingRe matches the body gorouter returns when the platform's
+// route table has no entry for the CF API host ("404 Not Found: Requested
+// route ('api.example.com') does not exist."). It reaches us as a capi 404,
+// but it is a router-level availability failure — the CF API itself was never
+// consulted — so it must not be confused with a CAPI resource 404.
+var gorouterRouteMissingRe = regexp.MustCompile(`Requested route \('[^']*'\) does not exist`)
+
+// isRouterRouteMissing reports whether err is the gorouter route-flap 404.
+func isRouterRouteMissing(err error) bool {
+	return err != nil && gorouterRouteMissingRe.MatchString(err.Error())
+}
 
 // stratosErrorReasonHeader carries the machine-readable failure classification
 // to the frontend. Present only for the called-out reasons (unreachable,
@@ -95,7 +108,40 @@ func classifyNativeErrors(next echo.HandlerFunc) echo.HandlerFunc {
 		if cnsiGUID == "" {
 			return err
 		}
+		// Client abandoned the request (page navigation cancels in-flight
+		// fetches — routine). Not a gateway failure: log quietly at debug
+		// and answer 499-style instead of polluting logs/metrics with 502s.
+		// The response never reaches the client anyway.
+		if reqErr := ctx.Request().Context().Err(); errors.Is(reqErr, context.Canceled) {
+			log.Debugf("[diag drain] client-abort cnsi=%s path=%s err=%v", cnsiGUID, ctx.Path(), err)
+			return echo.NewHTTPError(statusClientClosedRequest, "client closed request")
+		}
 		return nativeCFError(ctx, cnsiGUID, err)
+	}
+}
+
+// statusClientClosedRequest is nginx's non-standard 499 "client closed
+// request" — the conventional status for a request the client abandoned.
+const statusClientClosedRequest = 499
+
+// diagFailKind classifies a failed CAPI call in a parallel drain for the
+// [diag drain] logs, so one real failure that cancels its errgroup siblings
+// reads as 1 primary + N collateral instead of N+1 independent failures:
+//   - "primary": a real upstream failure (not a cancellation)
+//   - "client_abort": canceled because the browser dropped the request
+//   - "collateral": canceled because a sibling in the same errgroup failed
+//
+// parent is the request-scoped context from before the errgroup wrap.
+func diagFailKind(parent context.Context, err error) string {
+	switch {
+	case err == nil:
+		return ""
+	case !errors.Is(err, context.Canceled):
+		return "primary"
+	case parent.Err() != nil:
+		return "client_abort"
+	default:
+		return "collateral"
 	}
 }
 
@@ -170,6 +216,13 @@ func classifyCfError(err error) cfErrorReason {
 		default:
 			return reasonUnclassified
 		}
+	}
+
+	// gorouter route-flap: a 404 from the platform router, not from CAPI.
+	// The API route was missing from the route table, so the endpoint was
+	// effectively unreachable regardless of the 404 status.
+	if isRouterRouteMissing(err) {
+		return reasonUnreachable
 	}
 
 	// capi CF-API call path: sentinels mapped by capi.MapHTTPError.

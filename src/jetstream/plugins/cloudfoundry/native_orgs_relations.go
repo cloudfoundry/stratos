@@ -27,7 +27,9 @@ func fetchSpacesForOrgs(ctx context.Context, cfClient capi.Client, orgGUIDs []st
 		params.Page = page
 		params.Filters["organization_guids"] = orgGUIDs
 
-		raw, lerr := cfClient.Spaces().List(ctx, params)
+		raw, lerr := listWithRouterFlapRetry(ctx, "orgs.relations.spaces", func() (*capi.ListResponse[capi.Space], error) {
+			return cfClient.Spaces().List(ctx, params)
+		})
 		if lerr != nil {
 			return nil, nil, lerr
 		}
@@ -61,7 +63,9 @@ func drainAppsForOrgs(ctx context.Context, cfClient capi.Client, orgGUIDs []stri
 		params.Page = page
 		params.Filters["organization_guids"] = orgGUIDs
 
-		raw, err := cfClient.Apps().List(ctx, params)
+		raw, err := listWithRouterFlapRetry(ctx, "orgs.relations.apps", func() (*capi.ListResponse[capi.App], error) {
+			return cfClient.Apps().List(ctx, params)
+		})
 		if err != nil {
 			return nil, err
 		}

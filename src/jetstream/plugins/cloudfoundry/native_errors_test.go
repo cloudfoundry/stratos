@@ -53,6 +53,9 @@ func TestClassifyCfError(t *testing.T) {
 		{"capi 404 not found", fmt.Errorf("get failed: %w", capi.ErrNotFound), reasonUnclassified},
 		{"capi 422 unprocessable", fmt.Errorf("create failed: %w", capi.ErrUnprocessable), reasonUnclassified},
 
+		// --- gorouter route-flap: platform router lost the API route ---
+		{"gorouter route missing", errors.New("listing organizations: capi: resource not found (status 404): 404 Not Found: Requested route ('api.sys.example.com') does not exist."), reasonUnreachable},
+
 		// --- transport-level errors (no HTTP response at all) ---
 		{"net error", fakeNetError{}, reasonUnreachable},
 		{"net error wrapped", fmt.Errorf("doing request: %w", fakeNetError{timeout: true}), reasonUnreachable},
@@ -127,6 +130,23 @@ func TestClassifyNativeErrorsMiddleware(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("client-abort answers 499, not a shaped 502", func(t *testing.T) {
+		reqCtx, cancel := context.WithCancel(context.Background())
+		req := httptest.NewRequest(http.MethodGet, "/cf/orgs/cnsi-9", nil).WithContext(reqCtx)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("cnsiGuid")
+		c.SetParamValues("cnsi-9")
+		err := classifyNativeErrors(func(ctx echo.Context) error {
+			cancel() // browser navigates away mid-handler
+			return fmt.Errorf("executing request: %w", context.Canceled)
+		})(c)
+		he, ok := err.(*echo.HTTPError)
+		require.True(t, ok)
+		assert.Equal(t, statusClientClosedRequest, he.Code)
+		assert.Empty(t, c.Response().Header().Get(stratosErrorReasonHeader))
+	})
+
 	t.Run("raw error without cnsiGuid passes through untouched", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/no-cnsi", nil)
 		rec := httptest.NewRecorder()
@@ -134,6 +154,68 @@ func TestClassifyNativeErrorsMiddleware(t *testing.T) {
 		raw := errors.New("boom")
 		err := classifyNativeErrors(func(ctx echo.Context) error { return raw })(c)
 		assert.Same(t, raw, err)
+	})
+}
+
+func TestDiagFailKind(t *testing.T) {
+	live := context.Background()
+	dead, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	assert.Equal(t, "", diagFailKind(live, nil))
+	assert.Equal(t, "primary", diagFailKind(live, errors.New("real upstream failure")))
+	assert.Equal(t, "primary", diagFailKind(dead, errors.New("real upstream failure")))
+	assert.Equal(t, "collateral", diagFailKind(live, fmt.Errorf("giving up: %w", context.Canceled)))
+	assert.Equal(t, "client_abort", diagFailKind(dead, fmt.Errorf("giving up: %w", context.Canceled)))
+}
+
+func TestListWithRouterFlapRetry(t *testing.T) {
+	routerFlap := errors.New("capi: resource not found (status 404): 404 Not Found: Requested route ('api.sys.example.com') does not exist.")
+
+	t.Run("retries router flap then succeeds", func(t *testing.T) {
+		calls := 0
+		got, err := listWithRouterFlapRetry(context.Background(), "test", func() (int, error) {
+			calls++
+			if calls == 1 {
+				return 0, routerFlap
+			}
+			return 42, nil
+		})
+		require.NoError(t, err)
+		assert.Equal(t, 42, got)
+		assert.Equal(t, 2, calls)
+	})
+
+	t.Run("gives up after the retry budget", func(t *testing.T) {
+		calls := 0
+		_, err := listWithRouterFlapRetry(context.Background(), "test", func() (int, error) {
+			calls++
+			return 0, routerFlap
+		})
+		assert.ErrorIs(t, err, routerFlap)
+		assert.Equal(t, routerFlapRetries+1, calls)
+	})
+
+	t.Run("does not retry other errors", func(t *testing.T) {
+		calls := 0
+		_, err := listWithRouterFlapRetry(context.Background(), "test", func() (int, error) {
+			calls++
+			return 0, errors.New("capi: resource not found (status 404): org does not exist")
+		})
+		assert.Error(t, err)
+		assert.Equal(t, 1, calls)
+	})
+
+	t.Run("does not retry when the context is done", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		calls := 0
+		_, err := listWithRouterFlapRetry(ctx, "test", func() (int, error) {
+			calls++
+			return 0, routerFlap
+		})
+		assert.Error(t, err)
+		assert.Equal(t, 1, calls)
 	})
 }
 
