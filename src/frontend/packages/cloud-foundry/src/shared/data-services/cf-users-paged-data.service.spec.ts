@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { CfUsersPagedDataService } from './cf-users-paged-data.service';
 
 const CNSI = 'cf1';
@@ -97,5 +97,35 @@ describe('CfUsersPagedDataService', () => {
     const detail = firstValueFrom(svc.getUser('cf2', 'z'));
     http.expectOne(`/pp/v1/cf/users/cf2/z`).flush(mkUser('z'));
     expect(await detail).toMatchObject({ guid: 'z' });
+  });
+
+  describe('transient retry + cold cache on failure (#5577)', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('a failed drain does not stamp lastFetched or clear stale — next read refetches', async () => {
+      svc.markStale(CNSI);
+      const p = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush('boom', { status: 500, statusText: 'Server Error' });
+      await p;
+      expect(svc.lastFetched(CNSI)()).toBeNull();
+      expect(svc.errorsByCnsi()(CNSI)).toBeTruthy();
+
+      const again = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await again;
+      expect(svc.lastFetched(CNSI)()).not.toBeNull();
+      expect(svc.errorsByCnsi()(CNSI)).toBeFalsy();
+    });
+
+    it('retries a transient 502 page fetch via the shared drain helper', async () => {
+      vi.useFakeTimers();
+      const p = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush('bad gateway', { status: 502, statusText: 'Bad Gateway' });
+      await vi.advanceTimersByTimeAsync(500);
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await p;
+      expect(svc.usersSignal(CNSI)().map(u => u.guid)).toEqual(['a']);
+      expect(svc.lastFetched(CNSI)()).not.toBeNull();
+    });
   });
 });
