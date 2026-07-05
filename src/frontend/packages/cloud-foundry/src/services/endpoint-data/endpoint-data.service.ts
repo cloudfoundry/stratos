@@ -308,6 +308,7 @@ export class EndpointDataService {
         this._orgCount.set(resp.totalResults);
         this._orgsLastFetched.set(new Date());
         this._orgsStale.set(false);
+        this.clearErrors('orgs-full');
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('orgs-full', err); return of(undefined as void); }),
@@ -340,6 +341,7 @@ export class EndpointDataService {
         this._appCount.set(resp.totalResults);
         this._appsLastFetched.set(new Date());
         this._appsStale.set(false);
+        this.clearErrors('apps-full');
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('apps-full', err); return of(undefined as void); }),
@@ -374,6 +376,7 @@ export class EndpointDataService {
         this._spaces.set(resp.resources);
         this._spacesLastFetched.set(new Date());
         this._spacesStale.set(false);
+        this.clearErrors('spaces-full');
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('spaces-full', err); return of(undefined as void); }),
@@ -510,6 +513,7 @@ export class EndpointDataService {
         this._orgCount.set(resp.totalResults);
         this._orgsLastFetched.set(new Date());
         this._orgsStale.set(false);
+        this.clearErrors('orgs-full');
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('orgs-full', err); return of(undefined as void); }),
@@ -530,6 +534,7 @@ export class EndpointDataService {
         this._appCount.set(resp.totalResults);
         this._appsLastFetched.set(new Date());
         this._appsStale.set(false);
+        this.clearErrors('apps-full');
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('apps-full', err); return of(undefined as void); }),
@@ -549,6 +554,7 @@ export class EndpointDataService {
         this._spaces.set(resp.resources);
         this._spacesLastFetched.set(new Date());
         this._spacesStale.set(false);
+        this.clearErrors('spaces-full');
       }),
       map(() => undefined as void),
       catchError(err => { this.addError('spaces-full', err); return of(undefined as void); }),
@@ -725,6 +731,16 @@ export class EndpointDataService {
       spaces: this._spaces(),
       routeCount: this._routeCount(),
     };
+  }
+
+  // Drop recorded errors for one resource slice. Called from the drain
+  // success paths so a recovered slice stops reporting its old failure —
+  // without this a failed-then-retried drain leaves a stale error that the
+  // list error surfaces keep rendering forever.
+  private clearErrors(resource: string): void {
+    this._errors.update(errors => errors.some(e => e.resource === resource)
+      ? errors.filter(e => e.resource !== resource)
+      : errors);
   }
 
   private addError(resource: string, err: unknown): void {

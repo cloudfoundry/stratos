@@ -77,6 +77,20 @@ export class CfOrgsSignalConfigService {
   private readonly _hasLoadedOnce = signal(false);
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
 
+  // Orgs-slice failures for the signal-list error surfaces (top strip +
+  // failed-load empty state with Retry). Keyed by the active cnsi; empties
+  // when a later drain succeeds (EndpointDataService clears the slice's
+  // errors on success).
+  readonly errorsByCnsi: Signal<Map<string, unknown>> = computed(() => {
+    const out = new Map<string, unknown>();
+    const errs = this.orgsErrors();
+    if (errs.length > 0) out.set(this.cnsiGuid, errs[errs.length - 1]);
+    return out;
+  });
+
+  private readonly orgsErrors = computed(() =>
+    (this.endpointDataService()?.errors() ?? []).filter(e => e.resource === 'orgs-full' || e.resource === 'orgs'));
+
   initialize(cnsiGuid: string): void {
     this.cnsiGuid = cnsiGuid;
     const ds = this.registry.acquire(cnsiGuid);
@@ -115,7 +129,14 @@ export class CfOrgsSignalConfigService {
       this.loadedOnceEffect = effect(() => {
         const cur = this.endpointDataService();
         if (!cur) return;
-        if (cur.orgs().length > 0) this._hasLoadedOnce.set(true);
+        // Loaded = rows arrived, OR the drain completed successfully with
+        // zero rows (lastFetched stamps on success only), OR it failed and
+        // recorded an error. All three must release the loading state —
+        // gating on rows alone left a failed drain spinning on "Loading
+        // organizations…" forever (#5577).
+        if (cur.orgs().length > 0 || cur.orgsLastFetched() !== null || this.orgsErrors().length > 0) {
+          this._hasLoadedOnce.set(true);
+        }
       });
     });
     this.destroyRef.onDestroy(() => {

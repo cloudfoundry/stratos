@@ -357,6 +357,12 @@ export interface SignalListConfig<T> {
   // the UI distinguish "no apps here" from "your filters match nothing".
   readonly emptyFilterMessage?: string;
   readonly loadingMessage?: string;
+  // Shown in the failed-load empty state (0 rows AND errorsByCnsi
+  // non-empty). That state also renders a Retry button wired to onRefresh,
+  // so a transient failure that exhausted the automatic retries has an
+  // in-page recovery affordance instead of an empty list until
+  // re-navigation (#5577).
+  readonly errorMessage?: string;
   readonly nameFilter?: WritableSignal<string>;
   // Column keys (see SignalListColumn.key / header fallback) eligible for
   // the text-filter. When 2+ entries are provided AND filterField is

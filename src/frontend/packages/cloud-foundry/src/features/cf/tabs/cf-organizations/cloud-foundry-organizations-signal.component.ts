@@ -137,7 +137,7 @@ export class CloudFoundryOrganizationsSignalComponent {
       pageIndex: this.orgsConfig.pageIndex,
       pageSize: this.orgsConfig.pageSize,
       isAnyLoading: computed(() => !this.orgsConfig.hasLoadedOnce()),
-      errorsByCnsi: signal(new Map()),
+      errorsByCnsi: this.orgsConfig.errorsByCnsi,
       columns: [
         {
           header: 'Name', key: 'name', sortField: 'name',
@@ -190,6 +190,7 @@ export class CloudFoundryOrganizationsSignalComponent {
       emptyMessage: 'There are no organizations',
       emptyFilterMessage: 'No organizations match the current filters',
       loadingMessage: 'Loading organizations…',
+      errorMessage: 'Failed to load organizations — the endpoint may be temporarily unreachable',
       pageSizeOptions: {
         table: [10, 25, 50, 100],
         card: [6, 12, 24, 48, 96],

@@ -727,6 +727,18 @@ describe('EndpointDataService', () => {
       expect(service.apps()).toHaveLength(1);
     });
 
+    it('a successful drain clears the slice errors recorded by an earlier failure', async () => {
+      const failed = firstValueFrom(service.loadOrgs());
+      httpMock.expectOne(ORGS_FULL_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+      await failed;
+      expect(service.errors().some(e => e.resource === 'orgs-full')).toBeTruthy();
+
+      const retried = firstValueFrom(service.loadOrgs());
+      httpMock.expectOne(ORGS_FULL_URL).flush(orgPage);
+      await retried;
+      expect(service.errors().some(e => e.resource === 'orgs-full')).toBeFalsy();
+    });
+
     it('load() with a failed sub-request does not stamp lastFetched (cache stays cold)', async () => {
       const p = firstValueFrom(service.load());
       httpMock.expectOne(ORGS_URL).flush('x', { status: 500, statusText: 'Server Error' });
