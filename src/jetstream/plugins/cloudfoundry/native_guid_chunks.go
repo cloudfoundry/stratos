@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync/atomic"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -74,6 +75,28 @@ func chunkGuids(guids []string) [][]string {
 	return chunks
 }
 
+// guidChunkFloor bounds the adaptive halving: below this width, chunking
+// is not the problem (a 10-guid filter is ~400 bytes) and the 414 must
+// have another cause — stop retrying and surface the error.
+const guidChunkFloor = 10
+
+// adaptedChunkSize is the width adaptive mode derived from runtime 414s
+// (0 = never adapted). Process-wide, not per-endpoint: when multiple
+// registered CFs sit behind different chains, the tightest one wins —
+// conservative by construction.
+var adaptedChunkSize atomic.Int64
+
+// effectiveGuidChunkSize is the width new drains start from: the adapted
+// width when adaptive mode has learned one, otherwise the configured size.
+func effectiveGuidChunkSize() int {
+	if guidChunkAdaptive() {
+		if a := adaptedChunkSize.Load(); a > 0 {
+			return int(a)
+		}
+	}
+	return guidChunkSize()
+}
+
 // forEachGuidChunk runs fn once per chunk of guids and stops on the first
 // error. fn accumulates into captured state (a counts map, a resource
 // slice), so results merge naturally across chunks.
@@ -83,12 +106,34 @@ func chunkGuids(guids []string) [][]string {
 // (config reloads are hot; enterprise middleboxes appear). The WARN is
 // unconditional so a stale-high setting is self-announcing instead of
 // silently dropping counts again. filterKey only labels the log line.
+//
+// Fixed mode (default): WARN and stop — a human re-runs the diagnostics
+// probe and adjusts the knob deliberately. Adaptive mode
+// (STRATOS_CF_GUID_CHUNK=auto): halve the width and retry the same slice,
+// re-deriving the budget from the live failure instead of paging a human;
+// the learned width persists for later drains (see #5579 addendum 2).
 func forEachGuidChunk(filterKey string, guids []string, fn func(chunk []string) error) error {
-	for _, chunk := range chunkGuids(guids) {
+	size := effectiveGuidChunkSize()
+	for start := 0; start < len(guids); {
+		end := start + size
+		if end > len(guids) {
+			end = len(guids)
+		}
+		chunk := guids[start:end]
 		if err := fn(chunk); err != nil {
 			warnOnURITooLarge(err, filterKey, len(chunk))
+			if upstreamStatusOf(err) == 414 && guidChunkAdaptive() && size > guidChunkFloor {
+				size = size / 2
+				if size < guidChunkFloor {
+					size = guidChunkFloor
+				}
+				adaptedChunkSize.Store(int64(size))
+				log.Warnf("%s=auto: adapted guid chunk width to %d after a 414 and retrying", guidChunkEnv, size)
+				continue // retry the same slice at the reduced width
+			}
 			return err
 		}
+		start = end
 	}
 	return nil
 }

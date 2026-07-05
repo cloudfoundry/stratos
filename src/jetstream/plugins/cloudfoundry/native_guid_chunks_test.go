@@ -114,3 +114,66 @@ func TestGuidChunkSizeKnobParsing(t *testing.T) {
 		}
 	}
 }
+
+func TestForEachGuidChunkAdaptiveHalvesOn414(t *testing.T) {
+	// Not parallel — mutates the package-level setting + adapted width.
+	orig := guidChunkSetting
+	defer func() {
+		guidChunkSetting = orig
+		adaptedChunkSize.Store(0)
+	}()
+	guidChunkSetting = "auto"
+	adaptedChunkSize.Store(0)
+
+	err414 := errors.New("capi: request failed (status 414): Request-URI Too Large")
+
+	// The chain accepts <=80 guids: reject wider chunks with 414.
+	var widths []int
+	err := forEachGuidChunk("space_guids", mkGuids(300), func(chunk []string) error {
+		widths = append(widths, len(chunk))
+		if len(chunk) > 80 {
+			return err414
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("adaptive mode should have ridden through the 414s, got: %v", err)
+	}
+	// 150 fails → 75 passes; every guid still covered exactly once.
+	covered := 0
+	for _, w := range widths {
+		if w <= 80 {
+			covered += w
+		}
+	}
+	if covered != 300 {
+		t.Errorf("adaptive retries should cover all 300 guids, covered %d (widths: %v)", covered, widths)
+	}
+	if adaptedChunkSize.Load() != 75 {
+		t.Errorf("expected adapted width 75, got %d", adaptedChunkSize.Load())
+	}
+	// A later drain starts at the learned width.
+	if got := effectiveGuidChunkSize(); got != 75 {
+		t.Errorf("effectiveGuidChunkSize() = %d, want the adapted 75", got)
+	}
+}
+
+func TestForEachGuidChunkFixedModeStopsOn414(t *testing.T) {
+	// Not parallel — asserts against the default (fixed) mode.
+	orig := guidChunkSetting
+	defer func() { guidChunkSetting = orig }()
+	guidChunkSetting = ""
+
+	err414 := errors.New("capi: request failed (status 414): Request-URI Too Large")
+	calls := 0
+	err := forEachGuidChunk("space_guids", mkGuids(300), func(chunk []string) error {
+		calls++
+		return err414
+	})
+	if !errors.Is(err, err414) {
+		t.Errorf("fixed mode must propagate the 414, got %v", err)
+	}
+	if calls != 1 {
+		t.Errorf("fixed mode must not retry, got %d calls", calls)
+	}
+}

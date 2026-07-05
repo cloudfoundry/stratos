@@ -123,6 +123,9 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	nativeGroup.DELETE("/cf/roles/:cnsiGuid/:roleGuid", c.deleteNativeRole)
 	nativeGroup.POST("/cf/users/:cnsiGuid/associate", c.associateUser)
 	nativeGroup.GET("/cf/identity-providers/:cnsiGuid", c.getIdentityProviders)
+	// Diagnostics: operator-triggered probe of the endpoint chain's URI
+	// ceiling (#5579). Never runs automatically.
+	nativeGroup.GET("/cf/diag/urilimit/:cnsiGuid", c.probeEndpointURILimit)
 
 	// Services-domain scoped reads (slice 5: services-domain signal+V3).
 	// Path-derived filters layer on top of the existing CF-scoped handlers'
