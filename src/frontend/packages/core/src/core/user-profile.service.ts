@@ -9,7 +9,7 @@ import {
   UserProfileInfo,
   UserProfileInfoEmail,
   UserProfileInfoUpdates } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, defer, Observable, of as observableOf } from 'rxjs';
 import { take, filter, map } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
@@ -31,6 +31,8 @@ export class UserProfileService {
 
   private userGuid$: Observable<string>;
 
+  private fetchStarted = false;
+
   constructor() {
     // Source the user GUID from the signal-native auth projection. The
     // upstream pipe order matches the legacy implementation: wait for
@@ -44,8 +46,16 @@ export class UserProfileService {
 
     // Read the profile off the signal-native UserProfileDataService (replaces
     // the ngrx `userProfile` EntityService). Same emission shape as before:
-    // only emit a populated profile.
-    this.userProfile$ = this.userProfileData.profile$.pipe(
+    // only emit a populated profile. The legacy EntityService's
+    // `waitForEntity$` auto-fetched on first subscribe; the signal store is
+    // passive, so re-establish that here — without it, consumers that never
+    // call fetchUserProfile() (profile page, page header) wait forever.
+    this.userProfile$ = defer(() => {
+      if (!this.fetchStarted) {
+        this.fetchUserProfile();
+      }
+      return this.userProfileData.profile$;
+    }).pipe(
       filter((data): data is UserProfileInfo => !!data && !!data.id)
     );
     this.isFetching$ = this.userProfileData.fetching$;
@@ -62,6 +72,7 @@ export class UserProfileService {
   }
 
   fetchUserProfile() {
+    this.fetchStarted = true;
     // Once we have the user's guid, fetch their profile
     this.userGuid$.pipe(take(1)).subscribe(userGuid => {
       if (userGuid) { this.userProfileData.fetch(userGuid); }
