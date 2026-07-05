@@ -789,3 +789,53 @@ func TestListCNSIsWithUserEndpointsEnabled(t *testing.T) {
 		})
 	})
 }
+
+// Regression for the migrated endpoint-edit flow: the frontend PUTs the
+// endpoint id only in the URL path (POST /pp/v1/endpoints/:id). Before
+// UpdateEndpointParams gained the param:"id" tag, Bind left params.ID
+// empty and every update failed with the shadow 400 "Missing target
+// endpoint" before reaching the endpoint lookup.
+func TestUpdateEndpointBindsPathID(t *testing.T) {
+	t.Parallel()
+
+	req := setupMockReq("POST", "", map[string]string{"name": "renamed"})
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
+
+	ctx.SetParamNames("id")
+	ctx.SetParamValues(mockCNSIGUID)
+
+	err := pp.updateEndpoint(ctx)
+	if err == nil {
+		t.Fatal("expected the endpoint lookup to fail (no DB rows mocked)")
+	}
+	if strings.Contains(err.Error(), "Missing target endpoint") {
+		t.Errorf("update rejected before the lookup — path :id was not bound: %v", err)
+	}
+	// The lookup error names the guid it searched for — proves the path id
+	// travelled through Bind into the handler.
+	if !strings.Contains(err.Error(), mockCNSIGUID) {
+		t.Errorf("expected lookup error to reference the path id %q, got: %v", mockCNSIGUID, err)
+	}
+}
+
+// A body id, when present, still wins over the path id — clients send it to
+// correlate parallel operations and that contract is preserved.
+func TestUpdateEndpointBodyIDOverridesPath(t *testing.T) {
+	t.Parallel()
+
+	req := setupMockReq("POST", "", map[string]string{"id": "body-id", "name": "renamed"})
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
+
+	ctx.SetParamNames("id")
+	ctx.SetParamValues("path-id")
+
+	params := new(api.UpdateEndpointParams)
+	if err := ctx.Bind(params); err != nil {
+		t.Fatalf("bind failed: %v", err)
+	}
+	if params.ID != "body-id" {
+		t.Errorf("expected body id to override path id, got %q", params.ID)
+	}
+}

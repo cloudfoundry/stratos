@@ -798,3 +798,45 @@ func TestPgSQLCNSIs(t *testing.T) {
 	})
 
 }
+
+// Pins the positional arg order of the endpoint UPDATE against the SQL
+// (`... ca_cert = $6 WHERE guid = $7`). The GUID and CA cert were swapped
+// once: WHERE guid matched the cert value, so every endpoint update failed
+// with "no rows were updated" (and a matching row would have had its
+// ca_cert overwritten with the guid).
+func TestPgSQLCNSIsUpdateArgOrder(t *testing.T) {
+	t.Parallel()
+
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	repository, err := NewPostgresCNSIRepository(db)
+	if err != nil {
+		t.Fatalf("unexpected error creating repository: %v", err)
+	}
+
+	endpoint := api.CNSIRecord{
+		GUID:              "some-guid",
+		Name:              "renamed",
+		SkipSSLValidation: true,
+		SSOAllowed:        false,
+		ClientId:          "cf",
+		ClientSecret:      "",
+		CACert:            "ca-pem",
+	}
+	encryptionKey := make([]byte, 32)
+
+	mock.ExpectExec(`UPDATE cnsis`).
+		WithArgs("renamed", true, false, "cf", sqlmock.AnyArg(), "ca-pem", "some-guid").
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	if err := repository.Update(endpoint, encryptionKey); err != nil {
+		t.Errorf("unexpected error from Update: %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("unfulfilled expectations: %s", err)
+	}
+}

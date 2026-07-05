@@ -412,6 +412,11 @@ export class EndpointsDataService {
 
   async update(guid: string, opts: EndpointUpdateOptions): Promise<ActionState> {
     const body = new FormData();
+    // The backend requires the id in the body (UpdateEndpointParams) and
+    // uses it to correlate parallel operations; older backends never read
+    // the :id in the URL path. The migration dropped this field, which made
+    // every endpoint edit fail with 400 "Missing target endpoint".
+    body.set('id', guid);
     body.set('name', opts.name);
     body.set('skipSSL', String(opts.skipSSL));
     body.set('setClientInfo', String(opts.setClientInfo));
