@@ -45,10 +45,12 @@
       }
       <input
         type="text"
+        data-test="name-filter"
         [placeholder]="filterPlaceholder()"
         [attr.aria-label]="filterPlaceholder()"
         [value]="config.nameFilter()"
         (input)="config.nameFilter!.set($any($event.target).value)"
+        (keydown.escape)="config.nameFilter!.set('')"
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
     }
 
@@ -737,16 +739,17 @@
     <div class="flex items-center gap-2 text-content-muted">
       <span>Items per page:</span>
       <select
+        data-test="page-size"
         (change)="onPageSizeChange($any($event.target).value)"
         class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
         @for (opt of pageSizeOptions(); track opt) {
-          <option [value]="opt" [selected]="opt === config.pageSize()">{{ opt }}</option>
+          <option [value]="opt" [selected]="opt === config.pageSize()">{{ pageSizeLabel(opt) }}</option>
         }
       </select>
     </div>
 
     <!-- Range counter -->
-    <span class="text-content-muted">{{ rangeText() }}</span>
+    <span data-test="page-range" class="text-content-muted">{{ rangeText() }}</span>
 
     <!-- First / prev / next / last -->
     <div class="flex items-center gap-1">
