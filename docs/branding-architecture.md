@@ -261,6 +261,45 @@ components and are not cleared on upgrade.
 See the theme package `README.md` for the complete
 `company-config.json` schema with all fields documented.
 
+## Login Background Image: Performance
+
+The login background (`config.login.backgroundImage`) is fetched
+pre-auth on every login page load, and under the current blanket
+`no-cache` policy it re-transfers in full on repeat visits -- browsers
+do not get a 304 for it the way they do for hashed bundles. Its size
+is paid on every visit, so budget it like a bundle, not like a
+decoration.
+
+Guidelines for a custom background:
+
+1. Keep it at or under ~100 kB -- comparable to the app's own lazy
+   chunks. Anything larger becomes the heaviest asset on the page.
+2. A background rendered behind the login card does not need full
+   resolution or sharpness. 1280x720 WebP at quality 60-65 is visually
+   equivalent to a 1080p JPEG in this role.
+3. Same-resolution recompression of a detailed photo saves little
+   (measured 10-37% on the previous stock image) -- reduce the
+   resolution instead. If a soft-focus look suits your branding, a
+   gaussian blur compresses roughly 4x better again.
+4. Setting `backgroundImage` to an empty string (with a
+   `backgroundColor`) is the zero-cost option.
+
+Worked example -- the previous stock background, a 1920x1080 JPEG:
+
+| Variant | Size |
+|---------|------|
+| Original JPEG, 1920x1080 | 415 kB |
+| Same resolution, recompressed (JPEG q45 / WebP q45) | 258-266 kB |
+| 1280x720 WebP q65 | 158 kB |
+| 960x540 WebP q65 | 95 kB |
+| 1280x720 WebP q60, gaussian blur | 38 kB |
+
+The 960x540 variant ships as the current stock `login-bg.webp`
+(a 77% reduction; see issue #5550 for the measurements that motivated
+it). To check the impact on your own foundation, the login page load
+report at About -> Diagnostics -> Load Performance shows per-resource
+timings for any deployment.
+
 ## Testing
 
 ### Unit Tests
