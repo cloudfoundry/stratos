@@ -14,7 +14,7 @@
         Loading organizations…
       </div>
     } @else {
-      <ul class="role-assignment__org-list list-none m-0 p-1 max-h-40 overflow-y-auto">
+      <ul class="role-assignment__org-list list-none m-0 p-1 max-h-40 overflow-y-auto custom-scrollbar">
         @for (org of filteredAllowedOrgs(); track org.metadata.guid) {
           <li>
             <button
@@ -144,7 +144,7 @@
     <!-- Master: picked-org list -->
     <div
       data-testid="role-pane-list"
-      class="role-assignment__pane-list rounded border border-content-border bg-content-bg-alt overflow-hidden max-h-96 overflow-y-auto"
+      class="role-assignment__pane-list rounded border border-content-border bg-content-bg-alt overflow-hidden max-h-96 overflow-y-auto custom-scrollbar"
     >
       @for (org of pickedOrgs(); track org.metadata.guid) {
         <div

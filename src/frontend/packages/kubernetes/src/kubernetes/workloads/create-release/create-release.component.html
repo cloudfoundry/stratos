@@ -33,7 +33,7 @@
             formControlName="releaseNamespace"
             #namespaceInput>
           @if (namespaceInput.value && (namespaces$ | async)?.length) {
-            <div class="absolute top-full left-0 w-full bg-content-bg border border-content-border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto"
+            <div class="absolute top-full left-0 w-full bg-content-bg border border-content-border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto custom-scrollbar"
               >
               @for (namespace of namespaces$ | async; track namespace) {
                 <div
