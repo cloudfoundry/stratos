@@ -898,4 +898,24 @@ body.modal-open {
   .bg-nav-tooltip {
     background-color: var(--nav-tooltip);
   }
+
+  /* Always-visible themed scrollbar. macOS overlay scrollbars are 0px wide
+     when idle, leaving scrollable containers with no affordance. */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--content-secondary);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--content-border);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--input-border);
+  }
 }

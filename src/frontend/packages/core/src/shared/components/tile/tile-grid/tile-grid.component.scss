@@ -7,6 +7,26 @@ app-tile-grid {
   width: 100%;
   padding: 1rem;
 
+  // Always-visible scrollbar: macOS overlay scrollbars are 0px wide when
+  // idle, leaving no affordance that the grid scrolls.
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--content-secondary);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--content-border);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--input-border);
+  }
+
   &.app-tile-grid-fit {
     height: 100%;
     width: 100%;
