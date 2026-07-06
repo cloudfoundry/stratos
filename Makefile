@@ -782,4 +782,6 @@ include deprecated.mk
 
 # ── Site-specific overrides ──────────────────────────────────
 $(_HIDE)SITE := site
--include $($(_HIDE)SITE).mk
+# $(wildcard) so make 3.81 (macOS) stays silent when the file is absent —
+# bare -include still prints a spurious "No rule to make target" there.
+-include $(wildcard $($(_HIDE)SITE).mk)
