@@ -23,7 +23,12 @@ quarto preview dist/booklets/.work/theming
 ```
 
 Chapters must stay inside the GFM subset enforced by
-`scripts/lint-docs.mjs`; the spine files currently need no conversion
-shim (no GitHub alerts or mermaid blocks). If a future spine pulls in
-a chapter using `> [!NOTE]` alerts, add the alert-to-callout rewrite
-step to `render.sh` at that point.
+`scripts/lint-docs.mjs`. Quarto handles none of the subset's
+extensions natively in book output, so `render.sh` rewrites at
+assembly time: in-spine links become internal anchors, `> [!NOTE]`
+alerts become callouts, and `mermaid` fences become executable
+`{mermaid}` cells (chapters are assembled as `.qmd` for this; the
+spine lists `.qmd` names, and diagram rendering needs Chrome, which
+Quarto finds on dev machines and CI runners alike). Known ceiling:
+links to docs/ pages outside the spine become dead anchors — add a
+website-URL rewrite if a spine ever needs one.
