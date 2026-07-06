@@ -3,6 +3,12 @@
 
 set -euo pipefail
 
+# Must run from the repo root (paths below are root-relative).
+if [ ! -f Makefile ] || [ ! -d src/jetstream ]; then
+  echo "error: run from the repository root (where the Makefile lives)" >&2
+  exit 1
+fi
+
 VERSION=${1:-$(node -p "require('./package.json').version")}
 BUILD_DATE=${2:-$(date -u +"%Y-%m-%dT%H:%M:%SZ")}
 GIT_COMMIT=${3:-$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")}
