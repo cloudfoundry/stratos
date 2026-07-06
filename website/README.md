@@ -31,3 +31,21 @@ diagrams.
 The sidebar is curated in `sidebars.js` — new pages must be added
 there to appear in the site navigation. Landing-page and other
 site-only content lives under `src/pages`, never in `docs/`.
+
+## Deployment
+
+`.github/workflows/website-deploy.yml` publishes the site to GitHub
+Pages on every `develop` push touching `docs/` or `website/`
+(requires Pages to be enabled on the repo with source "GitHub
+Actions"). It builds with `SITE_URL`/`SITE_BASE_URL` set for
+`cloudfoundry.github.io/stratos/`; switch those to
+`https://stratos.cloudfoundry.org` and `/` once the custom domain
+CNAME exists.
+
+The built site can also be pushed to any Cloud Foundry as a static
+app:
+
+```bash
+make build website
+cf push -f website/manifest.yml
+```

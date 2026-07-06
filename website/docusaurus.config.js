@@ -9,8 +9,10 @@ const config = {
   tagline: 'Open-Source Multi-Cluster UI for Cloud Foundry and Kubernetes',
   favicon: 'img/favicon.ico',
 
-  url: 'https://stratos.app',
-  baseUrl: '/',
+  // Overridable so the GitHub Pages workflow can build for
+  // cloudfoundry.github.io/stratos/ until the custom domain lands.
+  url: process.env.SITE_URL || 'https://stratos.app',
+  baseUrl: process.env.SITE_BASE_URL || '/',
 
   organizationName: 'cloudfoundry',
   projectName: 'stratos',
