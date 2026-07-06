@@ -19,21 +19,19 @@ language their test framework uses (Python, Go, Ruby, etc.).
 The two components connect via the `STRATOS_SECRETS` environment
 variable. The script decrypts and injects; the loader reads and parses.
 
-```
-┌─────────────────┐     ┌──────────────┐     ┌──────────────────┐
-│  secrets.yaml   │────▶│ secrets.sh   │────▶│ secrets.yaml.enc │
-│  (plaintext)    │     │ encrypt      │     │ (encrypted, git) │
-│  .gitignored    │     └──────────────┘     └──────────────────┘
-└─────────────────┘            │
-        ▲                      │ decrypt
-        │                      ▼
-┌───────┴─────────┐     ┌──────────────┐     ┌──────────────────┐
-│ Secrets loader  │◀────│ secrets.sh   │◀────│ secrets.yaml.enc │
-│ (any language)  │     │ run-e2e      │     │ (encrypted, git) │
-└─────────────────┘     └──────────────┘     └──────────────────┘
-                               │
-                    STRATOS_SECRETS env var
-                    (in-memory, never on disk)
+```mermaid
+flowchart LR
+    plain["secrets.yaml
+    (plaintext, .gitignored)"]
+    enc["secrets.yaml.enc
+    (encrypted, in git)"]
+    env["STRATOS_SECRETS env var
+    (in-memory, never on disk)"]
+    loader["Secrets loader
+    (any language)"]
+    plain -- secrets.sh encrypt --> enc
+    enc -- secrets.sh run-e2e decrypts --> env
+    env --> loader
 ```
 
 Plaintext secrets never persist on disk in CI. For local development,

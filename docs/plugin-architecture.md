@@ -7,21 +7,17 @@ packages to the console.
 
 ## Overview
 
-```
-plugin-config.yaml (single source of truth)
-┌──────────────────────────────────────────┐
-│ plugins:                                 │
-│   - cloudfoundry                         │
-│   - cfapppush, cfappssh, userinvite      │
-│   - autoscaler                           │
-│   - kubernetes, analysis, monocular      │
-└──────────┬──────────────────┬────────────┘
-           │                  │
-     go generate        frontend prebuild
-           │                  │
-           ▼                  ▼
-    extra_plugins.go   extra_plugins.go
-    (backend build)    (frontend build)
+```mermaid
+flowchart TD
+    cfg["plugin-config.yaml (single source of truth)
+    plugins: cloudfoundry, cfapppush, cfappssh, userinvite,
+    autoscaler, kubernetes, analysis, monocular"]
+    be["extra_plugins.go
+    (backend build)"]
+    fe["extra_plugins.go
+    (frontend build)"]
+    cfg -- go generate --> be
+    cfg -- frontend prebuild --> fe
 ```
 
 ## Backend Plugins

@@ -12,25 +12,22 @@ The theme system has five layers that work together. For the
 service-level architecture and four-layer preference cascade, see
 [branding-architecture.md](branding-architecture.md).
 
-```
-┌─────────────────────────────────────────────────────┐
-│  StratosBrandingService (Angular)                   │
-│  Unified service: loads company-config.json,        │
-│  applies branding/colors/login, manages dark/light  │
-│  mode, persists preferences to localStorage         │
-├─────────────────────────────────────────────────────┤
-│  main.scss (:root / .dark-theme)                    │
-│  Defines all CSS custom properties                  │
-│  Dark overrides via .dark-theme selector on <body>  │
-├─────────────────────────────────────────────────────┤
-│  tailwind.css (@theme block)                        │
-│  Maps CSS variables to semantic Tailwind tokens     │
-│  e.g. text-content-text → var(--content-text)       │
-├─────────────────────────────────────────────────────┤
-│  Component templates                                │
-│  Use semantic tokens: bg-content-bg, text-primary   │
-│  NOT raw colors: bg-white, text-gray-500            │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    svc["StratosBrandingService (Angular)
+    Unified service: loads company-config.json, applies
+    branding/colors/login, manages dark/light mode,
+    persists preferences to localStorage"]
+    scss["main.scss (:root / .dark-theme)
+    Defines all CSS custom properties
+    Dark overrides via .dark-theme selector on body"]
+    tw["tailwind.css (@theme block)
+    Maps CSS variables to semantic Tailwind tokens
+    e.g. text-content-text = var(--content-text)"]
+    tpl["Component templates
+    Use semantic tokens: bg-content-bg, text-primary
+    NOT raw colors: bg-white, text-gray-500"]
+    svc --> scss --> tw --> tpl
 ```
 
 ## Key Files
