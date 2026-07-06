@@ -202,8 +202,6 @@ CI workflows use outdated tool versions. Tracked in
 | pr | Go | 1.21 | 1.24.2 |
 | release | Node.js | 24 | 24 (correct) |
 | release | Go | 1.21 | 1.24.2 |
-| documentation | Node.js | 12 | 24 |
-| documentation-versioning | Node.js | 12 | 24 |
 | All | Package manager | npm | bun |
 
 ## CF Release Build Process
