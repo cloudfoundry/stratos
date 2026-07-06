@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal } from '@angular/core';
+import { ClickStopPropagationDirective } from '../../../core/click-stop-propagation.directive';
 
 @Component({
   selector: 'app-copy-to-clipboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ClickStopPropagationDirective],
   templateUrl: './copy-to-clipboard.component.html',
 })
 export class CopyToClipboardComponent {
