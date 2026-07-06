@@ -6,9 +6,9 @@ book:
   author: "The Stratos maintainers"
   chapters:
     - index.qmd
-    - theming-architecture.md
-    - tailwind-usage.md
-    - branding-architecture.md
+    - theming-architecture.qmd
+    - tailwind-usage.qmd
+    - branding-architecture.qmd
 
 format:
   epub: default
