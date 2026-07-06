@@ -272,6 +272,25 @@ make release cf           # package for Cloud Foundry
 
 See `docs/build-and-packaging.md` for full details.
 
+### Documentation Booklets
+
+Curated slices of `docs/` also render as offline epub/PDF booklets via
+[Quarto](https://quarto.org) (see `docs-build/README.md`):
+
+```bash
+make build booklets       # render all booklets to dist/booklets/
+```
+
+For a live drafting loop on one booklet, render once, then preview its
+assembled work directory:
+
+```bash
+quarto preview dist/booklets/.work/theming
+```
+
+Booklet chapters are normal `docs/` pages and must pass the docs lint
+(`node scripts/lint-docs.mjs`), which CI enforces.
+
 ---
 
 ## Styling
