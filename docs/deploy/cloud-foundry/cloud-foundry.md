@@ -40,12 +40,11 @@ If you run into issues, please refer to the [Troubleshooting Guide](cf-troublesh
  the section [Associate Cloud Foundry database service](#associate-cloud-foundry-database-service) are followed.
  All other deployment methods (helm, docker all-in-one, etc) allow the registration of multiple CF instances by default.
 
-Note:
-
-1. You need the cf CLI command line tool installed and available on the path.
-1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
-1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
-1. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
+> [!NOTE]
+> 1. You need the cf CLI command line tool installed and available on the path.
+> 1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
+> 1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
+> 1. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
 
 ### Running Stratos in Production Environments
 
@@ -131,7 +130,8 @@ memory limit can be scaled down after the app has been pushed, using the cf CLI.
 
 Deploy Stratos using the [`splatform/stratos`](https://hub.docker.com/r/splatform/stratos) docker image
 
-> **NOTE:** Your Cloud Foundry must have docker support [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
+> [!IMPORTANT]
+> Your Cloud Foundry must have docker support [enabled](https://docs.cloudfoundry.org/adminguide/docker.html#enable).
 
 ```
 cf push console -o splatform/stratos:stable -m 128M -k 512M
