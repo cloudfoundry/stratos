@@ -1,0 +1,6 @@
+applications:
+  - name: stratos-docs
+    memory: 64M
+    path: build
+    buildpacks:
+      - staticfile_buildpack
