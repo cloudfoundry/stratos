@@ -35,6 +35,7 @@ jobs:
       non_stb: ${{ steps.filter.outputs.non_stb }}
       docs: ${{ steps.filter.outputs.docs }}
       website: ${{ steps.filter.outputs.website }}
+      booklets: ${{ steps.filter.outputs.booklets }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -51,12 +52,15 @@ jobs:
               - '**'
               - '!tools/stb/**'
               - '!docs/**'
+              - '!docs-build/**'
               - '!website/**'
               - '!README.md'
             docs:
               - 'docs/**'
             website:
               - 'website/**'
+            booklets:
+              - 'docs-build/**'
 
   # Enforce the GFM-intersection markdown subset on docs/ so every page
   # renders identically on GitHub and in the website generator. Not a
@@ -74,10 +78,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - run: node scripts/lint-docs.mjs
 
-  # The website previously had no PR coverage on develop: documentation.yml
-  # only triggers on master, so a website change (e.g. a dependency bump
-  # with a stale bun.lock) could merge green without ever being built.
-  # Frozen-lockfile install + full build catches both.
+  # The website previously had no PR coverage on develop: the legacy docs
+  # workflow (since removed) only triggered on master, so a website change
+  # (e.g. a dependency bump with a stale bun.lock) could merge green
+  # without ever being built. Frozen-lockfile install + full build
+  # catches both.
   website-build:
     name: Website Build
     runs-on: ubuntu-latest
@@ -95,6 +100,29 @@ jobs:
         run: cd website && bun install --frozen-lockfile
       - name: Build website
         run: cd website && bun run build
+
+  # Booklets are offline epub/PDF renderings of docs/ (see docs-build/).
+  # Rendered on any docs or docs-build change; the outputs are uploaded
+  # as a PR artifact for eyeballing, not published anywhere.
+  booklets-build:
+    name: Booklets Build
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs == 'true' || needs.changes.outputs.booklets == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.38
+      - name: Render booklets
+        run: docs-build/render.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: booklets
+          path: |
+            dist/booklets/
+            !dist/booklets/.work/**
+          retention-days: 14
 
   lint:
     name: Lint Check
@@ -316,7 +344,7 @@ jobs:
   pr-success:
     name: PR Quality Gate
     runs-on: ubuntu-latest
-    needs: [lint, test-frontend, test-backend, build-check, website-build]
+    needs: [lint, test-frontend, test-backend, build-check, website-build, booklets-build]
     if: always()
     steps:
       - name: Check all jobs
@@ -328,7 +356,8 @@ jobs:
                      "${{ needs.test-frontend.result }}" \
                      "${{ needs.test-backend.result }}" \
                      "${{ needs.build-check.result }}" \
-                     "${{ needs.website-build.result }}"; do
+                     "${{ needs.website-build.result }}" \
+                     "${{ needs.booklets-build.result }}"; do
             if [ "$res" != "success" ] && [ "$res" != "skipped" ]; then
               echo "❌ One or more required checks failed (result: $res)"
               exit 1
