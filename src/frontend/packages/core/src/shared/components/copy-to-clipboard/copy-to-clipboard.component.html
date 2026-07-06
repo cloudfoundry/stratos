@@ -8,7 +8,8 @@
     @case ('yes and saw succeeded'){
       <span class="material-icons col-start-1 row-start-1 justify-self-end cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300"
        [ngClass]="{'text-sm': compact, 'text-base': !compact, 'animate-scale-pop-in': didUserPressCopy() === 'yes and saw succeeded'}"
-       role="button" tabindex="0"
+       role="button" tabindex="0"  
+       appClickStopPropagation
        (click)="copyToClipboard(text)"
        (keydown.enter)="copyToClipboard(text)"
        (keydown.space)="copyToClipboard(text)"
