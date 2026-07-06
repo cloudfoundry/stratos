@@ -48,8 +48,9 @@ and engine via docker. Once set ensure you're in the root of the project and exe
 codeclimate analyze
 ```
 
-> **NOTE** Unfortunately this highlights all current issues and not those that are the diff between any master and feature branch. Analyze
-can be ran against a single/sub set of files, again with all current issues, but a little more digestible.
+> [!NOTE]
+> Unfortunately this highlights all current issues and not those that are the diff between any master and feature branch. Analyze
+> can be ran against a single/sub set of files, again with all current issues, but a little more digestible.
 
 ```
 codeclimate analyze <path to file/s>

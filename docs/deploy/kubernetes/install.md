@@ -40,11 +40,14 @@ kubectl create namespace console
 helm install my-console stratos/console --namespace=console
 ```
 
-> **Note**: The first `kubectl` command will create a namespace for Stratos. With Helm 3 you must create a namespace before installing.
-We recommend installing Stratos into a separate namespace.
+> [!NOTE]
+> The first `kubectl` command will create a namespace for Stratos. With Helm 3 you must create a namespace before installing.
+> We recommend installing Stratos into a separate namespace.
 
-> **Note**: This assumes that a storage class exists in the Kubernetes cluster that has been marked as `default`. If no such storage class exists, a specific storage class needs to be specified, please see the following section *Specifying a custom Storage Class*. 
+> [!NOTE]
+> This assumes that a storage class exists in the Kubernetes cluster that has been marked as `default`. If no such storage class exists, a specific storage class needs to be specified, please see the following section *Specifying a custom Storage Class*.
 
+> [!TIP]
 > You can change the namespace (--namespace) and the release name to values of your choice.
 
 This will create a Stratos instance named `my-console` in a namespace called `console` in your Kubernetes cluster.

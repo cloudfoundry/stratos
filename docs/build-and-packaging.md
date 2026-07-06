@@ -282,8 +282,9 @@ cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-{VERSION}.zip
 The `cf` modifier automatically sets `PLATFORM=linux/amd64` for backend
 compilation. The version can be overridden without editing `package.json`.
 
-Note: `cf push -p` does not read `manifest.yml` from inside the zip —
-the manifest must be passed separately with `-f` or be in the current directory.
+> [!IMPORTANT]
+> `cf push -p` does not read `manifest.yml` from inside the zip —
+> the manifest must be passed separately with `-f` or be in the current directory.
 
 **GitHub release (automated via CI):**
 
@@ -540,8 +541,9 @@ cf set-env console STRATOS_CF_MAX_PARALLEL_PAGES 8
 cf restage console
 ```
 
-Note: `cf restart` preserves the environment variable set loaded when the
-droplet was built and will NOT pick up `cf set-env` changes. Use `cf restage`.
+> [!IMPORTANT]
+> `cf restart` preserves the environment variable set loaded when the
+> droplet was built and will NOT pick up `cf set-env` changes. Use `cf restage`.
 
 The resolved values are logged at startup:
 
