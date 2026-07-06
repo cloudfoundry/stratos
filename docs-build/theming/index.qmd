@@ -1,0 +1,9 @@
+# Preface {.unnumbered}
+
+This booklet collects the Stratos theming documentation into a single
+offline guide: the theming architecture, how Tailwind is used and
+extended in the frontend, and how runtime branding is applied.
+
+The same chapters are published individually on the Stratos
+documentation site. This booklet tracks the develop branch rather than
+a specific release.

@@ -82,6 +82,7 @@ $(_HIDE)WANT_FRONTEND :=
 $(_HIDE)WANT_BACKEND  :=
 $(_HIDE)WANT_E2E      :=
 $(_HIDE)WANT_WEBSITE  :=
+$(_HIDE)WANT_BOOKLETS :=
 
 ifneq ($(filter frontend,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
@@ -95,13 +96,16 @@ endif
 ifneq ($(filter website,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_WEBSITE := yes
 endif
+ifneq ($(filter booklets,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_BOOKLETS := yes
+endif
 
 # Default: frontend + backend when none specified (unless e2e),
 # but only for verbs that use these modifiers (not clean/dump).
 # korifi counts as a build modifier here (make build korifi = static
 # backend only), so it must suppress the default like the others.
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$(filter korifi,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
@@ -214,8 +218,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website cf korifi github dist version e2e actions gate tests coverage summary dependabot
-frontend backend website cf korifi github dist version e2e actions gate tests coverage summary dependabot:
+.PHONY: frontend backend website booklets cf korifi github dist version e2e actions gate tests coverage summary dependabot
+frontend backend website booklets cf korifi github dist version e2e actions gate tests coverage summary dependabot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -325,6 +329,20 @@ define clean.website
 	rm -rf website/build website/.docusaurus website/node_modules
 endef
 $(call register, clean, website)
+
+# ── Booklets (offline epub/PDF renderings of docs/) ──────────
+
+define build.booklets
+	@echo "Rendering documentation booklets..."
+	docs-build/render.sh
+	@echo "Booklets rendered: dist/booklets/"
+endef
+$(call register, build, booklets)
+
+define clean.booklets
+	rm -rf dist/booklets
+endef
+$(call register, clean, booklets)
 
 # Local dev session expiry. Mirrors the cf-package deploy default
 # (`build/release-cf.sh`) so long Playwright drives don't get bounced
@@ -725,6 +743,7 @@ help:
 	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
 	@echo "  make dev website          Start documentation site dev server"
 	@echo "  make build website        Build the documentation website"
+	@echo "  make build booklets       Render docs booklets (epub/PDF, needs quarto)"
 	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
 	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
 	@echo ""
