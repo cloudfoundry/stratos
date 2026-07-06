@@ -268,6 +268,13 @@ $(call register, stamp, frontend)
 
 # ── Backend ───────────────────────────────────────────────────
 
+# extra_plugins.go is generated from plugin-config.yaml (gitignored), so a
+# fresh checkout compiles a plugin-less jetstream unless generation runs
+# first. Internal prerequisite of every backend build; hidden from help.
+.PHONY: $(_HIDE)gen-plugins
+$(_HIDE)gen-plugins:
+	cd src/jetstream && go generate ./...
+
 define build.backend
 	@if [ -n "$(PLATFORM)" ]; then \
 		echo "Building backend for $($(_HIDE)CURRENT_PLATFORM)..."; \
@@ -281,7 +288,7 @@ define build.backend
 		echo "All platform binaries built: $($(_HIDE)BIN_DIR)/"; \
 	fi
 endef
-$(call register, build, backend)
+$(call register, build, backend, $(_HIDE)gen-plugins)
 
 define test.backend
 	@echo "Running backend tests..."
@@ -530,14 +537,13 @@ define build.korifi
 	@command -v zig > /dev/null 2>&1 || (echo "zig not installed — required for the static cgo cross-compile. Install: brew install zig" >&2 && exit 1)
 	@echo "Building static backend for $($(_HIDE)CURRENT_PLATFORM) (Korifi)..."
 	@mkdir -p $($(_HIDE)BIN_DIR)
-	cd src/jetstream && go generate ./...
 	cd src/jetstream && CGO_ENABLED=1 GOOS=linux GOARCH=$($(_HIDE)TARGET_ARCH) \
 		CC="zig cc -target $(if $(filter arm64,$($(_HIDE)TARGET_ARCH)),aarch64,x86_64)-linux-musl" \
 		go build -ldflags "$($(_HIDE)GO_LDFLAGS) -linkmode external -extldflags -static" \
 		-o ../../$($(_HIDE)BIN_DIR)/jetstream
 	@echo "Backend built (static): $($(_HIDE)BIN_DIR)/jetstream"
 endef
-$(call register, build, korifi)
+$(call register, build, korifi, $(_HIDE)gen-plugins)
 
 define release.korifi
 	@chmod +x build/release-cf.sh
