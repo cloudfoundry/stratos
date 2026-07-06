@@ -2,7 +2,11 @@
 #
 # Stage and zip Stratos for Cloud Foundry deployment.
 #
-# Usage: ./build/release-cf.sh [VERSION]
+# Usage: ./build/release-cf.sh [VERSION] [MODE]
+#
+# MODE: cf (default) — classic CF manifest (binary_buildpack)
+#       korifi       — Korifi manifest (paketo-buildpacks/procfile;
+#                      requires a statically linked binary — make build korifi)
 #
 # Validates that required build artifacts exist before packaging.
 # Does NOT build anything — run 'make build' first.
@@ -10,12 +14,18 @@
 set -euo pipefail
 
 VERSION="${1:-$(node -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
+MODE="${2:-cf}"
+
+case "${MODE}" in
+  cf|korifi) ;;
+  *) echo "ERROR: unknown mode '${MODE}' — supported: cf, korifi" >&2; exit 1 ;;
+esac
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
 BIN_DIR="${DIST_DIR}/bin"
-PKG_DIR="${DIST_DIR}/cf-package"
-ZIP_FILE="${DIST_DIR}/stratos-cf-${VERSION}.zip"
+PKG_DIR="${DIST_DIR}/${MODE}-package"
+ZIP_FILE="${DIST_DIR}/stratos-${MODE}-${VERSION}.zip"
 
 log()   { echo "-----> $1"; }
 error() { echo "ERROR: $1" >&2; }
@@ -47,6 +57,11 @@ elif ! file "${jetstream_bin}" | grep -q "ELF"; then
   error "Backend binary is not a Linux binary — CF requires a Linux ELF binary"
   error "  Current binary: $(file "${jetstream_bin}")"
   error "  Run: make build PLATFORM=linux/amd64  (or linux/arm64)"
+  fail=1
+elif [[ "${MODE}" == "korifi" ]] && ! file "${jetstream_bin}" | grep -q "statically linked"; then
+  error "Backend binary is dynamically linked — Korifi's run image cannot exec it"
+  error "  Current binary: $(file "${jetstream_bin}")"
+  error "  Run: make build korifi"
   fail=1
 fi
 
@@ -91,7 +106,38 @@ fi
 echo "web: ./jetstream" > "${PKG_DIR}/Procfile"
 
 # CF manifest
-cat > "${PKG_DIR}/manifest.yml" <<'MANIFEST'
+if [[ "${MODE}" == "korifi" ]]; then
+  # Stable per-workstation key, generated once and reused so data the
+  # console encrypted under it (endpoint tokens) survives repackaging.
+  # A shared hardcoded key would be a credential leak; a fresh key per
+  # package would orphan previously encrypted data.
+  KEY_FILE="${DIST_DIR}/.korifi-encryption-key"
+  if [[ ! -f "${KEY_FILE}" ]]; then
+    (umask 077 && openssl rand -hex 32 > "${KEY_FILE}")
+  fi
+  ENCRYPTION_KEY="$(cat "${KEY_FILE}")"
+  cat > "${PKG_DIR}/manifest.yml" <<MANIFEST
+applications:
+  - name: console
+    memory: 512M
+    disk_quota: 1024M
+    timeout: 180
+    buildpacks:
+      - paketo-buildpacks/procfile
+    health-check-type: port
+    env:
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      SESSION_STORE_EXPIRY: "240"
+      # The CF API address inferred from VCAP_APPLICATION may not be
+      # reachable from inside the cluster (on kind it is localhost).
+      # Target the Korifi API service directly; its certificate does
+      # not carry the service hostname, hence the SSL skip. Adjust
+      # both for a non-default install.
+      CF_API_URL: https://korifi-api-svc.korifi.svc.cluster.local
+      SKIP_SSL_VALIDATION: "true"
+MANIFEST
+else
+  cat > "${PKG_DIR}/manifest.yml" <<'MANIFEST'
 applications:
   - name: console
     memory: 256M
@@ -108,6 +154,7 @@ applications:
 # Force the console to use secured communication with the Cloud Foundry API endpoint
 #       CF_API_FORCE_SECURE: true
 MANIFEST
+fi
 
 # ── Create zip ────────────────────────────────────────────────
 

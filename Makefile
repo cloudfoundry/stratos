@@ -98,24 +98,30 @@ endif
 
 # Default: frontend + backend when none specified (unless e2e),
 # but only for verbs that use these modifiers (not clean/dump).
+# korifi counts as a build modifier here (make build korifi = static
+# backend only), so it must suppress the default like the others.
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$(filter korifi,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
 endif
 
 $(_HIDE)WANT_CF     :=
+$(_HIDE)WANT_KORIFI :=
 $(_HIDE)WANT_GITHUB :=
 
 ifneq ($(filter cf,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CF := yes
 endif
+ifneq ($(filter korifi,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_KORIFI := yes
+endif
 ifneq ($(filter github,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_GITHUB := yes
 endif
 ifneq ($(filter release,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB),)
+ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB),)
   $(_HIDE)WANT_CF     := yes
   $(_HIDE)WANT_GITHUB := yes
 endif
@@ -146,6 +152,19 @@ ifeq ($($(_HIDE)WANT_CF),yes)
     $(_HIDE)TARGET_ARCH := amd64
     $(_HIDE)GO_ENV      := GOOS=linux GOARCH=amd64
     $(_HIDE)CURRENT_PLATFORM := linux/amd64
+  endif
+endif
+
+# korifi modifier targets linux at the host arch unless PLATFORM is set
+# (a local kind cluster runs the host arch; real clusters override,
+# e.g. make build korifi PLATFORM=linux/amd64)
+ifeq ($($(_HIDE)WANT_KORIFI),yes)
+  ifndef PLATFORM
+    PLATFORM := linux/$($(_HIDE)HOST_ARCH)
+    $(_HIDE)TARGET_OS   := linux
+    $(_HIDE)TARGET_ARCH := $($(_HIDE)HOST_ARCH)
+    $(_HIDE)GO_ENV      := GOOS=linux GOARCH=$($(_HIDE)HOST_ARCH)
+    $(_HIDE)CURRENT_PLATFORM := linux/$($(_HIDE)HOST_ARCH)
   endif
 endif
 
@@ -195,8 +214,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website cf github dist version e2e actions gate tests coverage summary dependabot
-frontend backend website cf github dist version e2e actions gate tests coverage summary dependabot:
+.PHONY: frontend backend website cf korifi github dist version e2e actions gate tests coverage summary dependabot
+frontend backend website cf korifi github dist version e2e actions gate tests coverage summary dependabot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -482,6 +501,32 @@ define release.cf
 endef
 $(call register, release, cf)
 
+# ── Korifi ────────────────────────────────────────────────────
+# Korifi runs droplets on the Paketo jammy run image, which has no
+# glibc loader at the paths a dynamically linked cgo binary expects,
+# and the sqlite driver needs cgo — so the binary must be a static
+# cgo build (zig/musl). Korifi also has no binary_buildpack; the
+# package manifest uses paketo-buildpacks/procfile instead.
+
+define build.korifi
+	@command -v zig > /dev/null 2>&1 || (echo "zig not installed — required for the static cgo cross-compile. Install: brew install zig" >&2 && exit 1)
+	@echo "Building static backend for $($(_HIDE)CURRENT_PLATFORM) (Korifi)..."
+	@mkdir -p $($(_HIDE)BIN_DIR)
+	cd src/jetstream && go generate ./...
+	cd src/jetstream && CGO_ENABLED=1 GOOS=linux GOARCH=$($(_HIDE)TARGET_ARCH) \
+		CC="zig cc -target $(if $(filter arm64,$($(_HIDE)TARGET_ARCH)),aarch64,x86_64)-linux-musl" \
+		go build -ldflags "$($(_HIDE)GO_LDFLAGS) -linkmode external -extldflags -static" \
+		-o ../../$($(_HIDE)BIN_DIR)/jetstream
+	@echo "Backend built (static): $($(_HIDE)BIN_DIR)/jetstream"
+endef
+$(call register, build, korifi)
+
+define release.korifi
+	@chmod +x build/release-cf.sh
+	@./build/release-cf.sh "$($(_HIDE)SEMVER_VERSION)" korifi
+endef
+$(call register, release, korifi)
+
 # ── GitHub release ────────────────────────────────────────────
 
 define release.github
@@ -506,7 +551,7 @@ $(_HIDE)finalize-and-reexec:
 	@./build/version-bump.sh bump release
 	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
 	@$(MAKE) FINAL= $(MAKECMDGOALS)
-$(filter-out frontend backend cf github dist version e2e actions lint gate tests coverage,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+$(filter-out frontend backend cf korifi github dist version e2e actions lint gate tests coverage,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
 else ifneq ($(FINAL),)
 $(error Unknown FINAL value '$(FINAL)' — supported: strip)
 endif
@@ -545,7 +590,7 @@ endif
 # make clean dist      — above + node_modules
 
 define clean.release
-	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip
+	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/korifi-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip $($(_HIDE)DIST_DIR)/stratos-korifi-*.zip
 endef
 
 define clean.dist
@@ -628,6 +673,7 @@ help:
 	@echo "  make build frontend       Build frontend only"
 	@echo "  make build backend        Cross-compile all backend platforms"
 	@echo "  make build backend PLATFORM=linux/amd64  Build single platform"
+	@echo "  make build korifi         Static cgo backend for Korifi (linux/host-arch)"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test                 Run all tests"
@@ -647,6 +693,7 @@ help:
 	@echo "Release:"
 	@echo "  make release              Create CF zip + GitHub archives"
 	@echo "  make release cf           CF-pushable zip only"
+	@echo "  make release korifi       Korifi-pushable zip (Paketo procfile manifest)"
 	@echo "  make release github       GitHub release archives only"
 	@echo ""
 	@echo "Setup:"
