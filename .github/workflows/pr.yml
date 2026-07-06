@@ -109,11 +109,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.docs == 'true' || needs.changes.outputs.booklets == 'true'
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: 1.9.38
+      # Mermaid diagrams render through chrome-headless-shell; without it
+      # preinstalled, quarto render blocks on an interactive install
+      # prompt and the job hangs until the timeout.
+      - name: Install chrome-headless-shell
+        run: quarto install chrome-headless-shell --no-prompt
       - name: Render booklets
         run: docs-build/render.sh
       - uses: actions/upload-artifact@v4
