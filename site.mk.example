@@ -5,6 +5,15 @@
 #
 # All variables and targets from the main Makefile are available.
 # Targets defined here extend (not replace) the main Makefile.
+# Do not put secrets in this file — the deploy targets deliberately
+# take credentials from tool state (cf login, git remotes), not variables.
+#
+# Three extension patterns, each shown below:
+#   1. Parameter override — set a variable the Makefile consumes.
+#   2. Recipe override — redefine a recipe variable (define NAME ... endef);
+#      the already-registered target picks up the new body. Do NOT call
+#      register again — that would duplicate the rule and make will warn.
+#   3. New destination — add a modifier word for `deploy website`.
 
 # ── Site Help ─────────────────────────────────────────────────
 # This target is called by 'make help' when site.mk exists.
@@ -12,27 +21,48 @@
 $(_HIDE)site-help:
 	@echo ""
 	@echo "Site-specific:"
-	@echo "  make build release deploy cf  Build, package, and push to current CF target"
-	@echo "  make deploy cf                Push existing CF zip to current CF target"
+	@echo "  make deploy cf                Push existing app CF zip to current CF target"
+	@echo "  make build release deploy cf  Build, package, and push app to current CF target"
 
-# ── Deploy ───────────────────────────────────────────────────
-# Deploy to Cloud Foundry. Requires cf CLI authenticated and targeted.
+# ── 1. Parameter override: fork remote for Pages previews ────
+# `make deploy website pages` pushes to the `origin` remote by default,
+# which is correct when your clone's origin is your fork. If your fork
+# is a differently named remote, set it here:
 #
-# Usage:
-#   make deploy cf                Push existing CF zip
-#   make build release deploy cf  Build, package, and push
+# PAGES_REMOTE = my-fork
 
-define deploy.cf
-	@echo "Deploying to CF..."
+# ── 2. Recipe override: enable app deploys to CF ─────────────
+# The committed Makefile only deploys the documentation website; app
+# deployment (the zip from `make release cf`) is site-specific and errors
+# by default. Redefine deploy.cf.app to enable it:
+
+define deploy.cf.app
+	@echo "Deploying app to CF..."
 	@cf target | grep -E "org:|space:" || \
-		(echo "ERROR: No CF target set. Run 'cf target -o ORG -s SPACE' first."; exit 1)
+		{ echo "ERROR: No CF target set. Run 'cf target -o ORG -s SPACE' first." >&2; exit 1; }
 	@ZIP=$$(ls -t $($(_HIDE)DIST_DIR)/stratos-cf-*.zip 2>/dev/null | head -1); \
 	if [ -z "$$ZIP" ]; then \
-		echo "ERROR: No CF zip found. Run 'make build release cf' first."; exit 1; \
+		echo "ERROR: No CF zip found. Run 'make build release cf' first." >&2; exit 1; \
 	fi; \
 	echo "Deploying $$ZIP..."; \
 	cf push -f $($(_HIDE)DIST_DIR)/cf-package/manifest.yml -p "$$ZIP"
 endef
-$(call register, deploy, cf)
 
-$(call declare_verb, deploy)
+# ── 3. New destination for `deploy website` ──────────────────
+# Operators publishing the site to their own infrastructure add a
+# destination word: flag + no-op target + recipe + register. Uncomment
+# and adapt. Adding the word to WEBSITE_DEPLOY_DESTS keeps the
+# `make deploy website` usage message accurate.
+#
+# WEBSITE_DEPLOY_DESTS += mysite
+# $(_HIDE)FLAG_mysite := $(filter mysite,$(MAKECMDGOALS))
+# .PHONY: mysite
+# mysite:
+#	@:
+#
+# define deploy.mysite
+#	@[ -d website/build ] || \
+#		{ echo "ERROR: website/build not found. Run 'make build website' first." >&2; exit 1; }
+#	rsync -a --delete website/build/ deploy@docs.example.internal:/srv/docs/
+# endef
+# $(call register, deploy, mysite)

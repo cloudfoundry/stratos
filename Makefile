@@ -114,9 +114,13 @@ endif
 $(_HIDE)WANT_CF     :=
 $(_HIDE)WANT_KORIFI :=
 $(_HIDE)WANT_GITHUB :=
+$(_HIDE)WANT_PAGES  :=
 
 ifneq ($(filter cf,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CF := yes
+endif
+ifneq ($(filter pages,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_PAGES := yes
 endif
 ifneq ($(filter korifi,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_KORIFI := yes
@@ -218,8 +222,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github dist version e2e actions gate tests coverage summary dependabot
-frontend backend website booklets cf korifi github dist version e2e actions gate tests coverage summary dependabot:
+.PHONY: frontend backend website booklets cf korifi github pages dist version e2e actions gate tests coverage summary dependabot
+frontend backend website booklets cf korifi github pages dist version e2e actions gate tests coverage summary dependabot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -559,6 +563,81 @@ define release.github
 endef
 $(call register, release, github)
 
+# ── Deploy (documentation website) ───────────────────────────
+# Grammar: make deploy website <destination> — the component says what is
+# deployed, the destination says where. Destinations here are mechanisms
+# with no environment baked in; site-specific values live in site.mk.
+#
+#   make deploy website pages   Push HEAD to your fork's pages-preview
+#                               branch; the Deploy Website workflow builds
+#                               and publishes your fork's Pages site.
+#                               One-time fork setup: see README.
+#   make deploy website cf      cf push the built site to the current
+#                               cf target (cf login / cf target first).
+#   make build deploy website cf    Build locally, then push.
+#
+# App deployment (the zip from `make release cf`) is site-specific —
+# site.mk redefines deploy.cf to add it (see site.mk.example).
+
+# Remote the pages-preview branch is pushed to. `origin` is right when
+# your clone's origin is your fork; override in site.mk otherwise.
+PAGES_REMOTE ?= origin
+
+# Destination words for `deploy website`. site.mk appends custom ones
+# (WEBSITE_DEPLOY_DESTS += mysite) so the usage guard stays accurate.
+WEBSITE_DEPLOY_DESTS := pages cf
+
+# Plain --force: pages-preview is a disposable deploy trigger that never
+# holds work, and --force-with-lease fails without a remote-tracking ref.
+define deploy.pages
+	@git remote get-url $(PAGES_REMOTE) >/dev/null 2>&1 || \
+		{ echo "ERROR: remote '$(PAGES_REMOTE)' not found — set PAGES_REMOTE to your fork remote (site.mk or make line)." >&2; exit 1; }
+	@echo "Pushing HEAD to $(PAGES_REMOTE)/pages-preview (GitHub Pages preview)..."
+	git push --force $(PAGES_REMOTE) HEAD:refs/heads/pages-preview
+	@echo "The fork's 'Deploy Website' workflow now builds and publishes the site."
+endef
+$(call register, deploy, pages)
+
+define deploy.cf
+	@if [ -n "$($(_HIDE)WANT_WEBSITE)" ]; then \
+		echo "Deploying documentation website to CF..."; \
+		cf target 2>/dev/null | grep -qE "org:.+" || \
+			{ echo "ERROR: no CF target / not logged in. Run 'cf login' then 'cf target -o ORG -s SPACE'." >&2; exit 1; }; \
+		[ -d website/build ] || \
+			{ echo "ERROR: website/build not found. Run 'make build website' first." >&2; exit 1; }; \
+		cf push -f website/manifest.yml; \
+	else \
+		$(MAKE) --no-print-directory $(_HIDE)deploy.cf.app; \
+	fi
+endef
+$(call register, deploy, cf)
+
+# App deploys carry site knowledge; site.mk redefines this recipe variable
+# (define deploy.cf.app ... endef) to enable them — see site.mk.example.
+define deploy.cf.app
+	@echo "ERROR: app deployment to CF is site-specific — see site.mk.example." >&2
+	@exit 1
+endef
+$(call register_always, deploy, cf.app)
+
+# Bare `make deploy website` (no destination word) → usage, not a no-op.
+define deploy.website
+	@if [ -z "$(filter $(WEBSITE_DEPLOY_DESTS),$(MAKECMDGOALS))" ]; then \
+		echo "Usage: make deploy website <destination>" >&2; \
+		echo "Destinations: $(WEBSITE_DEPLOY_DESTS)" >&2; \
+		exit 1; \
+	fi
+endef
+$(call register, deploy, website)
+
+# Bare `make deploy` → usage.
+define deploy.usage
+	@echo "Usage: make deploy website <destination>"
+	@echo "Destinations: $(WEBSITE_DEPLOY_DESTS)"
+	@echo "App deployment is site-specific — see site.mk.example."
+endef
+$(call register_always, deploy, usage)
+
 # ══════════════════════════════════════════════════════════════
 # Verb wiring — declare each verb after all objects are registered.
 # ══════════════════════════════════════════════════════════════
@@ -584,10 +663,12 @@ endif
 # These modifiers affect build behavior through variables (e.g.,
 # cf forces PLATFORM=linux/amd64) rather than via a registered recipe.
 $(call allow, build, cf)
+$(call allow, build, pages)
 
 $(call declare_verb, build)
 $(call declare_verb, test)
 $(call declare_verb, release)
+$(call declare_verb_default, deploy, $(_HIDE)deploy.usage)
 $(call declare_verb, stamp)
 $(call declare_verb, check)
 $(call declare_verb, audit)
@@ -719,6 +800,11 @@ help:
 	@echo "  make release cf           CF-pushable zip only"
 	@echo "  make release korifi       Korifi-pushable zip (Paketo procfile manifest)"
 	@echo "  make release github       GitHub release archives only"
+	@echo ""
+	@echo "Deploy (documentation website):"
+	@echo "  make deploy website pages Push preview to your fork's GitHub Pages"
+	@echo "  make deploy website cf    cf push built website to current CF target"
+	@echo "  make build deploy website cf  Build website, then cf push it"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make install              Install dependencies (bun install)"
