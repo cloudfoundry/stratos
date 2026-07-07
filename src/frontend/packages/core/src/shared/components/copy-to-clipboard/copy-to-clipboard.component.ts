@@ -30,22 +30,22 @@ export class CopyToClipboardComponent {
       await this.afterSomeSeconds();
       this.didUserPressCopy.set('yes and saw succeeded');
     } catch (err) {
-      // * manual testing suggestion paste below in browser console to simulate a clipboard failure:
-      // navigator.clipboard.writeText = async () => { throw new Error('Simulated clipboard failure') };
+      // * manual testing suggestion 
       this.didUserPressCopy.set('yes but failed'); 
       console.error('Failed to copy text. This might be due to security settings surrounding the clipboard API.', err);
+      await this.afterSomeSeconds(2_000);
+      this.didUserPressCopy.set(this.defaultCopyState);
     }
   }
 
-  private afterSomeSeconds() {
+  private afterSomeSeconds(howMany: number = 800): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
-      }, 700);
+      }, howMany);
     });
   }
-
 }
 
-// * manual testing suggestion paste below in browser console to simulate a clipboard failure:
+// * paste below in browser console to simulate a clipboard failure:
 // navigator.clipboard.writeText = async () => { throw new Error('Simulated clipboard failure') };
