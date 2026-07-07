@@ -6,16 +6,17 @@
   @switch (didUserPressCopy()) {
     @case ('not yet')
     @case ('yes and saw succeeded'){
-      <span class="material-icons col-start-1 row-start-1 justify-self-end cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300"
-       [ngClass]="{'text-sm': compact, 'text-base': !compact, 'animate-scale-pop-in': didUserPressCopy() === 'yes and saw succeeded'}"
-       role="button" tabindex="0"  
-       appClickStopPropagation
-       (click)="copyToClipboard(text)"
-       (keydown.enter)="copyToClipboard(text)"
-       (keydown.space)="copyToClipboard(text)"
-       [title]="tooltip">
-       content_copy
-     </span>
+      <button
+         class="inline-flex"
+         appClickStopPropagation
+         (click)="copyToClipboard(text)">
+        <span class="material-icons cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300"
+         [ngClass]="{'text-sm': compact, 'text-base': !compact}"
+         [class.animate-scale-pop-in]="didUserPressCopy() === 'yes and saw succeeded'"
+         [title]="tooltip">
+         content_copy
+       </span>
+      </button>
     }
     @case ('yes but failed') {
       <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300">
