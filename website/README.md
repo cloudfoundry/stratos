@@ -42,10 +42,38 @@ Actions"). It builds with `SITE_URL`/`SITE_BASE_URL` set for
 `https://stratos.cloudfoundry.org` and `/` once the custom domain
 CNAME exists.
 
-The built site can also be pushed to any Cloud Foundry as a static
-app:
+Deploy targets follow the Makefile's verb + modifier grammar — the
+component says what is deployed, the destination says where:
 
 ```bash
-make build website
-cf push -f website/manifest.yml
+make deploy website pages       # preview on your fork's GitHub Pages
+make deploy website cf          # cf push to your current cf target
+make build deploy website cf    # build locally, then push
 ```
+
+`deploy website cf` pushes `website/manifest.yml` as a static app to
+whatever `cf target` points at (log in and target first — no
+environment is baked into the Makefile). Site-specific destinations
+can be added from `site.mk`; see `site.mk.example`.
+
+### Fork previews (`deploy website pages`)
+
+`make deploy website pages` force-pushes `HEAD` to the
+`pages-preview` branch of your fork (`PAGES_REMOTE`, default
+`origin`; override in `site.mk` if your fork is a differently named
+remote). The deploy workflow triggers on that branch, builds with
+your fork's Pages URL, and publishes to
+`https://<you>.github.io/stratos/`. The workflow guards this path to
+forks only — the upstream site publishes exclusively from `develop`.
+
+One-time fork setup:
+
+1. Enable Pages with the "GitHub Actions" source:
+   `gh api -X POST repos/<you>/stratos/pages -f build_type=workflow`
+2. The first deploy auto-creates a `github-pages` deployment
+   environment restricted to the default branch. Allow the preview
+   branch:
+   `gh api -X POST repos/<you>/stratos/environments/github-pages/deployment-branch-policies -f name=pages-preview`
+
+The branch is a disposable deploy trigger — it never holds unique
+work and is always force-pushed.
