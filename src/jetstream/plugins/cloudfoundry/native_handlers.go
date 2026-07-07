@@ -529,6 +529,10 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		// totalResults, so Resources stays empty.
 		orgScope := splitNonEmpty(ctx.QueryParam("organization_guids"), ",")
 		spaceScope := splitNonEmpty(ctx.QueryParam("space_guids"), ",")
+		// names is an exact-match filter on /v3/apps — the app-name-unique
+		// validator asks "count of apps with this name in this space" and
+		// reads totalResults > 0.
+		nameScope := splitNonEmpty(ctx.QueryParam("names"), ",")
 		total := 0
 		runCount := func(orgChunk, spaceChunk []string) error {
 			params := capi.NewQueryParams().WithPerPage(1)
@@ -537,6 +541,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 			}
 			if len(spaceChunk) > 0 {
 				params = params.WithFilter("space_guids", spaceChunk...)
+			}
+			if len(nameScope) > 0 {
+				params = params.WithFilter("names", nameScope...)
 			}
 			raw, err := listWithRouterFlapRetry(ctx.Request().Context(), "apps.counts", func() (*capi.ListResponse[capi.App], error) {
 				return cfClient.Apps().List(ctx.Request().Context(), params)

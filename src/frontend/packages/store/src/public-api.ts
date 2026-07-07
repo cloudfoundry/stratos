@@ -88,7 +88,6 @@ export {
 export { getFavoriteInfoObservable } from './helpers/store-helpers';
 export {
   JetStreamErrorResponse,
-  cfAPIVersion,
   httpErrorResponseToSafeString,
   isHttpErrorResponse,
   proxyAPIVersion,

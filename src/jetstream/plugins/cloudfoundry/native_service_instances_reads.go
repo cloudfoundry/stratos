@@ -210,6 +210,14 @@ func applyServiceInstanceFilters(ctx echo.Context, params *capi.QueryParams) *ca
 			params = params.WithFilter("organization_guids", orgGUIDs...)
 		}
 	}
+	if rawNames := ctx.QueryParam("names"); rawNames != "" {
+		// Exact-match name filter — the UPS name-unique validator counts
+		// instances with this name in a space (type=user-provided).
+		names := splitNonEmpty(rawNames, ",")
+		if len(names) > 0 {
+			params = params.WithFilter("names", names...)
+		}
+	}
 	return params
 }
 
