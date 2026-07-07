@@ -7,14 +7,16 @@
     @case ('not yet')
     @case ('yes and saw succeeded'){
       <button
-         class="inline-flex"
-         appClickStopPropagation
-         (click)="copyToClipboard(text)">
-        <span class="material-icons cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300"
-         [ngClass]="{'text-sm': compact, 'text-base': !compact}"
-         [class.animate-scale-pop-in]="didUserPressCopy() === 'yes and saw succeeded'"
-         [title]="tooltip">
-         content_copy
+          class="inline-flex"
+          appClickStopPropagation       
+          [class.animate-scale-pop-in]="didUserPressCopy() === 'yes and saw succeeded'"
+          [attr.aria-label]="tooltip || 'Copy to clipboard'"
+          [title]="tooltip"
+          (click)="copyToClipboard(text)">
+        <span 
+          [ngClass]="{'text-sm': compact, 'text-base': !compact}"
+          class="material-icons cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300">
+          content_copy
        </span>
       </button>
     }
