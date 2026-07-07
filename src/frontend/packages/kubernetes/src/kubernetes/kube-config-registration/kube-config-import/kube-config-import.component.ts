@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 import { UntypedFormBuilder } from '@angular/forms';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, take } from 'rxjs/operators';
 
 import { EndpointsDataService } from '@stratosui/store';
@@ -46,18 +45,27 @@ const CONNECT_ACTION = 'Connect endpoint';
  */
 function createSignalWrapper<T>(initialValue: T) {
   const _signal = signal<T>(initialValue);
+  // asObservable() must be callable outside injection contexts (wrappers are
+  // created and read during import execution, from step event handlers), so
+  // it is backed by a BehaviorSubject kept in sync on every write instead of
+  // a lazy toObservable(), which throws NG0203 there.
+  const _subject = new BehaviorSubject<T>(initialValue);
+  const write = (value: T) => {
+    _signal.set(value);
+    _subject.next(value);
+  };
   const wrapper = Object.assign(
     // Make it callable like a signal
     () => _signal(),
     {
       // WritableSignal methods
-      set: (value: T) => _signal.set(value),
-      update: (fn: (value: T) => T) => _signal.update(fn),
+      set: write,
+      update: (fn: (value: T) => T) => write(fn(_signal())),
       asReadonly: () => _signal.asReadonly(),
       // BehaviorSubject compatibility methods
-      next: (value: T) => _signal.set(value),
+      next: write,
       getValue: () => _signal(),
-      asObservable: () => toObservable(_signal),
+      asObservable: () => _subject.asObservable(),
     }
   );
   return wrapper as WritableSignal<T> & {
