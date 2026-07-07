@@ -14,4 +14,3 @@ plugins:
   - kubernetes
   - analysis
   - monocular
-  - diagnostics

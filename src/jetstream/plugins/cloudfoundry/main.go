@@ -300,9 +300,6 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 	// Applications Log Streams
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
 
-	// Application Stream
-	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
-
 	// Native Stratos routes — v3-backed, Stratos-shaped DTOs
 	c.addNativeRoutes(echoGroup)
 }

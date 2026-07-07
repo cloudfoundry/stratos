@@ -1090,8 +1090,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		stableEndpointAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	}
 
-	// sessionGroup.DELETE("/cnsis", p.removeCluster)
-
 	// Serve up static resources
 	if staticDirErr == nil {
 		e.Use(p.setStaticCacheContentMiddleware)

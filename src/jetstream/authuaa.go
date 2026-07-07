@@ -2,9 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -584,37 +582,4 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 		returnURL = fmt.Sprintf("%s&guid=%s", returnURL, endpointGUID)
 	}
 	return returnURL
-}
-
-//HTTP Basic
-
-// fetchHTTPBasicToken currently unused?
-func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord api.CNSIRecord, c echo.Context) (*api.UAAResponse, *api.JWTUserTokenInfo, *api.CNSIRecord, error) {
-
-	uaaRes, u, err := p.loginHTTPBasic(c)
-
-	if err != nil {
-		return nil, nil, nil, api.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"Login failed",
-			"Login failed: %v", err)
-	}
-	return uaaRes, u, &cnsiRecord, nil
-}
-
-// fetchHTTPBasicToken currently unused?
-func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
-	log.Debug("login")
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-
-	if len(username) == 0 || len(password) == 0 {
-		return uaaRes, u, errors.New("needs username and password")
-	}
-
-	authString := fmt.Sprintf("%s:%s", username, password)
-	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
-
-	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
-	return uaaRes, u, nil
 }
