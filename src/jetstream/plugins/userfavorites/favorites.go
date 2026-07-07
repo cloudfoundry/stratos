@@ -66,63 +66,6 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 	return nil
 }
 
-func (uf *UserFavorites) setMetadata(c echo.Context) error {
-
-	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusInternalServerError,
-			"Unable to connect to favorites store",
-			"Unable to connect to favorites store: %v", err)
-	}
-
-	favoriteGUID := c.Param("guid")
-	if len(favoriteGUID) == 0 {
-		return api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Invalid favorite GUID",
-			"Invalid favorite GUID")
-	}
-	req := c.Request()
-	body, _ := ioutil.ReadAll(req.Body)
-	userGUID := c.Get("user_id").(string)
-	// Unmarshal
-	var msg map[string]interface{}
-	err = json.Unmarshal(body, &msg)
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Unable to parse metadata body",
-			"Unable to un Marshal User Favorite metadata body: %v", err)
-	}
-
-	metadataBytes, err := json.Marshal(msg)
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusInternalServerError,
-			"Unable to process metadata",
-			"Unable to Marshal User Favorite metadata: %v", err)
-	}
-	err = store.SetMetadata(userGUID, favoriteGUID, string(metadataBytes))
-	if err != nil {
-		// Check if the error indicates the favorite was not found
-		errMsg := err.Error()
-		if strings.Contains(errMsg, "Favorite not found") {
-			return api.NewHTTPShadowError(
-				http.StatusNotFound,
-				"Favorite not found",
-				"Favorite not found: %v", err)
-		}
-		return api.NewHTTPShadowError(
-			http.StatusInternalServerError,
-			"Unable to update favorite metadata",
-			"Unable to update favorite metadata: %v", err)
-	}
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"response\": \"User Favorite metadata updated okay\"}"))
-	return nil
-}
-
 func (uf *UserFavorites) create(c echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())

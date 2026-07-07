@@ -15,6 +15,5 @@ type FavoritesStore interface {
 	List(userGUID string) ([]*UserFavoriteRecord, error)
 	Delete(userGUID string, guid string) error
 	Save(favoriteRecord UserFavoriteRecord) (*UserFavoriteRecord, error)
-	SetMetadata(userGUID string, guid string, metadata string) error
 	DeleteFromEndpoint(endpointGUID string) error
 }
