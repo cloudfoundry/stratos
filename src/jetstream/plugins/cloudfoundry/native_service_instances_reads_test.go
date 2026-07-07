@@ -389,6 +389,27 @@ func TestGetNativeServiceInstances_CountsFastPath(t *testing.T) {
 	assert.Empty(t, resp.Resources)
 }
 
+func TestGetNativeServiceInstances_CountsHonorsNamesFilter(t *testing.T) {
+	srv, q := newCountsCapiServer(t, "/v3/service_instances", 1, "names", "type", "space_guids")
+	defer srv.Close()
+
+	e := echo.New()
+	ctx, rec := newServiceInstancesContext(e,
+		"/pp/v1/cf/service_instances/cnsi-1?return=counts&type=user-provided&names=my-ups&space_guids=space-A")
+	plugin := newServiceInstancesPlugin(srv.URL)
+
+	require.NoError(t, plugin.getNativeServiceInstances(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StServiceInstancesResponse
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Equal(t, 1, resp.TotalResults)
+	assert.Equal(t, "1", q.PerPage)
+	assert.Equal(t, "my-ups", q.Filters["names"])
+	assert.Equal(t, "user-provided", q.Filters["type"])
+	assert.Equal(t, "space-A", q.Filters["space_guids"])
+}
+
 func TestGetNativeServiceInstances_PerPagePassthrough(t *testing.T) {
 	body := []byte(`{
 		"pagination": {

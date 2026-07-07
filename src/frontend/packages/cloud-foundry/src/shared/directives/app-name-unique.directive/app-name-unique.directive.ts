@@ -1,7 +1,7 @@
-import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
-import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
+import { Observable, of as observableOf, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
@@ -13,7 +13,7 @@ const APP_UNIQUE_NAME_PROVIDER = {
 
 // See: https://medium.com/@kahlil/asynchronous-validation-with-angular-reactive-forms-1a392971c062
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
+const { proxyAPIVersion } = environment;
 export type NameTaken<T = any> = (response: HttpResponse<T>) => boolean;
 export type UniqueValidatorRequestBuilder<T = any> = (name: string) => HttpRequest<T>;
 export class AppNameUniqueChecking {
@@ -47,7 +47,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   @Input() appApplicationNameUnique!: AppNameUniqueChecking;
   @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
-  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
+  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.totalResults > 0;
 
   constructor() {
     if (!this.appApplicationNameUnique) {
@@ -73,9 +73,12 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
         this.appApplicationNameUnique.set(false, appNameTaken);
         return appNameTaken ? { appNameTaken } : null;
       }),
-      catchError(err => {
+      catchError(() => {
+        // Fail open: CC enforces name uniqueness at create time, so a
+        // failed convenience check must not wedge the form (an erroring
+        // async validator leaves the control PENDING forever).
         this.appApplicationNameUnique.set(false);
-        return observableThrowError(err);
+        return observableOf(null);
       }));
   }
 
@@ -91,19 +94,13 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   private getDefaultRequest(cfGuid: string, spaceGuid: string, name: string) {
     const params = new HttpParams()
-      .set('q', 'name:' + name)
-      .append('q', 'space_guid:' + spaceGuid);
-    const headers = new HttpHeaders({
-      'x-cap-cnsi-list': cfGuid,
-      'x-cap-passthrough': 'true'
-    });
+      .set('return', 'counts')
+      .set('names', name)
+      .set('space_guids', spaceGuid);
     return new HttpRequest(
       'GET',
-      `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/apps`,
-      {
-        headers,
-        params
-      },
+      `/pp/${proxyAPIVersion}/cf/apps/${cfGuid}`,
+      { params },
     );
   }
 

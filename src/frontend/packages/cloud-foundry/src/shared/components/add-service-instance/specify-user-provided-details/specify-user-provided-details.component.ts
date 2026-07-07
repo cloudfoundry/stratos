@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
@@ -41,7 +41,7 @@ export interface UpsPickerRow {
   alreadyBound: boolean;
 }
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
+const { proxyAPIVersion } = environment;
 @Component({
   selector: 'app-specify-user-provided-details',
   templateUrl: './specify-user-provided-details.component.html',
@@ -277,19 +277,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   public getUniqueRequest = (name: string) => {
     const params = new HttpParams()
-      .set('q', 'name:' + name)
-      .append('q', 'space_guid:' + this.spaceGuid);
-    const headers = new HttpHeaders({
-      'x-cap-cnsi-list': this.cfGuid,
-      'x-cap-passthrough': 'true'
-    });
+      .set('return', 'counts')
+      .set('type', 'user-provided')
+      .set('names', name)
+      .set('space_guids', this.spaceGuid);
     return new HttpRequest(
       'GET',
-      `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/user_provided_service_instances`,
-      {
-        headers,
-        params
-      },
+      `/pp/${proxyAPIVersion}/cf/service_instances/${this.cfGuid}`,
+      { params },
     );
   };
 
