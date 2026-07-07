@@ -6,10 +6,15 @@ name: Deploy Website
 # the site lives at https://cloudfoundry.github.io/stratos/ — hence the
 # SITE_URL/SITE_BASE_URL overrides below; once the CNAME lands, change them
 # to https://stratos.cloudfoundry.org and /.
+# The pages-preview branch is a fork-preview trigger: `make deploy website
+# pages` force-pushes HEAD there on a fork, and this workflow publishes the
+# fork's Pages site. The job-level guard below keeps that path fork-only —
+# the upstream site can only ever publish from develop.
 on:
   push:
     branches:
       - develop
+      - pages-preview
     paths:
       - 'docs/**'
       - 'website/**'
@@ -33,6 +38,8 @@ env:
 jobs:
   build:
     name: Build Website
+    # pages-preview deploys are fork-only; upstream publishes from develop.
+    if: github.ref != 'refs/heads/pages-preview' || github.repository_owner != 'cloudfoundry'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
