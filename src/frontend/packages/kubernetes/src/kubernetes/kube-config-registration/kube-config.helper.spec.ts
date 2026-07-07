@@ -74,6 +74,17 @@ describe('KubeConfigHelper', () => {
     expect(clusters[0]._state.getValue().info).toBe(true);
   });
 
+  it('clears connect-only when the cluster is renamed away from the collision', () => {
+    setup([endpoint('fresh', '1.2.3.4:6443')]);
+    helper.parse(kubeConfigYaml('fresh', 'https://1.2.3.4:6443')).subscribe();
+    expect(clusters[0]._guid).toBe('guid-fresh');
+    clusters[0].name = 'fresh-2';
+    helper.update(clusters[0]);
+    expect(clusters[0]._guid).toBe('');
+    expect(clusters[0]._invalid).toBeFalsy();
+    expect(clusters[0]._state.getValue().message).toBe('An endpoint with this URL already exists');
+  });
+
   it('blocks when the name is taken by an endpoint with a different URL', () => {
     setup([endpoint('fresh', '5.6.7.8:6443')]);
     helper.parse(kubeConfigYaml('fresh', 'https://1.2.3.4:6443')).subscribe();

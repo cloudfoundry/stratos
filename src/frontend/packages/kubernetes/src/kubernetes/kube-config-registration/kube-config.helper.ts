@@ -161,6 +161,11 @@ export class KubeConfigHelper {
 
   private validate(endpoints: EndpointModel[], cluster: KubeConfigFileCluster, clusters: KubeConfigFileCluster[] | null) {
     cluster._invalid = false;
+    // Recompute connect-only from scratch: a stale _guid from a previous
+    // pass would otherwise pin the cluster to connect-only after the user
+    // renames it away from the collision (import skips registration when
+    // _guid is set).
+    cluster._guid = '';
     let reset = true;
 
     const found = endpoints.find(item => item.name === cluster.name);
