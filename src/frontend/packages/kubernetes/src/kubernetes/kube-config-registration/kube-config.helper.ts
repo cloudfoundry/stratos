@@ -174,7 +174,7 @@ export class KubeConfigHelper {
       if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user && !!found.guid) {
         cluster._guid = found.guid;
         cluster._state.next({
-          message: 'This endpoint will be connected and not registered (endpoint is already registered)',
+          message: 'This endpoint is already registered — importing will connect it, not register a new one. Rename it to register a separate endpoint.',
           info: true
         });
         reset = false;
@@ -189,7 +189,10 @@ export class KubeConfigHelper {
       // warning icon), so inform the user but don't block the import.
       if (endpoints.find(item => getFullEndpointApiUrl(item) === cluster.cluster.server)) {
         reset = false;
-        cluster._state.next({ message: 'An endpoint with this URL already exists', warning: true });
+        cluster._state.next({
+          message: 'Another endpoint is already registered at this URL — importing will register this as an additional endpoint.',
+          warning: true
+        });
       }
     }
 
