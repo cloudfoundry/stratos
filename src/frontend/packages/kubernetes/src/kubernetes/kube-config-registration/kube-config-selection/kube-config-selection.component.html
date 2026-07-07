@@ -8,14 +8,19 @@
               class="flex-1 min-w-0 px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text"
               [value]="editRowName()"
               (click)="$event.stopPropagation()"
-              (input)="editRowName.set($any($event.target).value)" />
+              (input)="editRowName.set($any($event.target).value)"
+              (blur)="saveEdit(row)"
+              (keyup.enter)="saveEdit(row)"
+              (keyup.escape)="cancelEdit()" />
             <button id="kube-config-name-edit-done" type="button" title="Save"
               class="inline-flex items-center justify-center p-0.5 text-success hover:text-success/80"
+              (mousedown)="$event.preventDefault()"
               (click)="$event.stopPropagation(); saveEdit(row)">
               <span class="material-icons text-base leading-none">done</span>
             </button>
             <button id="kube-config-name-edit-cancel" type="button" title="Cancel"
               class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-content-text"
+              (mousedown)="$event.preventDefault()"
               (click)="$event.stopPropagation(); cancelEdit()">
               <span class="material-icons text-base leading-none">clear</span>
             </button>
