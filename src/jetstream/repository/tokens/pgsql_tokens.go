@@ -24,7 +24,7 @@ var insertAuthToken = `INSERT INTO tokens (cnsi_guid, token_guid, user_guid, tok
 									VALUES ('STRATOS', $1, $2, $3, $4, $5, $6)`
 
 var updateAuthToken = `UPDATE tokens
-									SET auth_token = $1, refresh_token = $2, token_expiry = $3
+									SET auth_token = $1, refresh_token = $2, token_expiry = $3, last_updated = CURRENT_TIMESTAMP
 									WHERE cnsi_guid = 'STRATOS' AND user_guid = $4 AND token_type = $5`
 
 var getToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
@@ -59,7 +59,7 @@ var insertCNSIToken = `INSERT INTO tokens (token_guid, cnsi_guid, user_guid, tok
 										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 var updateCNSIToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5, linked_token = $6
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5, linked_token = $6, last_updated = CURRENT_TIMESTAMP
 										WHERE cnsi_guid = $7 AND user_guid = $8 AND token_type = $9 AND auth_type = $10`
 var deleteCNSIToken = `DELETE FROM tokens
 										WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
@@ -67,7 +67,7 @@ var deleteCNSITokens = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
 var updateToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, last_updated = CURRENT_TIMESTAMP
 										WHERE token_guid = $4 AND user_guid = $5`
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository

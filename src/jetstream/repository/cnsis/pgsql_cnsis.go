@@ -37,10 +37,10 @@ var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_end
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
 // Update some of the endpoint metadata
-var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5, ca_cert = $6 WHERE guid = $7`
+var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5, ca_cert = $6, last_updated = CURRENT_TIMESTAMP WHERE guid = $7`
 
 // Update the metadata
-var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1 WHERE guid = $2`
+var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1, last_updated = CURRENT_TIMESTAMP WHERE guid = $2`
 
 var countCNSI = `SELECT COUNT(*) FROM cnsis WHERE guid=$1`
 
