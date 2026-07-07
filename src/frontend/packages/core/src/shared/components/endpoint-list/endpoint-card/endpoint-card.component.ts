@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, ChangeDetectorRef, inject } from '@angular/core';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EndpointModel,
   entityCatalog,
   getFullEndpointApiUrl,
-  MenuItem,
   StratosCatalogEndpointEntity,
   StratosStatus,
   UserFavoriteEndpoint,
@@ -63,7 +62,6 @@ import { DisableRouterLinkDirective } from '../../../../core/disable-router-link
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnDestroy {
-  private router = inject(Router);
   private endpointsSignal = inject(EndpointsSignalService);
   private endpoints$ = toObservable(this.endpointsSignal.endpoints);
   private endpointListHelper = inject(EndpointListHelper);
@@ -77,7 +75,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public favorite: UserFavoriteEndpoint | null = null;
   public address!: string;
   public isDuplicate$!: Observable<boolean>;
-  public cardMenu!: MenuItem[];
   public endpointCatalogEntity?: StratosCatalogEndpointEntity;
   public hasDetails = true;
   public endpointLink: string | null = null;
@@ -99,8 +96,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.endpointDetails = content;
     this.updateInnerComponent();
   }
-
-  @ViewChild('copyToClipboard') copyToClipboard!: CopyToClipboardComponent;
 
   @Input()
   set row(row: EndpointModel) {
@@ -127,10 +122,10 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   }
   // V2 BaseEndpointsDataSource was deleted in W12 — the kubernetes
   // card consumer never bound [dataSource] and the V2 endpoints list
-  // (only other consumer) was the only path that did. Card menu +
-  // cardStatus$ are now driven by direct consumer template bindings
-  // when needed, not the data-source narrowing the V2 list-config
-  // pipeline used to inject.
+  // (only other consumer) was the only path that did. cardStatus$ is
+  // now driven by direct consumer template bindings when needed, not
+  // the data-source narrowing the V2 list-config pipeline used to
+  // inject.
 
   constructor() {
     super();
@@ -184,11 +179,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
       this.component.row = this.row;
       this.componentRef.changeDetectorRef.detectChanges();
     }
-  }
-
-  editEndpoint() {
-    const routerLink = `/endpoints/edit/${this.row.guid}`;
-    this.router.navigate(routerLink.split('/'));
   }
 
   /**

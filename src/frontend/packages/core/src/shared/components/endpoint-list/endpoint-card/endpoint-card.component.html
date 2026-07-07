@@ -2,7 +2,7 @@
 </app-page-header-events>
 <app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
   [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': connectionStatus === 'disconnected', 'endpoint-card--checking': connectionStatus === 'checking'}"
-  [favorite]="favorite" [actionMenu]="cardMenu" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
+  [favorite]="favorite" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
     <div class="endpoint-card__title">
       @if (!!endpointCatalogEntity && endpointCatalogEntity.definition.logoUrl) {
@@ -25,8 +25,6 @@
           -->
         </div>
       </div>
-      <app-copy-to-clipboard #copyToClipboard class="endpoint-card__hidden" [text]="address" tooltip="Copy to clipboard"
-      [showSuccessText]="false"></app-copy-to-clipboard>
     </div>
   </app-meta-card-title>
   <app-meta-card-item>
@@ -49,6 +47,8 @@
     <app-meta-card-value>
       <div class="endpoint-card__address">
         <div class="endpoint-card__address__value">{{ address }}</div>
+        <app-copy-to-clipboard class="ml-0.5 w-fit inline-flex" [compact]="true" [text]="address"
+        tooltip="Copy to clipboard" [showSuccessText]="false"></app-copy-to-clipboard>
         @if (isDuplicate$ | async) {
           <span class="material-icons text-warning-shade-600 dark:text-warning-shade-300 ml-1 text-[20px] leading-none"
             matTooltip="Another endpoint is registered at this URL">warning</span>
