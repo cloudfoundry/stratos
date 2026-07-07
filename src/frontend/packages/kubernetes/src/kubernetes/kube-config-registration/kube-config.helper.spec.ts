@@ -62,7 +62,7 @@ describe('KubeConfigHelper', () => {
     setup([endpoint('other-name', '1.2.3.4:6443')]);
     helper.parse(kubeConfigYaml('fresh', 'https://1.2.3.4:6443')).subscribe();
     expect(clusters[0]._invalid).toBeFalsy();
-    expect(clusters[0]._state.getValue().message).toBe('An endpoint with this URL already exists');
+    expect(clusters[0]._state.getValue().message).toBe('Another endpoint is already registered at this URL — importing will register this as an additional endpoint.');
     expect(clusters[0]._state.getValue().warning).toBe(true);
   });
 
@@ -82,7 +82,7 @@ describe('KubeConfigHelper', () => {
     helper.update(clusters[0]);
     expect(clusters[0]._guid).toBe('');
     expect(clusters[0]._invalid).toBeFalsy();
-    expect(clusters[0]._state.getValue().message).toBe('An endpoint with this URL already exists');
+    expect(clusters[0]._state.getValue().message).toBe('Another endpoint is already registered at this URL — importing will register this as an additional endpoint.');
   });
 
   it('blocks when the name is taken by an endpoint with a different URL', () => {
