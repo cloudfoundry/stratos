@@ -1,7 +1,6 @@
 import { Injectable, signal, WritableSignal, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import * as yaml from 'js-yaml';
-import { combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
@@ -18,18 +17,27 @@ import { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
  */
 function createSignalWrapper<T>(initialValue: T) {
   const _signal = signal<T>(initialValue);
+  // asObservable() must be callable outside injection contexts (wrappers are
+  // created and read from event handlers, e.g. the file-input parse), so it
+  // is backed by a BehaviorSubject kept in sync on every write instead of a
+  // lazy toObservable(), which throws NG0203 there.
+  const _subject = new BehaviorSubject<T>(initialValue);
+  const write = (value: T) => {
+    _signal.set(value);
+    _subject.next(value);
+  };
   const wrapper = Object.assign(
     // Make it callable like a signal
     () => _signal(),
     {
       // WritableSignal methods
-      set: (value: T) => _signal.set(value),
-      update: (fn: (value: T) => T) => _signal.update(fn),
+      set: write,
+      update: (fn: (value: T) => T) => write(fn(_signal())),
       asReadonly: () => _signal.asReadonly(),
       // BehaviorSubject compatibility methods
-      next: (value: T) => _signal.set(value),
+      next: write,
       getValue: () => _signal(),
-      asObservable: () => toObservable(_signal),
+      asObservable: () => _subject.asObservable(),
     }
   );
   return wrapper as WritableSignal<T> & {
@@ -171,9 +179,11 @@ export class KubeConfigHelper {
         cluster._state.next({ message: 'An endpoint with this name already exists', warning: true });
       }
     } else {
-      // Check endpoint url is not registered with a different name
+      // A registered endpoint already uses this URL under a different name.
+      // Duplicate URLs are allowed (the endpoints list surfaces them with a
+      // warning icon), so inform the user but don't block the import.
       if (endpoints.find(item => getFullEndpointApiUrl(item) === cluster.cluster.server)) {
-        cluster._invalid = true;
+        reset = false;
         cluster._state.next({ message: 'An endpoint with this URL already exists', warning: true });
       }
     }
