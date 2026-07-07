@@ -29,7 +29,7 @@ describe('CopyToClipboardComponent', () => {
   });
 
   it('renders the copy action initially', () => {
-    const button = fixture.nativeElement.querySelector('[role="button"]');
+    const button = fixture.nativeElement.querySelector('button')
 
     expect(component.didUserPressCopy()).toBe('not yet');
     expect(button).toBeTruthy();
@@ -53,11 +53,11 @@ describe('CopyToClipboardComponent', () => {
     expect(component.didUserPressCopy()).toBe('yes and succeeded');
     expect(fixture.nativeElement.textContent).toContain('Copied to clipboard');
 
-    await vi.advanceTimersByTimeAsync(700);
+    await vi.advanceTimersByTimeAsync(800);
     fixture.detectChanges();
 
     expect(component.didUserPressCopy()).toBe('yes and saw succeeded');
-    const button = fixture.nativeElement.querySelector('[role="button"]');
+    const button = fixture.nativeElement.querySelector('button');
     expect(button).toBeTruthy();
     expect(button.className).toContain('animate-scale-pop-in');
   });
