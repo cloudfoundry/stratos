@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 
 import {
   EndpointModel,
+  MenuItem,
   UserFavorite,
   UserFavoriteManager,
   entityCatalog,
@@ -26,6 +27,8 @@ import {
   SignalListRowAction,
 } from '../../../shared/components/signal-list/signal-list.component';
 import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
+import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { SnackBarService } from '../../../shared/services/snackbar.service';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
@@ -44,11 +47,13 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
   host: { class: 'flex flex-col flex-1 min-h-0' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [EndpointListHelper],
   imports: [
     CommonModule,
     ListSubNavComponent,
     SignalListComponent,
     SignalListCellTemplateDirective,
+    EndpointCardComponent,
     TableCellEndpointAddressComponent,
   ],
 })
@@ -241,6 +246,15 @@ export class EndpointsSignalListComponent {
     this.endpointsConfig.registerSortExtractor('admin', adminLabel);
     this.endpointsConfig.registerSortExtractor('user', userLabel);
   }
+
+  // Card view projects the rich endpoint card; the kebab actions are the
+  // same ones the table rows use, adapted to the meta-card's MenuItem shape.
+  cardMenuFor = (ep: EndpointModel): MenuItem[] =>
+    this.buildEndpointActions(ep).map(a => ({
+      label: a.label,
+      icon: a.icon,
+      action: () => a.invoke(ep),
+    }));
 
   private toggleEndpointFavorite(ep: EndpointModel): void {
     if (!ep.guid || !ep.cnsi_type) {

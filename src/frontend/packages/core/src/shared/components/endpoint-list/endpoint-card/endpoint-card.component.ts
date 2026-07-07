@@ -7,6 +7,7 @@ import {
   EndpointModel,
   entityCatalog,
   getFullEndpointApiUrl,
+  MenuItem,
   StratosCatalogEndpointEntity,
   StratosStatus,
   UserFavoriteEndpoint,
@@ -89,6 +90,11 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   public viewCreator$!: Observable<boolean>;
 
   private componentRef!: ComponentRef<EndpointListDetailsComponent>;
+
+  // Optional per-endpoint kebab menu, rendered by the meta-card header.
+  // Consumers that suppress it (e.g. the kubernetes endpoints page) simply
+  // leave it unset.
+  @Input() actionMenu: MenuItem[] | null = null;
 
   @Input() component: EndpointListDetailsComponent | null = null;
   private endpointDetails!: ViewContainerRef;
