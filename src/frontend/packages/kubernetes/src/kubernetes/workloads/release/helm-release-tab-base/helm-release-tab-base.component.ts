@@ -9,7 +9,6 @@ import { PageHeaderComponent } from '../../../../../../core/src/shared/component
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
-import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { KubeResourceEntityDefinition } from '../../../store/kube.types';
@@ -58,7 +57,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   tabLinks: IPageSideNavTab[];
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private analysisService = inject(KubernetesAnalysisService);
-  private snackbarService = inject(TailwindSnackBarService);
   private sessionService = inject(SessionService);
   private socketService = inject(HelmReleaseSocketService);
 
@@ -86,8 +84,10 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
+    // No snackbar hide here: the only snackbar in this subtree is shown by
+    // HelmReleaseSocketService (provided by this component), which hides it
+    // in its own ngOnDestroy.
     this.socketService.stop();
-    this.snackbarService.hide();
   }
 
   private getTabsFromEntityConfig(): IPageSideNavTab[] {
