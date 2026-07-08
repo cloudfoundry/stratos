@@ -76,4 +76,32 @@ describe('SteppersComponent', () => {
     expect(component.steps).toEqual([stepA, stepB, stepC]);
     expect(markForCheck).toHaveBeenCalled();
   });
+
+  // Regression: step content is instantiated lazily (the ngTemplateOutlet
+  // on currentIndex), so a synchronous pOnEnter inside setActive ran
+  // before any @ViewChild referenced by a signal-handle onEnter body
+  // existed — the enter callback was silently dropped and, e.g., the
+  // bind-service wizard's Service Instance step rendered empty. Delivery
+  // must happen after the activating render, with the routed enterData.
+  it('delivers onEnter after the activating render, not synchronously', async () => {
+    const stepA = Object.assign(new StepComponent(), { title: 'A' });
+    const stepB = Object.assign(new StepComponent(), { title: 'B' });
+    stepA.valid = true;
+    const entered: unknown[] = [];
+    stepB.signalHandle = {
+      valid: (() => true) as any,
+      onEnter: (data?: unknown) => { entered.push(data); },
+    };
+    (component as any).allSteps = [stepA, stepB];
+    (component as any).filterSteps();
+    (component as any).enterData = { plan: 'p1' };
+
+    component.setActive(1);
+    // Not delivered synchronously — the entering step's child does not
+    // exist yet at this point in the real app.
+    expect(entered).toEqual([]);
+
+    await fixture.whenStable();
+    expect(entered).toEqual([{ plan: 'p1' }]);
+  });
 });

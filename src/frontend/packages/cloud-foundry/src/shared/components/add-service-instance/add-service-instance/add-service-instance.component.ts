@@ -182,9 +182,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   // *setters* so the bridge subscription is wired the moment the child
   // becomes available — and torn down when the user navigates away.
   // This is the only pattern that consistently works for lazily-
-  // instantiated step children under OnPush + zoneless change
-  // detection (signal-handle onEnter is not yet routed by the
-  // SteppersComponent).
+  // instantiated step children under OnPush + zoneless change detection.
   //
   // Mode branching (showSelectCf, showSelectService, showBindApp) is
   // already gated by @if blocks in the template so the per-step
@@ -276,9 +274,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
   @ViewChild('selectPlan', { static: false })
   set selectPlanRef(v: SelectPlanStepComponent | undefined) {
     this._selectPlan.set(v);
-    // onEnter is driven by an effect — see constructor — so swapping flag
-    // state (or having the child appear later) reliably reaches the
-    // child's onEnter regardless of which signal lands first.
+    // onEnter delivery is owned by selectPlanHandle.onEnter — the stepper
+    // defers pOnEnter past the activating render, so the ViewChild is set
+    // by the time the handle body dereferences it.
   }
 
   @ViewChild('bindApp', { static: false })
