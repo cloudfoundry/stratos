@@ -18,7 +18,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/sirupsen/logrus v1.9.4
-	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
