@@ -100,7 +100,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   @Input() appId!: string;
 
-  formMode!: CreateServiceFormMode;
+  // Signal (not a plain field): the stepper delivers onEnter after this
+  // component's activating render, outside change detection. The first
+  // render happens with formMode unset (every @if false), so under
+  // zoneless+OnPush a plain-field write in onEnter would never re-render
+  // the template — the step stayed empty in app-bind mode.
+  formMode = signal<CreateServiceFormMode | undefined>(undefined);
 
   selectExistingInstanceForm!: FormGroup<{
     serviceInstance: FormControl<string>;
@@ -250,7 +255,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       }
     }
 
-    this.formMode = CreateServiceFormMode.CreateServiceInstance;
+    this.formMode.set(CreateServiceFormMode.CreateServiceInstance);
     const helper = this.ensureHelper();
     if (helper) {
       this.allServiceInstances$ = helper.serviceInstances$();

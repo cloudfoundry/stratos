@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { RoutingHistoryService } from '@stratosui/store';
@@ -37,6 +37,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private snackBar = inject(TailwindSnackBarService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
+  private injector = inject(Injector);
 
 
   private nextSub!: Subscription;
@@ -286,8 +287,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           // signalHandle.onEnter.
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
-              this.allSteps[index].active = true;
-              this.allSteps[index].pOnEnter(this.enterData);
+              const step = this.allSteps[index];
+              step.active = true;
+              // Same deferred delivery as setActive's main path below: the
+              // first step's content may not have rendered yet when this
+              // interval fires, so a synchronous pOnEnter races the child
+              // instantiation. markForCheck guarantees the render that
+              // afterNextRender waits on.
+              this.cdr.markForCheck();
+              afterNextRender(() => step.pOnEnter(this.enterData), { injector: this.injector });
               clearInterval(timer);
             }
           }, 5);
@@ -314,8 +322,24 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.currentIndex.set(index);
     // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
     // wizards) receive the enter callback — see comment above for rationale.
-    this.steps[this.currentIndex()].pOnEnter(this.enterData);
+    //
+    // Delivery is deferred to after the NEXT render: the entering step's
+    // content is only instantiated by the ngTemplateOutlet on currentIndex
+    // during that render, so a synchronous pOnEnter here runs before any
+    // @ViewChild the handle's onEnter body dereferences exists — the enter
+    // callback was silently dropped for every step after the first (#5600:
+    // specify-details-step never received onEnter, so its formMode was
+    // never set and the step rendered empty).
+    const enteringStep = this.steps[index];
+    const enterData = this.enterData;
     this.enterData = undefined;
+    afterNextRender(() => {
+      // A further transition can land before this render callback fires —
+      // only deliver if the step is still the active one.
+      if (enteringStep.active) {
+        enteringStep.pOnEnter(enterData);
+      }
+    }, { injector: this.injector });
 
     // Trigger change detection for OnPush strategy
     this.cdr.markForCheck();

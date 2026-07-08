@@ -47,7 +47,11 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   guideText = 'Specify the application to bind (Optional)';
   selectedServicePlan!: APIResource<IServicePlan>;
   bindingParams: Record<string, unknown> = {};
-  schemaFormConfig!: SchemaFormConfig;
+  // Signal (not a plain field): onEnter is delivered after this component's
+  // activating render (SteppersComponent defers pOnEnter past it), so under
+  // zoneless+OnPush a plain field reassignment there would never reach the
+  // <app-schema-form> input.
+  schemaFormConfig = signal<SchemaFormConfig | undefined>(undefined);
 
   // Lifecycle management for subscriptions
   private destroyed$ = new Subject<void>();
@@ -100,15 +104,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       pathGet('entity.schemas.service_binding.create.parameters', this.selectedServicePlan) ??
       pathGet('schemas.service_binding.create.parameters', this.selectedServicePlan);
 
-    if (!this.schemaFormConfig) {
-      this.schemaFormConfig = { schema };
-    } else {
-      this.schemaFormConfig = {
-        ...this.schemaFormConfig,
-        initialData: this.bindingParams,
-        schema,
-      };
-    }
+    this.schemaFormConfig.update(cfg => cfg
+      ? { ...cfg, initialData: this.bindingParams, schema }
+      : { schema });
 
     // Schema-form's pValidChange BehaviorSubject seeds at false and only
     // flips true once a JSON change or validation pass fires. For plans
