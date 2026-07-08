@@ -703,7 +703,7 @@
               </tr>
             }
             @if (hasRowMessage(row) || rowStateBusy(row)) {
-              <tr data-test="row-message" [class]="rowStateRowClass(row)">
+              <tr data-test="row-message" [class]="rowStateMessageClass(row)">
                 <td [attr.colspan]="totalColumnCount()" class="px-3 pb-2 pt-0 text-sm">
                   <div class="flex items-start gap-2">
                     @if (rowStateBusy(row)) {
