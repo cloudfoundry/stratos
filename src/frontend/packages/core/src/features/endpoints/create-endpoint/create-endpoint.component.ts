@@ -63,7 +63,16 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // handles below only drive the legacy inline 2-step flow rendered when
   // no custom registrationComponent is wired up.
   @ViewChild('step1', { static: false }) step1?: CreateEndpointCfStep1Component;
-  @ViewChild('connect', { static: false }) connect?: CreateEndpointConnectComponent;
+
+  // Signal-backed (not a plain field): the connect step is instantiated
+  // lazily on activation, and the handle computeds below dereference it.
+  // A computed whose first evaluation sees an undefined plain field
+  // captures zero signal dependencies and never re-evaluates.
+  private _connect = signal<CreateEndpointConnectComponent | undefined>(undefined);
+  @ViewChild('connect', { static: false })
+  set connectRef(v: CreateEndpointConnectComponent | undefined) {
+    this._connect.set(v);
+  }
 
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
@@ -96,16 +105,17 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         this.registeredGuid = result.data.guid;
         this.registeredType = result.data.type;
       }
-      // Hand the registration result to the connect step before advance —
-      // the legacy `onEnter`-via-data path that the stepper used to drive.
-      if (this.connect && result.data) {
-        this.connect.onEnter(result.data);
-      }
       // Legacy `redirect: true` (only emitted when finalStep is set, i.e.
       // when there's no connect step) means "navigate back to /endpoints".
       if (result.redirect) {
         await this.router.navigate(['/endpoints']);
+        return;
       }
+      // Hand the registration result to the connect step via the stepper's
+      // enterData channel — the connect child does not exist yet at submit
+      // time (step content instantiates on activation), so a direct
+      // this.connect.onEnter(...) here silently no-ops.
+      return { data: result.data };
     },
   };
 
@@ -114,20 +124,23 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // step handle re-evaluates without polling.
   connectStepHandle: SignalStepHandle = {
     valid: computed(() => {
-      const c = this.connect;
+      const c = this._connect();
       if (!c) return true;
       return c.doConnectSignal() ? c.validSignal() : true;
     }),
     disablePrevious: signal(false).asReadonly(),
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
-      const c = this.connect;
+      const c = this._connect();
       return c?.doConnectSignal() ? 'Connect' : 'Finish';
     }),
-    onEnter: () => {
-      // The data is set by step1's submit before advance — nothing more
-      // to do here. Kept as a no-op so the handle's onEnter contract is
-      // explicit (vs falling through to legacy storage).
+    onEnter: (data) => {
+      // Registration result routed from step1's submit via the stepper's
+      // enterData channel. Delivery is deferred past the activating
+      // render, so the ViewChild is set by now.
+      if (data) {
+        this._connect()?.onEnter(data as any);
+      }
     },
     onLeave: async (isNext) => {
       if (isNext || !this.registeredGuid || !this.registeredType) {
@@ -143,7 +156,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       await this.endpointsSignalConfig.unregister(guid, type);
     },
     submit: async () => {
-      const result = await firstValueFrom(this.connect!.onNext());
+      const result = await firstValueFrom(this._connect()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to connect endpoint');
       }
