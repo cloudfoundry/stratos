@@ -4,7 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { safeUnsubscribe, MetadataItemComponent, BooleanIndicatorComponent, SnackBarService } from '@stratosui/core';
+import { safeUnsubscribe, MetadataItemComponent, BooleanIndicatorComponent, TailwindSnackBarService } from '@stratosui/core';
 import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud-foundry-space.service';
 
 @Component({
@@ -22,7 +22,7 @@ import { CloudFoundrySpaceService } from '../../../../features/cf/services/cloud
 export class CardCfSpaceDetailsComponent implements OnDestroy {
   public cfSpaceService = inject(CloudFoundrySpaceService);
   private router = inject(Router);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
 
   allowSshStatus$: Observable<string>;
   quotaLinkSub!: Subscription;

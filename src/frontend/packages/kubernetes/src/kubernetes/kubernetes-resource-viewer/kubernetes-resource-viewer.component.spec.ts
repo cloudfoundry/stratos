@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { ActivatedRoute } from '@angular/router';
 
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { SidePanelService } from '../../../../core/src/shared/services/side-panel.service';
 import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../kubernetes.testing.module';
@@ -53,7 +53,7 @@ describe('KubernetesResourceViewerComponent', () => {
   it('deleteWarn deletes through the signal data service and snackbars success', async () => {
     const podData = TestBed.inject(KubePodDataService);
     const deleteSpy = vi.spyOn(podData, 'delete').mockResolvedValue(undefined);
-    const snack = TestBed.inject(SnackBarService);
+    const snack = TestBed.inject(TailwindSnackBarService);
     const snackSpy = vi.spyOn(snack, 'show').mockImplementation(() => undefined as any);
     const sidePanel = TestBed.inject(SidePanelService);
     vi.spyOn(sidePanel, 'hide').mockImplementation(() => undefined as any);

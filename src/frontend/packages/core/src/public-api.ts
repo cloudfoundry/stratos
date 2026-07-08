@@ -206,7 +206,6 @@ export { FocusDirective } from './shared/components/focus.directive';
 export { ConfirmationDialogService } from './shared/components/confirmation-dialog.service';
 export { ConfirmationDialogConfig, TypeToConfirm } from './shared/components/confirmation-dialog.config';
 export { SidePanelService } from './shared/services/side-panel.service';
-export { SnackBarService } from './shared/services/snackbar.service';
 
 // Core Services
 export { EndpointsService } from './core/endpoints.service';

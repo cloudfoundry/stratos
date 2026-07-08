@@ -20,7 +20,7 @@ import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../
 import { SessionService } from '../../../../shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../core/user-profile.service';
-import { SnackBarService } from '../../../../shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../shared/services/tailwind-snackbar.service';
 import { ConnectEndpointConfig } from '../../connect.service';
 import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
@@ -59,7 +59,7 @@ interface CreateEndpointForm {
 })
 export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponent implements IStepperStep, AfterContentInit {
   private fb = inject(FormBuilder);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
   private endpointsSignals = inject(EndpointsSignalService);
 

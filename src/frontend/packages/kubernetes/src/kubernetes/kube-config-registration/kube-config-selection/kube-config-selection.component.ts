@@ -15,7 +15,7 @@ import {
 import {
   SignalListCellTemplateDirective,
 } from '../../../../../core/src/shared/components/signal-list/signal-list-cell-template.directive';
-import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
@@ -47,7 +47,7 @@ export class KubeConfigSelectionComponent {
   @Input() applyStarted!: boolean;
 
   public helper = inject(KubeConfigHelper);
-  private snackbarService = inject(SnackBarService);
+  private snackbarService = inject(TailwindSnackBarService);
 
   // Clusters as a signal. `helper.clusters$` filters to truthy arrays, so
   // this starts empty and populates once a kube config is parsed. Drives

@@ -20,7 +20,7 @@ import { JsonViewerComponent } from '../../../../core/src/shared/components/json
 import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { EntityDeleteCleanupService } from '../../../../store/src/services/entity-delete-cleanup.service';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
 import {
@@ -85,7 +85,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   private viewContainerRef = inject(ViewContainerRef);
   private confirmDialog = inject(ConfirmationDialogService);
   private sidePanelService = inject(SidePanelService);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private cdr = inject(ChangeDetectorRef);
 
   // Signal-native delete: resolve the resource's data service by catalog type

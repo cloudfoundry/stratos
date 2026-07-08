@@ -23,7 +23,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
-import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
@@ -51,7 +51,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   private endpointsData = inject(EndpointsDataService);
   private authSignal = inject(AuthSignalService);
   private ngZone = inject(NgZone);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
   private dashboardSignals = inject(DashboardSignalService);

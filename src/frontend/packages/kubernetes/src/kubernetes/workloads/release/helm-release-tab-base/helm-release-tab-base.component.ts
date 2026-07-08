@@ -9,7 +9,7 @@ import { PageHeaderComponent } from '../../../../../../core/src/shared/component
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { KubeResourceEntityDefinition } from '../../../store/kube.types';
@@ -58,7 +58,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   tabLinks: IPageSideNavTab[];
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private analysisService = inject(KubernetesAnalysisService);
-  private snackbarService = inject(SnackBarService);
+  private snackbarService = inject(TailwindSnackBarService);
   private sessionService = inject(SessionService);
   private socketService = inject(HelmReleaseSocketService);
 

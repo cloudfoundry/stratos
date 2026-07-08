@@ -30,7 +30,7 @@ import { SignalListCellTemplateDirective } from '../../../shared/components/sign
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
-import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { ConnectEndpointDialogComponent } from '../connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { EndpointsSignalConfigService } from './endpoints-signal-config.service';
@@ -63,7 +63,7 @@ export class EndpointsSignalListComponent {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private tailwindDialog = inject(TailwindDialogService);
-  private snackBar = inject(SnackBarService);
+  private snackBar = inject(TailwindSnackBarService);
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above

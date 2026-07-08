@@ -18,7 +18,7 @@ import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
 import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { SnackBarService } from '../../services/snackbar.service';
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
@@ -66,7 +66,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
   private viewContainerRef = inject(ViewContainerRef);

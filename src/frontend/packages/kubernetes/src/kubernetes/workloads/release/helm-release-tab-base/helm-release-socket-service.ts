@@ -3,7 +3,7 @@ import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, share, switchMap } from 'rxjs/operators';
 
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import {
   KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
   KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
@@ -29,7 +29,7 @@ interface SocketMessage {
 export class HelmReleaseSocketService implements OnDestroy {
   private helmReleaseHelper = inject(HelmReleaseHelperService);
   private releaseData = inject(HelmReleaseDataService);
-  private snackbarService = inject(SnackBarService);
+  private snackbarService = inject(TailwindSnackBarService);
   private podData = inject(KubePodDataService);
   private serviceData = inject(KubeServiceDataService);
   private jobData = inject(KubeJobDataService);

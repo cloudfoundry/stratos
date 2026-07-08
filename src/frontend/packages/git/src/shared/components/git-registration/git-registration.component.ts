@@ -30,7 +30,7 @@ import { UniqueDirective } from '../../../../../core/src/shared/components/uniqu
 import { SessionService } from '../../../../../core/src/shared/services/session.service';
 import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
 import { UserProfileService } from '../../../../../core/src/core/user-profile.service';
-import { SnackBarService } from '../../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
 import { entityCatalog, EndpointsDataService } from '../../../../../store/src/public-api';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '../../../store/git-entity-factory';
@@ -89,7 +89,7 @@ interface GitRegistrationForm {
 })
 export class GitRegistrationComponent extends CreateEndpointHelperComponent implements AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private endpointsService = inject(EndpointsService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);

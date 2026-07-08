@@ -10,7 +10,7 @@ import {
   Subscription } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 
-import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
+import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, TailwindSnackBarService } from '@stratosui/core';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import type { StApp, StAppsResponse } from '../../../../services/endpoint-data/stratos-types';
@@ -34,7 +34,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private deployData = inject(CfDeployAppDataService);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private injector = inject(Injector);
   private cdr = inject(ChangeDetectorRef);
