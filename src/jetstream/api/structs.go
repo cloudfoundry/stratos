@@ -312,6 +312,8 @@ type EndpointDetail struct {
 	User              *ConnectedUser    `json:"user"`
 	Creator           *CreatorInfo      `json:"creator"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
+	TokenExpiry       int64             `json:"token_expiry,omitempty"`
+	TokenRenewable    bool              `json:"token_renewable,omitempty"`
 	TokenMetadata     string            `json:"-"`
 	SystemSharedToken bool              `json:"system_shared_token"`
 }

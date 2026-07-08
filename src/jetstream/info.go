@@ -105,6 +105,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
+			endpoint.TokenExpiry = token.TokenExpiry
+			// A refresh token means jetstream can mint a fresh session on use,
+			// so an expired access token does not make the endpoint dead.
+			endpoint.TokenRenewable = token.RefreshToken != ""
 			endpoint.TokenMetadata = token.Metadata
 			endpoint.SystemSharedToken = token.SystemShared
 		}

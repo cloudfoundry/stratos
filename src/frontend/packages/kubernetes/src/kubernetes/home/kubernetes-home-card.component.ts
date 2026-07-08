@@ -1,27 +1,22 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, Input, OnInit, Signal, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Signal, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 
-import { SessionService } from '../../../../core/src/core/session.service';
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
-import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
 import { KubeNodeDataService } from '../../services/domain-data/kube-node-data.service';
 import { KubeNamespaceDataService } from '../../services/domain-data/kube-namespace-data.service';
-import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from '../../../../core/src/shared/components/tile/tile-group/tile-group.component';
 import { TileComponent } from '../../../../core/src/shared/components/tile/tile/tile.component';
 import { CardNumberMetricComponent } from '../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
-import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/home-shortcuts/home-shortcuts.component';
 
 @Component({
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
+  styleUrls: ['./kubernetes-home-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -29,11 +24,10 @@ import { HomeShortcutsComponent } from '../../../../core/src/features/home/home/
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
-    CardNumberMetricComponent,
-    HomeShortcutsComponent
+    CardNumberMetricComponent
   ]
 })
-export class KubernetesHomeCardComponent implements OnInit {
+export class KubernetesHomeCardComponent {
 
   @Input() endpoint!: EndpointModel;
 
@@ -50,10 +44,6 @@ export class KubernetesHomeCardComponent implements OnInit {
     }
   }
 
-  public shortcuts!: HomeCardShortcut[];
-
-  private session = inject(SessionService);
-  private http = inject(HttpClient);
   private podData = inject(KubePodDataService);
   private nodeData = inject(KubeNodeDataService);
   private namespaceData = inject(KubeNamespaceDataService);
@@ -86,25 +76,6 @@ export class KubernetesHomeCardComponent implements OnInit {
   });
   private readonly loaded$ = toObservable(this.loaded);
 
-  ngOnInit() {
-    // strict: home cards only render for registered endpoints, which always have a guid
-    const guid = this.endpoint.guid!;
-    this.shortcuts = [
-      {
-        title: 'View Nodes',
-        link: ['/kubernetes', guid, 'nodes'],
-        icon: 'node',
-        iconFont: 'stratos-icons'
-      },
-      {
-        title: 'View Namespaces',
-        link: ['/kubernetes', guid, 'resource', 'namespace'],
-        icon: 'namespace',
-        iconFont: 'stratos-icons'
-      }
-    ];
-  }
-
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
     // strict: home cards only render for registered endpoints, which always have a guid
@@ -114,31 +85,6 @@ export class KubernetesHomeCardComponent implements OnInit {
     this.guidSig.set(guid);
     void this.nodeData.refresh(guid);
     void this.namespaceData.refresh({ kubeGuid: guid });
-
-    KubernetesEndpointService.hasKubeTerminalEnabled(this.session).pipe(take(1)).subscribe(hasKubeTerminal => {
-      if (hasKubeTerminal) {
-        this.shortcuts.push(
-          {
-            title: 'Open Terminal',
-            link: ['/kubernetes', guid, 'terminal'],
-            icon: 'terminal',
-            iconFont: 'stratos-icons'
-          }
-        );
-      }
-    });
-
-    KubernetesEndpointService.kubeDashboardConfigured(this.http, this.session, guid).pipe(take(1)).subscribe(hasKubeDashboard => {
-      if (hasKubeDashboard) {
-        this.shortcuts.push(
-          {
-            title: 'View Dashboard',
-            link: ['/kubernetes', guid, 'dashboard'],
-            icon: 'dashboard'
-          }
-        );
-      }
-    });
 
     return this.loaded$;
   }
