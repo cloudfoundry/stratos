@@ -6,6 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { entityCatalog } from '@stratosui/store';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
+import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigSelectionComponent } from './kube-config-selection.component';
 
 describe('KubeConfigSelectionComponent', () => {
@@ -16,6 +17,10 @@ describe('KubeConfigSelectionComponent', () => {
     await TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        // Provided by the registration wizard in the app (the helper must
+        // outlive the lazily-instantiated selection step) — the spec hosts
+        // the component directly, so provide it here.
+        KubeConfigHelper,
         {
           provide: ActivatedRoute,
           useValue: {

@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -19,6 +18,7 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
+import { KubeConfigHelper } from './kube-config.helper';
 import { KubeConfigImportComponent } from './kube-config-import/kube-config-import.component';
 import { KubeConfigSelectionComponent } from './kube-config-selection/kube-config-selection.component';
 
@@ -26,7 +26,13 @@ import { KubeConfigSelectionComponent } from './kube-config-selection/kube-confi
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-config-registration',
   templateUrl: './kube-config-registration.component.html',
-
+  // KubeConfigHelper is provided here (not on the selection component) so
+  // the parsed cluster list survives step transitions: the stepper
+  // instantiates/destroys step content lazily, and the review step's
+  // onEnter needs the clusters the (by then destroyed) selection step
+  // produced. The selection step and its table sub-components inject the
+  // same instance from this scope.
+  providers: [KubeConfigHelper],
   standalone: true,
   imports: [
     CommonModule,
@@ -36,22 +42,17 @@ import { KubeConfigSelectionComponent } from './kube-config-selection/kube-confi
     KubeConfigImportComponent,
   ],
 })
-export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy {
+export class KubeConfigRegistrationComponent implements OnDestroy {
   // FWT-959 Part 2: SignalStepHandle wiring.
   //
   // Both child step components already own most of the state (selection's
   // valid$ + onEnter, import's onEnter + onNext + applyStarted/busy). The
   // parent assembles per-step handles that delegate into the children via
   // @ViewChild and bridges the children's RxJS surface into local signals
-  // for the reactive bits the handles need.
-  //
-  // Cross-step data flow (selection → import) was previously plumbed via
-  // the legacy `onNext` -> `onEnter(data)` data-return path. Signal-handle
-  // `submit()` has no return-value channel, so the import handle's onEnter
-  // pulls the cluster list straight from the selector's KubeConfigHelper.
-  @ViewChild('selector', { static: false }) selector!: KubeConfigSelectionComponent;
-  @ViewChild('importer', { static: false }) importer!: KubeConfigImportComponent;
-
+  // for the reactive bits the handles need. Step children are instantiated
+  // lazily on activation, so the bridges are wired in ViewChild *setters*
+  // (an ngAfterViewInit pass would only ever see the first step's child).
+  private helper = inject(KubeConfigHelper);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -61,31 +62,70 @@ export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy
 
   private selectionValid = signal<boolean>(false);
   private importerBusy = signal<boolean>(false);
-  private bridgeSubs: Subscription[] = [];
+  // Parent-owned mirror of the importer's applyStarted state. The importer
+  // is destroyed whenever it is not the active step, so handle computeds
+  // (and the selection step's [applyStarted] input) read this signal
+  // instead of reaching into the child: a computed whose first evaluation
+  // dereferences an undefined ViewChild captures zero signal dependencies
+  // and never re-evaluates. Lifecycle matches the importer's own flag:
+  // reset on review-step entry, set on the first Import click.
+  readonly applyStarted = signal<boolean>(false);
+
+  private _selector?: KubeConfigSelectionComponent;
+  private _importer?: KubeConfigImportComponent;
+  private selectorSub?: Subscription;
+  private importerSub?: Subscription;
+
+  @ViewChild('selector', { static: false })
+  set selectorRef(v: KubeConfigSelectionComponent | undefined) {
+    this._selector = v;
+    this.selectorSub?.unsubscribe();
+    this.selectorSub = undefined;
+    if (v) {
+      this.selectorSub = v.valid$.subscribe(valid => {
+        this.selectionValid.set(!!valid);
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  @ViewChild('importer', { static: false })
+  set importerRef(v: KubeConfigImportComponent | undefined) {
+    this._importer = v;
+    this.importerSub?.unsubscribe();
+    this.importerSub = undefined;
+    if (v) {
+      this.importerSub = v.busy$.subscribe(b => {
+        this.importerBusy.set(!!b);
+        this.cdr.markForCheck();
+      });
+    }
+  }
 
   selectionStepHandle: SignalStepHandle = {
     valid: this.selectionValid.asReadonly(),
-    onEnter: () => this.selector?.onEnter(),
-    // No submit — the step auto-advances (ignoreSuccess undefined). The
-    // cluster list is consumed lazily by the review step's onEnter via
-    // the shared KubeConfigHelper instance scoped to the selector.
+    onEnter: () => this._selector?.onEnter(),
+    // No submit — the step auto-advances. The cluster list is consumed by
+    // the review step's onEnter via the shared KubeConfigHelper instance.
   };
 
   reviewStepHandle: SignalStepHandle = {
     valid: signal(true).asReadonly(),
-    canClose: computed(() => !this.importer?.applyStartedSignal()),
+    canClose: computed(() => !this.applyStarted()),
     disablePrevious: this.importerBusy.asReadonly(),
-    destructiveStep: computed(() => !this.importer?.applyStartedSignal()),
+    destructiveStep: computed(() => !this.applyStarted()),
     finishButtonText: computed(() =>
-      this.importer?.applyStartedSignal() ? 'Close' : 'Import'
+      this.applyStarted() ? 'Close' : 'Import'
     ),
     onEnter: async () => {
-      // Pull the freshly-selected clusters from the selector's helper and
-      // hand them to the import step. Replaces the legacy `onNext` data
-      // return path (selection.onNext returned `{ data: clusters }` and the
-      // stepper passed that to import.onEnter via pOnEnter).
-      const clusters = await firstValueFrom(this.selector.helper.clusters$.pipe(take(1)));
-      this.importer.onEnter(clusters);
+      // Hand the freshly-selected clusters to the import step. Replaces
+      // the legacy `onNext` data return path (selection.onNext returned
+      // `{ data: clusters }` and the stepper passed that to import.onEnter
+      // via pOnEnter). The importer resets its applyStarted flag in
+      // onEnter — mirror that here.
+      this.applyStarted.set(false);
+      const clusters = await firstValueFrom(this.helper.clusters$.pipe(take(1)));
+      this._importer?.onEnter(clusters);
     },
     submit: async () => {
       // Two-click "Import then Close" semantic. The importer's existing
@@ -93,7 +133,7 @@ export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy
       // ignoreSuccess, second-click returns redirect). We delegate to it
       // to preserve the side-effects (busy flag, processAction kickoff)
       // and translate its result into the signal-handle Promise contract.
-      const result = await firstValueFrom(this.importer.onNext(0, null as any));
+      const result = await firstValueFrom(this._importer!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to import kube config');
       }
@@ -105,32 +145,14 @@ export class KubeConfigRegistrationComponent implements AfterViewInit, OnDestroy
         return;
       }
       if (result.ignoreSuccess) {
+        this.applyStarted.set(true);
         return { ignoreSuccess: true };
       }
     },
   };
 
-  ngAfterViewInit() {
-    // Bridge child observables into local signals so the handles'
-    // computed/readonly fields re-evaluate reactively. We use plain
-    // RxJS subscriptions (vs `toSignal`) so the parent keeps explicit
-    // teardown control across stepper re-entries and so we can call
-    // markForCheck on this OnPush parent when child state flips.
-    this.bridgeSubs.push(
-      this.selector.valid$.subscribe(v => {
-        this.selectionValid.set(!!v);
-        this.cdr.markForCheck();
-      }),
-    );
-    this.bridgeSubs.push(
-      this.importer.busy$.subscribe(v => {
-        this.importerBusy.set(!!v);
-        this.cdr.markForCheck();
-      }),
-    );
-  }
-
   ngOnDestroy() {
-    this.bridgeSubs.forEach(s => s.unsubscribe());
+    this.selectorSub?.unsubscribe();
+    this.importerSub?.unsubscribe();
   }
 }

@@ -26,9 +26,10 @@ import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-sel
   selector: 'app-kube-config-selection',
   templateUrl: './kube-config-selection.component.html',
   host: { class: 'flex flex-1' },
-  providers: [
-    KubeConfigHelper
-  ],
+  // KubeConfigHelper deliberately NOT provided here — the registration
+  // wizard provides it so the parsed clusters outlive this (lazily
+  // instantiated/destroyed) step component. See
+  // KubeConfigRegistrationComponent's providers note.
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
