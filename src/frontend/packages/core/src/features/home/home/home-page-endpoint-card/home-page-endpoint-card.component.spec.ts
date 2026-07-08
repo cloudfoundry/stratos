@@ -93,6 +93,46 @@ describe('HomePageEndpointCardComponent', () => {
     expect(component['ref']).toBeTruthy();
   });
 
+  // #5588 — disconnected endpoints render a Disconnected panel, no home card load
+  it('renders a Disconnected panel with a Connect button instead of loading the card', () => {
+    // beforeEach endpoint has no connectionStatus => not connected
+    expect(component.disconnected).toBe(true);
+    expect(component['ref']).toBeFalsy();
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    expect(buttons.some(b => b.textContent?.trim() === 'Connect')).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Disconnected');
+  });
+
+  it('does not present a connected endpoint as disconnected', () => {
+    component.endpoint = { ...component.endpoint, connectionStatus: 'connected' };
+    expect(component.disconnected).toBe(false);
+  });
+
+  it('presents a connected endpoint with an expired token as disconnected', () => {
+    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: 1 };
+    expect(component.disconnected).toBe(true);
+  });
+
+  it('ignores a future token expiry', () => {
+    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: Math.floor(Date.now() / 1000) + 3600 };
+    expect(component.disconnected).toBe(false);
+  });
+
+  it('does not create the card twice when the endpoint input rebinds during load', () => {
+    const spy = vi.spyOn(component, 'createCard').mockResolvedValue(undefined as any);
+    component.endpoint = { ...component.endpoint, connectionStatus: 'connected' };
+    // Simulate: rebind fires while ngAfterViewInit's create is still awaiting
+    component.ngOnChanges({ endpoint: { currentValue: component.endpoint } } as any);
+    component.ngAfterViewInit();
+    component.ngOnChanges({ endpoint: { currentValue: component.endpoint } } as any);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats an expired access token as alive when jetstream can refresh it', () => {
+    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: 1, token_renewable: true };
+    expect(component.disconnected).toBe(false);
+  });
+
   it('should load component from homeCard.component() when endpoint entity provided', async () => {
     @Component({ selector: 'app-mock-card', template: '', standalone: true })
     class MockCardComponent {

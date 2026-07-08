@@ -50,38 +50,47 @@ describe('DashboardPreferencesService', () => {
   it('starts with default values when nothing is persisted', () => {
     const service = configure(makeSessionStub(username));
     flushEffects();
-    expect(service.homeShowAllEndpoints()).toBeNull();
+    expect(service.homeShowMode()).toBeNull();
     expect(service.homeLayout()).toBe(0);
   });
 
   it('hydrates from localStorage on construction when the user is known', () => {
-    localStorage.setItem(storageKey, JSON.stringify({ homeShowAllEndpoints: true, homeLayout: 3 }));
+    localStorage.setItem(storageKey, JSON.stringify({ homeShowMode: 'connected', homeLayout: 3 }));
 
     const service = configure(makeSessionStub(username));
     flushEffects();
 
-    expect(service.homeShowAllEndpoints()).toBe(true);
+    expect(service.homeShowMode()).toBe('connected');
     expect(service.homeLayout()).toBe(3);
   });
 
   it('persists changes to localStorage', () => {
     const service = configure(makeSessionStub(username));
     flushEffects();
-    service.setHomeShowAllEndpoints(true);
+    service.setHomeShowMode('connected');
     service.setHomeLayout(2);
     flushEffects();
 
     const raw = localStorage.getItem(storageKey);
     expect(raw).not.toBeNull();
-    expect(JSON.parse(raw!)).toEqual({ homeShowAllEndpoints: true, homeLayout: 2 });
+    expect(JSON.parse(raw!)).toEqual({ homeShowMode: 'connected', homeLayout: 2, homeSortDirection: 'asc' });
   });
 
   it('does not persist when the user is not yet known', () => {
     const service = configure(makeSessionStub(null));
     flushEffects();
-    service.setHomeShowAllEndpoints(true);
+    service.setHomeShowMode('connected');
     flushEffects();
 
     expect(localStorage.getItem(storageKey)).toBeNull();
+  });
+
+  it('migrates the legacy boolean pref to a show mode', () => {
+    localStorage.setItem(storageKey, JSON.stringify({ homeShowAllEndpoints: false, homeLayout: 0 }));
+
+    const service = configure(makeSessionStub(username));
+    flushEffects();
+
+    expect(service.homeShowMode()).toBe('favorites');
   });
 });

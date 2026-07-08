@@ -17,6 +17,7 @@ import {
   StratosCatalogEntity,
 } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import {
+  HomeCardShortcut,
   IEntityMetadata,
   IStratosEntityDefinition,
   StratosEndpointExtensionDefinition,
@@ -310,7 +311,26 @@ export class KubeEntityCatalog {
         }],
       homeCard: {
         component: () => import('./home/kubernetes-home-card.component').then(m => m.KubernetesHomeCardComponent),
-        fullView: false
+        // Definition-level like CF, so the host card renders these in the
+        // sidebar under Favorites. The old in-card conditional shortcuts
+        // (Open Terminal / View Dashboard) needed async checks this sync
+        // hook can't do; both remain reachable from the kube endpoint pages.
+        shortcuts: (endpointID: string): HomeCardShortcut[] => [
+          {
+            title: 'View Nodes',
+            link: ['/kubernetes', endpointID, 'nodes'],
+            icon: 'node',
+            iconFont: 'stratos-icons'
+          },
+          {
+            title: 'View Namespaces',
+            link: ['/kubernetes', endpointID, 'resource', 'namespace'],
+            icon: 'namespace',
+            iconFont: 'stratos-icons'
+          }
+        ],
+        fullView: false,
+        linksBelow: true
       }
     };
 

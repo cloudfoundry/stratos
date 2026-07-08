@@ -1,6 +1,31 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
   <div class="page-header-right">
+    <div class="inline-flex items-center rounded-lg border border-content-border bg-content-bg p-1 shadow-sm"
+      role="group" aria-label="Which endpoints to show">
+      @for (mode of showModes; track mode.value) {
+        <button type="button"
+          class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
+          [class.bg-primary]="resolvedShowMode() === mode.value"
+          [class.text-white]="resolvedShowMode() === mode.value"
+          [class.text-content-text]="resolvedShowMode() !== mode.value"
+          [class.hover:bg-content-secondary]="resolvedShowMode() !== mode.value"
+          (click)="setShowMode(mode.value)"
+          [attr.aria-pressed]="resolvedShowMode() === mode.value">
+          {{ mode.label }}
+        </button>
+      }
+      <span class="self-stretch border-l border-content-border mx-1" aria-hidden="true"></span>
+      <button type="button" (click)="toggleSortDirection()"
+        [title]="sortDirection() === 'asc' ? 'Sorted by endpoint name, A→Z' : 'Sorted by endpoint name, Z→A'"
+        [attr.aria-label]="sortDirection() === 'asc' ? 'Sorted by endpoint name, ascending' : 'Sorted by endpoint name, descending'"
+        class="px-2 py-1.5 rounded-md text-content-muted hover:bg-content-secondary transition-colors duration-200">
+        <span class="material-icons text-base leading-5 block" [class.rotate-180]="sortDirection() === 'asc'">sort</span>
+      </button>
+    </div>
+    <!-- Divider between the endpoint controls and the layout menu, matching
+         the page header's own divider idiom -->
+    <span class="mx-2 text-content-muted opacity-40 select-none" aria-hidden="true">|</span>
     <div class="relative inline-block">
       <div class="dropdown">
         <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
@@ -26,14 +51,6 @@
                   }
                 </div>
               }
-              <div class="layout-dropdown__divider"></div>
-              <button (click)="toggleShowAllEndpoints(); closeDropdown(dropdownButton)"
-                class="layout-dropdown__option">
-                <span>Show connected endpoints</span>
-                <span class="material-icons text-brand-600"
-                  [class.opacity-100]="showAllEndpoints"
-                [class.opacity-0]="!showAllEndpoints">done</span>
-            </button>
           </div>
         </div>
       </div>

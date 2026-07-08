@@ -11,6 +11,8 @@ import { Observable } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../core/endpoints.service';
+import { HomeShowMode, HomeSortDirection } from '../../../core/dashboard-preferences.service';
+import { naturalCompare } from '../../../shared/utils/natural-sort';
 import { SessionService } from '../../../core/session.service';
 import { DashboardPreferencesService } from '../../../core/dashboard-preferences.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
@@ -32,7 +34,7 @@ const noFavoritesMsg = (endpointCount: number, favoriteCount: number) => ({
     ? `You have ${endpointCount} endpoint${endpointCount !== 1 ? 's' : ''} and ${favoriteCount > 0 ? favoriteCount : 'none'} ha${favoriteCount === 1 ? 's' : 've'} been selected to be on your home page.`
     : 'You have no endpoints.',
   secondLine: { text: endpointCount > 0
-    ? 'Use the layout menu above to show all endpoints, or star an endpoint to add it here.'
+    ? 'Switch to "Connected" or "All" above to show more endpoints, or star an endpoint to add it here.'
     : 'Use the Endpoints view to register and connect an endpoint.' },
   icon: 'star_outline'
 });
@@ -72,24 +74,42 @@ export class HomePageComponent implements OnInit {
     this.haveRegistered() ? this.connectedEndpointsRaw() : []
   );
 
-  private sessionDefaultShowMode: Signal<boolean | null> = computed(() => {
+  // Every registered endpoint, connection state ignored — source for the
+  // starred-only view, where a starred endpoint that is down must still show
+  // (as a Disconnected card) instead of silently disappearing (#5588).
+  private allEndpointsRaw: Signal<EndpointModel[]> = toSignal(
+    this.endpointsService.endpoints$.pipe(map(eps => Object.values(eps))),
+    { initialValue: [] as EndpointModel[] }
+  );
+
+  private allEndpoints: Signal<EndpointModel[]> = computed(() =>
+    this.haveRegistered() ? this.allEndpointsRaw() : []
+  );
+
+  private sessionDefaultShowMode: Signal<HomeShowMode | null> = computed(() => {
     const c = this.sessionService.config();
-    return c ? !c.homeViewShowFavoritesOnly : null;
+    return c ? (c.homeViewShowFavoritesOnly ? 'favorites' : 'connected') : null;
   });
 
-  private resolvedShowMode: Signal<boolean> = computed(() => {
-    const a = this._showMode();
-    const b = this.prefs.homeShowAllEndpoints();
-    const c = this.sessionDefaultShowMode();
-    return (a !== null) ? a : (b !== null) ? b : (c ?? false);
-  });
+  public resolvedShowMode: Signal<HomeShowMode> = computed(() =>
+    this._showMode() ?? this.prefs.homeShowMode() ?? this.sessionDefaultShowMode() ?? 'favorites'
+  );
 
   public endpoints: Signal<EndpointModel[]> = computed(() => {
-    const showMode = this.resolvedShowMode();
-    const endpoints = this.connectedEndpoints();
+    const mode = this.resolvedShowMode();
     const fav = this.allFavorites();
     const favGroups: IUserFavoritesGroups = fav ? fav[0] : ({} as IUserFavoritesGroups);
-    const ordered = this.orderEndpoints(endpoints, favGroups, showMode);
+    if (mode === 'favorites') {
+      // Every starred endpoint (directly, or via starred child entities)
+      // regardless of connection state — a starred endpoint that is down
+      // renders as a Disconnected card rather than being hidden (#5588).
+      return this.orderEndpoints(this.allEndpoints(), favGroups, false);
+    }
+    if (mode === 'all') {
+      // Every registered endpoint, any state, favorites sorted first.
+      return this.orderEndpoints(this.allEndpoints(), favGroups, true);
+    }
+    const ordered = this.orderEndpoints(this.connectedEndpoints(), favGroups, true);
     return ordered.filter(ep => {
       // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
       const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
@@ -103,8 +123,8 @@ export class HomePageComponent implements OnInit {
   private _layout = signal<HomePageCardLayout | null>(null);
   public layout = this._layout.asReadonly();
 
-  private _showMode = signal<boolean | null>(null);
-  public showAllEndpoints = false;
+  private _showMode = signal<HomeShowMode | null>(null);
+  private persistedShowMode: HomeShowMode | null = null;
 
   public columns = 1;
 
@@ -162,16 +182,17 @@ export class HomePageComponent implements OnInit {
     // Persist resolved show-mode and refresh the noneAvailable message
     // whenever it or the endpoint list changes
     effect(() => {
-      const showMode = this.resolvedShowMode();
-      const endpoints = this.connectedEndpoints();
+      const mode = this.resolvedShowMode();
+      const registered = this.allEndpoints();
       const ordered = this.endpoints();
 
-      if (this.showAllEndpoints !== showMode) {
-        this.showAllEndpoints = showMode;
-        this.prefs.setHomeShowAllEndpoints(this.showAllEndpoints);
+      if (this.persistedShowMode !== mode) {
+        this.persistedShowMode = mode;
+        this.prefs.setHomeShowMode(mode);
       }
-      const favoriteCount = showMode ? 0 : ordered.length;
-      this.noneAvailableMsg = showMode ? noConnectedMsg : noFavoritesMsg(endpoints.length, favoriteCount);
+      this.noneAvailableMsg = mode === 'favorites'
+        ? noFavoritesMsg(registered.length, ordered.length)
+        : noConnectedMsg;
     });
 
     // Set an initial layout (the layout-init effect above will replace this once prefs hydrate)
@@ -197,8 +218,24 @@ export class HomePageComponent implements OnInit {
     }, { injector: this.injector });
   }
 
-  public toggleShowAllEndpoints() {
-    this._showMode.set(!this.showAllEndpoints);
+  // Header segmented control: Favorites | Connected | All
+  public showModes: { value: HomeShowMode, label: string }[] = [
+    { value: 'favorites', label: 'Favorites' },
+    { value: 'connected', label: 'Connected' },
+    { value: 'all', label: 'All' },
+  ];
+
+  public setShowMode(mode: HomeShowMode) {
+    this._showMode.set(mode);
+  }
+
+  // Header name-order control (signal-list card-view sort convention).
+  // Applies to the NAME tiebreak only — star grouping and type priority are
+  // fixed (decided during #5588 review).
+  public sortDirection: Signal<HomeSortDirection> = computed(() => this.prefs.homeSortDirection());
+
+  public toggleSortDirection() {
+    this.prefs.setHomeSortDirection(this.sortDirection() === 'asc' ? 'desc' : 'asc');
   }
 
   // The layout was changed
@@ -219,7 +256,7 @@ export class HomePageComponent implements OnInit {
   // 2. Endpoint that has child favourites
   // 3. Remaining endpoints
   // Within each group, sort by renderPriority (lower = first)
-  private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, showMode: boolean): EndpointModel[] {
+  private orderEndpoints(endpoints: EndpointModel[], favorites: IUserFavoritesGroups, includeRest: boolean): EndpointModel[] {
     const processed: Record<string, boolean> = {};
     const directFavs: EndpointModel[] = [];
     const childFavs: EndpointModel[] = [];
@@ -251,7 +288,7 @@ export class HomePageComponent implements OnInit {
       }
     });
 
-    if (showMode) {
+    if (includeRest) {
       endpoints.forEach(ep => {
         if (ep.guid && !processed[ep.guid]) {
           processed[ep.guid] = true;
@@ -260,11 +297,15 @@ export class HomePageComponent implements OnInit {
       });
     }
 
+    const dir = this.sortDirection();
     const byPriority = (a: EndpointModel, b: EndpointModel) => {
       // strict: cnsi_type is populated on every endpoint; '' default keeps the lookup well-formed
       const pa = entityCatalog.getEndpoint(a.cnsi_type ?? '', a.sub_type)?.definition?.renderPriority ?? 1000;
       const pb = entityCatalog.getEndpoint(b.cnsi_type ?? '', b.sub_type)?.definition?.renderPriority ?? 1000;
-      return pa - pb;
+      // Same type (priority tie): natural name order, so cf1 < cf2 < cf10
+      // instead of the /pp/v1/info payload's arbitrary map order. Direction
+      // flips the name comparison only, never the group/type ordering.
+      return pa - pb || naturalCompare(a.name, b.name, false, dir);
     };
 
     return [

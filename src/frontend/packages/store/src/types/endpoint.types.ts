@@ -47,6 +47,12 @@ export interface EndpointModel {
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
+  // Expiry (epoch seconds) of this user's stored token; only present when the
+  // user has connected the endpoint. 0/absent means no expiry is known.
+  token_expiry?: number;
+  // True when jetstream holds a refresh token for this endpoint and can mint
+  // a fresh session on use — expiry of the access token is then harmless.
+  token_renewable?: boolean;
   // These are generated client side when we login
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;

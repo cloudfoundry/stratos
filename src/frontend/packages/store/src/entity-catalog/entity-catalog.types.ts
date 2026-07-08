@@ -76,6 +76,9 @@ export interface HomeCardMetadata {
   shortcuts?: (endpointID: string) => HomeCardShortcut[];
   fullView?: boolean;
   columnSpan?: number;
+  // Render Favorites/Shortcuts in a strip below the card content instead of
+  // the right-hand sidebar — suits content-light cards (e.g. kubernetes)
+  linksBelow?: boolean;
 }
 
 /**
