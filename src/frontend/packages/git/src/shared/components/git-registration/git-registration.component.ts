@@ -130,7 +130,15 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // the shared CreateEndpointConnectComponent. The connect child exposes
   // signal-backed `validSignal` / `doConnectSignal` so this parent can
   // drive its second-step handle without polling plain fields.
-  @ViewChild('connect', { static: false }) connect?: CreateEndpointConnectComponent;
+  // Signal-backed (not a plain field): the connect step is instantiated
+  // lazily on activation, and the handle computeds below dereference it.
+  // A computed whose first evaluation sees an undefined plain field
+  // captures zero signal dependencies and never re-evaluates.
+  private _connect = signal<CreateEndpointConnectComponent | undefined>(undefined);
+  @ViewChild('connect', { static: false })
+  set connectRef(v: CreateEndpointConnectComponent | undefined) {
+    this._connect.set(v);
+  }
   private registerValid = signal<boolean>(false);
 
   // Tracks the endpoint guid created by step 1's runRegistration. Used by
@@ -147,28 +155,33 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
       }
-      // Hand the registration result to the connect child before advance —
-      // replaces the legacy stepper's `onEnter`-via-data path.
-      if (this.connect && result.data) {
-        this.connect.onEnter(result.data);
-      }
+      // Hand the registration result to the connect child via the
+      // stepper's enterData channel — the connect child does not exist yet
+      // at submit time (step content instantiates on activation), so a
+      // direct this.connect.onEnter(...) here silently no-ops.
+      return { data: result.data };
     },
   };
 
   connectStepHandle: SignalStepHandle = {
     valid: computed(() => {
-      const c = this.connect;
+      const c = this._connect();
       if (!c) return true;
       return c.doConnectSignal() ? c.validSignal() : true;
     }),
     disablePrevious: signal(false).asReadonly(),
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
-      const c = this.connect;
+      const c = this._connect();
       return c?.doConnectSignal() ? 'Connect' : 'Finish';
     }),
-    onEnter: () => {
-      // Data already handed off in registerStepHandle.submit — no-op.
+    onEnter: (data) => {
+      // Registration result routed from registerStepHandle.submit via the
+      // stepper's enterData channel. Delivery is deferred past the
+      // activating render, so the ViewChild is set by now.
+      if (data) {
+        this._connect()?.onEnter(data as any);
+      }
     },
     onLeave: async (isNext) => {
       if (isNext || !this.registeredGuid) {
@@ -182,7 +195,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       await this.endpointsSignalConfig.unregister(guid, GIT_ENDPOINT_TYPE);
     },
     submit: async () => {
-      const result = await firstValueFrom(this.connect!.onNext());
+      const result = await firstValueFrom(this._connect()!.onNext());
       if (!result.success) {
         throw new Error(result.message || 'Failed to connect endpoint');
       }
