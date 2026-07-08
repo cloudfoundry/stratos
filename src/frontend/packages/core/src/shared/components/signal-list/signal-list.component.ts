@@ -909,18 +909,27 @@ export class SignalListComponent<T> implements AfterViewInit {
     return this.config.rowState?.(row)?.() ?? null;
   }
 
-  // Tailwind tint for the row <tr>, by severity precedence
-  // error → warning → info, then highlighted. blocked/deleting/disabled rows
-  // also dim and go non-interactive (cf. v4.9.2 table-row), the per-row
-  // feedback for multiline/bulk operations.
+  // Data rows stay neutral surfaces — severity colors belong to the message
+  // strip only (tinting a whole data row fights the theme). Rows keep the
+  // functional treatments: highlight, and dim/non-interactive for
+  // blocked/deleting/disabled (cf. v4.9.2 table-row).
   rowStateRowClass(row: T): string {
+    const s = this.rowStateOf(row);
+    if (!s) return '';
+    const dim = (s.blocked || s.deleting || s.disabled) ? ' opacity-60 pointer-events-none' : '';
+    if (s.highlighted) return 'bg-accent/5' + dim;
+    return dim.trim();
+  }
+
+  // Tailwind tint for the row's message strip, by severity precedence
+  // error → warning → info.
+  rowStateMessageClass(row: T): string {
     const s = this.rowStateOf(row);
     if (!s) return '';
     const dim = (s.blocked || s.deleting || s.disabled) ? ' opacity-60 pointer-events-none' : '';
     if (s.error)   return 'bg-danger-50 dark:bg-danger-900/30 border-l-2 border-danger-300 dark:border-danger-700' + dim;
     if (s.warning) return 'bg-warning-50 dark:bg-warning-900/30 border-l-2 border-warning-300 dark:border-warning-700' + dim;
     if (s.info)    return 'bg-info-50 dark:bg-info-900/30 border-l-2 border-info-300 dark:border-info-700' + dim;
-    if (s.highlighted) return 'bg-accent/5' + dim;
     return dim.trim();
   }
 

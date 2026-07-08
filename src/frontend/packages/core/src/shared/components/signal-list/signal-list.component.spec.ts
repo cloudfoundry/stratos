@@ -998,22 +998,26 @@ describe('SignalListComponent rowState', () => {
     expect(msgs[0].textContent).toContain('name taken');
   });
 
-  it('tints the row by severity and uses the warning icon for warning state', () => {
+  it('tints the message strip (not the data row) and uses the warning icon for warning state', () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.detectChanges();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
-    expect(rows[0].className).toContain('border-warning-300');
-    const icon = fixture.nativeElement.querySelector('[data-test="row-message"] .material-icons');
+    expect(rows[0].className).not.toContain('border-warning-300');
+    const msg = fixture.nativeElement.querySelector('[data-test="row-message"]');
+    expect(msg.className).toContain('border-warning-300');
+    const icon = msg.querySelector('.material-icons');
     expect(icon.textContent).toContain('warning');
   });
 
-  it('uses the info icon for info state and red tint for error', () => {
+  it('uses the info icon for info state and red tint on the error message strip', () => {
     const fixture = TestBed.createComponent(RowStateHost);
     fixture.componentInstance.states['one'].set({ info: true, message: 'just connecting' });
     fixture.componentInstance.states['two'].set({ error: true, message: 'bad' });
     fixture.detectChanges();
     const rows = fixture.nativeElement.querySelectorAll('[data-test="row"]');
-    expect(rows[1].className).toContain('border-danger-300');
+    expect(rows[1].className).not.toContain('border-danger-300');
+    const msgs = fixture.nativeElement.querySelectorAll('[data-test="row-message"]');
+    expect(msgs[1].className).toContain('border-danger-300');
     const icons = fixture.nativeElement.querySelectorAll('[data-test="row-message"] .material-icons');
     expect(icons[0].textContent).toContain('info');
     expect(icons[1].textContent).toContain('warning'); // error → warning glyph
