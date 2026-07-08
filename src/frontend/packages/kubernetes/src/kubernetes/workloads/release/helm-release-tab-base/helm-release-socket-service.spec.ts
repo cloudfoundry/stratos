@@ -10,7 +10,7 @@ import {
 } from '../../../../services/domain-data/kube-generic-resource-data.services';
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../../../../services/domain-data/kube-service-data.service';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 import { HelmReleaseSocketService } from './helm-release-socket-service';
@@ -34,8 +34,8 @@ describe('HelmReleaseSocketService.writeManifestResources', () => {
         provideHttpClientTesting(),
         HelmReleaseSocketService,
         { provide: HelmReleaseHelperService, useValue: stubHelper },
-        // SnackBarService stub
-        { provide: SnackBarService, useValue: { show: () => {}, hide: () => {} } },
+        // TailwindSnackBarService stub
+        { provide: TailwindSnackBarService, useValue: { show: () => {}, hide: () => {} } },
       ],
     });
   });

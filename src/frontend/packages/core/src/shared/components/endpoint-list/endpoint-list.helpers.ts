@@ -10,7 +10,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { ConnectEndpointDialogComponent } from '../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { SessionService } from '../../../shared/services/session.service';
 import { UserProfileService } from '../../../core/user-profile.service';
-import { SnackBarService } from '../../services/snackbar.service';
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { ConfirmationDialogConfig } from '../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
 import { createMetaCardMenuItemSeparator } from '../meta-card/meta-card-base/meta-card.component';
@@ -59,7 +59,7 @@ export class EndpointListHelper {
   private dialog = inject(TailwindDialogService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private sessionService = inject(SessionService);
   private userProfileService = inject(UserProfileService);
   private endpointsData = inject(EndpointsDataService);

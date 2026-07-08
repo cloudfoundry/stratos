@@ -6,7 +6,7 @@ import { Observable, of, BehaviorSubject } from 'rxjs';
 import { catchError, filter, map, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { SessionService } from '../../../../core/src/core/session.service';
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { KubeScoreReportHelper } from './kubescore-report.helper';
 import { PopeyeReportHelper } from './popeye-report.helper';
 import { AnalysisReport } from '../store/kube.types';
@@ -29,7 +29,7 @@ export class KubernetesAnalysisService {
   activatedRoute = inject(ActivatedRoute);
   private session = inject(SessionService);
   private http = inject(HttpClient);
-  private snackbarService = inject(SnackBarService);
+  private snackbarService = inject(TailwindSnackBarService);
 
   kubeGuid: string;
 

@@ -11,7 +11,7 @@ import { CoreTestingModule } from '@test-framework';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { SnackBarService } from '../../services/snackbar.service';
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { environment } from '../../../environments/environment';
 import { PageHeaderComponent } from './page-header.component';
 
@@ -137,7 +137,7 @@ describe('PageHeaderComponent', () => {
         configurable: true,
       });
 
-      const snack = TestBed.inject(SnackBarService);
+      const snack = TestBed.inject(TailwindSnackBarService);
       snackSpy = vi.spyOn(snack, 'show');
     });
 

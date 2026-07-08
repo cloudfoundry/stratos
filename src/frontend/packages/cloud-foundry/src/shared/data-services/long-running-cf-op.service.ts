@@ -2,13 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
 import { LongRunningOperationsService } from '../../../../core/src/shared/services/long-running-op.service';
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LongRunningCfOperationsService extends LongRunningOperationsService {
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private http = inject(HttpClient);
 
   handleLongRunningCreateService(bindApp: boolean) {

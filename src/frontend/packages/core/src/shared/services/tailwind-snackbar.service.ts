@@ -1,5 +1,7 @@
 import { Injectable, ApplicationRef, Injector, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subject, Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 export interface TailwindSnackBarConfig {
   duration?: number;
@@ -60,6 +62,46 @@ export class TailwindSnackBarService {
 
   private appRef = inject(ApplicationRef);
   private injector = inject(Injector);
+  private router = inject(Router);
+
+  // Snackbars opened via show()/showWithLink(), so hide() can dismiss them
+  // without touching error() snackbars (which must stay until dismissed).
+  private tracked: TailwindSnackBarRef<any>[] = [];
+
+  // Show a snack bar with the given message.
+  // If closeMessage is supplied a button to dismiss the snack bar is shown and the duration is ignored.
+  // If closeMessage is not supplied, no action button is shown and the snack bar hides after the duration (default 5s).
+  // If forceDuration is supplied the duration is used regardless of closeMessage.
+  show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
+    return this.track(this.open(message, closeMessage, {
+      duration: forceDuration ? duration : (closeMessage ? 0 : duration)
+    }));
+  }
+
+  // Show a snack bar whose action button navigates to the given route.
+  // Stays on screen until dismissed unless a duration is given.
+  showWithLink(message: string, returnUrl: string | string[], returnLabel: string, duration?: number): TailwindSnackBarRef<any> {
+    const ref = this.open(message, returnLabel, { duration: duration || 0 });
+    ref.onAction().pipe(take(1)).subscribe(() => {
+      if (Array.isArray(returnUrl)) {
+        this.router.navigate(returnUrl);
+      } else {
+        this.router.navigateByUrl(returnUrl);
+      }
+    });
+    return this.track(ref);
+  }
+
+  // Hide the snack bars opened via show()/showWithLink()
+  hide(): void {
+    this.tracked.forEach(ref => ref.dismiss());
+  }
+
+  private track(ref: TailwindSnackBarRef<any>): TailwindSnackBarRef<any> {
+    this.tracked.push(ref);
+    ref.afterDismissed().pipe(take(1)).subscribe(() => this.tracked = this.tracked.filter(r => r !== ref));
+    return ref;
+  }
 
   // Errors must stay on screen until the user dismisses them — the default
    // 4s auto-dismiss hid broker / 502 / job failures before the operator

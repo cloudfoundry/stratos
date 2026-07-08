@@ -13,7 +13,7 @@ import { BlurDirective } from '../../../shared/components/blur.directive';
 import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
 import { MarkdownPreviewComponent } from '../../../shared/components/markdown-preview/markdown-preview.component';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
-import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../connect.service';
 
@@ -35,7 +35,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   dialogRef = inject<TailwindDialogRef<ConnectEndpointDialogComponent>>(TailwindDialogRef);
   data = inject<ConnectEndpointConfig>(MAT_DIALOG_DATA);
   private sidePanelService = inject(SidePanelService);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private injector = inject(Injector);
 
 

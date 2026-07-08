@@ -16,7 +16,7 @@ import { SidePanelService } from './../../../shared/services/side-panel.service'
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CustomizationService } from '../../../core/customizations.types';
-import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointsPageComponent } from './endpoints-page.component';
 
@@ -73,7 +73,7 @@ describe('EndpointsPageComponent', () => {
         { provide: SessionService, useValue: mockSessionService },
         { provide: EndpointsService, useValue: mockEndpointsService },
         { provide: CustomizationService, useValue: mockCustomizationService },
-        { provide: SnackBarService, useValue: mockSnackBarService },
+        { provide: TailwindSnackBarService, useValue: mockSnackBarService },
         { provide: EndpointModalService, useValue: mockEndpointModalService },
         ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),

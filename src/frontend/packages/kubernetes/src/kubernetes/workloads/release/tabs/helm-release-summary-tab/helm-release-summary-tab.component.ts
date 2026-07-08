@@ -23,7 +23,7 @@ import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewe
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
-import { SnackBarService } from '@stratosui/core';
+import { TailwindSnackBarService } from '@stratosui/core';
 import {
   ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
@@ -124,7 +124,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private router = inject(Router);
   private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private snackbarService = inject(SnackBarService);
+  private snackbarService = inject(TailwindSnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
   private injector = inject(Injector);
