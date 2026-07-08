@@ -251,9 +251,14 @@ define build.frontend
 endef
 $(call register, build, frontend, $(_HIDE)stamp.frontend)
 
+# Optional narrowing for the edit-test loop:
+#   PROJECT=<vitest project(s)>  e.g. PROJECT=core or PROJECT="core git"
+#   SCOPE=<path filter(s)>       e.g. SCOPE=src/frontend/packages/core/src/shared/components/stepper
+# The npm `test` script hard-codes every --project, so narrowed runs
+# invoke vitest directly with the same unhandled-errors flag.
 define test.frontend
 	@echo "Running frontend tests..."
-	bun run test
+	$(if $(strip $(PROJECT)$(SCOPE)),bun run vitest run --dangerouslyIgnoreUnhandledErrors $(foreach p,$(PROJECT),--project $(p)) $(SCOPE),bun run test)
 endef
 $(call register, test, frontend)
 
@@ -783,6 +788,7 @@ help:
 	@echo "Testing:"
 	@echo "  make test                 Run all tests"
 	@echo "  make test frontend        Frontend tests only"
+	@echo "  make test frontend PROJECT=core SCOPE=<path>  Narrowed vitest run"
 	@echo "  make test backend         Backend tests only"
 	@echo "  make test e2e             Run Playwright E2E tests"
 	@echo "  make lint                 Run linters"
