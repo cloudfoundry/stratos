@@ -139,12 +139,12 @@ export class RequestHelper {
   /**
    * Send GET request
    */
-  async get(url: string): Promise<any> {
+  async get(url: string, extraHeaders?: Record<string, string>): Promise<any> {
     if (!this.context) {
       throw new Error('Request context not initialized. Call init() first.');
     }
 
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { ...extraHeaders };
     if (this.xsrfToken) {
       headers['x-xsrf-token'] = this.xsrfToken;
     }
@@ -162,7 +162,7 @@ export class RequestHelper {
       return text ? JSON.parse(text) : null;
     }
 
-    throw new Error(`GET ${url} failed: ${response.status()} ${response.statusText()}`);
+    throw new Error(`GET ${url} failed: ${response.status()} ${response.statusText()} ${(await response.text().catch(() => '')).slice(0, 400)}`);
   }
 
   /**
@@ -201,19 +201,20 @@ export class RequestHelper {
       return text ? JSON.parse(text) : null;
     }
 
-    throw new Error(`POST ${url} failed: ${response.status()} ${response.statusText()}`);
+    throw new Error(`POST ${url} failed: ${response.status()} ${response.statusText()} ${(await response.text().catch(() => '')).slice(0, 400)}`);
   }
 
   /**
    * Send POST request with JSON body
    */
-  async post(url: string, body?: any): Promise<any> {
+  async post(url: string, body?: any, extraHeaders?: Record<string, string>): Promise<any> {
     if (!this.context) {
       throw new Error('Request context not initialized. Call init() first.');
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...extraHeaders
     };
     if (this.xsrfToken) {
       headers['x-xsrf-token'] = this.xsrfToken;
@@ -235,19 +236,20 @@ export class RequestHelper {
       return text ? JSON.parse(text) : null;
     }
 
-    throw new Error(`POST ${url} failed: ${response.status()} ${response.statusText()}`);
+    throw new Error(`POST ${url} failed: ${response.status()} ${response.statusText()} ${(await response.text().catch(() => '')).slice(0, 400)}`);
   }
 
   /**
    * Send PATCH request with JSON body
    */
-  async patch(url: string, body?: any): Promise<any> {
+  async patch(url: string, body?: any, extraHeaders?: Record<string, string>): Promise<any> {
     if (!this.context) {
       throw new Error('Request context not initialized. Call init() first.');
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...extraHeaders
     };
     if (this.xsrfToken) {
       headers['x-xsrf-token'] = this.xsrfToken;
@@ -269,18 +271,18 @@ export class RequestHelper {
       return text ? JSON.parse(text) : null;
     }
 
-    throw new Error(`PATCH ${url} failed: ${response.status()} ${response.statusText()}`);
+    throw new Error(`PATCH ${url} failed: ${response.status()} ${response.statusText()} ${(await response.text().catch(() => '')).slice(0, 400)}`);
   }
 
   /**
    * Send DELETE request
    */
-  async delete(url: string): Promise<any> {
+  async delete(url: string, extraHeaders?: Record<string, string>): Promise<any> {
     if (!this.context) {
       throw new Error('Request context not initialized. Call init() first.');
     }
 
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { ...extraHeaders };
     if (this.xsrfToken) {
       headers['x-xsrf-token'] = this.xsrfToken;
     }
@@ -298,7 +300,7 @@ export class RequestHelper {
       return text ? JSON.parse(text) : null;
     }
 
-    throw new Error(`DELETE ${url} failed: ${response.status()} ${response.statusText()}`);
+    throw new Error(`DELETE ${url} failed: ${response.status()} ${response.statusText()} ${(await response.text().catch(() => '')).slice(0, 400)}`);
   }
 
   /**
