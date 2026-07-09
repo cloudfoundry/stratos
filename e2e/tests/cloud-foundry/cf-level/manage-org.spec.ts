@@ -241,7 +241,7 @@ test.describe('Manage Organization', () => {
         await deleteButton.click();
 
         // Confirm deletion dialog
-        const confirmDialog = page.locator('mat-dialog-container, app-confirm-dialog');
+        const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
         const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });

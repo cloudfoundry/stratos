@@ -80,7 +80,7 @@ test.describe('Edit Service Instance', () => {
       await editOption.click();
 
       // Verify edit dialog opened
-      const editDialog = page.locator('app-edit-service-instance, mat-dialog-container, app-stepper');
+      const editDialog = page.locator('app-edit-service-instance, [role="dialog"], app-stepper');
       const dialogExists = await editDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -131,7 +131,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container, app-stepper').first();
+      const editDialog = page.locator('[role="dialog"], app-stepper').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -193,7 +193,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container, app-stepper').first();
+      const editDialog = page.locator('[role="dialog"], app-stepper').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -247,7 +247,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container, app-stepper').first();
+      const editDialog = page.locator('[role="dialog"], app-stepper').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -300,7 +300,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container, app-stepper').first();
+      const editDialog = page.locator('[role="dialog"], app-stepper').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -403,7 +403,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -450,7 +450,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -502,7 +502,7 @@ test.describe('Edit Service Instance', () => {
       expect(url).toMatch(/[0-9a-f-]{36}/); // Contains GUID
 
       // Verify details page elements are present
-      const detailsContent = page.locator('.service-instance-summary, .service-details, app-page-header').first();
+      const detailsContent = page.locator('.service-instance-summary, .service-details, h1').first();
       const hasDetails = await detailsContent.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!hasDetails) {
@@ -713,7 +713,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container, app-stepper').first();
+      const editDialog = page.locator('[role="dialog"], app-stepper').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -779,7 +779,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -839,7 +839,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -923,7 +923,7 @@ test.describe('Edit Service Instance', () => {
 
       // Progress may not be visible until an actual operation is in progress
       // Just verify the page structure supports progress display
-      const pageStructure = page.locator('app-list, app-page-header').first();
+      const pageStructure = page.locator('app-list').first();
       await expect(pageStructure).toBeVisible();
     });
 
@@ -990,7 +990,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -1042,7 +1042,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -1100,7 +1100,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -1154,7 +1154,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }
@@ -1208,7 +1208,7 @@ test.describe('Edit Service Instance', () => {
 
       await editOption.click();
 
-      const editDialog = page.locator('mat-dialog-container').first();
+      const editDialog = page.locator('[role="dialog"]').first();
       if (!await editDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit dialog not displayed');
       }

@@ -67,7 +67,7 @@ test.describe('Delete User-Provided Service Instance', () => {
       await addButton.click();
 
       // Verify wizard/dialog opened
-      const wizard = page.locator('app-create-service, app-add-service, mat-dialog-container, app-stepper');
+      const wizard = page.locator('app-create-service, app-add-service, [role="dialog"], app-stepper');
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {
@@ -109,7 +109,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await addButton.click();
 
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       if (!await wizard.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Create service wizard not displayed');
       }
@@ -162,7 +162,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await addButton.click();
 
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       if (!await wizard.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Create service wizard not displayed');
       }
@@ -198,7 +198,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await addButton.click();
 
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       if (!await wizard.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Create service wizard not displayed');
       }
@@ -234,7 +234,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await addButton.click();
 
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       if (!await wizard.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Create service wizard not displayed');
       }
@@ -270,7 +270,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await addButton.click();
 
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       if (!await wizard.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Create service wizard not displayed');
       }
@@ -306,7 +306,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await addButton.click();
 
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       if (!await wizard.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Create service wizard not displayed');
       }
@@ -349,7 +349,7 @@ test.describe('Delete User-Provided Service Instance', () => {
       await addButton.click();
 
       // Look for UPS option
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       const hasWizard = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!hasWizard) {
@@ -453,7 +453,7 @@ test.describe('Delete User-Provided Service Instance', () => {
       await deleteOption.click();
 
       // Verify confirmation dialog
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       await expect(confirmDialog).toBeVisible({ timeout: 5000 });
 
       await page.keyboard.press('Escape');
@@ -499,7 +499,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       await expect(confirmDialog).toBeVisible({ timeout: 5000 });
 
       // Look for UPS details (name, type, etc.)
@@ -553,7 +553,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       await expect(confirmDialog).toBeVisible({ timeout: 5000 });
 
       // Look for bound applications list
@@ -606,7 +606,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       await expect(confirmDialog).toBeVisible({ timeout: 5000 });
 
       // Verify confirm button exists
@@ -1019,7 +1019,7 @@ test.describe('Delete User-Provided Service Instance', () => {
         await editOption.click();
 
         // Verify edit form/wizard appears
-        const editForm = page.locator('mat-dialog-container, app-stepper, form');
+        const editForm = page.locator('[role="dialog"], app-stepper, form');
         const hasForm = await editForm.first().isVisible({ timeout: 5000 }).catch(() => false);
 
         if (hasForm) {
@@ -1079,7 +1079,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await editOption.click();
 
-      const editForm = page.locator('mat-dialog-container, app-stepper, form');
+      const editForm = page.locator('[role="dialog"], app-stepper, form');
       if (!await editForm.first().isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit form not displayed');
       }
@@ -1135,7 +1135,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await editOption.click();
 
-      const editForm = page.locator('mat-dialog-container, app-stepper, form');
+      const editForm = page.locator('[role="dialog"], app-stepper, form');
       if (!await editForm.first().isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit form not displayed');
       }
@@ -1191,7 +1191,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await editOption.click();
 
-      const editForm = page.locator('mat-dialog-container, app-stepper, form');
+      const editForm = page.locator('[role="dialog"], app-stepper, form');
       if (!await editForm.first().isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit form not displayed');
       }
@@ -1247,7 +1247,7 @@ test.describe('Delete User-Provided Service Instance', () => {
 
       await editOption.click();
 
-      const editForm = page.locator('mat-dialog-container, app-stepper, form');
+      const editForm = page.locator('[role="dialog"], app-stepper, form');
       if (!await editForm.first().isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Edit form not displayed');
       }

@@ -74,7 +74,7 @@ test.describe('Application Revisions', () => {
       expect(rollbackClicked).toBeTruthy();
 
       // Wait for and verify rollback dialog
-      const dialog = page.locator('mat-dialog-container, [role="dialog"]').first();
+      const dialog = page.locator('[role="dialog"]').first();
       await expect(dialog).toBeVisible({ timeout: 5000 });
 
       // Assert dialog contains revision number

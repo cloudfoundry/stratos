@@ -58,7 +58,7 @@ test.describe('CF Space Level', () => {
       await spacePage.waitForPage();
 
       // Check breadcrumbs
-      const breadcrumb = page.locator('app-page-header-events app-breadcrumbs, .breadcrumbs').first();
+      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
       await expect(breadcrumb).toBeVisible();
 
       // Breadcrumb should contain CF name and org name
@@ -156,7 +156,7 @@ test.describe('CF Space Level', () => {
       await spacePage.navigateTo();
       await spacePage.waitForPage();
 
-      const breadcrumb = page.locator('app-page-header-events app-breadcrumbs, .breadcrumbs').first();
+      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
       await expect(breadcrumb).toBeVisible();
     });
 
@@ -217,7 +217,7 @@ test.describe('CF Space Level', () => {
       await addButton.click();
 
       // Verify deployment wizard or stepper opened
-      const wizard = page.locator('app-deploy-application, app-stepper-dialog, mat-dialog-container');
+      const wizard = page.locator('app-deploy-application, app-stepper-dialog, [role="dialog"]');
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (wizardExists) {
@@ -255,7 +255,7 @@ test.describe('CF Space Level', () => {
       await addButton.click();
 
       // Verify service creation wizard or marketplace opened
-      const wizard = page.locator('app-create-service-instance, app-add-service-instance, mat-dialog-container, .marketplace');
+      const wizard = page.locator('app-create-service-instance, app-add-service-instance, [role="dialog"], .marketplace');
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (wizardExists) {
@@ -297,7 +297,7 @@ test.describe('CF Space Level', () => {
       await manageButton.click();
 
       // Verify user management dialog opened
-      const dialog = page.locator('app-add-space-user, app-manage-users, mat-dialog-container');
+      const dialog = page.locator('app-add-space-user, app-manage-users, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (dialogExists) {
@@ -335,7 +335,7 @@ test.describe('CF Space Level', () => {
       await addButton.click();
 
       // Verify route creation dialog opened
-      const dialog = page.locator('app-create-route, app-add-route, mat-dialog-container');
+      const dialog = page.locator('app-create-route, app-add-route, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (dialogExists) {

@@ -131,7 +131,7 @@ test.describe('Delete Service Instance', () => {
       await deleteOption.click();
 
       // Verify confirmation dialog opened
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       const dialogExists = await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -183,7 +183,7 @@ test.describe('Delete Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       if (!await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Confirmation dialog not displayed');
       }
@@ -239,7 +239,7 @@ test.describe('Delete Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       if (!await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Confirmation dialog not displayed');
       }
@@ -293,7 +293,7 @@ test.describe('Delete Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       if (!await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Confirmation dialog not displayed');
       }
@@ -345,7 +345,7 @@ test.describe('Delete Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       if (!await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Confirmation dialog not displayed');
       }
@@ -474,7 +474,7 @@ test.describe('Delete Service Instance', () => {
       await deleteOption.click();
 
       // Verify warning about bound applications
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       await expect(confirmDialog).toBeVisible({ timeout: 5000 });
 
       // Look for warning or disabled delete button
@@ -525,7 +525,7 @@ test.describe('Delete Service Instance', () => {
 
       await deleteOption.click();
 
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       await expect(confirmDialog).toBeVisible({ timeout: 5000 });
 
       // Check for unbind instructions or link
@@ -676,7 +676,7 @@ test.describe('Delete Service Instance', () => {
       await servicesPage.waitForPage();
 
       // Verify error message display infrastructure
-      const errorDisplay = page.locator('app-snack-bar, .mat-snack-bar-container, mat-dialog-container');
+      const errorDisplay = page.locator('app-snack-bar, .mat-snack-bar-container, [role="dialog"]');
 
       // Error handling should be present
       expect(true).toBe(true);
@@ -706,7 +706,7 @@ test.describe('Delete Service Instance', () => {
 
       // Verify error message UI components exist
       const snackBar = page.locator('app-snack-bar, .mat-snack-bar-container');
-      const errorDialog = page.locator('mat-dialog-container').filter({ hasText: /error|failed/i });
+      const errorDialog = page.locator('[role="dialog"]').filter({ hasText: /error|failed/i });
 
       // UI should support detailed error display
       expect(true).toBe(true);

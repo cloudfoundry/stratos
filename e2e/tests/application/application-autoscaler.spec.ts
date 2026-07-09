@@ -34,7 +34,7 @@ test.describe('Application Autoscaler', () => {
       await appPage.navigateTo();
       await page.waitForLoadState('networkidle');
 
-      const summaryPage = page.locator('app-application-page');
+      const summaryPage = page.locator('app-page-side-nav');
       await expect(summaryPage).toBeVisible();
     });
 
@@ -49,7 +49,7 @@ test.describe('Application Autoscaler', () => {
       // Check if autoscaler tab/feature is available
       // Note: This test documents the autoscaler integration point
       // Actual autoscaler tab presence depends on extension being enabled
-      const appPageElement = page.locator('app-application-page');
+      const appPageElement = page.locator('app-page-side-nav');
       await expect(appPageElement).toBeVisible();
 
       // The autoscaler tab would appear here if extension is enabled
@@ -67,7 +67,7 @@ test.describe('Application Autoscaler', () => {
       await page.waitForLoadState('networkidle');
 
       // Check if autoscaler tab is present
-      const autoscalerTab = page.locator('app-page-tabs, mat-tab-group').locator('button, a').filter({ hasText: /autoscale/i });
+      const autoscalerTab = page.locator('app-page-side-nav .page-side-nav__item').filter({ hasText: /autoscale/i });
       const tabVisible = await autoscalerTab.isVisible().catch(() => false);
 
       if (!tabVisible) {
@@ -87,7 +87,7 @@ test.describe('Application Autoscaler', () => {
       await page.waitForLoadState('networkidle');
 
       // Check if autoscaler tab exists
-      const autoscalerTab = page.locator('app-page-tabs, mat-tab-group').locator('button, a').filter({ hasText: /autoscale/i });
+      const autoscalerTab = page.locator('app-page-side-nav .page-side-nav__item').filter({ hasText: /autoscale/i });
       const tabVisible = await autoscalerTab.isVisible().catch(() => false);
 
       if (!tabVisible) {
@@ -114,7 +114,7 @@ test.describe('Application Autoscaler', () => {
       await page.waitForLoadState('networkidle');
 
       // Check for autoscaler tab
-      const autoscalerTab = page.locator('app-page-tabs, mat-tab-group').locator('button, a').filter({ hasText: /autoscale/i });
+      const autoscalerTab = page.locator('app-page-side-nav .page-side-nav__item').filter({ hasText: /autoscale/i });
       const tabVisible = await autoscalerTab.isVisible().catch(() => false);
 
       if (!tabVisible) {
@@ -164,7 +164,7 @@ test.describe('Application Autoscaler', () => {
         await createButton.click();
 
         // Verify policy creation dialog/form opened
-        const policyDialog = page.locator('app-dialog, mat-dialog-container, app-autoscaler-policy-form');
+        const policyDialog = page.locator('app-dialog, [role="dialog"], app-autoscaler-policy-form');
         await expect(policyDialog.first()).toBeVisible({ timeout: 10000 });
       }
     });
@@ -398,7 +398,7 @@ test.describe('Application Autoscaler', () => {
         await editButton.click();
 
         // Verify policy edit dialog/form opened
-        const policyDialog = page.locator('app-dialog, mat-dialog-container, app-autoscaler-policy-form');
+        const policyDialog = page.locator('app-dialog, [role="dialog"], app-autoscaler-policy-form');
         await expect(policyDialog.first()).toBeVisible({ timeout: 10000 });
 
         // Verify fields are populated with existing values
@@ -539,7 +539,7 @@ test.describe('Application Autoscaler', () => {
         await deleteButton.click();
 
         // Verify confirmation dialog appears
-        const confirmDialog = page.locator('app-dialog-confirm, app-confirm-dialog, mat-dialog-container');
+        const confirmDialog = page.locator('app-dialog-confirm, app-dialog-confirm');
         await expect(confirmDialog.first()).toBeVisible({ timeout: 10000 });
       }
     });
@@ -563,7 +563,7 @@ test.describe('Application Autoscaler', () => {
         await deleteButton.click();
 
         // Confirm deletion
-        const confirmButton = page.locator('mat-dialog-container button, app-confirm-dialog button').filter({ hasText: /delete|confirm/i });
+        const confirmButton = page.locator('app-dialog-confirm button').filter({ hasText: /delete|confirm/i });
         if (await confirmButton.isVisible().catch(() => false)) {
           await confirmButton.first().click();
 
