@@ -997,6 +997,76 @@ func TestGetNativeSpaces_OrganizationGuidsFilter(t *testing.T) {
 	assert.Equal(t, "sp-b", resp.Resources[1].GUID)
 }
 
+// TestGetNativeSpaces_EnrichNoneSkipsCounts verifies that ?enrich=none
+// skips the per-space app/route count enrichment even with no guids
+// filter present — the prewarm-drain fast path. The full space list must
+// still be returned (the drain uses it as a guid→name catalog); only the
+// dead per-space count round-trips are elided.
+func TestGetNativeSpaces_EnrichNoneSkipsCounts(t *testing.T) {
+	var sawApps, sawRoutes bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case "/v3/spaces":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "sp-a", "name": "alpha",
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+						},
+					},
+					{
+						"guid": "sp-b", "name": "beta",
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z",
+						"relationships": map[string]interface{}{
+							"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-2"}},
+						},
+					},
+				},
+			})
+		case "/v3/apps":
+			sawApps = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		case "/v3/routes":
+			sawRoutes = true
+			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":0,"next":null},"resources":[]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(srv.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1?enrich=none&per_page=500&page=1", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("cnsi-1")
+
+	require.NoError(t, plugin.getNativeSpaces(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.False(t, sawApps, "enrich=none must skip app-count enrichment")
+	assert.False(t, sawRoutes, "enrich=none must skip route-count enrichment")
+
+	var resp StratosPagedResponse[StSpace]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	assert.Len(t, resp.Resources, 2, "full space list must still be returned")
+	assert.Equal(t, "sp-a", resp.Resources[0].GUID)
+	assert.Equal(t, "sp-b", resp.Resources[1].GUID)
+}
+
 // TestGetNativeApps_GuidsFilter verifies the apps handler forwards
 // ?guids=g1,g2 verbatim as the V3 filter — the transport piece of the
 // slice-3 Routes-tab Apps-Attached column resolver. Skipping per-app

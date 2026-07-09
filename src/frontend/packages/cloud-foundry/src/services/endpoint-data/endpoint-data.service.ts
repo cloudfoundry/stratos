@@ -370,7 +370,7 @@ export class EndpointDataService {
     }
     this.diagnostics?.emitCounter('cache-miss', { service: 'EndpointDataService', method: 'loadSpaces' });
     this._isLoadingSpaces.set(true);
-    this._inFlightLoadSpaces = drainCfPages<StSpace>(this.http, `/pp/v1/cf/spaces/${this.guid}`).pipe(
+    this._inFlightLoadSpaces = drainCfPages<StSpace>(this.http, `/pp/v1/cf/spaces/${this.guid}`, 'enrich=none').pipe(
       // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._spaces.set(resp.resources);
@@ -548,7 +548,7 @@ export class EndpointDataService {
   refreshSpaces(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'refreshSpaces' });
     this._isLoadingSpaces.set(true);
-    return drainCfPages<StSpace>(this.http, `/pp/v1/cf/spaces/${this.guid}`).pipe(
+    return drainCfPages<StSpace>(this.http, `/pp/v1/cf/spaces/${this.guid}`, 'enrich=none').pipe(
       // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._spaces.set(resp.resources);
