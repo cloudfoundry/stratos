@@ -316,7 +316,9 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
     await use(cfApi);
 
-    await cfApi.cleanupTestResources();
+    // Do NOT label-sweep here (cleanupTestResources): it deletes ALL
+    // stratos-e2e-test apps on the CF, including a parallel worker's app
+    // that is mid-test. Fixtures delete their own resources by guid.
     await request.dispose();
   },
 
