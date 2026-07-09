@@ -12,7 +12,7 @@ export class ApiKeyAddDialogPage {
   private readonly dialog: Locator;
 
   constructor(private page: Page) {
-    this.dialog = page.locator('app-add-api-key-dialog, mat-dialog-container').first();
+    this.dialog = page.locator('app-add-api-key-dialog, [role="dialog"]').first();
     this.form = new FormComponent(page, this.dialog.locator('.key-dialog, form').first());
     this.buttons = new MenuComponent(page, this.dialog.locator('.key-dialog__actions, mat-dialog-actions, .dialog-actions').first());
   }

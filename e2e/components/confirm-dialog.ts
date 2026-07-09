@@ -19,7 +19,7 @@ export class ConfirmDialogComponent {
   private dialog: Locator;
 
   constructor(private page: Page) {
-    this.dialog = page.locator('app-dialog-confirm, app-confirm-dialog, mat-dialog-container');
+    this.dialog = page.locator('app-dialog-confirm, app-dialog-confirm');
   }
 
   /**

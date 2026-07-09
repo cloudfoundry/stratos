@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from '../base.page';
 
 /**
@@ -19,11 +19,12 @@ export class RouteCreateDialogPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.dialog = page.locator('mat-dialog-container, app-add-route-dialog, app-create-route-dialog').first();
-    this.domainSelect = this.dialog.locator('mat-select[placeholder*="domain"], select[name="domain"]').first();
-    this.hostInput = this.dialog.locator('input[name="host"], input[placeholder*="host"]').first();
-    this.pathInput = this.dialog.locator('input[name="path"], input[placeholder*="path"]').first();
-    this.tcpPortInput = this.dialog.locator('input[name="port"], input[type="number"]').first();
+    // "Create Route" is a routed stepper page (/add-route), not an overlay dialog
+    this.dialog = page.locator('app-add-route-stepper').first();
+    this.domainSelect = this.dialog.locator('.select-trigger').first();
+    this.hostInput = this.dialog.locator('input[formcontrolname="host"]').first();
+    this.pathInput = this.dialog.locator('input[formcontrolname="path"]').first();
+    this.tcpPortInput = this.dialog.locator('input[formcontrolname="port"], input[type="number"]').first();
     this.createButton = this.dialog.locator('button').filter({ hasText: /create|add|map/i });
     this.cancelButton = this.dialog.locator('button').filter({ hasText: /cancel|close/i });
     this.mapExistingButton = this.dialog.locator('button').filter({ hasText: /map.*existing|existing.*route/i });
@@ -47,11 +48,15 @@ export class RouteCreateDialogPage extends BasePage {
    * Select domain from dropdown
    */
   async selectDomain(domainName: string): Promise<void> {
-    await this.domainSelect.click();
-    await this.page.waitForTimeout(500);
-
-    const option = this.page.locator('mat-option, option').filter({ hasText: domainName });
-    await option.click();
+    // Custom dropdown renders options in a .select-options overlay. Domains
+    // load async — the overlay can open empty, so retry until the option
+    // renders (each click toggles the overlay; toPass absorbs that).
+    const option = this.page.locator('.custom-option-content').filter({ hasText: domainName }).first();
+    await expect(async () => {
+      await this.domainSelect.click();
+      await option.waitFor({ state: 'visible', timeout: 3000 });
+      await option.click({ timeout: 2000 });
+    }).toPass({ timeout: 30000 });
   }
 
   /**

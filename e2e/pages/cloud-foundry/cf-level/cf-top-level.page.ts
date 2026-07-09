@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../../base.page';
+import { pageTab } from '../../../components/page-tabs.component';
 
 /**
  * Cloud Foundry Top Level Page
@@ -12,8 +13,8 @@ export class CfTopLevelPage extends BasePage {
   constructor(page: Page, navLink: string = '/cloud-foundry') {
     super(page);
     this.navLink = navLink;
-    // CF page uses sidebar navigation (mat-nav-list), not tab-group
-    this.tabs = page.locator('mat-nav-list, app-page-tabs, mat-tab-group');
+    // CF page tabs render as side-nav links
+    this.tabs = page.locator('app-page-side-nav');
   }
 
   static forEndpoint(page: Page, guid: string): CfTopLevelPage {
@@ -95,8 +96,7 @@ export class CfTopLevelPage extends BasePage {
   }
 
   private async goToTab(label: string, urlSuffix: string): Promise<void> {
-    // Navigation uses sidebar links (a elements in mat-nav-list)
-    const navLink = this.page.locator('a, button').filter({ hasText: new RegExp(`^\\s*${label}\\s*$`) }).first();
+    const navLink = pageTab(this.page, label);
     await navLink.waitFor({ state: 'visible', timeout: 10000 });
     await navLink.click();
     await this.page.waitForURL(new RegExp(`${this.navLink}.*/${urlSuffix}`), { timeout: 10000 });
@@ -143,7 +143,7 @@ export class CfTopLevelPage extends BasePage {
     await deleteOption.click();
 
     // Confirm dialog
-    const confirmDialog = this.page.locator('app-confirm-dialog, mat-dialog-container');
+    const confirmDialog = this.page.locator('app-dialog-confirm');
     await confirmDialog.waitFor({ state: 'visible' });
 
     const confirmButton = confirmDialog.locator('button').filter({ hasText: /confirm|delete/i });
@@ -196,7 +196,7 @@ export class CfTopLevelPage extends BasePage {
     await deleteOption.click();
 
     // Confirm dialog
-    const confirmDialog = this.page.locator('app-confirm-dialog, mat-dialog-container');
+    const confirmDialog = this.page.locator('app-dialog-confirm');
     await confirmDialog.waitFor({ state: 'visible' });
 
     const confirmButton = confirmDialog.locator('button').filter({ hasText: /confirm|delete/i });

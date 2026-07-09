@@ -85,7 +85,7 @@ export class ApplicationPageVariablesTab extends ApplicationBasePage {
     await deleteOption.click();
 
     // Wait for confirmation dialog
-    const confirmDialog = this.page.locator('app-confirm-dialog, mat-dialog-container');
+    const confirmDialog = this.page.locator('app-dialog-confirm');
     await confirmDialog.waitFor({ state: 'visible' });
 
     // Verify message

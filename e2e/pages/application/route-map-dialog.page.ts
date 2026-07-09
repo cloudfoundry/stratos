@@ -17,11 +17,13 @@ export class RouteMapDialogPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.dialog = page.locator('mat-dialog-container, app-map-route-dialog').first();
-    this.routeList = this.dialog.locator('app-list, mat-list, mat-table');
-    this.domainFilter = this.dialog.locator('mat-select[placeholder*="domain"], select[name="domain"]').first();
-    this.searchInput = this.dialog.locator('input[type="text"], input[placeholder*="search"]').first();
-    this.mapButton = this.dialog.locator('button').filter({ hasText: /map|add/i });
+    // Mapping an existing route is the "attach an existing route" section of
+    // the Add Route page — there is no separate dialog in the modern UI.
+    this.dialog = page.locator('app-add-route-stepper').first();
+    this.routeList = this.dialog.locator('[data-test="available-routes"] app-signal-list');
+    this.domainFilter = this.dialog.locator('select[name="domain"]').first(); // gone in modern UI; guarded no-op
+    this.searchInput = this.dialog.locator('[data-test="available-routes"] input[placeholder*="Filter"]').first();
+    this.mapButton = this.dialog.locator('button').filter({ hasText: /create|map|attach/i });
     this.cancelButton = this.dialog.locator('button').filter({ hasText: /cancel|close/i });
   }
 
@@ -76,8 +78,11 @@ export class RouteMapDialogPage extends BasePage {
    * Select a route from the list
    */
   async selectRoute(routeUrl: string): Promise<void> {
-    const routeItem = this.routeList.locator('mat-list-item, mat-row, tr').filter({ hasText: routeUrl });
-    await routeItem.click();
+    // Narrow the list first — the route may be beyond the first page
+    await this.searchInput.fill(routeUrl).catch(() => {});
+    const routeItem = this.routeList.locator('tbody tr').filter({ hasText: routeUrl });
+    // Rows carry a selection radio in the first cell
+    await routeItem.locator('input[type="radio"]').first().click({ timeout: 30000 });
   }
 
   /**

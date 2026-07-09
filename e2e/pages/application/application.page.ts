@@ -1,6 +1,7 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../base.page';
 import { BreadcrumbsComponent } from '../../components/breadcrumbs.component';
+import { pageTab } from '../../components/page-tabs.component';
 
 /**
  * Application Base Page Object
@@ -23,10 +24,12 @@ export class ApplicationBasePage extends BasePage {
   ) {
     super(page);
 
-    this.tabs = page.locator('app-page-tabs, mat-tab-group');
-    this.pageHeader = page.locator('app-page-header');
-    this.subHeader = page.locator('app-page-sub-header');
-    this.deleteButton = this.subHeader.locator('button[aria-label="delete"]');
+    // app-page-header/app-page-tabs are portal sources (zero-height) in the
+    // modernized frontend — target the rendered locations instead.
+    this.tabs = page.locator('app-page-side-nav');
+    this.pageHeader = page.locator('app-show-page-header');
+    this.subHeader = page.locator('.page-header-sub-nav');
+    this.deleteButton = this.subHeader.locator('button').filter({ hasText: 'delete' });
     this.breadcrumbs = new BreadcrumbsComponent(page);
   }
 
@@ -34,7 +37,13 @@ export class ApplicationBasePage extends BasePage {
    * Wait for page to be fully loaded
    */
   async waitForPage(): Promise<void> {
-    await this.pageHeader.waitFor({ state: 'visible', timeout: 10000 });
+    // The tab side-nav only renders on tabbed detail pages. Don't anchor on
+    // app-application-action-bar — its buttons portal to the sub-nav bar, so
+    // the host element is hidden for stopped apps.
+    await this.tabs.waitFor({ state: 'visible', timeout: 10000 });
+    // The "Retrieving..." overlay intercepts clicks while the app entity
+    // loads; the side-nav is visible beneath it, so wait it out explicitly.
+    await this.page.locator('.loading-page__overlay').waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {});
     await this.page.waitForTimeout(500); // Allow time for initial render
   }
 
@@ -137,15 +146,18 @@ export class ApplicationBasePage extends BasePage {
    * Wait for Autoscaler tab to appear
    */
   async waitForAutoscalerTab(): Promise<void> {
-    await this.tabs.locator('button, a').filter({ hasText: 'Autoscale' }).waitFor({ timeout: 15000 });
+    await pageTab(this.page, 'Autoscale').waitFor({ timeout: 15000 });
   }
 
   /**
    * Navigate to a specific tab
    */
   private async goToTab(label: string, urlSuffix: string): Promise<void> {
-    const tabButton = this.tabs.locator('button, a').filter({ hasText: label });
-    await tabButton.click();
+    const tabButton = pageTab(this.page, label);
+    // The "Retrieving..." overlay intercepts clicks while entities load and
+    // can reappear at any moment — let the click's actionability retry
+    // outlast it rather than racing a pre-wait.
+    await tabButton.click({ timeout: 60000 });
 
     const expectedUrl = `/applications/${this.cfGuid}/${this.appGuid}/${urlSuffix}`;
     await this.page.waitForURL(new RegExp(expectedUrl.replace(/\//g, '\\/')));
@@ -155,7 +167,7 @@ export class ApplicationBasePage extends BasePage {
    * Get application name from header
    */
   async getAppName(): Promise<string> {
-    const titleElement = this.pageHeader.locator('h1, .page-header__title');
+    const titleElement = this.pageHeader.locator('h1');
     return await titleElement.textContent() || '';
   }
 

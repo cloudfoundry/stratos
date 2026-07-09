@@ -22,7 +22,7 @@ export class RegisterStepperPage extends BasePage {
 
     this.stepper = page.locator('app-steppers, mat-horizontal-stepper');
     this.form = page.locator('form');
-    this.pageHeader = page.locator('app-page-header');
+    this.pageHeader = page.locator('app-show-page-header');
     this.nameField = page.locator('input[name="name"], input[formcontrolname="name"]').first();
     this.addressField = page.locator('input[name="url"], input[formcontrolname="url"]').first();
     this.nextButton = page.locator('button').filter({ hasText: /next/i });
@@ -49,7 +49,7 @@ export class RegisterStepperPage extends BasePage {
    * Get page title text
    */
   async getTitleText(): Promise<string> {
-    const titleElement = this.pageHeader.locator('h1, .page-header__title');
+    const titleElement = this.pageHeader.locator('h1');
     return await titleElement.textContent() || '';
   }
 
