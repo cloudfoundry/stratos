@@ -82,6 +82,10 @@ export class TailwindSnackBarService {
   // Stays on screen until dismissed unless a duration is given.
   showWithLink(message: string, returnUrl: string | string[], returnLabel: string, duration?: number): TailwindSnackBarRef<any> {
     const ref = this.open(message, returnLabel, { duration: duration || 0 });
+    // take(1), not firstValueFrom: onAction() completes WITHOUT emitting when the
+    // snackbar is dismissed without the link being clicked (the normal case).
+    // firstValueFrom would reject on that empty completion; subscribe simply never
+    // fires. Matches the app-wide take(1) convention.
     ref.onAction().pipe(take(1)).subscribe(() => {
       if (Array.isArray(returnUrl)) {
         this.router.navigate(returnUrl);
@@ -129,7 +133,8 @@ export class TailwindSnackBarService {
     // Previously, callers that wanted a persistent error snackbar (e.g. the
     // stepper's "Dismiss" action) had their explicit `duration: 0` silently
     // overridden, causing the error to pop up and disappear before the user
-    // could read it.
+    // could read it. This `duration: 0` = stay-until-dismissed rule mirrors
+    // Angular Material's MatSnackBar, so callers coming from Material get it.
     const duration = config?.duration ?? 4000;
     if (duration > 0) {
       setTimeout(() => {
