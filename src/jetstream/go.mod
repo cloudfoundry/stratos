@@ -99,7 +99,7 @@ require (
 	github.com/cloudfoundry/bosh-cli v6.4.1+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.385 // indirect
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f // indirect
-	github.com/containerd/containerd v1.7.32 // indirect
+	github.com/containerd/containerd v1.7.33 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
@@ -193,7 +193,7 @@ require (
 	github.com/swaggo/files/v2 v2.0.2 // indirect
 	github.com/swaggo/swag v1.16.4 // indirect
 	github.com/tedsuo/rata v1.0.1-0.20170830210128-07d200713958 // indirect
-	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/ulikunitz/xz v0.5.15 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vito/go-interact v1.0.0 // indirect
