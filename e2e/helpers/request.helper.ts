@@ -34,6 +34,7 @@ export class RequestHelper {
     this.context = await playwrightRequest.newContext({
       baseURL: this.baseURL,
       ignoreHTTPSErrors: true,
+      timeout: 30000, // CF writes (app create) regularly exceed the 10s actionTimeout under load
       extraHTTPHeaders: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -58,6 +59,7 @@ export class RequestHelper {
     this.context = await playwrightRequest.newContext({
       baseURL: this.baseURL,
       ignoreHTTPSErrors: true,
+      timeout: 30000, // CF writes (app create) regularly exceed the 10s actionTimeout under load
       extraHTTPHeaders: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -120,6 +122,7 @@ export class RequestHelper {
       this.context = await playwrightRequest.newContext({
         baseURL: this.baseURL,
         ignoreHTTPSErrors: true,
+        timeout: 30000, // CF writes (app create) regularly exceed the 10s actionTimeout under load
         extraHTTPHeaders: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

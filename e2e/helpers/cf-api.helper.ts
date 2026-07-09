@@ -532,13 +532,20 @@ export class CFApiHelper {
   async mapRoute(appGuid: string, routeGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
 
-    await this.ppost(`${this.cfApiBase}/routes/${routeGuid}/destinations`, {
+    const body = {
       destinations: [{
         app: {
           guid: appGuid
         }
       }]
-    });
+    };
+    try {
+      await this.ppost(`${this.cfApiBase}/routes/${routeGuid}/destinations`, body);
+    } catch (e) {
+      // CC intermittently 500s on destination writes under load — one retry
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      await this.ppost(`${this.cfApiBase}/routes/${routeGuid}/destinations`, body);
+    }
   }
 
   /**
@@ -547,7 +554,12 @@ export class CFApiHelper {
   async unmapRoute(routeGuid: string, appGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
 
-    await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}/destinations/${appGuid}`);
+    // The destination guid is not the app guid — look up the destination
+    // that points at this app.
+    const res = await this.pget(`${this.cfApiBase}/routes/${routeGuid}/destinations`);
+    const dest = (res.destinations || []).find((d: any) => d.app?.guid === appGuid);
+    if (!dest) return; // already unmapped
+    await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}/destinations/${dest.guid}`);
   }
 
   /**
