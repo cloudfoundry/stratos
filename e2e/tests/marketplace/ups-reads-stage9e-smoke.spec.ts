@@ -85,7 +85,7 @@ test.describe('Stage 9e — UPS reads smoke', () => {
     }
 
     await addButton.click();
-    const wizard = page.locator('mat-dialog-container, app-stepper').first();
+    const wizard = page.locator('[role="dialog"], app-stepper').first();
     await expect(wizard).toBeVisible({ timeout: 10000 });
 
     // The picker component is reachable via the UPS option — its sole

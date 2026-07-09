@@ -68,7 +68,7 @@ test.describe('Application Revisions Tab Action Bar', () => {
       await restartButton.click();
 
       // Verify confirmation dialog or prompt appears
-      const dialog = page.locator('mat-dialog-container, [role="dialog"]');
+      const dialog = page.locator('[role="dialog"]');
       await expect(dialog).toBeVisible({ timeout: 5000 });
 
       // Cancel out of the dialog (escape key or close button)
@@ -92,7 +92,7 @@ test.describe('Application Revisions Tab Action Bar', () => {
       await restageButton.click();
 
       // Verify confirmation dialog or prompt appears
-      const dialog = page.locator('mat-dialog-container, [role="dialog"]');
+      const dialog = page.locator('[role="dialog"]');
       await expect(dialog).toBeVisible({ timeout: 5000 });
 
       // Cancel out of the dialog (escape key or close button)

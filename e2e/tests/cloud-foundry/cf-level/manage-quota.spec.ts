@@ -274,7 +274,7 @@ test.describe('Manage Quota', () => {
         await deleteButton.click();
 
         // Confirm deletion dialog
-        const confirmDialog = page.locator('mat-dialog-container, app-confirm-dialog');
+        const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
         const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });
@@ -352,7 +352,7 @@ test.describe('Manage Quota', () => {
 
           // Should show error or be disabled if quota is attached
           // This is UI-dependent behavior that we can verify exists
-          const confirmDialog = page.locator('mat-dialog-container, app-confirm-dialog');
+          const confirmDialog = page.locator('app-dialog-confirm');
           const dialogAppears = await confirmDialog.isVisible({ timeout: 2000 }).catch(() => false);
 
           if (dialogAppears) {

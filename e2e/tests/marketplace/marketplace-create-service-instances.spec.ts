@@ -135,7 +135,7 @@ test.describe('Marketplace Create Service Instances', () => {
       await serviceCards.click();
 
       // Wait for navigation to service details/summary
-      const summaryOrDetails = page.locator('app-service-summary, app-service-details, mat-dialog-container').first();
+      const summaryOrDetails = page.locator('app-service-summary, app-service-details, [role="dialog"]').first();
       const detailsVisible = await summaryOrDetails.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!detailsVisible) {

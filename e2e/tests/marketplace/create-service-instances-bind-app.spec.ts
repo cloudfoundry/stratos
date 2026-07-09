@@ -65,7 +65,7 @@ test.describe('Create Service Instance and Bind to App', () => {
 
       if (!hasBindButton) {
         // Try looking in page header or action buttons
-        const headerButton = page.locator('app-page-header button').filter({ hasText: /bind|service/i }).first();
+        const headerButton = page.locator('.page-header-sub-nav button').filter({ hasText: /bind|service/i }).first();
         const hasHeaderButton = await headerButton.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (!hasHeaderButton) {
@@ -81,7 +81,7 @@ test.describe('Create Service Instance and Bind to App', () => {
 
       // Verify bind wizard or dialog opened
       await page.waitForTimeout(500);
-      const bindDialog = page.locator('mat-dialog-container, app-stepper, .bind-service').first();
+      const bindDialog = page.locator('[role="dialog"], app-stepper, .bind-service').first();
       const dialogExists = await bindDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -164,7 +164,7 @@ test.describe('Create Service Instance and Bind to App', () => {
       await bindButton.click();
       await page.waitForTimeout(500);
 
-      const bindDialog = page.locator('mat-dialog-container, app-stepper').first();
+      const bindDialog = page.locator('[role="dialog"], app-stepper').first();
       if (!await bindDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
         test.skip('Bind dialog not displayed');
       }
@@ -260,7 +260,7 @@ test.describe('Create Service Instance and Bind to App', () => {
 
       if (!hasEnvVars) {
         // Environment variables tab exists but may be empty
-        const pageHeader = page.locator('app-page-header, h1').first();
+        const pageHeader = page.locator('h1').first();
         const hasHeader = await pageHeader.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (!hasHeader) {
@@ -420,7 +420,7 @@ test.describe('Create Service Instance and Bind to App', () => {
       // Snackbar won't be visible until error occurs
 
       // Verify page has error handling structure
-      const pageStructure = page.locator('app-page-header, .marketplace').first();
+      const pageStructure = page.locator('.marketplace').first();
       await expect(pageStructure).toBeVisible();
 
       // Actual error testing requires triggering a binding failure
@@ -543,7 +543,7 @@ test.describe('Create Service Instance and Bind to App', () => {
       await page.waitForLoadState('networkidle');
 
       // Verify page loads (permission checking happens at CF API level)
-      const pageStructure = page.locator('app-page-header, app-list').first();
+      const pageStructure = page.locator('app-list').first();
       const hasPage = await pageStructure.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!hasPage) {
@@ -634,7 +634,7 @@ test.describe('Create Service Instance and Bind to App', () => {
 
       if (!hasEnvVars) {
         // Page may be empty if no env vars
-        const pageHeader = page.locator('app-page-header, h1').first();
+        const pageHeader = page.locator('h1').first();
         const hasHeader = await pageHeader.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (!hasHeader) {
@@ -692,7 +692,7 @@ test.describe('Create Service Instance and Bind to App', () => {
 
       if (!hasBindButton) {
         // Button may be in header
-        const headerButton = page.locator('app-page-header button').filter({ hasText: /bind|service/i }).first();
+        const headerButton = page.locator('.page-header-sub-nav button').filter({ hasText: /bind|service/i }).first();
         const hasHeaderButton = await headerButton.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (!hasHeaderButton) {
@@ -707,7 +707,7 @@ test.describe('Create Service Instance and Bind to App', () => {
         await bindButton.click();
         await page.waitForTimeout(500);
 
-        const bindDialog = page.locator('mat-dialog-container, app-stepper').first();
+        const bindDialog = page.locator('[role="dialog"], app-stepper').first();
         const dialogExists = await bindDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (dialogExists) {

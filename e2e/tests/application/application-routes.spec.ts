@@ -30,7 +30,7 @@ test.describe('Application Routes', () => {
       await appSummary.goToRoutesTab();
 
       // Verify routes tab is active
-      const routesTab = page.locator('.mat-tab-label, mat-tab-header').filter({ hasText: /routes/i });
+      const routesTab = page.locator('.page-side-nav__item--active').filter({ hasText: /routes/i });
       await expect(routesTab).toBeVisible();
     });
 
@@ -50,8 +50,8 @@ test.describe('Application Routes', () => {
       await page.waitForTimeout(1000);
 
       // Verify route is displayed
-      const routesList = page.locator('.routes-list, app-app-routes, mat-table').first();
-      await expect(routesList).toBeVisible();
+      const routesList = page.locator('app-routes-tab table').first();
+      await expect(routesList).toBeVisible({ timeout: 30000 });
     });
 
     test('should show route details (domain, host, path)', async ({ withTestApp }) => {
@@ -252,7 +252,7 @@ test.describe('Application Routes', () => {
       await dialog.enterHost(testHost);
 
       // Verify host was entered
-      const hostInput = page.locator('input[name="host"], input[placeholder*="host"]').first();
+      const hostInput = page.locator('input[formcontrolname="host"]').first();
       const hostValue = await hostInput.inputValue();
       expect(hostValue).toBe(testHost);
 
@@ -372,8 +372,8 @@ test.describe('Application Routes', () => {
       // Create the route
       await dialog.clickCreate();
 
-      // Wait for dialog to close
-      await page.waitForTimeout(2000);
+      // Wait for the stepper page to close (create + map + nav can be slow)
+      await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 30000 });
 
       // Verify dialog closed
       const isVisible = await dialog.isVisible();
@@ -408,12 +408,15 @@ test.describe('Application Routes', () => {
       await page.waitForTimeout(500);
       await dialog.clickCreate();
 
-      // Wait for route to be created and list to refresh
-      await page.waitForTimeout(3000);
+      // Wait for the stepper page to close (create + map + nav can be slow)
+      await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
 
-      // Verify route appears in list
+      // Verify route appears in list; nudge a refresh if the list came back cached
       const routeRow = page.locator('mat-row, tr').filter({ hasText: testHost });
-      await expect(routeRow).toBeVisible({ timeout: 10000 });
+      if (!(await routeRow.isVisible().catch(() => false))) {
+        await page.locator('app-routes-tab button').filter({ hasText: 'refresh' }).first().click().catch(() => {});
+      }
+      await expect(routeRow).toBeVisible({ timeout: 30000 });
     });
   });
 
@@ -546,7 +549,7 @@ test.describe('Application Routes', () => {
         await dialog.clickMap();
 
         // Wait for mapping to complete
-        await page.waitForTimeout(2000);
+        await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
 
         // Dialog should close
         const isVisible = await dialog.isVisible();
@@ -593,7 +596,8 @@ test.describe('Application Routes', () => {
       const isMapEnabled = await dialog.isMapEnabled();
       if (isMapEnabled) {
         await dialog.clickMap();
-        await page.waitForTimeout(3000);
+        // Mapping navigates back to the routes tab when it completes
+        await page.locator('app-add-route-stepper').waitFor({ state: 'hidden', timeout: 60000 }).catch(() => {});
       } else {
         await dialog.clickCancel();
       }
@@ -628,6 +632,8 @@ test.describe('Application Routes', () => {
       await expect(routeRow).toBeVisible({ timeout: 10000 });
 
       // Find and click unmap button
+      // Row actions live behind the more_vert menu
+      await routeRow.locator('button[aria-label="Row actions"]').click({ timeout: 60000 }); // outlast the loading overlay (CF-latency bound)
       const unmapButton = routeRow.locator('button, mat-icon').filter({ hasText: /unmap|remove|delete/i }).first();
       await expect(unmapButton).toBeVisible();
       await unmapButton.click();
@@ -655,11 +661,13 @@ test.describe('Application Routes', () => {
       await expect(routeRow).toBeVisible({ timeout: 10000 });
 
       // Click unmap button
+      // Row actions live behind the more_vert menu
+      await routeRow.locator('button[aria-label="Row actions"]').click({ timeout: 60000 }); // outlast the loading overlay (CF-latency bound)
       const unmapButton = routeRow.locator('button, mat-icon').filter({ hasText: /unmap|remove|delete/i }).first();
       await unmapButton.click();
 
       // Look for confirmation dialog
-      const confirmDialog = page.locator('mat-dialog-container, .confirm-dialog, [role="dialog"]').first();
+      const confirmDialog = page.locator('[role="dialog"], .confirm-dialog').first();
 
       // Either we see a confirmation dialog or the action completes directly
       const dialogVisible = await confirmDialog.isVisible().catch(() => false);
@@ -698,7 +706,10 @@ test.describe('Application Routes', () => {
 
       // For single-app routes, the unmap operation should be available
       // Shared routes (multiple apps) would show different behavior
+      // Row actions live behind the more_vert menu
+      await routeRow.locator('button[aria-label="Row actions"]').click({ timeout: 60000 }); // outlast the loading overlay (CF-latency bound)
       const unmapButton = routeRow.locator('button, mat-icon').filter({ hasText: /unmap|remove/i }).first();
+      await unmapButton.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}); // menu renders async
       const buttonExists = await unmapButton.count() > 0;
       expect(buttonExists).toBeTruthy();
     });
@@ -722,6 +733,8 @@ test.describe('Application Routes', () => {
       await expect(routeRow).toBeVisible({ timeout: 10000 });
 
       // Click unmap/delete button
+      // Row actions live behind the more_vert menu
+      await routeRow.locator('button[aria-label="Row actions"]').click({ timeout: 60000 }); // outlast the loading overlay (CF-latency bound)
       const actionButton = routeRow.locator('button, mat-icon').filter({ hasText: /unmap|remove|delete/i }).first();
       await actionButton.click();
 
@@ -729,7 +742,7 @@ test.describe('Application Routes', () => {
       await page.waitForTimeout(1000);
 
       // Look for dialog with delete option
-      const dialog = page.locator('mat-dialog-container, [role="dialog"]').first();
+      const dialog = page.locator('[role="dialog"]').first();
       const dialogVisible = await dialog.isVisible().catch(() => false);
 
       if (dialogVisible) {
@@ -860,7 +873,7 @@ test.describe('Application Routes', () => {
 
       // For TCP routes, port can be auto-assigned
       // Either port input should be optional or show auto-assign option
-      const portInput = page.locator('input[name="port"], input[type="number"]').first();
+      const portInput = page.locator('input[formcontrolname="port"], input[type="number"]').first();
       const portInputExists = await portInput.isVisible().catch(() => false);
 
       // TCP port input should exist for TCP domains
@@ -899,7 +912,7 @@ test.describe('Application Routes', () => {
       await page.waitForTimeout(1500);
 
       // If TCP routes exist, they should display with port numbers
-      const routesList = page.locator('app-list, mat-table').first();
+      const routesList = page.locator('app-signal-list, table').first();
       await expect(routesList).toBeVisible();
 
       // TCP routes typically show as "domain:port" format
@@ -944,7 +957,7 @@ test.describe('Application Routes', () => {
       await page.waitForTimeout(500);
 
       // Try to enter port that might be out of range
-      const portInput = page.locator('input[name="port"], input[type="number"]').first();
+      const portInput = page.locator('input[formcontrolname="port"], input[type="number"]').first();
       const portInputExists = await portInput.isVisible().catch(() => false);
 
       if (portInputExists) {
@@ -1071,7 +1084,7 @@ test.describe('Application Routes', () => {
         }
 
         // Clear input for next test
-        const hostInput = page.locator('input[name="host"], input[placeholder*="host"]').first();
+        const hostInput = page.locator('input[formcontrolname="host"]').first();
         await hostInput.clear();
       }
 
@@ -1101,15 +1114,13 @@ test.describe('Application Routes', () => {
 
       // Verify at least one domain is available in the dropdown
       // If no domains were available, the dialog wouldn't function properly
-      const domainSelect = page.locator('mat-select[placeholder*="domain"], select[name="domain"]').first();
+      const domainSelect = page.locator('.select-trigger').first();
       await expect(domainSelect).toBeVisible();
 
-      // Domain list should be populated
+      // Domain list should be populated (domains load async — wait for the first option)
       await domainSelect.click();
-      await page.waitForTimeout(500);
-
-      // Options should be available
-      const domainOptions = page.locator('mat-option, option');
+      const domainOptions = page.locator('.custom-option-content, option');
+      await domainOptions.first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
       const optionCount = await domainOptions.count();
 
       // At least one domain should be available

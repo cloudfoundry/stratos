@@ -48,7 +48,7 @@ test.describe('Space Invite User', () => {
       await inviteButton.click();
 
       // Verify invite dialog opened
-      const dialog = page.locator('app-invite-users, app-add-user, mat-dialog-container');
+      const dialog = page.locator('app-invite-users, app-add-user, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -87,7 +87,7 @@ test.describe('Space Invite User', () => {
       await inviteButton.click();
 
       // Wait for dialog
-      const dialog = page.locator('mat-dialog-container').first();
+      const dialog = page.locator('[role="dialog"]').first();
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -143,7 +143,7 @@ test.describe('Space Invite User', () => {
       await inviteButton.click();
 
       // Wait for dialog
-      const dialog = page.locator('mat-dialog-container').first();
+      const dialog = page.locator('[role="dialog"]').first();
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -205,7 +205,7 @@ test.describe('Space Invite User', () => {
       await inviteButton.click();
 
       // Wait for dialog
-      const dialog = page.locator('mat-dialog-container').first();
+      const dialog = page.locator('[role="dialog"]').first();
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

@@ -64,7 +64,7 @@ test.describe('Space Routes', () => {
       await createButton.click();
 
       // Verify route creation dialog opened
-      const dialog = page.locator('app-create-route, app-add-route, mat-dialog-container');
+      const dialog = page.locator('app-create-route, app-add-route, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -129,7 +129,7 @@ test.describe('Space Routes', () => {
       await mapOption.click();
 
       // Verify map dialog opened
-      const dialog = page.locator('mat-dialog-container');
+      const dialog = page.locator('[role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (dialogExists) {
@@ -242,7 +242,7 @@ test.describe('Space Routes', () => {
       await deleteOption.click();
 
       // Verify confirmation dialog
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       const dialogExists = await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

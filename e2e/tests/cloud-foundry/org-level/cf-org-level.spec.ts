@@ -60,7 +60,7 @@ test.describe('CF Org Level', () => {
       await orgPage.waitForPage();
 
       // Check breadcrumbs
-      const breadcrumb = page.locator('app-page-header-events app-breadcrumbs, .breadcrumbs').first();
+      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
       await expect(breadcrumb).toBeVisible();
 
       // Breadcrumb should contain CF name
@@ -135,7 +135,7 @@ test.describe('CF Org Level', () => {
       await orgPage.navigateTo();
       await orgPage.waitForPage();
 
-      const breadcrumb = page.locator('app-page-header-events app-breadcrumbs, .breadcrumbs').first();
+      const breadcrumb = page.locator('.page-header-breadcrumb, .page-header-sub-nav-breadcrumb').first();
       await expect(breadcrumb).toBeVisible();
     });
 
@@ -185,7 +185,7 @@ test.describe('CF Org Level', () => {
       await addButton.click();
 
       // Verify stepper dialog opened
-      const stepper = page.locator('app-create-space-stepper, app-stepper-dialog, mat-dialog-container');
+      const stepper = page.locator('app-create-space-stepper, app-stepper-dialog, [role="dialog"]');
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (stepperExists) {
@@ -260,7 +260,7 @@ test.describe('CF Org Level', () => {
       await manageButton.click();
 
       // Verify user management dialog opened
-      const dialog = page.locator('app-add-org-user, app-invite-users, mat-dialog-container');
+      const dialog = page.locator('app-add-org-user, app-invite-users, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (dialogExists) {
