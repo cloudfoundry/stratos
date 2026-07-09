@@ -41,7 +41,7 @@ function isTransientCfError(err: unknown): boolean {
       err.headers?.get(STRATOS_ERROR_REASON_HEADER) === 'unreachable');
 }
 
-export function drainCfPages<T>(http: HttpClient, urlBase: string): Observable<DrainedPages<T>> {
+export function drainCfPages<T>(http: HttpClient, urlBase: string, extraParams = ''): Observable<DrainedPages<T>> {
   const perPage = 500;
   type Paged<U> = { resources: U[]; totalResults?: number; pagination?: { totalResults?: number; totalPages?: number } };
   const totalResultsOf = <U>(r: Paged<U>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
@@ -49,7 +49,7 @@ export function drainCfPages<T>(http: HttpClient, urlBase: string): Observable<D
   // re-fetches only page 7. Non-transient errors rethrow immediately and
   // fail the drain as before.
   const fetchPage = (page: number) =>
-    http.get<Paged<T>>(`${urlBase}?per_page=${perPage}&page=${page}`).pipe(
+    http.get<Paged<T>>(`${urlBase}?per_page=${perPage}&page=${page}${extraParams ? '&' + extraParams : ''}`).pipe(
       retry({
         count: RETRY_DELAYS_MS.length,
         delay: (err, retryCount) => {

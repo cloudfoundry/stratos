@@ -814,9 +814,19 @@ func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error
 		return err
 	}
 
+	// ?enrich=none skips the per-space app/route count enrichment. The
+	// EndpointDataService prewarm drains the full space list purely as a
+	// guid→name catalog (routes/users/audit-events resolvers read only
+	// name+guid); the per-space counts it would compute here are never
+	// displayed off this list — the org→spaces tab sources counts from
+	// getNativeOrgSpaces instead. Skipping the enrichment turns each page
+	// from ~8 sequential filtered CAPI round-trips into one, which is the
+	// dominant cost on large foundations.
+	skipEnrich := ctx.QueryParam("enrich") == "none"
+
 	spaces := make([]StSpace, 0, len(raw.Resources))
-	if guidsFilter != "" {
-		// Name-resolution lookup path: skip enrichment.
+	if guidsFilter != "" || skipEnrich {
+		// Name-resolution / no-enrich path: skip enrichment.
 		for _, r := range raw.Resources {
 			spaces = append(spaces, toStSpace(r, cnsiGUID))
 		}
