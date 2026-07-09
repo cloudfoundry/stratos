@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../../base.page';
+import { pageTab } from '../../../components/page-tabs.component';
 
 /**
  * Cloud Foundry Space Level Page
@@ -12,7 +13,7 @@ export class CfSpaceLevelPage extends BasePage {
   constructor(page: Page, navLink: string) {
     super(page);
     this.navLink = navLink;
-    this.tabs = page.locator('app-page-tabs, mat-tab-group');
+    this.tabs = page.locator('app-page-side-nav');
   }
 
   static forEndpoint(page: Page, guid: string, orgGuid: string, spaceGuid: string): CfSpaceLevelPage {
@@ -55,6 +56,14 @@ export class CfSpaceLevelPage extends BasePage {
   }
 
   /**
+   * Wait for page to be loaded
+   */
+  async waitForPage(): Promise<void> {
+    await this.page.waitForURL(new RegExp(this.navLink), { timeout: 10000 });
+    await this.tabs.waitFor({ state: 'visible', timeout: 10000 });
+  }
+
+  /**
    * Tab navigation
    */
   async goToSummaryTab(): Promise<void> {
@@ -82,7 +91,7 @@ export class CfSpaceLevelPage extends BasePage {
   }
 
   private async goToTab(label: string, urlSuffix: string): Promise<void> {
-    const tabButton = this.tabs.locator(`button, a`).filter({ hasText: label });
+    const tabButton = pageTab(this.page, label);
     await tabButton.waitFor({ state: 'visible', timeout: 10000 });
     await tabButton.click();
     await this.page.waitForURL(new RegExp(`${this.navLink}.*/${urlSuffix}`), { timeout: 10000 });
@@ -92,12 +101,12 @@ export class CfSpaceLevelPage extends BasePage {
    * Delete space
    */
   async deleteSpace(spaceName: string): Promise<void> {
-    const subHeader = this.page.locator('app-page-header-sub, .page-header__sub');
-    const deleteButton = subHeader.locator('button[aria-label="delete"], button').filter({ hasText: /delete/i });
+    const subHeader = this.page.locator('.page-header-sub-nav');
+    const deleteButton = subHeader.locator('button').filter({ hasText: /delete/i });
     await deleteButton.click();
 
     // Confirm dialog
-    const confirmDialog = this.page.locator('app-confirm-dialog, mat-dialog-container');
+    const confirmDialog = this.page.locator('app-dialog-confirm');
     await confirmDialog.waitFor({ state: 'visible' });
 
     const confirmButton = confirmDialog.locator('button').filter({ hasText: /confirm|delete/i });

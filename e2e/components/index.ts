@@ -33,7 +33,7 @@ export { ChipComponent, ChipsComponent } from './chips.component';
 export { MenuComponent } from './menu.component';
 export { BreadcrumbsComponent } from './breadcrumbs.component';
 export { PageHeaderComponent, PageHeaderSubComponent } from './page-header.component';
-export { PageTabsComponent } from './page-tabs.component';
+export { PageTabsComponent, pageTab } from './page-tabs.component';
 
 // Feedback Components
 export { SnackBarComponent } from './snackbar.component';

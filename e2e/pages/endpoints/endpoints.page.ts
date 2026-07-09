@@ -39,7 +39,7 @@ export class EndpointsPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.addButton = page.locator('app-page-header button[aria-label="add"]');
+    this.addButton = page.locator('button').filter({ hasText: 'Register Endpoint' });
     this.welcomeMessage = page.locator('.app-no-content-container');
     this.welcomeFirstLine = this.welcomeMessage.locator('.first-line');
     this.welcomeSecondLine = this.welcomeMessage.locator('.second-line');
@@ -52,7 +52,8 @@ export class EndpointsPage extends BasePage {
     this.cards = this;
     this.header = {
       hasIconButton: async (icon: string) => {
-        const btn = page.locator(`app-page-header button[aria-label="${icon}"], app-page-header button mat-icon`).filter({ hasText: icon });
+        // Header buttons carry the material icon ligature as text
+        const btn = page.locator('app-show-page-header button').filter({ hasText: icon });
         return await btn.isVisible().catch(() => false);
       }
     };

@@ -8,11 +8,17 @@ export class BreadcrumbsComponent {
   private breadcrumbs: Locator;
 
   constructor(private page: Page) {
-    this.breadcrumbs = page.locator('app-breadcrumbs, .breadcrumbs');
+    // Breadcrumbs render in the top toolbar (.page-header-breadcrumbs) and/or
+    // the sub-nav bar; app-breadcrumbs still exists for standalone uses
+    this.breadcrumbs = page.locator(
+      'app-breadcrumbs, .breadcrumbs, .page-header-breadcrumbs, .page-header-sub-nav-breadcrumbs'
+    );
   }
 
   getBreadcrumbs(): Locator {
-    return this.breadcrumbs.locator('a, .breadcrumb-item');
+    return this.breadcrumbs.locator(
+      'a, .breadcrumb-item, .page-header-breadcrumb, .page-header-sub-nav-breadcrumb'
+    );
   }
 
   async getBreadcrumbCount(): Promise<number> {
