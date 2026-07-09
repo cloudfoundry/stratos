@@ -3,3 +3,4 @@
 # Use latest stable versions
 nodejs 26.2.0
 bun 1.3.14
+golang 1.26.5
