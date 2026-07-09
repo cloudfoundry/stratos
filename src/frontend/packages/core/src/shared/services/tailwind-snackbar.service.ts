@@ -82,10 +82,8 @@ export class TailwindSnackBarService {
   // Stays on screen until dismissed unless a duration is given.
   showWithLink(message: string, returnUrl: string | string[], returnLabel: string, duration?: number): TailwindSnackBarRef<any> {
     const ref = this.open(message, returnLabel, { duration: duration || 0 });
-    // take(1), not firstValueFrom: onAction() completes WITHOUT emitting when the
-    // snackbar is dismissed without the link being clicked (the normal case).
-    // firstValueFrom would reject on that empty completion; subscribe simply never
-    // fires. Matches the app-wide take(1) convention.
+    // Navigate when the action button is clicked. onAction() emits once per click and
+    // never completes, so this fires only on a real click; take(1) bounds it to one.
     ref.onAction().pipe(take(1)).subscribe(() => {
       if (Array.isArray(returnUrl)) {
         this.router.navigate(returnUrl);
