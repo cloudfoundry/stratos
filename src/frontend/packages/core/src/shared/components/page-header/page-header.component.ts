@@ -38,6 +38,7 @@ import { RecentEntitiesComponent } from '../recent-entities/recent-entities.comp
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { BreadcrumbsComponent } from '../breadcrumbs/breadcrumbs.component';
 
 // Shared between the anchor's target and the popup window.open call, so both
 // modes address the same window and reuse it on repeat clicks.
@@ -46,7 +47,6 @@ const DOCUMENTATION_WINDOW_NAME = 'stratos-docs';
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -57,7 +57,8 @@ const DOCUMENTATION_WINDOW_NAME = 'stratos-docs';
     RecentEntitiesComponent,
     UserAvatarComponent,
     PageHeaderEventsComponent,
-    ThemeToggleComponent
+    ThemeToggleComponent,
+    BreadcrumbsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
