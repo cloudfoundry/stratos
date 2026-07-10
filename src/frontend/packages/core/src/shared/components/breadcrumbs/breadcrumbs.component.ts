@@ -1,49 +1,19 @@
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-
-import { BREADCRUMB_URL_PARAM, IBreadcrumb, IBreadcrumbLink } from './breadcrumbs.types';
-import { CustomIconComponent } from '../custom-material/custom-material.component';
+import { IBreadcrumbLink } from './breadcrumbs.types';
 
 @Component({
   selector: 'app-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
-  styleUrls: ['./breadcrumbs.component.scss'],
   standalone: true,
-  imports: [
-    RouterModule,
-    CustomIconComponent
-],
+  imports: [RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BreadcrumbsComponent {
-  public breadcrumbDefinitions: IBreadcrumbLink[] = [];
-  breadcrumbKey: string | null;
-
-  @Input()
-  set breadcrumbs(breadcrumbs: IBreadcrumb[]) {
-    this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
-  }
-
-  private getBreadcrumb(breadcrumbs: IBreadcrumb[]) {
-    if (!breadcrumbs || !breadcrumbs.length) {
-      return [];
-    }
-    return this.getBreadcrumbFromKey(breadcrumbs).breadcrumbs;
-  }
-
-  private getBreadcrumbFromKey(breadcrumbs: IBreadcrumb[]) {
-    if (breadcrumbs.length === 1 || !this.breadcrumbKey) {
-      return breadcrumbs[0];
-    }
-    return breadcrumbs.find(breadcrumb => {
-      return breadcrumb.key === this.breadcrumbKey;
-    }) || breadcrumbs[0];
-  }
-
-  constructor() {
-    const route = inject(ActivatedRoute);
-
-    this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
-  }
+  // Presentational only: renders an already-resolved flat trail. Callers own
+  // the ?breadcrumbs= key resolution (page-header resolves it reactively).
+  // Colour/size are inherited from the host context so the trail sits inline
+  // with an adjacent page title.
+  @Input() breadcrumbs: IBreadcrumbLink[] | null = [];
 }

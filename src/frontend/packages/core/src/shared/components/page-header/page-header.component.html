@@ -1,7 +1,7 @@
 <ng-template #pageHeaderTmpl>
   <div class="page-header-outer bg-header-bg text-header-text">
     <div class="page-header-inner">
-      <div class="page-header">
+      <div class="page-header relative z-[2]">
         <div class="page-header-toolbar flex items-center justify-between px-6 py-4">
           <!-- Mobile menu toggle -->
           @if (isMobile$ | async) {
@@ -22,19 +22,7 @@
           <div class="page-header-left flex items-center space-x-4">
             <!-- Breadcrumbs -->
             @if (breadcrumbDefinitions) {
-              <div class="page-header-breadcrumbs flex items-center space-x-2">
-                @for (breadcrumbDef of breadcrumbDefinitions; track $index) {
-                  @if (breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-header-text opacity-80 hover:opacity-100 cursor-pointer"
-                    [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-                  }
-                  @if (!breadcrumbDef.routerLink) {
-                    <span class="page-header-breadcrumb text-header-text opacity-60"
-                    >{{ breadcrumbDef.value }}</span>
-                  }
-                  <span class="material-icons text-header-text opacity-50 text-sm">chevron_right</span>
-                }
-              </div>
+              <app-breadcrumbs [breadcrumbs]="breadcrumbDefinitions"></app-breadcrumbs>
             }
 
             <!-- Page content -->
@@ -245,7 +233,7 @@
         <!-- Header events -->
         @if (!hideEndpointErrors) {
           <app-page-header-events
-            class="header-events"
+            class="header-events z-[1]"
             [endpointIds$]="endpointIds$">
           </app-page-header-events>
         }

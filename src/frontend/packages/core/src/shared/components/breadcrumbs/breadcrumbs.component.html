@@ -1,14 +1,13 @@
-@if (breadcrumbDefinitions) {
-  <div class="breadcrumb__list">
-    @for (breadcrumbDef of breadcrumbDefinitions; track breadcrumbDef) {
-      @if (breadcrumbDef.routerLink) {
-        <span class="breadcrumb breadcrumb__link"
-        [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+@if (breadcrumbs?.length) {
+  <div class="breadcrumbs flex items-center text-2xl font-semibold leading-8">
+    @for (crumb of breadcrumbs; track $index) {
+      @if (crumb.routerLink) {
+        <a class="breadcrumb opacity-70 hover:opacity-100 transition-opacity cursor-pointer no-underline"
+        [routerLink]="crumb.routerLink">{{ crumb.value }}</a>
+      } @else {
+        <span class="breadcrumb opacity-70">{{ crumb.value }}</span>
       }
-      @if (!breadcrumbDef.routerLink) {
-        <span class="breadcrumb">{{ breadcrumbDef.value }}</span>
-      }
-      <app-custom-icon class="breadcrumb__separator">chevron_right</app-custom-icon>
+      <span class="material-icons opacity-70 shrink-0 mx-[3px] text-[26px] select-none">chevron_right</span>
     }
   </div>
 }

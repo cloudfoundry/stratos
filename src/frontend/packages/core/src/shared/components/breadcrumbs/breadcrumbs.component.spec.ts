@@ -1,109 +1,62 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter } from '@angular/router';
 
 import { BreadcrumbsComponent } from './breadcrumbs.component';
-import { IBreadcrumb } from './breadcrumbs.types';
+import { IBreadcrumbLink } from './breadcrumbs.types';
 
+// The component only renders an already-resolved trail; the ?breadcrumbs=
+// key resolution lives in page-header and is covered by its spec.
 describe('BreadcrumbsComponent', () => {
-  let component: BreadcrumbsComponent;
   let fixture: ComponentFixture<BreadcrumbsComponent>;
   let element: HTMLElement;
-  let breadcrumbs: IBreadcrumb[];
+
+  const render = (breadcrumbs: IBreadcrumbLink[] | null) => {
+    fixture.componentRef.setInput('breadcrumbs', breadcrumbs);
+    fixture.detectChanges();
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule.withRoutes([]),
-        BreadcrumbsComponent,
-      ],
-      providers: [{
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: {
-            queryParams: {},
-          },
-        },
-      }]
+      imports: [BreadcrumbsComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
-  });
 
-  beforeEach(() => {
-    breadcrumbs = [
-      {
-        breadcrumbs: [
-          { value: 'Page1', routerLink: '/link' },
-          { value: 'Page2', routerLink: '/link' }
-        ]
-      },
-      {
-        key: 'key',
-        breadcrumbs: [
-          { value: 'Page3', routerLink: '/link' },
-          { value: 'Page4', routerLink: '/link' }
-        ]
-      },
-      {
-        key: 'key-no-link',
-        breadcrumbs: [
-          { value: 'Page5' },
-        ]
-      }
-    ];
     fixture = TestBed.createComponent(BreadcrumbsComponent);
-    component = fixture.componentInstance;
-    component.breadcrumbs = breadcrumbs;
-    fixture.detectChanges();
     element = fixture.nativeElement;
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should not filter by default', () => {
-    expect(element.textContent).toContain('Page1');
-    expect(element.textContent).not.toContain('Page3');
+  it('should render each crumb in order', () => {
+    render([{ value: 'Page1', routerLink: '/one' }, { value: 'Page2' }]);
+
+    const crumbs = Array.from(element.querySelectorAll('.breadcrumb')).map(e => e.textContent?.trim());
+    expect(crumbs).toEqual(['Page1', 'Page2']);
   });
 
-  it('should filter by breadcrumb key', () => {
-    // The component filters based on breadcrumbKey set from ActivatedRoute in constructor.
-    // Since we control the ActivatedRoute in the test setup, we need to test that
-    // the breadcrumbs are displayed correctly when set.
-    // For now, this test checks that setting breadcrumbKey property works.
-    component.breadcrumbKey = 'key';
-    component.breadcrumbs = breadcrumbs;
-    fixture.detectChanges();
-    element = fixture.nativeElement;
+  it('should render a crumb with a router link as a link', () => {
+    render([{ value: 'Page1', routerLink: '/one' }]);
 
-    // Verify the breadcrumbDefinitions were set correctly based on the key
-    expect(component.breadcrumbDefinitions).toBeDefined();
-    expect(component.breadcrumbDefinitions.length).toBeGreaterThan(0);
+    const link = element.querySelector('a.breadcrumb');
+    expect(link?.textContent?.trim()).toBe('Page1');
+    expect(link?.getAttribute('href')).toBe('/one');
   });
 
-  it('should render router link', () => {
-    component.breadcrumbs = breadcrumbs;
-    fixture.detectChanges();
-    element = fixture.nativeElement;
+  it('should render a crumb without a router link as plain text', () => {
+    render([{ value: 'Page5' }]);
 
-    // Check that breadcrumbDefinitions has items with routerLink
-    const itemsWithLink = component.breadcrumbDefinitions.filter(b => b.routerLink);
-    expect(itemsWithLink.length).toBeGreaterThan(0);
+    expect(element.querySelector('a')).toBeNull();
+    expect(element.querySelector('span.breadcrumb')?.textContent?.trim()).toBe('Page5');
   });
 
-  it('should not render router link', () => {
-    component.breadcrumbKey = 'key-no-link';
-    component.breadcrumbs = breadcrumbs;
-    fixture.detectChanges();
-    element = fixture.nativeElement;
+  it('should render nothing for an empty or null trail', () => {
+    render([]);
+    expect(element.querySelector('.breadcrumbs')).toBeNull();
 
-    // Check that breadcrumbDefinitions has items without routerLink
-    const itemsWithoutLink = component.breadcrumbDefinitions.filter(b => !b.routerLink);
-    expect(itemsWithoutLink.length).toBeGreaterThan(0);
-
-    // Check that Page5 is in the breadcrumbs
-    const hasPage5 = component.breadcrumbDefinitions.some(b => b.value === 'Page5');
-    expect(hasPage5).toBeTruthy();
+    render(null);
+    expect(element.querySelector('.breadcrumbs')).toBeNull();
   });
 });
