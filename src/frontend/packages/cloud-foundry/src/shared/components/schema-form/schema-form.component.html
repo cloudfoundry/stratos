@@ -34,13 +34,21 @@
         }
       </div>
     } @else {
-      <div class="border border-content-border rounded-md overflow-hidden">
+      <div class="flex justify-end mb-1">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+          {{ isMinified() ? 'Format' : 'Minify' }}
+        </button>
+      </div>
+      <div class="h-[200px] min-h-[200px] resize-y overflow-hidden border border-content-border rounded-md">
         <app-monaco-editor
           [model]="{ language: 'json', value: jsonText }"
           [options]="monacoOptions"
           (editorInit)="onMonacoInit($event)">
         </app-monaco-editor>
       </div>
+      @if (!parseValid()) {
+        <div class="mt-1 text-sm text-warning-shade-500">Not valid JSON. Please specify a valid JSON object.</div>
+      }
       @if (warnings().length) {
         <ul class="mt-2 text-sm text-warning list-disc pl-5">
           @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
@@ -49,13 +57,21 @@
     }
   </div>
 } @else {
-  <div class="border border-content-border rounded-md overflow-hidden">
+  <div class="flex justify-end mb-1">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+      {{ isMinified() ? 'Format' : 'Minify' }}
+    </button>
+  </div>
+  <div class="h-[200px] min-h-[200px] resize-y overflow-hidden border border-content-border rounded-md">
     <app-monaco-editor
       [model]="{ language: 'json', value: jsonText }"
       [options]="monacoOptions"
       (editorInit)="onMonacoInit($event)">
     </app-monaco-editor>
   </div>
+  @if (!parseValid()) {
+    <div class="mt-1 text-sm text-warning-shade-500">Not valid JSON. Please specify a valid JSON object.</div>
+  }
   @if (warnings().length) {
     <ul class="mt-2 text-sm text-warning list-disc pl-5">
       @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
