@@ -553,15 +553,21 @@ export class CFApiHelper {
   }
 
   /**
+   * Get a route's destinations (the apps it is mapped to).
+   */
+  async getRouteDestinations(routeGuid: string): Promise<Array<{ guid: string; app?: { guid: string } }>> {
+    if (!this.cfApiBase) await this.init();
+    const res = await this.pget(`${this.cfApiBase}/routes/${routeGuid}/destinations`);
+    return res.destinations || [];
+  }
+
+  /**
    * Unmap route from app
    */
   async unmapRoute(routeGuid: string, appGuid: string): Promise<void> {
-    if (!this.cfApiBase) await this.init();
-
     // The destination guid is not the app guid — look up the destination
     // that points at this app.
-    const res = await this.pget(`${this.cfApiBase}/routes/${routeGuid}/destinations`);
-    const dest = (res.destinations || []).find((d: any) => d.app?.guid === appGuid);
+    const dest = (await this.getRouteDestinations(routeGuid)).find(d => d.app?.guid === appGuid);
     if (!dest) return; // already unmapped
     await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}/destinations/${dest.guid}`);
   }
