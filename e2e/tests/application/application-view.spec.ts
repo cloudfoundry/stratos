@@ -96,6 +96,25 @@ test.describe('Application View', () => {
         const appsBreadcrumb = breadcrumbs.find(bc => bc.label === 'Applications');
         expect(appsBreadcrumb).toBeDefined();
       });
+
+      test('should show the CF-scoped trail (endpoint › Applications) from the per-CF applications wall', async ({ withTestApp }) => {
+        const { page, testApp } = withTestApp;
+
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        // The per-CF applications wall row link passes ?breadcrumbs=cf; deep-link
+        // it to exercise the CF-scoped back-nav trail (endpoint > Applications).
+        await page.goto(`/applications/${testApp.cfGuid}/${testApp.app.guid}/summary?breadcrumbs=cf`);
+        await appSummary.waitForPage();
+
+        await expect.poll(async () => (await appSummary.breadcrumbs.getBreadcrumbsData()).length).toBe(2);
+        const breadcrumbs = await appSummary.breadcrumbs.getBreadcrumbsData();
+
+        // First crumb: the CF endpoint, linking back to its summary.
+        expect(breadcrumbs[0].href).toContain(`/cloud-foundry/${testApp.cfGuid}/summary`);
+        // Second crumb: the CF-scoped Applications wall, not the global /applications.
+        expect(breadcrumbs[1].label).toBe('Applications');
+        expect(breadcrumbs[1].href).toContain(`/cloud-foundry/${testApp.cfGuid}/applications`);
+      });
     });
 
     test.describe('Tabs', () => {
