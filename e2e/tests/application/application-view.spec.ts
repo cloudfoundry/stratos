@@ -106,7 +106,13 @@ test.describe('Application View', () => {
         await page.goto(`/applications/${testApp.cfGuid}/${testApp.app.guid}/summary?breadcrumbs=cf`);
         await appSummary.waitForPage();
 
-        await expect.poll(async () => (await appSummary.breadcrumbs.getBreadcrumbsData()).length).toBe(2);
+        // Poll timeout must exceed getBreadcrumbsData's internal 25s waitFor,
+        // otherwise the first (blocking) predicate call outlives the poll deadline
+        // and it can never retry.
+        await expect.poll(
+          async () => (await appSummary.breadcrumbs.getBreadcrumbsData()).length,
+          { timeout: 30000 }
+        ).toBe(2);
         const breadcrumbs = await appSummary.breadcrumbs.getBreadcrumbsData();
 
         // First crumb: the CF endpoint, linking back to its summary.
