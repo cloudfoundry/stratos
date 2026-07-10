@@ -152,6 +152,16 @@ ifeq ($($(_HIDE)WANT_VERSION)$($(_HIDE)WANT_ACTIONS),)
 endif
 endif
 
+$(_HIDE)WANT_PACKAGES :=
+$(_HIDE)WANT_SECRETS  :=
+
+ifneq ($(filter packages,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_PACKAGES := yes
+endif
+ifneq ($(filter secrets,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SECRETS := yes
+endif
+
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
 ifeq ($($(_HIDE)WANT_CF),yes)
   ifndef PLATFORM
@@ -212,8 +222,18 @@ ifeq ($($(_HIDE)WANT_LINT)$($(_HIDE)WANT_GATE)$($(_HIDE)WANT_TESTS)$($(_HIDE)WAN
   $(_HIDE)WANT_GATE     := yes
 endif
 endif
-# Default: frontend + backend for audit/outdated when no modifier given
-ifneq ($(filter audit outdated,$(MAKECMDGOALS)),)
+# Default: all scanners for audit when no modifier given
+ifneq ($(filter audit,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS),)
+  $(_HIDE)WANT_FRONTEND := yes
+  $(_HIDE)WANT_BACKEND  := yes
+  $(_HIDE)WANT_ACTIONS  := yes
+  $(_HIDE)WANT_PACKAGES := yes
+  $(_HIDE)WANT_SECRETS  := yes
+endif
+endif
+# Default: frontend + backend for outdated when no modifier given
+ifneq ($(filter outdated,$(MAKECMDGOALS)),)
 ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
@@ -222,8 +242,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github pages dist version e2e actions gate tests coverage summary dependabot
-frontend backend website booklets cf korifi github pages dist version e2e actions gate tests coverage summary dependabot:
+.PHONY: frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot
+frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -464,9 +484,12 @@ endef
 $(call register, check, e2e)
 
 # ── Audit (security scanning) ────────────────────────────────
-# make audit              — frontend + backend
+# make audit              — all scanners below
 # make audit frontend     — bun audit (npm advisory DB)
 # make audit backend      — gosec + trivy + govulncheck
+# make audit actions      — zizmor (GitHub Actions workflow SAST)
+# make audit packages     — osv-scanner (all lockfiles + go.mods, one pass)
+# make audit secrets      — gitleaks (working-tree secret scan)
 # make audit summary      — high/moderate/low counts only
 
 define audit.frontend
@@ -488,6 +511,31 @@ define audit.backend
 	cd src/jetstream && govulncheck ./... || true
 endef
 $(call register, audit, backend)
+
+define audit.actions
+	@echo "Running GitHub Actions workflow audit (zizmor)..."
+	@which zizmor > /dev/null 2>&1 || (echo "zizmor not installed. Run: brew install zizmor" >&2 && exit 1)
+	@if command -v gh > /dev/null 2>&1 && gh auth token > /dev/null 2>&1; then \
+		GH_TOKEN=$$(gh auth token) zizmor .github/workflows/ || true; \
+	else \
+		zizmor --offline .github/workflows/ || true; \
+	fi
+endef
+$(call register, audit, actions)
+
+define audit.packages
+	@echo "Running dependency audit (osv-scanner)..."
+	@which osv-scanner > /dev/null 2>&1 || (echo "osv-scanner not installed. Run: brew install osv-scanner" >&2 && exit 1)
+	@osv-scanner scan source -r . || true
+endef
+$(call register, audit, packages)
+
+define audit.secrets
+	@echo "Running secret scan (gitleaks)..."
+	@which gitleaks > /dev/null 2>&1 || (echo "gitleaks not installed. Run: brew install gitleaks" >&2 && exit 1)
+	@gitleaks dir . --no-banner --redact || true
+endef
+$(call register, audit, secrets)
 
 define audit.summary
 	@echo "── Frontend (bun audit) ──"
@@ -659,7 +707,7 @@ $(_HIDE)finalize-and-reexec:
 	@./build/version-bump.sh bump release
 	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
 	@$(MAKE) FINAL= $(MAKECMDGOALS)
-$(filter-out frontend backend cf korifi github dist version e2e actions lint gate tests coverage,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
 else ifneq ($(FINAL),)
 $(error Unknown FINAL value '$(FINAL)' — supported: strip)
 endif
@@ -823,9 +871,12 @@ help:
 	@echo "  make clean dist           Remove everything (including node_modules)"
 	@echo ""
 	@echo "Security & dependencies:"
-	@echo "  make audit                Run audit on frontend + backend"
+	@echo "  make audit                Run all security scanners"
 	@echo "  make audit frontend       bun audit (npm advisory DB)"
 	@echo "  make audit backend        gosec + trivy + govulncheck"
+	@echo "  make audit actions        zizmor (GitHub Actions workflow SAST)"
+	@echo "  make audit packages       osv-scanner (all lockfiles + go.mods)"
+	@echo "  make audit secrets        gitleaks (working-tree secret scan)"
 	@echo "  make audit summary        High/moderate/low counts only"
 	@echo "  make outdated             List outdated direct deps (frontend + backend)"
 	@echo "  make outdated frontend    bun outdated"
