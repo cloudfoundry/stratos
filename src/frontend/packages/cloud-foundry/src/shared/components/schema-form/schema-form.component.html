@@ -34,11 +34,13 @@
         }
       </div>
     } @else {
-      <app-monaco-editor
-        [model]="{ language: 'json', value: jsonText }"
-        [options]="{ automaticLayout: true, minimap: { enabled: false } }"
-        (editorInit)="onMonacoInit($event)">
-      </app-monaco-editor>
+      <div class="border border-content-border rounded-md overflow-hidden">
+        <app-monaco-editor
+          [model]="{ language: 'json', value: jsonText }"
+          [options]="monacoOptions"
+          (editorInit)="onMonacoInit($event)">
+        </app-monaco-editor>
+      </div>
       @if (warnings().length) {
         <ul class="mt-2 text-sm text-warning list-disc pl-5">
           @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
@@ -47,11 +49,13 @@
     }
   </div>
 } @else {
-  <app-monaco-editor
-    [model]="{ language: 'json', value: jsonText }"
-    [options]="{ automaticLayout: true, minimap: { enabled: false } }"
-    (editorInit)="onMonacoInit($event)">
-  </app-monaco-editor>
+  <div class="border border-content-border rounded-md overflow-hidden">
+    <app-monaco-editor
+      [model]="{ language: 'json', value: jsonText }"
+      [options]="monacoOptions"
+      (editorInit)="onMonacoInit($event)">
+    </app-monaco-editor>
+  </div>
   @if (warnings().length) {
     <ul class="mt-2 text-sm text-warning list-disc pl-5">
       @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }

@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Ou
 import { FormsModule } from '@angular/forms';
 import {
   MonacoEditorComponent,
+  MonacoEditorOptions,
   TailwindSnackBarService,
   safeStringToObj,
 } from '@stratosui/core';
@@ -67,6 +68,20 @@ export class SchemaFormComponent {
   readonly parseValid = signal<boolean>(true);   // the ONLY submission gate
   readonly warnings = signal<SchemaWarning[]>([]);
   jsonText = '';
+
+  // Compact JSON editor: no minimap / overview ruler / line-highlight chrome —
+  // the params box holds a few lines of JSON, not a code file.
+  readonly monacoOptions: MonacoEditorOptions = {
+    automaticLayout: true,
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    wordWrap: 'on',
+    tabSize: 2,
+    overviewRulerLanes: 0,
+    hideCursorInOverviewRuler: true,
+    overviewRulerBorder: false,
+    renderLineHighlight: 'none',
+  };
 
   cleanSchema: object | null | undefined;
   formInitialData: object | null | undefined;

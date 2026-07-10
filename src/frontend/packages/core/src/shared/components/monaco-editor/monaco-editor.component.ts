@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, AfterViewInit,
   Component,
+  effect,
   ElementRef,
   EventEmitter,
   forwardRef,
+  inject,
   Input,
   OnDestroy,
   Output,
@@ -10,6 +12,7 @@ import { ChangeDetectionStrategy, AfterViewInit,
  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { loadMonacoEditor } from '../../../monaco-loader';
 
 declare const monaco: typeof import('monaco-editor');
@@ -54,7 +57,21 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
   @Input() model?: MonacoEditorModel;
   @Output() editorInit = new EventEmitter<any>();
 
+  private branding = inject(StratosBrandingService);
   private editor: any;
+
+  constructor() {
+    // Monaco's theme is process-global (monaco.editor.setTheme), so one
+    // editor following the app theme re-skins every editor on the page.
+    // Callers that pin options.theme opt out of the sync.
+    effect(() => {
+      const dark = this.branding.isDarkMode();
+      if (!this.editor || this.options.theme || typeof monaco === 'undefined') {
+        return;
+      }
+      monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
+    });
+  }
   private value = '';
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
@@ -91,7 +108,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     const editorOptions = {
       value: this.value,
       language: this.model?.language || 'plaintext',
-      theme: this.options.theme || 'vs',
+      theme: this.options.theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
       automaticLayout: false,
       readOnly: this.disabled,
       ...this.options,
