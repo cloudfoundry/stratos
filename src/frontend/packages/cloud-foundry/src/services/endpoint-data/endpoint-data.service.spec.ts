@@ -13,7 +13,7 @@ const APPS_URL = '/pp/v1/cf/apps/test-cnsi-guid?return=recent';
 const ROUTES_URL = '/pp/v1/cf/routes/test-cnsi-guid?return=counts';
 const ORGS_FULL_URL = '/pp/v1/cf/orgs/test-cnsi-guid?per_page=500&page=1';
 const APPS_FULL_URL = '/pp/v1/cf/apps/test-cnsi-guid?per_page=500&page=1';
-const SPACES_FULL_URL = '/pp/v1/cf/spaces/test-cnsi-guid?per_page=500&page=1';
+const SPACES_FULL_URL = '/pp/v1/cf/spaces/test-cnsi-guid?per_page=500&page=1&enrich=none';
 
 const SERVICE_INSTANCES_COUNTS_URL = '/pp/v1/cf/service_instances/test-cnsi-guid?return=counts';
 const SERVICE_OFFERINGS_COUNTS_URL = '/pp/v1/cf/service_offerings/test-cnsi-guid?return=counts';
