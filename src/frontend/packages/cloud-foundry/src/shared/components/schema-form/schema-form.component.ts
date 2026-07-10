@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Output, inject, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Output, computed, inject, signal, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MonacoEditorComponent,
@@ -96,6 +96,49 @@ export class SchemaFormComponent {
 
   private _destroyed = false;
   private _jsonEditor: any = null;
+  // Signal mirror of jsonText (a plain field) so the Format/Minify button
+  // state tracks edits reactively.
+  private _jsonTextSig = signal('');
+
+  /** Format/Minify only offered when the text parses — reformatting
+   *  non-JSON makes no sense. Empty text never parses, so the button is
+   *  disabled on an untouched editor. */
+  readonly canFormat = computed(() => {
+    try {
+      JSON.parse(this._jsonTextSig());
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+  /** Whether the text is canonical-minified JSON — drives the
+   *  Format <-> Minify toggle's label and direction. */
+  readonly isMinified = computed(() => {
+    try {
+      const t = this._jsonTextSig();
+      return t === JSON.stringify(JSON.parse(t));
+    } catch {
+      return false;
+    }
+  });
+
+  /** Toggle the editor text between pretty-printed (2-space) and canonical
+   *  minified JSON. Pure editing aid — submission always sends the parsed
+   *  object, so this never changes what is sent. No-op on invalid JSON. */
+  toggleFormat(): void {
+    try {
+      const parsed = JSON.parse(this.jsonText);
+      const minified = JSON.stringify(parsed);
+      const next = this.jsonText === minified ? JSON.stringify(parsed, null, 2) : minified;
+      this.setJsonText(next);
+      if (this._jsonEditor && this._jsonEditor.getValue() !== next) {
+        this._jsonEditor.setValue(next);
+      }
+    } catch {
+      // Invalid JSON — the button is disabled, nothing to do.
+    }
+  }
 
   constructor() {
     effect(() => this.dataChange.emit(this.data()));
@@ -106,6 +149,7 @@ export class SchemaFormComponent {
   /** Called by the Monaco JSON view (and tests) when JSON text changes. */
   setJsonText(text: string) {
     this.jsonText = text;
+    this._jsonTextSig.set(text);
     const obj = safeStringToObj(text);          // null when unparseable
     const parsed = text.trim() === '' || obj !== null;
     this.parseValid.set(parsed);
