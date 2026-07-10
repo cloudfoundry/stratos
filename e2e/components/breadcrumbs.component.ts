@@ -55,7 +55,8 @@ export class BreadcrumbsComponent {
     // all loaded (combineLatest in application-tabs-base), which lags the page
     // shell — especially against a slow CF data path. Wait for the first crumb
     // before snapshotting so we don't read an empty (not-yet-rendered) trail.
-    await locators.first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => { /* leave empty; caller asserts */ });
+    // 25s covers the 2-worker shared-CF ceiling (15s tips over under contention).
+    await locators.first().waitFor({ state: 'visible', timeout: 25000 }).catch(() => { /* leave empty; caller asserts */ });
     const count = await locators.count();
     const breadcrumbs: Array<{ label: string; href?: string }> = [];
 
