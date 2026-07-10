@@ -23,10 +23,13 @@ export class ApplicationsPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.createButton = page.locator('#appwall-create-application');
-    this.listComponent = page.locator('app-list');
-    this.searchInput = this.listComponent.locator('input[type="search"]');
-    this.cards = this.listComponent.locator('app-card');
+    // Modernized app wall: <app-application-wall> hosts <app-signal-list> (a
+    // config-driven table), with the create action in <app-list-sub-nav>.
+    // The legacy app-list/app-card/mat-select DOM is gone.
+    this.createButton = page.getByRole('button', { name: /create application/i });
+    this.listComponent = page.locator('app-signal-list');
+    this.searchInput = page.getByRole('textbox', { name: /filter by name/i });
+    this.cards = this.listComponent.locator('tbody tr');
     this.sideNav = page.locator('app-side-nav');
   }
 
