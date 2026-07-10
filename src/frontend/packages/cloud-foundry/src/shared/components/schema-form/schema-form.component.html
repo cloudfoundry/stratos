@@ -39,7 +39,7 @@
           {{ isMinified() ? 'Format' : 'Minify' }}
         </button>
       </div>
-      <div class="h-[200px] min-h-[200px] resize-y overflow-hidden border border-content-border rounded-md">
+      <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
         <app-monaco-editor
           [model]="{ language: 'json', value: jsonText }"
           [options]="monacoOptions"
@@ -62,7 +62,7 @@
       {{ isMinified() ? 'Format' : 'Minify' }}
     </button>
   </div>
-  <div class="h-[200px] min-h-[200px] resize-y overflow-hidden border border-content-border rounded-md">
+  <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
     <app-monaco-editor
       [model]="{ language: 'json', value: jsonText }"
       [options]="monacoOptions"
