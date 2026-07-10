@@ -8,10 +8,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { CsiModeService } from '../csi-mode.service';
+import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 
@@ -106,6 +107,32 @@ describe('SpecifyDetailsStepComponent', () => {
     await fixture.whenStable();
 
     expect(component.schemaFormConfig()?.schema).toEqual(schema);
+  });
+
+  // Regression (GH#5600 follow-up): the bind-existing dropdown rendered no
+  // options because the template still read the legacy v2 APIResource shape
+  // (sI.metadata.guid / sI.entity.name) off the flat v3 StServiceInstance
+  // rows the signal-native helper emits.
+  it('renders bind-existing options from flat v3 service instances', async () => {
+    const instances = [
+      { guid: 'si-1', name: 'instance-one' },
+      { guid: 'si-2', name: 'instance-two' },
+    ] as StServiceInstance[];
+    component.serviceInstances$ = of(instances);
+    component.bindableServiceInstances$ = of(instances);
+    component.hasInstances$ = of(true);
+    component.formMode.set(CreateServiceFormMode.BindServiceInstance);
+    // setInput (not a plain field write) so the OnPush view is marked dirty,
+    // same as the parent-template binding in the real wizard.
+    fixture.componentRef.setInput('showModeSelection', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const texts = Array.from(
+      fixture.nativeElement.querySelectorAll('app-option') as NodeListOf<HTMLElement>,
+    ).map(o => o.textContent?.trim());
+    expect(texts).toContain('instance-one');
+    expect(texts).toContain('instance-two');
   });
 
   it('onEnter skips the details fetch when the plan already carries a schema', () => {
