@@ -104,8 +104,10 @@ test.describe('Application View', () => {
         await appSummary.navigateTo();
         await appSummary.waitForPage();
 
-        // Walk through all tabs
-        await appSummary.goToInstancesTab();
+        // Walk through the always-present tabs. Instances is no longer a tab
+        // (it's an accordion on Summary); Variables is hidden when the app has
+        // no env vars (the test app has none), so neither is walked here.
+        await appSummary.expandInstancesAccordion();
         await page.waitForTimeout(500);
 
         await appSummary.goToRoutesTab();
@@ -115,9 +117,6 @@ test.describe('Application View', () => {
         await page.waitForTimeout(500);
 
         await appSummary.goToServicesTab();
-        await page.waitForTimeout(500);
-
-        await appSummary.goToVariablesTab();
         await page.waitForTimeout(500);
 
         await appSummary.goToEventsTab();
@@ -162,7 +161,7 @@ test.describe('Application View', () => {
         await appSummary.waitForPage();
 
         // Look for instance count display (typically shows X/Y instances)
-        const instanceInfo = page.locator('text=/instances?/i, [class*="instance"]').first();
+        const instanceInfo = page.getByText(/instances?/i).first();
         const isVisible = await instanceInfo.isVisible().catch(() => false);
 
         // Instance count should be visible somewhere in the summary
@@ -177,7 +176,7 @@ test.describe('Application View', () => {
         await appSummary.waitForPage();
 
         // Look for memory info (MB, GB, etc.)
-        const memoryInfo = page.locator('text=/memory/i, text=/\\d+\\s*MB/i, text=/\\d+\\s*GB/i').first();
+        const memoryInfo = page.getByText(/memory/i).first();
         const isVisible = await memoryInfo.isVisible().catch(() => false);
 
         // Memory allocation should be displayed
@@ -192,7 +191,7 @@ test.describe('Application View', () => {
         await appSummary.waitForPage();
 
         // Look for disk info
-        const diskInfo = page.locator('text=/disk/i, [class*="disk"]').first();
+        const diskInfo = page.getByText(/disk/i).first();
         const isVisible = await diskInfo.isVisible().catch(() => false);
 
         // Disk allocation should be displayed (may be in summary cards)
@@ -207,7 +206,7 @@ test.describe('Application View', () => {
         await appSummary.waitForPage();
 
         // Look for buildpack info
-        const buildpackInfo = page.locator('text=/buildpack/i, [class*="buildpack"]').first();
+        const buildpackInfo = page.getByText(/buildpack/i).first();
         const isVisible = await buildpackInfo.isVisible().catch(() => false);
 
         // Buildpack info should be displayed (shows "none" or actual buildpack)
@@ -222,7 +221,7 @@ test.describe('Application View', () => {
         await appSummary.waitForPage();
 
         // Look for stack info (cflinuxfs3, etc.)
-        const stackInfo = page.locator('text=/stack/i, text=/cflinuxfs/i').first();
+        const stackInfo = page.getByText(/stack/i).first();
         const isVisible = await stackInfo.isVisible().catch(() => false);
 
         // Stack info should be displayed
@@ -248,50 +247,37 @@ test.describe('Application View', () => {
       });
     });
 
-    test.describe('Instances Tab', () => {
-      test('should list all instances', async ({ withTestApp }) => {
+    // The Instances view moved from a dedicated tab to a collapsible accordion
+    // (app-instances-accordion) on the Summary tab. Per-running-instance detail
+    // (live metrics, SSH, per-instance logs) needs an actually-running instance;
+    // the API-created test app has no bits and stays STOPPED, so those are
+    // skipped with a reason rather than asserted hollowly.
+    test.describe('Instances (Summary accordion)', () => {
+      test('should show instances accordion', async ({ withTestApp }) => {
         const { page, testApp } = withTestApp;
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
-        await appSummary.goToInstancesTab();
-        await page.waitForTimeout(1500);
+        await appSummary.waitForPage();
 
-        // Look for instances list
-        const instancesList = page.locator('app-list, mat-table, .instances-list').first();
-        await expect(instancesList).toBeVisible({ timeout: 10000 });
+        const accordion = await appSummary.expandInstancesAccordion();
+        await expect(accordion).toBeVisible();
       });
 
-      test('should show instance state', async ({ withTestApp }) => {
+      test('should show instance state (running / desired)', async ({ withTestApp }) => {
         const { page, testApp } = withTestApp;
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
-        await appSummary.goToInstancesTab();
-        await page.waitForTimeout(1500);
+        await appSummary.waitForPage();
 
-        // Look for instance state indicators (RUNNING, STOPPED, etc.)
-        const stateIndicator = page.locator('text=/running|stopped|starting|crashed/i, mat-chip, .state').first();
-        const isVisible = await stateIndicator.isVisible().catch(() => false);
-
-        // State should be displayed (even if no instances running)
-        expect(isVisible).toBeTruthy();
+        const accordion = await appSummary.expandInstancesAccordion();
+        // The header always shows the running/desired summary, e.g. "0 / 1 running".
+        await expect(accordion.getByText(/\d+\s*\/\s*\d+\s*running/i)).toBeVisible();
       });
 
-      test('should display instance metrics', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
-
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToInstancesTab();
-        await page.waitForTimeout(1500);
-
-        // Look for metrics (CPU, memory, disk usage)
-        const metricsInfo = page.locator('text=/cpu|memory|disk/i, [class*="metric"]').first();
-        const isVisible = await metricsInfo.isVisible().catch(() => false);
-
-        // Metrics should be visible (or message that app is stopped)
-        expect(isVisible).toBeTruthy();
+      test('should display instance metrics', async () => {
+        test.skip(true, 'Live instance metrics require a running instance; the API-created test app has no bits and stays STOPPED.');
       });
 
       test('should allow SSH to instance (if enabled)', async () => {
@@ -317,7 +303,7 @@ test.describe('Application View', () => {
         await page.waitForTimeout(1500);
 
         // Verify routes list is visible
-        const routesList = page.locator('app-list, mat-table, .routes-list').first();
+        const routesList = page.locator('app-routes-tab table').first();
         await expect(routesList).toBeVisible({ timeout: 10000 });
       });
 
@@ -377,7 +363,7 @@ test.describe('Application View', () => {
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
-        await appSummary.goToRoutesTab();
+        await appSummary.goToLogStreamTab();
         await page.waitForTimeout(1000);
 
         // Look for log stream component or container
@@ -413,7 +399,7 @@ test.describe('Application View', () => {
         await page.waitForTimeout(1500);
 
         // Look for services list
-        const servicesList = page.locator('app-list, mat-table, .services-list').first();
+        const servicesList = page.locator('app-services-tab').first();
         await expect(servicesList).toBeVisible({ timeout: 10000 });
       });
 
@@ -607,7 +593,7 @@ test.describe('Application View', () => {
         await page.waitForTimeout(1500);
 
         // Look for events list
-        const eventsList = page.locator('app-list, mat-table, .events-list').first();
+        const eventsList = page.locator('app-events-tab').first();
         await expect(eventsList).toBeVisible({ timeout: 10000 });
       });
 
@@ -636,7 +622,7 @@ test.describe('Application View', () => {
         await page.waitForTimeout(1500);
 
         // Look for event type indicators (audit events, app events, etc.)
-        const eventTypeElement = page.locator('text=/audit|app\\.crash|instance|update/i, [class*="type"]').first();
+        const eventTypeElement = page.getByText(/audit|app\.crash|instance|update/i).first();
         const typeVisible = await eventTypeElement.isVisible().catch(() => false);
 
         // Event types should be displayed
