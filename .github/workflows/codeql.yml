@@ -28,11 +28,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # build-mode: none — build-free extraction; avoids generating the
-          # gitignored src/jetstream/extra_plugins.go and a Go toolchain setup.
-          # Switch go to autobuild if traced-build precision is ever needed.
+          # Go has no build-free mode — CodeQL requires autobuild or manual.
+          # autobuild resolves src/jetstream/go.mod and builds without the
+          # gitignored extra_plugins.go (it only adds blank plugin imports).
           - language: go
-            build-mode: none
+            build-mode: autobuild
+          # JS/TS needs no build — build-free extraction.
           - language: javascript-typescript
             build-mode: none
     steps:
