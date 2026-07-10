@@ -61,9 +61,8 @@
       <app-form-field>
         <app-select class="form-control" required placeholder="Service Instance" formControlName="serviceInstance" [autoSelectSingleOption]="false">
           <app-option [value]="null">None</app-option>
-          @for (sI of bindableServiceInstances$ | async; track sI) {
-            <app-option [disabled]="!sI.metadata.guid"
-            [value]="sI.metadata.guid">{{ sI.entity.name }}</app-option>
+          @for (sI of bindableServiceInstances$ | async; track sI.guid) {
+            <app-option [value]="sI.guid">{{ sI.name }}</app-option>
           }
         </app-select>
       </app-form-field>
