@@ -9,10 +9,16 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
+permissions:
+  contents: read
+
 jobs:
   push-store-image:
     runs-on: ubuntu-latest
+    # contents: read must be restated: a job-level permissions block
+    # replaces the defaults entirely, and the checkout step needs it.
     permissions:
+      contents: read
       packages: write
 
     steps:
@@ -30,15 +36,16 @@ jobs:
           fi
       - name: 'Log into GHCR'
         if: steps.check_secrets.outputs.secrets_available == 'true'
-        uses: docker/login-action@v2
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{secrets.GH_PACKAGES_USER}}
           password: ${{secrets.GH_PACKAGES_TOKEN}}
       - name: 'Checkout current develop'
         if: steps.check_secrets.outputs.secrets_available == 'true'
-        uses: actions/checkout@v3
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
+          persist-credentials: false
           ref: "develop"
       - name: 'Build stratos base images'
         if: steps.check_secrets.outputs.secrets_available == 'true'
