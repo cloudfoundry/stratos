@@ -5,6 +5,8 @@ import { ApplicationPageSummary } from '../../pages/application/application.page
 import { ListTableComponent } from '../../components/list.component';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
 import { TestApp } from '../../helpers/application-test.helper';
+import { ApplicationPageRoutesTab } from '../../pages/application/tabs/routes.page';
+import { RouteMapDialogPage } from '../../pages/application/route-map-dialog.page';
 import { createCustomName } from '../../helpers/test-utils';
 
 /**
@@ -293,18 +295,19 @@ test.describe('Application View', () => {
       test('should list all routes', async ({ withTestApp }) => {
         const { page, testApp, helper } = withTestApp;
 
-        // Create a route
-        const routeGuid = await helper.createAndMapRoute(testApp, `view-test-${Date.now()}`);
+        const host = `view-test-${Date.now()}`;
+        const routeGuid = await helper.createAndMapRoute(testApp, host);
         expect(routeGuid).toBeTruthy();
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToRoutesTab();
-        await page.waitForTimeout(1500);
 
-        // Verify routes list is visible
-        const routesList = page.locator('app-routes-tab table').first();
-        await expect(routesList).toBeVisible({ timeout: 10000 });
+        // Modern routes tab renders app-signal-list (not the legacy app-list/table);
+        // assert the mapped route actually shows up as a row.
+        const list = new ListTableComponent(page, page.locator('app-routes-tab app-signal-list'));
+        const row = await list.findRowByCellContent(host);
+        await expect(row).toBeVisible();
       });
 
       test('should allow adding new route', async ({ withTestApp }) => {
@@ -313,47 +316,55 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToRoutesTab();
-        await page.waitForTimeout(1000);
 
-        // Look for add route button
-        const addButton = page.locator('button').filter({ hasText: /add.*route|create.*route/i }).first();
-        await expect(addButton).toBeVisible({ timeout: 10000 });
+        // The Add Route entry point opens the create/map stepper.
+        await expect(page.getByRole('button', { name: /add route/i })).toBeVisible({ timeout: 10000 });
       });
 
       test('should allow unmapping route', async ({ withTestApp }) => {
         const { page, testApp, helper } = withTestApp;
 
-        // Create a route first
-        const routeGuid = await helper.createAndMapRoute(testApp, `unmap-view-${Date.now()}`);
+        const host = `unmap-view-${Date.now()}`;
+        const routeGuid = await helper.createAndMapRoute(testApp, host);
         expect(routeGuid).toBeTruthy();
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToRoutesTab();
-        await page.waitForTimeout(1500);
 
-        // Look for unmap/remove action
-        const unmapButton = page.locator('button, mat-icon').filter({ hasText: /unmap|remove|delete/i }).first();
-        const unmapExists = await unmapButton.count() > 0;
-
-        // Unmap action should be available
-        expect(unmapExists).toBeGreaterThan(0);
+        // Unmap is a per-row action behind the signal-list row-actions kebab.
+        const list = new ListTableComponent(page, page.locator('app-routes-tab app-signal-list'));
+        const row = await list.findRowByCellContent(host);
+        const menu = await list.openRowActionMenuByRow(row);
+        await expect(menu.getItem('Unmap')).toBeVisible();
       });
 
       test('should allow mapping existing route', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
+        const { page, testApp, cfApi } = withTestApp;
 
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToRoutesTab();
-        await page.waitForTimeout(1000);
+        // Seed an unmapped route in the space so the stepper has one to offer.
+        const domains = await cfApi.getDomains(testApp.spaceGuid);
+        expect(domains.length).toBeGreaterThan(0);
+        const route = await cfApi.createRoute({
+          domainGuid: domains[0].guid,
+          spaceGuid: testApp.spaceGuid,
+          host: `map-view-${Date.now()}`,
+        });
+        expect(route.guid).toBeTruthy();
 
-        // Look for map existing route button
-        const mapButton = page.locator('button').filter({ hasText: /map.*route|existing.*route/i }).first();
-        const mapExists = await mapButton.count() > 0;
+        const routesTab = new ApplicationPageRoutesTab(page, testApp.cfGuid, testApp.app.guid);
+        await routesTab.navigateTo();
+        await routesTab.waitForPage();
+        // Mapping an existing route lives inside the Add Route stepper's
+        // available-routes list.
+        await routesTab.clickMapRoute();
 
-        // Map existing button should be available
-        expect(mapExists).toBeDefined();
+        const dialog = new RouteMapDialogPage(page);
+        await dialog.waitForDialog();
+        await expect(dialog.getRouteList()).toBeVisible({ timeout: 10000 });
+        await dialog.clickCancel();
+
+        await cfApi.deleteRoute(route.guid);
       });
     });
 
@@ -477,16 +488,20 @@ test.describe('Application View', () => {
 
     test.describe('Variables Tab', () => {
       test('should list environment variables', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
+        const { page, testApp, cfApi } = withTestApp;
+
+        // The tab is permission-gated, not env-var-gated — as admin it renders
+        // even with no vars, but seed one so the list shows real content.
+        await cfApi.updateAppEnvironment(testApp.app.guid, { E2E_VIEW_VAR: 'hello' });
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToVariablesTab();
-        await page.waitForTimeout(1500);
 
-        // Look for variables list or display
-        const variablesList = page.locator('app-list, mat-table, .variables-list, [class*="env"]').first();
-        await expect(variablesList).toBeVisible({ timeout: 10000 });
+        // Modern variables tab renders app-signal-list (not the legacy app-list/mat-table).
+        const list = new ListTableComponent(page, page.locator('app-variables-tab app-signal-list'));
+        const row = await list.findRowByCellContent('E2E_VIEW_VAR');
+        await expect(row).toBeVisible();
       });
 
       test('should allow adding variable', async ({ withTestApp }) => {
@@ -495,14 +510,9 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToVariablesTab();
-        await page.waitForTimeout(1000);
 
-        // Look for add variable button
-        const addButton = page.locator('button').filter({ hasText: /add.*variable|add.*env|new/i }).first();
-        const addExists = await addButton.count() > 0;
-
-        // Add variable functionality should exist
-        expect(addExists).toBeGreaterThan(0);
+        // Add Variable opens the shared editor dialog.
+        await expect(page.getByRole('button', { name: /add variable/i })).toBeVisible({ timeout: 10000 });
       });
 
       test('should allow editing variable', async ({ withTestApp }) => {
@@ -590,11 +600,11 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToEventsTab();
-        await page.waitForTimeout(1500);
 
-        // Look for events list
-        const eventsList = page.locator('app-events-tab').first();
+        const eventsList = page.locator('app-events-tab app-cloud-foundry-events-list');
         await expect(eventsList).toBeVisible({ timeout: 10000 });
+        // A freshly-created app already has audit events (create, map-route, ...).
+        await expect(eventsList.locator('tbody tr[data-test="row"]').first()).toBeVisible({ timeout: 15000 });
       });
 
       test('should show event timestamps', async ({ withTestApp }) => {
@@ -603,14 +613,10 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToEventsTab();
-        await page.waitForTimeout(1500);
 
-        // Look for timestamp column or timestamp data
-        const timestampElement = page.locator('text=/\\d{1,2}:\\d{2}|\\d{4}-\\d{2}-\\d{2}|ago|time/i').first();
-        const timestampVisible = await timestampElement.isVisible().catch(() => false);
-
-        // Timestamps should be displayed in events
-        expect(timestampVisible).toBeTruthy();
+        // The Time column renders a relative/absolute timestamp per event row.
+        const eventsList = page.locator('app-events-tab app-cloud-foundry-events-list');
+        await expect(eventsList).toContainText(/\d{1,2}:\d{2}|\d{4}-\d{2}-\d{2}|ago/i, { timeout: 15000 });
       });
 
       test('should display event types', async ({ withTestApp }) => {
@@ -619,14 +625,11 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToEventsTab();
-        await page.waitForTimeout(1500);
 
-        // Look for event type indicators (audit events, app events, etc.)
-        const eventTypeElement = page.getByText(/audit|app\.crash|instance|update/i).first();
-        const typeVisible = await eventTypeElement.isVisible().catch(() => false);
-
-        // Event types should be displayed
-        expect(typeVisible).toBeTruthy();
+        // Event type links render as audit.app.* (create, map-route, process.create).
+        await expect(
+          page.locator('app-events-tab').getByText(/audit\.app\./i).first()
+        ).toBeVisible({ timeout: 15000 });
       });
 
       test('should support event filtering', async ({ withTestApp }) => {
