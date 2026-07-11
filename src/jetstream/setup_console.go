@@ -163,7 +163,8 @@ func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleCo
 }
 
 func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
-	log.Debugf("Saving ConsoleConfig: %+v", consoleConfig)
+	// Don't dump the whole struct — it contains the client secret
+	log.Debugf("Saving ConsoleConfig for UAA endpoint: %v", consoleConfig.UAAEndpoint)
 
 	if err := consoleRepo.SetValue(systemGroupName, "UAA_ENDPOINT", consoleConfig.UAAEndpoint.String()); err != nil {
 		return err
