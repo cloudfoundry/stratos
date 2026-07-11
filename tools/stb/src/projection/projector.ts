@@ -66,6 +66,8 @@ function namespaceFor(snapshotId: string, containers: Record<string, string>): s
 
 function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {
   const parts = path.split('.');
+  // Guard against prototype pollution via crafted path segments
+  if (parts.some((p) => p === '__proto__' || p === 'constructor' || p === 'prototype')) return;
   let cur = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     const k = parts[i]!;
