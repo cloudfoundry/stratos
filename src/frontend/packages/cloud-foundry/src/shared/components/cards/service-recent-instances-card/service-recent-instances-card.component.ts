@@ -21,6 +21,7 @@ import {
   CardWrapperComponent,
   StatefulIconComponent,
 } from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../../services/endpoint-data/endpoint-data.service';
 import { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
@@ -59,6 +60,9 @@ const RECENT_ITEMS_COUNT = 10;
 export class ServiceRecentInstancesCardComponent implements OnInit, OnDestroy {
   private readonly registry = inject(EndpointDataRegistry);
   private readonly injector = inject(Injector);
+
+  // Exposed for the template's <app-stateful-icon [state]> binding
+  protected readonly stratosStatus = StratosStatus;
 
   private readonly _cfGuid = signal<string>('');
   private readonly _serviceGuid = signal<string>('');

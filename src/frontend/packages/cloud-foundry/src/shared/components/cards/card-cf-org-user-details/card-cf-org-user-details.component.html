@@ -25,7 +25,7 @@
 
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="Org Status">
-            {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.status) | capitalizeFirst }}
+            {{ (cfOrgService.orgDataService.org()?.status ?? '') | capitalizeFirst }}
           </app-metadata-item>
           <app-metadata-item label="Created At">
             {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.createdAt) | date: "medium" }}

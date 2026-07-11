@@ -60,20 +60,24 @@ export class NewApplicationBaseStepComponent {
   // selectionChange handler calling router.navigate.
   signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
-  set selectedTile(tile: ITileConfig<IAppTileData>) {
-    if (tile && tile.data) {
+  // The selector's (selection) output is typed against the base ITileConfig
+  // (and emits null on deselect); the tiles are built in this component with
+  // IAppTileData, so the narrowing here is sound.
+  set selectedTile(tile: ITileConfig | null) {
+    const data = tile?.data as IAppTileData | undefined;
+    if (data) {
       const baseUrl = 'applications';
-      const type = tile.data.type;
+      const type = data.type;
       const query: { [key: string]: string } = {
         [BASE_REDIRECT_QUERY]: `${baseUrl}/new`
       };
-      if (tile.data.subType) {
-        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
+      if (data.subType) {
+        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = data.subType;
         // endpointGuid is only present for deploy tiles auto-selected from a
         // specific CF; when absent the param is omitted (router drops undefined
         // params anyway, so this matches the prior behavior).
-        if (tile.data.endpointGuid) {
-          query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
+        if (data.endpointGuid) {
+          query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = data.endpointGuid;
         }
       }
       const endpoint = this.activatedRoute.snapshot.params.endpointId;

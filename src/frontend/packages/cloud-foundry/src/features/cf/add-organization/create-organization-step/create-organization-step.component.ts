@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle, TailwindSnackBarService } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle, TailwindSnackBarService } from '@stratosui/core';
 import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
@@ -27,6 +27,7 @@ interface CreateOrganizationForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,

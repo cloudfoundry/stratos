@@ -28,20 +28,20 @@
       <h2 class="m-0">{{ quotaDefinition.name }}</h2>
       <div class="flex my-2">
         <div class="mr-[10px] opacity-60">Non Basic Services Allowed:</div>
-        <app-boolean-indicator [isTrue]="quotaDefinition.paidServicesAllowed" type="yes-no" subtle="true">
+        <app-boolean-indicator [isTrue]="quotaDefinition.paidServicesAllowed" type="yes-no" [subtle]="true">
         </app-boolean-indicator>
       </div>
-      <app-tile-grid fit="true">
+      <app-tile-grid [fit]="true">
         <h3 class="my-[10px]">Quota Limits</h3>
         <h4 class="my-[10px] opacity-60">Memory</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="memory" label="Maximum Memory Usage" units="mb"
+            <app-card-number-metric [labelAtTop]="true" icon="memory" label="Maximum Memory Usage" units="mb"
               value="{{ quotaDefinition.totalMemoryInMB }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="memory" label="Maximum Application Instance Memory Usage"
+            <app-card-number-metric [labelAtTop]="true" icon="memory" label="Maximum Application Instance Memory Usage"
               units="mb" value="{{ quotaDefinition.totalInstanceMemoryInMB }}">
             </app-card-number-metric>
           </app-tile>
@@ -49,12 +49,12 @@
         <h4 class="my-[10px] opacity-60">Application</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="application_instance" iconFont="stratos-icons" label="Maximum Application Instances"
+            <app-card-number-metric [labelAtTop]="true" icon="application_instance" iconFont="stratos-icons" label="Maximum Application Instances"
               value="{{ quotaDefinition.totalInstances }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="apps" label="Maximum Application Tasks"
+            <app-card-number-metric [labelAtTop]="true" icon="apps" label="Maximum Application Tasks"
               value="{{ quotaDefinition.totalAppTasks }}">
             </app-card-number-metric>
           </app-tile>
@@ -62,12 +62,12 @@
         <h4 class="my-[10px] opacity-60">Service</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="service" iconFont="stratos-icons" label="Maximum Services"
+            <app-card-number-metric [labelAtTop]="true" icon="service" iconFont="stratos-icons" label="Maximum Services"
               value="{{ quotaDefinition.totalServiceInstances }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="service" iconFont="stratos-icons" label="Maximum Service Keys"
+            <app-card-number-metric [labelAtTop]="true" icon="service" iconFont="stratos-icons" label="Maximum Service Keys"
               value="{{ quotaDefinition.totalServiceKeys }}">
             </app-card-number-metric>
           </app-tile>
@@ -75,12 +75,12 @@
         <h4 class="my-[10px] opacity-60">Routes</h4>
         <app-tile-group class="tile-group-2-cols">
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons" label="Maximum Routes"
+            <app-card-number-metric [labelAtTop]="true" icon="route" iconFont="stratos-icons" label="Maximum Routes"
               value="{{ quotaDefinition.totalRoutes }}">
             </app-card-number-metric>
           </app-tile>
           <app-tile>
-            <app-card-number-metric labelAtTop="true" icon="route" iconFont="stratos-icons"
+            <app-card-number-metric [labelAtTop]="true" icon="route" iconFont="stratos-icons"
               label="Maximum Reserved Route Ports" value="{{ quotaDefinition.totalReservedPorts }}">
             </app-card-number-metric>
           </app-tile>

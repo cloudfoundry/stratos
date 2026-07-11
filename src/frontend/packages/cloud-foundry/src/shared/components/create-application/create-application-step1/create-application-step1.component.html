@@ -5,7 +5,7 @@
       <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
         [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy || endpointScoped"
         [ngModel]="cfOrgSpaceService.cf.select()"
-        (selectionChange)="onCfChange($event.value)" required name="cf"
+        (selectionChange)="onCfChange($event.value)" [required]="true" name="cf"
         [appFocus]="!cfOrgSpaceService.cf.loading()">
         <app-option [value]="null">None</app-option>
         @for (cf of cfOrgSpaceService.cf.list(); track cf) {
@@ -21,7 +21,7 @@
       [disabled]="!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy"
       [loading]="cfOrgSpaceService.org.loading()"
       [ngModel]="cfOrgSpaceService.org.select()"
-      (selectionChange)="onOrgChange($event.value)" required name="org"
+      (selectionChange)="onOrgChange($event.value)" [required]="true" name="org"
       [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy)">
       <app-option [value]="null">None</app-option>
       @for (org of cfOrgSpaceService.org.list(); track org) {
@@ -39,7 +39,7 @@
       [disabled]="!cfOrgSpaceService.org.select() || cfOrgSpaceService.space.loading() || isRedeploy"
       [loading]="cfOrgSpaceService.space.loading()"
       [ngModel]="cfOrgSpaceService.space.select()"
-      (selectionChange)="onSpaceChange($event.value)" required name="space">
+      (selectionChange)="onSpaceChange($event.value)" [required]="true" name="space">
       <app-option [value]="null">None</app-option>
       @for (space of spaces$ | async; track space) {
         <app-option [value]="space.guid" [label]="space.name">

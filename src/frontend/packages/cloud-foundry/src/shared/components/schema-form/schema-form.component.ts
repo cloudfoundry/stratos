@@ -17,8 +17,9 @@ export interface SchemaFormValidationError {
 }
 
 export class SchemaFormConfig {
-  // strict: always supplied by callers building a config
-  schema!: object;
+  // Optional: the broker may not supply a schema for the plan — the form
+  // then falls back to the raw JSON editor (see the `config` setter).
+  schema?: object;
   initialData?: object;
 }
 
@@ -43,7 +44,7 @@ export class SchemaFormComponent {
   private schema: object | undefined;
 
   @Input()
-  set config(config: SchemaFormConfig) {
+  set config(config: SchemaFormConfig | undefined) {
     // Skip if no config... or schema is the same (avoids losing existing data in form)
     if (!config || (config.schema && config.schema === this.schema)) {
       return;

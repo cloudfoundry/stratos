@@ -28,7 +28,7 @@
                       <div>
                         <app-metadata-item label="Commit">
                           <a href="{{ (commit$ | async)?.html_url }}" target="_blank">{{
-                            stratosProject.deploySource.commit | limitTo: 8
+                            (stratosProject.deploySource.commit ?? "") | limitTo: 8
                           }}</a>
                         </app-metadata-item>
                       </div>
@@ -110,7 +110,7 @@
                   <h3 class="text-lg font-semibold">Commit Details</h3>
                   <div>
                     <img
-                      src="{{ commitInfo.author.avatar_url }}"
+                      src="{{ commitInfo.author?.avatar_url }}"
                       alt="Commit author avatar"
                       class="h-12 w-12 rounded-full"
                     />
@@ -118,7 +118,7 @@
                 </div>
                 <div class="card-body">
                   <div>
-                    <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
+                    <app-metadata-item label="Message">{{ commitInfo.commit?.message }}</app-metadata-item>
                     <app-metadata-item label="SHA">
                       <a href="{{ commitInfo.html_url }}" target="_blank">{{ commitInfo.sha | limitTo: 8 }}</a>
                     </app-metadata-item>
@@ -126,7 +126,7 @@
                       <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
                     </app-metadata-item>
                     <app-metadata-item label="Date:"
-                      >{{ commitInfo.commit.author.date | date: "medium" }}
+                      >{{ commitInfo.commit?.author?.date | date: "medium" }}
                     </app-metadata-item>
                   </div>
                 </div>

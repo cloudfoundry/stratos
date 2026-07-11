@@ -17,7 +17,7 @@
             } @else {
               None assigned
               @if (cfSpaceService.quotaDefinition$ | async; as quotaDefinition) {
-                <span> - <a [routerLink]="[]" (click)="goToOrgQuota($event)">view organization's quota</a> </span>
+                <span> - <a [routerLink]="[]" (click)="goToOrgQuota()">view organization's quota</a> </span>
               }
             }
           </app-metadata-item>

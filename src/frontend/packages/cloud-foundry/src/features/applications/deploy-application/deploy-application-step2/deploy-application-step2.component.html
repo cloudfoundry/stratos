@@ -128,10 +128,10 @@
                       <select id="repositoryBranch" class="input"
                         [disabled]="isRedeploy || !repository || !sourceSelectionForm.controls.projectName.valid"
                         [(ngModel)]="repositoryBranch" name="repositoryBranch"
-                        (change)="updateBranchName($event.target.value)" required>
-                        <option value="" disabled>Select a branch</option>
+                        (ngModelChange)="updateBranchName($event)" required>
+                        <option [ngValue]="undefined" disabled>Select a branch</option>
                         @for (branch of repositoryBranches$ | async; track branch) {
-                          <option [value]="branch">
+                          <option [ngValue]="branch">
                             {{ branch.name }}
                           </option>
                         }
@@ -141,21 +141,21 @@
                       <div
                         class="deploy-step2-form__project-info-group deploy-step2-form__commit">
                         <div>
-                          <img src="{{commitInfo.author.avatar_url}}" alt="">
+                          <img src="{{commitInfo.author?.avatar_url}}" alt="">
                         </div>
                         <div src="description">
                           <div>
                             <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
                           </div>
                           <div>
-                            {{commitInfo.commit.message}}
+                            {{commitInfo.commit?.message}}
                           </div>
                           <div class="author-info">
                             <div>
-                              {{commitInfo.commit.author.name}}
+                              {{commitInfo.commit?.author?.name}}
                             </div>
                             <div>
-                              {{commitInfo.commit.author.date | date: 'medium'}}
+                              {{commitInfo.commit?.author?.date | date: 'medium'}}
                             </div>
                           </div>
                         </div>

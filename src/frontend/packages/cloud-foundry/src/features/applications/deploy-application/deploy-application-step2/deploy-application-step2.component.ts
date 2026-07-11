@@ -48,6 +48,7 @@ import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-applic
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
+import { FileScannerInfo } from './deploy-application-fs/deploy-application-fs-scanner';
 
 
 
@@ -104,8 +105,9 @@ export class DeployApplicationStep2Component
   canDeployType$!: Observable<boolean>;
   isLoading$!: Observable<boolean>;
 
-  // Local FS data when file or folder upload
-  // @Input('fsSourceData') fsSourceData;
+  // Local FS data when file or folder upload; bound via ngModel so the
+  // fsLocalSource control participates in form validation.
+  fsSourceData: FileScannerInfo | undefined;
 
   // ---- GIT ----------
   repositoryBranches$!: Observable<GitBranch[]>;

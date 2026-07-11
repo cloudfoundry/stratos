@@ -50,13 +50,16 @@ export class AddServiceInstanceBaseStepComponent {
     )
   ];
 
-  private pSelectedTile: ITileConfig<ICreateServiceTilesData> | null = null;
+  private pSelectedTile: ITileConfig | null = null;
   public bindApp: boolean;
   get selectedTile() {
     return this.pSelectedTile;
   }
-  set selectedTile(tile: ITileConfig<ICreateServiceTilesData> | null) {
-    this.serviceType = tile?.data?.type;
+  // The tile-selector emits the base ITileConfig; our tiles carry
+  // ICreateServiceTilesData whose `type` is always a string.
+  set selectedTile(tile: ITileConfig | null) {
+    const type = tile?.data?.type;
+    this.serviceType = typeof type === 'string' ? type : undefined;
     this.pSelectedTile = tile;
     if (tile) {
       const baseUrl = this.createServiceTileUrl();

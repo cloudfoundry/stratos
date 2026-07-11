@@ -4,7 +4,7 @@
   <app-card-header class="recent-instances__header">
     <app-card-title>Recently updated service instances</app-card-title>
     @if (serviceInstances === null) {
-      <app-stateful-icon [state]="'busy'"></app-stateful-icon>
+      <app-stateful-icon [state]="stratosStatus.BUSY"></app-stateful-icon>
     }
   </app-card-header>
   @if (serviceInstances) {

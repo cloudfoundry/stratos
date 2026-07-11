@@ -8,6 +8,7 @@ import { firstValueFrom, from, Observable, of, Subscription, throwError } from '
 import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
+  AppErrorComponent,
   AppInputDirective,
   CustomFormFieldComponent,
   CustomSelectComponent,
@@ -43,6 +44,7 @@ interface EditSpaceForm {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,

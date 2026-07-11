@@ -66,9 +66,9 @@
             <ul class="list-disc list-inside m-0">
               @for (binding of selectedServiceBindings; track binding.guid) {
                 <li data-test="confirm-binding">
-                  {{ binding.serviceInstanceName }}
-                  @if (binding.serviceInstanceType) {
-                    <span class="text-content-muted"> ({{ binding.serviceInstanceType }})</span>
+                  {{ binding.serviceInstance.name }}
+                  @if (binding.serviceInstance.type) {
+                    <span class="text-content-muted"> ({{ binding.serviceInstance.type }})</span>
                   }
                 </li>
               }

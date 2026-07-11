@@ -3,7 +3,7 @@ import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormCont
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { AppInputDirective, CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomCheckboxComponent, FocusDirective, UnlimitedInputComponent } from '@stratosui/core';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -23,6 +23,7 @@ export type { SpaceQuotaFormValues };
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomCheckboxComponent,
     CustomFormFieldComponent,

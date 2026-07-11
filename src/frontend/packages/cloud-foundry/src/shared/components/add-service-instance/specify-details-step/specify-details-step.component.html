@@ -59,7 +59,7 @@
     <form class="stepper-form"
       [formGroup]="selectExistingInstanceForm">
       <app-form-field>
-        <app-select class="form-control" required placeholder="Service Instance" formControlName="serviceInstance" [autoSelectSingleOption]="false">
+        <app-select class="form-control" [required]="true" placeholder="Service Instance" formControlName="serviceInstance" [autoSelectSingleOption]="false">
           <app-option [value]="null">None</app-option>
           @for (sI of bindableServiceInstances$ | async; track sI.guid) {
             <app-option [value]="sI.guid">{{ sI.name }}</app-option>

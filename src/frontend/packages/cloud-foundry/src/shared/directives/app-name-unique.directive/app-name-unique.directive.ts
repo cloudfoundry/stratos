@@ -5,6 +5,7 @@ import { Observable, of as observableOf, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
+import { StratosStatus } from '@stratosui/store';
 import { CreateAppStateService } from '../../data-services/create-app-state.service';
 
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -19,18 +20,20 @@ export type UniqueValidatorRequestBuilder<T = any> = (name: string) => HttpReque
 export class AppNameUniqueChecking {
   busy!: boolean;
   taken: boolean | undefined;
-  status!: string;
+  // Consumed by <app-stateful-icon [state]> so it carries StratosStatus
+  // values (NONE renders nothing, OK renders the 'done' icon).
+  status: StratosStatus = StratosStatus.NONE;
 
   set(busy: boolean, taken?: boolean) {
     this.busy = busy;
     this.taken = taken;
 
     if (this.busy) {
-      this.status = 'busy';
+      this.status = StratosStatus.BUSY;
     } else if (this.taken === undefined) {
-      this.status = '';
+      this.status = StratosStatus.NONE;
     } else {
-      this.status = this.taken ? 'error' : 'done';
+      this.status = this.taken ? StratosStatus.ERROR : StratosStatus.OK;
     }
   }
 }

@@ -98,9 +98,12 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     );
   }
 
-  set selectedTile(tile: ITileConfig<IAppTileData>) {
+  // The selector's (selection) output is typed against the base ITileConfig
+  // (and emits null on deselect); the tiles are built in this component with
+  // IAppTileData, so the narrowing here is sound.
+  set selectedTile(tile: ITileConfig | null) {
     if (tile && tile.data) {
-      const data = tile.data;
+      const data = tile.data as IAppTileData;
       const query: Record<string, string> = {
         [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
         [AUTO_SELECT_CF_URL_PARAM]: this.guid,

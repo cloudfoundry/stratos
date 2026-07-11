@@ -4,10 +4,6 @@ import { of } from 'rxjs';
 import { AppChip, AppChipsComponent, TableCellCustom } from '@stratosui/core';
 import { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
-export interface ServiceTag {
-  value: string;
-}
-
 @Component({
   selector: 'app-table-cell-service-tags',
   templateUrl: './table-cell-service-tags.component.html',
@@ -19,7 +15,8 @@ export interface ServiceTag {
 })
 export class TableCellServiceTagsComponent extends TableCellCustom<StServiceOffering> {
 
-  tags: AppChip<ServiceTag>[] = [];
+  // Plain string-keyed chips — the cell only sets `value`/`hideClearButton$`
+  tags: AppChip[] = [];
 
   @Input()
   set row(offering: StServiceOffering) {

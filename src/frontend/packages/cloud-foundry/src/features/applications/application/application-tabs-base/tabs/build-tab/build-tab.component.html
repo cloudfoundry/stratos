@@ -180,8 +180,8 @@
                       <div class="flex-1">
                         <app-metadata-item
                           class="mt-0"
-                          [iconFont]="deploySource.icon.fontName"
-                          [icon]="deploySource.icon.iconName"
+                          [iconFont]="deploySource.icon?.fontName"
+                          [icon]="deploySource.icon?.iconName ?? ''"
                           label="SCM"
                         >
                           {{ deploySource.label }}
@@ -278,7 +278,8 @@
                 {{ detail.process?.healthCheckType ?? "-" }}</app-metadata-item
               >
               <app-metadata-item icon="schedule" label="Health Check Timeout">
-                {{ $safeNavigationMigration(detail.process?.healthCheckTimeoutSeconds) | uptime }}</app-metadata-item
+                @let healthCheckTimeout = detail.process?.healthCheckTimeoutSeconds;
+                {{ healthCheckTimeout != null ? (healthCheckTimeout | uptime) : "-" }}</app-metadata-item
               >
               @if (detail.process?.healthCheckType === "http") {
                 <app-metadata-item icon="http" label="Health Check HTTP Endpoint">{{

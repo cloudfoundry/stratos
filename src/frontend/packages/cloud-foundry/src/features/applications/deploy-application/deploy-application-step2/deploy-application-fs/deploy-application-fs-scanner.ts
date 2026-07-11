@@ -21,6 +21,7 @@ export interface FileScannerInfo {
   summaryItem: any;
   manifestFile: any;
   cfIgnoreFile: any;
+  rootFolderName?: string;
 }
 
 export class DeployApplicationFSScanner implements FileScannerInfo {

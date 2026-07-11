@@ -15,6 +15,7 @@ import { Observable, of as observableOf } from "rxjs";
 import { map } from "rxjs/operators";
 
 import {
+  AppErrorComponent,
   AppInputDirective,
   CustomFormFieldComponent,
   ErrorStateMatcher,
@@ -44,6 +45,7 @@ interface CreateApplicationForm {
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     AppNameUniqueDirective,
