@@ -473,13 +473,15 @@ export class EntityCatalog {
         } else if (this.lookupStats.failure <= 5) {
           // For first few failures without debug mode, provide a hint about enabling debug
           console.warn(
-            `Missing catalog entity: endpoint='${config.endpointType}', entity='${config.entityType}'${config.subType ? `, subType='${config.subType}'` : ''}`,
+            'Missing catalog entity:',
+            `endpoint='${config.endpointType}', entity='${config.entityType}'${config.subType ? `, subType='${config.subType}'` : ''}`,
             `\nℹ️  Enable detailed diagnostics with: window.__STRATOS_ENTITY_CATALOG_DEBUG__ = {}`
           );
         } else {
           // Use concise warning after several failures to reduce console noise
           console.warn(
-            `Missing catalog entity: endpoint='${config.endpointType}', entity='${config.entityType}'${config.subType ? `, subType='${config.subType}'` : ''}`
+            'Missing catalog entity:',
+            `endpoint='${config.endpointType}', entity='${config.entityType}'${config.subType ? `, subType='${config.subType}'` : ''}`
           );
         }
       } else {
@@ -493,7 +495,8 @@ export class EntityCatalog {
     } catch (error) {
       this.lookupStats.failure++;
       console.error(
-        `Error getting catalog entity: endpoint='${endpointTypeOrConfig}', entity='${entityType}'`,
+        'Error getting catalog entity:',
+        `endpoint='${endpointTypeOrConfig}', entity='${entityType}'`,
         error
       );
       return null;
