@@ -281,6 +281,17 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	return nil
 }
 
+// safeUploadJoin joins a client-supplied folder or file name onto base,
+// rejecting names that would escape base via traversal or an absolute path.
+// Mirrors the archive-entry guard in unarchive.go for the upload path.
+func safeUploadJoin(base, name string) (string, error) {
+	name = filepath.FromSlash(name)
+	if !filepath.IsLocal(name) {
+		return "", errors.New("upload path escapes the upload directory")
+	}
+	return filepath.Join(base, name), nil
+}
+
 func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
 	// The msg data is JSON for the Folder info
 	info := FolderSourceInfo{
@@ -293,9 +304,11 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 	// Create all of the folders
 	for _, folder := range info.Folders {
-		path := filepath.Join(tempDir, folder)
-		err := os.Mkdir(path, 0700)
+		path, err := safeUploadJoin(tempDir, folder)
 		if err != nil {
+			return StratosProject{}, tempDir, err
+		}
+		if err := os.Mkdir(path, 0700); err != nil {
 			return StratosProject{}, tempDir, errors.New("failed to create folder")
 		}
 	}
@@ -334,7 +347,10 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		}
 
 		// Write the file
-		path := filepath.Join(tempDir, msg.Message)
+		path, joinErr := safeUploadJoin(tempDir, msg.Message)
+		if joinErr != nil {
+			return StratosProject{}, tempDir, joinErr
+		}
 		err = os.WriteFile(path, p, 0644)
 		if err != nil {
 			return StratosProject{}, tempDir, err
