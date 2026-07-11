@@ -87,6 +87,23 @@ export class AppCreateWizardPage extends BasePage {
     return labels;
   }
 
+  /**
+   * Poll a select's real options until they populate. org/space data loads
+   * async AFTER the parent selection, and there is a brief enabled-but-empty
+   * window, so a single read can wrongly see an empty list. Returns [] only if
+   * still empty after the timeout (a CF/org with genuinely no children).
+   */
+  private async pollRealOptions(id: 'cf' | 'org' | 'space', timeoutMs = 25000): Promise<string[]> {
+    const deadline = Date.now() + timeoutMs;
+    let labels: string[] = [];
+    do {
+      labels = await this.realOptionLabels(id).catch(() => []);
+      if (labels.length > 0) return labels;
+      await this.page.waitForTimeout(600);
+    } while (Date.now() < deadline);
+    return labels;
+  }
+
   private async selectOption(id: 'cf' | 'org' | 'space', label: string): Promise<void> {
     const trigger = this.page.locator(`app-select#${id} .select-trigger`);
     const option = this.optionsFor(id).filter({ hasText: label }).first();
@@ -112,17 +129,18 @@ export class AppCreateWizardPage extends BasePage {
     const cfNames = await this.realOptionLabels('cf');
     for (const cf of cfNames) {
       await this.selectCloudFoundry(cf);
-      await this.page.waitForTimeout(2000); // org list loads async
-      const orgs = await this.realOptionLabels('org');
-      if (orgs.length === 0) continue;
+      const orgs = await this.pollRealOptions('org', 15000);
+      if (orgs.length === 0) continue; // not the connected CF — try the next
+      // Orgs populated → THIS is the data CF. Commit to it and be patient for
+      // its spaces (don't bail to an empty CF just because the space list is
+      // slow under CF load).
       await this.selectOrg(orgs[0]);
-      await this.page.waitForTimeout(1500); // space list loads async
-      const spaces = await this.realOptionLabels('space');
-      if (spaces.length === 0) continue;
+      const spaces = await this.pollRealOptions('space', 40000);
+      if (spaces.length === 0) throw new Error(`CF ${cf} / org ${orgs[0]} has no spaces`);
       await this.selectSpace(spaces[0]);
       return { cf, org: orgs[0], space: spaces[0] };
     }
-    throw new Error('No CF endpoint has organizations/spaces in this session');
+    throw new Error('No CF endpoint has organizations in this session');
   }
 
   /** Select the CF with data + its first org, but NOT a space (for gating checks). */
@@ -130,8 +148,7 @@ export class AppCreateWizardPage extends BasePage {
     const cfNames = await this.realOptionLabels('cf');
     for (const cf of cfNames) {
       await this.selectCloudFoundry(cf);
-      await this.page.waitForTimeout(2000);
-      const orgs = await this.realOptionLabels('org');
+      const orgs = await this.pollRealOptions('org');
       if (orgs.length === 0) continue;
       await this.selectOrg(orgs[0]);
       return;
@@ -141,7 +158,7 @@ export class AppCreateWizardPage extends BasePage {
 
   /** Select the first real (non-"None") space; assumes CF+org already chosen. */
   async selectFirstRealSpace(): Promise<string> {
-    const spaces = await this.realOptionLabels('space');
+    const spaces = await this.pollRealOptions('space');
     if (spaces.length === 0) throw new Error('No spaces available for the selected org');
     await this.selectSpace(spaces[0]);
     return spaces[0];
@@ -152,8 +169,7 @@ export class AppCreateWizardPage extends BasePage {
     const cfNames = await this.realOptionLabels('cf');
     for (const cf of cfNames) {
       await this.selectCloudFoundry(cf);
-      await this.page.waitForTimeout(2000);
-      if ((await this.realOptionLabels('org')).length > 0) return;
+      if ((await this.pollRealOptions('org')).length > 0) return;
     }
     throw new Error('No CF endpoint has organizations in this session');
   }
