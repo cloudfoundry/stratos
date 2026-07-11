@@ -167,8 +167,8 @@ export class KubernetesDashboardTabComponent implements OnInit {
         let h2 = decodeURI(this.href);
         h2 = decodeURI(h2);
 
-        h2 = h2.replace('%3F', '?');
-        h2 = h2.replace('%3D', '=');
+        h2 = h2.replace(/%3F/g, '?');
+        h2 = h2.replace(/%3D/g, '=');
         h2 = '#!' + h2;
         iframeWindow.location.hash = h2;
         this.href = '';
