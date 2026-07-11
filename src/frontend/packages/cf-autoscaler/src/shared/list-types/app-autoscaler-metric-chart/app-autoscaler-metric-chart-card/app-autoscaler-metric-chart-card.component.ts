@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, Signal, computed, effect, inject, signal } from '@angular/core';
+import { ChartConfiguration, TooltipItem } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { ApplicationService } from '../../../../../../cloud-foundry/src/features/applications/application.service';
@@ -14,6 +15,7 @@ import {
 import {
   AppAutoscalerMetricDataLocal,
   AppAutoscalerMetricDataPoint,
+  AppAutoscalerMetricLegend,
   AppScalingTrigger,
 } from '../../../../store/app-autoscaler.types';
 import { AppAutoscalerComboChartComponent } from './combo-chart/combo-chart.component';
@@ -73,7 +75,14 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
   private currentTrigger = signal<AppScalingTrigger | null>(null);
 
   public metricData!: Signal<APIResource<AppAutoscalerMetricDataLocal>[] | null>;
-  public appAutoscalerAppMetricLegend!: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: unknown[] };
+  public appAutoscalerAppMetricLegend!: { legendValue: AppAutoscalerMetricDataPoint[], legendColor: AppAutoscalerMetricLegend[] };
+
+  // Doughnut gauge showing the latest metric reading against the chart
+  // maximum, coloured by trigger state — the same fields the legacy
+  // ngx-charts gauge bound (latest.target / latest.colorTarget /
+  // chartMaxValue / unit).
+  public gaugeData!: Signal<ChartConfiguration<'doughnut'>['data']>;
+  public gaugeOptions!: Signal<ChartConfiguration<'doughnut'>['options']>;
 
   constructor() {
     super();
@@ -102,6 +111,48 @@ export class AppAutoscalerMetricChartCardComponent extends CardCell<APIResource<
         entity: local,
         metadata: row.metadata,
       }];
+    });
+
+    this.gaugeData = computed(() => {
+      const entity = this.metricData()?.[0]?.entity;
+      if (!entity) {
+        return { labels: [], datasets: [] };
+      }
+      const value = Number(entity.latest.target[0]?.value ?? 0);
+      const color = String(entity.latest.colorTarget[0]?.value ?? 'rgba(0,0,0,0.2)');
+      return {
+        labels: [this.metricType, ''],
+        datasets: [{
+          data: [value, Math.max(entity.chartMaxValue - value, 0)],
+          backgroundColor: [color, 'rgba(0, 0, 0, 0.1)'],
+          borderWidth: 0,
+        }],
+      };
+    });
+
+    this.gaugeOptions = computed(() => {
+      const unit = this.metricData()?.[0]?.entity?.unit ?? '';
+      return {
+        // Fixed-size gauge (canvas width/height attributes), matching the
+        // legacy 200x200 gauge.
+        responsive: false,
+        // Legacy gauge geometry: a 240-degree arc starting at -120 degrees.
+        rotation: -120,
+        circumference: 240,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            // Only the value slice is meaningful; hide the filler slice.
+            filter: (item: TooltipItem<'doughnut'>) => item.dataIndex === 0,
+            callbacks: {
+              label: (item: TooltipItem<'doughnut'>) => unit ? `${item.parsed} ${unit}` : `${item.parsed}`,
+            },
+          },
+        },
+      };
     });
 
     // Whenever the row binding settles, fire the load() against the

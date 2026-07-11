@@ -73,9 +73,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   readonly editIndex$ = new BehaviorSubject<number>(-1);
   get editIndex(): number { return this.editIndex$.value; }
   set editIndex(v: number) { this.editIndex$.next(v); }
-  private editMetricType = '';
-  private editScaleType = 'upper';
-  private editAdjustmentType = 'value';
+  protected editMetricType = '';
+  protected editScaleType = 'upper';
+  protected editAdjustmentType = 'value';
   private subs: Subscription[] = [];
 
   constructor() {
