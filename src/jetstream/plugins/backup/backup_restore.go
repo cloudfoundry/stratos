@@ -1,12 +1,17 @@
 package backup
 
 import (
+	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+
+	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
@@ -284,13 +289,22 @@ func deSerializeEndpoint(endpoint map[string]interface{}) api.CNSIRecord {
 	return cnsi
 }
 
+// Key-derivation parameters for password-protected backups. Backups made
+// before the PBKDF2 format carry no magic prefix and decrypt via the legacy
+// single-round SHA256 path below.
+var backupKDFMagic = []byte("STRATOS-BACKUP-V2:")
+
+const (
+	backupKDFSaltLen    = 16
+	backupKDFIterations = 600000 // OWASP recommendation for PBKDF2-HMAC-SHA256
+)
+
 func encryptPayload(payload *BackupContentPayload, password string) ([]byte, error) {
-	// First ensure the password is an ok length
-	secret, err := createHash(password)
-	if err != nil {
-		log.Warningf("Could not create hash: %+v", err)
-		return nil, fmt.Errorf("Could not create hash")
+	salt := make([]byte, backupKDFSaltLen)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return nil, fmt.Errorf("Could not generate salt: %+v", err)
 	}
+	secret := pbkdf2.Key([]byte(password), salt, backupKDFIterations, 32, sha256.New)
 
 	// Create the text that will be encrypted
 	payloadBytes, err := json.Marshal(payload)
@@ -304,15 +318,30 @@ func encryptPayload(payload *BackupContentPayload, password string) ([]byte, err
 		return nil, fmt.Errorf("Could not encrypt payload: %+v", err)
 	}
 
-	return payloadEncrypted, nil
+	// magic + salt + ciphertext, so restore can find the salt again
+	out := append([]byte{}, backupKDFMagic...)
+	out = append(out, salt...)
+	out = append(out, payloadEncrypted...)
+	return out, nil
 }
 
 func decryptPayload(payloadEncrypted []byte, password string) (*string, error) {
-	// First ensure the password is an ok length
-	secret, err := createHash(password)
-	if err != nil {
-		log.Warningf("Could not create hash: %+v", err)
-		return nil, fmt.Errorf("Could not create hash")
+	var secret []byte
+	if bytes.HasPrefix(payloadEncrypted, backupKDFMagic) {
+		rest := payloadEncrypted[len(backupKDFMagic):]
+		if len(rest) < backupKDFSaltLen {
+			return nil, fmt.Errorf("Failed to decrypt payload: truncated backup")
+		}
+		secret = pbkdf2.Key([]byte(password), rest[:backupKDFSaltLen], backupKDFIterations, 32, sha256.New)
+		payloadEncrypted = rest[backupKDFSaltLen:]
+	} else {
+		// Legacy backup from before the PBKDF2 format
+		var err error
+		secret, err = createHash(password)
+		if err != nil {
+			log.Warningf("Could not create hash: %+v", err)
+			return nil, fmt.Errorf("Could not create hash")
+		}
 	}
 
 	payloadUnencrypted, err := crypto.DecryptToken(secret, payloadEncrypted)
@@ -323,7 +352,8 @@ func decryptPayload(payloadEncrypted []byte, password string) (*string, error) {
 	return &payloadUnencrypted, nil
 }
 
-// createHash - Ensure the token used by crypto is at an acceptable length
+// createHash - legacy key derivation, kept so pre-PBKDF2 backups can still be
+// restored
 func createHash(password string) ([]byte, error) {
 	// Create a hash long enough to ensure with use AES-256
 	hasher := sha256.New()
