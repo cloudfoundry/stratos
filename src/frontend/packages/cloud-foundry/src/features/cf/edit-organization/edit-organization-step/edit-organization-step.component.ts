@@ -7,7 +7,7 @@ import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
-import { AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, FocusDirective, SignalStepHandle, safeUnsubscribe } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, FocusDirective, SignalStepHandle, safeUnsubscribe } from '@stratosui/core';
 import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
@@ -42,6 +42,7 @@ interface EditOrganizationForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,

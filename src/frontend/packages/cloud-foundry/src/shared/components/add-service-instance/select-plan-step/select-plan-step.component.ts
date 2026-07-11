@@ -26,6 +26,7 @@ import {
 import { ServiceCatalogDataService, SignalSource } from '../../../../../../cloud-foundry/src/services/endpoint-data/service-catalog-data.service';
 import { StServicePlan, StServicePlanVisibility } from '../../../../../../cloud-foundry/src/services/endpoint-data/stratos-types';
 import { safeUnsubscribe } from '../../../../../../core/src/core/utils.service';
+import { CardWrapperComponent } from '../../../../../../core/src/shared/components/cards/card/card.component';
 import { CardStatusComponent } from '../../../../../../core/src/shared/components/cards/card-status/card-status.component';
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
 import { MetadataItemComponent } from '../../../../../../core/src/shared/components/metadata-item/metadata-item.component';
@@ -62,6 +63,7 @@ interface SelectPlanForm {
     AsyncPipe,
     FocusDirective,
     MetadataItemComponent,
+    CardWrapperComponent,
     CardStatusComponent,
     ServicePlanPublicComponent,
     ServicePlanPriceComponent
@@ -85,6 +87,11 @@ export class SelectPlanStepComponent implements OnDestroy {
   selectedPlan$!: Observable<StServicePlan | undefined>;
   private selectedPlanAccessibilitySignal = signal<StratosStatus | null>(null);
   selectedPlanAccessibility = this.selectedPlanAccessibilitySignal.asReadonly();
+  // Observable bridge for <app-card-status [status$]> — skips the initial
+  // null so the status strip only paints once accessibility is resolved.
+  selectedPlanAccessibility$ = toObservable(this.selectedPlanAccessibility).pipe(
+    filter((status): status is StratosStatus => status !== null),
+  );
   cSIHelperService!: CreateServiceInstanceHelper;
   @ViewChild('noplans', { read: ViewContainerRef, static: true })
   noPlansDiv!: ViewContainerRef;

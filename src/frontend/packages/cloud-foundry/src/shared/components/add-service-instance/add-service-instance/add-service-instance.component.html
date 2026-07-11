@@ -7,7 +7,7 @@
   </ng-template>
   <div class="h-full">
     <app-steppers [cancel]="modeService.cancelUrl"
-      [contextSummary]="contextSummaryParts().length > 0 ? contextSummaryTpl : null">
+      [contextSummary]="contextSummaryParts().length > 0 ? contextSummaryTpl : undefined">
       @if (serviceType === serviceTypes.SERVICE) {
         @if (modeService.viewDetail.showSelectCf && !isSpaceScoped()) {
           <app-step title="Cloud Foundry" [signalHandle]="selectCFHandle">
@@ -46,8 +46,8 @@
           </app-step>
         }
         <app-step title="Service Instance" [signalHandle]="supdHandle">
-          <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="cfGuid$ | async"
-            [spaceGuid]="spaceGuid$ | async" [serviceInstanceId]="serviceInstanceId" #supd>
+          <app-specify-user-provided-details [appId]="appId" [showModeSelection]="!!appId" [cfGuid]="(cfGuid$ | async) ?? ''"
+            [spaceGuid]="(spaceGuid$ | async) ?? ''" [serviceInstanceId]="serviceInstanceId" #supd>
           </app-specify-user-provided-details>
         </app-step>
       }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, booleanAttribute, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 import {
@@ -67,7 +67,8 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
     mode: TableCellServiceBrokerComponentMode.SCOPE
   };
 
-  @Input() disableCardClick = false;
+  // Attribute form (disableCardClick / disableCardClick="true") coerces to boolean
+  @Input({ transform: booleanAttribute }) disableCardClick = false;
 
   @Input()
   set row(row: StServiceOffering) {

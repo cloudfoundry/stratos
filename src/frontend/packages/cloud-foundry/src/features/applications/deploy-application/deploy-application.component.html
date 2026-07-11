@@ -14,8 +14,8 @@
     <app-deploy-application-step2 [isRedeploy]="isRedeploy" #step2></app-deploy-application-step2>
   </app-step>
   <!-- Select the commit if source type is git -->
-  <app-step [hidden]="appGuid || (step2.sourceTypeGithub$ | async) === false" [title]="'Source Config'"
-    [skip]="skipConfig$ | async" [signalHandle]="step2_1Handle">
+  <app-step [hidden]="!!appGuid || (step2.sourceTypeGithub$ | async) === false" [title]="'Source Config'"
+    [skip]="(skipConfig$ | async) ?? false" [signalHandle]="step2_1Handle">
     <app-deploy-application-step2-1 #step2_1></app-deploy-application-step2-1>
   </app-step>
   <!-- Upload the source if source type is folder/archive  -->

@@ -3,7 +3,7 @@
 @if ((deployer.fileTransferStatus$.asObservable() | async); as fsStatus) {
   <div class="source-upload">
     <div class="source-upload__fileSize">{{ fsStatus.totalFiles }} files, {{ fsStatus.totalBytes | bytesToHumanSize }} data</div>
-    <app-upload-progress-indicator value="{{ 100 * fsStatus.filesSent / fsStatus.totalFiles }}"></app-upload-progress-indicator>
+    <app-upload-progress-indicator [value]="100 * fsStatus.filesSent / fsStatus.totalFiles"></app-upload-progress-indicator>
     @if (fsStatus.filesSent !== fsStatus.totalFiles) {
       <div class="source-upload__fileName">{{ fsStatus.fileName }}</div>
     }

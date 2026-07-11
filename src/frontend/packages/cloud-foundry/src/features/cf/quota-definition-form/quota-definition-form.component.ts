@@ -3,6 +3,7 @@ import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormCont
 import { Subscription } from 'rxjs';
 
 import {
+  AppErrorComponent,
   AppInputDirective,
   CustomCheckboxComponent,
   CustomFormFieldComponent,
@@ -29,6 +30,7 @@ export type QuotaFormValues = OrgQuotaFormValues;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,

@@ -3,7 +3,7 @@
 @let brokerAvailable = isBrokerAvailable();
 
 <div class="summary">
-  <app-tile-grid fit="true">
+  <app-tile-grid [fit]="true">
     @if (brokerAvailable) {
       <app-tile-group class="tile-group-2-cols">
         <app-tile>

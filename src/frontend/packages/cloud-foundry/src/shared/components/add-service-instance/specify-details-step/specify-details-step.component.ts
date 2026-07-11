@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
@@ -41,9 +41,8 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
 
 // Local view of the schema-form config while it is being assembled: the
-// broker schema may not have arrived (or may not exist for the plan), so
-// `schema` is optional here even though SchemaFormConfig declares it
-// required. SchemaFormComponent.config tolerates an absent schema.
+// broker schema may not have arrived (or may not exist for the plan).
+// SchemaFormComponent.config tolerates an absent schema.
 type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: object };
 
 @Component({
@@ -56,6 +55,7 @@ type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: objec
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
@@ -497,7 +497,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     ).subscribe());
   }
 
-  addTagFromInput(event: KeyboardEvent): void {
+  // (keydown.*) template events are typed as plain Event by the compiler
+  addTagFromInput(event: Event): void {
     event.preventDefault();
     const input = event.target as HTMLInputElement;
     const value = input.value;

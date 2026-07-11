@@ -8,7 +8,7 @@
   </div>
   <app-enumerate [collection]="usersNames$"></app-enumerate>
 </div>
-@if ((usersWithWarning$ | async).length) {
+@if ((usersWithWarning$ | async)?.length) {
   <div class="modify-users__users-warning"><i>* Not all roles are known for user.</i></div>
 }
 <app-role-assignment

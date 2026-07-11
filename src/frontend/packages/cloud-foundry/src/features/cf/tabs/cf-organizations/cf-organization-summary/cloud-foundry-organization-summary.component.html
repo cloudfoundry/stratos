@@ -16,12 +16,12 @@
   </button>
   <app-polling-indicator class="ml-auto"
     [manualPoll]="(cfOrgService.loadingApps$ | async) === false"
-    [isPolling]="(cfOrgService.loadingApps$ | async)"
+    [isPolling]="(cfOrgService.loadingApps$ | async) ?? false"
     (poll)="cfOrgService.fetchApps()">
   </app-polling-indicator>
 </app-page-sub-nav>
 <div>
-  <app-tile-grid fit="true">
+  <app-tile-grid [fit]="true">
     <app-tile-group class="tile-group-1-cols">
       <app-tile>
         <app-card-cf-org-user-details>
@@ -69,7 +69,7 @@
             value="{{ cfOrgService.serviceInstancesCount() }}"
           limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalServiceInstances }}"></app-card-number-metric>
         </app-tile>
-        @if ((cfOrgService.userProvidedServiceInstancesCount$ | async) > 0) {
+        @if (((cfOrgService.userProvidedServiceInstancesCount$ | async) ?? 0) > 0) {
           <app-tile>
             <app-card-number-metric iconFont="stratos-icons" icon="service_instance" label="User Service Instances"
             value="{{ (cfOrgService.userProvidedServiceInstancesCount$ | async) }}"></app-card-number-metric>

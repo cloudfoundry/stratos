@@ -12,7 +12,7 @@
         <p>3. Login</p>
         <app-code-block>cf login</app-code-block>
         <p>Output</p>
-        <app-code-block codeBlockStyle="pre" hideCopy="true">
+        <app-code-block codeBlockStyle="pre" [hideCopy]="true">
           <pre>API endpoint: <b>{{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</b>
           Email> {{context.username || '[username]'}}
           Password> [password]

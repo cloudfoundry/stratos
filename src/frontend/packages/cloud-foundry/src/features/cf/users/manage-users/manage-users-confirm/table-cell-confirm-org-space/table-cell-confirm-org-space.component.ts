@@ -14,12 +14,13 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
   ]
 })
 export class TableCellConfirmOrgSpaceComponent extends TableCellCustom<CfRoleChangeWithNames> {
-  chipsConfig!: AppChip<CfRoleChangeWithNames>[];
+  chipsConfig!: AppChip[];
   @Input()
   set row(row: CfRoleChangeWithNames) {
     super.row = row;
-    const chipConfig = new AppChip<CfRoleChangeWithNames>();
-    chipConfig.key = row;
+    // key is only used by app-chips as a track identity; the single chip's
+    // value is unique here, so the default (string) key type suffices.
+    const chipConfig = new AppChip();
     chipConfig.value = row.spaceGuid ? `Space: ${row.spaceName}` : `Org: ${row.orgName}`;
     this.chipsConfig = [chipConfig];
   }

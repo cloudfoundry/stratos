@@ -9,6 +9,8 @@
         }
       </app-select>
     </app-form-field>
-    <app-cf-service-card disableCardClick="true" [row]="selectedService$ | async"></app-cf-service-card>
+    @if (selectedService$ | async; as selectedService) {
+      <app-cf-service-card disableCardClick="true" [row]="selectedService"></app-cf-service-card>
+    }
   </form>
 </div>

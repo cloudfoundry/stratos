@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
@@ -52,6 +52,7 @@ const { proxyAPIVersion } = environment;
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
@@ -396,7 +397,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
 
-  public addTagFromInput(event: KeyboardEvent): void {
+  // (keydown.*) template events are typed as plain Event by the compiler
+  public addTagFromInput(event: Event): void {
     event.preventDefault();
     const input = event.target as HTMLInputElement;
     const label = (input.value || '').trim();
