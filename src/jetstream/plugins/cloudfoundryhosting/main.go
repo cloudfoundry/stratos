@@ -294,6 +294,8 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity
 			w := c.Response().Writer
 			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
+			// CF hosting always terminates TLS (X-Forwarded-Proto is enforced above)
+			cookie.Secure = true
 			http.SetCookie(w, cookie)
 		}
 		return h(c)
