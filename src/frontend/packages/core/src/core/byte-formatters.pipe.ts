@@ -5,13 +5,13 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true
 })
 export class BytesToHumanSize implements PipeTransform {
-  transform(value: string): string {
+  transform(value: string | number): string {
     // Handle null/undefined/empty string
     if (value == null || value === '') {
       return '';
     }
 
-    const bytes = parseInt(value, 10);
+    const bytes = parseInt(String(value), 10);
 
     // Type guard: ensure parsing succeeded
     if (isNaN(bytes)) {

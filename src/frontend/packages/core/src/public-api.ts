@@ -127,7 +127,11 @@ export { TileComponent } from './shared/components/tile/tile/tile.component';
 export { LoadingPageComponent } from './shared/components/loading-page/loading-page.component';
 export { StatefulIconComponent } from './core/stateful-icon/stateful-icon.component';
 export { AppChipsComponent, AppChip, IAppChip } from './shared/components/chips/chips.component';
-export { BooleanIndicatorComponent } from './shared/components/boolean-indicator/boolean-indicator.component';
+export {
+  BooleanIndicatorComponent,
+  BooleanIndicatorType,
+  BooleanIndicatorTypeValue,
+} from './shared/components/boolean-indicator/boolean-indicator.component';
 export { CopyToClipboardComponent } from './shared/components/copy-to-clipboard/copy-to-clipboard.component';
 export { NoContentMessageComponent } from './shared/components/no-content-message/no-content-message.component';
 export { UploadProgressIndicatorComponent } from './shared/components/upload-progress-indicator/upload-progress-indicator.component';

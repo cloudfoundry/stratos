@@ -35,7 +35,7 @@
         class="metrics-range-parent-selector__date-range">
         <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start" [(end)]="rangeSelectorManager.end"></app-start-end-date>
         <div class="metrics-range-parent-selector__date-range-buttons">
-          <button class="btn btn-primary metrics-range-parent-selector__date-set" type="button" (click)="rangeSelectorManager.commit()"
+          <button class="btn btn-primary metrics-range-parent-selector__date-set" type="button" (click)="rangeSelectorManager.commit?.()"
           [disabled]="!rangeSelectorManager.dateValid || !rangeSelectorManager.commit">Set</button>
         </div>
       </div>

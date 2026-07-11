@@ -60,4 +60,9 @@ export class StatefulIconComponent {
     };
 
   public selectedState!: StatefulIconDefinition;
+
+  // Narrows the icon/template union for the template
+  get selectedStateIcon(): string {
+    return this.selectedState && 'icon' in this.selectedState ? this.selectedState.icon : '';
+  }
 }

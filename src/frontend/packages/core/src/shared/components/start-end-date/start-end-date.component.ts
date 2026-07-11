@@ -23,8 +23,9 @@ export class StartEndDateComponent {
     this.isValid.emit(this.validValue);
   }
 
+  // Accepts null/undefined so callers can bind not-yet-chosen range values
   @Input()
-  set start(start: Date) {
+  set start(start: Date | null | undefined) {
     this.valid = true;
     if (start && isValid(start)) {
       const clone = new Date(start);
@@ -37,12 +38,12 @@ export class StartEndDateComponent {
     }
   }
 
-  get start() {
+  get start(): Date | undefined {
     return this.startValue;
   }
 
   @Input()
-  set end(end: Date) {
+  set end(end: Date | null | undefined) {
     this.valid = true;
     if (end && isValid(end)) {
       const clone = new Date(end);
@@ -55,7 +56,7 @@ export class StartEndDateComponent {
     }
   }
 
-  get end() {
+  get end(): Date | undefined {
     return this.endValue;
   }
   @Output()
@@ -69,37 +70,42 @@ export class StartEndDateComponent {
   public validValue = true;
   public validMessage: string | null = null;
 
-  private startValue!: Date;
-  private endValue!: Date;
+  // Undefined until a valid date is set — validators see undefined for a missing date
+  private startValue?: Date;
+  private endValue?: Date;
 
-  private lastValidStartValue!: Date;
-  private lastValidEndValue!: Date;
+  private lastValidStartValue?: Date;
+  private lastValidEndValue?: Date;
 
   private emitChanges() {
-    if (this.isDifferentDate(this.lastValidStartValue, this.startValue)) {
+    if (this.startValue && this.isDifferentDate(this.lastValidStartValue, this.startValue)) {
       this.lastValidStartValue = this.startValue;
       this.startChange.emit(this.startValue);
     }
-    if (this.isDifferentDate(this.lastValidEndValue, this.endValue)) {
+    if (this.endValue && this.isDifferentDate(this.lastValidEndValue, this.endValue)) {
       this.lastValidEndValue = this.endValue;
       this.endChange.emit(this.endValue);
     }
   }
 
+  // Undefined (caller bound nothing) falls back to the default range check.
+  // Validators receive whichever date is missing as null/undefined, so a custom
+  // validator can also check a lone date.
   @Input()
-  public validate: (start: Date, end: Date) => string | null = (start: Date, end: Date): string | null => {
-    if (!end || !start) {
-      return null;
+  public validate: ((start: Date | undefined, end: Date | undefined) => string | null) | undefined =
+    (start: Date | undefined, end: Date | undefined): string | null => {
+      if (!end || !start) {
+        return null;
+      }
+      return isBefore(end, start) ? 'Start date must be before end date.' : null;
     }
-    return isBefore(end, start) ? 'Start date must be before end date.' : null;
-  }
 
-  private pValidate(start: Date, end: Date): boolean {
-    this.validMessage = this.validate(start, end);
+  private pValidate(start: Date | undefined, end: Date | undefined): boolean {
+    this.validMessage = this.validate ? this.validate(start, end) : null;
     return !this.validMessage;
   }
 
-  private isDifferentDate(oldDate: Date, newDate: Date) {
+  private isDifferentDate(oldDate: Date | undefined, newDate: Date | undefined) {
     return !oldDate || !newDate || !isEqual(oldDate, newDate);
   }
 }

@@ -17,6 +17,7 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 })
 export class ApplicationStateIconComponent {
 
-  @Input() public status!: StratosStatus;
+  // Accepts null so callers can bind `status$ | async` directly
+  @Input() public status!: StratosStatus | null;
 
 }

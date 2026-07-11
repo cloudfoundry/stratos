@@ -88,6 +88,13 @@ export class AppChipsComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  // displayProperty allows callers to render arbitrary chip-shaped objects,
+  // so the lookup has to go through a dynamic string key
+  public getDisplayValue(chip: AppChip): string {
+    const value: unknown = Reflect.get(chip, this.displayProperty);
+    return value == null ? '' : String(value);
+  }
+
   public getChipClasses(color?: string): string {
     if (!color) {
       return 'bg-content-secondary border-content-border text-content-text';

@@ -14,10 +14,10 @@
               class="app-chip__link hover:underline"
               [routerLink]="[chip.url.link]"
               [queryParams]="chip.url.params">
-              {{chip[displayProperty]}}
+              {{getDisplayValue(chip)}}
             </a>
           } @else {
-            <div class="flex-1 h-[18px] leading-[18px] break-all">{{chip[displayProperty]}}</div>
+            <div class="flex-1 h-[18px] leading-[18px] break-all">{{getDisplayValue(chip)}}</div>
           }
           @if (chip.clearAction && (chip.hideClearButton$ | async) === false) {
             @if (!chip.busy || (chip.busy | async) === false) {

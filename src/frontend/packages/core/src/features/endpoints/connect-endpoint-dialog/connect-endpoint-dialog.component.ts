@@ -72,8 +72,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.hasConnected.unsubscribe();
   }
 
-  public setHelpLink(link: string) {
-    this._helpDocument.set(link);
+  // Auth types without a help document emit `help: undefined`.
+  public setHelpLink(link: string | undefined) {
+    this._helpDocument.set(link ?? null);
   }
 
   public connect() {

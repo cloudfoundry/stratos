@@ -34,7 +34,9 @@
               }
             </div>
           }
-          <app-entity-favorite-star [confirmRemoval]="true" [favorite]="favorite"></app-entity-favorite-star>
+          @if (favorite; as fav) {
+            <app-entity-favorite-star [confirmRemoval]="true" [favorite]="fav"></app-entity-favorite-star>
+          }
         </div>
       </div>
     </div>

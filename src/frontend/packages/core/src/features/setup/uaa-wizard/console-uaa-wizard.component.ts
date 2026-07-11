@@ -62,7 +62,7 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   private uaaSetup$ = toObservable(this.uaaSetupSignals.uaaSetup);
   private auth$ = toObservable(this.authSignals.auth);
 
-  private clientRedirectURI: string;
+  protected clientRedirectURI: string;
 
   constructor() {
     // Client Redirect URI for SSO
@@ -73,6 +73,8 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   uaaScopes: string[] = [];
   selectedScope = '';
   applyingSetup = signal<boolean>(false);
+  // app-loading-page takes an Observable<boolean> — bridge the signal.
+  applyingSetup$ = toObservable(this.applyingSetup);
 
   // Tracks UAA form validity for the first step's signal handle. Updated
   // from the form's valueChanges subscription in ngOnInit so the step's

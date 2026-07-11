@@ -38,7 +38,8 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
 
   public validate!: Observable<boolean>;
-  public helpDocumentUrl!: string;
+  // Unset until an auth type with a help document is selected.
+  public helpDocumentUrl: string | undefined;
   public connectService!: ConnectEndpointService;
 
   // FWT-959 Part 2: signal-backed mirrors of `valid` and `doConnect` so
@@ -54,6 +55,9 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   set doConnect(v: boolean) { this.doConnectSignal.set(v); }
 
   showHelp() {
+    if (!this.helpDocumentUrl) {
+      return;
+    }
     this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
   }
 

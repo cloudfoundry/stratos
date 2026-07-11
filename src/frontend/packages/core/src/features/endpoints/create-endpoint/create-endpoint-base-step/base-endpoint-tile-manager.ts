@@ -15,6 +15,17 @@ export interface ICreateEndpointTilesData extends ITileData {
   type: string;
   parentType: string;
 }
+
+/**
+ * The tile selector's `(selection)` output is typed with the base ITileData
+ * shape (and emits null on deselect). Tiles built by BaseEndpointTileManager
+ * always carry the create-endpoint data, so narrow with a runtime check.
+ */
+export function isCreateEndpointTile(
+  tile: ITileConfig | null
+): tile is ITileConfig<ICreateEndpointTilesData> {
+  return !!tile && !!tile.data && typeof tile.data.type === 'string' && typeof tile.data.parentType === 'string';
+}
 type ExpandedEndpoint<T = number> = {
   current: number,
   limit: T;

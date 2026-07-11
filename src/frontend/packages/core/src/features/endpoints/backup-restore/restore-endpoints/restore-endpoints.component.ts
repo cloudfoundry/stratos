@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
-import { MatCheckboxChange } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { EndpointsDataService, httpErrorResponseToSafeString } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, defaultIfEmpty, map } from 'rxjs/operators';
@@ -87,8 +86,9 @@ export class RestoreEndpointsComponent {
     this.service.setFile(file);
   }
 
-  onIgnoreDbChange(event: MatCheckboxChange) {
-    this.service.setIgnoreDbVersion(event.checked);
+  // Native checkbox change event (the template uses a plain <input type="checkbox">).
+  onIgnoreDbChange(event: Event) {
+    this.service.setIgnoreDbVersion((event.target as HTMLInputElement).checked);
   }
 
   private runRestore(): Promise<void> {

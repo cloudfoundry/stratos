@@ -561,10 +561,11 @@
                 @if (col.kind === 'favorite' || col.kind === 'actions') {
                   <!-- Suppressed: rendered in the leading controls cell -->
                 } @else {
+                <!-- favorite/actions kinds are excluded by the branch above -->
                 <td class="px-3 py-2 align-top text-sm text-content-text"
-                    [class.truncate]="col.kind !== 'actions' && col.kind !== 'favorite' && col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
-                    [class.overflow-visible]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
-                    [attr.title]="col.kind === 'actions' || col.kind === 'favorite' || col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">
+                    [class.truncate]="col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
+                    [class.overflow-visible]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
+                    [attr.title]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">
                   @if (col.externalLink && col.externalLink(row); as href) {
                     <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
                       <span class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}
@@ -607,49 +608,6 @@
                           class="text-xs text-content-muted hover:text-accent hover:underline cursor-pointer self-start mt-0.5">
                           …show fewer
                         </button>
-                      }
-                    </div>
-                  } @else if (col.kind === 'favorite' && col.favorite) {
-                    <button
-                      data-test="favorite-star"
-                      type="button"
-                      (click)="onToggleFavorite(col, row, $event)"
-                      [title]="isFavorite(col, row) ? 'Remove from favorites' : 'Add to favorites'"
-                      class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
-                      <span class="material-icons text-xl leading-none" [class.text-accent]="isFavorite(col, row)">
-                        {{ isFavorite(col, row) ? 'star' : 'star_border' }}
-                      </span>
-                    </button>
-                  } @else if (col.kind === 'actions' && col.actions) {
-                    <div class="relative inline-block">
-                      <button
-                        data-test="row-actions"
-                        type="button"
-                        (click)="toggleRowActions(row, $event)"
-                        title="Actions"
-                        class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent">
-                        <span class="material-icons text-xl leading-none">more_vert</span>
-                      </button>
-                      @if (openActionsRowKey() === config.getRowKey(row)) {
-                        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- not interactive; (click) is only a stopPropagation guard so a click inside the menu doesn't bubble to the outside-click closer. Actions are real focusable <button>s below. -->
-                        <div
-                          data-test="row-actions-menu"
-                          (click)="$event.stopPropagation()"
-                          class="absolute right-0 top-full mt-1 z-20 min-w-[12rem] bg-content-bg border border-content-border rounded shadow-lg py-2">
-                          @for (act of col.actions(row); track act.label) {
-                            <button
-                              type="button"
-                              [disabled]="act.disabled"
-                              (click)="invokeAction(act, row, $event)"
-                              class="w-full text-left px-3 py-1.5 text-sm hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                              [class.text-danger]="act.danger">
-                              @if (act.icon) {
-                                <span class="material-icons text-base leading-none">{{ act.icon }}</span>
-                              }
-                              <span>{{ act.label }}</span>
-                            </button>
-                          }
-                        </div>
                       }
                     </div>
                   } @else if (col.kind === 'radio' && col.radio) {

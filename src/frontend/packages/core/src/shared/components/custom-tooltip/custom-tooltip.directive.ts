@@ -1,8 +1,10 @@
-import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject } from '@angular/core';
+import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject, numberAttribute } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Directive({
   selector: '[matTooltip]',
+  // Material parity: templates use #ref="matTooltip"
+  exportAs: 'matTooltip',
   standalone: true
 })
 export class CustomTooltipDirective implements OnDestroy {
@@ -14,8 +16,9 @@ export class CustomTooltipDirective implements OnDestroy {
   @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
   // eslint-disable-next-line @angular-eslint/no-input-rename -- intentional: drop-in replacement for Angular Material's matTooltip; the matTooltipClass alias IS the public API
   @Input('matTooltipClass') tooltipClass: string = '';
-  @Input('matTooltipShowDelay') showDelay: number = 250;
-  @Input('matTooltipHideDelay') hideDelay: number = 100;
+  // Coerce attribute-form values (matTooltipShowDelay="1000") like Material did
+  @Input({ alias: 'matTooltipShowDelay', transform: numberAttribute }) showDelay: number = 250;
+  @Input({ alias: 'matTooltipHideDelay', transform: numberAttribute }) hideDelay: number = 100;
   @Input('matTooltipDisabled') disabled: boolean = false;
 
   private tooltipElement: HTMLElement | null = null;

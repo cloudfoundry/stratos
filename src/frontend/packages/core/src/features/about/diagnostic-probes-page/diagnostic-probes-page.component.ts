@@ -48,7 +48,9 @@ export class DiagnosticProbesPageComponent {
     void this.endpoints.whenReady();
   }
 
-  stateFor(guid: string): ProbeState {
+  // guid is optional on EndpointModel; an endpoint without one has no probe state.
+  stateFor(guid: string | undefined): ProbeState {
+    if (!guid) { return { running: false }; }
     return this.states().get(guid) ?? { running: false };
   }
 
@@ -66,7 +68,8 @@ export class DiagnosticProbesPageComponent {
     return 'ok';
   }
 
-  async probe(guid: string): Promise<void> {
+  async probe(guid: string | undefined): Promise<void> {
+    if (!guid) { return; }
     this.patch(guid, { running: true, result: undefined, error: undefined });
     try {
       const result = await firstValueFrom(

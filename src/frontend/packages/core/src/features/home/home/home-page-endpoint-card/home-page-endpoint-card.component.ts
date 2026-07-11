@@ -74,7 +74,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   // strict: assigned by the @Input set layout accessor; reads are guarded with if (this.rawLayout)
   private rawLayout!: HomePageCardLayout;
 
-  @Input() set layout(value: HomePageCardLayout) {
+  // Null until the parent's persisted layout hydrates; the guard below skips it.
+  @Input() set layout(value: HomePageCardLayout | null) {
     if (value) {
       this.rawLayout = value;
       this.computeEffectiveLayout();

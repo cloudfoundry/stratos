@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
@@ -48,6 +48,7 @@ interface EditEndpointForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
@@ -177,9 +178,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     });
   }
 
-  get name() { return this.editEndpoint.get('name'); }
+  // Typed controls (get('name') would return AbstractControl | null).
+  get name() { return this.editEndpoint.controls.name; }
 
-  get clientID() { return this.editEndpoint.get('clientID'); }
+  get clientID() { return this.editEndpoint.controls.clientID; }
 
   updateControls() {
     if (!this.setClientInfo) {

@@ -226,7 +226,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
    * Finds the clicked option by matching the DOM element to the
    * ContentChildren QueryList, bypassing subscription timing issues.
    */
-  onOptionsClick(event: MouseEvent) {
+  onOptionsClick(event: Event) {
     const clickTarget = event.target as HTMLElement;
     const target = clickTarget.closest('.custom-option-content');
     if (!target) return;

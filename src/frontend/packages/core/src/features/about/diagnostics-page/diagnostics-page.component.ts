@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
-import { SessionData } from '@stratosui/store';
+import { Diagnostics, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { BUILD_INFO } from '../../../environments/build-info';
@@ -19,6 +20,7 @@ import { BUILD_INFO } from '../../../environments/build-info';
   imports: [
     CommonModule,
     BooleanIndicatorComponent,
+    CardWrapperComponent,
     CustomIconComponent,
     InfoCardComponent
   ],
@@ -31,9 +33,8 @@ export class DiagnosticsPageComponent implements OnInit {
 
   // toObservable() requires an injection context — bridge the signal here
   // (field initializer runs in DI context) rather than in ngOnInit (which is not).
-  sessionData$: Observable<SessionData> = toObservable(this.auth.sessionData).pipe(
-    filter((sessionData): sessionData is SessionData => !!sessionData),
-    filter(sessionData => !!sessionData.diagnostics)
+  sessionData$: Observable<SessionData & { diagnostics: Diagnostics; }> = toObservable(this.auth.sessionData).pipe(
+    filter((sessionData): sessionData is SessionData & { diagnostics: Diagnostics; } => !!sessionData && !!sessionData.diagnostics)
   );
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;

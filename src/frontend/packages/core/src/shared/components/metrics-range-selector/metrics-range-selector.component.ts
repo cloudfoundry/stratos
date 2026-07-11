@@ -86,7 +86,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
   }
 
   @Input()
-  public validate?: (start: Date, end: Date) => string;
+  public validate?: (start: Date | undefined, end: Date | undefined) => string;
 
   set showOverlay(show: boolean) {
     this.showOverlayValue = show;

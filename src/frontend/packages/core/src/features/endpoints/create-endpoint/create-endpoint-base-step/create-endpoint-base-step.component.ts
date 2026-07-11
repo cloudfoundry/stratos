@@ -10,7 +10,7 @@ import {
 import { SessionSignalService } from '../../../../core/signals/session-signal.service';
 import { BASE_REDIRECT_QUERY } from '../../../../shared/components/stepper/stepper.types';
 import { ITileConfig } from '../../../../shared/components/tile/tile-selector.types';
-import { BaseEndpointTileManager, ICreateEndpointTilesData } from './base-endpoint-tile-manager';
+import { BaseEndpointTileManager, ICreateEndpointTilesData, isCreateEndpointTile } from './base-endpoint-tile-manager';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
@@ -46,6 +46,14 @@ export class CreateEndpointBaseStepComponent extends BaseEndpointTileManager {
         `endpoints/new/${tile.data.parentType || tile.data.type}/${tile.data.parentType ? tile.data.type : ''}`.split('/'),
         { queryParams: { [BASE_REDIRECT_QUERY]: 'endpoints/new' } }
       );
+    }
+  }
+
+  // The tile selector emits the base ITileConfig shape (or null on deselect);
+  // narrow before handing off to the typed selectedTile setter.
+  onTileSelected(tile: ITileConfig | null) {
+    if (isCreateEndpointTile(tile)) {
+      this.selectedTile = tile;
     }
   }
 
