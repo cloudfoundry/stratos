@@ -11,7 +11,7 @@
  * 5. Signal ready for Angular build
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -123,12 +123,12 @@ async function runTool(tool, context = {}) {
     // Execute tool with inherited stdio for real-time output
     // Run from project root, not from build directory
     const projectRoot = path.resolve(__dirname, '..');
-    const args = tool.args ? (Array.isArray(tool.args) ? tool.args.join(' ') : tool.args) : '';
-    
-    // Use tsx for TypeScript files, node for JavaScript
-    const runner = tool.useTsx ? 'npx tsx' : 'node';
-    const command = `${runner} ${toolPath} ${args}`.trim();
-    execSync(command, {
+    const toolArgs = tool.args ? (Array.isArray(tool.args) ? tool.args : [tool.args]) : [];
+
+    // Use tsx for TypeScript files, node for JavaScript. Pass argv as an
+    // array to execFileSync so paths/args are never parsed by a shell.
+    const [cmd, ...runnerPrefix] = tool.useTsx ? ['npx', 'tsx'] : ['node'];
+    execFileSync(cmd, [...runnerPrefix, toolPath, ...toolArgs], {
       stdio: 'inherit',
       cwd: projectRoot,
       env: {

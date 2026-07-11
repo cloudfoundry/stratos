@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {execSync} = require('child_process');
+const {execSync, execFileSync} = require('child_process');
 
 const ROOT_DIR = path.join(__dirname, '..');
 
@@ -20,11 +20,17 @@ function error(message) {
 
 function runScript(scriptName, scriptPath) {
   log(`Running ${scriptName}...`);
+  // Run the script as .cjs so Node treats it as CommonJS regardless of the
+  // workspace "type": "module", then rename back. Done with fs/execFileSync
+  // rather than a shell string so the paths are never parsed by a shell.
+  const cjsPath = scriptPath.replace('.js', '.cjs');
   try {
-    execSync(`sh -c 'mv ${scriptPath} ${scriptPath.replace('.js', '.cjs')} 2>/dev/null || true && node ${scriptPath.replace('.js', '.cjs')} && mv ${scriptPath.replace('.js', '.cjs')} ${scriptPath} 2>/dev/null || true'`, {
-      cwd: ROOT_DIR,
-      stdio: 'inherit'
-    });
+    try { fs.renameSync(scriptPath, cjsPath); } catch { /* may already be .cjs */ }
+    try {
+      execFileSync('node', [cjsPath], {cwd: ROOT_DIR, stdio: 'inherit'});
+    } finally {
+      try { fs.renameSync(cjsPath, scriptPath); } catch { /* nothing to restore */ }
+    }
     log(`✓ ${scriptName} complete`);
     return true;
   } catch (err) {
