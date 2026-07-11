@@ -10,13 +10,13 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@angular-devkit/build-angular": "21.2.14",
-    "@angular-devkit/core": "21.2.14",
-    "@angular-devkit/schematics": "21.2.14",
+    "@angular-devkit/build-angular": "21.2.19",
+    "@angular-devkit/core": "21.2.19",
+    "@angular-devkit/schematics": "21.2.19",
     "typescript": "5.9.2"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "0.2102.14"
+    "@angular-devkit/architect": "0.2102.19"
   },
   "overrides": {
     "undici": "7.28.0",
