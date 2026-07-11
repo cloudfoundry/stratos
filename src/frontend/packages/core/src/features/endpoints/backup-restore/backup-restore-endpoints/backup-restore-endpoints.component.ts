@@ -36,7 +36,8 @@ export class BackupRestoreEndpointsComponent {
   // to consumers that drive validity reactively.
   signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
 
-  set selectedTile(tile: ITileConfig<IAppTileData>) {
+  // The tile selector emits the base ITileConfig shape (or null on deselect).
+  set selectedTile(tile: ITileConfig | null) {
     if (tile && tile.data) {
       const url = 'endpoints/backup-restore/' + tile.data.type;
       this.router.navigate(url.split('/'));

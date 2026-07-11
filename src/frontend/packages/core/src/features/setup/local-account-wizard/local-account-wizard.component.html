@@ -1,12 +1,12 @@
 <div class="setup flex flex-col h-full">
-  <app-page-header hideMenu="true" [showHistory]="false">
+  <app-page-header [hideMenu]="true" [showHistory]="false">
     <h1>{{title}} Setup with Local Admin Account</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
     <app-steppers class="flex flex-1 my-6" [cancel]="'/setup'">
       <app-step title="Local Account Information" [signalHandle]="signalHandle">
-        <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
+        <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
           text="Please wait - this will take a few moments">
           <div class="space-y-6">
             <div class="space-y-4">

@@ -5,7 +5,7 @@
         <h1 class="edit-endpoint__section-title text-base font-medium mb-4" style="color: var(--content-text);">{{definition.label}} Information</h1>
         <app-form-field>
           <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="name" name="name" formControlName="name" required placeholder="Name"
-            [appUnique]="(existingEndpoinNames$ | async)">
+            [appUnique]="(existingEndpointNames$ | async) ?? []">
           @if (name.errors && name.errors.required) {
             <app-error>Name is required</app-error>
           }

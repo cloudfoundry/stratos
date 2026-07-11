@@ -111,7 +111,7 @@
                     'btn-primary': !steps[currentIndex()].destructiveStep
                   }"
                 type="submit"
-                (click)="goNext(currentIndex())"
+                (click)="goNext()"
                 [disabled]="steps[currentIndex()].busy || steps[currentIndex()].blocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
                 @if (showNextButtonProgress) {

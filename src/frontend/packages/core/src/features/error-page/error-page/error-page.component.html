@@ -1,6 +1,6 @@
 @if (errorDetails$ | async; as errorDetails) {
   <app-page-header [hideEndpointErrors]="true">
-    <h1>{{ errorDetails.endpoint.name }} — Errors</h1>
+    <h1>{{ errorDetails.endpoint?.name }} — Errors</h1>
     <div class="page-header-right">
       <span>
         <button class="btn btn-icon" type="button" title="Close" [routerLink]="back$ | async" [queryParams]="backParams$ | async">
@@ -13,7 +13,7 @@
     @if (errorDetails.errors && errorDetails.errors.length) {
       <div class="flex items-center gap-2 mt-4 mb-2">
         <button class="btn btn-primary" type="button" aria-label="Dismiss errors"
-          (click)="dismissEndpointErrors(errorDetails.endpoint.guid)">
+          (click)="dismissEndpointErrors(errorDetails.endpoint?.guid)">
           Dismiss all
         </button>
         <a class="btn btn-icon" [href]="jsonDownloadHref$ | async"

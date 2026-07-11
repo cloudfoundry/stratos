@@ -4,13 +4,15 @@ import { entityCatalog, EndpointModel } from '@stratosui/store';
 
 import { TableCellCustom } from '../../signal-list/cell-base';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
+import { AppSpinnerComponent } from '../../progress-spinner/app-spinner.component';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
   templateUrl: './table-cell-endpoint-status.component.html',
   standalone: true,
   imports: [
-    CustomIconComponent
+    CustomIconComponent,
+    AppSpinnerComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

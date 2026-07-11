@@ -14,9 +14,9 @@
           placeholder="Name"
           class="w-full placeholder:!text-transparent focus:outline-none"
           [appUnique]="
-            registerForm.value.createSystemEndpointField
+            (registerForm.value.createSystemEndpointField
               ? $safeNavigationMigration((customEndpoints | async)?.names)
-              : $safeNavigationMigration((existingPersonalEndpoints | async)?.names)
+              : $safeNavigationMigration((existingPersonalEndpoints | async)?.names)) ?? []
           "
         />
         @if (registerForm.controls.nameField.errors?.required) {

@@ -50,7 +50,11 @@ export class ErrorPageComponent implements OnInit {
   public icon = StratosStatus.ERROR;
   public jsonDownloadHref$?: Observable<SafeUrl>;
 
-  public dismissEndpointErrors(endpointGuid: string) {
+  // The endpoint may not have resolved yet (guid optional on EndpointModel).
+  public dismissEndpointErrors(endpointGuid: string | undefined) {
+    if (!endpointGuid) {
+      return;
+    }
     this.errorEvents.clearEndpoint(endpointGuid);
   }
 

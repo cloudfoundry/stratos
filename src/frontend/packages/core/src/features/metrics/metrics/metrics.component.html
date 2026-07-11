@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">{{ (metricsEndpoint$ | async)?.provider.name }}</app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">{{ (metricsEndpoint$ | async)?.provider?.name }}</app-page-header>
 
 @if ((metricsEndpoint$ | async); as ep) {
   <div class="p-6">

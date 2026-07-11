@@ -1,5 +1,5 @@
 <div class="setup flex flex-col h-full">
-  <app-page-header hideMenu="true" [showHistory]="false">
+  <app-page-header [hideMenu]="true" [showHistory]="false">
     <h1>{{title}} Setup with Cloud Foundry UAA</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
@@ -87,7 +87,7 @@
     </div>
   </app-step>
   <app-step title="Admin Scope" [signalHandle]="uaaScopeStepHandle">
-    <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
+    <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
         <p class="text-content-text">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>

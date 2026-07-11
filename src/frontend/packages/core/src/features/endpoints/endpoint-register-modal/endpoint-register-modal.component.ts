@@ -10,7 +10,11 @@ import {
 
 import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { ITileConfig } from '../../../shared/components/tile/tile-selector.types';
-import { BaseEndpointTileManager, ICreateEndpointTilesData } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
+import {
+  BaseEndpointTileManager,
+  ICreateEndpointTilesData,
+  isCreateEndpointTile,
+} from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
 import { TileSelectorComponent } from '../../../shared/components/tile-selector/tile-selector.component';
 
 @Component({
@@ -73,8 +77,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     this.closeModal();
   }
 
-  onTileSelected(tile: ITileConfig<ICreateEndpointTilesData>) {
-    if (tile) {
+  // The tile selector emits the base ITileConfig shape (or null on deselect);
+  // narrow before storing/loading the typed create-endpoint tile.
+  onTileSelected(tile: ITileConfig | null) {
+    if (isCreateEndpointTile(tile)) {
       this.selectedEndpointInfo = tile;
       // Force the @if(selectedEndpointInfo) branch to render synchronously
       // so the #endpointFormContainer ViewChild is available — then load

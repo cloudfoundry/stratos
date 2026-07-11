@@ -17,7 +17,7 @@
   }
   @if (userProfile$ | async; as profile) {
     <app-user-profile-banner [user]="profile"
-      [allowGravatar]="allowGravatar$ | async">
+      [allowGravatar]="(allowGravatar$ | async) ?? false">
     </app-user-profile-banner>
   }
   @if (userProfile$ | async; as profile) {
@@ -73,7 +73,7 @@
               <h3 class="card-title">Groups</h3>
             </div>
             <div class="card-body">
-              <app-chips [chips]="profile.groups" [stacked]="false" lowerLimit="20" displayProperty="display"></app-chips>
+              <app-chips [chips]="profile.groups ?? []" [stacked]="false" [lowerLimit]="20" displayProperty="display"></app-chips>
             </div>
           </div>
         }

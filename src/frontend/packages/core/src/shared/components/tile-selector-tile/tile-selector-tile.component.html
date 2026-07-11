@@ -6,11 +6,11 @@
       (keydown.enter)="onClick(tile)"
       (keydown.space)="onClick(tile); $event.preventDefault()">
       <div class="tile-selector__header">
-        @if (tile.graphic.matIcon) {
+        @if (iconGraphic; as graphic) {
           <app-custom-icon class="tile-selector__icon"
-          [fontSet]="tile.graphic.matIconFont"> {{ tile.graphic.matIcon }}</app-custom-icon>
-        } @else {
-          <img src="{{tile.graphic.location}}" [style.transform]="tile.graphic.transform" alt="" />
+          [fontSet]="graphic.matIconFont"> {{ graphic.matIcon }}</app-custom-icon>
+        } @else if (imageGraphic; as graphic) {
+          <img src="{{graphic.location}}" [style.transform]="graphic.transform" alt="" />
         }
       </div>
       <div class="tile-selector__content">

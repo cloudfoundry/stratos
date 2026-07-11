@@ -20,6 +20,7 @@ import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
+import { StratosActionType } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -146,7 +147,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public unreadEventCount$: Observable<number>;
   public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
-  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
         this.pFavorite = favorite;
@@ -179,10 +180,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public refreshToken$!: Observable<string>;
   public tokenExpiry$!: Observable<Date | null>;
 
-  public actionsKey: string | null;
+  public actionsKey: StratosActionType | null;
 
   @Input()
-  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
+  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
     this.latestBreadcrumbs = breadcrumbs;
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
     this.cdr.markForCheck();
@@ -191,7 +192,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
   @Input() logoutOnly?: boolean;
 
-  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
+  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[] | null) {
     if (!breadcrumbs || !breadcrumbs.length) {
       return [];
     }

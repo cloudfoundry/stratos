@@ -56,8 +56,10 @@ export class PageSideNavComponent implements OnInit {
     return this.pTabs;
   }
 
+  // Bound from async-piped streams that may emit null/undefined before the
+  // header resolves; interpolation renders those as an empty string.
   @Input()
-  public header!: string;
+  public header: string | null | undefined;
   public activeTab$!: Observable<string>;
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;

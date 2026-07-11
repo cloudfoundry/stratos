@@ -1,7 +1,7 @@
 <div class="user-profile__options">
   @if (canEdit$ | async) {
     <div class="user-profile__option">
-      @if (show[types.GRAVATAR] && gravatarEnabled$ | async; as enableGravatar) {
+      @if (show[types.GRAVATAR] && (gravatarEnabled$ | async); as enableGravatar) {
         <div class="user-profile__option-inner">
           <app-slide-toggle [checked]="enableGravatar === 'true'" (change)="updateGravatarEnabled(enableGravatar)">
             <div class="user-profile__option-header">Use Gravatar for user icon</div>
@@ -13,7 +13,7 @@
     </div>
   }
 
-  @if (show[types.SESSION_TIMEOUT] && timeoutSession$ | async; as timeoutSession) {
+  @if (show[types.SESSION_TIMEOUT] && (timeoutSession$ | async); as timeoutSession) {
     <div class="user-profile__option"
       [ngClass]="{'user-profile__option-warning': timeoutSession === 'false'}">
       <div class="user-profile__option-inner">
@@ -35,7 +35,7 @@
     </div>
   }
 
-  @if (show[types.POLLING] && pollingEnabled$ | async; as pollingEnabled) {
+  @if (show[types.POLLING] && (pollingEnabled$ | async); as pollingEnabled) {
     <div class="user-profile__option"
       [ngClass]="{'user-profile__option-warning': pollingEnabled === 'false'}">
       <div class="user-profile__option-inner">
@@ -73,7 +73,7 @@
     </div>
   }
 
-  @if (show[types.STORAGE] && localStorageSize$ | async; as localStorageSize) {
+  @if (show[types.STORAGE] && (localStorageSize$ | async); as localStorageSize) {
     <div class="user-profile__section user-profile__local-storage"
       >
       <app-card-title class="user-profile__section">Reset Preferences</app-card-title>

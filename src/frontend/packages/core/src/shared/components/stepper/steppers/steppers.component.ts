@@ -416,7 +416,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(_step: StepComponent, _index: number): string {
+  getIconLigature(): string {
     return 'done';
   }
 

@@ -20,29 +20,30 @@ export class DateTimeComponent implements OnDestroy {
   public time = new FormControl<string | null>(null);
   private sub!: Subscription;
   private changeSub!: Subscription;
-  private dateTimeValue!: Date;
+  // Null until a date is chosen (or when the bound value is cleared)
+  private dateTimeValue: Date | null = null;
 
   private dateObservable: Observable<string>;
   private timeObservable: Observable<string>;
 
   @Output()
-  public dateTimeChange = new EventEmitter<Date>();
+  public dateTimeChange = new EventEmitter<Date | null | undefined>();
 
   @Input()
-  get dateTime() {
+  get dateTime(): Date | null {
     return this.dateTimeValue;
   }
 
-  set dateTime(dateTime: Date) {
+  set dateTime(dateTime: Date | null | undefined) {
     const empty = !dateTime && this.dateTimeValue !== dateTime;
     const validDate = dateTime && isValid(dateTime) && (!this.dateTimeValue || !isEqual(dateTime, this.dateTimeValue));
     if (empty || validDate) {
-      this.dateTimeValue = dateTime;
+      this.dateTimeValue = dateTime ?? null;
       this.dateTimeChange.emit(this.dateTimeValue);
     }
   }
 
-  private isDifferentDate(oldDate: Date, newDate: Date) {
+  private isDifferentDate(oldDate: Date | null, newDate: Date) {
     return !oldDate || !newDate || !isValid(newDate) || !isEqual(oldDate, newDate);
   }
 

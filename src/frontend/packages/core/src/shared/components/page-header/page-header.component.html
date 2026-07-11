@@ -123,7 +123,7 @@
                     class="absolute right-0 top-full mt-2 bg-content-bg rounded-lg shadow-lg border border-content-border z-50">
                     <div class="page-header-history p-4 w-80">
                       <h3 class="page-header-history-title text-lg font-semibold text-content-text mb-4">Recent Activity</h3>
-                      <app-recent-entities mode="menu" class="page-header-history-list" history="true">
+                      <app-recent-entities mode="menu" class="page-header-history-list" [history]="true">
                       </app-recent-entities>
                     </div>
                   </div>
@@ -132,7 +132,7 @@
             }
 
             <!-- Notifications button -->
-            @if ((events$ | async).length > 0) {
+            @if (((events$ | async) || []).length > 0) {
               <button
                 routerLink="/events"
                 matTooltip="Notifications"

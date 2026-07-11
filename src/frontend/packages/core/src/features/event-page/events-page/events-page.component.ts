@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { take, distinctUntilChanged, map, share, switchMap, tap } from 'rxjs/operators';
 
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
@@ -27,6 +28,7 @@ export enum EventFilterValues {
   imports: [
     CommonModule,
     RouterModule,
+    CardWrapperComponent,
     CustomIconComponent,
     CustomTooltipDirective,
     PageHeaderComponent

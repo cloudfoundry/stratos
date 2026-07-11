@@ -32,7 +32,7 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
 export class CardStatusComponent {
   @Input() status$!: Observable<StratosStatus>;
 
-  private cardStatus = StratosStatus;
+  protected cardStatus = StratosStatus;
 
   constructor() { }
 }

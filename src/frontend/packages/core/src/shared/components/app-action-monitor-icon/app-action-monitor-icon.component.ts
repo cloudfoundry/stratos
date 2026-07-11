@@ -2,6 +2,7 @@ import { Component, Input, OnInit, Output, ChangeDetectionStrategy } from '@angu
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 
 export interface IActionMonitorComponentState {
   busy: boolean;
@@ -17,7 +18,8 @@ export interface IActionMonitorComponentState {
   standalone: true,
   imports: [
     CommonModule,
-    CustomIconComponent
+    CustomIconComponent,
+    ProgressSpinnerComponent
   ]
 })
 export class AppActionMonitorIconComponent implements OnInit {

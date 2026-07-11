@@ -15,6 +15,7 @@ import { map } from 'rxjs/operators';
 
 import { EndpointsSignalService } from '../../../core/signals/endpoints-signal.service';
 import { FreshEntityNameService } from '../../../core/signals/fresh-entity-name.service';
+import { CardWrapperComponent } from '../cards/card/card.component';
 import { NoContentMessageComponent } from '../no-content-message/no-content-message.component';
 
 class RenderableRecent {
@@ -57,6 +58,7 @@ class RenderableRecent {
     CommonModule,
     RouterModule,
     CustomIconComponent,
+    CardWrapperComponent,
     NoContentMessageComponent
   ]
 })

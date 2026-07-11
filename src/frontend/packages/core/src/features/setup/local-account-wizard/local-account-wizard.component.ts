@@ -59,6 +59,8 @@ export class LocalAccountWizardComponent implements OnInit {
   passwordForm!: FormGroup;
   validateLocalAuthForm!: Observable<boolean>;
   applyingSetup = signal<boolean>(false);
+  // app-loading-page takes an Observable<boolean> — bridge the signal.
+  applyingSetup$ = toObservable(this.applyingSetup);
   signalHandle!: SignalStepHandle;
 
   showPassword: boolean[] = [];

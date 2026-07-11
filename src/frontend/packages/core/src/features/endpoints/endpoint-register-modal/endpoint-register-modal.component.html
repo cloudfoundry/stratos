@@ -54,7 +54,7 @@
         @if (!selectedEndpointInfo) {
           <div>
             <app-tile-selector
-              [options]="tileSelectorConfig$ | async"
+              [options]="(tileSelectorConfig$ | async) ?? []"
               [dynamicSmallerTiles]="6"
               (selection)="onTileSelected($event)"
               class="endpoint-tile-selector">
