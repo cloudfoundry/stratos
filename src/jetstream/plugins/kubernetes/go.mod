@@ -161,5 +161,4 @@ replace (
 	github.com/kubernetes-sigs/aws-iam-authenticator => github.com/kubernetes-sigs/aws-iam-authenticator v0.3.1-0.20190111160901-390d9087a4bc
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2
 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.0.0
-	github.com/spf13/cobra => github.com/spf13/cobra v0.0.3
 )
