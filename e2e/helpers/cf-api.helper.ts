@@ -390,6 +390,14 @@ export class CFApiHelper {
   }
 
   /**
+   * Get the console name of this CF endpoint (as shown in the UI selects).
+   */
+  async getEndpointName(): Promise<string> {
+    const endpoints = await this.request.get('/api/v1/endpoints');
+    return endpoints.find((ep: any) => ep.guid === this.cfGuid)?.name || '';
+  }
+
+  /**
    * Get organization by GUID
    */
   async getOrg(orgGuid: string): Promise<CFOrganization> {
