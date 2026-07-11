@@ -161,7 +161,8 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		// Invalid SSL mode
 		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
 	}
-	return dc, fmt.Errorf("invalid provider %v", dc)
+	// Only name the provider — dc holds the database password
+	return dc, fmt.Errorf("invalid database provider %q", dc.DatabaseProvider)
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
