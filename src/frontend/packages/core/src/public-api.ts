@@ -250,6 +250,8 @@ export { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './featur
 export * from './features/endpoints/create-endpoint/create-endpoint-helper';
 export { CreateEndpointModule } from './features/endpoints/create-endpoint/create-endpoint.module';
 export { CreateEndpointBaseStepComponent } from './features/endpoints/create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
+export { ConnectEndpointDialogComponent } from './features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+export { ConnectEndpointConfig } from './features/endpoints/connect.service';
 export { BaseEndpointAuth, EndpointAuthTypeNames } from './core/endpoint-auth';
 
 // List Types and Components

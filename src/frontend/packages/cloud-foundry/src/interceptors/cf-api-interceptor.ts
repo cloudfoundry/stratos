@@ -2,7 +2,14 @@ import { HttpErrorResponse, HttpEventType, HttpInterceptorFn, HttpResponse } fro
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
-import { EndpointAuthStateService, EndpointsSignalService, TailwindSnackBarService } from '@stratosui/core';
+import {
+  ConnectEndpointConfig,
+  ConnectEndpointDialogComponent,
+  EndpointAuthStateService,
+  EndpointsSignalService,
+  TailwindDialogService,
+  TailwindSnackBarService,
+} from '@stratosui/core';
 import { StratosDiagnostics } from '../services/diagnostics/stratos-diagnostics.service';
 
 // Stratos cnsi GUIDs come in two flavours: standard hex UUIDs from
@@ -79,6 +86,7 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
   const diagnostics = inject(StratosDiagnostics);
   const authState = inject(EndpointAuthStateService);
   const snackbar = inject(TailwindSnackBarService);
+  const dialog = inject(TailwindDialogService);
   const router = inject(Router);
   const endpointsSignal = inject(EndpointsSignalService);
   const start = performance.now();
@@ -141,7 +149,39 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
                   `${line1}\n${codePrefix}Authentication expired. Reconnect to refresh.`,
                   'Reconnect',
                 );
-                ref.onAction().subscribe(() => router.navigate(['/endpoints']));
+                // One-click reconnect: open the connect dialog in place for
+                // the affected endpoint. The user just clicked "Reconnect" on
+                // an error about the page they're on, so a modal here is the
+                // expected response — routing to /endpoints and making them
+                // find the row was the old behaviour this replaces (#5621).
+                // Re-read the signal at click time; fall back to the
+                // endpoints list when the endpoint is unknown (nothing to
+                // hand the dialog).
+                ref.onAction().subscribe(() => {
+                  const ep = endpointsSignal.endpoints()[cnsiGuid];
+                  if (!ep) {
+                    router.navigate(['/endpoints']);
+                    return;
+                  }
+                  const data: ConnectEndpointConfig = {
+                    name: ep.name,
+                    guid: ep.guid,
+                    // cnsi_type/sub_type are optional on EndpointModel; this
+                    // interceptor only sees CF traffic, so 'cf' is the only
+                    // possible fallback.
+                    type: ep.cnsi_type ?? 'cf',
+                    subType: ep.sub_type ?? '',
+                    ssoAllowed: ep.sso_allowed,
+                  };
+                  // Same dialog options the endpoints list uses.
+                  dialog.open(ConnectEndpointDialogComponent, {
+                    data,
+                    disableClose: true,
+                    width: '550px',
+                    maxWidth: '550px',
+                    panelClass: ['overflow-visible', 'p-6'],
+                  });
+                });
               }
             } else if (reason === 'unreachable') {
               // Endpoint is down — no stale mark (reconnect won't help).
