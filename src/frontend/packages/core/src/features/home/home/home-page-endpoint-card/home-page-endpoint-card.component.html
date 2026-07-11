@@ -22,12 +22,12 @@
         <div class="flex items-center space-x-2">
           @if ((status$ | async); as status) {
             <div>
-              @if (status === 1) {
+              @if (status === Status.Loading) {
                 <div class="animate-spin">
                   <div class="h-5 w-5 border-2 border-brand-600 border-t-transparent rounded-full"></div>
                 </div>
               }
-              @if (status === 2) {
+              @if (status === Status.Error) {
                 <div class="text-warning-shade-500" title="Data for this endpoint took too long to load">
                   <span class="material-icons">warning</span>
                 </div>
