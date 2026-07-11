@@ -5,39 +5,88 @@ import { ListComponent } from '../../components/list.component';
 /**
  * Apps list filter sync regression test
  *
- * Verifies that org/space filter dropdowns stay in sync with the
- * underlying NgRx store, preventing the 49→2 regression where
- * persisted filters silently re-applied while dropdowns showed "All".
+ * Verifies that the org/space filter dropdowns stay in sync with the
+ * underlying store, preventing the 49→2 regression where persisted filters
+ * silently re-applied while the dropdowns still showed "All".
+ *
+ * Modern-wall realities this suite has to drive (all confirmed live):
+ *  - The wall aggregates 4 connected CFs *progressively*, so the total is a
+ *    moving target until every CF reports — see settledTotal().
+ *  - The org/space catalog is *lazy*: options are empty until the dropdown's
+ *    onOpen hook fires, and that only happens on a real (trusted) click, not
+ *    a synthetic focus/dispatch — see openDropdownForOptions().
+ *  - Picking the first alphabetical org can hit an org with zero apps, so we
+ *    derive a guaranteed-non-empty org from the first app's row link.
  */
 
-/** Wait for list to finish loading and return the count (may be 0) */
-async function waitForListLoaded(page: Page, list: ListComponent, timeout = 30000): Promise<number> {
-  await list.waitForNoLoadingIndicator(timeout);
-  await page.waitForTimeout(2000);
-  return await list.getTotalResults().catch(() => 0);
-}
+const CF_DD = '[data-test="dropdown-Cloud Foundry"] select';
+const ORG_DD = '[data-test="dropdown-Organization"] select';
 
-/** Wait for list to have at least 1 result */
-async function waitForListWithResults(page: Page, list: ListComponent, timeout = 45000): Promise<number> {
-  await list.waitForNoLoadingIndicator(timeout);
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const count = await list.getTotalResults().catch(() => 0);
-    if (count > 0) return count;
+/**
+ * Resolve the *settled* filtered total. The refresh button reads
+ * data-test="refresh-loading" while ANY CF is still aggregating (with results
+ * already present) and flips to "refresh" only once all report — the one
+ * reliable "fully aggregated" DOM signal. We then hold until getTotalResults
+ * (the real [data-test="page-range"] "of N") is unchanged for 3s to cover
+ * walls without a refresh button and any late settle.
+ */
+async function settledTotal(page: Page, list: ListComponent, requirePositive: boolean, timeout = 120000): Promise<number> {
+  const start = Date.now();
+  const refreshLoading = page.locator('[data-test="refresh-loading"]');
+  let prev = -1;
+  let stableSince = Date.now();
+  while (Date.now() - start < timeout) {
+    // refresh-loading is present while ANY CF is still aggregating (with
+    // results already shown). Re-check it every poll: never settle a total
+    // while it shows, or a mid-load plateau under 2-worker CF latency reads
+    // as the final count (a filtered subset would then exceed it).
+    const loading = (await refreshLoading.count()) > 0;
+    const cur = await list.getTotalResults().catch(() => -1);
+    if (loading || cur !== prev) {
+      prev = cur;
+      stableSince = Date.now();
+    } else if (cur >= 0 && (!requirePositive || cur > 0) && Date.now() - stableSince >= 4000) {
+      return cur;
+    }
     await page.waitForTimeout(500);
   }
-  return await list.getTotalResults().catch(() => 0);
+  return prev >= 0 ? prev : 0;
 }
 
-/** Wait for a select to have more than minCount options */
-async function waitForOptions(page: Page, selectLocator: ReturnType<Page['locator']>, minCount: number, timeout = 20000): Promise<number> {
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const count = await selectLocator.locator('option').count();
-    if (count > minCount) return count;
+/**
+ * Fire the dropdown's lazy onOpen catalog fetch with a real (trusted) click,
+ * then wait for its options to load. Returns the final option count (incl.
+ * "All"). A synthetic focus/dispatchEvent does NOT trigger onOpen.
+ */
+async function openDropdownForOptions(page: Page, selectSelector: string, timeout = 75000): Promise<number> {
+  const sel = page.locator(selectSelector);
+  await expect(sel).toBeVisible({ timeout: 15000 });
+  await sel.click();
+  await page.keyboard.press('Escape').catch(() => {});
+
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (await sel.locator('option').count() > 1) break;
     await page.waitForTimeout(500);
   }
-  return await selectLocator.locator('option').count();
+  return await sel.locator('option').count();
+}
+
+/**
+ * Read the org guid of the first app on the wall from its CF/Org/Space cell
+ * link (/cloud-foundry/{cnsi}/organizations/{orgGuid}). Guarantees the org
+ * owns at least one app, so filtering by it can't collapse to an empty list.
+ * Requires the catalog to have resolved names first (the org segment renders
+ * as a link only once orgName !== '—').
+ */
+async function firstAppOrgGuid(page: Page): Promise<string | null> {
+  const orgLink = page
+    .locator('app-application-wall app-signal-list a[href*="/organizations/"]:not([href*="/spaces/"])')
+    .first();
+  if (!(await orgLink.count())) return null;
+  const href = (await orgLink.getAttribute('href')) ?? '';
+  const m = href.match(/\/organizations\/([^/?]+)/);
+  return m ? m[1] : null;
 }
 
 /** Dismiss endpoint error banner if present */
@@ -48,7 +97,7 @@ async function dismissErrorBanner(page: Page): Promise<void> {
   }
 }
 
-/** Navigate via side nav link (preserves NgRx store, unlike page.goto) */
+/** Navigate via side nav link (preserves the store, unlike page.goto) */
 async function clickSideNavLink(page: Page, label: string, urlPattern: RegExp): Promise<void> {
   const link = page.locator('a.nav-item-link').filter({ hasText: label });
   await link.click();
@@ -56,7 +105,39 @@ async function clickSideNavLink(page: Page, label: string, urlPattern: RegExp): 
   await page.waitForTimeout(500);
 }
 
+/**
+ * Shared setup: land on the wall, open the org dropdown to load the catalog,
+ * and derive a guaranteed-non-empty org. Skips (with the TRUE reason) when the
+ * live CF genuinely can't satisfy the precondition. Returns the settled
+ * unfiltered total and the chosen org guid.
+ */
+async function loadWallAndPickOrg(page: Page, list: ListComponent): Promise<{ totalAll: number; orgGuid: string } | null> {
+  const totalAll = await settledTotal(page, list, true);
+  if (totalAll === 0) {
+    test.skip(true, 'No apps loaded — endpoint may be errored');
+    return null;
+  }
+
+  const optionCount = await openDropdownForOptions(page, ORG_DD);
+  if (optionCount <= 1) {
+    test.skip(true, 'Org filter catalog did not load within 75s (multi-CF CAPI latency)');
+    return null;
+  }
+
+  const orgGuid = await firstAppOrgGuid(page);
+  if (!orgGuid) {
+    test.skip(true, 'Could not resolve the first app\'s org from the wall (names still draining)');
+    return null;
+  }
+  return { totalAll, orgGuid };
+}
+
 test.describe('Apps list filter sync', () => {
+  // Each test drives the lazy multi-CF org catalog and settles the
+  // progressively-aggregating wall total several times; under 2-worker CF
+  // latency that legitimately exceeds the default 90s cap.
+  test.describe.configure({ timeout: 240000 });
+
 
   test('should show all apps with dropdowns at "All" on fresh load', async ({ adminPage: page }) => {
     await page.goto('/applications');
@@ -64,15 +145,13 @@ test.describe('Apps list filter sync', () => {
     const list = new ListComponent(page);
     await list.waitUntilShown();
 
-    const totalOnLoad = await waitForListWithResults(page, list);
+    const totalOnLoad = await settledTotal(page, list, true);
     expect(totalOnLoad).toBeGreaterThan(0);
 
-    // Org dropdown should show empty value (= "All")
-    const orgSelect = page.locator('select#org');
-    if (await orgSelect.isVisible().catch(() => false)) {
-      const orgValue = await orgSelect.inputValue();
-      expect(orgValue).toBe('');
-    }
+    // Org dropdown renders and defaults to "All" (empty value).
+    const orgSelect = page.locator(ORG_DD);
+    await expect(orgSelect).toBeVisible({ timeout: 10000 });
+    expect(await orgSelect.inputValue()).toBe('');
   });
 
   test('should filter apps when org is selected', async ({ adminPage: page }) => {
@@ -81,27 +160,20 @@ test.describe('Apps list filter sync', () => {
     const list = new ListComponent(page);
     await list.waitUntilShown();
 
-    const totalBefore = await waitForListWithResults(page, list);
-    if (totalBefore === 0) test.skip(true, 'No apps loaded — endpoint may be errored');
+    const picked = await loadWallAndPickOrg(page, list);
+    if (!picked) return;
 
-    // Wait for org options to populate (they load async from store)
-    const orgSelect = page.locator('select#org');
-    await expect(orgSelect).toBeVisible({ timeout: 10000 });
-    const optionCount = await waitForOptions(page, orgSelect, 1);
-    if (optionCount <= 1) test.skip(true, 'Only one org available');
+    const orgSelect = page.locator(ORG_DD);
+    await orgSelect.selectOption(picked.orgGuid);
 
-    const firstOrgOption = orgSelect.locator('option').nth(1);
-    const orgValue = await firstOrgOption.getAttribute('value') ?? '';
+    const totalAfter = await settledTotal(page, list, false);
+    // The derived org owns at least one app, so the filter is non-empty and
+    // can only ever be a subset of the unfiltered wall.
+    expect(totalAfter).toBeGreaterThan(0);
+    expect(totalAfter).toBeLessThanOrEqual(picked.totalAll);
 
-    await orgSelect.selectOption(orgValue);
-    await waitForListLoaded(page, list);
-
-    const totalAfter = await list.getTotalResults();
-    expect(totalAfter).toBeLessThanOrEqual(totalBefore);
-
-    // Dropdown still shows the org we selected
-    const selectedValue = await orgSelect.inputValue();
-    expect(selectedValue).toBe(orgValue);
+    // Dropdown still reflects the org we selected.
+    expect(await orgSelect.inputValue()).toBe(picked.orgGuid);
   });
 
   test('should preserve filters after navigating to app detail and back', async ({ adminPage: page }) => {
@@ -110,47 +182,36 @@ test.describe('Apps list filter sync', () => {
     const list = new ListComponent(page);
     await list.waitUntilShown();
 
-    const total = await waitForListWithResults(page, list);
-    if (total === 0) test.skip(true, 'No apps loaded');
+    const picked = await loadWallAndPickOrg(page, list);
+    if (!picked) return;
 
-    // Wait for org options
-    const orgSelect = page.locator('select#org');
-    await expect(orgSelect).toBeVisible({ timeout: 10000 });
-    const optionCount = await waitForOptions(page, orgSelect, 1);
-    if (optionCount <= 1) test.skip(true, 'Only one org available');
+    const orgSelect = page.locator(ORG_DD);
+    await orgSelect.selectOption(picked.orgGuid);
+    const filteredCount = await settledTotal(page, list, false);
+    expect(filteredCount).toBeGreaterThan(0);
 
-    const firstOrgOption = orgSelect.locator('option').nth(1);
-    const orgValue = await firstOrgOption.getAttribute('value') ?? '';
-
-    await orgSelect.selectOption(orgValue);
-    const filteredCount = await waitForListLoaded(page, list);
-    if (filteredCount === 0) test.skip(true, 'No apps in selected org');
-
-    // Click first app to navigate to detail
+    // Navigate to a detail page by CLICKING an app row (deep-linking redirects
+    // to Home on a fresh store); browser back preserves the router + store.
     const isCards = await list.isCardsView();
     if (isCards) {
       await list.cards.getCard(0).click();
     } else {
       await list.table.getRows().first().click();
     }
-
     await page.waitForURL(/\/applications\/[^/]+/, { timeout: 15000 });
 
-    // Go back (browser back preserves Angular router + NgRx store)
     await page.goBack();
     await page.waitForURL(/\/applications$/, { timeout: 15000 });
 
     const listAfterBack = new ListComponent(page);
     await listAfterBack.waitUntilShown();
-    await waitForListLoaded(page, listAfterBack);
 
-    // Org dropdown should still show the selected org
-    const orgSelectAfter = page.locator('select#org');
+    // Org dropdown still shows the selected org, and the count is unchanged.
+    const orgSelectAfter = page.locator(ORG_DD);
     await expect(orgSelectAfter).toBeVisible({ timeout: 10000 });
-    const selectedValueAfter = await orgSelectAfter.inputValue();
-    expect(selectedValueAfter).toBe(orgValue);
+    expect(await orgSelectAfter.inputValue()).toBe(picked.orgGuid);
 
-    const countAfterBack = await listAfterBack.getTotalResults();
+    const countAfterBack = await settledTotal(page, listAfterBack, false);
     expect(countAfterBack).toBe(filteredCount);
   });
 
@@ -160,38 +221,29 @@ test.describe('Apps list filter sync', () => {
     const list = new ListComponent(page);
     await list.waitUntilShown();
 
-    const total = await waitForListWithResults(page, list);
-    if (total === 0) test.skip(true, 'No apps loaded');
+    const picked = await loadWallAndPickOrg(page, list);
+    if (!picked) return;
 
-    // Wait for org options
-    const orgSelect = page.locator('select#org');
-    await expect(orgSelect).toBeVisible({ timeout: 10000 });
-    const optionCount = await waitForOptions(page, orgSelect, 1);
-    if (optionCount <= 1) test.skip(true, 'Only one org available');
+    const orgSelect = page.locator(ORG_DD);
+    await orgSelect.selectOption(picked.orgGuid);
+    const filteredCount = await settledTotal(page, list, false);
+    expect(filteredCount).toBeGreaterThan(0);
 
-    const firstOrgOption = orgSelect.locator('option').nth(1);
-    const orgValue = await firstOrgOption.getAttribute('value') ?? '';
-
-    await orgSelect.selectOption(orgValue);
-    const filteredCount = await waitForListLoaded(page, list);
-
-    // Navigate to Endpoints via side nav (preserves NgRx store)
+    // Navigate away to Endpoints and back via side nav (preserves the store).
     await clickSideNavLink(page, 'Endpoints', /\/endpoints/);
     await page.waitForTimeout(1000);
-
-    // Navigate back to Applications via side nav
     await clickSideNavLink(page, 'Applications', /\/applications/);
     await dismissErrorBanner(page);
+
     const listAfter = new ListComponent(page);
     await listAfter.waitUntilShown();
-    await waitForListLoaded(page, listAfter);
 
-    // Dropdown should reflect the persisted org selection
-    const orgSelectAfter = page.locator('select#org');
+    // Dropdown reflects the persisted org selection, count unchanged.
+    const orgSelectAfter = page.locator(ORG_DD);
     await expect(orgSelectAfter).toBeVisible({ timeout: 10000 });
-    await expect(orgSelectAfter).toHaveValue(orgValue, { timeout: 30000 });
+    await expect(orgSelectAfter).toHaveValue(picked.orgGuid, { timeout: 30000 });
 
-    const countAfter = await listAfter.getTotalResults();
+    const countAfter = await settledTotal(page, listAfter, false);
     expect(countAfter).toBe(filteredCount);
   });
 
@@ -201,35 +253,19 @@ test.describe('Apps list filter sync', () => {
     const list = new ListComponent(page);
     await list.waitUntilShown();
 
-    const totalAll = await waitForListWithResults(page, list);
-    if (totalAll === 0) test.skip(true, 'No apps loaded');
+    const picked = await loadWallAndPickOrg(page, list);
+    if (!picked) return;
 
-    // Wait for org options
-    const orgSelect = page.locator('select#org');
-    await expect(orgSelect).toBeVisible({ timeout: 10000 });
-    const optionCount = await waitForOptions(page, orgSelect, 1);
-    if (optionCount <= 1) test.skip(true, 'Only one org available');
+    const orgSelect = page.locator(ORG_DD);
+    await orgSelect.selectOption(picked.orgGuid);
+    const filteredCount = await settledTotal(page, list, false);
+    expect(filteredCount).toBeLessThanOrEqual(picked.totalAll);
 
-    await orgSelect.selectOption({ index: 1 });
-    await waitForListLoaded(page, list);
-
-    // Select "All" for org (empty value = first option)
+    // Re-select "All" (empty value) — the filter must fully clear back to the
+    // unfiltered total, not stick at the previous org (the 49→2 regression).
     await orgSelect.selectOption('');
-    // Wait for auto-selector cascade (org clear → space clear) to propagate
-    await page.waitForTimeout(2000);
-    // Also explicitly clear space if auto-selector set one during the org selection
-    const spaceSelect = page.locator('select#space');
-    if (await spaceSelect.isVisible().catch(() => false)) {
-      const spaceValue = await spaceSelect.inputValue();
-      if (spaceValue) {
-        await spaceSelect.selectOption('');
-        await page.waitForTimeout(1000);
-      }
-    }
-    await waitForListWithResults(page, list);
-
-    const totalAfterClear = await list.getTotalResults();
-    expect(totalAfterClear).toBe(totalAll);
+    const totalAfterClear = await settledTotal(page, list, true);
+    expect(totalAfterClear).toBe(picked.totalAll);
   });
 
   test('should work with services wall the same way', async ({ adminPage: page }) => {
@@ -238,19 +274,22 @@ test.describe('Apps list filter sync', () => {
     const list = new ListComponent(page);
     await list.waitUntilShown();
 
-    const totalOnLoad = await waitForListLoaded(page, list);
+    // Services aggregate across CFs progressively, so the count only ever
+    // grows as endpoints report — with filters at "All" it must never DROP
+    // (a silent filtered re-apply while the dropdown still shows "All").
+    const settled = await settledTotal(page, list, true);
+    expect(settled).toBeGreaterThan(0);
 
-    // CF dropdown should be visible on services wall too
-    const cfSelect = page.locator('select#cf');
-    if (await cfSelect.isVisible().catch(() => false)) {
-      const cfValue = await cfSelect.inputValue();
-      expect(cfValue).toBeDefined();
+    // CF dropdown is present and left at "All" (no stuck filter).
+    const cfSelect = page.locator(CF_DD);
+    if (await cfSelect.count()) {
+      expect(await cfSelect.inputValue()).toBe('');
     }
 
-    // Verify list loaded without the count dropping
+    // No late drop after a further settle window.
     await page.waitForTimeout(3000);
     const totalAfterSettle = await list.getTotalResults();
-    expect(totalAfterSettle).toBe(totalOnLoad);
+    expect(totalAfterSettle).toBeGreaterThanOrEqual(settled);
   });
 
 });

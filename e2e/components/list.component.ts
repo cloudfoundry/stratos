@@ -466,7 +466,10 @@ export class ListComponent {
   }
 
   getLoadingIndicator(): Locator {
-    return this.locator.locator('.list-component > .progress-bar, .list-component > mat-progress-bar');
+    // Legacy app-list used a .progress-bar child; signal-list marks its
+    // loading overlay with data-test="loading". Match either so the wait is
+    // real (a dead selector makes waitForNoLoadingIndicator a silent no-op).
+    return this.locator.locator('.list-component > .progress-bar, .list-component > mat-progress-bar, [data-test="loading"]');
   }
 
   async isLoading(): Promise<boolean> {
@@ -482,6 +485,19 @@ export class ListComponent {
   }
 
   async getTotalResults(): Promise<number> {
+    // Prefer the signal-list range footer ("start – end of TOTAL"): it reports
+    // the real filtered total (config.totalFilteredResults), not the
+    // page-size-capped rendered row count. Count-regression assertions (e.g.
+    // the 49→2 filter-sync bug) only have teeth against the real total.
+    const range = this.locator.locator('[data-test="page-range"]');
+    if (await range.count()) {
+      const text = (await range.textContent()) || '';
+      const match = text.match(/of\s+(\d+)/);
+      if (match) {
+        return parseInt(match[1], 10);
+      }
+    }
+
     const havePaginator = await this.pagination.isDisplayed();
 
     if (havePaginator) {
