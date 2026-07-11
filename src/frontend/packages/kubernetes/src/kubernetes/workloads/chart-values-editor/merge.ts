@@ -18,6 +18,10 @@ function doMergeObjects(src: Record<string, unknown>, dest: Record<string, unkno
   }
 
   Object.keys(dest).forEach(key => {
+    // Guard against prototype pollution from parsed YAML/JSON keys
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      return;
+    }
     if (typeof (dest[key]) === 'object' && !Array.isArray(dest)) {
       if (!src[key]) {
         src[key] = {};
