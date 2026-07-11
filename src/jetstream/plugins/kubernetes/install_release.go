@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -119,9 +120,14 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 func (c *KubernetesSpecification) loadChart(downloadURL string) (*chart.Chart, error) {
 	log.Debugf("Helm Chart Download URL: %s", downloadURL)
 
+	target, err := url.Parse(downloadURL)
+	if err != nil || (target.Scheme != "https" && target.Scheme != "http") || target.Host == "" {
+		return nil, fmt.Errorf("Invalid Chart download URL")
+	}
+
 	// NWM: Should we look up Helm Repository endpoint and use the value from that
-	httpClient := c.portalProxy.GetHttpClient(false, "")
-	resp, err := httpClient.Get(downloadURL)
+	httpClient := c.portalProxy.GetGuardedHttpClient(false)
+	resp, err := httpClient.Get(target.String())
 	if err != nil {
 		return nil, fmt.Errorf("Could not download Chart Archive: %s", err)
 	}

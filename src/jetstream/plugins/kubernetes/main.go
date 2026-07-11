@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strconv"
 
 	"errors"
@@ -276,17 +277,26 @@ func (c *KubernetesSpecification) UpdateMetadata(info *api.Info, userGUID string
 }
 
 func (c *KubernetesSpecification) RequiresCert(ec echo.Context) error {
-	url := ec.QueryParam("url")
-
 	log.Debug("Request Kube API Versions")
-	var httpClient = c.portalProxy.GetHttpClient(false, "")
-	_, err := httpClient.Get(url + "/api")
+
 	var response struct {
 		Status   int
 		Required bool
 		Error    bool
 		Message  string
 	}
+
+	target, parseErr := url.Parse(ec.QueryParam("url"))
+	if parseErr != nil || (target.Scheme != "https" && target.Scheme != "http") || target.Host == "" {
+		response.Status = http.StatusBadRequest
+		response.Error = true
+		response.Message = "A valid http(s) Kubernetes API URL is required"
+		return ec.JSON(response.Status, response)
+	}
+	target.Path = path.Join(target.Path, "api")
+
+	httpClient := c.portalProxy.GetGuardedHttpClient(false)
+	_, err := httpClient.Get(target.String())
 	if err != nil {
 		if errors.Is(err, new(x509.CertificateInvalidError)) {
 			response.Status = http.StatusOK
