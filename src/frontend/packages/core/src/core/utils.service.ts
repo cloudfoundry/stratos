@@ -257,20 +257,6 @@ export function pathGet(path: string, object: any): any {
   return (index && index === length) ? object : undefined;
 }
 
-export function pathSet(path: string, object: any, value: any) {
-  const params = path.split('.');
-
-  let index = 0;
-  const length = params.length - 1;
-
-  while (object !== null && object !== undefined && index < length) {
-    object = object[params[index++]];
-  }
-  if ((index && index === length)) {
-    object[params[index++]] = value;
-  }
-}
-
 export function safeStringToObj<T = object>(value: string): T | null {
   try {
     if (value) {
