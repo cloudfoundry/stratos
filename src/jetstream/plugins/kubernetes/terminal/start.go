@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 
@@ -114,10 +115,18 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	// API Endpoint to SSH/exec into a container
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s/exec?command=/bin/bash&stdin=true&stderr=true&stdout=true&tty=true", k.APIServer, k.Namespace, podData.PodName)
 
+	// Verify the API server against the in-cluster CA; only skip
+	// verification in the dev setup where no CA file is mounted
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	if len(k.CACert) > 0 {
+		pool := x509.NewCertPool()
+		if pool.AppendCertsFromPEM(k.CACert) {
+			tlsConfig = &tls.Config{RootCAs: pool}
+		}
+	}
+
 	dialer := &websocket.Dialer{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
+		TLSClientConfig: tlsConfig,
 	}
 
 	if strings.HasPrefix(target, "https://") {

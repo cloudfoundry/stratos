@@ -13,6 +13,7 @@ import (
 
 const (
 	serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	serviceAccountCAFile    = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 	serviceHostEnvVar       = "KUBERNETES_SERVICE_HOST"
 	servicePortEnvVar       = "KUBERNETES_SERVICE_PORT"
 	// For dev - read token from env var
@@ -32,6 +33,7 @@ type KubeTerminal struct {
 	Image       string `configName:"STRATOS_KUBERNETES_TERMINAL_IMAGE"`
 	Token       []byte
 	APIServer   string
+	CACert      []byte
 	Kube        api.Kubernetes
 }
 
@@ -79,6 +81,15 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	}
 
 	kt.Token = token
+
+	// Read the in-cluster CA so the API server's certificate can be verified.
+	// Absent only in the env-var-token dev setup, which falls back to
+	// skipping verification.
+	if caCert, err := ioutil.ReadFile(serviceAccountCAFile); err == nil {
+		kt.CACert = caCert
+	} else {
+		log.Warnf("Unable to load Kubernetes CA certificate - API server TLS verification disabled. %v", err)
+	}
 
 	log.Debug("Kubernetes Terminal configured")
 	return kt
