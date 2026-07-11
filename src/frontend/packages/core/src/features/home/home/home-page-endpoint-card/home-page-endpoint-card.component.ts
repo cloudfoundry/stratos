@@ -109,6 +109,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   private _status = signal<Status>(Status.OK);
   public statusSignal = this._status.asReadonly();
   public status$: Observable<Status>;
+  // Expose the Status enum so the template can name values instead of magic numbers
+  public readonly Status = Status;
 
   // strict: assigned by createCard (ngAfterViewInit) before any card-instance read; reads are guarded with if (this.ref)
   private ref!: ComponentRef<HomePageEndpointCard>;
