@@ -38,7 +38,7 @@ export class KubernetesNamespaceAnalysisReportComponent {
 
   public report$ = new Subject<AnalysisReport | null>();
 
-  path: string | undefined;
+  path: string;
 
   currentReport: string | null = null;
 

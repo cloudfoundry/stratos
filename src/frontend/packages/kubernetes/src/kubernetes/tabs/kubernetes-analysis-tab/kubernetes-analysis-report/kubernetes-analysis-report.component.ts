@@ -8,6 +8,7 @@ import { catchError, map, startWith, take } from 'rxjs/operators';
 import {
   IHeaderBreadcrumbLink,
   LoadingPageComponent,
+  NoContentMessageComponent,
   PageHeaderModule,
   PageSubNavComponent,
 } from '@stratosui/core';
@@ -41,6 +42,7 @@ import { AnalysisReport } from '../../../../services/endpoint-data/kube-types';
     PageHeaderModule,
     PageSubNavComponent,
     LoadingPageComponent,
+    NoContentMessageComponent,
     AnalysisReportViewerComponent,
   ],
 })
@@ -50,8 +52,9 @@ export class KubernetesAnalysisReportComponent implements OnInit {
   report$!: Observable<AnalysisReport | false>;
   isLoading$!: Observable<boolean>;
 
-  private errorMsg = new Subject<{ firstLine: string; secondLine?: string } | string>();
-  errorMsg$ = this.errorMsg.pipe(startWith(''));
+  // null = no error to show; the template's @if guard filters it out
+  private errorMsg = new Subject<{ firstLine: string } | null>();
+  errorMsg$ = this.errorMsg.pipe(startWith(null));
 
   endpointID?: string;
   id: string;
@@ -87,7 +90,7 @@ export class KubernetesAnalysisReportComponent implements OnInit {
           this.error();
           return false;
         }
-        this.errorMsg.next('');
+        this.errorMsg.next(null);
         return report;
       }),
       catchError(() => {

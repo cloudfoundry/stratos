@@ -9,11 +9,14 @@ import {
   KubernetesEndpointService,
 } from "../../../../services/kubernetes-endpoint.service";
 import { KubernetesNodeService } from "../../../../services/kubernetes-node.service";
+import {
+  KubernetesNodeConditionComponent,
+} from "../kubernetes-node-condition-card/kubernetes-node-condition/kubernetes-node-condition.component";
 
 @Component({
   selector: "app-kubernetes-node-summary-card",
   templateUrl: "./kubernetes-node-summary-card.component.html",
-  imports: [AsyncPipe, DatePipe, MetadataItemComponent],
+  imports: [AsyncPipe, DatePipe, MetadataItemComponent, KubernetesNodeConditionComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })

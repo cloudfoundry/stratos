@@ -15,6 +15,14 @@ import {
 import { SimpleUsageChartComponent } from '../../../../../core/src/shared/components/simple-usage-chart/simple-usage-chart.component';
 import { PageSubNavComponent } from '../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { LoadingPageComponent } from '../../../../../core/src/shared/components/loading-page/loading-page.component';
+import {
+  CardNumberMetricComponent,
+  EntitySummaryTitleComponent,
+  MetadataItemComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+} from '@stratosui/core';
 import { entityCatalog } from '@stratosui/store';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
@@ -43,7 +51,13 @@ interface IEndpointDetails {
     RouterModule,
     SimpleUsageChartComponent,
     PageSubNavComponent,
-    LoadingPageComponent
+    LoadingPageComponent,
+    EntitySummaryTitleComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent,
+    MetadataItemComponent
   ]
 })
 export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
@@ -104,7 +118,9 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   public memoryPressure$!: Observable<ISimpleUsageChartData>;
   public outOfDisk$!: Observable<ISimpleUsageChartData>;
   public nodesReady$!: Observable<ISimpleUsageChartData>;
-  public networkUnavailable$!: Observable<ISimpleUsageChartData>;
+  // getNodeStatusCount decorates the chart data with a `supported` flag —
+  // NetworkUnavailable is only reported by some K8S versions.
+  public networkUnavailable$!: Observable<ISimpleUsageChartData & { supported?: boolean }>;
   public kubeNodeVersions$!: Observable<string>;
   public caaspData$!: Observable<CaaspNodesData | null>;
 

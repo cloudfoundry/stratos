@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+<app-page-header [breadcrumbs]="(breadcrumbs$ | async) ?? []">
   <h1>Kubernetes Terminal</h1>
   <div class="page-header-right">
     <span>

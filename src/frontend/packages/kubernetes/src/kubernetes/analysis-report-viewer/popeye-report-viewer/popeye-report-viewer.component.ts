@@ -4,6 +4,32 @@ import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
+interface PopeyeIssue {
+  level?: number;
+  message?: string;
+}
+
+interface PopeyeIssueGroup {
+  name: string;
+  issues: PopeyeIssue[];
+}
+
+interface PopeyeSanitizer {
+  sanitizer: string;
+  tally: { ok: number; info: number; warning: number; error: number; score: number };
+  issues?: Record<string, PopeyeIssue[]>;
+  hide: boolean;
+  groups: PopeyeIssueGroup[];
+}
+
+interface PopeyeReport {
+  popeye: {
+    score: number;
+    grade: string;
+    sanitizers: PopeyeSanitizer[];
+  };
+}
+
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-popeye-report-viewer',
@@ -14,13 +40,13 @@ changeDetection: ChangeDetectionStrategy.OnPush,
 export class PopeyeReportViewerComponent implements OnInit, IReportViewer {
 
   report!: AnalysisReport;
-  processed: unknown;
+  processed: PopeyeReport | undefined;
 
   ngOnInit() {
     this.processed = this.apply(this.report);
   }
 
-  private apply(response: AnalysisReport): unknown {
+  private apply(response: AnalysisReport): PopeyeReport | undefined {
     const reportData = response.report as { popeye?: { sanitizers?: unknown[] } } | undefined;
     if (reportData?.popeye?.sanitizers) {
       // In order to supplement the sanitizers with extra properties need to create new obj (see spread below and `reduce`)

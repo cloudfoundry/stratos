@@ -29,6 +29,9 @@ import {
 } from '../../services/domain-data/kube-generic-resource-data.services';
 import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../../services/domain-data/kube-service-data.service';
+import {
+  ResourceAlertViewComponent,
+} from '../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition } from '../store/kube.types';
@@ -76,6 +79,7 @@ selector: 'app-kubernetes-resource-viewer',
     SidepanelPreviewComponent,
     MetadataItemComponent,
     JsonViewerComponent,
+    ResourceAlertViewComponent,
   ]
 })
 export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {

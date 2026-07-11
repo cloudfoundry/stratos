@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { BooleanIndicatorComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
+import { BooleanIndicatorComponent, CardWrapperComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
 
+import { BooleanIndicatorType } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
@@ -47,6 +49,7 @@ type MessageUpdater = (msg: string) => void;
     CommonModule,
     RouterModule,
     BooleanIndicatorComponent,
+    CardWrapperComponent,
     MetadataItemComponent,
     CardProgressOverlayComponent,
     PageHeaderModule,
@@ -98,6 +101,8 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
+  public booleanIndicatorType = BooleanIndicatorType;
+
   // Signal-native dashboard status — fetched directly from the kubedash
   // status endpoint, no ngrx dispatch. Wave-3 deletes the ngrx kubeEntityCatalog
   // dashboard slice; the consumer (this component) is the only reader, so it
@@ -115,9 +120,12 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   // Signals for busy state tracking
   public serviceAccountBusy = signal<boolean>(false);
+  // Observable view — app-card-progress-overlay's `busy` input is an Observable<boolean>
+  public serviceAccountBusy$ = toObservable(this.serviceAccountBusy);
   public serviceAccountMsg = '';
 
   public dashboardUIBusy = signal<boolean>(false);
+  public dashboardUIBusy$ = toObservable(this.dashboardUIBusy);
   public dashboardUIMsg = '';
 
   // Are we busy with an operation - disable buttons if we are

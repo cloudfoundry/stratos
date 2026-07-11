@@ -3,7 +3,7 @@ import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angul
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { BooleanIndicatorComponent } from '@stratosui/core';
+import { BooleanIndicatorComponent, BooleanIndicatorTypeValue } from '@stratosui/core';
 import { KubernetesNodeService } from '../../../../../services/kubernetes-node.service';
 import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../../../../store/kube.types';
 
@@ -18,7 +18,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
 
 
   @Input()
-  condition!: ConditionType; // strict: required @Input, always bound by the template
+  condition!: ConditionType | `${ConditionType}`; // strict: required @Input, templates bind literal strings (condition="Ready")
   // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
   condition$!: Observable<boolean | undefined>; // strict: assigned in ngOnInit before the template reads it
   hasCondition$!: Observable<boolean>; // strict: assigned in ngOnInit before the template reads it
@@ -27,7 +27,7 @@ export class KubernetesNodeConditionComponent implements OnInit {
   overrideCondition$?: Observable<boolean>;
 
   @Input()
-  type = 'yes-no';
+  type: BooleanIndicatorTypeValue = 'yes-no';
 
   @Input()
   inverse = false;

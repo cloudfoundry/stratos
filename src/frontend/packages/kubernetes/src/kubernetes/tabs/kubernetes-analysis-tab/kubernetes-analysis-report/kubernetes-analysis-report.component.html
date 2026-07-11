@@ -1,9 +1,11 @@
-<app-page-sub-nav [breadcrumbs]="breadcrumbs$ | async"></app-page-sub-nav>
+<app-page-sub-nav [breadcrumbs]="(breadcrumbs$ | async) ?? []"></app-page-sub-nav>
 
 <app-loading-page [isLoading]="isLoading$" text="Loading Analysis Report">
   @if (errorMsg$ | async; as message) {
-    <app-no-content-message icon="warning" [hidden]="!message" [firstLine]="message.firstLine" [secondLine]="message.secondLine">
+    <app-no-content-message icon="warning" [hidden]="!message" [firstLine]="message.firstLine">
     </app-no-content-message>
   }
-  <app-analysis-report-viewer [report]="report$ | async"></app-analysis-report-viewer>
+  @if (report$ | async; as report) {
+    <app-analysis-report-viewer [report]="report"></app-analysis-report-viewer>
+  }
 </app-loading-page>

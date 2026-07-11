@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, Input, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { Chart } from '../../shared/models/chart';
@@ -14,7 +14,7 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe, CustomTooltipDirective]
+  imports: [AsyncPipe, CustomTooltipDirective, RouterLink]
 })
 export class ChartDetailsUsageComponent {
   @Input() chart!: Chart;

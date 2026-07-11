@@ -42,7 +42,7 @@ export class KubernetesNodeMetricStatsCardComponent
   period = "Hour";
 
   @Input()
-  unit!: string;
+  unit?: string;
 
   max$!: Observable<number>;
   mean$!: Observable<number>;

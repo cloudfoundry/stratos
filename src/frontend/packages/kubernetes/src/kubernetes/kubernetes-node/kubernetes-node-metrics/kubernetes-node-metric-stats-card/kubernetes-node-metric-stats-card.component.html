@@ -5,8 +5,8 @@
   @if (metric==='container_memory_usage_bytes') {
     <div class="card-content p-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <app-kubernetes-node-simple-metric key="Mean" value="{{ (mean$ | async) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
-        <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | bytesToHumanSize }}" [unit]=""></app-kubernetes-node-simple-metric>
+        <app-kubernetes-node-simple-metric key="Mean" value="{{ ('' + ((mean$ | async) ?? '')) | bytesToHumanSize }}"></app-kubernetes-node-simple-metric>
+        <app-kubernetes-node-simple-metric key="Maximum" value="{{ ('' + ((max$ | async) ?? '')) | bytesToHumanSize }}"></app-kubernetes-node-simple-metric>
       </div>
     </div>
   }

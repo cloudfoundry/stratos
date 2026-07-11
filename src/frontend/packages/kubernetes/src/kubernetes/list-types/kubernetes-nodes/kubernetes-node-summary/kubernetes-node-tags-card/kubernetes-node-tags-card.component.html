@@ -5,7 +5,7 @@
     </app-card-header>
     <app-card-content>
       <div class="kubernetes-node-tags-card__content">
-        <app-chips [chips]="(chipTags$ | async)" [stacked]="true" [orientation]="'rtl'"></app-chips>
+        <app-chips [chips]="(chipTags$ | async) ?? []" [stacked]="true" [orientation]="'rtl'"></app-chips>
         </div>
       </app-card-content>
   </app-card>

@@ -4,7 +4,8 @@ import {
   inject,
   ChangeDetectionStrategy,
 } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { DatePipe, SlicePipe } from "@angular/common";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 
 import { ChartAttributes } from "../../shared/models/chart";
 import { ChartVersion } from "../../shared/models/chart-version";
@@ -15,6 +16,7 @@ import { ChartsService } from "../../shared/services/charts.service";
   templateUrl: "./chart-details-versions.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  imports: [DatePipe, RouterLink, SlicePipe],
 })
 export class ChartDetailsVersionsComponent {
   @Input() versions!: ChartVersion[];
