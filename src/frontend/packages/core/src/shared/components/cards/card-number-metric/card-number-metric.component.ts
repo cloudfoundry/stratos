@@ -87,6 +87,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   handleValue() {
     const value = parseInt(this.value, 10);
     this.isUnlimited = false;
+    // CF quota APIs encode 'unlimited' as -1
     if (value === -1) {
       this.formattedValue = 'Unlimited';
       this.isUnlimited = true;
@@ -102,6 +103,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     this._status.set(status);
 
     const limit = parseInt(this.limit, 10);
+    // CF quota APIs encode 'unlimited' as -1
     if (limit === -1) {
       this.formattedLimit = '∞';
       this.usage = '';

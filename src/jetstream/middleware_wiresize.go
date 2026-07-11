@@ -127,6 +127,8 @@ func (w *bufferingResponseWriter) flushStatus() {
 		return
 	}
 	status := w.statusCode
+	// 0 means the handler never called WriteHeader; net/http defaults
+	// that to 200, so mirror it here.
 	if status == 0 {
 		status = http.StatusOK
 	}

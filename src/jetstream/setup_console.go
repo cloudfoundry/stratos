@@ -92,6 +92,8 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 	if err != nil {
 		errInfo, ok := err.(api.ErrHTTPRequest)
 		if ok {
+			// Status 0 means no HTTP response was received (transport or
+			// certificate failure), not a real HTTP status code.
 			if errInfo.Status == 0 {
 				var certError *x509.CertificateInvalidError
 				if errors.As(err, certError) {

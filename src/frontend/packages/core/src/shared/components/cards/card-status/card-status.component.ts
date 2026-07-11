@@ -6,6 +6,7 @@ import { StratosStatus } from '@stratosui/store';
 
 
 export function determineCardStatus(value: number, limit: number): StratosStatus {
+  // -1 is the CF quota 'unlimited' sentinel, so there is no meaningful usage fraction
   if ((limit !== 0 && !limit) || limit === -1) {
     return StratosStatus.NONE;
   }

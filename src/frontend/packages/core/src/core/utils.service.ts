@@ -75,7 +75,7 @@ export class UtilsService {
       return '';
     }
 
-    // Special case: unlimited
+    // Special case: CF quota APIs encode 'unlimited' as -1
     if (mb === -1) {
       return '∞';
     }
@@ -107,7 +107,7 @@ export class UtilsService {
       return '';
     }
 
-    // Special case: unlimited
+    // Special case: CF quota APIs encode 'unlimited' as -1
     if (bytes === -1) {
       return '∞';
     }

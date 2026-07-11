@@ -90,6 +90,7 @@ export class ProfileSettingsComponent {
   public allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
   public localStorageSize$ = this.sessionData$.pipe(
+    // -1 means the size could not be determined (no user session or storage unavailable)
     map(sessionData => sessionData && sessionData.user ? LocalStorageService.localStorageSize(sessionData) : -1),
     filter(bytes => bytes !== -1),
   );
