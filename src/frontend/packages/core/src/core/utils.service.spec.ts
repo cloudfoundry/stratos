@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Subscription } from 'rxjs';
 
-import { pathGet, pathSet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
+import { pathGet, safeStringToObj, safeUnsubscribe, UtilsService } from './utils.service';
 
 describe('UtilsService', () => {
   let service: UtilsService;
@@ -140,19 +140,6 @@ describe('UtilsService', () => {
       expect(pathGet('a', null)).toBe(undefined);
       expect(pathGet('a', undefined)).toBe(undefined);
       expect(pathGet('a.b.c', { a: { b: {}}})).toBe(undefined);
-    });
-  });
-
-  describe('#pathSet', () => {
-    it('should set object value based on path ', () => {
-      const obj: any = { a: { b: {} } };
-      pathSet('a.b', obj, 1);
-
-      expect(obj.a.b).toBe(1);
-    });
-
-    it('should throw exception if path doesnt exist', () => {
-      expect(() => pathSet('a.b', {}, 1)).toThrowError();
     });
   });
 
