@@ -1,5 +1,6 @@
 import { test, expect } from '../../fixtures/test-base';
 import { ApplicationsPage } from '../../pages/application/applications-list.page';
+import { ListTableComponent } from '../../components/list.component';
 import { createCustomName } from '../../helpers/test-utils';
 
 /**
@@ -36,45 +37,51 @@ test.describe('Application Wall Tests', () => {
       await appsPage.waitForPage();
 
       // List should be visible
-      expect(await appsPage.list.isDisplayed()).toBeTruthy();
+      await appsPage.list.waitUntilShown();
+      expect(await appsPage.list.locator.isVisible()).toBeTruthy();
     });
   });
 
   test.describe('List Operations', () => {
-    test('should switch between card and table view', async ({ connectedEndpointsUserPage }) => {
-      const appsPage = new ApplicationsPage(connectedEndpointsUserPage.page);
+    // These need real rows on the wall, so they seed apps via withTestApps —
+    // the connectedEndpointsUser wall is empty (renders neither table nor cards).
+    test('should switch between card and table view', async ({ withTestApps }) => {
+      const { page } = withTestApps;
+      const appsPage = new ApplicationsPage(page);
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
-      // Get current view
-      const isCardView = await appsPage.list.isCardsView();
+      // Modern signal-list has a single view-toggle button; the wall defaults
+      // to table view (renders <table>) and switches to a [data-test="card-grid"].
+      // Assert directly on the wall's signal-list DOM with auto-waiting.
+      const list = page.locator('app-application-wall app-signal-list');
+      const toggle = list.locator('[data-test="view-toggle"]');
+      await expect(toggle).toBeVisible();
 
-      // Toggle view
-      if (isCardView) {
-        await appsPage.list.header.setTableView();
-        expect(await appsPage.list.isTableView()).toBeTruthy();
-      } else {
-        await appsPage.list.header.setCardsView();
-        expect(await appsPage.list.isCardsView()).toBeTruthy();
-      }
+      await expect(list.locator('table')).toBeVisible({ timeout: 15000 });
+      await toggle.click();
+      await expect(list.locator('[data-test="card-grid"]')).toBeVisible();
+      await toggle.click();
+      await expect(list.locator('table')).toBeVisible();
     });
 
-    test('should filter applications by name', async ({ connectedEndpointsUserPage }) => {
-      const appsPage = new ApplicationsPage(connectedEndpointsUserPage.page);
+    test('should filter applications by name', async ({ withTestApps }) => {
+      const { page, testApps } = withTestApps;
+      const appsPage = new ApplicationsPage(page);
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
-      // Get initial count
-      const initialCount = await appsPage.list.getTotalResults();
+      // Wait for the seeded apps to load, then capture the unfiltered count.
+      await expect.poll(async () => appsPage.getCardCount(), { timeout: 15000 }).toBeGreaterThan(0);
+      const initialCount = await appsPage.getCardCount();
 
-      // Apply filter
-      await appsPage.list.header.setSearchText('test-app');
+      // Filter to one seeded app by name (page object drives [data-test="name-filter"]).
+      await appsPage.setSearchText(testApps[0].app.name);
+      await appsPage.list.waitForNoLoadingIndicator();
 
-      // Wait for filter to apply
-      await connectedEndpointsUserPage.waitForTimeout(500);
-
-      // Filtered count should be <= initial count
-      const filteredCount = await appsPage.list.getTotalResults();
+      // The named app still matches, and the filtered set is no larger than before.
+      const filteredCount = await appsPage.getCardCount();
+      expect(filteredCount).toBeGreaterThan(0);
       expect(filteredCount).toBeLessThanOrEqual(initialCount);
     });
   });
@@ -94,255 +101,136 @@ test.describe('Application Wall Tests', () => {
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
-      // Verify we have applications displayed
-      const totalResults = await appsPage.list.getTotalResults();
-      expect(totalResults).toBeGreaterThanOrEqual(testApps.length);
+      // Wait for the seeded apps to load.
+      await expect.poll(async () => appsPage.getCardCount(), { timeout: 15000 }).toBeGreaterThan(0);
 
-      // Verify at least one of our test apps is visible
-      const appNames = testApps.map(app => app.app.name);
-      const firstAppName = appNames[0];
+      // Filter to a seeded app by name and confirm it renders as a row.
+      const firstAppName = testApps[0].app.name;
+      await appsPage.setSearchText(firstAppName);
+      await appsPage.list.waitForNoLoadingIndicator();
 
-      // Search for our test app
-      await appsPage.list.header.setSearchText(firstAppName);
-      await page.waitForTimeout(1000); // Wait for filter
-
-      // Should find the app
-      const filteredResults = await appsPage.list.getTotalResults();
-      expect(filteredResults).toBeGreaterThan(0);
+      const list = new ListTableComponent(page, page.locator('app-application-wall app-signal-list'));
+      const row = await list.findRowByCellContent(firstAppName);
+      await expect(row).toBeVisible();
     });
 
     test('should navigate to application details', async ({ withTestApp }) => {
-      const { page, testApp, helper } = withTestApp;
+      const { page, testApp } = withTestApp;
+      const appsPage = new ApplicationsPage(page);
+      await appsPage.navigateTo();
+      await appsPage.waitForPage();
 
-      // Navigate to app summary using helper
-      await helper.navigateToAppSummary(testApp);
+      // Click through from the loaded wall (a raw deep-link goto redirects to
+      // Home before the store hydrates); this is the real user flow.
+      await appsPage.setSearchText(testApp.app.name);
+      await appsPage.list.waitForNoLoadingIndicator();
+      // Generous wait for the just-created app's row (slow polled wall under load).
+      const cell = page.locator('app-application-wall app-signal-list td', { hasText: testApp.app.name }).first();
+      await expect(cell).toBeVisible({ timeout: 30000 });
+      const row = cell.locator('xpath=ancestor::tr');
+      await row.getByRole('link', { name: testApp.app.name }).click();
 
-      // Verify we're on the app summary page
-      const summaryPage = page.locator('app-application-page');
-      await summaryPage.waitFor({ timeout: 10000 });
-      expect(await summaryPage.isVisible()).toBeTruthy();
-
-      // Verify app name is displayed
-      const appName = testApp.app.name;
-      const heading = page.locator('h1, h2, .app-name').filter({ hasText: appName });
-      await heading.waitFor({ timeout: 5000 });
-      expect(await heading.isVisible()).toBeTruthy();
+      // The app detail page renders our app's name as its page heading.
+      const heading = page.locator('h1, h2, .app-name').filter({ hasText: testApp.app.name });
+      await expect(heading).toBeVisible({ timeout: 20000 });
     });
+
+    // Signal-list columns sort via a per-header button; toggling a column's
+    // sort must reorder the rows (proven by a change in the first row).
+    const headerSortButton = (page: import('@playwright/test').Page, header: string) =>
+      page.locator('app-application-wall app-signal-list thead th', { hasText: header }).locator('button');
+
+    // Read the first data row's text (carries the unique app name) — robust to
+    // column layout, unlike index-mapped cell reads.
+    const firstRowText = (page: import('@playwright/test').Page) =>
+      page.locator('app-application-wall app-signal-list tbody tr[data-test="row"]').first().textContent();
 
     test('should sort applications by name', async ({ withTestApps }) => {
       const { page } = withTestApps;
       const appsPage = new ApplicationsPage(page);
-
       await appsPage.navigateTo();
       await appsPage.waitForPage();
+      await expect.poll(async () => appsPage.getCardCount(), { timeout: 15000 }).toBeGreaterThan(1);
 
-      // Look for sort options
-      const sortButton = page.locator('button, mat-select').filter({ hasText: /sort|order/i }).first();
-      const hasSortButton = await sortButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!hasSortButton) {
-        test.skip('Sort functionality not available in UI');
-      }
-
-      await sortButton.click();
-
-      // Look for name sort option
-      const nameOption = page.locator('mat-option, button').filter({ hasText: /name/i }).first();
-      const hasNameOption = await nameOption.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasNameOption) {
-        await nameOption.click();
-        await page.waitForTimeout(1000);
-      } else {
-        await page.keyboard.press('Escape');
-        test.skip('Name sort option not found');
-      }
+      const firstAsc = await firstRowText(page);
+      // Toggle the Name column from asc (default) to desc; the top row must change.
+      await headerSortButton(page, 'Name').click();
+      await appsPage.list.waitForNoLoadingIndicator();
+      await expect.poll(async () => firstRowText(page)).not.toBe(firstAsc);
     });
 
     test('should sort applications by creation date', async ({ withTestApps }) => {
       const { page } = withTestApps;
       const appsPage = new ApplicationsPage(page);
-
       await appsPage.navigateTo();
       await appsPage.waitForPage();
+      await expect.poll(async () => appsPage.getCardCount(), { timeout: 15000 }).toBeGreaterThan(1);
 
-      // Look for sort options
-      const sortButton = page.locator('button, mat-select').filter({ hasText: /sort|order/i }).first();
-      const hasSortButton = await sortButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!hasSortButton) {
-        test.skip('Sort functionality not available in UI');
-      }
-
-      await sortButton.click();
-
-      // Look for creation date sort option
-      const dateOption = page.locator('mat-option, button').filter({ hasText: /creat|date/i }).first();
-      const hasDateOption = await dateOption.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasDateOption) {
-        await dateOption.click();
-        await page.waitForTimeout(1000);
-      } else {
-        await page.keyboard.press('Escape');
-        test.skip('Creation date sort option not found');
-      }
+      const firstByName = await firstRowText(page); // default: name asc
+      // Sorting by Created reorders the wall away from the name order.
+      await headerSortButton(page, 'Created').click();
+      await appsPage.list.waitForNoLoadingIndicator();
+      await expect.poll(async () => firstRowText(page)).not.toBe(firstByName);
     });
 
-    test('should filter by organization', async ({ withTestApps }) => {
-      const { page } = withTestApps;
+    // The wall renders native org/space filter <select>s that default to "All".
+    // Assert each is present and correctly initialised. Populated filter→result
+    // behavior is covered in depth by apps-list-filter-sync.spec.ts — the org/space
+    // options are gated on choosing a single CF when endpoints share a URL.
+    async function assertFilterDropdown(page: import('@playwright/test').Page, label: string) {
       const appsPage = new ApplicationsPage(page);
-
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
-      // Look for org filter
-      const orgFilter = page.locator('[placeholder*="org"], mat-select').filter({ hasText: /organization/i }).first();
-      const hasOrgFilter = await orgFilter.isVisible({ timeout: 5000 }).catch(() => false);
+      const select = page.locator(`app-application-wall app-signal-list select#dropdown-${label}`);
+      await expect(select).toBeVisible();
+      expect(await select.inputValue()).toBe(''); // "All"
+    }
 
-      if (!hasOrgFilter) {
-        test.skip('Organization filter not available');
-      }
-
-      await orgFilter.click();
-
-      // Select first organization option
-      const firstOrg = page.locator('mat-option').first();
-      const hasOptions = await firstOrg.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasOptions) {
-        await firstOrg.click();
-        await page.waitForTimeout(1000);
-      } else {
-        await page.keyboard.press('Escape');
-        test.skip('No organization options available');
-      }
+    test('should filter by organization', async ({ withTestApps }) => {
+      await assertFilterDropdown(withTestApps.page, 'Organization');
     });
 
     test('should filter by space', async ({ withTestApps }) => {
-      const { page } = withTestApps;
-      const appsPage = new ApplicationsPage(page);
+      await assertFilterDropdown(withTestApps.page, 'Space');
+    });
 
+    // The wall row (signal-list) carries Status / Instances / Memory columns;
+    // assert each renders for a freshly-created (STOPPED) app.
+    async function wallRowFor(page: import('@playwright/test').Page, appName: string) {
+      const appsPage = new ApplicationsPage(page);
       await appsPage.navigateTo();
       await appsPage.waitForPage();
-
-      // Look for space filter
-      const spaceFilter = page.locator('[placeholder*="space"], mat-select').filter({ hasText: /space/i }).first();
-      const hasSpaceFilter = await spaceFilter.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!hasSpaceFilter) {
-        test.skip('Space filter not available');
-      }
-
-      await spaceFilter.click();
-
-      // Select first space option
-      const firstSpace = page.locator('mat-option').first();
-      const hasOptions = await firstSpace.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasOptions) {
-        await firstSpace.click();
-        await page.waitForTimeout(1000);
-      } else {
-        await page.keyboard.press('Escape');
-        test.skip('No space options available');
-      }
-    });
+      await appsPage.setSearchText(appName);
+      await appsPage.list.waitForNoLoadingIndicator();
+      // Wait generously for the filtered row — a just-created app on the polled
+      // wall + slow CF path can exceed the default row wait under full-suite load.
+      const cell = page.locator('app-application-wall app-signal-list td', { hasText: appName }).first();
+      await expect(cell).toBeVisible({ timeout: 30000 });
+      const row = cell.locator('xpath=ancestor::tr');
+      await expect(row).toBeVisible();
+      return row;
+    }
 
     test('should display application status correctly', async ({ withTestApp }) => {
       const { page, testApp } = withTestApp;
-      const appsPage = new ApplicationsPage(page);
-
-      await appsPage.navigateTo();
-      await appsPage.waitForPage();
-
-      // Search for our test app
-      await appsPage.list.header.setSearchText(testApp.app.name);
-      await page.waitForTimeout(1000);
-
-      // Find app card/row
-      const appCard = page.locator('app-card, mat-card, tr').filter({ hasText: testApp.app.name }).first();
-      const cardExists = await appCard.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!cardExists) {
-        test.skip('Application card not found');
-      }
-
-      // Check for status indicator
-      const statusIndicator = appCard.locator('.status, mat-chip, .state, [class*="status"]').first();
-      const hasStatus = await statusIndicator.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasStatus) {
-        await expect(statusIndicator).toBeVisible();
-        const statusText = await statusIndicator.textContent();
-        expect(statusText).toBeTruthy();
-      } else {
-        test.skip('Status indicator not found in app card');
-      }
+      const row = await wallRowFor(page, testApp.app.name);
+      // A freshly-created app is STOPPED; the Status column renders that state.
+      await expect(row).toContainText(/stopp?ed|started|running/i);
     });
 
     test('should show application instance count', async ({ withTestApp }) => {
       const { page, testApp } = withTestApp;
-      const appsPage = new ApplicationsPage(page);
-
-      await appsPage.navigateTo();
-      await appsPage.waitForPage();
-
-      // Search for our test app
-      await appsPage.list.header.setSearchText(testApp.app.name);
-      await page.waitForTimeout(1000);
-
-      // Find app card/row
-      const appCard = page.locator('app-card, mat-card, tr').filter({ hasText: testApp.app.name }).first();
-      const cardExists = await appCard.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!cardExists) {
-        test.skip('Application card not found');
-      }
-
-      // Check for instance count (look for patterns like "1/1", "2 instances", etc.)
-      const instanceInfo = appCard.locator(':text-matches("\\d+[/\\s]*(instance|running)", "i")').first();
-      const hasInstanceInfo = await instanceInfo.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasInstanceInfo) {
-        await expect(instanceInfo).toBeVisible();
-      } else {
-        // May be displayed differently
-        const cardText = await appCard.textContent();
-        const hasNumbers = /\d+/.test(cardText || '');
-        expect(hasNumbers).toBeTruthy();
-      }
+      const row = await wallRowFor(page, testApp.app.name);
+      // The Instances column renders a running/desired count, e.g. "0 / 1".
+      await expect(row).toContainText(/\d+\s*\/\s*\d+/);
     });
 
     test('should display application memory usage', async ({ withTestApp }) => {
       const { page, testApp } = withTestApp;
-      const appsPage = new ApplicationsPage(page);
-
-      await appsPage.navigateTo();
-      await appsPage.waitForPage();
-
-      // Search for our test app
-      await appsPage.list.header.setSearchText(testApp.app.name);
-      await page.waitForTimeout(1000);
-
-      // Find app card/row
-      const appCard = page.locator('app-card, mat-card, tr').filter({ hasText: testApp.app.name }).first();
-      const cardExists = await appCard.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!cardExists) {
-        test.skip('Application card not found');
-      }
-
-      // Check for memory info (look for patterns like "256MB", "1GB", etc.)
-      const memoryInfo = appCard.locator(':text-matches("\\d+\\s*(MB|GB|memory)", "i")').first();
-      const hasMemoryInfo = await memoryInfo.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasMemoryInfo) {
-        await expect(memoryInfo).toBeVisible();
-      } else {
-        // Memory might be displayed in a different format
-        test.skip('Memory information not found in expected format');
-      }
+      const row = await wallRowFor(page, testApp.app.name);
+      // The Memory column renders an allocation, e.g. "256 MB".
+      await expect(row).toContainText(/\d+\s*(MB|GB)/i);
     });
   });
 });
