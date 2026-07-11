@@ -17,8 +17,6 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
-
-	archiver "github.com/mholt/archiver/v3"
 )
 
 // Success
@@ -362,7 +360,7 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 			return StratosProject{}, tempDir, err
 		}
 
-		err = archiver.Unarchive(lastFilePath, unpackPath)
+		err = unarchive(lastFilePath, unpackPath)
 		if err != nil {
 			return StratosProject{}, tempDir, err
 		}
