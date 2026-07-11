@@ -145,6 +145,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	if err != nil {
 		log.Errorf("Failed to fetch source: %v+", err)
+		// Tell the client the deploy is over — git getters send their own close
+		// events, but the file/folder path otherwise fails silently
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
