@@ -150,7 +150,7 @@ export { SystemSharedUserGuid } from './types/endpoint.types';
 export { stratosEntityCatalog } from './stratos-entity-catalog';
 export { EntityCatalogHelper } from './entity-catalog/entity-catalog-entity/entity-catalog.service';
 export type { PermissionValues } from './types/current-user-roles.types';
-export type { SessionData, SessionDataConfig } from './types/auth.types';
+export type { SessionData, SessionDataConfig, Diagnostics } from './types/auth.types';
 export { APIKeysEnabled, UserEndpointsEnabled } from './types/auth.types';
 export type { RouterRedirect } from './types/auth.types';
 export { EntitySchema } from './helpers/entity-schema';
