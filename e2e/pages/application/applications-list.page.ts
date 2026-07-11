@@ -1,5 +1,6 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../base.page';
+import { ListComponent } from '../../components';
 
 /**
  * Applications List Page Object
@@ -20,6 +21,10 @@ export class ApplicationsPage extends BasePage {
   private readonly cards: Locator;
   private readonly sideNav: Locator;
 
+  // Shared list facade (table/cards/header/pagination) over the wall's
+  // app-signal-list, matching the canonical page-object pattern (EndpointsPage).
+  public readonly list: ListComponent;
+
   constructor(page: Page) {
     super(page);
 
@@ -31,6 +36,15 @@ export class ApplicationsPage extends BasePage {
     this.searchInput = page.getByRole('textbox', { name: /filter by name/i });
     this.cards = this.listComponent.locator('tbody tr');
     this.sideNav = page.locator('app-side-nav');
+    this.list = new ListComponent(page);
+  }
+
+  /**
+   * Check if currently on the applications wall
+   */
+  async isActivePage(): Promise<boolean> {
+    await this.page.waitForURL(/\/applications/, { timeout: 5000 }).catch(() => {});
+    return this.page.url().includes('/applications');
   }
 
   /**

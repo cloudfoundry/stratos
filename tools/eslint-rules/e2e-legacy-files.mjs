@@ -62,7 +62,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/tests/application/application-deploy.spec.ts",
   "e2e/tests/application/application-routes.spec.ts",
   "e2e/tests/application/application-view.spec.ts",
-  "e2e/tests/application/application-wall.spec.ts",
   "e2e/tests/application/apps-list-filter-sync.spec.ts",
   "e2e/tests/application/revisions-rollback-happy.spec.ts",
   "e2e/tests/application/revisions-tab-smoke.spec.ts",
