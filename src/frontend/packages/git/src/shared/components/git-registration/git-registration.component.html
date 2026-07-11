@@ -58,8 +58,8 @@
                   class="input"
                   [appUnique]="
                     registerForm.value.createSystemEndpointField
-                      ? $safeNavigationMigration((customEndpoints | async)?.names)
-                      : $safeNavigationMigration((existingPersonalEndpoints | async)?.names)
+                      ? ($safeNavigationMigration((customEndpoints | async)?.names) ?? [])
+                      : ($safeNavigationMigration((existingPersonalEndpoints | async)?.names) ?? [])
                   "
                 />
                 @if (registerForm.controls.nameField.errors?.required) {
@@ -81,8 +81,8 @@
                   class="input"
                   [appUnique]="
                     registerForm.value.createSystemEndpointField
-                      ? $safeNavigationMigration((customEndpoints | async)?.urls)
-                      : $safeNavigationMigration((existingPersonalEndpoints | async)?.urls)
+                      ? ($safeNavigationMigration((customEndpoints | async)?.urls) ?? [])
+                      : ($safeNavigationMigration((existingPersonalEndpoints | async)?.urls) ?? [])
                   "
                 />
                 @if (registerForm.controls.urlField.errors?.required) {
@@ -99,7 +99,7 @@
               </div>
               <div class="space-y-3">
                 @if (userEndpointsAndIsAdmin | async) {
-                  <label class="checkbox-label" for="git-create-system-endpoint" [class.hidden]="fixedUrl">
+                  <label class="checkbox-label" for="git-create-system-endpoint">
                     <input
                       id="git-create-system-endpoint"
                       type="checkbox"
@@ -111,7 +111,7 @@
                     <span class="checkbox-text">Create a system endpoint (visible to all users)</span>
                   </label>
                 }
-                <label class="checkbox-label" for="git-skip-ssl" [class.hidden]="fixedUrl">
+                <label class="checkbox-label" for="git-skip-ssl">
                   <input
                     id="git-skip-ssl"
                     type="checkbox"

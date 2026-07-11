@@ -142,6 +142,7 @@ export interface AuthTokenEnvelope {
 export interface Diagnostics {
   deploymentType?: string;
   gitClientVersion?: string;
+  databaseBackend?: string;
   databaseMigrations?: any;
   helmName?: string;
   helmRevision?: string;

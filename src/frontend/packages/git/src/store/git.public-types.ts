@@ -29,6 +29,9 @@ export interface GitUser {
   html_url: string;
   id: number;
   login: string;
+  // GitLab repo owners are mapped with a display name instead of a login
+  // (see GitLabSCM.convertProject), so consumers can fall back to it.
+  name?: string;
 }
 
 export interface GitBranch extends GitEntity {
