@@ -54,6 +54,18 @@ export class KubeConfigAuthHelper {
   }
 
   // Try and parse the authentication metadata
+  // Match the cluster server against a provider domain by hostname suffix,
+  // rather than a substring anywhere in the URL (which a URL like
+  // https://evil.com/azmk8s.io would spuriously match).
+  private serverHostEndsWith(server: string, domain: string): boolean {
+    try {
+      const host = new URL(server).hostname;
+      return host === domain || host.endsWith('.' + domain);
+    } catch {
+      return false;
+    }
+  }
+
   public parseAuth(cluster: KubeConfigFileCluster, user: KubeConfigFileUser): RowState {
 
     // Default subtype is generic Kubernetes ('') or previously determined/selected sub type
@@ -68,7 +80,7 @@ export class KubeConfigAuthHelper {
       // Default is generic kubernetes
       let subType = '';
       const authType = 'kube-cert-auth';
-      if (cluster.cluster.server.indexOf('azmk8s.io') >= 0) {
+      if (this.serverHostEndsWith(cluster.cluster.server, 'azmk8s.io')) {
         // Probably Azure
         subType = 'aks';
         cluster._subType = 'aks';
@@ -109,7 +121,7 @@ export class KubeConfigAuthHelper {
     }
 
     if (
-      cluster.cluster.server.indexOf('eks.amazonaws.com') >= 0 ||
+      this.serverHostEndsWith(cluster.cluster.server, 'eks.amazonaws.com') ||
       (user.user.exec && user.user.exec.command && user.user.exec.command === 'aws-iam-authenticator')
     ) {
       // Probably EKS
