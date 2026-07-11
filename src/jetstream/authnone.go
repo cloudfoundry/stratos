@@ -16,6 +16,11 @@ import (
 
 const (
 	noAuthUserID = "10000000-1111-2222-3333-444444444444"
+
+	// sessionNeverExpires marks sessions that have no expiry (no-auth and
+	// local-auth logins); session validation treats any future exp as valid,
+	// so MaxInt64 means the session never expires.
+	sessionNeverExpires int64 = math.MaxInt64
 )
 
 // More fields will be moved into here as global portalProxy struct is phased out
@@ -62,7 +67,7 @@ func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 
 func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	var err error
-	var expiry int64 = math.MaxInt64
+	var expiry int64 = sessionNeverExpires
 
 	session, err := a.p.GetSession(c)
 	if err != nil {
@@ -94,7 +99,7 @@ func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, u
 	log.Debug("generateLoginResponse")
 
 	var err error
-	var expiry int64 = math.MaxInt64
+	var expiry int64 = sessionNeverExpires
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID

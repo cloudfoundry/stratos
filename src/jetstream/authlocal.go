@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -189,7 +188,7 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 	log.Debug("generateLoginResponse")
 
 	var err error
-	var expiry int64 = math.MaxInt64
+	var expiry int64 = sessionNeverExpires
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID

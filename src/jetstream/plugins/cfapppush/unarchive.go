@@ -53,6 +53,8 @@ func unarchive(src, dst string) error {
 				return err
 			}
 			mode := entry.Mode().Perm()
+			// A zero mode means the archive entry recorded no permission
+			// bits; fall back to owner read/write.
 			if mode == 0 {
 				mode = 0600
 			}
