@@ -11,7 +11,7 @@ import {
 } from '../../../../core/src/shared/components/endpoints-missing/endpoints-missing.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderModule } from '../../../../core/src/shared/components/page-header/page-header.module';
-import { LoadingPageComponent } from '@stratosui/core';
+import { LoadingPageComponent, NoContentMessageComponent } from '@stratosui/core';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
@@ -25,7 +25,8 @@ import { KubernetesService } from '../services/kubernetes.service';
     CommonModule,
     RouterModule,
     PageHeaderModule,
-    LoadingPageComponent
+    LoadingPageComponent,
+    NoContentMessageComponent
   ],
   providers: [
     {
@@ -176,7 +177,7 @@ export class KubernetesDashboardTabComponent implements OnInit {
   }
 
   // toggle visibility of the kube dashboard header bar
-  toggle(val: boolean) {
+  toggle(val?: boolean) {
     if (val !== undefined) {
       this.expanded = val;
     } else {

@@ -23,9 +23,9 @@
               }
             }
           </div>
-          <div>{{ check.Check.Name }}</div>
+          <div>{{ check.Check?.Name }}</div>
         </div>
-        @for (comment of check.Comments; track comment) {
+        @for (comment of check.Comments ?? []; track comment) {
           <div class="list-item list-square ml-[58px]">
             <div>{{ comment.Summary }}</div>
           </div>

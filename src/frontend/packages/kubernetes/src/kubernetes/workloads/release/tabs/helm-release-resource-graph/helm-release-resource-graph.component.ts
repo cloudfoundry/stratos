@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
-import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
+import { Edge, NgxGraphModule, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
@@ -90,7 +90,9 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
   update$ = toObservable(this.updateSignal);
 
-  private fitSignal: WritableSignal<boolean> = signal<boolean>(false);
+  // ngx-graph zooms-to-fit on every emission; the options object matches
+  // the [zoomToFit$] input's Observable<NgxGraphZoomOptions> type.
+  private fitSignal: WritableSignal<NgxGraphZoomOptions> = signal<NgxGraphZoomOptions>({});
   fit$ = toObservable(this.fitSignal);
 
   public layout = 'dagre';
@@ -110,7 +112,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     publishReplay(1),
     refCount()
   );
-  private helper = inject(HelmReleaseHelperService);
+  protected helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
 
@@ -233,7 +235,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   public fitGraph() {
-    this.fitSignal.set(true);
+    this.fitSignal.set({});
   }
 
   public toggleLayout() {

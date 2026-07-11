@@ -13,13 +13,14 @@ export class KubernetesNodeSimpleMetricComponent {
   @Input()
   key!: string;
 
-  // strict: required @Input, set by Angular before the template reads it
+  // strict: required @Input, set by Angular before the template reads it.
+  // Callers bind interpolated (already formatted) values, so this is a string.
   @Input()
-  value!: number;
+  value!: string;
 
-  // strict: required @Input, set by Angular before the template reads it
+  // Optional - callers may omit the unit; formatValue() falls back to ''
   @Input()
-  unit!: string;
+  unit?: string;
 
   public formatValue() {
     switch (this.unit) {

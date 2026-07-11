@@ -3,6 +3,13 @@ import { ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import { AnalysisReport } from '../../store/kube.types';
 import { IReportViewer } from '../analysis-report-viewer.component';
 
+interface KubeScoreCheck {
+  Grade?: number;
+  Skipped?: boolean;
+  Check?: { Name?: string };
+  Comments?: Array<{ Summary?: string }>;
+}
+
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kube-score-report-viewer',
@@ -22,7 +29,7 @@ export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
   */
 
   report!: AnalysisReport;
-  processed: Array<{ _checks: unknown[]; _name: string }> = [];
+  processed: Array<{ _checks: KubeScoreCheck[]; _name: string }> = [];
 
   constructor() { }
 
@@ -30,7 +37,7 @@ export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
     this.processed = [];
     // Turn the report into an array
     if (this.report?.report) {
-      const reportData = this.report.report as Record<string, { Checks?: Array<{ Grade?: number; Skipped?: boolean }> }>;
+      const reportData = this.report.report as Record<string, { Checks?: KubeScoreCheck[] }>;
       Object.keys(reportData).forEach(key => {
         const filtered = this.filter(reportData[key]);
         if (filtered.length > 0) {
@@ -44,8 +51,8 @@ export class KubeScoreReportViewerComponent implements OnInit, IReportViewer {
     }
   }
 
-  public filter(report: { Checks?: Array<{ Grade?: number; Skipped?: boolean }> }): Array<{ Grade?: number; Skipped?: boolean }> {
-    const filtered: Array<{ Grade?: number; Skipped?: boolean }> = [];
+  public filter(report: { Checks?: KubeScoreCheck[] }): KubeScoreCheck[] {
+    const filtered: KubeScoreCheck[] = [];
     if (report.Checks) {
       report.Checks.forEach(r => {
         if (r.Grade !== 10 && !r.Skipped) {

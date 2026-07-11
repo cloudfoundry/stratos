@@ -27,7 +27,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
   private id!: string;
 
   @Input()
-  set report(report: AnalysisReport) {
+  set report(report: AnalysisReport | null) {
     if (report === null || report.id === this.id) {
       return;
     }

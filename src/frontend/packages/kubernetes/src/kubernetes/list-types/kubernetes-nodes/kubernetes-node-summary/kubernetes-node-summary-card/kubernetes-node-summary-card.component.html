@@ -6,11 +6,11 @@
     <div class="card-content">
       <div class="kubernetes-node-summary-card__content">
         <app-metadata-item icon="title" label="Name"
-          >{{ (kubeNodeService.nodeEntity$ | async)?.metadata.name }}
+          >{{ (kubeNodeService.nodeEntity$ | async)?.metadata?.name }}
         </app-metadata-item>
         <app-metadata-item icon="today" label="Created">
           {{
-            $safeNavigationMigration((kubeNodeService.nodeEntity$ | async)?.metadata.creationTimestamp) | date: "medium"
+            (kubeNodeService.nodeEntity$ | async)?.metadata?.creationTimestamp | date: "medium"
           }}</app-metadata-item
         >
         @if (caaspNode$ | async; as caaspNode) {

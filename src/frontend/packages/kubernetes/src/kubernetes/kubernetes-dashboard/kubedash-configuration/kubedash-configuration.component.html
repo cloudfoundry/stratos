@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+<app-page-header [breadcrumbs]="(breadcrumbs$ | async) ?? []">
   <h1>Dashboard Configuration</h1>
 </app-page-header>
 
@@ -22,7 +22,7 @@
         @if (status.service && status.serviceAccount) {
           <div class="flex my-5 [&>div]:flex-1">
             <div class="flex">
-              <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no"></app-boolean-indicator>
+              <app-boolean-indicator [showText]="false" [isTrue]="true" [type]="booleanIndicatorType.yesNo"></app-boolean-indicator>
               <div>Kubernetes Dashboard is installed and a Service Account exists - you can access the dashboard using the
               'View Dashboard' button on the Summary view for this cluster.</div>
             </div>
@@ -35,12 +35,12 @@
           </div>
         }
         <app-card class="mb-5">
-          <app-card-progress-overlay [busy]="dashboardUIBusy()" [label]="dashboardUIMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="dashboardUIBusy$" [label]="dashboardUIMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Kubernetes Dashboard Installation</div>
             <div class="absolute right-5 top-5">
               @if (status.service) {
-                <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no">
+                <app-boolean-indicator [showText]="false" [isTrue]="true" [type]="booleanIndicatorType.yesNo">
                 </app-boolean-indicator>
               }
               @if (!status.service) {
@@ -86,12 +86,12 @@
           }
         </app-card>
         <app-card class="mb-5">
-          <app-card-progress-overlay [busy]="serviceAccountBusy()" [label]="serviceAccountMsg"></app-card-progress-overlay>
+          <app-card-progress-overlay [busy]="serviceAccountBusy$" [label]="serviceAccountMsg"></app-card-progress-overlay>
           <div class="card-header">
             <div class="card-title">Service Account</div>
             <div class="absolute right-5 top-5">
               @if (status.serviceAccount) {
-                <app-boolean-indicator [showText]="false" [isTrue]="true" type="yes-no">
+                <app-boolean-indicator [showText]="false" [isTrue]="true" [type]="booleanIndicatorType.yesNo">
                 </app-boolean-indicator>
               }
               @if (!status.serviceAccount) {
