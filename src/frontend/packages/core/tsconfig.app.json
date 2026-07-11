@@ -16,6 +16,6 @@
     "src/**/*.d.ts"
   ],
   "angularCompilerOptions": {
-    "strictTemplates": false
+    "strictTemplates": true
   }
 }
