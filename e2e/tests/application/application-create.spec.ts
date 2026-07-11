@@ -210,12 +210,14 @@ test.describe('Application Create', () => {
 
   test.describe('Create Errors', () => {
     test('should handle duplicate app name', async () => {
-      // The step-2 uniqueness validator checks the WIZARD-selected space (the
-      // connected CF with org/space data). The test fixtures create apps on a
-      // different CF endpoint than the one the browser session has connected
-      // (cross-CF fixture mismatch), so there is no seeded app in the selected
-      // space to collide with. Needs a data-CF-aligned app seed to run for real.
-      test.skip(true, 'Needs an app seeded in the wizard-selected (data-CF) space; fixtures create apps on a different CF endpoint.');
+      // Built out fully once (drive wizard → self-discover the connected CF →
+      // seed a real colliding app on the WIZARD-SELECTED CF/org/space via the CF
+      // API → assert the step-2 app-error). The drive + seed both work; the
+      // blocker is that the wizard's async uniqueness validator does NOT flag an
+      // app seeded through the CF API into the selected space — a validator
+      // caching/timing question. Crack that fresh; the approach is in task #11
+      // and [[reference_stratos_e2e_create_wizard]].
+      test.skip(true, 'Wizard uniqueness validator does not detect an API-seeded app in the selected space — needs validator-behaviour investigation (task #11).');
     });
 
     test('should handle invalid buildpack', async () => {
