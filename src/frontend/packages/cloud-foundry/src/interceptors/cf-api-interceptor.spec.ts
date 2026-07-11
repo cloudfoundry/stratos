@@ -2,18 +2,29 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { EndpointsSignalService } from '@stratosui/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { Router } from '@angular/router';
+import { ConnectEndpointDialogComponent, EndpointsSignalService, TailwindDialogService } from '@stratosui/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StratosDiagnostics } from '../services/diagnostics/stratos-diagnostics.service';
 import { cfApiInterceptor } from './cf-api-interceptor';
 
-// Minimal EndpointsSignalService stub — the interceptor only reads
-// `endpoints()` to look up a name for the 502 snackbar. An empty map is
-// enough for the existing tests; the snackbar-naming regression test below
-// pre-populates a single endpoint via the same stub.
+// Minimal EndpointsSignalService stub — the interceptor reads `endpoints()`
+// to name the 502 snackbar and to build the connect-dialog config for the
+// Reconnect action. An empty map is enough for the existing tests; the
+// snackbar-naming and reconnect tests pre-populate endpoints via the stub.
 const endpointsStub = {
-  endpoints: signal<Record<string, { name?: string }>>({}),
+  endpoints: signal<Record<string, {
+    name?: string;
+    guid?: string;
+    cnsi_type?: string;
+    sub_type?: string;
+    sso_allowed?: boolean;
+  }>>({}),
 };
+
+// TailwindDialogService stub — the Reconnect action opens the connect
+// dialog through it; the tests only assert the open() call.
+const dialogStub = { open: vi.fn() };
 
 describe('cfApiInterceptor', () => {
   let http: HttpClient;
@@ -22,11 +33,13 @@ describe('cfApiInterceptor', () => {
 
   beforeEach(() => {
     endpointsStub.endpoints.set({});
+    dialogStub.open.mockReset();
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([cfApiInterceptor])),
         provideHttpClientTesting(),
         { provide: EndpointsSignalService, useValue: endpointsStub },
+        { provide: TailwindDialogService, useValue: dialogStub },
       ],
     });
     http = TestBed.inject(HttpClient);
@@ -80,13 +93,14 @@ describe('cfApiInterceptor', () => {
   //
   // Helper: capture banner messages and the action label passed alongside.
   const captureSnackbar = async () => {
-    const calls: { msg: string; action?: string }[] = [];
+    const calls: { msg: string; action?: string; ref: { dismissWithAction: () => void } }[] = [];
     const { TailwindSnackBarService } = await import('@stratosui/core');
     const snackbar = TestBed.inject(TailwindSnackBarService);
     const origError = snackbar.error.bind(snackbar);
     snackbar.error = (msg: string, action?: string) => {
-      calls.push({ msg, action });
-      return origError(msg, action);
+      const ref = origError(msg, action);
+      calls.push({ msg, action, ref });
+      return ref;
     };
     return calls;
   };
@@ -107,6 +121,57 @@ describe('cfApiInterceptor', () => {
     expect(calls[0].msg).not.toContain(cnsi); // GUID dropped from the banner
     expect(calls[0].msg).toContain('Authentication expired');
     expect(calls[0].action).toBe('Reconnect');
+  });
+
+  // #5621: the Reconnect action must actually reconnect — it opens the
+  // connect dialog for the affected endpoint in place instead of dumping
+  // the user on /endpoints to find the row themselves.
+  it('Reconnect action opens the connect dialog for the affected endpoint', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({
+      [cnsi]: { name: 'Kevin', guid: cnsi, cnsi_type: 'cf', sub_type: '', sso_allowed: true },
+    });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
+      JSON.stringify({ reason: 'auth_expired', detail: 'token rejected' }),
+      { status: 502, statusText: 'Bad Gateway', headers: { 'X-Stratos-Error-Reason': 'auth_expired' } },
+    );
+
+    expect(calls).toHaveLength(1);
+    calls[0].ref.dismissWithAction(); // click "Reconnect"
+
+    expect(dialogStub.open).toHaveBeenCalledTimes(1);
+    const [component, config] = dialogStub.open.mock.calls[0];
+    expect(component).toBe(ConnectEndpointDialogComponent);
+    expect(config.data).toEqual({
+      name: 'Kevin',
+      guid: cnsi,
+      type: 'cf',
+      subType: '',
+      ssoAllowed: true,
+    });
+  });
+
+  it('Reconnect action falls back to /endpoints when the endpoint is unknown', async () => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    // No endpoint registered in the signal — nothing to hand the dialog.
+    const calls = await captureSnackbar();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    http.get(`/pp/v1/cf/info/${cnsi}`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/info/${cnsi}`).flush(
+      JSON.stringify({ reason: 'auth_expired', detail: 'token rejected' }),
+      { status: 502, statusText: 'Bad Gateway', headers: { 'X-Stratos-Error-Reason': 'auth_expired' } },
+    );
+
+    expect(calls).toHaveLength(1);
+    calls[0].ref.dismissWithAction(); // click "Reconnect"
+
+    expect(dialogStub.open).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith(['/endpoints']);
   });
 
   it('unreachable reason → "unreachable" banner, no Reconnect, includes upstream status', async () => {
