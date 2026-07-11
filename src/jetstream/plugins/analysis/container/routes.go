@@ -30,6 +30,12 @@ func (a *Analyzer) report(ec echo.Context) error {
 		return errors.New("Can't serve that file")
 	}
 
+	for _, seg := range []string{user, endpoint, id, name} {
+		if err := validateSegment(seg); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid report path")
+		}
+	}
+
 	file := filepath.Join(a.reportsDir, user, endpoint, id, name)
 	_, err := os.Stat(file)
 	if os.IsNotExist(err) {
@@ -46,6 +52,11 @@ func (a *Analyzer) delete(ec echo.Context) error {
 	user := ec.Param("user")
 	endpoint := ec.Param("endpoint")
 	id := ec.Param("id")
+	for _, seg := range []string{user, endpoint, id} {
+		if err := validateSegment(seg); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid report path")
+		}
+	}
 	folder := filepath.Join(a.reportsDir, user, endpoint, id)
 	if err := os.RemoveAll(folder); err != nil {
 		log.Warnf("Could not delete Analysis report folder: %s", folder)
@@ -60,6 +71,9 @@ func (a *Analyzer) deleteEndpoint(ec echo.Context) error {
 	log.Debug("delete reports for endpoint")
 
 	endpoint := ec.Param("endpoint")
+	if err := validateSegment(endpoint); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid endpoint")
+	}
 
 	// Iterate over all user folders
 	if items, err := ioutil.ReadDir(a.reportsDir); err == nil {

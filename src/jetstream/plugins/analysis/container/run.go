@@ -40,6 +40,13 @@ func (a *Analyzer) doRun(ec echo.Context) error {
 		return errors.New("Mising ID header")
 	}
 
+	// The ID header is "user/endpoint/id" — a nested but local path. Reject
+	// any value that would escape reportsDir (e.g. "../../etc"). This also
+	// confines job.Folder, which the analyzers write reports into.
+	if !filepath.IsLocal(id) {
+		return errors.New("Invalid ID header")
+	}
+
 	folder := filepath.Join(a.reportsDir, id)
 	if os.MkdirAll(folder, os.ModePerm) != nil {
 		return errors.New("Could not create folder for analysis report")
