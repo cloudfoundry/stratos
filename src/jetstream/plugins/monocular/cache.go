@@ -63,10 +63,31 @@ func (m *Monocular) cacheCharts(charts []store.ChartStoreRecord) error {
 	return nil
 }
 
+// safeSegment returns a filesystem-safe single path segment for a cache
+// component. Chart names and versions originate from external Helm
+// repository indexes, so they must not be able to introduce path
+// separators or traversal. Any character outside [A-Za-z0-9._-] becomes
+// '_', and a segment that is only dots (".", "..") collapses to "_".
+func safeSegment(s string) string {
+	s = strings.Map(func(r rune) rune {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.':
+			return r
+		default:
+			return '_'
+		}
+	}, s)
+	if strings.Trim(s, ".") == "" {
+		return "_"
+	}
+	return s
+}
+
 // Get the cache folder path for a chart
 func (m *Monocular) getChartCacheFolder(chart store.ChartStoreRecord) string {
-	filename := fmt.Sprintf("%s_%s", chart.Name, chart.Version)
-	return path.Join(m.CacheFolder, chart.EndpointID, filename)
+	filename := fmt.Sprintf("%s_%s", safeSegment(chart.Name), safeSegment(chart.Version))
+	return path.Join(m.CacheFolder, safeSegment(chart.EndpointID), filename)
 }
 
 // cleanCacheFiles will Clean all files in the folder for an endpoint that are not referenced by any of the charts we have for that endpoint
