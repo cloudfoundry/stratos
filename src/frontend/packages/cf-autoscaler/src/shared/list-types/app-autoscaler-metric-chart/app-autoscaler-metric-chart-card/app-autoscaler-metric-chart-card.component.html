@@ -15,18 +15,17 @@
           <div class="flex justify-center">
             <canvas baseChart
               [type]="'doughnut'"
-              [data]="gaugeData"
-              [options]="gaugeOptions"
+              [data]="gaugeData()"
+              [options]="gaugeOptions()"
               width="200"
-              height="200"
-              (chartClick)="select($event)">
+              height="200">
             </canvas>
           </div>
           <div class="w-full">
             <app-autoscaler-combo-chart-component [scheme]="comboBarScheme" [colorSchemeLine]="lineChartScheme"
               [customColors]="metricData[0].entity.formated.colorTarget" [results]="metricData[0].entity.formated.target"
               [animations]="true" [lineChart]="metricData[0].entity.markline" [tooltipDisabled]="false"
-              [yLeftAxisScaleFactor]="yLeftAxisScale" [gradient]="false" [xAxis]="true" [yAxis]="true" [legend]="true"
+              [xAxis]="true" [yAxis]="true" [legend]="true"
               [legendData]="appAutoscalerAppMetricLegend.legendColor" [showGridLines]="true" [showXAxisLabel]="true"
               [showYAxisLabel]="true" [yAxisLabel]="metricData[0].entity.unit" [metricName]="metricType"
               [yScaleMax]="metricData[0].entity.chartMaxValue">

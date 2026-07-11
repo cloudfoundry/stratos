@@ -136,52 +136,52 @@
                       </div>
                     </form>
                     <div class="space-y-1">
-                      @if (editRecurringScheduleForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')) {
+                      @if (editRecurringScheduleForm.get('instance_min_count')?.hasError('alertInvalidPolicyMinimumRange')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyMinimumRange}}
                         </div>
                       }
-                      @if (editRecurringScheduleForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')) {
+                      @if (editRecurringScheduleForm.get('instance_max_count')?.hasError('alertInvalidPolicyMaximumRange')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyMaximumRange}}
                         </div>
                       }
-                      @if (editRecurringScheduleForm.get('initial_min_instance_count').hasError('alertInvalidPolicyInitialMaximumRange')) {
+                      @if (editRecurringScheduleForm.get('initial_min_instance_count')?.hasError('alertInvalidPolicyInitialMaximumRange')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyInitialMaximumRange}}
                         </div>
                       }
-                      @if (editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleDateBeforeNow') || editRecurringScheduleForm.get('end_date').hasError('alertInvalidPolicyScheduleDateBeforeNow')) {
+                      @if (editRecurringScheduleForm.get('start_date')?.hasError('alertInvalidPolicyScheduleDateBeforeNow') || editRecurringScheduleForm.get('end_date')?.hasError('alertInvalidPolicyScheduleDateBeforeNow')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleDateBeforeNow}}
                         </div>
                       }
-                      @if (editRecurringScheduleForm.get('start_date').hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')) {
+                      @if (editRecurringScheduleForm.get('start_date')?.hasError('alertInvalidPolicyScheduleEndDateBeforeStartDate')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleEndDateBeforeStartDate}}
                         </div>
                       }
-                      @if (editRecurringScheduleForm.get('start_time').hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')) {
+                      @if (editRecurringScheduleForm.get('start_time')?.hasError('alertInvalidPolicyScheduleEndTimeBeforeStartTime')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleEndTimeBeforeStartTime}}
                         </div>
                       }
-                      @if (editRepeatType==='week' && editRecurringScheduleForm.get('days_of_week').hasError('required')) {
+                      @if (editRepeatType==='week' && editRecurringScheduleForm.get('days_of_week')?.hasError('required')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
                         </div>
                       }
-                      @if (editRepeatType==='week' && editRecurringScheduleForm.get('days_of_week').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
+                      @if (editRepeatType==='week' && editRecurringScheduleForm.get('days_of_week')?.hasError('alertInvalidPolicyScheduleRecurringConflict')) {
                         <div class="text-danger text-sm">
                           days_of_week {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
                         </div>
                       }
-                      @if (editRepeatType==='month' && editRecurringScheduleForm.get('days_of_month').hasError('required')) {
+                      @if (editRepeatType==='month' && editRecurringScheduleForm.get('days_of_month')?.hasError('required')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyScheduleRepeatOn}}
                         </div>
                       }
-                      @if (editRepeatType==='month' && editRecurringScheduleForm.get('days_of_month').hasError('alertInvalidPolicyScheduleRecurringConflict')) {
+                      @if (editRepeatType==='month' && editRecurringScheduleForm.get('days_of_month')?.hasError('alertInvalidPolicyScheduleRecurringConflict')) {
                         <div class="text-danger text-sm">
                           days_of_month {{policyAlert.alertInvalidPolicyScheduleRecurringConflict}}
                         </div>

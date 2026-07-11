@@ -87,27 +87,27 @@
                       <span>seconds.</span>
                     </form>
                     <div class="space-y-1">
-                      @if (editTriggerForm.get('metric_type').hasError('required')) {
+                      @if (editTriggerForm.get('metric_type')?.hasError('required')) {
                         <div class="text-danger text-sm">
                           Metric type is required
                         </div>
                       }
-                      @if (editTriggerForm.get('metric_type').hasError('alertInvalidPolicyTriggerMetricName')) {
+                      @if (editTriggerForm.get('metric_type')?.hasError('alertInvalidPolicyTriggerMetricName')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerMetricName}}
                         </div>
                       }
-                      @if (editTriggerForm.get('threshold').hasError('required')) {
+                      @if (editTriggerForm.get('threshold')?.hasError('required')) {
                         <div class="text-danger text-sm">
                           Threshold is required
                         </div>
                       }
-                      @if (editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThreshold100')) {
+                      @if (editTriggerForm.get('threshold')?.hasError('alertInvalidPolicyTriggerThreshold100')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerThreshold100}}
                         </div>
                       }
-                      @if (editTriggerForm.get('threshold').hasError('alertInvalidPolicyTriggerThresholdRange')) {
+                      @if (editTriggerForm.get('threshold')?.hasError('alertInvalidPolicyTriggerThresholdRange')) {
                         <div class="text-danger text-sm">
                           @if (editScaleType==='upper') {
                             <span>
@@ -121,17 +121,17 @@
                           }
                         </div>
                       }
-                      @if (editTriggerForm.get('breach_duration_secs').hasError('min') || editTriggerForm.get('breach_duration_secs').hasError('max')) {
+                      @if (editTriggerForm.get('breach_duration_secs')?.hasError('min') || editTriggerForm.get('breach_duration_secs')?.hasError('max')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerBreachDurationRange}}
                         </div>
                       }
-                      @if (editTriggerForm.get('adjustment').hasError('required')) {
+                      @if (editTriggerForm.get('adjustment')?.hasError('required')) {
                         <div class="text-danger text-sm">
                           Adjustment is required
                         </div>
                       }
-                      @if (editTriggerForm.get('adjustment').hasError('alertInvalidPolicyTriggerStepRange')) {
+                      @if (editTriggerForm.get('adjustment')?.hasError('alertInvalidPolicyTriggerStepRange')) {
                         <div class="text-danger text-sm">
                           @if (editAdjustmentType==='value') {
                             <span>
@@ -145,7 +145,7 @@
                           }
                         </div>
                       }
-                      @if (editTriggerForm.get('cool_down_secs').hasError('min') || editTriggerForm.get('cool_down_secs').hasError('max')) {
+                      @if (editTriggerForm.get('cool_down_secs')?.hasError('min') || editTriggerForm.get('cool_down_secs')?.hasError('max')) {
                         <div class="text-danger text-sm">
                           {{policyAlert.alertInvalidPolicyTriggerCooldownRange}}
                         </div>
