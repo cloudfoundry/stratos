@@ -72,6 +72,22 @@ func TestValidateNamespace_RejectsShellMetacharacters(t *testing.T) {
 	}
 }
 
+func TestValidateSegment_AcceptsSingleSegments(t *testing.T) {
+	for _, seg := range []string{"user-a", "endpoint1", "report.json", "abc123"} {
+		if err := validateSegment(seg); err != nil {
+			t.Errorf("expected %q to be accepted, got %v", seg, err)
+		}
+	}
+}
+
+func TestValidateSegment_RejectsTraversalAndSeparators(t *testing.T) {
+	for _, seg := range []string{"..", ".", "", "../etc", "a/b", "a\\b", "/abs"} {
+		if err := validateSegment(seg); err == nil {
+			t.Errorf("expected %q to be rejected", seg)
+		}
+	}
+}
+
 func TestValidateContentID_AcceptsFlatFilenames(t *testing.T) {
 	parent := "/reports/user-a"
 	accepted := []string{

@@ -34,6 +34,23 @@ func validateNamespace(ns string) error {
 	return nil
 }
 
+// validateSegment rejects a single report-path route parameter
+// (user/endpoint/id/file) that is empty, contains a path separator, or is
+// "." / "..". Each parameter forms one directory level under reportsDir;
+// without this a bare ".." parameter traverses out of the reports tree.
+func validateSegment(seg string) error {
+	if seg == "" {
+		return errors.New("empty path segment")
+	}
+	if strings.ContainsAny(seg, `/\`) {
+		return fmt.Errorf("path segment %q contains a separator", seg)
+	}
+	if seg == "." || seg == ".." {
+		return fmt.Errorf("path segment %q is reserved", seg)
+	}
+	return nil
+}
+
 // validateContentID takes a multipart Content-ID header value and a parent
 // directory, returns a sanitised absolute path confined to parent. Rejects
 // any filename containing a path separator, `..`, an empty name, or anything
