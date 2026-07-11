@@ -102,6 +102,9 @@ export interface CreateAppParams {
   memory?: number;
   disk?: number;
   environmentVariables?: Record<string, string>;
+  // Override the app lifecycle. Defaults to buildpack (buildpacks/stack).
+  // Pass { type: 'docker', data: {} } to create a Docker-image app.
+  lifecycle?: { type: 'buildpack' | 'docker'; data?: Record<string, unknown> };
 }
 
 export interface CreateOrgParams {
@@ -233,7 +236,7 @@ export class CFApiHelper {
           }
         }
       },
-      lifecycle: {
+      lifecycle: params.lifecycle ?? {
         type: 'buildpack',
         data: {
           buildpacks: params.buildpacks || [],
@@ -344,6 +347,16 @@ export class CFApiHelper {
     await this.ppatch(`${this.cfApiBase}/apps/${appGuid}/environment_variables`, {
       var: vars
     });
+  }
+
+  /**
+   * Read an app's user-provided environment variables. CF API v3 returns them
+   * under `var` (they are a separate sub-resource, not echoed on app create).
+   */
+  async getAppEnvironment(appGuid: string): Promise<Record<string, string>> {
+    if (!this.cfApiBase) await this.init();
+    const resp = await this.pget(`${this.cfApiBase}/apps/${appGuid}/environment_variables`);
+    return resp?.var ?? {};
   }
 
   /**
