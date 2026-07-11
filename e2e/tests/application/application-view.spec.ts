@@ -445,11 +445,14 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToServicesTab();
-        await page.waitForTimeout(1000);
 
-        // Look for bind service button
+        // Wait for the tab to actually render before hunting the button — a flat
+        // sleep races the slow CF data path and flakes under 2-worker contention.
+        await expect(page.locator('app-services-tab').first()).toBeVisible({ timeout: 15000 });
+
+        // Look for bind service button (25s covers the 2-worker shared-CF ceiling).
         const bindButton = page.locator('button').filter({ hasText: /bind.*service|add.*service/i }).first();
-        await expect(bindButton).toBeVisible({ timeout: 10000 });
+        await expect(bindButton).toBeVisible({ timeout: 25000 });
       });
 
       test('should allow unbinding service', async ({ withTestApp }) => {
