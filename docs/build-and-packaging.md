@@ -49,8 +49,8 @@ when deployed as a Cloud Foundry application.
 
 | Command | What it does |
 |---------|-------------|
-| `make check` | Lint + gate (default — ESLint + go fmt/vet + Vitest) |
-| `make check lint` | Lint checks (ESLint + `go fmt` + `go vet`). Note: `go fmt` may modify files. |
+| `make check` | Lint + gate (default — ESLint + go fmt/vet + golangci-lint + Vitest) |
+| `make check lint` | Lint checks (ESLint + `go fmt` + `go vet` + `golangci-lint` on both Go modules). Requires `golangci-lint` installed. Note: `go fmt` may modify files. |
 | `make check gate` | Full pre-push quality gate — mirrors what CI runs on each PR (ESLint + Vitest frontend tests + Go unit tests). Run this before every push. |
 | `make check tests` | Unit tests only |
 | `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
