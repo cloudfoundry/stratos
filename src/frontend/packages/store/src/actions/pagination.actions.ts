@@ -111,7 +111,7 @@ export class SetPage extends BasePaginationAction implements Action {
   ) {
     super(pEntityConfig);
     if (forceLocalPage) {
-      keepPages = true;
+      this.keepPages = true;
     }
   }
   type = SET_PAGE;
