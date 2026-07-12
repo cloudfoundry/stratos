@@ -440,7 +440,7 @@ $(call register, test, e2e)
 
 # ── Check (quality gates) ────────────────────────────────────
 # make check          — lint + gate (default)
-# make check lint     — ESLint + go vet only
+# make check lint     — ESLint + go vet + golangci-lint
 # make check gate     — lint + unit tests + production build (= bun run gate-check)
 # make check tests    — unit tests only
 # make check coverage — unit tests with coverage
@@ -448,8 +448,11 @@ $(call register, test, e2e)
 
 define check.lint
 	@echo "Running lint checks..."
+	@which golangci-lint > /dev/null 2>&1 || (echo "golangci-lint not installed. See https://golangci-lint.run/welcome/install/ (macOS: brew install golangci-lint)" >&2 && exit 1)
 	bun run lint
 	cd src/jetstream && go fmt ./... && go vet ./...
+	cd src/jetstream && golangci-lint run ./...
+	cd src/jetstream/api && golangci-lint run ./...
 endef
 $(call register, check, lint)
 
@@ -796,8 +799,7 @@ install:
 # lint: standalone verb, but no-op when used as check modifier
 ifeq ($(filter check,$(MAKECMDGOALS)),)
 lint:
-	bun run lint
-	cd src/jetstream && go fmt ./... && go vet ./...
+	$(check.lint)
 else
 lint: ;@:
 endif
