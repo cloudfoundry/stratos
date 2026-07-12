@@ -109,7 +109,12 @@ describe('HomePageEndpointCardComponent', () => {
   });
 
   it('presents a connected endpoint with an expired token as disconnected', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: 1 };
+    // endpoint-token-lifecycle (Task 3): connectionStatus is now computed
+    // once at hydration time (computeConnectionStatus) rather than derived
+    // again here from token_expiry, so an expired token is represented
+    // directly as connectionStatus: 'expired' rather than the old
+    // 'connected' + stale-token_expiry combination.
+    component.endpoint = { ...component.endpoint, connectionStatus: 'expired', token_expiry: 1 };
     expect(component.disconnected).toBe(true);
   });
 

@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { EndpointType } from '../extension-types';
 import { httpErrorResponseToSafeString } from '../jetstream';
 import { ActionState, getDefaultActionState } from '../types/entity-pipeline.types';
-import { EndpointModel } from '../types/endpoint.types';
+import { computeConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { SystemInfo } from '../types/system.types';
 
 /**
@@ -178,6 +178,10 @@ export class EndpointsDataService {
         if (type && e.cnsi_type !== type) {
           return false;
         }
+        // 'expired' deliberately does NOT count as connected here: this
+        // feeds request fan-out to endpoints jetstream can actually reach.
+        // An expired token can't serve a request, so fanning out to it
+        // would just produce a per-request 401.
         return e.connectionStatus === 'connected';
       })
     );
@@ -242,7 +246,7 @@ export class EndpointsDataService {
           Object.values(endpointsForType).forEach(endpointInfo => {
             const merged: EndpointModel = {
               ...endpointInfo,
-              connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
+              connectionStatus: computeConnectionStatus(endpointInfo),
             };
             // A keyless endpoint can't be tracked by guid — skip malformed
             // entries rather than collapse them under an `undefined` key.

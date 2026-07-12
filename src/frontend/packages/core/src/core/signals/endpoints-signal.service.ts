@@ -65,6 +65,10 @@ export class EndpointsSignalService {
   });
 }
 
+// 'expired' deliberately does NOT count as connected: `connectedEndpoints` /
+// `haveConnected` gate request fan-out (e.g. cf-current-user-roles sync,
+// service-catalog listing) to endpoints that can actually serve a request.
+// An expired token can't — jetstream would just get a 401 back.
 function isConnected(endpoint: EndpointModel): boolean {
   if (!endpoint || !endpoint.cnsi_type) {
     return false;

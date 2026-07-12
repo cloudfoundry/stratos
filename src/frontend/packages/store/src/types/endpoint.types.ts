@@ -22,7 +22,25 @@ export interface IApiEndpointInfo {
   // Go url.Userinfo pointer: serializes to JSON null when no userinfo is present.
   User: object | null;
 }
-export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
+export type endpointConnectionStatus = 'connected' | 'expired' | 'disconnected' | 'unknown' | 'checking';
+
+// 'expired' = connected but past the connection time: a stored token exists
+// but is known-dead — past token_expiry with no refresh token to renew from.
+// Rejected refresh tokens are disposed server-side into exactly this shape
+// (refresh cleared, expiry floored), so one computation covers both the
+// predictable death and the witnessed one. A renewable token past expiry is
+// still 'connected' — jetstream mints a fresh one on use.
+export function computeConnectionStatus(info: {
+  user?: unknown; token_renewable?: boolean; token_expiry?: number;
+}): endpointConnectionStatus {
+  if (!info.user) {
+    return 'disconnected';
+  }
+  if (!info.token_renewable && !!info.token_expiry && info.token_expiry * 1000 <= Date.now()) {
+    return 'expired';
+  }
+  return 'connected';
+}
 export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;
   authorization_endpoint?: string;
