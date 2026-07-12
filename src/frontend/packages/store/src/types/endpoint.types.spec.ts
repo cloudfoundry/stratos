@@ -22,4 +22,7 @@ describe('computeConnectionStatus', () => {
   it('connected when no expiry is known', () => {
     expect(computeConnectionStatus({ user })).toBe('connected');
   });
+  it('connected when token_expiry is 0 (documented no-expiry value), even if not renewable', () => {
+    expect(computeConnectionStatus({ user, token_expiry: 0, token_renewable: false })).toBe('connected');
+  });
 });
