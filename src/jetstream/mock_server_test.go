@@ -336,20 +336,21 @@ func setupMockEndpointServer(t *testing.T) *httptest.Server {
 		var responseBody []byte
 		var err error
 
-		if r.URL.Path == "/" {
+		switch r.URL.Path {
+		case "/":
 			responseBody, err = json.Marshal(mockApiRootResponse)
 
-		} else if r.URL.Path == "/v2/info" {
+		case "/v2/info":
 			responseBody, err = json.Marshal(mockV2InfoResponse)
 
-		} else if r.URL.Path == "/v3/info" {
+		case "/v3/info":
 			// CF plugin (e238c315b0) now probes /v3/info during capability detection.
 			// Return 404 silently so supportsV3 resolves to false in the tests that use
 			// this mock — they only care about v2-era registration behavior.
 			w.WriteHeader(http.StatusNotFound)
 			return
 
-		} else {
+		default:
 			t.Errorf("No API Setup path / or /v1/info, got path '%s'", r.URL.Path)
 		}
 

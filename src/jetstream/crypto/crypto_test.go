@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"encoding/hex"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -92,13 +91,13 @@ func writeFakeEncryptionKey() error {
 	var err error
 
 	// create a temporary volume
-	FakeVolumeName, err = ioutil.TempDir("", "fake-volume")
+	FakeVolumeName, err = os.MkdirTemp("", "fake-volume")
 	if err != nil {
 		return err
 	}
 
 	key := filepath.Join(FakeVolumeName, FakeKeyName)
-	if err = ioutil.WriteFile(key, FakeKey, 0666); err != nil {
+	if err = os.WriteFile(key, FakeKey, 0666); err != nil {
 		return err
 	}
 

@@ -188,7 +188,7 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 	log.Debug("generateLoginResponse")
 
 	var err error
-	var expiry int64 = sessionNeverExpires
+	expiry := sessionNeverExpires
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID

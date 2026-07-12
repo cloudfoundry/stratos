@@ -143,14 +143,15 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, err
 	}
 
-	if dc.DatabaseProvider == PGSQL {
+	switch dc.DatabaseProvider {
+	case PGSQL:
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
 		}
 		// Invalid SSL mode
 		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
-	} else if dc.DatabaseProvider == MYSQL {
+	case MYSQL:
 		// Map default of disabled to false for MySQL
 		if dc.SSLMode == "disable" {
 			dc.SSLMode = "false"
@@ -218,13 +219,14 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	var openStr, name string
 
-	if dc.DatabaseProvider == PGSQL {
+	switch dc.DatabaseProvider {
+	case PGSQL:
 		name = "postgres"
 		openStr = buildConnectionString(dc)
-	} else if dc.DatabaseProvider == MYSQL {
+	case MYSQL:
 		name = "mysql"
 		openStr = buildConnectionStringForMysql(dc)
-	} else {
+	default:
 		name = "sqlite3"
 		sqlDbDir := env.String("SQLITE_DB_DIR", ".")
 		openStr = path.Join(sqlDbDir, SQLiteDatabaseFile)
@@ -249,7 +251,7 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 func buildConnectionString(dc DatabaseConfig) string {
 	log.Debug("buildConnectionString")
 	escapeStr := func(in string) string {
-		return strings.Replace(in, `'`, `\'`, -1)
+		return strings.ReplaceAll(in, `'`, `\'`)
 	}
 
 	connStr := fmt.Sprintf("user='%s' password='%s' dbname='%s' host='%s' port=%d connect_timeout=%d",
@@ -288,7 +290,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 func buildConnectionStringForMysql(dc DatabaseConfig) string {
 	log.Debug("buildConnectionStringForMysql")
 	escapeStr := func(in string) string {
-		return strings.Replace(in, `'`, `\'`, -1)
+		return strings.ReplaceAll(in, `'`, `\'`)
 	}
 
 	connStr := fmt.Sprintf("%s:%%s@tcp(%s:%d)/%s?parseTime=true",

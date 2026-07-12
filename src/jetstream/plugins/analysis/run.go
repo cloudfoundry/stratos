@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -115,7 +115,7 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 
 	// Read body
 	defer func() { _ = ec.Request().Body.Close() }()
-	if b, err := ioutil.ReadAll((ec.Request().Body)); err == nil {
+	if b, err := io.ReadAll(ec.Request().Body); err == nil {
 		requestBody = b
 	}
 
@@ -161,7 +161,7 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	// Updated job is in the response
 
 	defer func() { _ = rsp.Body.Close() }()
-	response, err := ioutil.ReadAll(rsp.Body)
+	response, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		return errors.New("Could not read response")
 	}

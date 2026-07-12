@@ -351,8 +351,8 @@ func (p *PostgresCNSIRepository) Save(guid string, cnsi api.CNSIRecord, encrypti
 	if err != nil {
 		return err
 	}
-	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
+	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, cnsi.CNSIType,
+		cnsi.APIEndpoint.String(), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
 		cnsi.ClientId, cipherTextClientSecret, cnsi.SSOAllowed, cnsi.SubType, cnsi.Metadata, cnsi.Creator, cnsi.CACert); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}

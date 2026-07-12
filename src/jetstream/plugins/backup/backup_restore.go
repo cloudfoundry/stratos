@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"golang.org/x/crypto/pbkdf2"
@@ -32,8 +31,8 @@ type ConnectionType string
 
 const (
 	BACKUP_CONNECTION_NONE    ConnectionType = "NONE"
-	BACKUP_CONNECTION_CURRENT                = "CURRENT"
-	BACKUP_CONNECTION_ALL                    = "ALL"
+	BACKUP_CONNECTION_CURRENT ConnectionType = "CURRENT"
+	BACKUP_CONNECTION_ALL     ConnectionType = "ALL"
 )
 
 // BackupEndpointsState - For a given endpoint define what's backed up
@@ -72,7 +71,7 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	log.Debug("BackupEndpoints")
 
 	// Create the backup request struct from the body
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return api.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body", "Invalid request body: %+v", err)
 	}
@@ -82,7 +81,7 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 		return api.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body - could not parse JSON", "Invalid request body - could not parse JSON: %+v", err)
 	}
 
-	if data.State == nil || len(data.State) == 0 {
+	if len(data.State) == 0 {
 		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body - no endpoints to backup")
 	}
 
@@ -191,7 +190,7 @@ func (ctb *cnsiTokenBackup) RestoreEndpoints(c echo.Context) error {
 	log.Debug("RestoreEndpoints")
 
 	// Create the restore request struct from the body
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return api.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body", "Invalid request body: %+v", err)
 	}
@@ -219,7 +218,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	}
 
 	// Check that the db version of backup file matches the stratos db version
-	if backup.IgnoreDbVersion == false {
+	if !backup.IgnoreDbVersion {
 		if ctb.dbVersion != data.DBVersion {
 			errorStr := fmt.Sprintf("Incompatible database versions. Expected %+v but got %+v", ctb.dbVersion, data.DBVersion)
 			return api.NewHTTPError(http.StatusBadRequest, errorStr)

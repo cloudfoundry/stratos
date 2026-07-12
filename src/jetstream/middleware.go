@@ -391,8 +391,8 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 
 		apiKey, err := p.APIKeysRepository.GetAPIKeyBySecret(apiKeySecret)
 		if err != nil {
-			switch {
-			case err == sql.ErrNoRows:
+			switch err {
+			case sql.ErrNoRows:
 				log.Debug("apiKeyMiddleware: Invalid API key supplied")
 			default:
 				log.Errorf("apiKeyMiddleware: %v", err)

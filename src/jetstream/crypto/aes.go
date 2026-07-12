@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -35,7 +35,10 @@ func Encrypt(key, text []byte) (ciphertext []byte, err error) {
 		return
 	}
 
-	cfb := cipher.NewCFBEncrypter(block, iv)
+	// CFB is deprecated upstream, but all persisted ciphertexts (endpoint
+	// tokens, client secrets) are CFB-encrypted; switching modes requires a
+	// versioned re-encryption migration, not a drop-in replacement.
+	cfb := cipher.NewCFBEncrypter(block, iv) //nolint:staticcheck
 	cfb.XORKeyStream(ciphertext[aes.BlockSize:], text)
 
 	return
@@ -63,7 +66,8 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 
-	cfb := cipher.NewCFBDecrypter(block, iv)
+	// See Encrypt: CFB retained for compatibility with persisted ciphertexts.
+	cfb := cipher.NewCFBDecrypter(block, iv) //nolint:staticcheck
 	cfb.XORKeyStream(ciphertext, ciphertext)
 
 	plaintext = ciphertext
@@ -79,7 +83,7 @@ func ReadEncryptionKey(v, f string) ([]byte, error) {
 	if string(f[0]) == "/" {
 		encryptionKey = fmt.Sprintf("%s/%s", v, f)
 	}
-	key64chars, err := ioutil.ReadFile(encryptionKey)
+	key64chars, err := os.ReadFile(encryptionKey)
 	if err != nil {
 		log.Errorf("Unable to read encryption key file: %+v\n", err)
 		return nil, err

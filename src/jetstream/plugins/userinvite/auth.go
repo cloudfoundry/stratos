@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -86,7 +86,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint a
 	if res.StatusCode != http.StatusOK {
 		errMessage := "Error validating Client ID and Client Secret"
 		authError := &api.UAAErrorResponse{}
-		uaaResponse, _ := ioutil.ReadAll(res.Body)
+		uaaResponse, _ := io.ReadAll(res.Body)
 		if err := json.Unmarshal([]byte(uaaResponse), authError); err == nil {
 			errMessage = errMessage + " - " + authError.ErrorDescription
 		}

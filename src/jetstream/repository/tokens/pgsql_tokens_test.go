@@ -52,7 +52,7 @@ func TestSaveUAATokens(t *testing.T) {
 			db, _, repository := initialiseRepo(t)
 
 			Convey("should fail to save token with an invalid user GUID", func() {
-				var userGuid string = ""
+				userGuid := ""
 				err := repository.SaveAuthToken(userGuid, tokenRecord, mockEncryptionKey)
 				So(err, ShouldNotBeNil)
 
@@ -408,7 +408,7 @@ func TestDeleteCNSIToken(t *testing.T) {
 		db, mock, repository := initialiseRepo(t)
 
 		Convey("should fail to delete token with an invalid CNSI GUID", func() {
-			var cnsiGuid string = ""
+			cnsiGuid := ""
 			err := repository.DeleteCNSIToken(cnsiGuid, mockUserGuid)
 			So(err, ShouldNotBeNil)
 		})
@@ -453,7 +453,7 @@ func TestDeleteCNSITokens(t *testing.T) {
 		db, mock, repository := initialiseRepo(t)
 
 		Convey("should fail to delete token with an invalid CNSI GUID", func() {
-			var cnsiGuid string = ""
+			cnsiGuid := ""
 			err := repository.DeleteCNSITokens(cnsiGuid)
 			So(err, ShouldNotBeNil)
 		})

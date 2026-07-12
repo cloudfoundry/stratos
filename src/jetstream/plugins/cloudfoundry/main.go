@@ -210,7 +210,9 @@ func (c *CloudFoundrySpecification) Init() error {
 
 func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 
-	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
+	// Error is ignored: it is also set when no record exists, which is handled
+	// below via the empty CNSIType
+	cfAPI, cfCnsi, _ := c.fetchAutoRegisterEndpoint()
 	// CF auto reg url missing, continue as normal
 	if cfAPI == "" {
 		return nil

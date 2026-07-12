@@ -30,10 +30,10 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 	s := &serviceOfferingTestServer{}
 	s.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/v3":
+		switch r.URL.Path {
+		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_offerings":
+		case "/v3/service_offerings":
 			s.listHits++
 			s.lastListQuery = r.URL.RawQuery
 			// v3 emits the `included` block only when the request asked
@@ -92,7 +92,7 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 				}
 			}
 			_ = json.NewEncoder(w).Encode(body)
-		case r.URL.Path == "/v3/service_offerings/offering-1":
+		case "/v3/service_offerings/offering-1":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"guid":              "offering-1",
 				"name":              "redis",
@@ -116,7 +116,7 @@ func newServiceOfferingTestServer(t *testing.T) *serviceOfferingTestServer {
 					},
 				},
 			})
-		case r.URL.Path == "/v3/service_brokers":
+		case "/v3/service_brokers":
 			s.brokerHits++
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
