@@ -27,7 +27,8 @@ import { SignalListCellTemplateDirective } from '../../../shared/components/sign
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
-import { EndpointRowActionsService } from '../endpoint-row-actions.service';
+import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
+import { EndpointRowActionsService, isEndpointExpired } from '../endpoint-row-actions.service';
 import { EndpointsSignalConfigService } from './endpoints-signal-config.service';
 
 // Signal-native replacement for the inner <app-list> on /endpoints. Reuses
@@ -56,6 +57,7 @@ export class EndpointsSignalListComponent {
   private endpointsConfig = inject(EndpointsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private rowActions = inject(EndpointRowActionsService);
+  private authState = inject(EndpointAuthStateService);
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
@@ -136,11 +138,22 @@ export class EndpointsSignalListComponent {
     const userLabel = (ep: EndpointModel): string => ep.user?.name ?? '';
 
     const statusLabel = (ep: EndpointModel): string => {
+      // 'expired' arrives computed on connectionStatus (Task 3, from wire
+      // data); the authState overlay catches 401s the interceptor witnessed
+      // THIS session, before the next info refetch reflects the
+      // server-side disposal - see isEndpointExpired in
+      // endpoint-row-actions.service.ts (shared with the action gate there).
+      if (isEndpointExpired(ep, this.authState.stale())) {
+        return 'Expired';
+      }
       const s = ep.connectionStatus ?? 'unknown';
       return s.charAt(0).toUpperCase() + s.slice(1);
     };
 
     const statusColor = (ep: EndpointModel): SignalListPillColor => {
+      if (isEndpointExpired(ep, this.authState.stale())) {
+        return 'warning';
+      }
       const s = ep.connectionStatus;
       if (s === 'connected') return 'success';
       if (s === 'checking') return 'warning';
