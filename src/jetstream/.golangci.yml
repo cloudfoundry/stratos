@@ -1,0 +1,25 @@
+version: "2"
+
+linters:
+  settings:
+    staticcheck:
+      # Defaults, plus ST1005 disabled: error-string style (capitalization,
+      # punctuation). Jetstream error strings are user-facing surface — they
+      # flow into API responses and logs that clients and tests match on —
+      # so mass-rewording them is behavioral churn, not cleanup.
+      checks:
+        - all
+        - -ST1000
+        - -ST1003
+        - -ST1016
+        - -ST1020
+        - -ST1021
+        - -ST1022
+        - -ST1005
+  exclusions:
+    rules:
+      # Teardown calls in tests (db.Close and friends) — checking their
+      # error returns adds noise, not safety.
+      - path: _test\.go
+        linters:
+          - errcheck
