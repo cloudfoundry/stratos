@@ -139,7 +139,13 @@ export {
   EndpointHealthCheck,
 } from './entity-catalog/entity-catalog.types';
 export type { APIResource, EntityInfo, NormalizedResponse } from './types/api.types';
-export { getFullEndpointApiUrl, countDuplicateUrlEndpoints } from './endpoint-utils';
+export {
+  getFullEndpointApiUrl,
+  countDuplicateUrlEndpoints,
+  countDuplicateUrlEndpointsByType,
+  duplicateUrlStats,
+  formatDuplicateUrlEndpointsMessage,
+} from './endpoint-utils';
 export type { PaginatedAction, BasePaginatedAction, PaginationClientFilter, PaginationParam } from './types/pagination.types';
 export { PaginationEntityState, isPaginatedAction } from './types/pagination.types';
 export { MAX_RECENT_COUNT, RecentlyVisitedDataService } from './services/recently-visited-data.service';
