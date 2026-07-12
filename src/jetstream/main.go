@@ -826,6 +826,10 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		go stopEchoWhenUpgraded(e, p.Env())
 	}
 
+	if !isUpgrade {
+		p.reportDeadTokensAtBoot()
+	}
+
 	if p.Config.AutoRefreshCNSITokens {
 		if err := p.startCNSITokenRefreshRoutines(); err != nil {
 			return err
