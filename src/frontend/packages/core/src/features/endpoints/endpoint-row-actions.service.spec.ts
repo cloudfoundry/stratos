@@ -4,18 +4,20 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { EndpointModel } from '@stratosui/store';
 
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
+import { EndpointAuthStateService } from '../../shared/services/endpoint-auth-state.service';
 import { TailwindDialogService } from '../../shared/services/tailwind-dialog.service';
 import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar.service';
 import { EndpointRowActionsService } from './endpoint-row-actions.service';
 import { EndpointsSignalConfigService } from './endpoints-page/endpoints-signal-config.service';
 
-function ep(connectionStatus: string): EndpointModel {
-  return { guid: 'guid-1', name: 'ep1', cnsi_type: 'cf', connectionStatus } as unknown as EndpointModel;
+function ep(connectionStatus: string, guid = 'guid-1'): EndpointModel {
+  return { guid, name: 'ep1', cnsi_type: 'cf', connectionStatus } as unknown as EndpointModel;
 }
 
 describe('EndpointRowActionsService', () => {
   let service: EndpointRowActionsService;
   let tailwindDialog: { open: ReturnType<typeof vi.fn> };
+  let authState: EndpointAuthStateService;
 
   beforeEach(() => {
     tailwindDialog = { open: vi.fn() };
@@ -29,6 +31,7 @@ describe('EndpointRowActionsService', () => {
       ],
     });
     service = TestBed.inject(EndpointRowActionsService);
+    authState = TestBed.inject(EndpointAuthStateService);
   });
 
   it('offers Disconnect and Reconnect for a connected endpoint', () => {
@@ -52,4 +55,16 @@ describe('EndpointRowActionsService', () => {
     reconnect?.invoke(ep('connected'));
     expect(tailwindDialog.open).toHaveBeenCalledTimes(1);
   });
+
+  it('offers Disconnect and Reconnect for an expired endpoint', () => {
+    const labels = service.buildEndpointActions(ep('expired')).map(a => a.label);
+    expect(labels).toEqual(['Disconnect', 'Reconnect', 'Edit', 'Unregister']);
+  });
+
+  it('offers Disconnect and Reconnect for a connected endpoint the interceptor marked stale this session', () => {
+    authState.markStale('guid-1');
+    const labels = service.buildEndpointActions(ep('connected', 'guid-1')).map(a => a.label);
+    expect(labels).toEqual(['Disconnect', 'Reconnect', 'Edit', 'Unregister']);
+  });
+
 });

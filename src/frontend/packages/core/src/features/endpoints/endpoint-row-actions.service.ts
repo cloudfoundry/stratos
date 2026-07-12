@@ -6,10 +6,29 @@ import { EndpointModel, entityCatalog } from '@stratosui/store';
 import { ConfirmationDialogConfig } from '../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
 import { SignalListRowAction } from '../../shared/components/signal-list/signal-list.component';
+import { EndpointAuthStateService } from '../../shared/services/endpoint-auth-state.service';
 import { TailwindDialogService } from '../../shared/services/tailwind-dialog.service';
 import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar.service';
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { EndpointsSignalConfigService } from './endpoints-page/endpoints-signal-config.service';
+
+/**
+ * True when an endpoint's stored token is expired or effectively dead —
+ * either the store computed `'expired'` from wire data at hydration (Task 3
+ * of the token-lifecycle work), or the auth interceptor witnessed a 401 for
+ * this guid THIS session (`EndpointAuthStateService.stale`) before the next
+ * info refetch reflects the server-side disposal. Exported here (rather than
+ * duplicated) so the endpoints-list status pill
+ * (`EndpointsSignalListComponent`) and this service's action gate can never
+ * disagree about what "expired" means. Lives in this file rather than the
+ * store package because it needs no store-only knowledge beyond
+ * `EndpointModel`, and core components already import from this service
+ * file - no new dependency edge, no cycle.
+ */
+export function isEndpointExpired(ep: EndpointModel, staleGuids: ReadonlySet<string>): boolean {
+  return ep.connectionStatus === 'expired' ||
+    (ep.connectionStatus === 'connected' && !!ep.guid && staleGuids.has(ep.guid));
+}
 
 /**
  * Per-endpoint kebab actions (Connect / Disconnect / Edit / Unregister) with
@@ -32,6 +51,7 @@ export class EndpointRowActionsService {
   private confirmDialog = inject(ConfirmationDialogService);
   private tailwindDialog = inject(TailwindDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private authState = inject(EndpointAuthStateService);
 
   /**
    * `unregister: false` for surfaces that project endpoints without managing
@@ -40,7 +60,11 @@ export class EndpointRowActionsService {
    * stay on the Endpoints page.
    */
   buildEndpointActions = (ep: EndpointModel, opts: { unregister?: boolean } = {}): readonly SignalListRowAction<EndpointModel>[] => {
-    const isConnected = ep.connectionStatus === 'connected';
+    // 'expired' rows (and 'connected' rows the interceptor has marked stale
+    // this session) still hold a stored token - Disconnect must stay
+    // available, and they get the same Reconnect entry a healthy connected
+    // endpoint does, so the two states share the isConnected branch below.
+    const isConnected = ep.connectionStatus === 'connected' || isEndpointExpired(ep, this.authState.stale());
     const isDisconnected = ep.connectionStatus === 'disconnected';
     const def = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
     const connectable = !(def?.definition?.unConnectable);
