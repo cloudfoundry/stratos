@@ -165,7 +165,9 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
                   }
                   const data: ConnectEndpointConfig = {
                     name: ep.name,
-                    guid: ep.guid,
+                    // cnsiGuid, not ep.guid: same value (it's the lookup key)
+                    // but non-optional, which the config type requires.
+                    guid: cnsiGuid,
                     // cnsi_type/sub_type are optional on EndpointModel; this
                     // interceptor only sees CF traffic, so 'cf' is the only
                     // possible fallback.
