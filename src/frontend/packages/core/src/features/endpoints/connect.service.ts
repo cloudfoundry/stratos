@@ -26,6 +26,11 @@ export interface ConnectEndpointConfig {
   type: EndpointType;
   subType: string;
   ssoAllowed: boolean;
+  // The currently-connected username, when the dialog opens against an
+  // already-connected endpoint (Reconnect). Preferred over the
+  // localStorage-remembered username, which only covers past connects
+  // from this browser profile.
+  username?: string;
 }
 
 export interface ConnectEndpointData {
@@ -102,7 +107,12 @@ export class ConnectEndpointService {
     }));
 
     this.subs.push(this.connected$.pipe(
-      filter(([isConnected]) => isConnected),
+      // Gate on hasAttemptedConnect (like connectingError$): for an
+      // already-connected endpoint (Reconnect flow) the endpoint carries a
+      // user from the moment the dialog opens, and without the gate the
+      // pre-existing connection reads as an instant success - the dialog
+      // self-closes with a "Connected" snackbar before any input.
+      filter(([isConnected]) => isConnected && this.hasAttemptedConnect),
       delay(this.connectDelay),
       tap(() => this.hasConnected.next(true)),
       distinctUntilChanged(([isConnected], [oldIsConnected]) => isConnected && oldIsConnected),
