@@ -18,6 +18,7 @@ import { CustomizationService } from '../../../core/customizations.types';
 import { naturalCompare } from '../../../shared/utils/natural-sort';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
+import { EndpointReauthReportService } from '../../../shared/services/endpoint-reauth-report.service';
 import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
 import { PageSideNavComponent, IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
@@ -58,6 +59,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
   private userFavorites = inject(UserFavoritesDataService);
+  private endpointReauthReport = inject(EndpointReauthReportService);
 
   public activeTabLabel$!: Observable<string>;
   public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
@@ -193,6 +195,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     // Initialize user favorites - fire and forget, no subscription needed
     this.userFavorites.load();
 
+    // Once-per-session arrival report of endpoints that already need
+    // re-authentication - fire and forget, no subscription needed.
+    void this.endpointReauthReport.reportOnce();
   }
 
   ngOnDestroy() {
