@@ -65,7 +65,7 @@ func (cf *CloudFoundrySpecification) getIdentityProviders(ctx echo.Context) erro
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadGateway, "UAA request failed: "+err.Error())
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Pass UAA 403 through so the frontend can degrade to free-text origin input.
 	if resp.StatusCode == http.StatusForbidden {

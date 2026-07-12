@@ -59,8 +59,8 @@ func (invite *UserInvite) status(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 // Configure
@@ -96,8 +96,8 @@ func (invite *UserInvite) configure(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"status\": \"ok\"}"))
-	return nil
+	_, err = c.Response().Write([]byte("{\"status\": \"ok\"}"))
+	return err
 }
 
 // arrayContainsString checks the string array to see if it contains the specifed value
@@ -131,6 +131,6 @@ func (invite *UserInvite) remove(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"status\": \"ok\"}"))
-	return nil
+	_, err = c.Response().Write([]byte("{\"status\": \"ok\"}"))
+	return err
 }

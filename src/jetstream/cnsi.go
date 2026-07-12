@@ -96,8 +96,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo api.InfoFunc) e
 		return err
 	}
 
-	c.JSON(http.StatusCreated, newCNSI)
-	return nil
+	return c.JSON(http.StatusCreated, newCNSI)
 }
 
 func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createSystemEndpoint bool, caCert string, fetchInfo api.InfoFunc) (api.CNSIRecord, error) {
@@ -213,13 +212,18 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 	log.Debug("doUnregisterCluster")
 
-	// Should check for errors?
-	p.unsetCNSIRecord(cnsiGUID)
+	if err := p.unsetCNSIRecord(cnsiGUID); err != nil {
+		return err
+	}
 
-	p.unsetCNSITokenRecords(cnsiGUID)
+	if err := p.unsetCNSITokenRecords(cnsiGUID); err != nil {
+		log.Warnf("Unable to remove tokens for unregistered endpoint %s: %v", cnsiGUID, err)
+	}
 
 	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
-	ufe.RemoveFavorites()
+	if err := ufe.RemoveFavorites(); err != nil {
+		log.Warnf("Unable to remove favorites for unregistered endpoint %s: %v", cnsiGUID, err)
+	}
 
 	return nil
 }
@@ -376,8 +380,8 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
@@ -415,8 +419,8 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {

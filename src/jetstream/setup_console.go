@@ -122,8 +122,7 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 			"Failed to authenticate with UAA due to %s", err)
 	}
 
-	c.JSON(http.StatusOK, userTokenInfo)
-	return nil
+	return c.JSON(http.StatusOK, userTokenInfo)
 }
 
 func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
@@ -232,17 +231,20 @@ func (p *portalProxy) setupSaveConfig(c echo.Context) error {
 		consoleConfig.LocalUser = "admin"
 		if consoleConfig.IsSetupComplete() {
 			p.GetConfig().ConsoleConfig.AuthEndpointType = "local"
-			p.InitStratosAuthService(api.Local)
+			if err := p.InitStratosAuthService(api.Local); err != nil {
+				return err
+			}
 			c.Request().Form.Add("username", "admin")
 			c.Request().Form.Add("password", consoleConfig.LocalUserPassword)
 			c.Request().RequestURI = "/pp/v1/login"
-			setupInitialiseLocalUsersConfiguration(consoleConfig, p)
+			if err := setupInitialiseLocalUsersConfiguration(consoleConfig, p); err != nil {
+				return err
+			}
 			return p.consoleLogin(c)
 		}
 	}
 
-	c.NoContent(http.StatusOK)
-	return nil
+	return c.NoContent(http.StatusOK)
 }
 
 func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.ConsoleConfig, error) {
@@ -412,7 +414,9 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 	}
 
 	// This will reload the env config
-	console_config.InitializeConfEnvProvider(consoleRepo)
+	if err := console_config.InitializeConfEnvProvider(consoleRepo); err != nil {
+		log.Warnf("Unable to initialize config environment provider: %v", err)
+	}
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
 	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
@@ -427,7 +431,9 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
-		portalProxy.InitStratosAuthService(api.AuthEndpointTypes[consoleConfig.AuthEndpointType])
+		if err := portalProxy.InitStratosAuthService(api.AuthEndpointTypes[consoleConfig.AuthEndpointType]); err != nil {
+			log.Errorf("Unable to initialise Stratos auth service: %v", err)
+		}
 	}
 
 	return consoleConfig.IsSetupComplete()

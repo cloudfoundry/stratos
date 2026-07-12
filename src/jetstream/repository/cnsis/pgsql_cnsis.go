@@ -76,7 +76,7 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*api.CNSIRecord, 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var cnsiList []*api.CNSIRecord
 	cnsiList = make([]*api.CNSIRecord, 0)
@@ -144,7 +144,7 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*api.ConnectedEn
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var clusterList []*api.ConnectedEndpoint
 	clusterList = make([]*api.ConnectedEndpoint, 0)
@@ -214,7 +214,7 @@ func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKe
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var cnsiList []*api.CNSIRecord
 	cnsiList = make([]*api.CNSIRecord, 0)

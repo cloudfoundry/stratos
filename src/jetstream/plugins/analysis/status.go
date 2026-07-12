@@ -75,7 +75,7 @@ func (c *Analysis) checkStatus() error {
 		return fmt.Errorf("Failed getting status from Analyzer service: %d", rsp.StatusCode)
 	}
 
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	response, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		log.Errorf("Could not read response: %v", err)
