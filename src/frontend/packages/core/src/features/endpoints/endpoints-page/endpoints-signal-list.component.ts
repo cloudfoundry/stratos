@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import {
@@ -13,8 +12,6 @@ import {
   getFullEndpointApiUrl,
 } from '@stratosui/store';
 
-import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import {
   ListSubNavAddAction,
   ListSubNavComponent,
@@ -30,9 +27,7 @@ import { SignalListCellTemplateDirective } from '../../../shared/components/sign
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
-import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
-import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
-import { ConnectEndpointDialogComponent } from '../connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { EndpointRowActionsService } from '../endpoint-row-actions.service';
 import { EndpointsSignalConfigService } from './endpoints-signal-config.service';
 
 // Signal-native replacement for the inner <app-list> on /endpoints. Reuses
@@ -58,12 +53,9 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
   ],
 })
 export class EndpointsSignalListComponent {
-  private router = inject(Router);
   private endpointsConfig = inject(EndpointsSignalConfigService);
   private userFavoriteManager = inject(UserFavoriteManager);
-  private confirmDialog = inject(ConfirmationDialogService);
-  private tailwindDialog = inject(TailwindDialogService);
-  private snackBar = inject(TailwindSnackBarService);
+  private rowActions = inject(EndpointRowActionsService);
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
@@ -272,124 +264,9 @@ export class EndpointsSignalListComponent {
     this.userFavoriteManager.toggleFavorite(fav);
   }
 
-  // Build the per-row kebab menu. Decisions deliberately mirror the legacy
-  // EndpointListHelper: visibility tied to connectionStatus + endpoint type
-  // capability flags, with destructive Unregister flagged danger so it stands
-  // apart visually. The legacy permission-aware visibility checks (Edit /
-  // Unregister hidden behind EDIT_ADMIN_ENDPOINT etc.) are intentionally NOT
-  // ported here for the first cut — the page's existing canRegisterEndpoint
-  // signal already gates the page-level Register button, and the surrounding
-  // permission model needs its own pass during the endpoint subpages migration.
-  // Flagging this as a deferred-parity item in the commit message.
-  private buildEndpointActions = (ep: EndpointModel): readonly SignalListRowAction<EndpointModel>[] => {
-    const isConnected = ep.connectionStatus === 'connected';
-    const isDisconnected = ep.connectionStatus === 'disconnected';
-    const def = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
-    const connectable = !(def?.definition?.unConnectable);
-
-    const out: SignalListRowAction<EndpointModel>[] = [];
-
-    if (isConnected) {
-      out.push({
-        // `link_off` is Material Symbols only — under the classic
-        // Material Icons font shipped here it fails to compose as a
-        // ligature, widening the kebab cell. `power_settings_new`
-        // composes correctly and conveys disconnect.
-        label: 'Disconnect', icon: 'power_settings_new',
-        invoke: () => this.openDisconnectConfirm(ep),
-      });
-    } else if (connectable) {
-      out.push({
-        label: 'Connect', icon: 'link',
-        disabled: !isDisconnected,
-        invoke: () => this.openConnectDialog(ep),
-      });
-    }
-
-    out.push({
-      label: 'Edit', icon: 'edit',
-      invoke: () => { this.router.navigate(`/endpoints/edit/${ep.guid}`.split('/')); },
-    });
-
-    out.push({
-      label: 'Unregister', icon: 'delete', danger: true,
-      invoke: () => this.openUnregisterConfirm(ep),
-    });
-
-    return out;
-  };
-
-  private openConnectDialog(ep: EndpointModel): void {
-    // Same data shape the legacy endpoint-list helper uses — keeps the dialog
-    // contract identical so the unchanged ConnectEndpointDialogComponent reads
-    // the same input fields it always has.
-    this.tailwindDialog.open(ConnectEndpointDialogComponent, {
-      data: {
-        name: ep.name,
-        guid: ep.guid,
-        type: ep.cnsi_type,
-        subType: ep.sub_type,
-        ssoAllowed: ep.sso_allowed,
-      },
-      disableClose: true,
-      width: '550px',
-      maxWidth: '550px',
-      panelClass: ['overflow-visible', 'p-6'],
-    });
-  }
-
-  private openDisconnectConfirm(ep: EndpointModel): void {
-    const { guid, cnsi_type } = ep;
-    if (!guid || !cnsi_type) {
-      return;
-    }
-    const message1 = `Are you sure you want to disconnect endpoint '${ep.name}'?`;
-    const message2 = ep.local ? `This will also update your local configuration.` : '';
-    const config = new ConfirmationDialogConfig(
-      'Disconnect Endpoint',
-      `${message1}${message2 ? `<br><br>${message2}` : ''}`,
-      'Disconnect',
-      false,
-    );
-    this.confirmDialog.open(config, () => {
-      void this.handleAction(this.endpointsConfig.disconnectEndpoint(guid, cnsi_type), () => {
-        this.snackBar.show(`Disconnected endpoint '${ep.name}'`);
-      });
-    });
-  }
-
-  private openUnregisterConfirm(ep: EndpointModel): void {
-    const { guid, cnsi_type } = ep;
-    if (!guid || !cnsi_type) {
-      return;
-    }
-    const config = new ConfirmationDialogConfig(
-      'Unregister Endpoint',
-      `Are you sure you want to unregister endpoint '${ep.name}'?`,
-      'Unregister',
-      true,
-    );
-    this.confirmDialog.open(config, () => {
-      void this.handleAction(this.endpointsConfig.unregisterEndpoint(guid, cnsi_type), () => {
-        this.snackBar.show(`Unregistered ${ep.name}`);
-      });
-    });
-  }
-
-  // W36-B Wave 3: EndpointsDataService returns a single resolved
-  // ActionState via Promise — no more pairwise() over a busy→idle
-  // legacy ngrx Observable. Success/failure routes off the resolved
-  // state directly.
-  private async handleAction(action: Promise<{ error: boolean; message?: string }>, onSuccess: () => void): Promise<void> {
-    try {
-      const result = await action;
-      if (!result.error) {
-        onSuccess();
-      } else {
-        this.snackBar.show(result.message ?? 'Action failed');
-      }
-    } catch (err) {
-      this.snackBar.show((err as Error)?.message ?? 'Action failed');
-    }
-  }
+  // Per-row kebab menu (Connect / Disconnect / Edit / Unregister) - shared
+  // with the /cloud-foundry endpoint picker via EndpointRowActionsService so
+  // both surfaces offer the same endpoint management menu.
+  private buildEndpointActions = (ep: EndpointModel): readonly SignalListRowAction<EndpointModel>[] =>
+    this.rowActions.buildEndpointActions(ep);
 }

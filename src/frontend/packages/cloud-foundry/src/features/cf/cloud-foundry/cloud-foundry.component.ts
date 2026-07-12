@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 
 import {
+  EndpointRowActionsService,
   PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
@@ -42,6 +43,10 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
 export class CloudFoundryComponent {
   cloudFoundryService = inject(CloudFoundryService);
   private router = inject(Router);
+  // The CF picker is a projection of the Endpoints page onto its CF subset -
+  // rows carry the same management kebab (Connect / Disconnect / Edit /
+  // Unregister) via the shared builder.
+  private endpointRowActions = inject(EndpointRowActionsService);
 
   public readonly listConfig: Signal<SignalListConfig<EndpointModel>>;
   public readonly connectedCount: Signal<number>;
@@ -122,6 +127,13 @@ export class CloudFoundryComponent {
           sortField: (e: EndpointModel) => e.user?.name ?? '',
           render: (e: EndpointModel) => e.user?.name ?? '—',
           widthHint: '12rem',
+        },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: (e: EndpointModel) => this.endpointRowActions.buildEndpointActions(e, { unregister: false }),
+          render: () => '',
+          widthHint: '3rem',
         },
       ],
       getRowKey: (e: EndpointModel) => e.guid ?? e.name,
