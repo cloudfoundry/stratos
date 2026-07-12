@@ -172,7 +172,18 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 
 	u.UserGUID = userGUID
 
-	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	// RFC 6749 §4.3.3 permits a token response WITHOUT a refresh_token; the
+	// previously issued refresh token then remains valid and the client must
+	// keep using it. An empty refresh token here must NOT clobber the live
+	// stored one — only the rejected-token disposal write above writes an
+	// intentionally empty refresh token (UpdateTokenAuth is empty-tolerant
+	// for exactly that write, so this keep is the success path's guard).
+	refreshToken := uaaRes.RefreshToken
+	if refreshToken == "" {
+		refreshToken = userToken.RefreshToken
+	}
+
+	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, refreshToken, userToken.Disconnected)
 	tokenRecord.TokenGUID = userToken.TokenGUID
 	err = p.updateTokenAuth(userGUID, tokenRecord)
 	if err != nil {
