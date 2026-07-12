@@ -22,7 +22,6 @@ import (
 type localAuth struct {
 	databaseConnectionPool *sql.DB
 	localUserScope         string
-	consoleAdminScope      string
 	p                      *portalProxy
 }
 

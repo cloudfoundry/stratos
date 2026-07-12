@@ -29,11 +29,6 @@ func (s *stubTranslator) Kind() string {
 	return s.kind
 }
 
-// constantClock gives tests deterministic timestamps.
-func constantClock(ts time.Time) func() time.Time {
-	return func() time.Time { return ts }
-}
-
 func newTestTracker(t *testing.T, clock func() time.Time) *InMemoryTracker {
 	t.Helper()
 	// Very long sweep interval so tests drive eviction deterministically by

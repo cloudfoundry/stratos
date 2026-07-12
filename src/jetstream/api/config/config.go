@@ -17,8 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const secretsDir = "/etc/secrets"
-
 // APIKeysConfigValue - special type for configuring whether API keys feature is enabled
 type APIKeysConfigValue string
 
@@ -232,20 +230,6 @@ func NewSecretsDirLookup(secretsDir string) env.Lookup {
 		// File does not exist
 		return "", false
 	}
-}
-
-type notFoundErr string
-
-func isNotFoundErr(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, ok := err.(notFoundErr)
-	return ok
-}
-
-func (n notFoundErr) Error() string {
-	return fmt.Sprintf("could not find secret file: %s", string(n))
 }
 
 // NewConfigFileLookup - Load the configuration values in the specified config file if it exists

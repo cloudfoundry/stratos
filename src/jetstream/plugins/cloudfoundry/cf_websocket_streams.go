@@ -22,19 +22,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	// Time allowed to read the next pong message from the peer
-	pongWait = 30 * time.Second
-
-	// Send ping messages to peer with this period (must be less than pongWait)
-	pingPeriod = (pongWait * 9) / 10
-)
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
-
 func (c *CloudFoundrySpecification) appStream(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, appStreamHandler)
 }

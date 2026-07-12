@@ -18,7 +18,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type popeyeConfig struct {
+// Referenced only by the parked sonobuoy analyzer (container/sonobuoy.go_);
+// kept so that file compiles if re-enabled.
+type popeyeConfig struct { //nolint:unused
 	Namespace string `json:"namespace"`
 	App       string `json:"app"`
 }

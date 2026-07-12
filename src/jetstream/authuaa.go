@@ -24,7 +24,6 @@ const UAAAdminIdentifier = "stratos.admin"
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p                      *portalProxy
-	skipSSLValidation      bool
 }
 
 func (a *uaaAuth) ShowConfig(config *api.ConsoleConfig) {

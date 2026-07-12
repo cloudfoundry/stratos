@@ -341,15 +341,6 @@ func composeStAppSummary(app capi.App, cnsiGUID string, process *capi.Process, s
 	return s
 }
 
-// toStAppSummary is retained as a two-argument convenience for the tests +
-// the subset of callers that don't need org / route resolution. Delegates
-// to composeStAppSummary with space=nil and routes=[] so orgGuid is
-// always unavailable in this path; routes default to empty so the absence
-// is treated as "no routes" rather than "routes fetch failed".
-func toStAppSummary(app capi.App, cnsiGUID string, process *capi.Process) StApp {
-	return composeStAppSummary(app, cnsiGUID, process, nil, "", []StAppRoute{})
-}
-
 // envelopeMetaForCompositionErrors builds the envelope-level _meta.errors
 // entries for any composition sub-fetch that failed. Returns nil (so the
 // envelope's _meta stays absent) when no errors occurred. Supports

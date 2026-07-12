@@ -108,6 +108,9 @@ func TestListAPIKeys(t *testing.T) {
 		defer db.Close()
 
 		repository, err := NewPgsqlAPIKeysRepository(db)
+		if err != nil {
+			t.Errorf("an error '%s' was not expected when creating the repository", err)
+		}
 
 		Convey("if no records exist in the DB", func() {
 			rs := sqlmock.NewRows(rowFields)
@@ -194,6 +197,9 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 		defer db.Close()
 
 		repository, err := NewPgsqlAPIKeysRepository(db)
+		if err != nil {
+			t.Errorf("an error '%s' was not expected when creating the repository", err)
+		}
 
 		Convey("if no matching record exists in the DB", func() {
 			rs := sqlmock.NewRows(rowFields)
