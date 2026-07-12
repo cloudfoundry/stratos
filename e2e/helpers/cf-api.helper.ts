@@ -337,7 +337,8 @@ export class CFApiHelper {
    */
   async updateAppEnvironment(appGuid: string, vars: Record<string, string>): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.ppost(`${this.cfApiBase}/apps/${appGuid}/environment_variables`, {
+    // CF API v3 updates env vars via PATCH; POST returns 404 "Unknown request".
+    await this.ppatch(`${this.cfApiBase}/apps/${appGuid}/environment_variables`, {
       var: vars
     });
   }
@@ -588,12 +589,47 @@ export class CFApiHelper {
   }
 
   /**
-   * Bind service to app
+   * Create a user-provided service instance (no broker needed) and return its guid
    */
-  async bindService(appGuid: string, serviceInstanceGuid: string): Promise<void> {
+  async createUserProvidedService(spaceGuid: string, name: string): Promise<string> {
     if (!this.cfApiBase) await this.init();
 
-    await this.ppost(`${this.cfApiBase}/service_credential_bindings`, {
+    const response = await this.ppost(`${this.cfApiBase}/service_instances`, {
+      type: 'user-provided',
+      name,
+      relationships: {
+        space: {
+          data: {
+            guid: spaceGuid
+          }
+        }
+      },
+      metadata: {
+        labels: {
+          'stratos-e2e-test': 'true'
+        }
+      }
+    });
+    return response.guid;
+  }
+
+  /**
+   * Delete a service instance (unbind first if bound)
+   */
+  async deleteServiceInstance(serviceInstanceGuid: string): Promise<void> {
+    if (!this.cfApiBase) await this.init();
+    await this.pdelete(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  /**
+   * Bind service to app; returns the credential-binding guid. User-provided
+   * bindings return it synchronously (201 + body); managed bindings are async
+   * (202, empty body) and yield undefined.
+   */
+  async bindService(appGuid: string, serviceInstanceGuid: string): Promise<string | undefined> {
+    if (!this.cfApiBase) await this.init();
+
+    const response = await this.ppost(`${this.cfApiBase}/service_credential_bindings`, {
       type: 'app',
       relationships: {
         service_instance: {
@@ -608,6 +644,7 @@ export class CFApiHelper {
         }
       }
     });
+    return response?.guid;
   }
 
   /**
@@ -874,6 +911,15 @@ export class CFApiHelper {
     if (routes.resources) {
       for (const route of routes.resources) {
         await this.deleteRoute(route.guid).catch(() => {});
+      }
+    }
+
+    // Delete service instances with e2e label (before spaces - CF refuses to
+    // delete a space that still contains instances)
+    const serviceInstances = await this.pget(`${this.cfApiBase}/service_instances?label_selector=stratos-e2e-test`);
+    if (serviceInstances.resources) {
+      for (const si of serviceInstances.resources) {
+        await this.deleteServiceInstance(si.guid).catch(() => {});
       }
     }
 

@@ -143,7 +143,9 @@ export class ListTableComponent {
       customMenu.waitFor({ state: 'visible', timeout: 5000 }),
     ]).catch(() => {});
 
-    return new MenuComponent(this.page);
+    // Bind to the row's own menu (custom dropdown / signal-list row-actions),
+    // not the dead Material menu the default MenuComponent locator targets.
+    return new MenuComponent(this.page, customMenu);
   }
 
   async toggleSort(headerTitle: string): Promise<void> {
