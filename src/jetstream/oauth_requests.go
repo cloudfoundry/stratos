@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -93,17 +94,41 @@ func (p *portalProxy) getCNSIRequestRecords(r *api.CNSIRequest) (t api.TokenReco
 }
 
 // isTokenRejectedErr reports whether a token-refresh failure means UAA
-// REJECTED the refresh token (401, or 400 invalid_grant) — as opposed to
-// UAA being unreachable (status 0) or erroring (5xx). Only a rejection
-// justifies disposing of the stored refresh token; a down UAA says nothing
-// about the token. Mirrors classifyCfError's discrimination in the
-// cloudfoundry plugin, which cannot be imported from here.
+// REJECTED the refresh token itself — as opposed to UAA being unreachable
+// (status 0), erroring (5xx), or the request failing for a reason that says
+// nothing about the token's validity. Only a genuine rejection justifies
+// disposing of the stored refresh token.
+//
+// Status alone is not enough to tell those apart: a rotated or misconfigured
+// client secret at UAA also surfaces as 401 (invalid_client) or 400
+// (invalid_request), and disposing the token on that basis would destroy
+// every user's still-valid refresh token for the endpoint the moment the
+// operator's client config drifts — unrecoverable even after the secret is
+// fixed. So the body is inspected too:
+//   - 400 disposes only when the body names invalid_grant or invalid_token
+//     (the token was rejected); invalid_request and other 400s are treated
+//     as client/request problems and left alone.
+//   - 401 disposes UNLESS the body names invalid_client (our own client
+//     credentials are wrong, not the user's token); an empty or
+//     unrecognized 401 body is treated as a token rejection, matching UAA's
+//     normal invalid_token/invalid_grant response to a bad refresh token.
+//
+// Mirrors classifyCfError's discrimination in the cloudfoundry plugin, which
+// cannot be imported from here.
 func isTokenRejectedErr(err error) bool {
 	var httpReq api.ErrHTTPRequest
-	if errors.As(err, &httpReq) {
-		return httpReq.Status == http.StatusUnauthorized || httpReq.Status == http.StatusBadRequest
+	if !errors.As(err, &httpReq) {
+		return false
 	}
-	return false
+	switch httpReq.Status {
+	case http.StatusUnauthorized:
+		return !strings.Contains(httpReq.Response, "invalid_client")
+	case http.StatusBadRequest:
+		return strings.Contains(httpReq.Response, "invalid_grant") ||
+			strings.Contains(httpReq.Response, "invalid_token")
+	default:
+		return false
+	}
 }
 
 func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
@@ -138,7 +163,14 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
 	if err != nil {
 		log.Warnf("[diag refresh] UAA call FAILED cnsi=%s user=%s err=%v", cnsiGUID, userGUID, err)
-		if isTokenRejectedErr(err) {
+		// OAUTH TOKENS ONLY: this function is the OAuth refresh path, but it
+		// is reached for every stored token row regardless of auth type
+		// (startCNSITokenRefreshRoutines has no auth_type filter) — basic-auth
+		// rows store the username in RefreshToken and must never be cleared
+		// this way. The AuthType check below makes that a hard gate rather
+		// than an assumption resting on basic-auth endpoints happening to
+		// lack a TokenEndpoint today.
+		if isTokenRejectedErr(err) && userToken.AuthType == api.AuthTypeOAuth2 {
 			// UAA rejected the refresh token — it is worthless now. Record the
 			// death in the row itself: drop the dead refresh token and floor
 			// the expiry, so read-time state (token_renewable=false + expiry
@@ -146,12 +178,14 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 			// fresh (mid-window revocation). No new column: this IS the
 			// corrected state. The kept auth_token still carries the JWT user
 			// claims the UI shows and the reconnect dialog prefills from.
-			// OAUTH TOKENS ONLY: this function is the OAuth refresh path;
-			// basic-auth rows store the username in RefreshToken and must
-			// never be cleared this way.
 			dead := userToken
 			dead.RefreshToken = ""
-			if now := time.Now().Unix(); dead.TokenExpiry > now {
+			// The row must always end up with a positive PAST expiry — a
+			// zero expiry reads as "no known expiry" (boot report skips it,
+			// frontend computes 'connected'), which would make the disposal
+			// invisible. Floor whenever the current value isn't already a
+			// positive past timestamp: zero or future both get set to now.
+			if now := time.Now().Unix(); dead.TokenExpiry == 0 || dead.TokenExpiry > now {
 				dead.TokenExpiry = now
 			}
 			if updErr := p.updateTokenAuth(userGUID, dead); updErr != nil {
