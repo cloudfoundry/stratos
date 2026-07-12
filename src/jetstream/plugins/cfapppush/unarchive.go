@@ -2,6 +2,7 @@ package cfapppush
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -64,8 +65,9 @@ func unarchive(src, dst string) error {
 			}
 			in, err := entry.Open()
 			if err != nil {
-				out.Close()
-				return err
+				// Join rather than drop the close error - the open failure
+				// matters more, but a failed close is still worth surfacing
+				return errors.Join(err, out.Close())
 			}
 			defer in.Close()
 			_, err = io.Copy(out, in)
