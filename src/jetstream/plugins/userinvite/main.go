@@ -100,7 +100,9 @@ func (userinvite *UserInvite) Init() error {
 	}
 
 	userinvite.portalProxy.GetConfig().PluginConfig[UserInvitePluginConfigSetting] = "true"
-	userinvite.portalProxy.AddLoginHook(5, userinvite.initClientToken)
+	if err := userinvite.portalProxy.AddLoginHook(5, userinvite.initClientToken); err != nil {
+		return err
+	}
 	userinvite.portalProxy.AddAuthProvider(UAAClientAuthType, api.AuthProvider{
 		Handler:  userinvite.doUAAClientAuthFlow,
 		UserInfo: userinvite.getCNSIUserFromUAAClientToken,

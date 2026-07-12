@@ -55,7 +55,11 @@ func (c *SessionDataRepository) GetValues(session, group string) (map[string]str
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve session data records: %v", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Warnf("Unable to close rows: %v", err)
+		}
+	}()
 
 	var values = make(map[string]string)
 	for rows.Next() {

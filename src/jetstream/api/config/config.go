@@ -261,7 +261,9 @@ func NewConfigFileLookup(path string) env.Lookup {
 		log.Warn("Error reading configuration file, ignoring this file: ", err)
 		return env.NoopLookup
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	loadedConfig := make(map[string]string)
 	scanner := bufio.NewScanner(file)

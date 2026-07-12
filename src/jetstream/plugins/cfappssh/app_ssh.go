@@ -133,14 +133,14 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return fmt.Errorf("Failed to create session: %s", err)
 	}
 
-	defer connection.Close()
+	defer func() { _ = connection.Close() }()
 
 	// Upgrade the web socket
 	ws, pingTicker, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
+	defer func() { _ = ws.Close() }()
 	defer pingTicker.Stop()
 
 	modes := ssh.TerminalModes{
@@ -150,7 +150,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 
 	// NB: rows, cols
 	if err := session.RequestPty("xterm", 84, 80, modes); err != nil {
-		session.Close()
+		_ = session.Close()
 		return fmt.Errorf("request for pseudo terminal failed: %s", err)
 	}
 
@@ -164,11 +164,15 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return fmt.Errorf("Unable to setup stdout for session: %v", err)
 	}
 
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	stdoutDone := make(chan struct{})
 	go pumpStdout(ws, stdout, stdoutDone)
-	go session.Shell()
+	go func() {
+		if err := session.Shell(); err != nil {
+			log.Errorf("App SSH failed to start shell: %v", err)
+		}
+	}()
 
 	// Read the input from the web socket and pipe it to the SSH client
 	for {
@@ -180,10 +184,15 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		}
 
 		res := KeyCode{}
-		json.Unmarshal(r, &res)
+		if err := json.Unmarshal(r, &res); err != nil {
+			log.Warnf("App SSH: could not parse message from web socket: %+v", err)
+			continue
+		}
 
 		if res.Cols == 0 {
-			stdin.Write([]byte(res.Key))
+			if _, err := stdin.Write([]byte(res.Key)); err != nil {
+				log.Errorf("App SSH: error writing to session stdin: %v", err)
+			}
 		} else {
 			// Terminal resize request
 			if err := windowChange(session, res.Rows, res.Cols); err != nil {
@@ -251,15 +260,15 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 			if err != io.EOF {
 				log.Errorf("App SSH encountered an error reading from stdout; %v", err)
 			}
-			ws.Close()
+			_ = ws.Close()
 			break
 		}
 
-		ws.SetWriteDeadline(time.Now().Add(writeWait))
+		_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
 		bytes := fmt.Sprintf("% x\n", buffer[:len])
 		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
 			log.Error("App SSH Failed to write nessage")
-			ws.Close()
+			_ = ws.Close()
 			break
 		}
 	}
@@ -293,7 +302,7 @@ func getWebProcessGUID(apiEndpoint, appGUID, token string, skipSSLValidation boo
 	if err != nil {
 		return "", fmt.Errorf("failed to get processes: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("processes API returned status %d", resp.StatusCode)

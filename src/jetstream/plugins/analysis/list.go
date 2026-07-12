@@ -170,7 +170,7 @@ func (c *Analysis) deleteReports(ec echo.Context) error {
 	// Need to get a config object for the target endpoint
 	userID := ec.Get("user_id").(string)
 
-	defer ec.Request().Body.Close()
+	defer func() { _ = ec.Request().Body.Close() }()
 	body, err := ioutil.ReadAll(ec.Request().Body)
 	if err != nil {
 		return err
@@ -200,7 +200,9 @@ func (c *Analysis) deleteReports(ec echo.Context) error {
 				log.Warnf("Could not delete analysis report for: %s", job.ID)
 			}
 		}
-		dbStore.Delete(userID, id)
+		if err := dbStore.Delete(userID, id); err != nil {
+			log.Warnf("Could not delete analysis report %s from store: %v", id, err)
+		}
 	}
 
 	return ec.JSON(200, ids)
@@ -218,7 +220,7 @@ func (c *Analysis) getReportFile(userID, endpointID, ID, name string) ([]byte, e
 		return nil, fmt.Errorf("Failed getting report from Analyzer service: %d", rsp.StatusCode)
 	}
 
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	response, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Could not read response: %v", err)

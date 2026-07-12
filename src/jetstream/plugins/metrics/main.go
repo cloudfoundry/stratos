@@ -195,7 +195,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecor
 			"Could not connect to the endpoint: %s", err)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	// If we got anything other than a 200, then we did not find the Stratos Metrics metadata file
 	if res.StatusCode != http.StatusOK {
@@ -218,7 +218,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecor
 			return nil, false, api.LogHTTPError(res, err)
 		}
 
-		defer response.Body.Close()
+		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode != http.StatusOK {
 			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
 			return nil, false, api.LogHTTPError(res, err)
@@ -256,7 +256,7 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		log.Errorf("Error performing http request: %v", err)
 		return "", api.LogHTTPError(res, err)
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v", res)
 		return "", api.LogHTTPError(res, err)

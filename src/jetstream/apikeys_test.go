@@ -30,7 +30,7 @@ func Test_addAPIKey(t *testing.T) {
 		mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 		pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 		defer ctrl.Finish()
-		defer pp.DatabaseConnectionPool.Close()
+		defer func() { _ = pp.DatabaseConnectionPool.Close() }()
 
 		Convey("when API keys are disabled", func() {
 			pp.Config.APIKeysEnabled = config.APIKeysConfigEnum.Disabled
@@ -231,7 +231,7 @@ func Test_listAPIKeys(t *testing.T) {
 	mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 	pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 	defer ctrl.Finish()
-	defer pp.DatabaseConnectionPool.Close()
+	defer func() { _ = pp.DatabaseConnectionPool.Close() }()
 
 	Convey("Given a request to list API keys", t, func() {
 		userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -320,7 +320,7 @@ func Test_deleteAPIKeys(t *testing.T) {
 	mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 	pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 	defer ctrl.Finish()
-	defer pp.DatabaseConnectionPool.Close()
+	defer func() { _ = pp.DatabaseConnectionPool.Close() }()
 
 	userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 	keyID := "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"

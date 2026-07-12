@@ -201,7 +201,9 @@ func GetInMemorySQLLiteConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	goose.SetDialect("sqlite3")
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return nil, err
+	}
 
 	err = ApplyMigrations(db)
 	if err != nil {
@@ -230,11 +232,15 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 		log.Infof("SQLite Database file: %s", openStr)
 
 		if !sqliteKeepDB {
-			os.Remove(openStr)
+			if err := os.Remove(openStr); err != nil && !os.IsNotExist(err) {
+				log.Warnf("Unable to remove SQLite database file %s: %v", openStr, err)
+			}
 		}
 	}
 
-	goose.SetDialect(name)
+	if err := goose.SetDialect(name); err != nil {
+		return nil, err
+	}
 	db, err := sql.Open(name, openStr)
 
 	return db, err

@@ -43,7 +43,7 @@ func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve User Favorite records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var favoritesList []*UserFavoriteRecord
 	favoritesList = make([]*UserFavoriteRecord, 0)

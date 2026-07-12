@@ -829,10 +829,14 @@ func TestLogout(t *testing.T) {
 			}
 		}
 
-		pp.StratosAuthService.Logout(ctx)
+		err = pp.StratosAuthService.Logout(ctx)
 
 		header := res.Header()
 		setCookie := header.Get("Set-Cookie")
+
+		Convey("Should not return an error", func() {
+			So(err, ShouldBeNil)
+		})
 
 		Convey("Should unset Cookie", func() {
 			So(setCookie, ShouldNotStartWith, "console-session=")

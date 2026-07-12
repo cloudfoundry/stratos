@@ -56,7 +56,11 @@ func (p *PostgresGooseDBVersionRepository) List() ([]*api.GooseDBVersionRecord, 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Goose Version records: %v", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Warnf("Unable to close rows: %v", err)
+		}
+	}()
 
 	var versionList []*api.GooseDBVersionRecord
 	versionList = make([]*api.GooseDBVersionRecord, 0)

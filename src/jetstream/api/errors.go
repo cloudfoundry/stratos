@@ -64,7 +64,9 @@ func LogHTTPError(r *http.Response, innerErr error) error {
 	b := []byte("No request body")
 	status := 0
 	if r != nil {
-		defer r.Body.Close()
+		defer func() {
+			_ = r.Body.Close()
+		}()
 		if bb, err := ioutil.ReadAll(r.Body); err == nil {
 			b = bb
 		}

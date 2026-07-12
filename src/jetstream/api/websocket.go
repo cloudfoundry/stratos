@@ -42,17 +42,20 @@ func UpgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker
 	log.Debugf("Successfully upgraded to a WebSocket connection")
 
 	// HSC-1276 - handle pong messages and reset the read deadline
-	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
+	if err := clientWebSocket.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+		log.Warnf("Unable to set read deadline on the WebSocket connection: %v", err)
+	}
 	clientWebSocket.SetPongHandler(func(string) error {
-		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
+		return clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
 	})
 
 	// HSC-1276 - send regular Pings to prevent the WebSocket being closed on us
 	ticker := time.NewTicker(pingPeriod)
 	go func() {
 		for range ticker.C {
-			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout))
+			if err := clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout)); err != nil {
+				log.Errorf("Web socket ping error: %+v", err)
+			}
 		}
 	}()
 
