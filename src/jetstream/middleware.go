@@ -20,8 +20,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 )
 
-const cfSessionCookieName = "JSESSIONID"
-
 // Header to communicate the configured Cookie Domain
 const StratosDomainHeader = "x-stratos-domain"
 

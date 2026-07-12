@@ -27,8 +27,6 @@ const (
 	sessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 	// ClientRequestDateHeader Custom header for getting date form client
 	clientRequestDateHeader = "X-Cap-Request-Date"
-	// XSRFTokenCookie - XSRF Token Cookie name
-	xSRFTokenCookie = "XSRF-TOKEN"
 	// Default cookie name/cookie name prefix
 	jetstreamSessionName              = "console-session"
 	jetStreamSessionContextKey        = "jetstream-session"

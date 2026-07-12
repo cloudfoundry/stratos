@@ -489,7 +489,6 @@ func (p *portalProxy) GetCNSIUserFromBasicToken(cnsiGUID string, cfTokenRecord *
 
 func (p *portalProxy) GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
 	var cnsiUser *api.ConnectedUser
-	var scope = []string{}
 
 	// get the scope out of the JWT token data
 	userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
@@ -505,7 +504,7 @@ func (p *portalProxy) GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *
 		Name:   userTokenInfo.UserName,
 		Scopes: userTokenInfo.Scope,
 	}
-	scope = userTokenInfo.Scope
+	scope := userTokenInfo.Scope
 
 	// is the user an CF admin?
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)

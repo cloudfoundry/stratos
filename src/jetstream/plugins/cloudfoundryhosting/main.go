@@ -37,8 +37,7 @@ func init() {
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
-	portalProxy  api.PortalProxy
-	endpointType string
+	portalProxy api.PortalProxy
 }
 
 // Package initialization

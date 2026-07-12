@@ -132,7 +132,7 @@ func MigrateSetupData(portal api.PortalProxy, configStore Repository) error {
 
 func migrateConfigSetting(envLookup *env.VarSet, configStore Repository, envVarName, value, defaultValue string) error {
 
-	var shouldStore = true
+	var shouldStore bool
 
 	// Get the current value from the environment
 	if currentValue, ok := envLookup.Lookup(envVarName); ok {

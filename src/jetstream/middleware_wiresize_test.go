@@ -10,14 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// fakeProxy satisfies the *portalProxy shape wireSizeMiddleware needs —
-// only GetConfig() is exercised. Keeps the test self-contained so it can
-// run without the full DI graph.
-type fakeProxyForWireSize struct {
-	*portalProxy
-	diagEnabled bool
-}
-
 func newTestPortalProxy(diagEnabled bool) *portalProxy {
 	cfg := &api.PortalConfig{DiagnosticsEnabled: diagEnabled}
 	return &portalProxy{Config: *cfg}

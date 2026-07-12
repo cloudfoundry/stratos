@@ -11,10 +11,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-type sessionTestPortalProxy struct {
-	portalProxy
-}
-
 type testEchoContext struct {
 	echo.Context
 }
@@ -25,10 +21,6 @@ func (s *testEchoContext) Request() *http.Request {
 
 func (s *testEchoContext) Get(key string) interface{} {
 	return nil
-}
-
-func (p *sessionTestPortalProxy) GetSession(c echo.Context) (*sessions.Session, error) {
-	return nil, errors.New("Test error")
 }
 
 type testSessionStore struct {

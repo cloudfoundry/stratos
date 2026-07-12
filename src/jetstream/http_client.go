@@ -23,7 +23,6 @@ var (
 	defaultHTTPClientTimeout           int64
 	defaultHTTPClientMutatingTimeout   int64
 	defaultHTTPClientConnectionTimeout int64
-	defaultDialer                      net.Dialer
 )
 
 func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeout int64) {

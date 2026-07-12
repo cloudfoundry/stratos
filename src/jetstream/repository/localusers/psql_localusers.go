@@ -263,7 +263,8 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 
 	if err == nil {
 		//Validate that 1 row has been updated
-		rowsUpdates, err := result.RowsAffected()
+		var rowsUpdates int64
+		rowsUpdates, err = result.RowsAffected()
 		if err != nil {
 			err = errors.New("unable to INSERT local user: could not determine number of rows that were updated")
 		} else if rowsUpdates < 1 {
@@ -312,7 +313,8 @@ func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
 
 	if err == nil {
 		//Validate that 1 row has been updated
-		rowsUpdates, err := result.RowsAffected()
+		var rowsUpdates int64
+		rowsUpdates, err = result.RowsAffected()
 		if err != nil {
 			err = errors.New("unable to UPDATE local user: could not determine number of rows that were updated")
 		} else if rowsUpdates < 1 {

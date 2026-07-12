@@ -384,45 +384,6 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 	return err
 }
 
-func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
-	log.Debug("listRegisteredCNSIs")
-	userGUIDIntf, err := p.GetSessionValue(c, "user_id")
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"User session could not be found",
-			"User session could not be found: %v", err,
-		)
-	}
-	userGUID := userGUIDIntf.(string)
-
-	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
-	if err != nil {
-		return fmt.Errorf("listRegisteredCNSIs: %s", err)
-	}
-
-	var jsonString []byte
-	var clusterList []*api.ConnectedEndpoint
-
-	clusterList, err = cnsiRepo.ListByUser(userGUID)
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to retrieve list of clusters",
-			"Failed to retrieve list of clusters: %v", err,
-		)
-	}
-
-	jsonString, err = marshalClusterList(clusterList)
-	if err != nil {
-		return err
-	}
-
-	c.Response().Header().Set("Content-Type", "application/json")
-	_, err = c.Response().Write(jsonString)
-	return err
-}
-
 func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {
 	log.Debug("marshalCNSIlist")
 	jsonString, err := json.Marshal(cnsiList)
@@ -431,19 +392,6 @@ func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {
 			http.StatusBadRequest,
 			"Failed to retrieve list of CNSIs",
 			"Failed to retrieve list of CNSIs: %v", err,
-		)
-	}
-	return jsonString, nil
-}
-
-func marshalClusterList(clusterList []*api.ConnectedEndpoint) ([]byte, error) {
-	log.Debug("marshalClusterList")
-	jsonString, err := json.Marshal(clusterList)
-	if err != nil {
-		return nil, api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to retrieve list of clusters",
-			"Failed to retrieve list of clusters: %v", err,
 		)
 	}
 	return jsonString, nil
@@ -510,13 +458,6 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRec
 	rec.APIEndpoint.Path = strings.TrimRight(rec.APIEndpoint.Path, "/")
 
 	return *rec, nil
-}
-
-func (p *portalProxy) adminCNSIRecordExists(apiEndpoint string) bool {
-	log.Debug("adminCNSIRecordExists")
-
-	_, err := p.GetAdminCNSIRecordByEndpoint(apiEndpoint)
-	return err == nil
 }
 
 func (p *portalProxy) setCNSIRecord(guid string, c api.CNSIRecord) error {

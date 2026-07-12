@@ -26,17 +26,9 @@ const (
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
 
-	// Inactivity timeout
-	inActivityTimeout = 10 * time.Second
-
 	md5FingerprintLength          = 47 // inclusive of space between bytes
 	base64Sha256FingerprintLength = 43
 )
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 // KeyCode - JSON object that is passed from the front-end to notify of a key press or a term resize
 type KeyCode struct {

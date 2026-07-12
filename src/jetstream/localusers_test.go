@@ -15,10 +15,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-const (
-	insertLocalUserSQL = `INSERT INTO local_users (user_guid, password_hash, user_name, user_email, user_scope) VALUES ($1, $2, $3, $4, $5)`
-)
-
 func TestAddLocalUser(t *testing.T) {
 	t.Parallel()
 
@@ -34,6 +30,7 @@ func TestAddLocalUser(t *testing.T) {
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 		guid, err := pp.AddLocalUser(ctx)
+		So(err, ShouldBeNil)
 
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
 		mock.ExpectQuery(findUserGUID).WillReturnRows(expectedGUIDRow)
@@ -118,6 +115,7 @@ func TestAddLocalUserDuplicate(t *testing.T) {
 
 		mock.ExpectExec(addLocalUser).WillReturnResult(sqlmock.NewResult(1, 1))
 		guid, err := pp.AddLocalUser(ctx)
+		So(err, ShouldBeNil)
 
 		//Check that the new local user has been added correctly before we try to add a duplicate
 		expectedGUIDRow := sqlmock.NewRows([]string{"user_guid"}).AddRow(guid)
@@ -182,6 +180,7 @@ func TestFindPasswordHash(t *testing.T) {
 		expectedHashRow := sqlmock.NewRows([]string{"password_hash"}).AddRow(generatedPasswordHash)
 		mock.ExpectQuery(findPasswordHash).WillReturnRows(expectedHashRow)
 		fetchedPasswordHash, err := localUsersRepo.FindPasswordHash(userGUID)
+		So(err, ShouldBeNil)
 
 		Convey("Password hashes should match", func() {
 			So(fetchedPasswordHash, ShouldResemble, generatedPasswordHash)

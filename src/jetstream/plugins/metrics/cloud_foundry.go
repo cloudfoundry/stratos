@@ -184,6 +184,9 @@ func (m *MetricsSpecification) makePrometheusRequest(c echo.Context, cnsiList []
 	// Construct the metadata for proxying
 	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, queries, true)
 	responses, err := m.portalProxy.DoProxyRequest(requests)
+	if err != nil {
+		return err
+	}
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }
 
