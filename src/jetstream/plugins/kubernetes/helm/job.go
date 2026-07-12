@@ -24,6 +24,9 @@ type KubeResourceJobResult struct {
 	KubeResourceJob
 	StatusCode int
 	Data       []byte
+	// Err marks a job whose request never produced a response; consumers
+	// must not treat it as an empty result
+	Err error
 }
 
 // KubeAPIJob represents a set of jobs to run against the Kube API
@@ -70,16 +73,17 @@ func (j *KubeAPIJob) Run() []KubeResourceJobResult {
 func (j *KubeAPIJob) restWorker(jetstream api.PortalProxy, id int, jobs <-chan KubeResourceJob, results chan<- KubeResourceJobResult) {
 	for job := range jobs {
 		response, err := j.Jetstream.DoProxySingleRequest(job.Endpoint, job.User, "GET", job.URL, nil, nil)
+		if err != nil {
+			log.Errorf("KubeAPIJob: Failed to run job: %+v", err)
+			// The collector expects one result per job
+			results <- KubeResourceJobResult{KubeResourceJob: job, Err: err}
+			continue
+		}
 		log.Debugf("Rest Worker finished for: %s - %d", job.URL, response.StatusCode)
-		res := KubeResourceJobResult{
+		results <- KubeResourceJobResult{
 			KubeResourceJob: job,
 			StatusCode:      response.StatusCode,
 			Data:            response.Response,
 		}
-
-		if err != nil {
-			log.Errorf("KubeAPIJob: Failed to run job: %+v", err)
-		}
-		results <- res
 	}
 }

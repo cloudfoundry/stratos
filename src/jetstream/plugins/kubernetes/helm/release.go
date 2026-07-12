@@ -266,7 +266,12 @@ func (r *HelmRelease) UpdatePods(jetstream api.PortalProxy) {
 
 	runner := NewKubeAPIJob(jetstream, jobs)
 	res := runner.Run()
+	anyJobFailed := false
 	for _, j := range res {
+		if j.Err != nil {
+			anyJobFailed = true
+			continue
+		}
 		var list v1.PodList
 		err := json.Unmarshal(j.Data, &list)
 		if err == nil {
@@ -293,7 +298,12 @@ func (r *HelmRelease) UpdatePods(jetstream api.PortalProxy) {
 	}
 
 	// Now remove all pods that have not just been retrieved
-	// These are stale pods
+	// These are stale pods. Skip the sweep when a job failed - an errored
+	// job returns no pods, and sweeping would delete every pod it covers;
+	// keep the last-known-good set until a clean refresh
+	if anyJobFailed {
+		return
+	}
 	for _, res := range r.Resources {
 		_, exists := pods[res.getID()]
 		if res.Kind == "Pod" && !exists {
@@ -343,6 +353,11 @@ func (r *HelmRelease) UpdateResources(jetstream api.PortalProxy) {
 	runner := NewKubeAPIJob(jetstream, r.Jobs)
 	res := runner.Run()
 	for _, j := range res {
+		// An errored job carries no response; skip it so the cached
+		// resource is kept rather than overwritten with an empty one
+		if j.Err != nil {
+			continue
+		}
 
 		// Add a kube resource
 		res := KubeResource{

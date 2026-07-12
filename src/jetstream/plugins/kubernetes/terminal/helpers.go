@@ -66,6 +66,9 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	secretName := fmt.Sprintf("terminal-%s", id)
 	podName := secretName
 	podClient, secretClient, err := k.getClients()
+	if err != nil {
+		return nil, err
+	}
 	ctx := context.Background()
 	result := &PodCreationData{}
 	result.Namespace = k.Namespace
@@ -180,8 +183,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	for {
 		// This ensures we keep the web socket alive while the container is creating
 		sendProgressMessage(ws, startingProgressMessage)
-		status, err := podClient.Get(ctx, pod.Name, statusOptions)
-		if err == nil && status.Status.Phase == "Running" {
+		status, getErr := podClient.Get(ctx, pod.Name, statusOptions)
+		if getErr == nil && status.Status.Phase == "Running" {
 			break
 		}
 

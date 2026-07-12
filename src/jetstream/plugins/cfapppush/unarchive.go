@@ -62,13 +62,17 @@ func unarchive(src, dst string) error {
 			if err != nil {
 				return err
 			}
-			defer out.Close()
 			in, err := entry.Open()
 			if err != nil {
+				out.Close()
 				return err
 			}
 			defer in.Close()
 			_, err = io.Copy(out, in)
+			// Close errors on a written file can mean lost data - don't drop them
+			if closeErr := out.Close(); err == nil {
+				err = closeErr
+			}
 			return err
 		}
 	})

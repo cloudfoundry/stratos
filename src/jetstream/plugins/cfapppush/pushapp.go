@@ -119,17 +119,11 @@ func (p *PushError) Error() string {
 // Constructor returns a CFPush based on the supplied config
 func Constructor(config *CFPushAppConfig, portalProxy api.PortalProxy) CFPush {
 	pushCmd := &v7.PushCommand{}
-	cfPush := &CFPushApp{
+	return &CFPushApp{
 		pushCommand: pushCmd,
 		config:      config,
 		portalProxy: portalProxy,
 	}
-	cfPush.init(config)
-	return cfPush
-}
-
-func (c *CFPushApp) init(config *CFPushAppConfig) error {
-	return nil
 }
 
 // Init initializes the push operation with the specified application directory and manifest path
