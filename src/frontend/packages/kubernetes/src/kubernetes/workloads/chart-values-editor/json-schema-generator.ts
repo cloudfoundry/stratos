@@ -29,7 +29,7 @@ function isBuiltIn(constructor: new (...args: any[]) => any): boolean {
 }
 
 function of(obj: unknown): (new (...args: any[]) => any) | null | undefined {
-  if ((obj === null) || (obj === undefined)) {
+  if (obj == null) {
     return obj as null | undefined;
   } else {
     return (obj as any).constructor as (new (...args: any[]) => any);

@@ -94,7 +94,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   deleteDashboardConfirmation = new ConfirmationDialogConfig(
     'Delete Kubernetes Dashboard?',
-    'Are you sure you want to delete the Kubernetes Dashboard from this cluster?' +
+    'Are you sure you want to delete the Kubernetes Dashboard from this cluster? ' +
     'This will delete the dashboard namespace and cluster service account and role binding',
     'Delete'
   );

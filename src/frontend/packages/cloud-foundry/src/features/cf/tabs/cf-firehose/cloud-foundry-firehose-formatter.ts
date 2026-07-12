@@ -39,7 +39,7 @@ export class CloudFoundryFirehoseFormatter {
    * Filter and format Firehose JSOM log message
    */
   public jsonFilter(jsonString: string): string {
-    let filtered = jsonString;
+    let filtered: string;
     try {
       const cfEvent: FireHoseItem = JSON.parse(jsonString);
       switch (cfEvent.eventType) {
