@@ -144,8 +144,8 @@ func (invite *UserInvite) invite(c echo.Context) error {
 		return api.NewHTTPError(http.StatusInternalServerError, "Failed to serialize response")
 	}
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func (invite *UserInvite) processUserInvites(c echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) (*UserInviteResponse, error) {
@@ -273,7 +273,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint api.CNSIRecord,
 	}
 
 	// Read the response
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, api.NewHTTPShadowError(

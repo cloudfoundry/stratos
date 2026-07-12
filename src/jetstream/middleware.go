@@ -421,7 +421,9 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		// some endpoints check not only the context store, but also the contents of the session store
 		sessionValues := make(map[string]interface{})
 		sessionValues["user_id"] = apiKey.UserGUID
-		p.setSessionValues(c, sessionValues)
+		if err := p.setSessionValues(c, sessionValues); err != nil {
+			log.Errorf("apiKeyMiddleware: %v", err)
+		}
 
 		err = p.APIKeysRepository.UpdateAPIKeyLastUsed(apiKey.GUID)
 		if err != nil {

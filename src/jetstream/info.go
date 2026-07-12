@@ -161,7 +161,9 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 func marshalEndpointMetadata(metadata string) interface{} {
 	if len(metadata) > 2 && strings.Index(metadata, "{") == 0 {
 		var anyJSON map[string]interface{}
-		json.Unmarshal([]byte(metadata), &anyJSON)
+		if err := json.Unmarshal([]byte(metadata), &anyJSON); err != nil {
+			return metadata
+		}
 		return anyJSON
 	} else {
 		return metadata

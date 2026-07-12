@@ -73,7 +73,9 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	if err != nil {
 		// No session, so create one
 		session, err = a.p.NewSession(c)
-		a.p.SaveSession(c, session)
+		if saveErr := a.p.SaveSession(c, session); saveErr != nil {
+			log.Warnf("Unable to save session: %v", saveErr)
+		}
 	}
 
 	sessionValues := make(map[string]interface{})
@@ -85,7 +87,9 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	req.Header.Set("Cookie", "")
 	if err = a.p.setSessionValues(c, sessionValues); err == nil {
 		//Makes sure the client gets the right session expiry time
-		a.p.handleSessionExpiryHeader(c)
+		if err = a.p.handleSessionExpiryHeader(c); err != nil {
+			log.Warnf("Unable to set session expiry header: %v", err)
+		}
 	}
 }
 
@@ -128,7 +132,9 @@ func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, u
 		// Add XSRF Token
 		a.p.ensureXSRFToken(c)
 		c.Response().Header().Set("Content-Type", "application/json")
-		c.Response().Write(jsonString)
+		if _, err := c.Response().Write(jsonString); err != nil {
+			return err
+		}
 	}
 
 	return err
@@ -141,7 +147,9 @@ func (a *noAuth) logout(c echo.Context) error {
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
+		log.Warnf("Unable to remove XSRF token from session: %v", err)
+	}
 
 	err := a.p.clearSession(c)
 	if err != nil {

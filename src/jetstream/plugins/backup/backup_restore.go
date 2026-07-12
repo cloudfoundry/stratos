@@ -99,8 +99,8 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, error) {

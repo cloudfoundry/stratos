@@ -217,7 +217,9 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 		// Add XSRF Token
 		a.p.ensureXSRFToken(c)
 		c.Response().Header().Set("Content-Type", "application/json")
-		c.Response().Write(jsonString)
+		if _, err := c.Response().Write(jsonString); err != nil {
+			return err
+		}
 	}
 
 	return err
@@ -230,7 +232,9 @@ func (a *localAuth) logout(c echo.Context) error {
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
+		log.Warnf("Unable to remove XSRF token from session: %v", err)
+	}
 
 	err := a.p.clearSession(c)
 	if err != nil {

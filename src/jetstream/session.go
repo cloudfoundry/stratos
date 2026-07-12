@@ -244,7 +244,9 @@ func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 		}
 		sessionValues := make(map[string]interface{})
 		sessionValues[XSRFTokenSessionName] = token
-		p.setSessionValues(c, sessionValues)
+		if err := p.setSessionValues(c, sessionValues); err != nil {
+			log.Warnf("Unable to save XSRF token to session: %v", err)
+		}
 	}
 
 	if len(token) > 0 {

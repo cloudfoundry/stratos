@@ -52,7 +52,7 @@ func (p *AnalysisDBStore) List(userGUID, endpointID string) ([]*AnalysisRecord, 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Analysis Reports records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	return list(rows)
 }
@@ -63,7 +63,7 @@ func (p *AnalysisDBStore) ListCompletedByPath(userGUID, endpointID, path string)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Analysis Reports records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	return list(rows)
 }
@@ -74,7 +74,7 @@ func (p *AnalysisDBStore) ListRunning() ([]*AnalysisRecord, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Analysis Reports records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	return list(rows)
 }

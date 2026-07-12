@@ -61,9 +61,9 @@ func (a *uaaAuth) Login(c echo.Context) error {
 	a.p.ensureXSRFToken(c)
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
+	_, err = c.Response().Write(jsonString)
 
-	return nil
+	return err
 }
 
 // Logout provides UAA-auth specific Stratos login
@@ -170,7 +170,9 @@ func (a *uaaAuth) logout(c echo.Context) error {
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
+		log.Warnf("Unable to remove XSRF token from session: %v", err)
+	}
 
 	err := a.p.clearSession(c)
 	if err != nil {
@@ -374,7 +376,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 		return nil, api.LogHTTPError(res, err)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	var response api.UAAResponse
 
@@ -529,8 +531,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	}
 
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
-	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-	return nil
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
 func validateSSORedirectState(state string, allowListStr string) error {

@@ -148,7 +148,7 @@ func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNS
 	v2Uri := *uri
 	v2Uri.Path = "v2/info"
 	if res, err := h.Get(v2Uri.String()); err == nil {
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 		if res.StatusCode == 200 {
 			var v2 api.V2Info
 			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
@@ -160,7 +160,7 @@ func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNS
 	v3Uri := *uri
 	v3Uri.Path = "v3/info"
 	if res, err := h.Get(v3Uri.String()); err == nil {
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 		if res.StatusCode == 200 {
 			var v3 api.V3Info
 			if json.NewDecoder(res.Body).Decode(&v3) == nil && v3.Links.Self.Href != "" {
@@ -185,7 +185,9 @@ func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNS
 
 func (c *CloudFoundrySpecification) Init() error {
 	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
-	c.portalProxy.AddLoginHook(0, c.cfLoginHook)
+	if err := c.portalProxy.AddLoginHook(0, c.cfLoginHook); err != nil {
+		return err
+	}
 
 	// Wire into the stratosjobs contract. Plugin load order isn't
 	// guaranteed — if stratosjobs didn't register yet we log + skip, and
@@ -328,8 +330,8 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	}
 	if res.StatusCode != 200 {
 		buf := &bytes.Buffer{}
-		io.Copy(buf, res.Body)
-		res.Body.Close()
+		_, _ = io.Copy(buf, res.Body)
+		_ = res.Body.Close()
 		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
 	dec := json.NewDecoder(res.Body)
@@ -353,7 +355,7 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	v2Uri := *uri
 	v2Uri.Path = "v2/info"
 	if res, err := h.Get(v2Uri.String()); err == nil {
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 		if res.StatusCode == 200 {
 			var v2 api.V2Info
 			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
@@ -370,7 +372,7 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	v3Uri := *uri
 	v3Uri.Path = "v3/info"
 	if res, err := h.Get(v3Uri.String()); err == nil {
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 		if res.StatusCode == 200 {
 			var v3 api.V3Info
 			if json.NewDecoder(res.Body).Decode(&v3) == nil && v3.Links.Self.Href != "" {

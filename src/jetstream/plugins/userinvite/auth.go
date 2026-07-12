@@ -80,7 +80,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint a
 		)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	// Check error code
 	if res.StatusCode != http.StatusOK {

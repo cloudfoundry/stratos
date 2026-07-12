@@ -156,7 +156,9 @@ func main() {
 
 	if isUpgrading {
 		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup)
+		if err := start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup); err != nil {
+			log.Warnf("Unable to start upgrade web server instance: %v", err)
+		}
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
@@ -200,7 +202,7 @@ func main() {
 	}
 	defer func() {
 		log.Info(`... Closing database connection pool`)
-		databaseConnectionPool.Close()
+		_ = databaseConnectionPool.Close()
 	}()
 	log.Info("Database connection pool created.")
 
@@ -301,7 +303,7 @@ func main() {
 
 		// Database connection pool
 		log.Info(`... Closing database connection pool`)
-		databaseConnectionPool.Close()
+		_ = databaseConnectionPool.Close()
 
 		// Session store
 		log.Info(`... Closing session store`)
@@ -675,7 +677,7 @@ func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessi
 	domain := pc.CookieDomain
 	if len(domain) > 0 && domain != "-" {
 		h := sha1.New()
-		io.WriteString(h, domain)
+		_, _ = io.WriteString(h, domain)
 		hash := fmt.Sprintf("%x", h.Sum(nil))
 		cookieName = fmt.Sprintf("%s-%s", jetstreamSessionName, hash[0:10])
 	}
@@ -1143,7 +1145,9 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
 		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
-			c.File(path.Join(staticDir, "index.html"))
+			if fileErr := c.File(path.Join(staticDir, "index.html")); fileErr != nil {
+				log.Warnf("Unable to serve index.html: %v", fileErr)
+			}
 			// Let the default handler handle it
 			defaultHandler(err, c)
 		} else {
@@ -1173,10 +1177,14 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 
 	// Send response
 	if !c.Response().Committed {
+		var writeErr error
 		if c.Request().Method == http.MethodHead { // Issue #608
-			c.NoContent(code)
+			writeErr = c.NoContent(code)
 		} else {
-			c.String(code, msg)
+			writeErr = c.String(code, msg)
+		}
+		if writeErr != nil {
+			c.Logger().Error(writeErr)
 		}
 	}
 
@@ -1224,7 +1232,9 @@ func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 		time.Sleep(1 * time.Second)
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
-	e.Close()
+	if err := e.Close(); err != nil {
+		log.Warnf("Unable to shut down Upgrade web server instance: %v", err)
+	}
 }
 
 // GetStoreFactory gets the store factory

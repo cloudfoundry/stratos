@@ -342,7 +342,7 @@ func (p *PgsqlTokenRepository) ListAllEnabledConnectedCNSITokens(encryptionKey [
 		return make([]api.BackupTokenRecord, 0), fmt.Errorf(msg, err)
 	}
 
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	btrs := make([]api.BackupTokenRecord, 0)
 
@@ -434,7 +434,7 @@ func (p *PgsqlTokenRepository) FindAllCNSITokenBackup(cnsiGUID string, encryptio
 		return make([]api.BackupTokenRecord, 0), fmt.Errorf(msg, err)
 	}
 
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	btrs := make([]api.BackupTokenRecord, 0)
 	for rows.Next() {

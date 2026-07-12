@@ -48,13 +48,13 @@ func (c *CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context
 	if err != nil {
 		return err
 	}
-	defer ac.consumer.Close()
+	defer func() { _ = ac.consumer.Close() }()
 
 	clientWebSocket, pingTicker, err := api.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		return err
 	}
-	defer clientWebSocket.Close()
+	defer func() { _ = clientWebSocket.Close() }()
 	defer pingTicker.Stop()
 
 	if err := bespokeStreamHandler(echoContext, ac, clientWebSocket); err != nil {
