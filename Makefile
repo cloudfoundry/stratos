@@ -154,12 +154,24 @@ endif
 
 $(_HIDE)WANT_PACKAGES :=
 $(_HIDE)WANT_SECRETS  :=
+$(_HIDE)WANT_TREE     :=
+$(_HIDE)WANT_HISTORY  :=
+$(_HIDE)WANT_LICENSES :=
 
 ifneq ($(filter packages,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_PACKAGES := yes
 endif
 ifneq ($(filter secrets,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_SECRETS := yes
+endif
+ifneq ($(filter tree,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_TREE := yes
+endif
+ifneq ($(filter history,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_HISTORY := yes
+endif
+ifneq ($(filter licenses,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_LICENSES := yes
 endif
 
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
@@ -224,7 +236,7 @@ endif
 endif
 # Default: all scanners for audit when no modifier given
 ifneq ($(filter audit,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
   $(_HIDE)WANT_ACTIONS  := yes
@@ -242,8 +254,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot
-frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot:
+.PHONY: frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses
+frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -394,6 +406,9 @@ E2E_TRACE       ?=
 E2E_VIDEO       ?=
 E2E_SCREENSHOTS ?=
 
+# Extra zizmor flags for `make audit actions` (e.g. --persona=auditor)
+ZIZMOR_FLAGS    ?=
+
 # Helpers — translate the variables above into Playwright CLI flags.
 
 # Convert "a,b,c" → "--project=a --project=b --project=c"
@@ -487,12 +502,17 @@ endef
 $(call register, check, e2e)
 
 # ── Audit (security scanning) ────────────────────────────────
-# make audit              — all scanners below
+# make audit              — default scanners (frontend backend actions packages secrets)
 # make audit frontend     — bun audit (npm advisory DB)
-# make audit backend      — gosec + trivy + govulncheck
+# make audit backend      — gosec + trivy + govulncheck (both Go modules)
 # make audit actions      — zizmor (GitHub Actions workflow SAST)
+#                           ZIZMOR_FLAGS="--persona=auditor" for the strict rule set
 # make audit packages     — osv-scanner (all lockfiles + go.mods, one pass)
 # make audit secrets      — gitleaks (working-tree secret scan)
+# make audit tests        — gosec including _test.go files + #nosec suppression report
+# make audit tree         — trivy over the whole tree (deploy/ Dockerfiles, helm, manifests)
+# make audit history      — gitleaks full git-history secret scan (slow)
+# make audit licenses     — osv-scanner dependency license report
 # make audit summary      — high/moderate/low counts only
 
 define audit.frontend
@@ -508,10 +528,12 @@ define audit.backend
 	@which govulncheck > /dev/null 2>&1 || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2 && exit 1)
 	@echo "── gosec ──"
 	cd src/jetstream && gosec -quiet ./... || true
+	cd src/jetstream/api && gosec -quiet ./... || true
 	@echo "── trivy ──"
-	trivy fs --security-checks vuln,config src/jetstream || true
+	trivy fs --scanners vuln,misconfig src/jetstream || true
 	@echo "── govulncheck ──"
 	cd src/jetstream && govulncheck ./... || true
+	cd src/jetstream/api && govulncheck ./... || true
 endef
 $(call register, audit, backend)
 
@@ -519,9 +541,9 @@ define audit.actions
 	@echo "Running GitHub Actions workflow audit (zizmor)..."
 	@which zizmor > /dev/null 2>&1 || (echo "zizmor not installed. Run: brew install zizmor" >&2 && exit 1)
 	@if command -v gh > /dev/null 2>&1 && gh auth token > /dev/null 2>&1; then \
-		GH_TOKEN=$$(gh auth token) zizmor .github/workflows/ || true; \
+		GH_TOKEN=$$(gh auth token) zizmor $(ZIZMOR_FLAGS) .github/workflows/ || true; \
 	else \
-		zizmor --offline .github/workflows/ || true; \
+		zizmor --offline $(ZIZMOR_FLAGS) .github/workflows/ || true; \
 	fi
 endef
 $(call register, audit, actions)
@@ -539,6 +561,35 @@ define audit.secrets
 	@gitleaks dir . --no-banner --redact || true
 endef
 $(call register, audit, secrets)
+
+define audit.tests
+	@echo "Running gosec including test files..."
+	@which gosec > /dev/null 2>&1 || (echo "gosec not installed. Run: go install github.com/securego/gosec/v2/cmd/gosec@latest" >&2 && exit 1)
+	cd src/jetstream && gosec -quiet -tests -track-suppressions ./... || true
+	cd src/jetstream/api && gosec -quiet -tests -track-suppressions ./... || true
+endef
+$(call register, audit, tests)
+
+define audit.tree
+	@echo "Running full-tree scan (trivy)..."
+	@which trivy > /dev/null 2>&1 || (echo "trivy not installed. See https://github.com/aquasecurity/trivy" >&2 && exit 1)
+	trivy fs --scanners vuln,misconfig --skip-dirs '**/node_modules' --skip-dirs '**/dist' . || true
+endef
+$(call register, audit, tree)
+
+define audit.history
+	@echo "Running full git-history secret scan (gitleaks)..."
+	@which gitleaks > /dev/null 2>&1 || (echo "gitleaks not installed. Run: brew install gitleaks" >&2 && exit 1)
+	gitleaks git . --no-banner --redact || true
+endef
+$(call register, audit, history)
+
+define audit.licenses
+	@echo "Running dependency license report (osv-scanner)..."
+	@which osv-scanner > /dev/null 2>&1 || (echo "osv-scanner not installed. Run: brew install osv-scanner" >&2 && exit 1)
+	osv-scanner scan source --licenses -r . || true
+endef
+$(call register, audit, licenses)
 
 define audit.summary
 	@echo "── Frontend (bun audit) ──"
@@ -710,7 +761,7 @@ $(_HIDE)finalize-and-reexec:
 	@./build/version-bump.sh bump release
 	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
 	@$(MAKE) FINAL= $(MAKECMDGOALS)
-$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage tree history licenses,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
 else ifneq ($(FINAL),)
 $(error Unknown FINAL value '$(FINAL)' — supported: strip)
 endif
@@ -873,12 +924,16 @@ help:
 	@echo "  make clean dist           Remove everything (including node_modules)"
 	@echo ""
 	@echo "Security & dependencies:"
-	@echo "  make audit                Run all security scanners"
+	@echo "  make audit                Run default security scanners"
 	@echo "  make audit frontend       bun audit (npm advisory DB)"
-	@echo "  make audit backend        gosec + trivy + govulncheck"
-	@echo "  make audit actions        zizmor (GitHub Actions workflow SAST)"
+	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
+	@echo "  make audit actions        zizmor (ZIZMOR_FLAGS=\"--persona=auditor\" for strict)"
 	@echo "  make audit packages       osv-scanner (all lockfiles + go.mods)"
 	@echo "  make audit secrets        gitleaks (working-tree secret scan)"
+	@echo "  make audit tests          gosec incl. test files + #nosec suppressions"
+	@echo "  make audit tree           trivy full-tree scan (deploy/, helm, manifests)"
+	@echo "  make audit history        gitleaks full git-history scan (slow)"
+	@echo "  make audit licenses       osv-scanner dependency license report"
 	@echo "  make audit summary        High/moderate/low counts only"
 	@echo "  make outdated             List outdated direct deps (frontend + backend)"
 	@echo "  make outdated frontend    bun outdated"
