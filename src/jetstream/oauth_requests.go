@@ -92,6 +92,20 @@ func (p *portalProxy) getCNSIRequestRecords(r *api.CNSIRequest) (t api.TokenReco
 	return t, c, nil
 }
 
+// isTokenRejectedErr reports whether a token-refresh failure means UAA
+// REJECTED the refresh token (401, or 400 invalid_grant) — as opposed to
+// UAA being unreachable (status 0) or erroring (5xx). Only a rejection
+// justifies disposing of the stored refresh token; a down UAA says nothing
+// about the token. Mirrors classifyCfError's discrimination in the
+// cloudfoundry plugin, which cannot be imported from here.
+func isTokenRejectedErr(err error) bool {
+	var httpReq api.ErrHTTPRequest
+	if errors.As(err, &httpReq) {
+		return httpReq.Status == http.StatusUnauthorized || httpReq.Status == http.StatusBadRequest
+	}
+	return false
+}
+
 func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
 	log.Debug("refreshToken")
 	mu := refreshMutex(cnsiGUID, userGUID)
@@ -124,6 +138,26 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
 	if err != nil {
 		log.Warnf("[diag refresh] UAA call FAILED cnsi=%s user=%s err=%v", cnsiGUID, userGUID, err)
+		if isTokenRejectedErr(err) {
+			// UAA rejected the refresh token — it is worthless now. Record the
+			// death in the row itself: drop the dead refresh token and floor
+			// the expiry, so read-time state (token_renewable=false + expiry
+			// past) computes 'expired' even when the access token looked
+			// fresh (mid-window revocation). No new column: this IS the
+			// corrected state. The kept auth_token still carries the JWT user
+			// claims the UI shows and the reconnect dialog prefills from.
+			// OAUTH TOKENS ONLY: this function is the OAuth refresh path;
+			// basic-auth rows store the username in RefreshToken and must
+			// never be cleared this way.
+			dead := userToken
+			dead.RefreshToken = ""
+			if now := time.Now().Unix(); dead.TokenExpiry > now {
+				dead.TokenExpiry = now
+			}
+			if updErr := p.updateTokenAuth(userGUID, dead); updErr != nil {
+				log.Warnf("could not record rejected token for cnsi=%s user=%s: %v", cnsiGUID, userGUID, updErr)
+			}
+		}
 		// %w (not %v) so the underlying api.ErrHTTPRequest stays unwrappable —
 		// the native CF error classifier inspects its upstream Status to tell
 		// an unreachable UAA (5xx/timeout) from a rejected token (401).
