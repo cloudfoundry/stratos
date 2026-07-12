@@ -15,16 +15,14 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 // An endpoint is only effectively connected while its stored token is still
 // usable. An expired token must read as Disconnected rather than a broken
 // card — e.g. korifi pasted tokens have no refresh, so every session ends in
-// expiry (#5588). Expiry only matters when jetstream cannot renew: refresh-
-// capable endpoints (token_renewable) mint a fresh access token on use, so
-// their access-token expiry is harmless. token_expiry is epoch seconds;
-// 0/absent = no known expiry.
+// expiry (#5588). This expiry math now lives in `computeConnectionStatus`
+// (store package, endpoint.types.ts) and is baked into `connectionStatus` at
+// hydration time — the manual token_renewable/token_expiry check that used
+// to live here is redundant with that computed status. Sole caller is the
+// home-page endpoint card's Connect-prompt gate, where treating 'expired'
+// the same as 'disconnected' (i.e. offering Connect) is correct.
 export function isEndpointConnected(endpoint: EndpointModel): boolean {
-  if (endpoint.connectionStatus !== 'connected') {
-    return false;
-  }
-  return endpoint.token_renewable ||
-    !endpoint.token_expiry || endpoint.token_expiry * 1000 > Date.now();
+  return endpoint.connectionStatus === 'connected';
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';

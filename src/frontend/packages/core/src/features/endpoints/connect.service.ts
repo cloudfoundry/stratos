@@ -41,6 +41,12 @@ export interface ConnectEndpointData {
 }
 
 // Why is this here instead of somewhere more common? Answer - Because it'd create circulate dependencies due to reliance on entityCatalog
+//
+// endpoint-token-lifecycle (Task 3): left as-is rather than widened to treat
+// 'expired' as connected — this export currently has no importers anywhere
+// in the codebase (verified by repo-wide grep), so there is no dialog flow
+// to break either way. If a caller shows up, re-decide against that flow's
+// actual behaviour rather than defaulting to widen.
 export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
   if (!endpoint.cnsi_type) {
     return endpoint.connectionStatus === 'connected';

@@ -50,6 +50,9 @@ export class KubernetesComponent implements OnInit, OnDestroy {
   constructor() {
     this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
       map((kubeEndpoints) => {
+        // 'expired' deliberately excluded: a dead-token endpoint must not
+        // count as the "one connected endpoint" that triggers the
+        // auto-navigate below — entering it would just land on a broken view.
         const connectedEndpoints = kubeEndpoints.filter(
           (c) => c.connectionStatus === "connected",
         );
