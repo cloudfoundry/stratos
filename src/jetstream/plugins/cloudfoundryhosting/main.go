@@ -288,7 +288,9 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			if err != nil || guid == nil {
 				guid = uuid.NewV4().String()
 				session.Values[cfSessionCookieName] = guid
-				ch.portalProxy.SaveSession(c, session)
+				if err := ch.portalProxy.SaveSession(c, session); err != nil {
+					log.Warnf("Unable to save session for Cloud Foundry session affinity: %v", err)
+				}
 			}
 			sessionGUID := fmt.Sprintf("%s", guid)
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity

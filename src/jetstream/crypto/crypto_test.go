@@ -52,7 +52,7 @@ func TestAESEncryptDecrypt(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.RemoveAll(FakeVolumeName)
+			_ = os.RemoveAll(FakeVolumeName)
 		})
 
 	})

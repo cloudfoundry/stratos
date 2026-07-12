@@ -268,7 +268,7 @@ func serializeEndpoint(endpoint *api.CNSIRecord) map[string]interface{} {
 	// Convert struct to generic map
 	m, _ := json.Marshal(endpoint)
 	var a interface{}
-	json.Unmarshal(m, &a)
+	_ = json.Unmarshal(m, &a)
 	newEndpoint := a.(map[string]interface{})
 
 	// Apply the correct client secret
@@ -282,7 +282,7 @@ func deSerializeEndpoint(endpoint map[string]interface{}) api.CNSIRecord {
 	// Convert struct to endpoint
 	m, _ := json.Marshal(endpoint)
 	var cnsi api.CNSIRecord
-	json.Unmarshal(m, &cnsi)
+	_ = json.Unmarshal(m, &cnsi)
 
 	// Apply the correct client secret
 	cnsi.ClientSecret = fmt.Sprintf("%v", endpoint["client_secret"])

@@ -153,7 +153,7 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 	}
 
 	data, err := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	log.Debug("User profile request completed OK")
 	return res.StatusCode, data, &res.Header, err

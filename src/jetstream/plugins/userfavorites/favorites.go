@@ -40,8 +40,8 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func (uf *UserFavorites) delete(c echo.Context) error {
@@ -62,8 +62,8 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 		return err
 	}
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
-	return nil
+	_, err = c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
+	return err
 }
 
 func (uf *UserFavorites) create(c echo.Context) error {
@@ -120,8 +120,8 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 // RemoveEndpointFavorites removes favorites form an endpoint using the given endpoint guid
