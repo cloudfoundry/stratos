@@ -667,11 +667,14 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenReco
 		return errors.New(msg)
 	}
 
-	if tr.RefreshToken == "" {
-		msg := "Unable to save Token without a valid Refresh Token."
-		log.Debug(msg)
-		return errors.New(msg)
-	}
+	// Deliberately no "RefreshToken must be non-empty" guard here: the
+	// rejected-token disposal write (RefreshOAuthToken, oauth_requests.go)
+	// calls this with an intentionally empty RefreshToken to record that
+	// UAA rejected it. Both AuthToken and RefreshToken are always encrypted
+	// below (even when empty) so the write never leaves a nil ciphertext —
+	// crypto.Decrypt errors ("ciphertext too short") on a nil/short byte
+	// slice, so a nil ciphertext would break every future FindCNSIToken
+	// read of this row, not just its renewability.
 
 	var ciphertextAuthToken, ciphertextRefreshToken []byte
 	var err error
@@ -685,11 +688,6 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenReco
 		tokenGUID = tr.LinkedGUID
 	}
 
-	if tr.RefreshToken == "" {
-		msg := "Unable to save Token without a valid Token GUID"
-		return errors.New(msg)
-	}
-
 	log.Infof("Updating token %s", tokenGUID)
 
 	log.Debug("Encrypting Auth Token")
@@ -697,12 +695,10 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenReco
 	if err != nil {
 		return err
 	}
-	if tr.RefreshToken != "" {
-		log.Debug("Encrypting Refresh Token")
-		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
-		if err != nil {
-			return err
-		}
+	log.Debug("Encrypting Refresh Token")
+	ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
+	if err != nil {
+		return err
 	}
 
 	result, err := p.db.Exec(updateToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, tokenGUID, userGUID)

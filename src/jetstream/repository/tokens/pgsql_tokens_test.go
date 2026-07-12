@@ -2,6 +2,7 @@ package tokens
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"log"
 	"testing"
@@ -484,4 +485,71 @@ func TestDeleteCNSITokens(t *testing.T) {
 
 	})
 
+}
+
+// capturedArg is a sqlmock.Argument that records whatever value it matched,
+// so a test can feed the exact bytes a write produced back into a
+// subsequent read mock — proving a real round trip rather than asserting
+// against a value the test invented itself.
+type capturedArg struct {
+	dest *interface{}
+}
+
+func (c capturedArg) Match(v driver.Value) bool {
+	*c.dest = v
+	return true
+}
+
+// TestUpdateTokenAuthEmptyRefreshToken guards the empty-refresh-token round
+// trip that Task 1's rejected-token disposal write relies on: UAA rejecting
+// a refresh token makes UpdateTokenAuth write RefreshToken="" onto the row,
+// and a later FindCNSIToken read must decrypt that back to "" (so
+// token_renewable computes false) rather than erroring or panicking.
+func TestUpdateTokenAuthEmptyRefreshToken(t *testing.T) {
+
+	Convey("UpdateTokenAuth empty RefreshToken round trip", t, func() {
+
+		db, mock, repository := initialiseRepo(t)
+
+		Convey("should save a token with an empty RefreshToken, and find it back as empty", func() {
+			deadToken := api.TokenRecord{
+				TokenGUID:    mockTokenGUID,
+				AuthToken:    mockUAAToken,
+				RefreshToken: "",
+				TokenExpiry:  mockTokenExpiry,
+			}
+
+			var capturedCiphertext interface{}
+			mock.ExpectExec(updateUAATokenSql).
+				WithArgs(sqlmock.AnyArg(), capturedArg{&capturedCiphertext}, deadToken.TokenExpiry, mockTokenGUID, mockUserGuid).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			err := repository.UpdateTokenAuth(mockUserGuid, deadToken, mockEncryptionKey)
+			So(err, ShouldBeNil)
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+
+			// Feed the exact ciphertext UpdateTokenAuth wrote for the refresh
+			// token back through FindCNSIToken, proving the stored value
+			// decrypts to "" instead of erroring ("ciphertext too short") or
+			// producing garbage.
+			ciphertext, ok := capturedCiphertext.([]byte)
+			So(ok, ShouldBeTrue)
+
+			rs := sqlmock.NewRows([]string{"token_guid", "auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data", "user_guid", "linked_token", "enabled"}).
+				AddRow(mockTokenGUID, mockUAAToken, ciphertext, mockTokenExpiry, false, "oauth", "", mockUserGuid, nil, true)
+
+			mock.ExpectQuery(findTokenSql).
+				WillReturnRows(rs)
+
+			tr, findErr := repository.FindCNSIToken(mockCNSIGuid, mockUserGuid, mockEncryptionKey)
+
+			So(findErr, ShouldBeNil)
+			So(tr.RefreshToken, ShouldEqual, "")
+			So(mock.ExpectationsWereMet(), ShouldBeNil)
+		})
+
+		Reset(func() {
+			db.Close()
+		})
+	})
 }
