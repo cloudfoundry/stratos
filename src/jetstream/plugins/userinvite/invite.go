@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -108,7 +108,7 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	}
 
 	// Check we can unmarshall the request
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
@@ -167,7 +167,7 @@ func (invite *UserInvite) processUserInvites(c echo.Context, endpoint api.CNSIRe
 
 	for _, user := range inviteResponse.NewInvites {
 		userErr, err := invite.processUserInvite(cfGUID, userGUID, userInviteRequest, user, endpoint)
-		if err == true {
+		if err {
 			failedInvites = append(failedInvites, userErr)
 		} else {
 			newInvites = append(newInvites, user)
@@ -274,7 +274,7 @@ func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint api.CNSIRecord,
 
 	// Read the response
 	defer func() { _ = res.Body.Close() }()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, api.NewHTTPShadowError(
 			http.StatusInternalServerError,

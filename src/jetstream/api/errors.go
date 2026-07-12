@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -67,7 +67,7 @@ func LogHTTPError(r *http.Response, innerErr error) error {
 		defer func() {
 			_ = r.Body.Close()
 		}()
-		if bb, err := ioutil.ReadAll(r.Body); err == nil {
+		if bb, err := io.ReadAll(r.Body); err == nil {
 			b = bb
 		}
 		status = r.StatusCode

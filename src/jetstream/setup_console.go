@@ -263,15 +263,16 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.Conso
 
 	val, endpointTypeSupported := api.AuthEndpointTypes[consoleConfig.AuthEndpointType]
 	if endpointTypeSupported {
-		if val == api.AuthNone {
+		switch val {
+		case api.AuthNone:
 			return consoleConfig, nil
-		} else if val == api.Local {
+		case api.Local:
 			//Auth endpoint type is set to "local", so load the local user config
 			err := initialiseLocalUsersConfiguration(consoleConfig, p)
 			if err != nil {
 				return consoleConfig, err
 			}
-		} else if val == api.Remote {
+		case api.Remote:
 			// Auth endpoint type is set to "remote", so need to load local user config vars
 			// Default authorization endpoint to be UAA endpoint
 			if consoleConfig.AuthorizationEndpoint == nil {
@@ -279,7 +280,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.Conso
 				consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
 				log.Debugf("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
 			}
-		} else {
+		default:
 			//Auth endpoint type has been set to an invalid value
 			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
 		}
@@ -394,7 +395,7 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 			// Request is not a setup request, refuse backend requests and allow all others
 			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
 			isAPIRequest, _ := regexp.MatchString(apiRequestRegex, requestURLPath)
-			if !(isBackendRequest || isAPIRequest) {
+			if !isBackendRequest && !isAPIRequest {
 				return h(c)
 			}
 

@@ -6,7 +6,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -190,11 +189,12 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 	case reflect.String:
 		apiKeysConfigType := reflect.TypeOf((*APIKeysConfigValue)(nil)).Elem()
 		userEndpointsConfigType := reflect.TypeOf((*UserEndpointsConfigValue)(nil)).Elem()
-		if typ == apiKeysConfigType {
+		switch typ {
+		case apiKeysConfigType:
 			newVal, err = parseAPIKeysConfigValue(val)
-		} else if typ == userEndpointsConfigType {
+		case userEndpointsConfigType:
 			newVal, err = parseUserEndpointsConfigValue(val)
-		} else {
+		default:
 			newVal = val
 		}
 	default:
@@ -218,11 +218,11 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 // in /etc/secrets/hello-there
 func NewSecretsDirLookup(secretsDir string) env.Lookup {
 	return func(name string) (string, bool) {
-		name = strings.ToLower(strings.Replace(name, "_", "-", -1))
+		name = strings.ToLower(strings.ReplaceAll(name, "_", "-"))
 		filename := filepath.Join(secretsDir, name)
 
 		if _, err := os.Stat(filename); err == nil {
-			contents, err := ioutil.ReadFile(filename)
+			contents, err := os.ReadFile(filename)
 			if err != nil {
 				log.Warnf("Error reading secrets file: %s, %s", filename, err)
 				return "", false

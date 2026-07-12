@@ -31,10 +31,10 @@ func newBindingsTestServer(t *testing.T) *bindingsTestServer {
 	s := &bindingsTestServer{}
 	s.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/v3":
+		switch r.URL.Path {
+		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_credential_bindings":
+		case "/v3/service_credential_bindings":
 			s.listHits++
 			s.lastListQuery = r.URL.RawQuery
 			body := map[string]interface{}{
@@ -200,10 +200,10 @@ func TestGetAppServiceBindings_SoftFallbackWhenIncludedMissing(t *testing.T) {
 	// is forwarded — simulates an upstream gap.
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/v3":
+		switch r.URL.Path {
+		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_credential_bindings":
+		case "/v3/service_credential_bindings":
 			_, _ = w.Write([]byte(`{
 				"pagination": {"total_results": 1, "total_pages": 1, "next": null},
 				"resources": [
@@ -242,10 +242,10 @@ func TestGetAppServiceBindings_SoftFallbackWhenIncludedMissing(t *testing.T) {
 func TestGetAppServiceBindings_EmptyReturnsEmptyArray(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/v3":
+		switch r.URL.Path {
+		case "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case r.URL.Path == "/v3/service_credential_bindings":
+		case "/v3/service_credential_bindings":
 			_, _ = w.Write([]byte(`{"pagination":{"total_results":0,"total_pages":1,"next":null},"resources":[]}`))
 		default:
 			http.NotFound(w, r)

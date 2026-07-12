@@ -3,7 +3,7 @@ package userfavorites
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -79,7 +79,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	userGUID := c.Get("user_id").(string)
 
 	req := c.Request()
-	body, _ := ioutil.ReadAll(req.Body)
+	body, _ := io.ReadAll(req.Body)
 
 	favorite := userfavoritesstore.UserFavoriteRecord{}
 	err = json.Unmarshal(body, &favorite)

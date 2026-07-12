@@ -107,7 +107,7 @@ func MigrateSetupData(portal api.PortalProxy, configStore Repository) error {
 	// SSO_LOGIN was incorrectly being set in previous console config table, this was then transferred over here where the console expects
 	// previous values to have been explicitly set by user (and as such should take precedents over env vars)
 	// See https://github.com/cloudfoundry/stratos/issues/4013
-	if config.UseSSO == true {
+	if config.UseSSO {
 		if err := migrateConfigSetting(portal.Env(), configStore, "SSO_LOGIN", strconv.FormatBool(config.UseSSO), "false"); err != nil {
 			return err
 		}

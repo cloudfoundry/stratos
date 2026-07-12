@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -218,7 +218,7 @@ func MakePluginsFromConfig() {
 
 	var config []pluginConfig
 
-	yamlFile, err := ioutil.ReadFile("plugins.yaml")
+	yamlFile, err := os.ReadFile("plugins.yaml")
 	if err != nil {
 		log.Errorf("Can't generate plugins from YAML: %v ", err)
 		return

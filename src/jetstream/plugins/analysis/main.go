@@ -3,7 +3,7 @@ package analysis
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -135,7 +135,7 @@ func (analysis *Analysis) OnEndpointNotification(action api.EndpointAction, endp
 
 			if rsp.Body != nil {
 				defer func() { _ = rsp.Body.Close() }()
-				_, err = ioutil.ReadAll(rsp.Body)
+				_, err = io.ReadAll(rsp.Body)
 				if err != nil {
 					log.Errorf("Could not read response: %v", err)
 				}

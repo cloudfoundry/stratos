@@ -52,7 +52,7 @@ func TestWireSizeMiddleware_EmitsHeaderForJSONResponse(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Errorf("status = %d, want 200", rec.Code)
 	}
-	if string(rec.Body.Bytes()) != string(body) {
+	if rec.Body.String() != string(body) {
 		t.Errorf("body mismatch: got %q, want %q", rec.Body.String(), string(body))
 	}
 	h := rec.Header().Get("X-Stratos-Wire-Sizes")

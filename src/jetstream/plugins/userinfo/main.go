@@ -3,7 +3,7 @@ package userinfo
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -128,7 +128,7 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 
 	provider := userInfo.getProvider(c)
 
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		log.Errorf("Unexpected response: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
@@ -168,7 +168,7 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 
 	provider := userInfo.getProvider(c)
 
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		log.Errorf("Unexpected response: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")

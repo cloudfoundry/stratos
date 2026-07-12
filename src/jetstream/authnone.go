@@ -67,7 +67,7 @@ func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 
 func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	var err error
-	var expiry int64 = sessionNeverExpires
+	expiry := sessionNeverExpires
 
 	session, err := a.p.GetSession(c)
 	if err != nil {
@@ -103,7 +103,7 @@ func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, u
 	log.Debug("generateLoginResponse")
 
 	var err error
-	var expiry int64 = sessionNeverExpires
+	expiry := sessionNeverExpires
 
 	sessionValues := make(map[string]interface{})
 	sessionValues["user_id"] = userGUID
