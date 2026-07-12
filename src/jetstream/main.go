@@ -541,6 +541,9 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+		if err != nil {
+			return nil, nil, err
+		}
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
@@ -548,12 +551,15 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
-		return sessionStore, sessionStore.Options, err
+		return sessionStore, sessionStore.Options, nil
 	}
 	// Store depends on the DB Type
 	if databaseProvider == datastore.MYSQL {
 		log.Info("Creating MySQL session store")
 		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+		if err != nil {
+			return nil, nil, err
+		}
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
@@ -561,11 +567,14 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
-		return sessionStore, sessionStore.Options, err
+		return sessionStore, sessionStore.Options, nil
 	}
 
 	log.Info("Creating SQLite session store")
 	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+	if err != nil {
+		return nil, nil, err
+	}
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
@@ -573,7 +582,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 	if len(domain) > 0 {
 		sessionStore.Options.Domain = domain
 	}
-	return sessionStore, sessionStore.Options, err
+	return sessionStore, sessionStore.Options, nil
 }
 
 func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, error) {

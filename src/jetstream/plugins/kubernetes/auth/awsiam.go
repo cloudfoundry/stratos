@@ -102,6 +102,9 @@ func (c *AWSKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*a
 
 	// Use the AWS IAM library to get a token
 	accessToken, err := c.getTokenIAM(info)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	// Tokens last 15 minutes
 	expiry := time.Now().Local().Add(time.Minute * time.Duration(15))
