@@ -16,6 +16,16 @@
       }
       <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
     }
+    @if (row.connectionStatus === 'expired') {
+      @if (config?.showLabel) {
+        <span class="mr-2 text-warning-shade-600 dark:text-warning-shade-300">Expired @if (row.local) {
+          <span class="mr-2">(local)</span>
+        }</span>
+      }
+      <!-- No dedicated "expired" glyph exists in the stratos-icons font;
+           reuse endpoints_disconnected rather than add a new font entry. -->
+      <app-custom-icon fontSet="stratos-icons" class="text-warning-shade-600 dark:text-warning-shade-300">endpoints_disconnected</app-custom-icon>
+    }
     @if (row.connectionStatus === 'checking') {
       @if (config?.showLabel) {
         <span class="mr-2">Updating </span>
