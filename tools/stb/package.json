@@ -12,9 +12,7 @@
     "test:watch": "vitest",
     "lint": "eslint src tests",
     "format": "prettier --write src tests",
-    "typecheck": "tsc --noEmit",
-    "lint:harvest": "node --experimental-strip-types scripts/harvest-login.ts ../../src/frontend/packages/core/src/features/login/login-page/login-page.component.html public/snapshots/v1/login/routing.json",
-    "lint:templates": "node --experimental-strip-types scripts/lint-templates.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@codemirror/commands": "^6.6.0",

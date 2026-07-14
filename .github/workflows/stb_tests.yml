@@ -2,10 +2,7 @@ name: STB Tests
 
 # Gate for the Stratos Theme Builder (tools/stb). It is a standalone npm
 # project outside the Angular workspace, so the frontend/backend workflows
-# never exercise it. The real gate runs only when stb itself changes, or when
-# one of the Stratos templates stb is instrumented against changes — a template
-# edit can break the snapshot-id <-> routing correspondence the harvest lint
-# checks.
+# never exercise it. The real gate runs only when stb itself changes.
 #
 # STB Tests is a REQUIRED status check on develop/main. A required check that is
 # `paths`-filtered at the trigger level never reports on PRs that don't touch
@@ -36,8 +33,7 @@ env:
   NODE_VERSION: '24'
 
 jobs:
-  # Does this PR touch stb or an instrumented template? The gate job gates on
-  # this output. Add new instrumented templates here as more scenes convert.
+  # Does this PR touch stb? The gate job gates on this output.
   changes:
     name: Detect stb changes
     runs-on: ubuntu-latest
@@ -53,10 +49,6 @@ jobs:
           filters: |
             stb:
               - 'tools/stb/**'
-              - 'src/frontend/packages/core/src/features/login/login-page/login-page.component.html'
-              - 'src/frontend/packages/core/src/shared/components/stepper/steppers/steppers.component.html'
-              - 'src/frontend/packages/core/src/shared/components/dialog-confirm/dialog-confirm.component.html'
-              - 'src/frontend/packages/cloud-foundry/src/features/applications/application-wall/application-wall.component.html'
 
   test:
     name: STB Tests
@@ -93,13 +85,3 @@ jobs:
 
       - name: Unit + integration tests
         run: npm test
-
-      # Drift check: login live template ids vs the snapshot routing map.
-      - name: Harvest lint (login template <-> routing drift)
-        run: npm run lint:harvest
-
-      # Drift check: the shared scene's live template ids (stepper +
-      # dialog-confirm) must exist in its captured snapshot. (login is covered
-      # by lint:harvest above; app-list is a mock with no static correspondence.)
-      - name: Template lint (shared live templates <-> snapshot drift)
-        run: npm run lint:templates

@@ -147,15 +147,16 @@ provisional and validated by use, not a closed design.
                                             Stratos assets/branding/  ── boot ──► branded UI
 ```
 
-1. **Instrument** — Stratos templates carry `stb-snapshot-id` (a stable
-   dot-path identity, e.g. `auth.login.sign-in`) and the ARIA-mimicking
-   `stba-role` / `stba-roledescription` / `stba-description` attributes
-   (see *Source of truth and direction* above). These are plain static
-   attributes; they have no runtime effect in Stratos today.
+1. **Instrument** — at capture time, Stratos templates carried
+   `stb-snapshot-id` (a stable dot-path identity, e.g. `auth.login.sign-in`)
+   and the ARIA-mimicking `stba-role` / `stba-roledescription` /
+   `stba-description` attributes (see *Source of truth and direction* above).
+   The live templates have since been de-instrumented; the attributes survive
+   only inside the captured snapshots below.
 2. **Harvest / capture** — tooling reads the instrumented DOM into a
    **snapshot pack** under `public/snapshots/v1/<scene>/`.
-   `scripts/harvest-login.ts` extracts the ids/attributes and lint-checks them
-   against routing; `scripts/generate-model.ts` combines that harvest with the
+   `scripts/harvest-login.ts` extracts the ids/attributes;
+   `scripts/generate-model.ts` combines that harvest with the
    `values.json` sidecar to (re)build `branding-model.json`.
 3. **Load** — at startup the app loads the snapshot pack into signals (see
    *State* below).
@@ -265,10 +266,9 @@ signal updates → effect re-renders / posts `STB_*` messages to the iframe shim
   optional `company-config.json` + assets) and `zip.ts`.
 - `taxonomy/taxonomy.ts` — term/role taxonomy helpers.
 - `scripts/` — `harvest-login.ts` (DOM reader: extracts `stb-snapshot-id` +
-  `stba-*` per element, + login routing drift lint), `lint-templates.ts`
-  (asserts a scene's live-template ids exist in its snapshot — currently the
-  shared scene), `generate-model.ts` (`buildModel(scene, html, values)` →
-  rebuilds `branding-model.json`), `seed-worklist.ts`.
+  `stba-*` per element, + snapshot/routing drift lint), `generate-model.ts`
+  (`buildModel(scene, html, values)` → rebuilds `branding-model.json`),
+  `seed-worklist.ts`.
 
 ## Export bundle
 
