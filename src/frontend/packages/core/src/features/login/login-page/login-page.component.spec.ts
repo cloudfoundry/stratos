@@ -104,7 +104,7 @@ describe('LoginPageComponent — error banner branding', () => {
     fixture.detectChanges();
     flushEffects();
     fixture.detectChanges();
-    const banner = fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.page.error"]');
+    const banner = fixture.nativeElement.querySelector('#login-error-message');
     expect(banner).not.toBeNull();
     expect(banner.classList).toContain('alert-danger');
     expect(banner.className).not.toContain('bg-danger-50');
@@ -149,7 +149,7 @@ describe('LoginPageComponent — login-scoped input branding', () => {
 
   it('applies login input branding scoped to the login card', () => {
     fixture.detectChanges();
-    const card = fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.page.card"]');
+    const card = fixture.nativeElement.querySelector('.login-card');
     expect(card.style.getPropertyValue('--input-bg')).toBe('#222222');
     expect(card.style.getPropertyValue('--input-border')).toBe('#ff0000');
   });
@@ -193,55 +193,12 @@ describe('LoginPageComponent — logo and title visibility', () => {
 
   it('hides the login logo when showLogo is false', () => {
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.page.card.logo"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.login-logo')).toBeNull();
   });
 
   it('hides the login title when showTitle is false', () => {
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.page.card.title"]')).toBeNull();
-  });
-});
-
-describe('LoginPageComponent — snapshot-id instrumentation', () => {
-  let fixture: ComponentFixture<LoginPageComponent>;
-
-  beforeEach(async () => {
-    const themeState = signal<StratosTheme>({
-      ...defaultTheme,
-      branding: {
-        ...defaultTheme.branding,
-        loginSubtitle: 'Multi-cloud management',
-      },
-    });
-
-    const brandingStub = {
-      theme: themeState.asReadonly(),
-    } as unknown as StratosBrandingService;
-
-    await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        NoopAnimationsModule,
-        createBasicStoreModule(),
-        LoginPageComponent,
-      ],
-      providers: [
-        ...STORE_TEST_PROVIDERS,
-        provideZonelessChangeDetection(),
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        { provide: StratosBrandingService, useValue: brandingStub },
-      ],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(LoginPageComponent);
-  });
-
-  it('instruments the login background and subtitle for harvest', () => {
-    fixture.detectChanges();
-    const el = fixture.nativeElement;
-    expect(el.querySelector('[stb-snapshot-id="auth.login.page.background"]')).not.toBeNull();
-    expect(el.querySelector('[stb-snapshot-id="auth.login.page.card.subtitle"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.login-title')).toBeNull();
   });
 });
 
@@ -282,7 +239,7 @@ describe('LoginPageComponent — before-login notice', () => {
 
   it('renders the before-login notice when a custom message is set', () => {
     fixture.detectChanges();
-    const el = fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.page.card.message"]');
+    const el = fixture.nativeElement.querySelector('.login-message');
     expect(el).not.toBeNull();
     expect(el.textContent).toContain('Authorized users only');
   });
@@ -314,6 +271,6 @@ describe('LoginPageComponent — before-login notice hidden when empty', () => {
 
   it('hides the before-login notice when customMessage is empty', () => {
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[stb-snapshot-id="auth.login.page.card.message"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.login-message')).toBeNull();
   });
 });

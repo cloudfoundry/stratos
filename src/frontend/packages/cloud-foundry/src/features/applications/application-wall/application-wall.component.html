@@ -1,5 +1,5 @@
 <app-page-header [endpointIds$]="cfIds$">
-  <h1 stb-snapshot-id="cf.applications.heading" stba-role="heading" stba-description="page title text for the applications page">Applications</h1>
+  <h1>Applications</h1>
 </app-page-header>
 <app-cf-endpoints-missing #appEndpointsMissing></app-cf-endpoints-missing>
 
@@ -7,7 +7,6 @@
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
   <div
     class="flex items-center justify-center p-8"
-    stb-snapshot-id="cf.applications.loading"
     role="status">
     <div class="flex items-center space-x-3 text-content-muted">
       <div class="spinner spinner-primary"></div>
