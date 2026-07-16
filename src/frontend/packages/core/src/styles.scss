@@ -11,9 +11,13 @@
 @reference 'tailwindcss';
 
 // Base styles are handled by Tailwind in main.css
-// Override font family to match existing design
+// The interface face. Inter led this list but was never vendored, so it only
+// ever rendered on machines that happened to have it installed; everyone else
+// fell through to Lato. Lato ships no 500 or 600, which are the two weights the
+// templates ask for most, so both resolved to a face that says nothing —
+// font-medium rendered as font-normal, font-semibold as font-bold.
 body {
-  font-family: 'Inter', 'Lato', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
 // Angular 20 breaking change: [hidden] attribute support removed
