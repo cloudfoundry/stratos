@@ -1,6 +1,28 @@
 $scpro-font-path: '../assets/fonts' !default;
 $roboto-font-path: '../assets/fonts/roboto' !default;
 $lato-font-path: '../assets/fonts/lato' !default;
+$plex-font-path: '../assets/fonts/plex' !default;
+
+// IBM Plex Sans — the interface face.
+//
+// woff2 only: every browser this app supports has taken woff2 since 2016. The
+// eot/svg/ttf/woff sets on the families below came from google-webfonts-helper's
+// "best support" bundle in 2019 and serve IE6-9 and iOS 4, which Angular cannot
+// run in.
+//
+// All seven faces the family ships are here, so Tailwind's weight names resolve
+// 1:1 to a real face and none of them has to be remapped. The family has no 800
+// or 900, so font-extrabold and font-black resolve to Bold — neither is used.
+@each $weight, $file in (100: '100', 200: '200', 300: '300', 400: 'regular',
+                         500: '500', 600: '600', 700: '700') {
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    font-style: normal;
+    font-weight: $weight;
+    font-display: swap;
+    src: url('#{$plex-font-path}/ibm-plex-sans-v23-latin-#{$file}.woff2') format('woff2');
+  }
+}
 
 // Source Code Pro Regular
 
