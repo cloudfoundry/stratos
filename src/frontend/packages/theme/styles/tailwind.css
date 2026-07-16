@@ -247,7 +247,7 @@
      repo vendors, so a fallback could land on our own files rather than the
      OS font and make a screenshot unreproducible. */
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-mono: 'IBM Plex Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
   /* ─── Font sizes (with paired line-heights) ─── */
   --text-xs:   0.75rem;   --text-xs--line-height:   1rem;

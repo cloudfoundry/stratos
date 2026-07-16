@@ -82,7 +82,7 @@ form.stepper-form {
     margin: 10px 0;
   }
   &__cacert {
-    font-family: "Source Code Pro";
+    font-family: var(--font-mono);
     font-size: 14px;
     line-break: anywhere;
     max-width: 580px;

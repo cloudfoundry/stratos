@@ -39,7 +39,7 @@
     width: 100%;
 
     textarea {
-      font-family: 'Source Code Pro';
+      font-family: var(--font-mono);
       font-size: 14px;
       line-break: anywhere;
     }

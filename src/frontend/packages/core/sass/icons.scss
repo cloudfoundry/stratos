@@ -14,9 +14,7 @@ $stratos-icons-font-path: '/core/assets/fonts/stratos' !default;
   font-weight: 400;
   // No local() sources: a user's locally-installed (possibly stale) Material
   // Icons would shadow the bundled font and silently lose newer ligatures.
-  src: url('#{$material-icons-font-path}/MaterialIcons-Regular.woff2') format('woff2'),
-    url('#{$material-icons-font-path}/MaterialIcons-Regular.woff') format('woff'),
-    url('#{$material-icons-font-path}/MaterialIcons-Regular.ttf') format('truetype');
+  src: url('#{$material-icons-font-path}/MaterialIcons-Regular.woff2') format('woff2');
 }
 
 // Stratos icons
@@ -33,10 +31,5 @@ $stratos-icons-font-path: '/core/assets/fonts/stratos' !default;
   font-family: 'stratos-icons';
   font-style: normal;
   font-weight: normal;
-  src: url('#{$stratos-icons-font-path}/stratos-icons.eot');
-  src: url('#{$stratos-icons-font-path}/stratos-icons.eot?#iefix') format('embedded-opentype'),
-		url('#{$stratos-icons-font-path}/stratos-icons.woff2') format('woff2'),
-		url('#{$stratos-icons-font-path}/stratos-icons.woff') format('woff'),
-		url('#{$stratos-icons-font-path}/stratos-icons.ttf') format('truetype'),
-		url('#{$stratos-icons-font-path}/stratos-icons.svg') format('svg');
+  src: url('#{$stratos-icons-font-path}/stratos-icons.woff2') format('woff2');
 }
