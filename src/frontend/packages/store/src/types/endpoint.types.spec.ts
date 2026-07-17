@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeConnectionStatus } from './endpoint.types';
+import { computeConnectionStatus, withConnectingOverlay } from './endpoint.types';
 
 describe('computeConnectionStatus', () => {
   const future = Math.floor(Date.now() / 1000) + 3600;
@@ -24,5 +24,21 @@ describe('computeConnectionStatus', () => {
   });
   it('connected when token_expiry is 0 (documented no-expiry value), even if not renewable', () => {
     expect(computeConnectionStatus({ user, token_expiry: 0, token_renewable: false })).toBe('connected');
+  });
+});
+
+describe('withConnectingOverlay', () => {
+  it('overlays connecting onto any settled status while a connect is in flight', () => {
+    expect(withConnectingOverlay('connected', true)).toBe('connecting');
+    expect(withConnectingOverlay('expired', true)).toBe('connecting');
+    expect(withConnectingOverlay('disconnected', true)).toBe('connecting');
+  });
+  it('passes the settled status through when nothing is in flight', () => {
+    expect(withConnectingOverlay('connected', false)).toBe('connected');
+    expect(withConnectingOverlay('expired', false)).toBe('expired');
+    expect(withConnectingOverlay('disconnected', false)).toBe('disconnected');
+  });
+  it('falls back to unknown for an absent status', () => {
+    expect(withConnectingOverlay(undefined, false)).toBe('unknown');
   });
 });

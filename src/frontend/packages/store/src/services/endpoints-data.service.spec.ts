@@ -216,6 +216,10 @@ describe('EndpointsDataService', () => {
       systemShared: false,
     });
     expect(svc.connectingState('cf-2')().busy).toBe(true);
+    // isConnecting drives the transient 'connecting' overlay; it tracks the
+    // same busy window.
+    expect(svc.isConnecting('cf-2')).toBe(true);
+    expect(svc.isConnecting('cf-1')).toBe(false);
 
     httpMock.expectOne('/api/v1/tokens').flush({ guid: 'cf-2' });
     // Yield enough microtasks so the .then() handler runs and dispatches
@@ -226,6 +230,7 @@ describe('EndpointsDataService', () => {
 
     expect(state.error).toBe(false);
     expect(svc.connectingState('cf-2')().busy).toBe(false);
+    expect(svc.isConnecting('cf-2')).toBe(false);
 
     // Successful connect emits on the connectedSignal delta queue.
     expect(svc.connectedSignal()).toHaveLength(1);

@@ -151,8 +151,8 @@ export { PaginationEntityState, isPaginatedAction } from './types/pagination.typ
 export { MAX_RECENT_COUNT, RecentlyVisitedDataService } from './services/recently-visited-data.service';
 export type { ActionState, RequestInfoState } from './types/entity-pipeline.types';
 export { getDefaultActionState, rootUpdatingKey } from './types/entity-pipeline.types';
-export type { EndpointModel, EndpointUser, INewlyConnectedEndpointInfo } from './types/endpoint.types';
-export { SystemSharedUserGuid } from './types/endpoint.types';
+export type { EndpointModel, EndpointUser, INewlyConnectedEndpointInfo, endpointConnectionStatus } from './types/endpoint.types';
+export { SystemSharedUserGuid, withConnectingOverlay } from './types/endpoint.types';
 export { stratosEntityCatalog } from './stratos-entity-catalog';
 export { EntityCatalogHelper } from './entity-catalog/entity-catalog-entity/entity-catalog.service';
 export type { PermissionValues } from './types/current-user-roles.types';

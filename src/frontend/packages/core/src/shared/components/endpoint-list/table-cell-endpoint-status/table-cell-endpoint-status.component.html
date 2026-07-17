@@ -1,6 +1,6 @@
 <div class="flex items-center">
   @if (connectable) {
-    @if (row.connectionStatus === 'connected' ) {
+    @if (status === 'connected' ) {
       @if (config?.showLabel) {
         <span class="mr-2">Connected @if (row.local) {
           <span class="mr-2">(local)</span>
@@ -8,7 +8,7 @@
       }
       <app-custom-icon fontSet="stratos-icons">endpoints_connected</app-custom-icon>
     }
-    @if (row.connectionStatus === 'disconnected') {
+    @if (status === 'disconnected') {
       @if (config?.showLabel) {
         <span class="mr-2">Disconnected @if (row.local) {
           <span class="mr-2">(local)</span>
@@ -16,7 +16,7 @@
       }
       <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
     }
-    @if (row.connectionStatus === 'expired') {
+    @if (status === 'expired') {
       @if (config?.showLabel) {
         <span class="mr-2 text-warning-shade-600 dark:text-warning-shade-300">Expired @if (row.local) {
           <span class="mr-2">(local)</span>
@@ -26,13 +26,13 @@
            reuse endpoints_disconnected rather than add a new font entry. -->
       <app-custom-icon fontSet="stratos-icons" class="text-warning-shade-600 dark:text-warning-shade-300">endpoints_disconnected</app-custom-icon>
     }
-    @if (row.connectionStatus === 'checking') {
+    @if (status === 'connecting') {
       @if (config?.showLabel) {
-        <span class="mr-2">Updating </span>
+        <span class="mr-2">Connecting </span>
       }
       <app-spinner [diameter]="20"></app-spinner>
     }
-    @if (!row.connectionStatus || row.connectionStatus === 'unknown') {
+    @if (status === 'unknown') {
       @if (config?.showLabel) {
         <span class="mr-2">Unknown </span>
       }

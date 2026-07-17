@@ -195,6 +195,15 @@ export class EndpointsDataService {
     return computed(() => this._connectingStates().get(guid) ?? getDefaultActionState());
   }
 
+  // True while a connect or reconnect is in flight for this guid — the busy
+  // window connect() holds from before the token POST until it resolves. Read
+  // inside a computed/render to drive the transient 'connecting' overlay (see
+  // withConnectingOverlay); reads the state map directly so a caller filtering
+  // many endpoints doesn't spin up one computed per guid.
+  isConnecting(guid: string): boolean {
+    return !!this._connectingStates().get(guid)?.busy;
+  }
+
   disconnectingState(guid: string): Signal<ActionState> {
     return computed(() => this._disconnectingStates().get(guid) ?? getDefaultActionState());
   }

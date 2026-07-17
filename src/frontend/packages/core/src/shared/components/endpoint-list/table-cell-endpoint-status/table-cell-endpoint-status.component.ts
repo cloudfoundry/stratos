@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 
-import { entityCatalog, EndpointModel } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService, endpointConnectionStatus, entityCatalog, withConnectingOverlay } from '@stratosui/store';
 
 import { TableCellCustom } from '../../signal-list/cell-base';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -19,6 +19,7 @@ import { AppSpinnerComponent } from '../../progress-spinner/app-spinner.componen
 export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointModel, { showLabel: boolean; }> implements OnInit {
 
   public connectable = true;
+  private endpointsData = inject(EndpointsDataService);
 
   @Input()
   get row(): EndpointModel {
@@ -26,6 +27,14 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   }
   set row(row: EndpointModel) {
     super.row = row;
+  }
+
+  // Displayed status = the wire-derived connectionStatus overlaid with the
+  // transient 'connecting' while a connect/reconnect is in flight. Reading
+  // isConnecting() here tracks the connecting-state signal, so the zoneless
+  // OnPush template re-renders when the operation starts and finishes.
+  get status(): endpointConnectionStatus {
+    return withConnectingOverlay(this.row?.connectionStatus, this.endpointsData.isConnecting(this.row?.guid ?? ''));
   }
 
   constructor() {
