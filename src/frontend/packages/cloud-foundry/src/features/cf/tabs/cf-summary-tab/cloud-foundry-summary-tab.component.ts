@@ -13,7 +13,6 @@ import {
   LoadingPageComponent,
   CardNumberMetricComponent
 } from '@stratosui/core';
-import { goToAppWall } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CardCfInfoComponent } from '../../../../shared/components/cards/card-cf-info/card-cf-info.component';
@@ -60,7 +59,13 @@ export class CloudFoundrySummaryTabComponent {
 
   constructor() {
     this.appLink = () => {
-      goToAppWall(this.appsConfig, this.router, this.cfEndpointService.cfGuid);
+      // The tile means "every app in this CF", so drop any org/space scope a
+      // previous mount left on the root-singleton config. The Applications tab
+      // can't do this itself: it keeps the existing org/space so that returning
+      // from an app detail page preserves the filter the user set there.
+      this.appsConfig.selectedOrg.set(null);
+      this.appsConfig.selectedSpace.set(null);
+      this.router.navigate(['/cloud-foundry', this.cfEndpointService.cfGuid, 'applications']);
     };
 
     const endpointData = this.registry.acquire(this.cfEndpointService.cfGuid);
