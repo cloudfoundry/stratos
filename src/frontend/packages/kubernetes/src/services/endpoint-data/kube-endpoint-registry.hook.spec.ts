@@ -14,7 +14,7 @@ import { KubeEndpointRegistryHook } from './kube-endpoint-registry.hook';
 
 type EndpointMap = { [guid: string]: EndpointModel };
 
-function kubeEp(guid: string, status: 'connected' | 'disconnected' | 'checking' = 'connected'): EndpointModel {
+function kubeEp(guid: string, status: 'connected' | 'disconnected' | 'connecting' = 'connected'): EndpointModel {
   return {
     guid,
     name: guid,

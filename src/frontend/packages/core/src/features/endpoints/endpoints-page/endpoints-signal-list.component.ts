@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 
 import {
   EndpointModel,
+  EndpointsDataService,
   MenuItem,
   UserFavorite,
   UserFavoriteManager,
@@ -58,6 +59,7 @@ export class EndpointsSignalListComponent {
   private userFavoriteManager = inject(UserFavoriteManager);
   private rowActions = inject(EndpointRowActionsService);
   private authState = inject(EndpointAuthStateService);
+  private endpointsData = inject(EndpointsDataService);
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
@@ -138,6 +140,12 @@ export class EndpointsSignalListComponent {
     const userLabel = (ep: EndpointModel): string => ep.user?.name ?? '';
 
     const statusLabel = (ep: EndpointModel): string => {
+      // 'connecting' is a transient overlay held while a connect/reconnect is in
+      // flight (EndpointsDataService.isConnecting); it outranks the settled
+      // states because an active operation is what the user most wants to see.
+      if (this.endpointsData.isConnecting(ep.guid ?? '')) {
+        return 'Connecting';
+      }
       // 'expired' arrives computed on connectionStatus (Task 3, from wire
       // data); the authState overlay catches 401s the interceptor witnessed
       // THIS session, before the next info refetch reflects the
@@ -151,13 +159,16 @@ export class EndpointsSignalListComponent {
     };
 
     const statusColor = (ep: EndpointModel): SignalListPillColor => {
+      if (this.endpointsData.isConnecting(ep.guid ?? '')) {
+        return 'warning';
+      }
       if (isEndpointExpired(ep, this.authState.stale())) {
         return 'warning';
       }
       const s = ep.connectionStatus;
       if (s === 'connected') return 'success';
-      if (s === 'checking') return 'warning';
-      // disconnected / unknown / undefined all collapse to neutral.
+      // disconnected / unknown / undefined all collapse to neutral. 'connecting'
+      // never reaches here — it's the overlay handled above, not a wire status.
       return 'neutral';
     };
 

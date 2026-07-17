@@ -8,18 +8,19 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
 
 import {
   EndpointRowActionsService,
   PageHeaderComponent,
   SignalListComponent,
   SignalListConfig,
+  SignalListPillColor,
   SignalListSort,
   naturalCompare,
 } from '@stratosui/core';
+import { EndpointsDataService } from '../../../../../store/src/services/endpoints-data.service';
+import { withConnectingOverlay } from '@stratosui/store';
 import type { EndpointModel } from '@stratosui/store';
 
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
@@ -42,6 +43,7 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
 })
 export class CloudFoundryComponent {
   cloudFoundryService = inject(CloudFoundryService);
+  private endpointsData = inject(EndpointsDataService);
   private router = inject(Router);
   // The CF picker is a projection of the Endpoints page onto its CF subset -
   // rows carry the same management kebab (Connect / Disconnect / Edit /
@@ -52,14 +54,24 @@ export class CloudFoundryComponent {
   public readonly connectedCount: Signal<number>;
 
   constructor() {
-    const connected: Signal<EndpointModel[]> = toSignal(
-      this.cloudFoundryService.connectedCFEndpoints$,
-      { initialValue: [] as EndpointModel[] },
-    );
-    this.connectedCount = computed(() => connected().length);
+    // The picker lists every CF that belongs to the user — connected, expired
+    // (theirs, needs reconnect), or mid-connect — not just the ones with a live
+    // token. A disconnected CF the user dropped is reconnected from the
+    // Endpoints page, not here.
+    const available: Signal<EndpointModel[]> = this.cloudFoundryService.availableCFEndpoints;
+    this.connectedCount = computed(() => available().length);
 
-    // Single connected CF — skip the picker and route straight in.
-    this.cloudFoundryService.connectedCFEndpoints$.pipe(take(1)).subscribe(endpoints => {
+    // Single CF — skip the picker and route straight in. The decision waits on
+    // whenReady() because the endpoint list is empty while the first
+    // /pp/v1/info call is in flight: on a cold load (reload, bookmark, first
+    // navigation after login) reading it at construction always sees zero and
+    // the shortcut never fires. whenReady() also triggers that fetch if nothing
+    // else has yet, and resolves on failure too — a list that never arrives
+    // leaves the picker up, which is the right fallback. At this hydration point
+    // no user connect is in flight, so the set holds only settled connected/
+    // expired CFs; routing into a lone expired one lands on its reconnect prompt.
+    void this.endpointsData.whenReady().then(() => {
+      const endpoints = available();
       if (endpoints.length === 1) {
         void this.router.navigate(['cloud-foundry', endpoints[0].guid]);
       }
@@ -68,15 +80,24 @@ export class CloudFoundryComponent {
     const nameFilter: WritableSignal<string> = signal('');
     const filtered: Signal<EndpointModel[]> = computed(() => {
       const q = nameFilter().trim().toLowerCase();
-      const all = connected();
+      const all = available();
       if (!q) return all;
       return all.filter(e => (e.name ?? '').toLowerCase().includes(q));
     });
+    // Status the picker renders per row. The set now holds mixed states —
+    // connected, expired (needs reconnect), mid-connect — so the row must say
+    // which, else an expired CF looks identical to a live one. 'connecting'
+    // overlays the wire status while a connect/reconnect is in flight, tracking
+    // the isConnecting signal so the row updates when the operation resolves.
+    const rowStatus = (e: EndpointModel): string =>
+      withConnectingOverlay(e.connectionStatus, this.endpointsData.isConnecting(e.guid ?? ''));
+
     const sortState: WritableSignal<SignalListSort> = signal({ field: 'name', direction: 'asc' });
     const sortExtractors: Record<string, (e: EndpointModel) => unknown> = {
       name: e => e.name ?? '',
       address: e => e.api_endpoint?.Host ?? '',
       user: e => e.user?.name ?? '',
+      status: e => rowStatus(e),
     };
     const sorted: Signal<EndpointModel[]> = computed(() => {
       const items = filtered();
@@ -99,6 +120,17 @@ export class CloudFoundryComponent {
       const i = pageIndex();
       return items.slice(i * sz, (i + 1) * sz);
     });
+
+    const statusLabel = (e: EndpointModel): string => {
+      const s = rowStatus(e);
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    };
+    const statusColor = (e: EndpointModel): SignalListPillColor => {
+      const s = rowStatus(e);
+      if (s === 'connected') return 'success';
+      if (s === 'expired' || s === 'connecting') return 'warning';
+      return 'neutral';
+    };
 
     this.listConfig = signal<SignalListConfig<EndpointModel>>({
       pagedItems: paged,
@@ -129,6 +161,14 @@ export class CloudFoundryComponent {
           widthHint: '12rem',
         },
         {
+          header: 'Status', key: 'status',
+          kind: 'dot',
+          pillColor: statusColor,
+          sortField: (e: EndpointModel) => rowStatus(e),
+          render: statusLabel,
+          widthHint: '10rem',
+        },
+        {
           header: '', key: 'actions',
           kind: 'actions',
           actions: (e: EndpointModel) => this.endpointRowActions.buildEndpointActions(e, { unregister: false }),
@@ -137,7 +177,7 @@ export class CloudFoundryComponent {
         },
       ],
       getRowKey: (e: EndpointModel) => e.guid ?? e.name,
-      emptyMessage: 'There are no Cloud Foundry endpoints connected',
+      emptyMessage: 'There are no connected or expired Cloud Foundry endpoints',
       emptyFilterMessage: 'No Cloud Foundry endpoints match the current filters',
       loadingMessage: 'Loading…',
       nameFilter,

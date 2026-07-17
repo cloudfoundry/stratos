@@ -206,7 +206,7 @@ export class AppModule {
     //     selector: (state: AppState) => state.requestData.endpoint,
     //     eventTriggered: (state: IRequestEntityTypeState<EndpointModel>) => {
     //       return Object.values(state).reduce((events, endpoint) => {
-    //         if (endpoint.connectionStatus === 'checking') {
+    //         if (endpoint.connectionStatus === 'connecting') {
     //           events.push(new GlobalEventData(true, endpoint));
     //         }
     //         return events;

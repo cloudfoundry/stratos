@@ -81,7 +81,7 @@ function isConnected(endpoint: EndpointModel): boolean {
     return (
       epType.definition.unConnectable ||
       endpoint.connectionStatus === 'connected' ||
-      endpoint.connectionStatus === 'checking'
+      endpoint.connectionStatus === 'connecting'
     );
   } catch {
     return false;
