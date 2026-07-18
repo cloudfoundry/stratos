@@ -3,12 +3,16 @@ import { Page, Locator } from '@playwright/test';
 /**
  * Locate a page tab link by its exact label.
  *
- * Tabs render as side-nav links (app-page-side-nav) carrying a
- * data-test="page-tab-<label>" hook; exact attribute match avoids the
- * "Services" vs "User Services" substring collision.
+ * Tabs render as side-nav links (app-page-side-nav) carrying a hook of
+ * 'page-tab-' plus the label; exact attribute match avoids the "Services"
+ * vs "User Services" substring collision. The visible-label filter stays on
+ * top of the hook so a tab that loses its rendered text goes red instead of
+ * matching invisibly through the attribute.
  */
 export function pageTab(page: Page, label: string): Locator {
-  return page.locator(`app-page-side-nav [data-test="page-tab-${label}"]`);
+  return page
+    .locator(`app-page-side-nav [data-test="page-tab-${label}"]`)
+    .filter({ has: page.locator('span', { hasText: new RegExp(`^${label}$`) }) });
 }
 
 /**

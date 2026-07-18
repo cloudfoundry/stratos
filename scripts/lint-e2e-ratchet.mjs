@@ -34,15 +34,21 @@ const eslint = new ESLint({
 })
 const results = existing.length ? await eslint.lintFiles(existing) : []
 for (const r of results) {
+  const rel = r.filePath.replace(process.cwd() + '/', '')
   const guardHits = r.messages.filter((m) => GUARD_RULES.includes(m.ruleId)).length
-  if (guardHits === 0) {
-    const rel = r.filePath.replace(process.cwd() + '/', '')
+  if (guardHits > 0) continue
+  // A parse error or eslint-ignore produces ruleId-null messages and zero
+  // guard hits — that is "unverifiable", not "clean"; saying clean would
+  // direct the author to delist a file the guards never actually checked.
+  if (r.messages.some((m) => m.ruleId === null)) {
+    problems.push(`${rel}  could not be checked (parse error or ignored): ${r.messages[0].message.split('\n')[0]}`)
+  } else {
     problems.push(`${rel}  is clean`)
   }
 }
 
 if (problems.length) {
-  console.error(`e2e ratchet stale entries (${problems.length}) — remove them from tools/eslint-rules/e2e-legacy-files.mjs so the guards apply:`)
+  console.error(`e2e ratchet problems (${problems.length}) in tools/eslint-rules/e2e-legacy-files.mjs — remove entries that are clean or gone so the guards apply; fix files that could not be checked:`)
   for (const p of problems) console.error('  ' + p)
   process.exit(1)
 }
