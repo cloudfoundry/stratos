@@ -15,6 +15,7 @@
         }
         @if (tab && tab.link && (tab.hidden$ | async) !== true) {
           <a class="page-side-nav__item"
+            [attr.data-test]="'page-tab-' + tab.label"
             [routerLink]="[tab.link]" queryParamsHandling="preserve"
             [routerLinkActive]="['page-side-nav__item--active']">
             @if (tab.icon) {

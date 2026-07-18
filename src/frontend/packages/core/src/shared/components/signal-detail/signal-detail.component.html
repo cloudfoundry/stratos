@@ -52,7 +52,7 @@
         <a [routerLink]="tab.link"
            routerLinkActive="signal-detail-tab--active text-accent border-accent"
            [routerLinkActiveOptions]="{ exact: false }"
-           data-test="signal-detail-tab"
+           [attr.data-test]="'signal-detail-tab-' + tab.label"
            class="signal-detail-tab flex items-center gap-1.5 px-4 py-2.5 text-sm border-b-2 border-transparent text-content-muted hover:text-content-text hover:border-content-border transition-colors whitespace-nowrap">
           @if (tab.icon) {
             <span class="material-icons text-base leading-none">{{ tab.icon }}</span>

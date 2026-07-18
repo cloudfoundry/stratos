@@ -135,8 +135,9 @@ describe('SignalDetailComponent', () => {
         { label: 'Bindings', link: ['bindings'], icon: 'link' },
       ]).asReadonly(),
     });
-    const tabs = fixture.nativeElement.querySelectorAll('[data-test="signal-detail-tab"]');
+    const tabs = fixture.nativeElement.querySelectorAll('[data-test^="signal-detail-tab-"]');
     expect(tabs.length).toBe(2);
+    expect(tabs[0].getAttribute('data-test')).toBe('signal-detail-tab-Summary');
     expect(tabs[0].textContent).toContain('Summary');
     expect(tabs[1].textContent).toContain('Bindings');
     expect(tabs[1].querySelector('.material-icons')?.textContent).toBe('link');
@@ -150,12 +151,12 @@ describe('SignalDetailComponent', () => {
         { label: 'Public', link: ['public'] },
       ]).asReadonly(),
     });
-    let tabs = fixture.nativeElement.querySelectorAll('[data-test="signal-detail-tab"]');
+    let tabs = fixture.nativeElement.querySelectorAll('[data-test^="signal-detail-tab-"]');
     expect(tabs.length).toBe(1);
     expect(tabs[0].textContent).toContain('Public');
     hidden.set(false);
     fixture.detectChanges();
-    tabs = fixture.nativeElement.querySelectorAll('[data-test="signal-detail-tab"]');
+    tabs = fixture.nativeElement.querySelectorAll('[data-test^="signal-detail-tab-"]');
     expect(tabs.length).toBe(2);
   });
 

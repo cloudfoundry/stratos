@@ -3,14 +3,12 @@ import { Page, Locator } from '@playwright/test';
 /**
  * Locate a page tab link by its exact label.
  *
- * Tabs render as side-nav links (app-page-side-nav) whose text includes the
- * icon ligature (e.g. "service Services"), so match the label <span> exactly —
- * substring matching would collide ("Services" vs "User Services").
+ * Tabs render as side-nav links (app-page-side-nav) carrying a
+ * data-test="page-tab-<label>" hook; exact attribute match avoids the
+ * "Services" vs "User Services" substring collision.
  */
 export function pageTab(page: Page, label: string): Locator {
-  return page
-    .locator('app-page-side-nav a.page-side-nav__item')
-    .filter({ has: page.locator('span', { hasText: new RegExp(`^${label}$`) }) });
+  return page.locator(`app-page-side-nav [data-test="page-tab-${label}"]`);
 }
 
 /**
