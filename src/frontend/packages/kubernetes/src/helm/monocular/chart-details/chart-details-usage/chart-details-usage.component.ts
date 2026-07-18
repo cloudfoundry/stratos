@@ -1,7 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, Input, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CustomTooltipDirective } from '@stratosui/core';
-import { TailwindSnackBarService } from '@stratosui/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
@@ -20,7 +19,6 @@ export class ChartDetailsUsageComponent {
   @Input() chart!: Chart;
   @Input() currentVersion!: string; // strict: required @Input, only rendered inside @if (currentVersion) with a bound string
   installing!: boolean;
-  public snackBar = inject(TailwindSnackBarService);
   public endpointsService = inject(EndpointsService);
   private route = inject(ActivatedRoute);
 
