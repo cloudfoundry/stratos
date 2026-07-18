@@ -37,9 +37,7 @@ import {
           aria-valuemin="0"
           aria-valuemax="100"
         ></div>
-        , changeDetection: ChangeDetectionStrategy.OnPush
       }
-      )
 
       <!-- Determinate spinner (arc showing progress) -->
       @if (mode === "determinate") {
