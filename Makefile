@@ -20,6 +20,7 @@
 #   make clean dist             Remove everything (including node_modules)
 #   make check                  Run all quality gates (lint + gate)
 #   make check e2e              Run Playwright E2E tests
+#   make test e2e TIER=acceptance PR=1234   Tiered E2E run (see TESTING.md)
 #   make stamp frontend         Generate build-info.ts with version metadata
 #   make dump version           Print resolved version variables
 #
@@ -406,6 +407,13 @@ E2E_TRACE       ?=
 E2E_VIDEO       ?=
 E2E_SCREENSHOTS ?=
 
+# Tiered selection (see TESTING.md "Tiered E2E runs"). Comma lists.
+# TIER/GROUP set → recipe delegates to scripts/e2e-run.mjs and the
+# browser default becomes all three (E2E_BROWSERS still overrides).
+TIER            ?=
+GROUP           ?=
+PR              ?=
+
 # Extra zizmor flags for `make audit actions` (e.g. --persona=auditor)
 ZIZMOR_FLAGS    ?=
 
@@ -445,11 +453,18 @@ endef
 
 define test.e2e
 	$(_ensure_host_backend)
-	@echo "Running Playwright E2E tests..."
-	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
-		$(call _e2e_browsers,$(E2E_BROWSERS)) \
-		$(call _e2e_flag,trace,$(E2E_TRACE)) \
-		$(call _e2e_toggle,list,$(DRYRUN))
+	@if [ -n "$(TIER)$(GROUP)" ]; then \
+		echo "Running tiered E2E tests..."; \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )node scripts/e2e-run.mjs \
+			$(if $(TIER),--tier $(TIER) )$(if $(GROUP),--group $(GROUP) )--browsers $(or $(E2E_BROWSERS),all) \
+			$(if $(PR),--pr $(PR) )$(call _e2e_toggle,dry-run,$(DRYRUN)); \
+	else \
+		echo "Running Playwright E2E tests..."; \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
+			$(call _e2e_browsers,$(E2E_BROWSERS)) \
+			$(call _e2e_flag,trace,$(E2E_TRACE)) \
+			$(call _e2e_toggle,list,$(DRYRUN)); \
+	fi
 endef
 $(call register, test, e2e)
 
