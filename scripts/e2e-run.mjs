@@ -27,6 +27,7 @@ for (let i = 0; i < args.length; i++) {
     case '--browsers': opt.browsers.push(...next().split(',').filter(Boolean)); break
     case '--base': opt.base = next(); break
     case '--dry-run': opt.dryRun = true; break
+    case '--pr': opt.pr = next(); break
     default: console.error(`unknown argument: ${args[i]}`); process.exit(2)
   }
 }
@@ -129,5 +130,12 @@ const verdict = [
   ...(failedTests.length ? ['', '### Failed', ...failedTests.map((t) => `- ${t}`)] : []),
 ].join('\n')
 console.log('\n' + verdict + '\n')
+
+if (opt.pr) {
+  const r = spawnSync('gh', ['pr', 'comment', opt.pr, '--repo', 'cloudfoundry/stratos', '--body-file', '-'],
+    { input: verdict, encoding: 'utf8' })
+  if (r.status === 0) console.log(`verdict posted to PR #${opt.pr}`)
+  else console.error(`could not post verdict to PR #${opt.pr} (gh exit ${r.status}) — run result above still stands`)
+}
 
 process.exit(exitCode)
