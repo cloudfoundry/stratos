@@ -60,83 +60,83 @@
  * here to switch themes. */
 :root {
   /* Navigation colors - these will be overridden by StratosThemeService */
-  --nav-bg: #1e293b;
-  --nav-text: #ffffff;
+  --nav-bg: oklch(27.95% 0.0368 260.03);
+  --nav-text: oklch(100% 0 none);
   --nav-text-muted: rgba(255, 255, 255, 0.7);
   --nav-hover: rgba(255, 255, 255, 0.1);
   --nav-active: rgba(255, 255, 255, 0.15);
   --nav-border: rgba(255, 255, 255, 0.1);
-  --nav-tooltip: #374151;
+  --nav-tooltip: oklch(37.293% 0.0306 259.73);
 
   /* Layout colors - these will be overridden by StratosThemeService */
-  --app-bg: #f8fafc;
-  --body-bg: #f1f5f9;
-  --app-text: #1e293b;
-  --text-muted: #64748b;
-  --header-bg: #ffffff;
-  --header-text: #1e293b;
-  --header-border: #e2e8f0;
-  --content-bg: #ffffff;
-  --content-secondary: #f8fafc;
-  --content-border: #e2e8f0;
-  --content-text: #1e293b;
-  --content-muted: #64748b;
+  --app-bg: oklch(98.415% 0.0034 247.86);
+  --body-bg: oklch(96.826% 0.0069 247.9);
+  --app-text: oklch(27.95% 0.0368 260.03);
+  --text-muted: oklch(55.439% 0.0407 257.42);
+  --header-bg: oklch(100% 0 none);
+  --header-text: oklch(27.95% 0.0368 260.03);
+  --header-border: oklch(92.876% 0.0126 255.51);
+  --content-bg: oklch(100% 0 none);
+  --content-secondary: oklch(98.415% 0.0034 247.86);
+  --content-border: oklch(92.876% 0.0126 255.51);
+  --content-text: oklch(27.95% 0.0368 260.03);
+  --content-muted: oklch(55.439% 0.0407 257.42);
 
   /* Login page */
-  --login-bg: #f5f5f5;
+  --login-bg: oklch(97.015% 0 none);
   --login-bg-image: url('/core/assets/login-bg.webp');
-  --login-card-bg: #ffffff;
+  --login-card-bg: oklch(100% 0 none);
 
   /* Logo */
-  --logo-bg: #ffffff;
+  --logo-bg: oklch(100% 0 none);
 
   /* Interactive elements - light theme */
-  --input-bg: #ffffff;
-  --input-border: #d1d5db;
-  --input-text: #1e293b;
-  --input-placeholder: #9ca3af;
+  --input-bg: oklch(100% 0 none);
+  --input-border: oklch(87.168% 0.0093 258.34);
+  --input-text: oklch(27.95% 0.0368 260.03);
+  --input-placeholder: oklch(71.366% 0.0192 261.32);
   --input-focus-border: var(--color-primary);
-  --input-disabled-bg: #f3f4f6;
+  --input-disabled-bg: oklch(96.696% 0.0029 264.54);
 
   /* Code block - light theme */
-  --code-block-bg: #f3f4f6;
-  --code-block-border: #d1d5db;
-  --code-block-text: #1e293b;
+  --code-block-bg: oklch(96.696% 0.0029 264.54);
+  --code-block-border: oklch(87.168% 0.0093 258.34);
+  --code-block-text: oklch(27.95% 0.0368 260.03);
 
   /* Card and panel colors */
-  --card-bg: #ffffff;
-  --card-border: #e5e7eb;
-  --card-header-bg: #f9fafb;
+  --card-bg: oklch(100% 0 none);
+  --card-border: oklch(92.758% 0.0058 264.53);
+  --card-header-bg: oklch(98.463% 0.0017 247.84);
   --card-shadow: rgba(0, 0, 0, 0.1);
 
   /* Table colors */
-  --table-header-bg: #f9fafb;
-  --table-header-text: #1e293b;
-  --table-row-hover: #f9fafb;
-  --table-border: #e5e7eb;
+  --table-header-bg: oklch(98.463% 0.0017 247.84);
+  --table-header-text: oklch(27.95% 0.0368 260.03);
+  --table-row-hover: oklch(98.463% 0.0017 247.84);
+  --table-border: oklch(92.758% 0.0058 264.53);
 
   /* Stepper colors - light theme */
-  --step-inactive-bg: #e5e7eb;
-  --step-inactive-text: #4b5563;
-  --step-skip-bg: #f3f4f6;
-  --step-skip-text: #9ca3af;
+  --step-inactive-bg: oklch(92.758% 0.0058 264.53);
+  --step-inactive-text: oklch(44.611% 0.0263 256.8);
+  --step-skip-bg: oklch(96.696% 0.0029 264.54);
+  --step-skip-text: oklch(71.366% 0.0192 261.32);
 
   /* Status and state colors */
-  --success-bg: #dcfce7;
-  --success-text: #166534;
-  --success-border: #86efac;
+  --success-bg: oklch(96.241% 0.0434 156.74);
+  --success-text: oklch(44.792% 0.1083 151.33);
+  --success-border: oklch(87.116% 0.1363 154.45);
 
-  --warning-bg: #fef3c7;
-  --warning-text: #92400e;
-  --warning-border: #fcd34d;
+  --warning-bg: oklch(96.19% 0.058 95.62);
+  --warning-text: oklch(47.319% 0.1247 46.2);
+  --warning-border: oklch(87.897% 0.1534 91.61);
 
-  --danger-bg: #fee2e2;
-  --danger-text: #991b1b;
-  --danger-border: #fca5a5;
+  --danger-bg: oklch(93.564% 0.0309 17.72);
+  --danger-text: oklch(44.369% 0.1613 26.9);
+  --danger-border: oklch(80.769% 0.1035 19.57);
 
-  --info-bg: #dbeafe;
-  --info-text: #1e40af;
-  --info-border: #93c5fd;
+  --info-bg: oklch(93.192% 0.0316 255.59);
+  --info-text: oklch(42.445% 0.1809 265.64);
+  --info-border: oklch(80.907% 0.0956 251.81);
 
   /* Shadow system */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -148,92 +148,92 @@
 /* Dark Theme - WCAG AA Compliant */
 .dark-theme {
   /* Brand colors - adjusted for dark theme with higher contrast */
-  --color-primary: #60a5fa;
-  --color-secondary: #38bdf8;
-  --color-accent: #38bdf8;
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-danger: #f87171;
-  --color-info: #60a5fa;
+  --color-primary: oklch(71.374% 0.1434 254.62);
+  --color-secondary: oklch(75.351% 0.139 232.66);
+  --color-accent: oklch(75.351% 0.139 232.66);
+  --color-success: oklch(80.035% 0.1821 151.71);
+  --color-warning: oklch(83.686% 0.1644 84.43);
+  --color-danger: oklch(71.063% 0.1661 22.22);
+  --color-info: oklch(71.374% 0.1434 254.62);
 
   /* Navigation colors - dark theme */
-  --nav-bg: #0f172a;
-  --nav-text: #f1f5f9;
+  --nav-bg: oklch(20.768% 0.0398 265.75);
+  --nav-text: oklch(96.826% 0.0069 247.9);
   --nav-text-muted: rgba(241, 245, 249, 0.7);
   --nav-hover: rgba(241, 245, 249, 0.1);
   --nav-active: rgba(241, 245, 249, 0.15);
   --nav-border: rgba(241, 245, 249, 0.1);
-  --nav-tooltip: #1e293b;
+  --nav-tooltip: oklch(27.95% 0.0368 260.03);
 
   /* Layout colors - dark theme with proper contrast */
-  --app-bg: #0f172a;
-  --body-bg: #020617;
-  --app-text: #f1f5f9;
-  --text-muted: #94a3b8;
-  --header-bg: #1e293b;
-  --header-text: #f1f5f9;
-  --header-border: #334155;
-  --content-bg: #1e293b;
-  --content-secondary: #0f172a;
-  --content-border: #334155;
-  --content-text: #f1f5f9;
-  --content-muted: #94a3b8;
+  --app-bg: oklch(20.768% 0.0398 265.75);
+  --body-bg: oklch(12.88% 0.0406 264.7);
+  --app-text: oklch(96.826% 0.0069 247.9);
+  --text-muted: oklch(71.067% 0.0351 256.79);
+  --header-bg: oklch(27.95% 0.0368 260.03);
+  --header-text: oklch(96.826% 0.0069 247.9);
+  --header-border: oklch(37.17% 0.0392 257.29);
+  --content-bg: oklch(27.95% 0.0368 260.03);
+  --content-secondary: oklch(20.768% 0.0398 265.75);
+  --content-border: oklch(37.17% 0.0392 257.29);
+  --content-text: oklch(96.826% 0.0069 247.9);
+  --content-muted: oklch(71.067% 0.0351 256.79);
 
   /* Login page - dark theme */
-  --login-bg: #0f172a;
+  --login-bg: oklch(20.768% 0.0398 265.75);
   --login-bg-image: url('/core/assets/login-bg.webp');
-  --login-card-bg: #1e293b;
+  --login-card-bg: oklch(27.95% 0.0368 260.03);
 
   /* Logo - dark theme */
-  --logo-bg: #1e293b;
+  --logo-bg: oklch(27.95% 0.0368 260.03);
 
   /* Interactive elements - dark theme */
-  --input-bg: #1e293b;
-  --input-border: #475569;
-  --input-text: #f1f5f9;
-  --input-placeholder: #64748b;
+  --input-bg: oklch(27.95% 0.0368 260.03);
+  --input-border: oklch(44.553% 0.0374 257.28);
+  --input-text: oklch(96.826% 0.0069 247.9);
+  --input-placeholder: oklch(55.439% 0.0407 257.42);
   --input-focus-border: var(--color-primary);
-  --input-disabled-bg: #0f172a;
+  --input-disabled-bg: oklch(20.768% 0.0398 265.75);
 
   /* Code block - dark theme */
-  --code-block-bg: #0f172a;
-  --code-block-border: #334155;
-  --code-block-text: #e2e8f0;
+  --code-block-bg: oklch(20.768% 0.0398 265.75);
+  --code-block-border: oklch(37.17% 0.0392 257.29);
+  --code-block-text: oklch(92.876% 0.0126 255.51);
 
   /* Card and panel colors - dark theme */
-  --card-bg: #1e293b;
-  --card-border: #334155;
-  --card-header-bg: #0f172a;
+  --card-bg: oklch(27.95% 0.0368 260.03);
+  --card-border: oklch(37.17% 0.0392 257.29);
+  --card-header-bg: oklch(20.768% 0.0398 265.75);
   --card-shadow: rgba(0, 0, 0, 0.3);
 
   /* Table colors - dark theme */
-  --table-header-bg: #0f172a;
-  --table-header-text: #cbd5e1;
-  --table-row-hover: #334155;
-  --table-border: #334155;
+  --table-header-bg: oklch(20.768% 0.0398 265.75);
+  --table-header-text: oklch(86.898% 0.0198 252.89);
+  --table-row-hover: oklch(37.17% 0.0392 257.29);
+  --table-border: oklch(37.17% 0.0392 257.29);
 
   /* Stepper colors - dark theme */
-  --step-inactive-bg: #334155;
-  --step-inactive-text: #cbd5e1;
-  --step-skip-bg: #1e293b;
-  --step-skip-text: #64748b;
+  --step-inactive-bg: oklch(37.17% 0.0392 257.29);
+  --step-inactive-text: oklch(86.898% 0.0198 252.89);
+  --step-skip-bg: oklch(27.95% 0.0368 260.03);
+  --step-skip-text: oklch(55.439% 0.0407 257.42);
 
   /* Status and state colors - dark theme with WCAG AA compliance */
-  --success-bg: #14532d;
-  --success-text: #86efac;
-  --success-border: #22c55e;
+  --success-bg: oklch(39.253% 0.0896 152.54);
+  --success-text: oklch(87.116% 0.1363 154.45);
+  --success-border: oklch(72.275% 0.192 149.58);
 
-  --warning-bg: #78350f;
-  --warning-text: #fcd34d;
-  --warning-border: #f59e0b;
+  --warning-bg: oklch(41.371% 0.1054 45.9);
+  --warning-text: oklch(87.897% 0.1534 91.61);
+  --warning-border: oklch(76.859% 0.1647 70.08);
 
-  --danger-bg: #7f1d1d;
-  --danger-text: #fca5a5;
-  --danger-border: #ef4444;
+  --danger-bg: oklch(39.584% 0.1331 25.72);
+  --danger-text: oklch(80.769% 0.1035 19.57);
+  --danger-border: oklch(63.683% 0.2078 25.33);
 
-  --info-bg: #1e3a8a;
-  --info-text: #93c5fd;
-  --info-border: #3b82f6;
+  --info-bg: oklch(37.906% 0.1378 265.52);
+  --info-text: oklch(80.907% 0.0956 251.81);
+  --info-border: oklch(62.308% 0.188 259.81);
 
   /* Shadow system - enhanced for dark theme */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);

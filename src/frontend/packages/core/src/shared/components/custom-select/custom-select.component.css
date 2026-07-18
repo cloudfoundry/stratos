@@ -15,14 +15,14 @@
 
 /* Disabled trigger override */
 .custom-select.disabled .select-trigger {
-  background-color: var(--input-disabled-bg, #f3f4f6);
-  color: var(--text-muted, #9ca3af);
-  border-color: var(--input-border, #d1d5db);
+  background-color: var(--input-disabled-bg, oklch(96.696% 0.0029 264.54));
+  color: var(--text-muted, oklch(71.366% 0.0192 261.32));
+  border-color: var(--input-border, oklch(87.168% 0.0093 258.34));
 }
 
 /* Invalid trigger border */
 .custom-select.invalid .select-trigger {
-  border-color: var(--color-danger, #ef4444);
+  border-color: var(--color-danger, oklch(63.683% 0.2078 25.33));
   border-width: 2px;
 }
 
@@ -32,30 +32,30 @@
 }
 
 .select-options::-webkit-scrollbar-track {
-  background: var(--scrollbar-track, #f1f1f1);
+  background: var(--scrollbar-track, oklch(95.815% 0 none));
   border-radius: 4px;
 }
 
 .select-options::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb, #888);
+  background: var(--scrollbar-thumb, oklch(62.675% 0 none));
   border-radius: 4px;
 }
 
 .select-options::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover, #555);
+  background: var(--scrollbar-thumb-hover, oklch(44.953% 0 none));
 }
 
 /* Dark theme scrollbar */
 .dark-theme .select-options::-webkit-scrollbar-track {
-  background: var(--scrollbar-track, #334155);
+  background: var(--scrollbar-track, oklch(37.17% 0.0392 257.29));
 }
 
 .dark-theme .select-options::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb, #64748b);
+  background: var(--scrollbar-thumb, oklch(55.439% 0.0407 257.42));
 }
 
 .dark-theme .select-options::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover, #94a3b8);
+  background: var(--scrollbar-thumb-hover, oklch(71.067% 0.0351 256.79));
 }
 
 /* Error message */
@@ -64,7 +64,7 @@
   padding: 4px 0;
   font-size: 0.75rem;
   line-height: 1.25;
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger, oklch(63.683% 0.2078 25.33));
   animation: slideDown 0.3s ease-out;
 }
 

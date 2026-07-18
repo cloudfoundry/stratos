@@ -15,7 +15,7 @@
 
   &.invalid {
     .slide-toggle-bar {
-      border: 2px solid var(--color-danger, #ef4444);
+      border: 2px solid var(--color-danger, oklch(63.683% 0.2078 25.33));
       background-color: rgba(239, 68, 68, 0.1);
     }
   }
@@ -50,22 +50,22 @@
   position: relative;
   width: 36px;
   height: 20px;
-  background-color: var(--input-border, #ccc);
+  background-color: var(--input-border, oklch(84.522% 0 none));
   border-radius: 10px;
   transition: all 0.3s ease;
   cursor: pointer;
 
   .custom-slide-toggle.checked & {
-    background-color: var(--color-primary, #2196f3);
+    background-color: var(--color-primary, oklch(65.816% 0.169 248.81));
   }
 
   .custom-slide-toggle.disabled & {
-    background-color: var(--input-disabled-bg, #e5e7eb);
+    background-color: var(--input-disabled-bg, oklch(92.758% 0.0058 264.53));
     cursor: not-allowed;
   }
 
   .custom-slide-toggle.invalid:not(.checked) & {
-    border-color: var(--color-danger, #ef4444);
+    border-color: var(--color-danger, oklch(63.683% 0.2078 25.33));
     background-color: rgba(239, 68, 68, 0.1);
   }
 
@@ -117,7 +117,7 @@
   padding: 4px 0;
   font-size: 0.75rem;
   line-height: 1.25;
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger, oklch(63.683% 0.2078 25.33));
   animation: slideDown 0.3s ease-out;
 
   div {
