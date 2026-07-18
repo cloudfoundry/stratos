@@ -83,6 +83,9 @@
               "expect-type"
             ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
+            "loader": {
+              ".ttf": "file"
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -104,16 +107,6 @@
                 "glob": "**/*",
                 "input": "src/frontend/packages/kubernetes/assets",
                 "output": "/kubernetes/assets"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/monaco-editor/min/vs",
-                "output": "/core/assets/monaco/vs"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/@cfstratos/monaco-yaml/lib",
-                "output": "/core/assets/monaco/vs/language/yaml"
               },
               {
                 "glob": "company-config.json",
