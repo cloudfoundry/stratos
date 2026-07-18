@@ -124,7 +124,6 @@ export class ServicePlansComponent implements OnInit {
                 maxWidth: '92vw',
                 maxHeight: '90vh',
                 resizable: true,
-                draggable: true,
                 data: {
                   cnsiGuid: p.cnsiGuid,
                   planGuid: p.guid,

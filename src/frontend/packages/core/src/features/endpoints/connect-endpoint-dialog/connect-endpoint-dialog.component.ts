@@ -29,7 +29,6 @@ export const CONNECT_ENDPOINT_DIALOG_OPTIONS: TailwindDialogConfig = {
   width: '400px',
   maxWidth: '400px',
   panelClass: ['overflow-visible', 'p-6'],
-  draggable: true,
   modeless: true,
 };
 

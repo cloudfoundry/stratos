@@ -474,6 +474,46 @@ describe('TailwindDialogService', () => {
       await vi.advanceTimersByTimeAsync(300);
       vi.useRealTimers();
     });
+
+    it('should be draggable by default (no config)', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent);
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
+      expect(handle.style.cursor).toBe('move');
+
+      handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 130, clientY: 120 }));
+      expect(panel.style.left).toBe('30px');
+      expect(panel.style.top).toBe('20px');
+
+      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    it('should NOT be draggable when draggable is false', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent, { draggable: false });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
+      expect(handle.style.cursor).not.toBe('move');
+
+      handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 160, clientY: 140 }));
+      expect(panel.style.left).toBe('');
+      expect(panel.style.top).toBe('');
+
+      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
   });
 
   describe('Modeless', () => {
