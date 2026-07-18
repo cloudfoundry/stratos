@@ -47,9 +47,7 @@ import { CommonModule } from "@angular/common";
           class="absolute h-full animate-progress-indeterminate-primary z-20 opacity-70"
           [ngClass]="progressBarPrimaryClass"
         ></div>
-        , changeDetection: ChangeDetectionStrategy.OnPush
       }
-      )
 
       <!-- Determinate progress -->
       @if (mode === "determinate") {
