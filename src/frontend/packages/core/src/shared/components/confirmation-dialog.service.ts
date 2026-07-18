@@ -24,8 +24,7 @@ export class ConfirmationDialogService {
       data: dialog,
       // Same behaviour as the connect dialog: the dim backdrop lets pointer
       // events through so the page behind stays live (e.g. an endpoint's
-      // status pill during disconnect), and the panel drags by its title.
-      draggable: true,
+      // status pill during disconnect). Drags by its title (service default).
       modeless: true,
     });
 

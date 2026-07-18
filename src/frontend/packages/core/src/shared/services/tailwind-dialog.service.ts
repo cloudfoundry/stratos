@@ -36,7 +36,9 @@ export interface TailwindDialogConfig<D = any> {
    *  (a flex-centered panel would re-center and grow at half speed). */
   resizable?: boolean;
   /** Let the user move the panel by dragging an element marked with
-   *  `data-dialog-drag-handle` (e.g. the dialog header). */
+   *  `data-dialog-drag-handle` (e.g. the dialog header). Defaults to true —
+   *  every dialog is movable; pass false to opt out. A template with no
+   *  drag-handle element simply isn't movable. */
   draggable?: boolean;
   /** Keep the dim backdrop visually but let pointer events pass through it,
    *  so the page behind stays visible AND interactive while the dialog is
@@ -167,8 +169,8 @@ export class TailwindDialogService {
       this.focusFirstElement(dialogContainer);
       // Resize/drag are wired here (after first layout) so the panel can be
       // measured and pinned to a fixed viewport position.
-      if (config?.resizable || config?.draggable) {
-        this.setupResizableDraggable(dialogContainer, config);
+      if (config?.resizable || config?.draggable !== false) {
+        this.setupResizableDraggable(dialogContainer, config ?? {});
       }
       dialogRef._emitOpened();
       // ZONELESS: Trigger change detection after dialog is fully opened
@@ -416,6 +418,14 @@ export class TailwindDialogService {
     const panel = dialogContainer.querySelector('[role="dialog"]') as HTMLElement;
     if (!panel) return;
 
+    // Drag is on unless explicitly disabled, but only takes effect when the
+    // template marks a handle. A dialog with neither resize nor a handle is
+    // left flex-centered (pinning it would cost re-centering for nothing).
+    const handle = config.draggable !== false
+      ? panel.querySelector('[data-dialog-drag-handle]') as HTMLElement
+      : null;
+    if (!config.resizable && !handle) return;
+
     // Pin to current position so resize/drag have a stable origin. The panel
     // was flex-centered; reuse that measured rect as the fixed start point.
     const rect = panel.getBoundingClientRect();
@@ -461,36 +471,33 @@ export class TailwindDialogService {
 
     clampSizeToViewport();
 
-    if (config.draggable) {
-      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
-      if (handle) {
-        handle.style.cursor = 'move';
-        handle.style.userSelect = 'none';
-        handle.addEventListener('mousedown', (e: MouseEvent) => {
-          const start = panel.getBoundingClientRect();
-          const startX = e.clientX;
-          const startY = e.clientY;
-          const onMove = (m: MouseEvent) => {
-            // Clamp to the viewport so the panel (and its action buttons) can
-            // never be dragged off-screen — it's position:fixed/overflow:hidden,
-            // so anything past the edge would be unreachable.
-            const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
-            const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
-            const left = Math.min(Math.max(0, start.left + m.clientX - startX), maxLeft);
-            const top = Math.min(Math.max(0, start.top + m.clientY - startY), maxTop);
-            panel.style.left = `${left}px`;
-            panel.style.top = `${top}px`;
-            clampSizeToViewport();
-          };
-          const onUp = () => {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-          };
-          document.addEventListener('mousemove', onMove);
-          document.addEventListener('mouseup', onUp);
-          e.preventDefault();
-        });
-      }
+    if (handle) {
+      handle.style.cursor = 'move';
+      handle.style.userSelect = 'none';
+      handle.addEventListener('mousedown', (e: MouseEvent) => {
+        const start = panel.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const onMove = (m: MouseEvent) => {
+          // Clamp to the viewport so the panel (and its action buttons) can
+          // never be dragged off-screen — it's position:fixed/overflow:hidden,
+          // so anything past the edge would be unreachable.
+          const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
+          const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
+          const left = Math.min(Math.max(0, start.left + m.clientX - startX), maxLeft);
+          const top = Math.min(Math.max(0, start.top + m.clientY - startY), maxTop);
+          panel.style.left = `${left}px`;
+          panel.style.top = `${top}px`;
+          clampSizeToViewport();
+        };
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        e.preventDefault();
+      });
     }
   }
 

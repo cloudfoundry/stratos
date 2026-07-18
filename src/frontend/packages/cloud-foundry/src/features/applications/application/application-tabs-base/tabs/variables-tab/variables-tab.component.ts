@@ -217,7 +217,6 @@ export class VariablesTabComponent implements OnInit {
       maxWidth: '92vw',
       maxHeight: '90vh',
       resizable: true,
-      draggable: true,
       data: { mode, name: row?.name, value: row?.value, existingNames },
     });
 
