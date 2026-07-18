@@ -4,19 +4,16 @@ version: 2
 
 # Disable Dependabot during Angular
 updates:
-  - package-ecosystem: "npm"
+  # bun ecosystem, not npm: the lockfile is bun.lock (no package-lock.json),
+  # so npm-ecosystem PRs edit only package.json and every CI job then fails
+  # `bun install --frozen-lockfile` (see PR #5643).
+  - package-ecosystem: "bun"
     directory: "/"
-    schedule: 
+    schedule:
       interval: "weekly"
-    open-pull-requests-limit: 0 # Angular v14 tree depracated, being updated to v20/v21
-  
-  - package-ecosystem: "npm"
-    directory: "/electron"
-    schedule: 
-      interval: "weekly"
-    open-pull-requests-limit: 0 # Electron app deprecated
-  
-  - package-ecosystem: "npm"
+    open-pull-requests-limit: 0 # version updates off; security updates still open PRs
+
+  - package-ecosystem: "bun"
     directory: "/website"
     schedule:
       interval: "weekly"
