@@ -208,6 +208,12 @@ export class EndpointsDataService {
     return computed(() => this._disconnectingStates().get(guid) ?? getDefaultActionState());
   }
 
+  // Mirror of isConnecting() for the disconnect window disconnect() holds —
+  // drives the transient 'disconnecting' overlay (see withConnectingOverlay).
+  isDisconnecting(guid: string): boolean {
+    return !!this._disconnectingStates().get(guid)?.busy;
+  }
+
   // ---- readiness primitive (used by pipeline) ----------------------------
 
   /**

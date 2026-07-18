@@ -36,16 +36,18 @@ export class CloudFoundryService {
 
   // Endpoints that belong to the user and should appear in the /cloud-foundry
   // picker: a live connection, an expired one they never disconnected (still
-  // theirs, needs reconnect), or one mid-connect (shows the transient state).
-  // 'disconnected' is excluded — the user dropped it; reconnect from the
-  // Endpoints page. Broader than connectedCFEndpoints, which is fan-out only.
+  // theirs, needs reconnect), or one mid-connect/mid-disconnect (shows the
+  // transient state until the operation settles). 'disconnected' is excluded —
+  // the user dropped it; reconnect from the Endpoints page. Broader than
+  // connectedCFEndpoints, which is fan-out only.
   readonly availableCFEndpoints: Signal<EndpointModel[]> = computed(() =>
     this.cfEndpoints().filter(endpoint => {
       const status = withConnectingOverlay(
         endpoint.connectionStatus,
         this.endpointsData.isConnecting(endpoint.guid ?? ''),
+        this.endpointsData.isDisconnecting(endpoint.guid ?? ''),
       );
-      return status === 'connected' || status === 'expired' || status === 'connecting';
+      return status === 'connected' || status === 'expired' || status === 'connecting' || status === 'disconnecting';
     })
   );
 

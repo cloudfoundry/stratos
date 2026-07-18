@@ -22,7 +22,7 @@ export interface IApiEndpointInfo {
   // Go url.Userinfo pointer: serializes to JSON null when no userinfo is present.
   User: object | null;
 }
-export type endpointConnectionStatus = 'connected' | 'expired' | 'disconnected' | 'unknown' | 'connecting';
+export type endpointConnectionStatus = 'connected' | 'expired' | 'disconnected' | 'unknown' | 'connecting' | 'disconnecting';
 
 // 'expired' = connected but past the connection time: a stored token exists
 // but is known-dead — past token_expiry with no refresh token to renew from.
@@ -47,18 +47,21 @@ export function computeConnectionStatus(info: {
   return 'connected';
 }
 
-// Overlay the transient 'connecting' state onto a wire-derived status while a
-// connect or reconnect is in flight for the endpoint. The operation owns no
-// stored status of its own — EndpointsDataService.connect() (also the reconnect
-// path) holds a busy connecting-state for the duration, and this folds that
-// signal onto the last settled status so display surfaces can show it without
-// the value being written into the endpoint model (which getAll() would clobber
-// on its next wholesale refresh).
+// Overlay the transient 'connecting' / 'disconnecting' states onto a
+// wire-derived status while the operation is in flight for the endpoint. The
+// operation owns no stored status of its own — EndpointsDataService.connect()
+// (also the reconnect path) and disconnect() hold a busy state for the
+// duration, and this folds that signal onto the last settled status so display
+// surfaces can show it without the value being written into the endpoint model
+// (which getAll() would clobber on its next wholesale refresh).
 export function withConnectingOverlay(
   status: endpointConnectionStatus | undefined,
   isConnecting: boolean,
+  isDisconnecting = false,
 ): endpointConnectionStatus {
-  return isConnecting ? 'connecting' : (status ?? 'unknown');
+  if (isConnecting) return 'connecting';
+  if (isDisconnecting) return 'disconnecting';
+  return status ?? 'unknown';
 }
 export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;
