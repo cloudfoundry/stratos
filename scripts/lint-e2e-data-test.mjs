@@ -88,7 +88,7 @@ for (const f of files('e2e', ['.ts'])) {
         // ('tab-' vs 'tab-action-') could shadow a valid shorter-prefix ref.
         const prefixes = ns.prefixes.filter((p) => value.startsWith(p))
         if (!prefixes.length) {
-          problems.push(`${f}:${line()}  ${nsName} "${value}" is not defined in any component template`)
+          problems.push(`${f}:${line()}  ${nsName} "${value}" is not defined by any component (template attribute or dataTest config)`)
         } else if (!prefixes.some((p) => suffixes.has(value.slice(p.length)))) {
           problems.push(
             `${f}:${line()}  ${nsName} "${value}" matches prefix(es) ${prefixes.map((p) => `"${p}"`).join(', ')} but the remainder is not a label defined in src` +
