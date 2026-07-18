@@ -9,7 +9,7 @@ import { test, expect } from '../../fixtures/test-base';
 
 test.describe('Cloud Foundry List', () => {
 
-  test('should display CF endpoints on endpoints page', async ({ connectedEndpointsAdminPage }) => {
+  test('should display CF endpoints on endpoints page', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
     const { page } = connectedEndpointsAdminPage;
 
     // Navigate to endpoints page
@@ -26,7 +26,7 @@ test.describe('Cloud Foundry List', () => {
     expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('should navigate to CF from endpoints list', async ({ connectedEndpointsAdminPage, secrets }) => {
+  test('should navigate to CF from endpoints list', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage, secrets }) => {
     const { page } = connectedEndpointsAdminPage;
     const cfEndpoint = secrets.getCloudfoundryEndpoint(0);
 

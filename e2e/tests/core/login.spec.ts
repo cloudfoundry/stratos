@@ -11,7 +11,7 @@ import { LoginPage } from '../../pages/login.page';
  */
 test.describe('Login', () => {
 
-  test('should reach log in page', async ({ unauthenticatedPage, authType }) => {
+  test('should reach log in page', { tag: '@smoke' }, async ({ unauthenticatedPage, authType }) => {
     const loginPage = new LoginPage(unauthenticatedPage);
     await loginPage.navigateTo();
 

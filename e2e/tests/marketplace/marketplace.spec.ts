@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 test.describe('Marketplace', () => {
-  test('should navigate to marketplace', async ({ connectedEndpointsAdminPage }) => {
+  test('should navigate to marketplace', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
     const { page, cfGuid } = connectedEndpointsAdminPage;
     await page.goto(`/marketplace/${cfGuid}`);
     await page.waitForLoadState('networkidle');
