@@ -1,7 +1,9 @@
 // e2e files that predate the drift guards (#5619) and still carry violations
 // (dead Material-era selectors, can't-fail assertions). This list only
 // shrinks: remove a file once it is modernised — never add to it. Generated
-// by running the guards over e2e/ when they were introduced.
+// by running the guards over e2e/ when they were introduced. Enforced by
+// scripts/lint-e2e-ratchet.mjs: an entry whose file is clean (or gone)
+// fails lint until it is removed.
 export const E2E_LEGACY_FILES = [
   "e2e/components/boolean-indicator.component.ts",
   "e2e/components/chips.component.ts",
