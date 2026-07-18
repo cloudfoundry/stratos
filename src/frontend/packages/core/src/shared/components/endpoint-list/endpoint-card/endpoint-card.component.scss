@@ -62,7 +62,7 @@
     &-subtext {
       font-size: 13px;
       margin-top: 4px;
-      color: var(--text-muted, #64748b);
+      color: var(--text-muted, oklch(55.439% 0.0407 257.42));
       font-weight: 400;
     }
 
@@ -76,7 +76,7 @@
 
     &-link {
       font-weight: 500;
-      color: var(--content-text, #1e293b);
+      color: var(--content-text, oklch(27.95% 0.0368 260.03));
     }
   }
 
@@ -92,7 +92,7 @@
       white-space: nowrap;
       font-family: 'Roboto Mono', 'Courier New', monospace;
       font-size: 13px;
-      color: var(--content-muted, #64748b);
+      color: var(--content-muted, oklch(55.439% 0.0407 257.42));
     }
   }
 }

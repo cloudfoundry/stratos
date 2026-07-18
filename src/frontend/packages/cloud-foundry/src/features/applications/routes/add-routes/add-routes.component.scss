@@ -78,7 +78,7 @@
   &__collision {
     margin-top: 8px;
     padding: 8px 12px;
-    border-left: 3px solid var(--color-warn, #d97706);
+    border-left: 3px solid var(--color-warn, oklch(66.584% 0.1574 58.32));
     background: var(--color-warn-bg, rgba(217, 119, 6, 0.08));
     color: var(--color-content-text, inherit);
     font-size: 0.875rem;
