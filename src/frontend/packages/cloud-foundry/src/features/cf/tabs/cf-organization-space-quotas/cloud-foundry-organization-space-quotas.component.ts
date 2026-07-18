@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
+  isUnlimited,
   ListSubNavAddAction,
   ListSubNavComponent,
   SignalListComponent,
@@ -246,10 +247,9 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
     ];
   }
 
-  // -1 on the wire signals "Unlimited" (the backend coerces null v3
-  // limits to -1 for a flat int wire shape).
+  // The backend coerces null v3 limits to -1 for a flat int wire shape.
   static formatLimit(value: number, unit?: string): string {
-    if (value === -1) return 'Unlimited';
+    if (isUnlimited(value)) return 'Unlimited';
     return unit ? `${value.toLocaleString()} ${unit}` : value.toLocaleString();
   }
 

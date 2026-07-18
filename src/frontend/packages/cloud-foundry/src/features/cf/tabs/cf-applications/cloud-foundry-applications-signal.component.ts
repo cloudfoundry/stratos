@@ -8,6 +8,7 @@ import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
   CurrentUserPermissionsService,
+  isUnlimited,
   ListSubNavAddAction,
   ListSubNavComponent,
   SignalListCompoundSegment,
@@ -356,8 +357,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
 
   static formatMb(mb: number | null | undefined): string {
     if (mb == null || typeof mb !== 'number' || Number.isNaN(mb)) return '—';
-    // CF quota APIs encode 'unlimited' as -1
-    if (mb === -1) return '∞';
+    if (isUnlimited(mb)) return '∞';
     if (mb < 1024) return `${mb} MB`;
     const gb = mb / 1024;
     if (gb < 1024) return `${gb.toFixed(1)} GB`;

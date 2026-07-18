@@ -9,6 +9,7 @@ export * from './core/extension/extension-service';
 
 // Utils
 export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString } from './core/utils.service';
+export { CF_QUOTA_UNLIMITED, isUnlimited } from './core/cf-quota.types';
 export {
   naturalCollator,
   naturalCompare,

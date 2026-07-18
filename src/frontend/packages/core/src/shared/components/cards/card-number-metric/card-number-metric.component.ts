@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
+import { isUnlimited } from '../../../../core/cf-quota.types';
 import { UtilsService } from '../../../../core/utils.service';
 import { CardStatusComponent, determineCardStatus } from '../card-status/card-status.component';
 
@@ -87,8 +88,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   handleValue() {
     const value = parseInt(this.value, 10);
     this.isUnlimited = false;
-    // CF quota APIs encode 'unlimited' as -1
-    if (value === -1) {
+    if (isUnlimited(value)) {
       this.formattedValue = 'Unlimited';
       this.isUnlimited = true;
     } else {
@@ -103,8 +103,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     this._status.set(status);
 
     const limit = parseInt(this.limit, 10);
-    // CF quota APIs encode 'unlimited' as -1
-    if (limit === -1) {
+    if (isUnlimited(limit)) {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {

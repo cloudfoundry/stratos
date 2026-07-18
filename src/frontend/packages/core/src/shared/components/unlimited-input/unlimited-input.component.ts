@@ -20,8 +20,7 @@ import {
   AppInputDirective,
   CustomFormFieldComponent,
 } from "../custom-form-field/custom-form-field.component";
-
-const UNLIMITED = -1;
+import { CF_QUOTA_UNLIMITED } from "../../../core/cf-quota.types";
 
 @Component({
   selector: "app-unlimited-input",
@@ -69,7 +68,7 @@ export class UnlimitedInputComponent implements OnInit {
       this.formControl.disable();
     } else {
       this.formControl.enable();
-      if (this.initialValue !== UNLIMITED && this.initialValue != null) {
+      if (this.initialValue !== CF_QUOTA_UNLIMITED && this.initialValue != null) {
         this.formControl.patchValue(this.initialValue);
       } else {
         this.formControl.setValue("");
@@ -88,7 +87,7 @@ export class UnlimitedInputComponent implements OnInit {
 
   setInitialValues(value: any) {
     this.initialValue = value;
-    this.unlimited = value === UNLIMITED;
+    this.unlimited = value === CF_QUOTA_UNLIMITED;
     this.onChange();
   }
 }

@@ -4,10 +4,12 @@ import { Observable } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
 
+import { isUnlimited } from '../../../../core/cf-quota.types';
+
 
 export function determineCardStatus(value: number, limit: number): StratosStatus {
-  // -1 is the CF quota 'unlimited' sentinel, so there is no meaningful usage fraction
-  if ((limit !== 0 && !limit) || limit === -1) {
+  // An unlimited quota has no meaningful usage fraction
+  if ((limit !== 0 && !limit) || isUnlimited(limit)) {
     return StratosStatus.NONE;
   }
 
