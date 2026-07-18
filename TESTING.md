@@ -458,6 +458,26 @@ node --version && bun --version
 # Should be: v24.x.x and 1.2.13
 ```
 
+### 6. Keep E2E Specs in Sync When Changing Component DOM
+
+E2E specs bind to components through `data-test` hooks and element
+selectors. When you change a component's template or DOM structure:
+
+```bash
+# See which specs cover the files you changed
+git diff --name-only develop...HEAD | node scripts/e2e-impact.mjs
+
+# Or grep directly for the component's hooks / selector
+grep -rn 'data-test-value-or-selector' e2e/
+```
+
+Run the specs the script names (it prints a scoped `playwright test`
+command), and fix any spec your change breaks in the same PR — or file a
+follow-up issue if the fix is substantial. Never leave a spec silently
+binding to DOM that no longer exists; the lint guards
+(`bun run lint`) catch dead selectors and orphaned hooks, and CI posts
+the same impact report on every PR as an advisory job summary.
+
 ---
 
 ## Getting Help

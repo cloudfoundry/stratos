@@ -144,6 +144,34 @@ jobs:
             !dist/booklets/.work/**
           retention-days: 14
 
+  # Advisory: names the e2e specs that cover the components a PR changes,
+  # derived from data-test hooks and element selectors (scripts/
+  # e2e-impact.mjs). Never gates — the e2e suite needs a live CF endpoint,
+  # so it cannot run here; this puts the scoped-run command in the job
+  # summary so reviewers know exactly which specs the change touches.
+  e2e-impact:
+    name: E2E Impact (advisory)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.non_stb == 'true'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Report covering specs
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          {
+            echo '```'
+            git diff --name-only "origin/${BASE}...HEAD" | node scripts/e2e-impact.mjs
+            echo '```'
+          } | tee -a "${GITHUB_STEP_SUMMARY}"
+
   lint:
     name: Lint Check
     runs-on: ubuntu-latest
