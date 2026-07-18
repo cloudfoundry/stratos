@@ -52,6 +52,16 @@ const DEFS = {
   'data-testid': [/(?<!\[attr\.)data-testid=["']([^"']+)/g, /\[attr\.data-testid\]="([^"]*)"/g],
 }
 
+// Suffix vocabulary for prefix-style bindings ('header-action-' + act.label):
+// every label/textLabel string literal in app code or templates, plus
+// explicit dataTest config values. A static e2e ref under a live prefix must
+// end in one of these, so a renamed action label turns the old ref red.
+const SUFFIX_SOURCES = [
+  /\b(?:label|textLabel):\s*['"]([^'"]+)['"]/g,
+  /\b(?:label|textLabel)=["']([^"']+)["']/g,
+]
+const suffixes = new Set()
+
 for (const f of files('src/frontend', ['.html', '.ts'])) {
   const text = readFileSync(f, 'utf8')
   for (const [ns, [staticDef, dynamicDef]] of Object.entries(DEFS)) {
@@ -60,11 +70,17 @@ for (const f of files('src/frontend', ['.html', '.ts'])) {
       for (const s of m[1].matchAll(/'([^']+)'/g)) NAMESPACES[ns].defined.add(s[1])
     }
   }
+  for (const pattern of SUFFIX_SOURCES) {
+    for (const m of text.matchAll(pattern)) suffixes.add(m[1])
+  }
+  // dataTest config values (SignalListRowAction etc.) are full definitions.
+  for (const m of text.matchAll(/\bdataTest:\s*['"]([^'"]+)['"]/g)) NAMESPACES['data-test'].defined.add(m[1])
 }
 
 // 'header-action-' + label style bindings define a prefix, not a value.
-// Known limitation: a typo'd or renamed suffix under a live prefix passes;
-// validating suffixes needs shared test-id constants (#5619 follow-on).
+// simplification: suffixes validate against harvested label literals, not
+// shared test-id constants — a label anywhere in src satisfies any prefix.
+// Tighten to per-prefix vocabularies if cross-component collisions bite.
 for (const ns of Object.values(NAMESPACES)) {
   ns.prefixes = [...ns.defined].filter((d) => d.endsWith('-'))
 }
@@ -78,9 +94,14 @@ for (const f of files('e2e', ['.ts'])) {
       for (const m of text.matchAll(pattern)) {
         const value = m[1]
         if (value.includes('$') || value.includes('{')) continue // dynamic
-        if (!ns.defined.has(value) && !ns.prefixes.some((p) => value.startsWith(p))) {
-          const line = text.slice(0, m.index).split('\n').length
-          problems.push(`${f}:${line}  ${nsName} "${value}" is not defined in any component template`)
+        if (value.includes('<')) continue // doc-comment placeholder, e.g. page-tab-<label>
+        if (ns.defined.has(value)) continue
+        const line = () => text.slice(0, m.index).split('\n').length
+        const prefix = ns.prefixes.filter((p) => value.startsWith(p)).sort((a, b) => b.length - a.length)[0]
+        if (!prefix) {
+          problems.push(`${f}:${line()}  ${nsName} "${value}" is not defined in any component template`)
+        } else if (!suffixes.has(value.slice(prefix.length))) {
+          problems.push(`${f}:${line()}  ${nsName} "${value}" matches prefix "${prefix}" but "${value.slice(prefix.length)}" is not a label defined anywhere in src`)
         }
       }
     }
