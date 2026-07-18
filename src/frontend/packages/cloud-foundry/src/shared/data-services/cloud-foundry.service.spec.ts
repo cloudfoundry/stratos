@@ -15,6 +15,7 @@ import { CloudFoundryService } from './cloud-foundry.service';
 describe('CloudFoundryService endpoint sets', () => {
   let list: WritableSignal<EndpointModel[]>;
   let connecting: Set<string>;
+  let disconnecting: Set<string>;
   let service: CloudFoundryService;
 
   const ep = (guid: string, connectionStatus: string, cnsi_type = 'cf'): EndpointModel =>
@@ -23,12 +24,17 @@ describe('CloudFoundryService endpoint sets', () => {
   beforeEach(() => {
     list = signal<EndpointModel[]>([]);
     connecting = new Set<string>();
+    disconnecting = new Set<string>();
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
         {
           provide: EndpointsDataService,
-          useValue: { endpointsList: list, isConnecting: (g: string) => connecting.has(g) },
+          useValue: {
+            endpointsList: list,
+            isConnecting: (g: string) => connecting.has(g),
+            isDisconnecting: (g: string) => disconnecting.has(g),
+          },
         },
         CloudFoundryService,
       ],
@@ -67,5 +73,17 @@ describe('CloudFoundryService endpoint sets', () => {
     // fan-out set (still no usable token).
     expect(service.availableCFEndpoints().map(e => e.guid)).toEqual(['a', 'c']);
     expect(service.connectedCFEndpoints().map(e => e.guid)).toEqual(['a']);
+  });
+
+  it('availableCFEndpoints keeps a CF visible while it is mid-disconnect (disconnecting overlay)', () => {
+    disconnecting.add('a');
+    list.set([ep('a', 'connected'), ep('b', 'connected')]);
+
+    // 'a' is mid-disconnect: the picker keeps it visible (as Disconnecting)
+    // until the operation settles. Fan-out still includes it — the token
+    // remains valid until the DELETE lands, and the wire status only flips
+    // once it does.
+    expect(service.availableCFEndpoints().map(e => e.guid)).toEqual(['a', 'b']);
+    expect(service.connectedCFEndpoints().map(e => e.guid)).toEqual(['a', 'b']);
   });
 });

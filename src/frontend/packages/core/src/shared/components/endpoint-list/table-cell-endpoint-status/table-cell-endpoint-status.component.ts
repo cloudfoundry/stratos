@@ -30,11 +30,16 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   }
 
   // Displayed status = the wire-derived connectionStatus overlaid with the
-  // transient 'connecting' while a connect/reconnect is in flight. Reading
-  // isConnecting() here tracks the connecting-state signal, so the zoneless
-  // OnPush template re-renders when the operation starts and finishes.
+  // transient 'connecting' / 'disconnecting' while the operation is in
+  // flight. Reading isConnecting()/isDisconnecting() here tracks the state
+  // signals, so the zoneless OnPush template re-renders when the operation
+  // starts and finishes.
   get status(): endpointConnectionStatus {
-    return withConnectingOverlay(this.row?.connectionStatus, this.endpointsData.isConnecting(this.row?.guid ?? ''));
+    return withConnectingOverlay(
+      this.row?.connectionStatus,
+      this.endpointsData.isConnecting(this.row?.guid ?? ''),
+      this.endpointsData.isDisconnecting(this.row?.guid ?? ''),
+    );
   }
 
   constructor() {

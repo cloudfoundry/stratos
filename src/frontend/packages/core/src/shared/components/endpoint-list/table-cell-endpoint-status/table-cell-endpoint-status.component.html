@@ -32,6 +32,12 @@
       }
       <app-spinner [diameter]="20"></app-spinner>
     }
+    @if (status === 'disconnecting') {
+      @if (config?.showLabel) {
+        <span class="mr-2">Disconnecting </span>
+      }
+      <app-spinner [diameter]="20"></app-spinner>
+    }
     @if (status === 'unknown') {
       @if (config?.showLabel) {
         <span class="mr-2">Unknown </span>

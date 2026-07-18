@@ -90,7 +90,11 @@ export class CloudFoundryComponent {
     // overlays the wire status while a connect/reconnect is in flight, tracking
     // the isConnecting signal so the row updates when the operation resolves.
     const rowStatus = (e: EndpointModel): string =>
-      withConnectingOverlay(e.connectionStatus, this.endpointsData.isConnecting(e.guid ?? ''));
+      withConnectingOverlay(
+        e.connectionStatus,
+        this.endpointsData.isConnecting(e.guid ?? ''),
+        this.endpointsData.isDisconnecting(e.guid ?? ''),
+      );
 
     const sortState: WritableSignal<SignalListSort> = signal({ field: 'name', direction: 'asc' });
     const sortExtractors: Record<string, (e: EndpointModel) => unknown> = {
@@ -128,7 +132,7 @@ export class CloudFoundryComponent {
     const statusColor = (e: EndpointModel): SignalListPillColor => {
       const s = rowStatus(e);
       if (s === 'connected') return 'success';
-      if (s === 'expired' || s === 'connecting') return 'warning';
+      if (s === 'expired' || s === 'connecting' || s === 'disconnecting') return 'warning';
       return 'neutral';
     };
 

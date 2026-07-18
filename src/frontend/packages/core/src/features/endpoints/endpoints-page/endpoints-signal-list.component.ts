@@ -146,6 +146,9 @@ export class EndpointsSignalListComponent {
       if (this.endpointsData.isConnecting(ep.guid ?? '')) {
         return 'Connecting';
       }
+      if (this.endpointsData.isDisconnecting(ep.guid ?? '')) {
+        return 'Disconnecting';
+      }
       // 'expired' arrives computed on connectionStatus (Task 3, from wire
       // data); the authState overlay catches 401s the interceptor witnessed
       // THIS session, before the next info refetch reflects the
@@ -159,7 +162,7 @@ export class EndpointsSignalListComponent {
     };
 
     const statusColor = (ep: EndpointModel): SignalListPillColor => {
-      if (this.endpointsData.isConnecting(ep.guid ?? '')) {
+      if (this.endpointsData.isConnecting(ep.guid ?? '') || this.endpointsData.isDisconnecting(ep.guid ?? '')) {
         return 'warning';
       }
       if (isEndpointExpired(ep, this.authState.stale())) {
