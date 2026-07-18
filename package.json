@@ -67,7 +67,7 @@
     "posttest": "echo 'Coverage reports in coverage/ directory'",
     "codecov": "codecov -f coverage/coverage-final.json -F frontend",
     "codecov-backend": "codecov -f src/jetstream/coverage.txt -F backend",
-    "lint": "eslint --report-unused-disable-directives-severity warn src/frontend/packages/{core,store,cloud-foundry,kubernetes,cf-autoscaler,git,shared,extension}/src/",
+    "lint": "eslint --report-unused-disable-directives-severity warn src/frontend/packages/{core,store,cloud-foundry,kubernetes,cf-autoscaler,git,shared,extension}/src/ e2e/ && node --test 'tools/eslint-rules/tests/*.test.mjs' && node scripts/lint-e2e-data-test.mjs",
     "lint:docs": "node scripts/lint-docs.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
