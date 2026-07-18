@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
+import { isUnlimited } from './cf-quota.types';
+
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   if (activatedRoute.snapshot.params[id]) {
     return activatedRoute.snapshot.params[id];
@@ -75,8 +77,7 @@ export class UtilsService {
       return '';
     }
 
-    // Special case: CF quota APIs encode 'unlimited' as -1
-    if (mb === -1) {
+    if (isUnlimited(mb)) {
       return '∞';
     }
 
@@ -107,8 +108,7 @@ export class UtilsService {
       return '';
     }
 
-    // Special case: CF quota APIs encode 'unlimited' as -1
-    if (bytes === -1) {
+    if (isUnlimited(bytes)) {
       return '∞';
     }
 

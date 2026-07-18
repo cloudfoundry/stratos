@@ -1,5 +1,7 @@
 import { HttpParams, HttpRequest } from '@angular/common/http';
 
+import { CF_QUOTA_UNLIMITED } from '@stratosui/core';
+
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
 import { IQuotaDefinition } from '../cf-api.types';
@@ -61,7 +63,6 @@ export const DELETE_SPACE_QUOTA_DEFINITION_FAILED = '[QuotaDefinitions] Delete s
 const quotaDefinitionEntitySchema = cfEntityFactory(quotaDefinitionEntityType);
 const spaceQuotaEntitySchema = cfEntityFactory(spaceQuotaEntityType);
 
-const UNLIMITED = -1;
 // Legacy ngrx action — write path now goes through QuotaDataService.
 // V3-shape form values can be number | string (UnlimitedInputComponent
 // emits '' for unlimited); coerce to number for the V2 wire body kept
@@ -69,7 +70,7 @@ const UNLIMITED = -1;
 // cf-entity-catalog wiring.
 function toNumber(v: number | string | undefined): number {
   const n = Number(v);
-  return isNaN(n) || v === '' || v == null ? UNLIMITED : n;
+  return isNaN(n) || v === '' || v == null ? CF_QUOTA_UNLIMITED : n;
 }
 function orgSpaceQuotaFormValuesToApiObject(formValues: QuotaFormValues, isOrg = true, orgGuid?: string): IQuotaDefinition {
   const res: IQuotaDefinition = {
