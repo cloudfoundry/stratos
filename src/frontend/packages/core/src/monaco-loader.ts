@@ -1,11 +1,20 @@
 /**
  * Monaco Editor Loader
  *
- * Loads Monaco Editor globally using the AMD loader.
- * This replaces the ngx-monaco-editor loader with direct monaco-editor support.
+ * Imports Monaco as ESM through the Angular build: the editor arrives as
+ * hashed, lazy chunks like the rest of the app, and its language workers are
+ * bundled by the builder from `new Worker(new URL(...))` references —
+ * replacing the AMD loader and the copied vs/ asset tree (#5561).
+ *
+ * Consumers keep using the `monaco` global: the legacy surface predates the
+ * ESM import and every call site reads `window.monaco` after awaiting
+ * loadMonacoEditor().
  */
 
+import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
+
 let monacoLoad: Promise<void> | null = null;
+let monacoYaml: MonacoYaml | null = null;
 
 export function loadMonacoEditor(): Promise<void> {
   if (!monacoLoad) {
@@ -16,53 +25,57 @@ export function loadMonacoEditor(): Promise<void> {
   return monacoLoad;
 }
 
-function doLoadMonacoEditor(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    // Check if Monaco is already loaded
-    if ((window as any).monaco) {
-      resolve();
-      return;
-    }
+/**
+ * Replace the YAML language configuration (schemas, validation, hover).
+ * monaco-yaml v5 configures once and updates via a handle — the old
+ * per-call `yamlDefaults.setDiagnosticsOptions` API no longer exists.
+ */
+export async function configureYaml(options: MonacoYamlOptions): Promise<void> {
+  await loadMonacoEditor();
+  // Null when a pre-set window.monaco short-circuited the import path (the
+  // unit-test mock does this) — yaml configuration is a no-op there.
+  if (monacoYaml) {
+    await monacoYaml.update(options);
+  }
+}
 
-    // Configure Monaco paths
-    (window as any).MonacoEnvironment = {
-      getWorkerUrl: function (moduleId: string, label: string) {
-        if (label === 'json') {
-          return '/core/assets/monaco/vs/language/json/json.worker.js';
-        }
-        if (label === 'css' || label === 'scss' || label === 'less') {
-          return '/core/assets/monaco/vs/language/css/css.worker.js';
-        }
-        if (label === 'html' || label === 'handlebars' || label === 'razor') {
-          return '/core/assets/monaco/vs/language/html/html.worker.js';
-        }
-        if (label === 'typescript' || label === 'javascript') {
-          return '/core/assets/monaco/vs/language/typescript/ts.worker.js';
-        }
-        if (label === 'yaml') {
-          return '/core/assets/monaco/vs/language/yaml/yaml.worker.js';
-        }
-        return '/core/assets/monaco/vs/editor/editor.worker.js';
+async function doLoadMonacoEditor(): Promise<void> {
+  if ((window as any).monaco) {
+    return;
+  }
+
+  // The builder rewrites each relative `new Worker(new URL(...))` into a
+  // hashed lazy chunk of its own; bare package specifiers are not resolved
+  // here, hence the local wrapper modules in monaco-workers/ (same pattern
+  // as the upstream ESM integration guide, minus Vite's `?worker` sugar).
+  // Only the languages Stratos edits get a language worker (json, yaml);
+  // everything else falls back to the basic editor worker — add a wrapper
+  // in monaco-workers/ if an editor surface for a new language appears.
+  (self as any).MonacoEnvironment = {
+    getWorker(workerId: string, label: string): Worker {
+      switch (label) {
+        case 'json':
+          return new Worker(new URL('./monaco-workers/json.worker', import.meta.url), { type: 'module' });
+        case 'yaml':
+          return new Worker(new URL('./monaco-workers/yaml.worker', import.meta.url), { type: 'module' });
+        default:
+          return new Worker(new URL('./monaco-workers/editor.worker', import.meta.url), { type: 'module' });
       }
-    };
+    },
+  };
 
-    // Load Monaco via AMD loader
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = '/core/assets/monaco/vs/loader.js';
-    script.onload = () => {
-      const req = (window as any).require;
-      req.config({ paths: { vs: '/core/assets/monaco/vs' } });
+  // Explicit file specifier: monaco-editor publishes only a `module` field
+  // (no main/exports), which vitest's vite resolver rejects as a bare
+  // 'monaco-editor' import while esbuild accepts it — the concrete path
+  // resolves identically in both (typed by monaco-editor-esm.d.ts).
+  const [monaco, { configureMonacoYaml }] = await Promise.all([
+    import('monaco-editor/esm/vs/editor/editor.main.js'),
+    import('monaco-yaml'),
+  ]);
 
-      // Load Monaco editor
-      req(['vs/editor/editor.main'], () => {
-        resolve();
-      });
-    };
-    script.onerror = () => {
-      reject(new Error('Failed to load Monaco Editor'));
-    };
+  // Baseline YAML support (highlighting, indentation-aware completion);
+  // schema-driven validation is layered on per-editor via configureYaml().
+  monacoYaml = configureMonacoYaml(monaco, { hover: true, completion: true, validate: true });
 
-    document.head.appendChild(script);
-  });
+  (window as any).monaco = monaco;
 }

@@ -11,6 +11,7 @@ import { ConfirmationDialogConfig } from '../../../../../core/src/shared/compone
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
+import { configureYaml } from '../../../../../core/src/monaco-loader';
 import { StratosBrandingService } from '@stratosui/theme';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
@@ -298,13 +299,11 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       return;
     }
 
-    // Load the YAML Language support - require is available as it will have been loaded by the Monaco vs loader
-    const req = (window as any).require;
-    req(['vs/language/yaml/monaco.contribution'], () => {
-      // Set the model now that YAML support is loaded - this will update the editor correctly
-      this.updateModel();
-      this.monacoLoaded.set(true);
-    });
+    // YAML language support is registered by the ESM loader (monaco-yaml)
+    // before any editor exists — no AMD contribution load needed. Set the
+    // model directly; its uri matches the schema's fileMatch entry.
+    this.updateModel();
+    this.monacoLoaded.set(true);
 
     // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes
     this.themeSub = this.isDarkMode$.subscribe((isDark: boolean) => {
@@ -359,16 +358,18 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     return `https://stratos.app/schemas${this.schemaUrl}`;
   }
 
-  // Register the schema with the Monaco editor
-  // Reference: https://github.com/pengx17/monaco-yaml/blob/master/examples/umd/index.html#L69
+  // Register the schema with the Monaco editor (monaco-yaml v5 configures
+  // through a handle owned by the loader, not per-call yamlDefaults).
+  // Global registration, last writer wins — same semantics as the old
+  // per-call yamlDefaults surface.
   registerSchema(schema: any) {
-    const monaco = (window as any).monaco;
-    monaco.languages.yaml.yamlDefaults.setDiagnosticsOptions({
+    configureYaml({
       enableSchemaRequest: true,
       hover: true,
       completion: true,
       validate: true,
-      format: true,
+      // monaco-yaml v5 takes formatter options, not a boolean; {} = defaults.
+      format: {},
       schemas: [
         {
           uri: this.getSchemaUri(),
@@ -376,6 +377,10 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
           schema
         }
       ]
+    }).catch((err) => {
+      // The editor still works without schema hints; surface the loss
+      // instead of letting it vanish as an unhandled rejection.
+      console.error('Failed to register chart values schema', err);
     });
   }
 

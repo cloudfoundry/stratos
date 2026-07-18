@@ -118,25 +118,9 @@ if (typeof window !== 'undefined') {
     Uri: {
       parse: (uri: string) => ({ toString: () => uri }),
     },
-    languages: {
-      yaml: {
-        yamlDefaults: {
-          setDiagnosticsOptions: () => {},
-        },
-      },
-    },
   };
 
   (window as any).monaco = monacoMock;
-
-  // Mock the AMD require function used by Chart Values Editor
-  (window as any).require = (modules: string[], callback: () => void) => {
-    // Immediately call callback for YAML language support
-    if (modules.includes('vs/language/yaml/monaco.contribution')) {
-      setTimeout(callback, 0);
-    }
-  };
-  (window as any).require.config = () => {};
 }
 
 import '@angular/compiler';

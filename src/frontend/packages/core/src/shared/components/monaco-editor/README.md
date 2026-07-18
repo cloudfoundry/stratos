@@ -9,7 +9,7 @@ A standalone Angular component that provides Monaco Editor integration with full
 - ✅ TypeScript type safety with @types/monaco-editor
 - ✅ Automatic layout handling with ResizeObserver
 - ✅ Theme synchronization support
-- ✅ YAML language support (via @cfstratos/monaco-yaml)
+- ✅ YAML language support (via monaco-yaml)
 - ✅ 100% API compatible with ngx-monaco-editor
 
 ## Usage
@@ -95,24 +95,21 @@ export class YamlEditorComponent {
   onEditorInit(editor: any) {
     this.editor = editor;
 
-    // Load YAML language support
-    const req = (window as any).require;
-    req(['vs/language/yaml/monaco.contribution'], () => {
-      // Register YAML schema
-      const monaco = (window as any).monaco;
-      monaco.languages.yaml.yamlDefaults.setDiagnosticsOptions({
-        enableSchemaRequest: true,
-        hover: true,
-        completion: true,
-        validate: true,
-        format: true,
-        schemas: [{
-          uri: this.model.uri,
-          fileMatch: [this.model.uri],
-          schema: this.getSchema()
-        }]
-      });
-    });
+    // YAML language support (monaco-yaml) is registered by the ESM loader
+    // before any editor exists. Register a schema through the loader's
+    // configureYaml() — the model's uri must appear in fileMatch.
+    configureYaml({
+      enableSchemaRequest: true,
+      hover: true,
+      completion: true,
+      validate: true,
+      format: {},
+      schemas: [{
+        uri: this.model.uri,
+        fileMatch: [this.model.uri],
+        schema: this.getSchema()
+      }]
+    }).catch((err) => console.error('Schema registration failed', err));
   }
 
   getSchema() {
@@ -288,16 +285,14 @@ Monaco includes built-in support for:
 - And many more...
 
 ### YAML Support
-YAML support is provided via `@cfstratos/monaco-yaml`:
+YAML support is provided via `monaco-yaml`, registered once by the ESM
+loader (`monaco-loader.ts`) before any editor is created — nothing to load
+per editor. Schema-driven validation/completion is configured through the
+loader's `configureYaml()` helper (see the schema example above).
 
-```typescript
-onEditorInit(editor: any) {
-  const req = (window as any).require;
-  req(['vs/language/yaml/monaco.contribution'], () => {
-    console.log('YAML support loaded');
-  });
-}
-```
+Language workers ship as hashed lazy chunks for the languages Stratos
+edits (json, yaml); other languages fall back to the basic editor worker —
+add a wrapper in `monaco-workers/` if a new language surface appears.
 
 ### Custom Languages
 Register custom languages using Monaco API:
