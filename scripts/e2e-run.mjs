@@ -8,7 +8,7 @@
 // Exits nonzero if any Playwright invocation fails.
 
 import { execFileSync, spawnSync } from 'node:child_process'
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -93,6 +93,7 @@ for (const run of runs) {
   const argv = ['playwright', 'test', ...run.args]
   console.log(`\n>>> ${run.label}\n    npx ${argv.join(' ')}`)
   if (opt.dryRun) continue
+  rmSync('e2e-reports/results.json', { force: true }) // a crashed run must not inherit the previous run's report
   const r = spawnSync('npx', argv, { stdio: 'inherit' })
   if (r.status !== 0) exitCode = 1
   try {
