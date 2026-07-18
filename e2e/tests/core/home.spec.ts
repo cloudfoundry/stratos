@@ -8,7 +8,7 @@ import { HomePage } from '../../pages/home.page';
  * Tests the home/dashboard page functionality
  */
 test.describe('Home', () => {
-  test('should reach home page', async ({ connectedEndpointsUserPage }) => {
+  test('should reach home page', { tag: '@smoke' }, async ({ connectedEndpointsUserPage }) => {
     // Page is already connected with endpoints as user
     const homePage = new HomePage(connectedEndpointsUserPage.page);
 

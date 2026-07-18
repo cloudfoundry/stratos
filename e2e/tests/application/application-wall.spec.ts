@@ -19,7 +19,7 @@ const customOrgSpacesLabel = createCustomName('app-wall-tests');
 test.describe('Application Wall Tests', () => {
 
   test.describe('Basic Wall View', () => {
-    test('should display applications wall', async ({ connectedEndpointsUserPage }) => {
+    test('should display applications wall', { tag: '@smoke' }, async ({ connectedEndpointsUserPage }) => {
       const appsPage = new ApplicationsPage(connectedEndpointsUserPage);
 
       // Navigate to applications

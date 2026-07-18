@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 test.describe('Metrics Registration', () => {
-  test('should check metrics availability', async ({ connectedEndpointsAdminPage }) => {
+  test('should check metrics availability', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
     const { page } = connectedEndpointsAdminPage;
     await page.goto('/');
     const url = page.url();
