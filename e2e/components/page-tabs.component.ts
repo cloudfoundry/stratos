@@ -10,9 +10,10 @@ import { Page, Locator } from '@playwright/test';
  * matching invisibly through the attribute.
  */
 export function pageTab(page: Page, label: string): Locator {
+  const exact = new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
   return page
     .locator(`app-page-side-nav [data-test="page-tab-${label}"]`)
-    .filter({ has: page.locator('span', { hasText: new RegExp(`^${label}$`) }) });
+    .filter({ has: page.locator('span', { hasText: exact }) });
 }
 
 /**

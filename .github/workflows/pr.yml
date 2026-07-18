@@ -165,6 +165,9 @@ jobs:
       - name: Report covering specs
         env:
           BASE: ${{ github.base_ref }}
+          # Lets the impact script harvest tokens of components DELETED in
+          # the PR from the base ref, so their stranded specs still surface.
+          IMPACT_BASE: origin/${{ github.base_ref }}
         run: |
           # pipefail: a failing git diff must fail the job, not feed node an
           # empty stdin that reads as a green "no frontend changes".

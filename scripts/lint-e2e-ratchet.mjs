@@ -35,13 +35,19 @@ const eslint = new ESLint({
 const results = existing.length ? await eslint.lintFiles(existing) : []
 for (const r of results) {
   const rel = r.filePath.replace(process.cwd() + '/', '')
-  const guardHits = r.messages.filter((m) => GUARD_RULES.includes(m.ruleId)).length
+  // Suppressed messages count as violations: an inline eslint-disable does
+  // not make a file clean, and treating it as clean would force delisting a
+  // file whose guards then never fire again.
+  const allMessages = [...r.messages, ...(r.suppressedMessages ?? [])]
+  const guardHits = allMessages.filter((m) => GUARD_RULES.includes(m.ruleId)).length
   if (guardHits > 0) continue
-  // A parse error or eslint-ignore produces ruleId-null messages and zero
-  // guard hits — that is "unverifiable", not "clean"; saying clean would
-  // direct the author to delist a file the guards never actually checked.
-  if (r.messages.some((m) => m.ruleId === null)) {
-    problems.push(`${rel}  could not be checked (parse error or ignored): ${r.messages[0].message.split('\n')[0]}`)
+  // A parse error or an eslint-ignored file is "unverifiable", not "clean";
+  // saying clean would direct the author to delist a file the guards never
+  // actually checked. (Other ruleId-null messages — e.g. unused-disable-
+  // directive warnings — do not block a genuine clean verdict.)
+  const blocker = r.messages.find((m) => m.fatal || /File ignored/i.test(m.message))
+  if (blocker) {
+    problems.push(`${rel}  could not be checked (parse error or ignored): ${blocker.message.split('\n')[0]}`)
   } else {
     problems.push(`${rel}  is clean`)
   }
