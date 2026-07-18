@@ -143,6 +143,8 @@ export interface SignalListRowAction<T> {
   readonly icon?: string;
   readonly disabled?: boolean;
   readonly danger?: boolean;
+  /** Optional `data-test` attribute for E2E selectors. */
+  readonly dataTest?: string;
   readonly invoke: (row: T) => void | Promise<void>;
 }
 
