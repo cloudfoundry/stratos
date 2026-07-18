@@ -2,7 +2,9 @@
 // mat-* element, a .mat- class, or the retired app-list component matches
 // nothing (or the wrong thing) and keeps a spec green while asserting drift.
 // Matches only string content, so commented-out code is naturally ignored.
-const DEAD_TOKEN = /(^|[^\w-])(mat-[a-z][\w-]*|app-list)(?![\w-])|\.mat-[a-z]/;
+// The '.' of a class selector satisfies the [^\w-] left boundary, so .mat-*
+// classes are covered by the same alternative as bare mat-* tags.
+const DEAD_TOKEN = /(^|[^\w-])(mat-[a-z][\w-]*|app-list)(?![\w-])/;
 
 export default {
   meta: {
@@ -22,7 +24,7 @@ export default {
         context.report({
           node,
           messageId: "deadSelector",
-          data: { token: (match[2] ? match[2] : match[0]).trim() },
+          data: { token: match[2] },
         });
       }
     };

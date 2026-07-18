@@ -51,6 +51,14 @@ ruleTester.run("no-unused-snackbar-service", rule, {
           constructor(snackBar: TailwindSnackBarService) { snackBar.show('x'); }
         }`,
     },
+    // parameter property used by its bare name inside the constructor body —
+    // legal TS, must not be a false positive
+    {
+      code: `
+        class A {
+          constructor(private snackBar: TailwindSnackBarService) { snackBar.show('saved'); }
+        }`,
+    },
     // optional chaining use
     {
       code: `
@@ -103,6 +111,16 @@ ruleTester.run("no-unused-snackbar-service", rule, {
           private snackBar = inject(TailwindSnackBarService);
           private snackBarConfig = { x: 1 };
           go() { return this.snackBarConfig; }
+        }`,
+      errors: [{ messageId: "unusedInjection" }],
+    },
+    // an unrelated identifier with the same name elsewhere in the class must
+    // not mask an unused injection (scope-aware resolution)
+    {
+      code: `
+        class A {
+          constructor(snackBar: TailwindSnackBarService) {}
+          other(snackBar: string) { return snackBar.length; }
         }`,
       errors: [{ messageId: "unusedInjection" }],
     },

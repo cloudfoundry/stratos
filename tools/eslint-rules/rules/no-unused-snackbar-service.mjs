@@ -4,9 +4,15 @@ const SERVICE = "TailwindSnackBarService";
 
 // Flags a class that injects TailwindSnackBarService (inject() initializer or
 // constructor parameter) but never references the injected value again. Any
-// reference counts as use — a method call, optional chaining, or passing the
+// read counts as use — a method call, optional chaining, or passing the
 // service to a helper — so components using error()/showWithLink() are not
 // false positives the way a show()-only check would be.
+//
+// Constructor parameters (including parameter properties, which are legally
+// readable by bare name inside the constructor body) are resolved through
+// ESLint's scope analysis, so an unrelated identifier with the same name
+// elsewhere in the class neither masks a dead injection nor causes a false
+// positive.
 export default {
   meta: {
     type: "problem",
@@ -42,23 +48,25 @@ export default {
     };
 
     function checkClass(node) {
-      // kind 'this': reachable as this.<name>; kind 'local': a plain
-      // constructor parameter, reachable as a bare identifier.
+      // { name, reportNode, needThis, variable }
+      // needThis: reachable as this.<name> (property or parameter property).
+      // variable: the scope Variable for constructor params — its read
+      // references are bare-name uses.
       const injections = [];
 
       for (const el of node.body.body) {
         if (el.type === "PropertyDefinition" && isInjectCall(el.value)) {
           const name = keyName(el.key);
           if (name) {
-            injections.push({ name, kind: "this", reportNode: el.key, declNode: el.key });
+            injections.push({ name, reportNode: el.key, needThis: true, variable: null });
           }
         }
         if (el.type === "MethodDefinition" && el.kind === "constructor") {
+          const ctorVariables = context.sourceCode.getDeclaredVariables(el.value);
           for (const rawParam of el.value.params) {
             let param = rawParam;
-            let isProperty = false;
-            if (param.type === "TSParameterProperty") {
-              isProperty = true;
+            const isProperty = param.type === "TSParameterProperty";
+            if (isProperty) {
               param = param.parameter;
             }
             if (param.type === "AssignmentPattern") {
@@ -67,10 +75,9 @@ export default {
             if (param.type === "Identifier" && isServiceType(param.typeAnnotation?.typeAnnotation)) {
               injections.push({
                 name: param.name,
-                kind: isProperty ? "this" : "local",
                 reportNode: param,
-                declNode: param,
-                used: false,
+                needThis: isProperty,
+                variable: ctorVariables.find((v) => v.name === param.name) ?? null,
               });
             }
           }
@@ -81,6 +88,7 @@ export default {
         return;
       }
 
+      const thisUsed = new Set();
       walk(node.body, context.sourceCode.visitorKeys, (current) => {
         if (
           current.type === "MemberExpression" &&
@@ -88,24 +96,14 @@ export default {
           current.object.type === "ThisExpression" &&
           current.property.type === "Identifier"
         ) {
-          for (const inj of injections) {
-            if (inj.kind === "this" && inj.name === current.property.name) {
-              inj.used = true;
-            }
-          }
+          thisUsed.add(current.property.name);
         }
-        if (current.type === "Identifier") {
-          for (const inj of injections) {
-            if (inj.kind === "local" && inj.name === current.name && current !== inj.declNode) {
-              inj.used = true;
-            }
-          }
-        }
-        return undefined;
       });
 
       for (const inj of injections) {
-        if (!inj.used) {
+        const usedViaThis = inj.needThis && thisUsed.has(inj.name);
+        const usedByName = inj.variable?.references.some((ref) => ref.isRead()) ?? false;
+        if (!usedViaThis && !usedByName) {
           context.report({
             node: inj.reportNode,
             messageId: "unusedInjection",

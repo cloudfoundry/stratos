@@ -71,13 +71,10 @@ export default {
             (isUndefinedOperand(current.left) || isUndefinedOperand(current.right))
           ) {
             context.report({ node: current, messageId: "undefinedComparison" });
-            return false;
           }
           if (isSwallowingCatch(current)) {
             context.report({ node: current.callee.property, messageId: "swallowedCatch" });
-            return false;
           }
-          return undefined;
         });
       },
     };

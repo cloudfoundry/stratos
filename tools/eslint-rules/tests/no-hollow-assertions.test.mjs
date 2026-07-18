@@ -51,5 +51,10 @@ ruleTester.run("no-hollow-assertions", rule, {
       code: `expect(await el.count().catch(() => 0)).toBeGreaterThan(0);`,
       errors: [{ messageId: "swallowedCatch" }],
     },
+    // two hollow patterns in one expect argument both report in one pass
+    {
+      code: `expect(x !== undefined && (await p.catch(() => false))).toBeTruthy();`,
+      errors: [{ messageId: "undefinedComparison" }, { messageId: "swallowedCatch" }],
+    },
   ],
 });
