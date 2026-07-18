@@ -19,14 +19,14 @@ import { files, HOOK_DEFS, DATA_TEST_CONFIG } from './lib/e2e-hooks.mjs'
 
 process.chdir(fileURLToPath(new URL('..', import.meta.url)))
 
-if (process.argv.length <= 2 && process.stdin.isTTY) {
-  console.error('Usage: git diff --name-only develop...HEAD | node scripts/e2e-impact.mjs')
-  console.error('   or: node scripts/e2e-impact.mjs <changed-file> [...]')
+const FILES_ONLY = process.argv.includes('--files')
+const argFiles = process.argv.slice(2).filter((a) => a !== '--files')
+if (!argFiles.length && process.stdin.isTTY) {
+  console.error('Usage: git diff --name-only develop...HEAD | node scripts/e2e-impact.mjs [--files]')
+  console.error('   or: node scripts/e2e-impact.mjs [--files] <changed-file> [...]')
   process.exit(1)
 }
-const input = process.argv.length > 2
-  ? process.argv.slice(2)
-  : readFileSync(0, 'utf8').split('\n')
+const input = argFiles.length ? argFiles : readFileSync(0, 'utf8').split('\n')
 const changed = input.map((l) => l.trim()).filter(Boolean)
 
 const IMPACT_BASE = process.env.IMPACT_BASE ?? 'develop'
@@ -75,7 +75,7 @@ const changedStems = [...new Set(
 )]
 
 if (!changedStems.length) {
-  console.log('e2e impact: no frontend component changes.')
+  if (!FILES_ONLY) console.log('e2e impact: no frontend component changes.')
   process.exit(0)
 }
 
@@ -190,7 +190,10 @@ for (const stem of changedStems) {
   if (specs.size) report.push({ comp: stem, specs: [...specs].sort() })
 }
 
-if (!report.length) {
+if (FILES_ONLY) {
+  const all = [...new Set(report.flatMap((r) => r.specs))].sort()
+  if (all.length) console.log(all.join('\n'))
+} else if (!report.length) {
   console.log('e2e impact: changed components have no e2e references — no scoped specs to suggest.')
 } else {
   console.log('e2e impact — specs covering changed components (advisory):')
