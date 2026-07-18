@@ -322,6 +322,7 @@
                                 <button
                                   type="button"
                                   [disabled]="act.disabled"
+                                  [attr.data-test]="act.dataTest ?? ('row-action-' + act.label)"
                                   (click)="invokeAction(act, row, $event)"
                                   class="w-full text-left px-3 py-1.5 text-sm hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                                   [class.text-danger]="act.danger">
@@ -540,6 +541,7 @@
                             @for (act of ac.actions!(row); track act.label) {
                               <button
                                 type="button"
+                                [attr.data-test]="act.dataTest ?? ('row-action-' + act.label)"
                                 [disabled]="act.disabled"
                                 (click)="invokeAction(act, row, $event)"
                                 class="w-full text-left px-3 py-1.5 text-sm hover:bg-content-secondary disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"

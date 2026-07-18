@@ -48,6 +48,29 @@ describe('SignalListComponent', () => {
     expect(rows[1].textContent).toContain('two');
   });
 
+  it('row-action menu items expose data-test hooks (label default, dataTest override)', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        {
+          header: '', kind: 'actions', render: () => '',
+          actions: () => [
+            { label: 'Delete', invoke: () => {} },
+            { label: 'Rename', dataTest: 'rename-row', invoke: () => {} },
+          ],
+        },
+      ],
+    };
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('[data-test="row-actions"]').click();
+    fixture.detectChanges();
+    const menu = fixture.nativeElement.querySelector('[data-test="row-actions-menu"]');
+    expect(menu.querySelector('[data-test="row-action-Delete"]')).not.toBeNull();
+    expect(menu.querySelector('[data-test="rename-row"]')).not.toBeNull();
+  });
+
   it('swaps the refresh button into the refreshing-state indicator when items present and isAnyLoading is true', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = { ...fixture.componentInstance.config, isAnyLoading: signal(true).asReadonly() };
