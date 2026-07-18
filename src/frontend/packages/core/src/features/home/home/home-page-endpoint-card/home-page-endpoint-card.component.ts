@@ -14,7 +14,7 @@ import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-st
 import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { TailwindDialogService } from '../../../../shared/services/tailwind-dialog.service';
-import { ConnectEndpointDialogComponent } from '../../../endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from '../../../endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { isEndpointConnected } from '../../../endpoints/endpoint-helpers';
 import { FavoritesSidePanelComponent } from '../favorites-side-panel/favorites-side-panel.component';
 import { FavoritesMetaCardComponent } from '../favorites-meta-card/favorites-meta-card.component';
@@ -188,10 +188,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
         subType: this.endpoint.sub_type,
         ssoAllowed: this.endpoint.sso_allowed,
       },
-      disableClose: true,
-      width: '550px',
-      maxWidth: '550px',
-      panelClass: ['overflow-visible', 'p-6'],
+      ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
     });
   }
 

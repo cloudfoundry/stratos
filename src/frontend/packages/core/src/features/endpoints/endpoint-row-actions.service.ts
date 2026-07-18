@@ -9,7 +9,7 @@ import { SignalListRowAction } from '../../shared/components/signal-list/signal-
 import { EndpointAuthStateService } from '../../shared/services/endpoint-auth-state.service';
 import { TailwindDialogService } from '../../shared/services/tailwind-dialog.service';
 import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar.service';
-import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { EndpointsSignalConfigService } from './endpoints-page/endpoints-signal-config.service';
 
 /**
@@ -125,10 +125,7 @@ export class EndpointRowActionsService {
         // Prefills the Reconnect dialog with the live connection's user
         username: ep.user?.name,
       },
-      disableClose: true,
-      width: '550px',
-      maxWidth: '550px',
-      panelClass: ['overflow-visible', 'p-6'],
+      ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
     });
   }
 

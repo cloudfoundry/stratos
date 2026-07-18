@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import {
+  CONNECT_ENDPOINT_DIALOG_OPTIONS,
   ConnectEndpointConfig,
   ConnectEndpointDialogComponent,
   EndpointAuthStateService,
@@ -178,10 +179,7 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
                   // Same dialog options the endpoints list uses.
                   dialog.open(ConnectEndpointDialogComponent, {
                     data,
-                    disableClose: true,
-                    width: '550px',
-                    maxWidth: '550px',
-                    panelClass: ['overflow-visible', 'p-6'],
+                    ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
                   });
                 });
               }

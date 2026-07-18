@@ -1,11 +1,11 @@
-<div class="connection-dialog__loading-wrapper">
-  <app-progress-bar class="connection-dialog__loading"
-    [color]="(connectService.connectingError$ | async) && (connectService.isBusy$ | async) === false ? 'warn' : 'primary'"
-    [mode]="(connectService.isBusy$ | async) ? 'indeterminate' : 'solid'">
-  </app-progress-bar>
-</div>
+@if (connectService.isBusy$ | async) {
+  <div class="connection-dialog__loading-wrapper">
+    <app-progress-bar class="connection-dialog__loading" color="primary" mode="indeterminate">
+    </app-progress-bar>
+  </div>
+}
 <div class="connection-dialog">
-  <div class="connection-dialog__title">
+  <div class="connection-dialog__title" data-dialog-drag-handle>
     <h2 class="dialog-title">
       Connect to {{ data.name }}
     </h2>
@@ -20,8 +20,14 @@
   <app-dialog-error message="{{connectService.connectingError$ | async}}"
     [show]="!!(connectService.connectingError$ | async) && (connectService.isBusy$ | async) === false">
   </app-dialog-error>
+  @if (!!(connectService.connectingError$ | async) && (connectService.isBusy$ | async) === false && stillConnected) {
+    <div class="flex items-center gap-2 text-xs text-content-muted">
+      <span class="material-icons text-base">info</span>
+      <span>Your existing connection is unaffected and remains active.</span>
+    </div>
+  }
   <div class="dialog-actions connection-dialog__actions">
-    <button (click)="dialogRef.close()" class="btn btn-warn">Cancel</button>
+    <button (click)="dialogRef.close()" class="btn btn-secondary">Cancel</button>
     <button (click)="connect()" [disabled]="(connectService.isBusy$ | async) || !valid" class="btn btn-primary">Connect</button>
   </div>
 </div>

@@ -38,6 +38,10 @@ export interface TailwindDialogConfig<D = any> {
   /** Let the user move the panel by dragging an element marked with
    *  `data-dialog-drag-handle` (e.g. the dialog header). */
   draggable?: boolean;
+  /** Keep the dim backdrop visually but let pointer events pass through it,
+   *  so the page behind stays visible AND interactive while the dialog is
+   *  open. The panel itself remains interactive. */
+  modeless?: boolean;
   position?: DialogPosition;
   customPosition?: DialogPositionConfig;
   ariaLabel?: string;
@@ -238,6 +242,12 @@ export class TailwindDialogService {
     overlay.className = backdropClasses.join(' ');
     overlay.style.zIndex = zIndex.toString();
 
+    // Modeless: the dim stays, but clicks fall through to the page beneath.
+    // The panel re-enables pointer events for itself below.
+    if (config?.modeless) {
+      overlay.style.pointerEvents = 'none';
+    }
+
     // Start with transparent backdrop for fade-in animation
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
 
@@ -284,7 +294,10 @@ export class TailwindDialogService {
 
     // Accessibility attributes
     dialog.setAttribute('role', 'dialog');
-    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-modal', config?.modeless ? 'false' : 'true');
+    if (config?.modeless) {
+      dialog.style.pointerEvents = 'auto';
+    }
 
     if (config?.id) {
       dialog.setAttribute('id', config.id);

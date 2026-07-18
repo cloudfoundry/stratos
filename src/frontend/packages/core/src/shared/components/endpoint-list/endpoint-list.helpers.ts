@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { TailwindDialogService } from '../../services/tailwind-dialog.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
-import { ConnectEndpointDialogComponent } from '../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from '../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { SessionService } from '../../../shared/services/session.service';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
@@ -130,10 +130,7 @@ export class EndpointListHelper {
               subType: item.sub_type,
               ssoAllowed: item.sso_allowed
             },
-            disableClose: true,
-            width: '550px',
-            maxWidth: '550px',
-            panelClass: ['overflow-visible', 'p-6']
+            ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
           });
         },
         label: 'Connect',

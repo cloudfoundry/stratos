@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { EndpointsDataService } from '@stratosui/store';
 
 import { ConnectEndpointConfig } from '../../features/endpoints/connect.service';
-import { ConnectEndpointDialogComponent } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { TailwindDialogService } from './tailwind-dialog.service';
 import { TailwindSnackBarService } from './tailwind-snackbar.service';
 
@@ -49,10 +49,7 @@ export class EndpointReauthReportService {
         };
         this.dialog.open(ConnectEndpointDialogComponent, {
           data,
-          disableClose: true,
-          width: '550px',
-          maxWidth: '550px',
-          panelClass: ['overflow-visible', 'p-6'],
+          ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
         });
       });
     } else {
