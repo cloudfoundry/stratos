@@ -166,6 +166,9 @@ jobs:
         env:
           BASE: ${{ github.base_ref }}
         run: |
+          # pipefail: a failing git diff must fail the job, not feed node an
+          # empty stdin that reads as a green "no frontend changes".
+          set -o pipefail
           {
             echo '```'
             git diff --name-only "origin/${BASE}...HEAD" | node scripts/e2e-impact.mjs

@@ -12,24 +12,16 @@
 // skipped — their selectors are rewritten wholesale when they are modernised.
 // Dynamic values (template interpolation) cannot be checked and are skipped.
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { E2E_LEGACY_FILES } from '../tools/eslint-rules/e2e-legacy-files.mjs'
+import { files, contractSources, HOOK_DEFS, DATA_TEST_CONFIG } from './lib/e2e-hooks.mjs'
 
 // All paths are repo-root-relative with '/' separators, on every platform:
 // built that way below, matching the legacy list's entries.
 process.chdir(fileURLToPath(new URL('..', import.meta.url)))
 
 const legacy = new Set(E2E_LEGACY_FILES)
-
-function files(dir, ext) {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.name === 'node_modules') return []
-    const p = `${dir}/${entry.name}`
-    if (entry.isDirectory()) return files(p, ext)
-    return ext.some((e) => entry.name.endsWith(e)) ? [p] : []
-  })
-}
 
 const NAMESPACES = {
   'data-test': {
@@ -42,16 +34,6 @@ const NAMESPACES = {
   },
 }
 
-// Definitions components provide: static attributes, plus every quoted
-// string fragment inside a dynamic [attr.data-test] binding ('refresh' and
-// 'refresh-loading' out of a ternary, prefixes like 'header-action-').
-// A data-testid ref must not match a data-test definition, so the static
-// data-test pattern excludes the 'id'-suffixed attribute via (?!id).
-const DEFS = {
-  'data-test': [/(?<!\[attr\.)data-test(?!id)=["']([^"']+)/g, /\[attr\.data-test\]="([^"]*)"/g],
-  'data-testid': [/(?<!\[attr\.)data-testid=["']([^"']+)/g, /\[attr\.data-testid\]="([^"]*)"/g],
-}
-
 // Suffix vocabulary for prefix-style bindings ('header-action-' + act.label):
 // every label/textLabel string literal in app code or templates, plus
 // explicit dataTest config values. A static e2e ref under a live prefix must
@@ -60,11 +42,16 @@ const SUFFIX_SOURCES = [
   /\b(?:label|textLabel):\s*['"]([^'"]+)['"]/g,
   /\b(?:label|textLabel)=["']([^"']+)["']/g,
 ]
-const suffixes = new Set()
+// Escape hatch for labels the harvest cannot see (computed at runtime —
+// variable, i18n lookup, function result). Add the rendered label here when
+// a correct e2e ref fails the suffix check; keep entries commented with the
+// component that renders them.
+const COMPUTED_LABEL_ALLOWLIST = new Set([])
+const suffixes = new Set(COMPUTED_LABEL_ALLOWLIST)
 
-for (const f of files('src/frontend', ['.html', '.ts'])) {
+for (const f of contractSources('src/frontend')) {
   const text = readFileSync(f, 'utf8')
-  for (const [ns, [staticDef, dynamicDef]] of Object.entries(DEFS)) {
+  for (const [ns, [staticDef, dynamicDef]] of Object.entries(HOOK_DEFS)) {
     for (const m of text.matchAll(staticDef)) NAMESPACES[ns].defined.add(m[1])
     for (const m of text.matchAll(dynamicDef)) {
       for (const s of m[1].matchAll(/'([^']+)'/g)) NAMESPACES[ns].defined.add(s[1])
@@ -74,7 +61,7 @@ for (const f of files('src/frontend', ['.html', '.ts'])) {
     for (const m of text.matchAll(pattern)) suffixes.add(m[1])
   }
   // dataTest config values (SignalListRowAction etc.) are full definitions.
-  for (const m of text.matchAll(/\bdataTest:\s*['"]([^'"]+)['"]/g)) NAMESPACES['data-test'].defined.add(m[1])
+  for (const m of text.matchAll(DATA_TEST_CONFIG)) NAMESPACES['data-test'].defined.add(m[1])
 }
 
 // 'header-action-' + label style bindings define a prefix, not a value.
@@ -94,14 +81,19 @@ for (const f of files('e2e', ['.ts'])) {
       for (const m of text.matchAll(pattern)) {
         const value = m[1]
         if (value.includes('$') || value.includes('{')) continue // dynamic
-        if (value.includes('<')) continue // doc-comment placeholder, e.g. page-tab-<label>
         if (ns.defined.has(value)) continue
         const line = () => text.slice(0, m.index).split('\n').length
-        const prefix = ns.prefixes.filter((p) => value.startsWith(p)).sort((a, b) => b.length - a.length)[0]
-        if (!prefix) {
+        // A value is valid under ANY live prefix whose remainder is a known
+        // label — don't privilege the longest match, or a nested prefix
+        // ('tab-' vs 'tab-action-') could shadow a valid shorter-prefix ref.
+        const prefixes = ns.prefixes.filter((p) => value.startsWith(p))
+        if (!prefixes.length) {
           problems.push(`${f}:${line()}  ${nsName} "${value}" is not defined in any component template`)
-        } else if (!suffixes.has(value.slice(prefix.length))) {
-          problems.push(`${f}:${line()}  ${nsName} "${value}" matches prefix "${prefix}" but "${value.slice(prefix.length)}" is not a label defined anywhere in src`)
+        } else if (!prefixes.some((p) => suffixes.has(value.slice(p.length)))) {
+          problems.push(
+            `${f}:${line()}  ${nsName} "${value}" matches prefix(es) ${prefixes.map((p) => `"${p}"`).join(', ')} but the remainder is not a label defined in src` +
+            ' (computed label? add it to COMPUTED_LABEL_ALLOWLIST in scripts/lint-e2e-data-test.mjs)',
+          )
         }
       }
     }
