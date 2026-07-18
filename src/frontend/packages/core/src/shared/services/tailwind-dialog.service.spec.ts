@@ -476,6 +476,39 @@ describe('TailwindDialogService', () => {
     });
   });
 
+  describe('Modeless', () => {
+    it('should let pointer events pass through the backdrop but not the panel when modeless', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDialogComponent, { modeless: true });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const overlay = document.querySelector('.fixed.inset-0') as HTMLElement;
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      expect(overlay.style.pointerEvents).toBe('none');
+      expect(panel.style.pointerEvents).toBe('auto');
+      expect(panel.getAttribute('aria-modal')).toBe('false');
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    it('should keep a blocking backdrop and aria-modal by default', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDialogComponent);
+      await vi.advanceTimersByTimeAsync(0);
+
+      const overlay = document.querySelector('.fixed.inset-0') as HTMLElement;
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      expect(overlay.style.pointerEvents).toBe('');
+      expect(panel.getAttribute('aria-modal')).toBe('true');
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+  });
+
   describe('Data Injection', () => {
     it('should inject data into dialog component', async () => {
 
