@@ -20,7 +20,7 @@ test.describe('Application Wall Tests', () => {
 
   test.describe('Basic Wall View', () => {
     test('should display applications wall', { tag: '@smoke' }, async ({ connectedEndpointsUserPage }) => {
-      const appsPage = new ApplicationsPage(connectedEndpointsUserPage);
+      const appsPage = new ApplicationsPage(connectedEndpointsUserPage.page);
 
       // Navigate to applications
       await appsPage.navigateTo();
@@ -31,7 +31,7 @@ test.describe('Application Wall Tests', () => {
     });
 
     test('should show list component', async ({ connectedEndpointsUserPage }) => {
-      const appsPage = new ApplicationsPage(connectedEndpointsUserPage);
+      const appsPage = new ApplicationsPage(connectedEndpointsUserPage.page);
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
@@ -42,7 +42,7 @@ test.describe('Application Wall Tests', () => {
 
   test.describe('List Operations', () => {
     test('should switch between card and table view', async ({ connectedEndpointsUserPage }) => {
-      const appsPage = new ApplicationsPage(connectedEndpointsUserPage);
+      const appsPage = new ApplicationsPage(connectedEndpointsUserPage.page);
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
@@ -60,7 +60,7 @@ test.describe('Application Wall Tests', () => {
     });
 
     test('should filter applications by name', async ({ connectedEndpointsUserPage }) => {
-      const appsPage = new ApplicationsPage(connectedEndpointsUserPage);
+      const appsPage = new ApplicationsPage(connectedEndpointsUserPage.page);
       await appsPage.navigateTo();
       await appsPage.waitForPage();
 
