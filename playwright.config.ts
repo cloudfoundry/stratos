@@ -159,11 +159,14 @@ export default defineConfig({
         // registers a duplicate endpoint into it (stale duplicates then fail
         // every list page with "Request failed"). A fresh dedicated file per
         // run keeps e2e deterministic and leaves the dev database alone.
-        command: `cd src/jetstream && mkdir -p ../../dist/e2e-db && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 SQLITE_DB_DIR=../../dist/e2e-db SQLITE_KEEP_DB=false ../../dist/bin/jetstream`,
+        command: `cd src/jetstream && mkdir -p ../../dist/e2e-db && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SQLITE_DB_DIR=../../dist/e2e-db SQLITE_KEEP_DB=false ../../dist/bin/jetstream`,
         url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
         reuseExistingServer: true,
         ignoreHTTPSErrors: true,
         timeout: 30000,
+        env: {
+          SESSION_STORE_EXPIRY: '360',
+        },
       },
       {
         command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
