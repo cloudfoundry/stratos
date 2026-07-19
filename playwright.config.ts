@@ -102,6 +102,17 @@ export default defineConfig({
       name: 'setup',
       testDir: './e2e',
       testMatch: /auth\.setup\.ts/,
+      // Not fully parallel: 'authenticate as admin' and 'authenticate as
+      // user' both call registerDefaultCloudFoundry(), whose idempotence
+      // check is check-then-act (GET-then-POST, see
+      // endpoint-management.helper.ts) — on a cold DB, two workers running
+      // this project concurrently can both observe "not registered" and
+      // both POST, duplicating the CF endpoint registration and breaking
+      // every list page with "Request failed". Deliberately NOT
+      // `mode: 'serial'`: serial would abort the user-setup test entirely
+      // if admin-setup fails, whereas non-parallel here just forces the
+      // two tests onto one worker so they run one at a time, in file order.
+      fullyParallel: false,
       use: { storageState: undefined },
     },
     {
