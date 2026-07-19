@@ -18,6 +18,12 @@
 // font-medium rendered as font-normal, font-semibold as font-bold.
 body {
   font-family: 'IBM Plex Sans', sans-serif;
+  // Plex's stylistic alternates: dotted zero, single-storey a, simple g.
+  // The dotted zero disambiguates 0 from O without colliding with ø the
+  // way a slashed zero (the `zero` feature) would for Danish/Norwegian
+  // text. Inherits everywhere the family reaches; requires the upstream
+  // font files — Google-pipeline subsets strip the salt feature.
+  font-feature-settings: 'salt' 1;
 }
 
 // Angular 20 breaking change: [hidden] attribute support removed
