@@ -10,6 +10,8 @@ export interface TestApp {
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
+  /** GUIDs of routes created via createAndMapRoute — app delete does not cascade to routes. */
+  routeGuids: string[];
 }
 
 /**
@@ -60,7 +62,8 @@ export class ApplicationTestHelper {
       app,
       cfGuid: this.cfGuid,
       orgGuid: this.defaultOrgGuid,
-      spaceGuid: this.defaultSpaceGuid
+      spaceGuid: this.defaultSpaceGuid,
+      routeGuids: []
     };
   }
 
@@ -140,6 +143,9 @@ export class ApplicationTestHelper {
     // Map route to app
     await this.cfApi.mapRoute(testApp.app.guid, route.guid);
 
+    // Track for cleanupTestApp — app delete does not cascade to routes.
+    testApp.routeGuids.push(route.guid);
+
     return route.guid;
   }
 
@@ -169,14 +175,26 @@ export class ApplicationTestHelper {
   }
 
   /**
-   * Clean up test application and associated resources
+   * Clean up test application and associated resources.
+   * Routes are deleted before the app: CF app delete does not cascade to
+   * routes, so an unmapped route left behind is invisible debris.
    */
   async cleanupTestApp(testApp: TestApp): Promise<void> {
+    for (const routeGuid of testApp.routeGuids) {
+      try {
+        await this.cfApi.deleteRoute(routeGuid);
+      } catch (error) {
+        // Cleanup is best-effort — continue with the rest, but don't swallow
+        // the failure silently.
+        console.warn(`Failed to cleanup route ${routeGuid} (app ${testApp.app.name}):`, error);
+      }
+    }
+
     try {
       await this.cfApi.deleteApp(testApp.app.guid);
     } catch (error) {
-      // Ignore cleanup errors - app may already be deleted
-      console.warn(`Failed to cleanup app ${testApp.app.guid}:`, error);
+      // Cleanup is best-effort — app may already be deleted.
+      console.warn(`Failed to cleanup app ${testApp.app.name} (${testApp.app.guid}):`, error);
     }
   }
 
