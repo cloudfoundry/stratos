@@ -136,11 +136,11 @@ this group leaves that shared state in a different condition than it
 found it, so it must run after everything else, not alongside it.
 
 `scripts/e2e-run.mjs` enforces this automatically: whenever a selection
-(tier, group, impact scan, or explicit file list) includes both
-`dependent/` and non-`dependent/` specs, the runner splits it into two
-passes — everything else first, `dependent/` last — regardless of how
-the selection was built. A selection touching only one side still runs
-as a single pass.
+(tier or group — including the impact scan a tier computes internally)
+includes both `dependent/` and non-`dependent/` specs, the runner splits
+it into two passes — everything else first, `dependent/` last —
+regardless of how the selection was built. A selection touching only
+one side still runs as a single pass.
 
 This exists because of a measured failure: in a full run, a failed
 endpoint-registry restore in `endpoints.spec.ts` cascaded into roughly
@@ -152,6 +152,18 @@ New specs belong in `dependent/` if they mutate state other specs
 depend on (endpoint registrations, shared orgs/spaces, etc.) and don't
 clean up reliably enough to run interleaved with the parallel pool.
 Everything else stays in its existing group directory.
+
+**This ordering is enforced only by the tiered runner** (`make e2e
+TIER=…` / `make e2e GROUP=…`, which delegates to
+`scripts/e2e-run.mjs`). A bare `npx playwright test` or `make test e2e`
+(with no `TIER`/`GROUP` set) runs the plain Playwright test-runner
+directly — `dependent/` is not ordered last and can interleave with the
+parallel pool, reintroducing the blast-radius risk above.
+
+`make check e2e` also bypasses the tiered runner: it scopes directly to
+`npx playwright test e2e/tests/core/`, so it no longer covers the
+endpoint lifecycle spec at all — `endpoints.spec.ts` lives in
+`dependent/`, outside that path.
 
 ---
 
