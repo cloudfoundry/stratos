@@ -182,9 +182,24 @@ export class EndpointManagementHelper {
       );
 
       if (found) {
-        const creds = userType === ConsoleUserType.admin
-          ? found.creds.admin
-          : found.creds.nonAdmin || found.creds.admin;
+        let creds;
+        if (userType === ConsoleUserType.admin) {
+          creds = found.creds.admin;
+        } else {
+          // No fallback to admin creds here: minting the "user" identity's
+          // token with admin credentials would make permission-scoped
+          // tests pass vacuously (they'd be exercising admin access under
+          // the user label). Fail loudly instead — see auth.setup.ts,
+          // which catches this and warns, and e2e/fixtures/test-base.ts's
+          // E2E_NO_CF_TOKEN guard, which then fails any test that actually
+          // needs the missing token.
+          if (!found.creds.nonAdmin) {
+            throw new Error(
+              `E2E_NO_NONADMIN_CREDS: profile has no cloudFoundry creds.nonAdmin for endpoint '${found.name}' — refusing to mint the user identity with admin credentials`
+            );
+          }
+          creds = found.creds.nonAdmin;
+        }
 
         await request.postForm('/api/v1/tokens', {
           cnsi_guid: endpoint.guid,
