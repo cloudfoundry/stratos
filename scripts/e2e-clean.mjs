@@ -54,7 +54,19 @@ function loadSecrets() {
   }
 
   const profile = process.env.E2E_PROFILE || 'local'
-  const secrets = raw.profiles?.[profile] ? { ...raw, ...raw.profiles[profile] } : raw
+  let secrets
+  if (raw.profiles) {
+    if (!raw.profiles[profile]) {
+      console.error(
+        `profile '${profile}' not found in secrets. Available: ${Object.keys(raw.profiles).join(', ')}`
+      )
+      process.exit(2)
+    }
+    secrets = { ...raw, ...raw.profiles[profile] }
+  } else {
+    // Legacy top-level-config file: no 'profiles:' key at all.
+    secrets = raw
+  }
   const cfEndpoints = secrets.cloudFoundry || secrets.endpoints?.cf || []
   const cf = cfEndpoints[0]
   if (!cf?.url || !cf?.creds?.admin?.username || !cf?.creds?.admin?.password) {
