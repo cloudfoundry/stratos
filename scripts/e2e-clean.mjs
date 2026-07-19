@@ -23,6 +23,7 @@
 // this process — not logged, not passed to a subprocess, not put in argv.
 //
 // Usage: node scripts/e2e-clean.mjs [--dry-run]
+//        DRYRUN=yes|true|1|on node scripts/e2e-clean.mjs   (as used by `make e2e clean`)
 
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -32,7 +33,23 @@ import { load as loadYaml } from 'js-yaml'
 
 process.chdir(fileURLToPath(new URL('..', import.meta.url)))
 
-const DRY_RUN = process.argv.includes('--dry-run')
+const DRY_RUN_SPELLINGS = ['yes', 'true', '1', 'on']
+
+// Any misspelled/unrecognized DRYRUN value is a hard error rather than a
+// silent real run — this is a destructive sweep, so "close but wrong" (e.g.
+// DRYRUN=Yes1, DRYRUN=dryrun) must never fall through to deletion.
+function resolveDryRun() {
+  const raw = process.env.DRYRUN
+  if (raw === undefined || raw === '') return process.argv.includes('--dry-run')
+  const normalized = raw.trim().toLowerCase()
+  if (DRY_RUN_SPELLINGS.includes(normalized)) return true
+  console.error(
+    `invalid DRYRUN value '${raw}' — accepted spellings: ${DRY_RUN_SPELLINGS.join(', ')} (case-insensitive), or leave DRYRUN unset for a real run`
+  )
+  process.exit(2)
+}
+
+const DRY_RUN = resolveDryRun()
 const LABEL = 'stratos-e2e-test'
 
 // ── Secrets (mirrors e2e/helpers/secrets-helpers.ts resolution order) ──

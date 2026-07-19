@@ -475,7 +475,7 @@ $(call register, test, e2e)
 # of any test/check recipe; an operator runs it between runs.
 define clean.e2e
 	@echo "Sweeping stratos-e2e-test labeled CF resources..."
-	node scripts/e2e-clean.mjs $(call _e2e_toggle,dry-run,$(DRYRUN))
+	DRYRUN=$(DRYRUN) node scripts/e2e-clean.mjs
 endef
 $(call register, clean, e2e)
 
