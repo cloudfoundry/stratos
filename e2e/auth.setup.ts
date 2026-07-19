@@ -133,9 +133,11 @@ setup('authenticate as user', async ({ page, baseURL }) => {
   // Without this, the nonAdmin identity has no CNSI token row, and any
   // proxied request it makes (e.g. via connectedEndpointsUserPage) returns
   // an empty-body 400 at the jetstream proxy layer (missing token lookup).
-  // registerDefaultCloudFoundry() is idempotent, so calling it here too
-  // (rather than assuming the admin setup test already ran) avoids a race
-  // between the two setup tests over registration order.
+  // registerDefaultCloudFoundry()'s idempotence check is check-then-act
+  // (GET-then-POST), which is NOT safe against concurrent callers — it's
+  // only safe to call again here because the 'setup' project runs
+  // non-parallel (see playwright.config.ts), guaranteeing 'authenticate as
+  // admin' has already finished registering before this test starts.
   const manager = new EndpointManagementHelper(baseURL);
   await manager.registerDefaultCloudFoundry();
   await manager.connectAllEndpoints(ConsoleUserType.user);
