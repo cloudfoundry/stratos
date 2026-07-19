@@ -21,6 +21,7 @@
 #   make check                  Run all quality gates (lint + gate)
 #   make check e2e              Run Playwright E2E tests
 #   make test e2e TIER=acceptance PR=1234   Tiered E2E run (see TESTING.md)
+#   make e2e clean               Sweep stratos-e2e-test labeled CF resources
 #   make stamp frontend         Generate build-info.ts with version metadata
 #   make dump version           Print resolved version variables
 #
@@ -468,6 +469,16 @@ define test.e2e
 endef
 $(call register, test, e2e)
 
+# make e2e clean — sweep stratos-e2e-test labeled CF resources left behind
+# by e2e runs (apps/routes/service instances/spaces/orgs). Direct CF API,
+# no Playwright — see scripts/e2e-clean.mjs. Deliberately not run as part
+# of any test/check recipe; an operator runs it between runs.
+define clean.e2e
+	@echo "Sweeping stratos-e2e-test labeled CF resources..."
+	node scripts/e2e-clean.mjs $(call _e2e_toggle,dry-run,$(DRYRUN))
+endef
+$(call register, clean, e2e)
+
 # ── Check (quality gates) ────────────────────────────────────
 # make check          — lint + gate (default)
 # make check lint     — ESLint + go vet + golangci-lint
@@ -815,6 +826,8 @@ endif
 # make clean frontend  — frontend build only
 # make clean backend   — backend binaries only
 # make clean dist      — above + node_modules
+# make e2e clean        — sweep stratos-e2e-test labeled CF resources
+#                         (defined in the E2E section, above)
 
 define clean.release
 	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/korifi-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip $($(_HIDE)DIST_DIR)/stratos-korifi-*.zip
@@ -907,6 +920,7 @@ help:
 	@echo "  make test frontend PROJECT=core SCOPE=<path>  Narrowed vitest run"
 	@echo "  make test backend         Backend tests only"
 	@echo "  make test e2e             Run Playwright E2E tests"
+	@echo "  make e2e clean            Sweep stratos-e2e-test labeled CF resources"
 	@echo "  make lint                 Run linters"
 	@echo ""
 	@echo "Quality:"
