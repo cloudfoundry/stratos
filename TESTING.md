@@ -153,8 +153,8 @@ depend on (endpoint registrations, shared orgs/spaces, etc.) and don't
 clean up reliably enough to run interleaved with the parallel pool.
 Everything else stays in its existing group directory.
 
-**This ordering is enforced only by the tiered runner** (`make e2e
-TIER=…` / `make e2e GROUP=…`, which delegates to
+**This ordering is enforced only by the tiered runner** (`make test e2e
+TIER=…` / `make test e2e GROUP=…`, which delegates to
 `scripts/e2e-run.mjs`). A bare `npx playwright test` or `make test e2e`
 (with no `TIER`/`GROUP` set) runs the plain Playwright test-runner
 directly — `dependent/` is not ordered last and can interleave with the
