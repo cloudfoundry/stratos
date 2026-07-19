@@ -5,6 +5,23 @@ import * as path from 'path';
 import { CF_GUIDS_FILE } from '../auth.constants';
 
 /**
+ * Capability flags declared by a secrets profile.
+ *
+ * Keys name an environment-dependent feature (e.g. `autoscaler`, `sso`,
+ * `metrics`); values are `true` only when that feature is genuinely
+ * present and exercisable in the target environment. No secret values
+ * belong here — names and booleans only.
+ *
+ * A capability that is absent from the map, or a map that is absent
+ * entirely, both mean "unknown" — never treated as available. See
+ * `requireCapability()` in `test-utils.ts`, which skips rather than
+ * guessing from the DOM.
+ */
+export interface SecretsCapabilities {
+  [name: string]: boolean;
+}
+
+/**
  * Secrets Helper
  * Loads and provides access to E2E test secrets.
  *
@@ -222,6 +239,7 @@ export class SecretsHelper {
         apiUrl: secrets.stratosGitHubApiUrl || 'https://api.github.com',
       },
       headless: secrets.headless || false,
+      capabilities: (secrets.capabilities || {}) as SecretsCapabilities,
       raw: secrets,
 
       /** Get a Cloud Foundry endpoint config by index */
