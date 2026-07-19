@@ -151,11 +151,28 @@ setup('authenticate as user', async ({ page, baseURL }) => {
   // only safe to call again here because the 'setup' project runs
   // non-parallel (see playwright.config.ts), guaranteeing 'authenticate as
   // admin' has already finished registering before this test starts.
-  const manager = new EndpointManagementHelper(baseURL);
-  await manager.registerDefaultCloudFoundry();
-  await manager.connectAllEndpoints(ConsoleUserType.user);
-  await manager.dispose();
-  console.log('  User identity: CF endpoint connect attempted via connectAllEndpoints(ConsoleUserType.user)');
+  //
+  // Fail-open, like resolveAndPersistCfGuids above: every browser project
+  // depends on the 'setup' project, so an uncaught throw here would abort
+  // this whole test ('authenticate as user') before storageState is
+  // written below, which in turn skips every downstream project. A failed
+  // connect must not do that — the per-test E2E_NO_CF_TOKEN guard (see
+  // e2e/fixtures/test-base.ts) is the designed loud failure path for
+  // tests that actually need the missing token; it fires precisely when
+  // this connect didn't happen.
+  try {
+    const manager = new EndpointManagementHelper(baseURL);
+    await manager.registerDefaultCloudFoundry();
+    await manager.connectAllEndpoints(ConsoleUserType.user);
+    await manager.dispose();
+    console.log('  User identity: CF endpoint connect attempted via connectAllEndpoints(ConsoleUserType.user)');
+  } catch (e) {
+    console.warn(
+      '  User identity: CF endpoint connect failed; continuing without a connected token. ' +
+      'Tests that require one will fail loudly at the E2E_NO_CF_TOKEN guard.',
+      e
+    );
+  }
 
   const authType = await detectAuthType(baseURL || 'https://localhost:5540');
   await browserLogin(page, username, password, authType);
