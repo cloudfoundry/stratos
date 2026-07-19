@@ -165,6 +165,17 @@ parallel pool, reintroducing the blast-radius risk above.
 endpoint lifecycle spec at all — `endpoints.spec.ts` lives in
 `dependent/`, outside that path.
 
+#### Session Expiry & Server Reuse
+
+`SESSION_STORE_EXPIRY` in `playwright.config.ts`'s `webServer` config only
+takes effect when the backend is actually spawned by Playwright. With
+`reuseExistingServer: true`, an already-running jetstream keeps whatever
+value it booted with until its next real boot — a stale process can be
+running with a stale expiry regardless of what the config file currently
+says. The `BACKEND BOOT MARKER` line printed by `global-setup.ts` at the
+start of each run reports fresh boot vs. reused, so check it there rather
+than assuming the config's value is live.
+
 ---
 
 ## Running Tests
