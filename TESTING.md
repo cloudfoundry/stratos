@@ -126,6 +126,33 @@ If versions are incorrect, you'll see:
 - **Browsers**: Chromium, Firefox, WebKit
 - **Note**: ⚠️ E2E tests MUST NOT be run by Vitest!
 
+#### Dependent Tests
+
+Most e2e specs are self-contained and can run in any order, in parallel,
+across any subset of groups. `e2e/tests/dependent/` is the exception: it
+holds specs that mutate shared state other specs rely on — today, that's
+the endpoint registry (`clearAllEndpoints` / `removeEndpoint`). A spec in
+this group leaves that shared state in a different condition than it
+found it, so it must run after everything else, not alongside it.
+
+`scripts/e2e-run.mjs` enforces this automatically: whenever a selection
+(tier, group, impact scan, or explicit file list) includes both
+`dependent/` and non-`dependent/` specs, the runner splits it into two
+passes — everything else first, `dependent/` last — regardless of how
+the selection was built. A selection touching only one side still runs
+as a single pass.
+
+This exists because of a measured failure: in a full run, a failed
+endpoint-registry restore in `endpoints.spec.ts` cascaded into roughly
+200 downstream failures ("No CF endpoint found") in specs that assumed a
+registered CF endpoint. Running `dependent/` last, in its own pass,
+contains that blast radius instead of poisoning the rest of the suite.
+
+New specs belong in `dependent/` if they mutate state other specs
+depend on (endpoint registrations, shared orgs/spaces, etc.) and don't
+clean up reliably enough to run interleaved with the parallel pool.
+Everything else stays in its existing group directory.
+
 ---
 
 ## Running Tests
