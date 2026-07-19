@@ -4,7 +4,7 @@
  */
 
 export { E2EHelpers } from './e2e-helpers';
-export { SecretsHelper, SecretsCapabilities } from './secrets-helpers';
+export { SecretsHelper } from './secrets-helpers';
 export { WaitHelpers } from './wait-helpers';
 export { StepperBase } from './stepper-base';
 export { RequestHelper, ConsoleUserType } from './request.helper';
@@ -27,6 +27,5 @@ export {
   createCustomName,
   disableAnimations,
   WindowSize,
-  E2E_ITEM_PREFIX,
-  requireCapability
+  E2E_ITEM_PREFIX
 } from './test-utils';

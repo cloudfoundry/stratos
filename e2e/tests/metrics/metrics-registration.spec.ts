@@ -1,5 +1,4 @@
 import { test, expect } from '../../fixtures/test-base';
-import { requireCapability } from '../../helpers/test-utils';
 
 test.describe('Metrics Registration', () => {
   test('should check metrics availability', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
@@ -12,10 +11,6 @@ test.describe('Metrics Registration', () => {
   test.describe('Metrics UI', () => {
 
     test('should register metrics endpoint', async ({ connectedEndpointsAdminPage }) => {
-      // Config-driven: was two chained isVisible().catch(() => false) probes
-      // (register button, then metrics option) that couldn't tell "metrics
-      // not installed" apart from "selector broke" or "dialog was slow".
-      requireCapability('metrics');
       const { page } = connectedEndpointsAdminPage;
 
       // Navigate to endpoints page
@@ -42,10 +37,6 @@ test.describe('Metrics Registration', () => {
     });
 
     test('should display metrics', async ({ connectedEndpointsAdminPage }) => {
-      // Config-driven: was a probe chain (content visible? else empty-state
-      // message visible? else skip) whose final branch existed only to
-      // guess at metrics availability from the DOM.
-      requireCapability('metrics');
       const { page, cfGuid } = connectedEndpointsAdminPage;
 
       // Try to navigate to metrics page
@@ -53,8 +44,7 @@ test.describe('Metrics Registration', () => {
       await page.waitForLoadState('networkidle');
 
       // Metrics page should show either live content or an explicit
-      // "no data yet" placeholder — both are valid states once the
-      // metrics capability is declared available.
+      // "no data yet" placeholder.
       const metricsContent = page.locator(
         'app-metrics, .metrics-container, .no-metrics, .empty-message, app-no-content-message'
       );

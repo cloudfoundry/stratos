@@ -1,28 +1,10 @@
-import { Page, test } from '@playwright/test';
-import { SecretsHelper } from './secrets-helpers';
+import { Page } from '@playwright/test';
 
 /**
  * Test Utilities
  * Common utility functions for E2E tests
  * Migrated from Protractor E2EHelpers
  */
-
-/**
- * Skip the current test unless `name` is declared `true` in the active
- * secrets profile's `capabilities` map.
- *
- * Config-driven — no UI probing. This replaces the
- * `if (!await el.isVisible().catch(() => false)) test.skip(...)` pattern,
- * which can't tell "feature not installed" apart from "selector broke" or
- * "page was slow". A capability that is undeclared (map absent, or key
- * absent/false) is treated as unknown, never as available, so a test never
- * silently runs against an environment that didn't opt in.
- */
-export function requireCapability(name: string): void {
-  const capabilities = SecretsHelper.load().capabilities;
-  const enabled = capabilities?.[name] === true;
-  test.skip(!enabled, `capability '${name}' not enabled in secrets profile`);
-}
 
 /**
  * E2E item prefix for test data identification
