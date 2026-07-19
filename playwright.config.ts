@@ -6,6 +6,13 @@ if (!process.env.E2E_PROFILE) {
   process.env.E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
 }
 
+// Anchor timestamp for backend fresh-vs-reused detection (see global-setup.ts).
+// Captured here because this module evaluates before Playwright starts (or
+// skips starting, per reuseExistingServer) the webServer processes below.
+if (!process.env.E2E_RUN_START) {
+  process.env.E2E_RUN_START = String(Date.now());
+}
+
 // Test environment ports (separate from dev to avoid conflicts)
 const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
 const FRONTEND_PORT = process.env.FRONTEND_PORT || '5540';
