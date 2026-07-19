@@ -5,6 +5,8 @@
 // into one file list; browsers apply uniformly to the result. Tiers that
 // scope down (acceptance, broad) add a second pass running @smoke tests
 // over the UNSELECTED remainder, so every run keeps cross-surface cover.
+// Any selection touching e2e/tests/dependent/ (see TESTING.md "Dependent
+// tests") runs that group in its own trailing pass, after everything else.
 // Exits nonzero if any Playwright invocation fails.
 
 import { execFileSync, spawnSync } from 'node:child_process'
@@ -77,12 +79,34 @@ const smokeFiles = allSpecs.filter((f) => readFileSync(f, 'utf8').includes("tag:
 const browserFlags = (!opt.browsers.length || opt.browsers.includes('all'))
   ? [] : opt.browsers.map((b) => `--project=${b}`)
 
+// dependent/ holds specs that mutate shared state other specs rely on
+// (endpoint registry today — see TESTING.md). A failed restore there
+// cascades into every spec that assumes a registered endpoint, so the
+// group always runs last, in its own pass, regardless of how it was
+// selected (tier, group, impact, or explicit files).
+const DEPENDENT_GROUP = 'dependent'
+const isDependent = (f) => groupOf(f) === DEPENDENT_GROUP
+// Split a file list into [primary, dependent] passes; either half may be
+// empty, in which case its caller skips pushing that run.
+function splitDependent(fileList) {
+  return [fileList.filter((f) => !isDependent(f)), fileList.filter(isDependent)]
+}
+
 const runs = []
-if (files.size) runs.push({ label: `selected specs (${files.size} files)`, args: [...browserFlags, ...[...files].sort()] })
+if (files.size) {
+  const [primary, dependent] = splitDependent([...files].sort())
+  if (primary.length) runs.push({ label: `selected specs (${primary.length} files)`, args: [...browserFlags, ...primary] })
+  if (dependent.length) runs.push({ label: `selected specs — dependent (${dependent.length} files)`, args: [...browserFlags, ...dependent], dependent: true })
+}
 if (smokeRest) {
   const rest = smokeFiles.filter((f) => !files.has(f))
-  if (rest.length) runs.push({ label: `smoke over the rest (${rest.length} files)`, args: [...browserFlags, '--grep', '@smoke', ...rest] })
+  const [primary, dependent] = splitDependent(rest)
+  if (primary.length) runs.push({ label: `smoke over the rest (${primary.length} files)`, args: [...browserFlags, '--grep', '@smoke', ...primary] })
+  if (dependent.length) runs.push({ label: `smoke over the rest — dependent (${dependent.length} files)`, args: [...browserFlags, '--grep', '@smoke', ...dependent], dependent: true })
 }
+// Stable sort: dependent-group passes always trail, but their relative
+// order (and every non-dependent pass's order) is otherwise unchanged.
+runs.sort((a, b) => (a.dependent ? 1 : 0) - (b.dependent ? 1 : 0))
 if (impactEmpty) console.log(`impact scan against '${opt.base}' found no covered specs — running smoke only.`)
 if (!runs.length) { console.log('selection is empty — nothing to run.'); process.exit(0) }
 
