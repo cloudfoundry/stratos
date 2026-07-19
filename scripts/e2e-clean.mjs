@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// Standalone label-sweep behind `make e2e clean` — see TESTING.md "E2E
-// resource cleanup". Deletes every CF resource carrying the
-// stratos-e2e-test metadata label, direct against the CF API (no Stratos
-// proxy, no Playwright). Delete order mirrors CFApiHelper.cleanupTestResources()
+// Standalone label-sweep behind `make e2e clean`. Deletes every CF resource
+// carrying the stratos-e2e-test metadata label, direct against the CF API
+// (no Stratos proxy, no Playwright). Delete order mirrors CFApiHelper.cleanupTestResources()
 // (e2e/helpers/cf-api.helper.ts): apps -> routes -> service instances ->
 // spaces -> orgs, each async CF delete polled to job completion before the
 // next resource type starts (a space/org delete 422s if it still contains
@@ -183,8 +182,12 @@ async function deleteResource(ctx, kind, path, resource) {
   const r = await httpRequest('DELETE', `${apiUrl}${path}/${resource.guid}`, { headers: authHeaders(token), insecure })
   if (r.status === 202) {
     const jobUrl = r.headers.location
+    if (!jobUrl) {
+      console.warn(`  deleted ${kind} ${name} (${resource.guid}) — no job Location header, completion not confirmed`)
+      return true
+    }
     try {
-      if (jobUrl) await waitForJob(ctx, jobUrl)
+      await waitForJob(ctx, jobUrl)
       console.log(`  deleted ${kind} ${name} (${resource.guid})`)
       return true
     } catch (e) {
@@ -194,6 +197,12 @@ async function deleteResource(ctx, kind, path, resource) {
   }
   if (r.status === 204) {
     console.log(`  deleted ${kind} ${name} (${resource.guid})`)
+    return true
+  }
+  if (r.status === 404) {
+    // Deleted by someone/something else between our list and delete calls —
+    // the end state (gone) is what we wanted, so this is success, not failure.
+    console.log(`  ${kind} ${name} (${resource.guid}) already gone (404) — treating as cleaned`)
     return true
   }
   console.warn(`  FAILED to delete ${kind} ${name} (${resource.guid}): HTTP ${r.status} ${(r.text ?? '').slice(0, 300)}`)
