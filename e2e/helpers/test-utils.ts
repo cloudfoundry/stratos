@@ -22,7 +22,7 @@ export const CUSTOM_ORG_SPACE_LABEL = E2E_ITEM_PREFIX + (process.env.CUSTOM_ORG_
  */
 export function createCustomName(prefix: string, isoTime?: string): string {
   const timestamp = isoTime || new Date().toISOString().replace(/[-:.]+/g, '');
-  return `${prefix}.${timestamp}`;
+  return `${prefix}-${timestamp}`;
 }
 
 /**
