@@ -13,6 +13,12 @@ $plex-font-path: '../assets/fonts/plex' !default;
 // All seven faces the family ships are here, so Tailwind's weight names resolve
 // 1:1 to a real face and none of them has to be remapped. The family has no 800
 // or 900, so font-extrabold and font-black resolve to Bold — neither is used.
+//
+// The -upstream- files are subset from IBM's own release (plex-sans 1.1.0,
+// latin range) with the OpenType layout features kept. The Google Fonts
+// pipeline the previous files came from strips the zero, salt and ss
+// features, which the interface now relies on (see the body rule that
+// enables salt).
 @each $weight, $file in (100: '100', 200: '200', 300: '300', 400: 'regular',
                          500: '500', 600: '600', 700: '700') {
   @font-face {
@@ -20,7 +26,7 @@ $plex-font-path: '../assets/fonts/plex' !default;
     font-style: normal;
     font-weight: $weight;
     font-display: swap;
-    src: url('#{$plex-font-path}/ibm-plex-sans-v23-latin-#{$file}.woff2') format('woff2');
+    src: url('#{$plex-font-path}/ibm-plex-sans-upstream-latin-#{$file}.woff2') format('woff2');
   }
 }
 
