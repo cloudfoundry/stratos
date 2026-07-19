@@ -22,6 +22,21 @@ type WorkerFixtures = {
   workerUserContext: BrowserContext;
 };
 
+/**
+ * Race a promise against an explicit deadline so a stuck network call
+ * throws a named error instead of hanging the worker until the test
+ * timeout fires and teardown then waits out TCP-level timeouts on top
+ * of that (measured hang: 32.5 minutes for a single stuck fixture GET).
+ */
+function withDeadline<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`E2E_DEADLINE_EXCEEDED: ${label} did not complete within ${ms}ms`)), ms)
+    )
+  ]);
+}
+
 type TestFixtures = {
   secrets: ReturnType<typeof SecretsHelper.load>;
   authType: AuthType;
@@ -258,7 +273,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID using the worker's own session
-    const response = await page.request.get('/api/v1/endpoints');
+    const response = await withDeadline(page.request.get('/api/v1/endpoints'), 15000, 'connectedEndpointsUserPage endpoints GET');
     if (!response.ok()) {
       throw new Error(`GET /api/v1/endpoints failed: ${response.status()} ${response.statusText()} — session may be invalid`);
     }
@@ -286,7 +301,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     // measured cause of the empty-body 400 at the proxy (passthrough.go
     // token lookup failure) — surface it loudly instead of letting every
     // proxied call in the test fail with an unexplained empty 400.
-    const infoResp = await page.request.get('/pp/v1/info');
+    const infoResp = await withDeadline(page.request.get('/pp/v1/info'), 15000, 'connectedEndpointsUserPage info GET');
     if (!infoResp.ok()) {
       throw new Error(`GET /pp/v1/info failed: ${infoResp.status()} ${infoResp.statusText()} — cannot verify CF token connection`);
     }
@@ -322,10 +337,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
     // Create request helper with pre-authenticated state
     const request = new RequestHelper(baseURL || 'http://localhost:4200');
-    await request.initFromStorageState(ADMIN_STATE);
+    await withDeadline(request.initFromStorageState(ADMIN_STATE), 15000, 'cfApi initFromStorageState');
 
     // Get registered endpoints
-    const endpointsList = await request.get('/api/v1/endpoints');
+    const endpointsList = await withDeadline(request.get('/api/v1/endpoints'), 15000, 'cfApi endpoints GET');
     const cfEndpoint = endpointsList.find((ep: any) =>
       ep.cnsi_type === 'cf' && ep.api_endpoint?.Host
     );

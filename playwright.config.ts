@@ -77,6 +77,14 @@ export default defineConfig({
   // SSO login fixtures can take 15-20s each (headless browser OAuth flow)
   timeout: 90000,
 
+  // Run-level backstop: caps total wall-clock time for the whole test run,
+  // independent of any single test's timeout. The full 3-browser suite
+  // legitimately runs ~4h, and future tiers must fit under this ceiling
+  // too, so 6h leaves headroom without masking a genuinely stuck run
+  // (e.g. a hung fixture whose per-test timeout is itself defeated, as
+  // measured in the 32.5-minute teardown hang this backstop guards against).
+  globalTimeout: 6 * 60 * 60 * 1000,
+
   // Report test environment status before tests start
   globalSetup: './e2e/global-setup.ts',
 
