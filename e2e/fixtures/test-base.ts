@@ -266,10 +266,34 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     if (!Array.isArray(endpointsList)) {
       throw new Error(`GET /api/v1/endpoints returned ${typeof endpointsList} instead of array: ${JSON.stringify(endpointsList).slice(0, 200)}`);
     }
+    // Guard (a): registry emptied out from under us (e.g. an earlier spec
+    // cleared it and its own restore failed) — every downstream proxy call
+    // would otherwise die with "No CF endpoint found", or worse.
+    if (endpointsList.length === 0) {
+      throw new Error('E2E_ENDPOINT_REGISTRY_EMPTY: no endpoints registered — an earlier spec likely cleared them');
+    }
     const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
 
     if (!cfEndpoint) {
       throw new Error(`No CF endpoint found. Endpoints: ${JSON.stringify(endpointsList.map((e: any) => ({ name: e.name, type: e.cnsi_type }))).slice(0, 200)}`);
+    }
+
+    // Guard (b): registry is non-empty, but does the *user* identity
+    // riding this worker context actually have a connected CF token for
+    // it? /api/v1/endpoints doesn't carry per-identity token state; /pp/v1/info
+    // does (Endpoints[type][guid].user is populated only when a token row
+    // exists for the calling session). Missing token here is exactly the
+    // measured cause of the empty-body 400 at the proxy (passthrough.go
+    // token lookup failure) — surface it loudly instead of letting every
+    // proxied call in the test fail with an unexplained empty 400.
+    const infoResp = await page.request.get('/pp/v1/info');
+    if (!infoResp.ok()) {
+      throw new Error(`GET /pp/v1/info failed: ${infoResp.status()} ${infoResp.statusText()} — cannot verify CF token connection`);
+    }
+    const info = await infoResp.json();
+    const connectedDetail = info?.endpoints?.[cfEndpoint.cnsi_type]?.[cfEndpoint.guid];
+    if (!connectedDetail?.user) {
+      throw new Error(`E2E_NO_CF_TOKEN: identity user has no connected CF token for endpoint ${cfEndpoint.name} (${cfEndpoint.guid})`);
     }
 
     const cfConfig = secrets.cloudFoundry[0];
