@@ -19,12 +19,23 @@ import { ADMIN_STATE, USER_STATE, CF_GUIDS_FILE } from './auth.constants';
 async function resolveAndPersistCfGuids(page: Page, cfEndpoints: any[]): Promise<void> {
   if (!Array.isArray(cfEndpoints) || cfEndpoints.length === 0) return;
 
-  const endpointsResp = await page.request.get('/api/v1/endpoints');
-  if (!endpointsResp.ok()) {
-    console.warn(`GUID resolution: could not list endpoints (${endpointsResp.status()}); skipping.`);
+  let registeredEndpoints: any;
+  try {
+    const endpointsResp = await page.request.get('/api/v1/endpoints');
+    if (!endpointsResp.ok()) {
+      console.warn(`GUID resolution: could not list endpoints (${endpointsResp.status()}); skipping.`);
+      return;
+    }
+    registeredEndpoints = await endpointsResp.json();
+  } catch (e) {
+    console.warn('GUID resolution: failed to fetch/parse registered endpoints; skipping.', e);
     return;
   }
-  const registeredEndpoints = await endpointsResp.json();
+
+  if (!Array.isArray(registeredEndpoints) || registeredEndpoints.length === 0) {
+    console.warn('GUID resolution: no registered endpoints returned; skipping.');
+    return;
+  }
 
   const guids: Record<string, { orgGuid: string; spaceGuid: string }> = {};
 
@@ -72,8 +83,9 @@ async function resolveAndPersistCfGuids(page: Page, cfEndpoints: any[]): Promise
   }
 
   if (Object.keys(guids).length > 0) {
-    fs.mkdirSync(path.dirname(CF_GUIDS_FILE), { recursive: true });
-    fs.writeFileSync(CF_GUIDS_FILE, JSON.stringify(guids, null, 2));
+    const guidsPath = path.join(process.cwd(), CF_GUIDS_FILE);
+    fs.mkdirSync(path.dirname(guidsPath), { recursive: true });
+    fs.writeFileSync(guidsPath, JSON.stringify(guids, null, 2));
   }
 }
 
@@ -93,7 +105,14 @@ setup('authenticate as admin', async ({ page, baseURL }) => {
 
   // page.request now carries the admin session cookie — resolve org/space
   // GUIDs through the proxy and persist them for every later test process.
-  await resolveAndPersistCfGuids(page, secrets.cloudFoundry);
+  // Fail-open: GUID resolution is a bonus, not a login requirement — any
+  // failure here must not prevent storageState below from being written,
+  // or every downstream test cascade-fails on a missing admin session.
+  try {
+    await resolveAndPersistCfGuids(page, secrets.cloudFoundry);
+  } catch (e) {
+    console.warn('GUID resolution failed unexpectedly; continuing without persisted GUIDs.', e);
+  }
 
   // Save authenticated state
   await page.context().storageState({ path: ADMIN_STATE });
