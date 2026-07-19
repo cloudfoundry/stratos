@@ -22,6 +22,24 @@ import { createCustomName } from '../../helpers/test-utils';
  * - applicationHelper: App management utilities
  */
 
+/**
+ * Feature detection helper for GitHub OAuth
+ * GitHub deployment requires OAuth configuration in CF
+ */
+async function isGitHubAvailable(page: any, cfGuid: string): Promise<boolean> {
+  const deployPage = new GitHubDeployStepperPage(page);
+
+  try {
+    await deployPage.navigateTo(cfGuid);
+    await deployPage.waitForStepper();
+
+    // Check if GitHub connect button is present or if already connected
+    return await deployPage.isOnDeploymentWizard();
+  } catch (error) {
+    return false;
+  }
+}
+
 test.describe('Application Deploy (Git)', () => {
 
   test.describe('Basic Deployment Setup', () => {
@@ -64,24 +82,6 @@ test.describe('Application Deploy (Git)', () => {
   });
 
   test.describe('Deploy from GitHub (UI)', () => {
-    /**
-     * Feature detection helper for GitHub OAuth
-     * GitHub deployment requires OAuth configuration in CF
-     */
-    async function isGitHubAvailable(page: any, cfGuid: string): Promise<boolean> {
-      const deployPage = new GitHubDeployStepperPage(page);
-
-      try {
-        await deployPage.navigateTo(cfGuid);
-        await deployPage.waitForStepper();
-
-        // Check if GitHub connect button is present or if already connected
-        return await deployPage.isOnDeploymentWizard();
-      } catch (error) {
-        return false;
-      }
-    }
-
     test('should connect GitHub account', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
       const githubAvailable = await isGitHubAvailable(page, cfGuid);
