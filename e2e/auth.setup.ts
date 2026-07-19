@@ -85,7 +85,20 @@ async function resolveAndPersistCfGuids(page: Page, cfEndpoints: any[]): Promise
   if (Object.keys(guids).length > 0) {
     const guidsPath = path.join(process.cwd(), CF_GUIDS_FILE);
     fs.mkdirSync(path.dirname(guidsPath), { recursive: true });
-    fs.writeFileSync(guidsPath, JSON.stringify(guids, null, 2));
+    // __meta lets readers (SecretsHelper.resolveEndpointGuids) detect a
+    // stale file — e.g. this run's setup failed to resolve GUIDs and an
+    // older file is still sitting there, or the org/space it points at
+    // was deleted by a clean sweep since it was written. Consumers must
+    // tolerate this extra key alongside the per-endpoint entries.
+    const payload = {
+      ...guids,
+      __meta: {
+        profile: process.env.E2E_PROFILE || null,
+        apiUrl: cfEndpoints[0]?.url || null,
+        writtenAt: Date.now(),
+      },
+    };
+    fs.writeFileSync(guidsPath, JSON.stringify(payload, null, 2));
   }
 }
 

@@ -53,15 +53,53 @@ export class SecretsHelper {
 
   /**
    * Read GUIDs persisted by auth.setup.ts (see CF_GUIDS_FILE), if present.
-   * Returns null when the file is missing or unparsable.
+   * Returns null when the file is missing or unparsable. The result may
+   * carry a `__meta` key (profile/apiUrl/writtenAt) alongside the
+   * per-endpoint entries — see warnIfGuidsStale().
    */
-  private static loadPersistedGuids(): Record<string, { orgGuid: string; spaceGuid: string }> | null {
+  private static loadPersistedGuids(): Record<string, any> | null {
     const guidsPath = path.join(process.cwd(), CF_GUIDS_FILE);
     if (!fs.existsSync(guidsPath)) return null;
     try {
       return JSON.parse(fs.readFileSync(guidsPath, 'utf8'));
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Warn loudly — but never fail — when the persisted GUIDs file looks
+   * stale: written before this run started (E2E_RUN_START predates
+   * `__meta.writtenAt`), or stamped for a different profile/API endpoint
+   * than the one active now. Stays fail-open (GUIDs are consumed either
+   * way): a stale-but-still-valid entry is far more common than a
+   * genuinely poisoned one, and this file's whole purpose is avoiding
+   * the slow/racy cf CLI fallback below. A file with no `__meta` (older
+   * format) is treated as unknown, not stale — silently accepted.
+   */
+  private static warnIfGuidsStale(persisted: Record<string, any> | null, activeApiUrl: string | undefined): void {
+    const meta = persisted?.__meta;
+    if (!meta) return;
+
+    const runStart = Number(process.env.E2E_RUN_START);
+    const reasons: string[] = [];
+
+    if (runStart && meta.writtenAt && meta.writtenAt < runStart) {
+      reasons.push(`written at ${new Date(meta.writtenAt).toISOString()}, before this run started`);
+    }
+    if (process.env.E2E_PROFILE && meta.profile && meta.profile !== process.env.E2E_PROFILE) {
+      reasons.push(`written for profile '${meta.profile}', active profile is '${process.env.E2E_PROFILE}'`);
+    }
+    if (activeApiUrl && meta.apiUrl && meta.apiUrl !== activeApiUrl) {
+      reasons.push(`written for API '${meta.apiUrl}', active API is '${activeApiUrl}'`);
+    }
+
+    if (reasons.length > 0) {
+      console.warn(
+        `[SecretsHelper] STALE ${CF_GUIDS_FILE}: ${reasons.join('; ')} — consuming it anyway. ` +
+        `GUIDs may point at a deleted org/space or a different run. ` +
+        `Re-run 'npx playwright test --project=setup' to refresh.`
+      );
     }
   }
 
@@ -77,6 +115,7 @@ export class SecretsHelper {
     if (!Array.isArray(cfEndpoints)) return cfEndpoints;
 
     const persisted = this.loadPersistedGuids();
+    this.warnIfGuidsStale(persisted, cfEndpoints[0]?.url);
 
     for (const ep of cfEndpoints) {
       const fromFile = persisted?.[ep.name];
