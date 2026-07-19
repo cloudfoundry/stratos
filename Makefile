@@ -35,7 +35,40 @@
 #
 # See docs/build-and-packaging.md for full documentation.
 
+# ── Version (repo settings + shared core) ─────────────────────
+# Stratos versions from package.json — the current version, not the
+# core's next-tag default. `make bump` edits package.json at recipe
+# time; the core keeps version resolution lazy so chains stay correct.
+VERSION_CMD := node -p "require('./package.json').version" 2>/dev/null
+
 include version.mk
+
+# Stratos-specific build metadata and stamps — the per-repo config the
+# vendorable core deliberately excludes.
+$(_HIDE)BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
+$(_HIDE)BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
+
+# Lazy (=) so the backend binary's baked-in version reflects the post-bump
+# value when `bump` and `build` chain in a single Make invocation.
+$(_HIDE)GO_LDFLAGS = -X main.appVersion=$($(_HIDE)SEMVER_VERSION) -X main.buildDate=$($(_HIDE)BUILD_DATE) -X main.gitCommit=$($(_HIDE)BUILD_VCS_ID) -X main.gitBranch=$($(_HIDE)BUILD_VCS_BRANCH)
+
+# ── Frontend build info path ─────────────────────────────────
+$(_HIDE)BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
+
+# ── Stamp action ─────────────────────────────────────────────
+define stamp.frontend
+	@mkdir -p $(dir $($(_HIDE)BUILD_INFO_TS))
+	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitProject: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n  nodeVersion: '%s',\n  typescriptVersion: '%s',\n  bunVersion: '%s',\n};\n" \
+		"$($(_HIDE)SEMVER_VERSION)" "$($(_HIDE)BUILD_VCS_URL)" "$($(_HIDE)BUILD_VCS_ID)" "$($(_HIDE)BUILD_VCS_BRANCH)" "$($(_HIDE)BUILD_DATE)" \
+		"$($(_HIDE)BUILD_NODE_VERSION)" "$($(_HIDE)BUILD_TS_VERSION)" "$($(_HIDE)BUILD_BUN_VERSION)" \
+		> $($(_HIDE)BUILD_INFO_TS)
+	@echo "Generated $($(_HIDE)BUILD_INFO_TS)"
+endef
+
+define dump.version.extra
+	@echo "GO_LDFLAGS        $($(_HIDE)GO_LDFLAGS)"
+endef
 
 # ── Directories ───────────────────────────────────────────────
 $(_HIDE)DIST_DIR    := dist
@@ -306,7 +339,7 @@ define dev.frontend
 endef
 $(call register, dev, frontend)
 
-# stamp.frontend recipe is defined in version.mk (shared library)
+# stamp.frontend recipe is defined in the version block near the top
 $(call register, stamp, frontend)
 
 # ── Backend ───────────────────────────────────────────────────
