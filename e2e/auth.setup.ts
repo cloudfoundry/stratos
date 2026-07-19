@@ -129,6 +129,19 @@ setup('authenticate as user', async ({ page, baseURL }) => {
     return;
   }
 
+  // Connect endpoints for the user identity — mirrors the admin path above.
+  // Without this, the nonAdmin identity has no CNSI token row, and any
+  // proxied request it makes (e.g. via connectedEndpointsUserPage) returns
+  // an empty-body 400 at the jetstream proxy layer (missing token lookup).
+  // registerDefaultCloudFoundry() is idempotent, so calling it here too
+  // (rather than assuming the admin setup test already ran) avoids a race
+  // between the two setup tests over registration order.
+  const manager = new EndpointManagementHelper(baseURL);
+  await manager.registerDefaultCloudFoundry();
+  await manager.connectAllEndpoints(ConsoleUserType.user);
+  await manager.dispose();
+  console.log('  User identity: CF endpoint connect attempted via connectAllEndpoints(ConsoleUserType.user)');
+
   const authType = await detectAuthType(baseURL || 'https://localhost:5540');
   await browserLogin(page, username, password, authType);
   await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
