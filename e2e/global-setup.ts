@@ -48,11 +48,13 @@ function checkPort(port: number): Promise<boolean> {
  * process's own stdout. DB file mtime vs run-start is the documented
  * fallback for exactly this case and needs no extra plumbing.
  */
-function backendBootStatus(): 'fresh boot' | 'reused (existing process)' | 'unknown (no db file found)' {
+function backendBootStatus(): 'fresh boot' | 'reused (existing process)' | 'unknown (no run-start anchor)' | 'unknown (no db file found)' {
   const runStart = Number(process.env.E2E_RUN_START);
   try {
     const mtimeMs = fs.statSync(BACKEND_DB_FILE).mtimeMs;
-    if (!runStart) return 'unknown (no db file found)';
+    // The DB file is present — it's the E2E_RUN_START anchor that's
+    // missing, not the file. Distinct from the catch-block case below.
+    if (!runStart) return 'unknown (no run-start anchor)';
     // Small negative skew allowance for filesystem timestamp resolution.
     return mtimeMs >= runStart - 2000 ? 'fresh boot' : 'reused (existing process)';
   } catch {
@@ -71,6 +73,8 @@ async function globalSetup() {
   console.log(`    Frontend (port ${FRONTEND_PORT}): ${frontendUp ? 'reusing existing' : 'will be started'}`);
   console.log('');
   console.log(`  BACKEND BOOT MARKER: ${bootStatus.toUpperCase()} (${BACKEND_DB_FILE})`);
+  console.log('  (heuristic: mtime vs run-start — a reused backend that happens to write');
+  console.log('   to the DB between config eval and this check can misreport as fresh boot)');
   console.log('');
 }
 
