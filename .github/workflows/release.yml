@@ -111,7 +111,12 @@ jobs:
       - name: Package release archives
         env:
           VERSION: ${{ needs.validate-version.outputs.version }}
-        run: make release github VERSION="$VERSION"
+        run: |
+          # cf first (writes dist/stratos-cf-*.zip), then github (rebuilds
+          # dist/release/); stage the cf-pushable zip into dist/release so it
+          # is checksummed and published alongside the platform archives.
+          make release cf github VERSION="$VERSION"
+          cp dist/stratos-cf-*.zip dist/release/
 
       - name: Generate checksums
         env:

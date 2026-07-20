@@ -47,7 +47,15 @@ else
 fi
 
 # Backend binary — CF requires a Linux ELF binary (amd64 or arm64)
+# Prefer an explicit dist/bin/jetstream (from `make build PLATFORM=linux/amd64`
+# or `make build korifi`); for cf mode, fall back to the cross-compiled
+# artifact from a plain `make build`, so `make build release cf github`
+# composes in one pass. korifi keeps requiring its own static build below.
+CF_ARCH="${CF_ARCH:-amd64}"
 jetstream_bin="${BIN_DIR}/jetstream"
+if [[ ! -f "${jetstream_bin}" && "${MODE}" == "cf" && -f "${BIN_DIR}/jetstream-linux-${CF_ARCH}" ]]; then
+  jetstream_bin="${BIN_DIR}/jetstream-linux-${CF_ARCH}"
+fi
 
 if [[ ! -f "${jetstream_bin}" ]]; then
   error "Backend binary not found at dist/bin/jetstream"
