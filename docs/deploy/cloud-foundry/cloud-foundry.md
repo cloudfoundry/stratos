@@ -21,8 +21,9 @@ Alternatively, Stratos can be configured [with a persistent Cloud Foundry databa
 
 Stratos can be pushed as an application to Cloud Foundry. 
 
-You can do it in two ways:
+You can do it in three ways:
 
+1. [Deploy Stratos from a release](#deploy-stratos-from-a-release) (pre-built, fastest push)
 1. [Deploy Stratos from source](#deploy-stratos-from-source)
 1. [Deploy Stratos from docker image](#deploy-stratos-from-docker-image)
 
@@ -83,6 +84,49 @@ See the [invite users guide](../../endpoints/cf/invite-user-guide.md) for more i
 
 We do not recommend deploying Stratos to a production environment using the default embedded SQLite Database. Instead we recommend creating
 and binding a database service instance to Stratos - for more information see [here](db-migration.md).
+
+### Deploy Stratos from a release
+
+Each Stratos [GitHub release](https://github.com/cloudfoundry/stratos/releases) includes a pre-built, `cf push`-ready package: `stratos-cf-<version>.zip` (Linux/amd64). The backend binary and the compiled UI are already in the zip, so the push uses the `binary_buildpack` and does no build during staging - this is the fastest way to get the console running and needs far less memory than a source push.
+
+1. Download `stratos-cf-<version>.zip` from the release you want and unpack it:
+
+    ```
+    unzip stratos-cf-<version>.zip -d stratos-console
+    cd stratos-console
+    ```
+
+    The folder contains the `jetstream` binary, the `ui/` assets, `manifest.yml`, `Procfile` and `config.properties`.
+
+2. **Edit `manifest.yml` before pushing.** The bundled config ships with development defaults that are not safe to run as-is. At a minimum, set your own values in the `env:` block (values there override `config.properties`):
+
+    ```yaml
+    applications:
+      - name: console
+        memory: 256M
+        disk_quota: 1024M
+        buildpack: binary_buildpack
+        command: ./jetstream
+        env:
+          # REQUIRED - regenerate; the shipped value is a public constant.
+          # Generate one with: openssl rand -hex 32
+          ENCRYPTION_KEY: <your 32-byte hex key>
+          # REQUIRED - the shipped default is a placeholder.
+          SESSION_STORE_SECRET: <your session store secret>
+    ```
+
+    Set a route/domain for your foundation if `console.<DOMAIN>` is not what you want, and see [Running Stratos in Production Environments](#running-stratos-in-production-environments) above for session store, SQLite and user-invite guidance. If your platform does not validate against real certificates you may also need `SKIP_SSL_VALIDATION`; in production with valid certificates leave it `false`.
+
+3. Push from the unpacked folder:
+
+    ```
+    cf push
+    ```
+
+    `cf push` with no arguments uses the bundled `manifest.yml` and the current folder as the application bits. As with the other methods, the console auto-detects the host Cloud Foundry API from `VCAP_APPLICATION`; if your platform does not provide `cf_api_url`, set it manually as described in the [troubleshooting note](cf-troubleshooting.md#console-fails-to-start).
+
+> [!NOTE]
+> The package is Linux/amd64. There is no build step in this path, so the source-push memory guidance below does not apply - the default `256M` is sufficient.
 
 ### Deploy Stratos from source
 
