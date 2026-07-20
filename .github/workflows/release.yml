@@ -99,7 +99,7 @@ jobs:
         env:
           NODE_ENV: production
           VERSION: ${{ needs.validate-version.outputs.version }}
-        run: make build all VERSION="$VERSION"
+        run: make build VERSION="$VERSION"
 
       - name: Verify binaries
         run: |
