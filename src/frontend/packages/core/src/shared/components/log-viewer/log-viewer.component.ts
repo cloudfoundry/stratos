@@ -86,7 +86,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private maxReconnectAttempts = 5;
   private lastConnectionError: ConnectionErrorInfo | null = null;
 
-  public maxLogLines = 1000;
+  @Input() maxLogLines = 10000;
   public isHighThroughput$!: Observable<boolean>;
   public isLocked$!: Observable<boolean>;
   public statusMessage$ = new BehaviorSubject<LogStreamMessage>({ message: '' });
