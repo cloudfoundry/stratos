@@ -14,7 +14,8 @@ import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
-import { ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
+import { ConfirmationDialogService, TailwindDialogService, TailwindSnackBarService } from '@stratosui/core';
+import { ShareServiceInstanceDialogComponent } from './share-service-instance-dialog.component';
 
 function source<T>(value: T, error: unknown = null): SignalSource<T> {
   return {
@@ -32,7 +33,9 @@ describe('ServiceInstanceSummaryComponent — Parameters / Credentials sections'
     serviceBindingsForInstance: ReturnType<typeof vi.fn>;
     serviceInstanceParameters: ReturnType<typeof vi.fn>;
     userProvidedCredentials: ReturnType<typeof vi.fn>;
+    shareServiceInstanceWithSpaces: ReturnType<typeof vi.fn>;
   };
+  let dialog: { open: ReturnType<typeof vi.fn> };
 
   function build(instance: StServiceInstance = managed) {
     catalog = {
@@ -40,7 +43,9 @@ describe('ServiceInstanceSummaryComponent — Parameters / Credentials sections'
       serviceBindingsForInstance: vi.fn(() => source([])),
       serviceInstanceParameters: vi.fn(() => source<Record<string, unknown> | null>({ a: 1 })),
       userProvidedCredentials: vi.fn(() => source<Record<string, unknown> | null>({ password: 's3cr3t' })),
+      shareServiceInstanceWithSpaces: vi.fn(),
     };
+    dialog = { open: vi.fn() };
 
     TestBed.configureTestingModule({
       imports: [ServiceInstanceSummaryComponent],
@@ -56,10 +61,13 @@ describe('ServiceInstanceSummaryComponent — Parameters / Credentials sections'
         { provide: CfServiceInstancesSignalConfigService, useValue: {} },
         { provide: ConfirmationDialogService, useValue: {} },
         { provide: TailwindSnackBarService, useValue: {} },
+        { provide: TailwindDialogService, useValue: dialog },
       ],
     });
     return TestBed.createComponent(ServiceInstanceSummaryComponent).componentInstance;
   }
+
+  const ups = { guid: 'si-2', name: 'ups', type: 'user-provided' } as unknown as StServiceInstance;
 
   beforeEach(() => TestBed.resetTestingModule());
 
@@ -111,5 +119,30 @@ describe('ServiceInstanceSummaryComponent — Parameters / Credentials sections'
     const pw = fields.find(f => f.key === 'password')!;
     expect(pw.sensitive).toBe(true);
     expect(pw.displayMasked).toBe('••••••••');
+  });
+
+  // Guard: the "Share to spaces" affordance must exist and be wired to the
+  // share dialog for managed instances. If openShareToSpaces or its dialog
+  // wiring is removed, this fails.
+  it('opens the share-to-spaces dialog for a managed instance', () => {
+    const c = build(managed);
+    expect(c.canShare()).toBe(true);
+
+    c.openShareToSpaces();
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    const [component, config] = dialog.open.mock.calls[0];
+    expect(component).toBe(ShareServiceInstanceDialogComponent);
+    // siName is derived from the loaded instance (route-param guids aren't
+    // populated in this harness, so assert on the instance-sourced field).
+    expect(config.data.siName).toBe('db');
+    expect('siGuid' in config.data).toBe(true);
+    expect('cfGuid' in config.data).toBe(true);
+  });
+
+  // Guard: share is managed-only — CF rejects sharing a user-provided
+  // instance, so the affordance must be gated off for UPS.
+  it('does not offer share for a user-provided instance', () => {
+    const c = build(ups);
+    expect(c.canShare()).toBe(false);
   });
 });

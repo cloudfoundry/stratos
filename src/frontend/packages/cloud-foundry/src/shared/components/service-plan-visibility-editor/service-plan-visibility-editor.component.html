@@ -1,0 +1,58 @@
+@if (servicePlan) {
+  <div class="visibility-editor" data-test="visibility-editor">
+    <fieldset class="visibility-editor__type">
+      <legend>Visibility</legend>
+      @for (t of visibilityTypes; track t) {
+        <label>
+          <input
+            type="radio"
+            name="visibility-type"
+            [value]="t"
+            [checked]="type() === t"
+            (change)="setType(t)"
+          />
+          {{ t }}
+        </label>
+      }
+    </fieldset>
+
+    @if (type() === 'organization') {
+      <div class="visibility-editor__orgs" data-test="org-multiselect">
+        <div class="visibility-editor__orgs-actions">
+          <button type="button" (click)="selectAllOrgs()" data-test="select-all-orgs">Select all</button>
+          <button type="button" (click)="clearOrgs()" data-test="clear-orgs">Clear</button>
+          <span class="visibility-editor__count" data-test="selected-count">{{ selectedCount() }} selected</span>
+        </div>
+        <ul class="visibility-editor__org-list">
+          @for (org of organizations; track org.guid) {
+            <li>
+              <label>
+                <input
+                  type="checkbox"
+                  [attr.data-test]="'org-option-' + org.guid"
+                  [checked]="isOrgSelected(org.guid)"
+                  (change)="toggleOrg(org.guid)"
+                />
+                {{ org.name || org.guid }}
+              </label>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="visibility-editor__apply">
+      <button
+        type="button"
+        data-test="apply-visibility"
+        [disabled]="!canApply() || isApplying()"
+        (click)="apply()"
+      >
+        Apply
+      </button>
+      @if (applyError()) {
+        <span class="visibility-editor__error" data-test="apply-error">Failed to apply visibility.</span>
+      }
+    </div>
+  </div>
+}

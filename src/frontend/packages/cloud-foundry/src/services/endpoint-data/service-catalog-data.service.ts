@@ -181,6 +181,29 @@ export class ServiceCatalogDataService {
     );
   }
 
+  // Writes one plan's visibility scope via the native apply handler
+  // (Jetstream: applyNativeServicePlanVisibility). The backend request
+  // body is `{ type, organizations }` where `organizations` is a flat
+  // list of org guids — so `type=organization` with N guids applies the
+  // plan to N orgs in a single call. POST replaces the existing scope;
+  // PATCH merges onto it (both map to the same body shape). `orgGuids` is
+  // only meaningful for `type=organization`; the other types send it
+  // empty and the backend ignores it.
+  applyPlanVisibility(
+    cnsiGuid: string,
+    planGuid: string,
+    type: string,
+    orgGuids: string[] = [],
+    mode: 'replace' | 'merge' = 'replace',
+  ): SignalSource<StServicePlanVisibility | null> {
+    const url = `/pp/v1/cf/service_plans/${cnsiGuid}/${planGuid}/visibility`;
+    const body = { type, organizations: orgGuids };
+    const req = mode === 'merge'
+      ? this.http.patch<StServicePlanVisibility>(url, body)
+      : this.http.post<StServicePlanVisibility>(url, body);
+    return this.signalize(req, null);
+  }
+
   // `?return=summary` so the backend resolves the
   // servicePlan → serviceOffering chain on the SI envelope. Base mode
   // returns only relationship guids, leaving `servicePlan.serviceOffering`
@@ -210,6 +233,21 @@ export class ServiceCatalogDataService {
         { params },
       ).pipe(map(resp => resp?.resources ?? [])),
       [],
+    );
+  }
+
+  // Bulk-share one managed service instance with N target spaces in a single
+  // call. Wraps the backend POST
+  // /cf/service_instances/:cnsi/:si/relationships/shared_spaces, which forwards
+  // to CF V3 POST /v3/service_instances/{guid}/relationships/shared_spaces.
+  // Body is the shared { guids: [...] } bulk shape (decodeBulkGUIDs on the
+  // backend), NOT the V3 { data: [{ guid }] } relationship envelope — the
+  // handler rebuilds the envelope. Returns the raw CF shared-spaces
+  // relationships response; the share dialog `firstValueFrom`s it.
+  shareServiceInstanceWithSpaces(cnsiGuid: string, instanceGuid: string, spaceGuids: string[]): Observable<unknown> {
+    return this.http.post(
+      `/pp/v1/cf/service_instances/${cnsiGuid}/${instanceGuid}/relationships/shared_spaces`,
+      { guids: spaceGuids },
     );
   }
 

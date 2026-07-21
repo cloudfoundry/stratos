@@ -3,6 +3,10 @@
     <h1>{{ quotaDefinition()?.name }}</h1>
     @if (canEditQuota()) {
       <div class="page-header-right">
+        <button class="btn btn-icon" name="apply-to-orgs" data-test="quota-apply-to-orgs"
+          (click)="openApplyToOrgs()" matTooltip="Apply to organizations">
+          <span class="material-icons">domain_add</span>
+        </button>
         <button class="btn btn-icon" name="edit" [routerLink]="editLink()" [queryParams]="editParams" matTooltip="Edit">
           <span class="material-icons">edit</span>
         </button>

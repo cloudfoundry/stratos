@@ -25,6 +25,7 @@ import {
   AppChipsComponent,
   PageHeaderComponent,
   SignalListRowAction,
+  TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
 import { of } from 'rxjs';
@@ -47,6 +48,10 @@ import {
   buildServiceInstanceRowActions,
 } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import {
+  ShareServiceInstanceDialogComponent,
+  ShareServiceInstanceDialogData,
+} from './share-service-instance-dialog.component';
 
 interface BindingRow {
   guid: string;
@@ -117,6 +122,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   private readonly snackBar = inject(TailwindSnackBarService);
   private readonly router = inject(Router);
   private readonly instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly dialog = inject(TailwindDialogService);
 
   private readonly cfGuid: string;
   private readonly siGuid: string;
@@ -238,10 +244,38 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     this.registry.release(this.cfGuid);
   }
 
+  // Share is a managed-instance-only affordance — CF rejects sharing a
+  // user-provided instance. Gated in the template so the button only shows
+  // for managed instances that have loaded.
+  readonly canShare = computed(() => this.source.value()?.type != null
+    && this.source.value()?.type !== 'user-provided');
+
   /** Invoke a header action (the builder's invokes close over the instance). */
   runAction(action: SignalListRowAction<StServiceInstance>): void {
     const si = this.source.value();
     if (si) { void action.invoke(si); }
+  }
+
+  // Open the multi-select "Share to spaces" dialog. Bulk-shares this managed
+  // instance with the chosen spaces in one call (POST .../relationships/
+  // shared_spaces, body { guids }). The instance's own space is passed so the
+  // picker can exclude it. Managed-only — see canShare.
+  openShareToSpaces(): void {
+    const si = this.source.value();
+    if (!si) { return; }
+    this.dialog.open<ShareServiceInstanceDialogComponent, ShareServiceInstanceDialogData, boolean>(
+      ShareServiceInstanceDialogComponent,
+      {
+        ariaLabelledBy: 'share-service-instance-dialog-title',
+        data: {
+          cfGuid: this.cfGuid,
+          siGuid: this.siGuid,
+          siName: si.name,
+          ownerSpaceGuid: si.space?.guid,
+        },
+        width: '520px',
+      },
+    );
   }
 
   /** Unbind one app from this instance (confirm → v3 DELETE → re-fetch list). */

@@ -35,6 +35,7 @@ function makeHttp(groups: StSecurityGroup[]): HttpClient {
         last: { href: '' },
       },
     })),
+    post: vi.fn(() => of({ data: [{ guid: 'space-1' }, { guid: 'space-2' }] })),
   } as unknown as HttpClient;
 }
 
@@ -86,6 +87,36 @@ describe('CfSecurityGroupsSignalConfigService', () => {
     expect(svc.securityGroups()[0].name).toBe('public_networks');
     expect(http.get).toHaveBeenCalledWith(
       expect.stringContaining('/pp/v1/cf/security_groups/cnsi-1'),
+    );
+  });
+
+  // Guard: the bulk space-bind wiring must POST {guids} to the correct CF
+  // relationship sub-resource per lifecycle. Removing bindSpaces (or pointing
+  // it at the wrong endpoint / body) fails here.
+  it('bindSpaces POSTs {guids} to running_spaces for the running lifecycle', async () => {
+    const http = makeHttp([]);
+    const svc = makeSvc(http);
+    svc.initialize('cnsi-1');
+
+    const result = await svc.bindSpaces('cnsi-1', 'sg-1', ['space-1', 'space-2'], 'running');
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/pp/v1/cf/security_groups/cnsi-1/sg-1/relationships/running_spaces',
+      { guids: ['space-1', 'space-2'] },
+    );
+    expect(result.data.map(d => d.guid)).toEqual(['space-1', 'space-2']);
+  });
+
+  it('bindSpaces POSTs {guids} to staging_spaces for the staging lifecycle', async () => {
+    const http = makeHttp([]);
+    const svc = makeSvc(http);
+    svc.initialize('cnsi-1');
+
+    await svc.bindSpaces('cnsi-1', 'sg-9', ['space-7'], 'staging');
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/pp/v1/cf/security_groups/cnsi-1/sg-9/relationships/staging_spaces',
+      { guids: ['space-7'] },
     );
   });
 
