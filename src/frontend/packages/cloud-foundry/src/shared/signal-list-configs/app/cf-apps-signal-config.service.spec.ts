@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
@@ -38,6 +38,12 @@ function makeSvc(http: HttpClient, cf?: CloudFoundryService): CfAppsSignalConfig
 }
 
 beforeEach(() => TestBed.resetTestingModule());
+// Destroy the LAST test's module too — beforeEach alone leaves the final
+// module (and any live stats timer/effects on its injector) alive until
+// worker shutdown. resetTestingModule() destroys the module injector, which
+// fires the service's destroyRef.onDestroy cleanup (clearInterval + effect
+// destroys).
+afterEach(() => TestBed.resetTestingModule());
 
 describe('CfAppsSignalConfigService', () => {
   it('constructs one CnsiAppsSource per connected CF in scope', () => {
