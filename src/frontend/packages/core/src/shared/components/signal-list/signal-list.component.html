@@ -186,11 +186,17 @@
         Clear
       </button>
       <div class="flex-1"></div>
+      @if (config.bulkRunning && config.bulkRunning()) {
+        <span data-test="bulk-running" class="flex items-center gap-1 text-sm text-content-muted">
+          <span class="material-icons text-base leading-5 animate-spin">progress_activity</span>
+          Working…
+        </span>
+      }
       @for (act of config.bulkActions; track act.label) {
         <button
           type="button"
           (click)="invokeBulkAction(act)"
-          [disabled]="act.disabled ? act.disabled() : false"
+          [disabled]="(act.disabled ? act.disabled() : false) || (config.bulkRunning ? config.bulkRunning() : false)"
           [title]="act.title ?? act.label"
           [attr.data-test]="act.dataTest ?? ('bulk-action-' + act.label)"
           [class]="'flex items-center gap-1 px-3 py-1 text-sm border rounded disabled:opacity-40 disabled:cursor-not-allowed ' +

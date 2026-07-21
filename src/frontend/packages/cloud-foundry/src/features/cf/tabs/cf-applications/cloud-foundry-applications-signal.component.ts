@@ -103,6 +103,11 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   // orgs/spaces within this CNSI — the backend delete fans out per guid.
   private readonly selectedAppKeys: WritableSignal<ReadonlySet<string>> = signal(new Set());
 
+  // True while a bulk op is in flight. Drives the bulk bar's "Working…"
+  // spinner + disabled actions. Set here (not inferred by the bar) because
+  // the work runs behind the confirm dialog, after the action's run() returns.
+  private readonly bulkRunning: WritableSignal<boolean> = signal(false);
+
   public listConfig: WritableSignal<SignalListConfig<StApp> | undefined> = signal(undefined);
 
   async ngOnInit(): Promise<void> {
@@ -277,6 +282,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       viewMode: this.appsConfig.viewMode,
       sort: this.appsConfig.sort,
       bulkActions: this.buildBulkActions(),
+      bulkRunning: this.bulkRunning,
     });
 
     // Sort + filter extractors for the Org/Space column (composed from name
@@ -325,19 +331,27 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   // Run a bulk op, report partial failures, and clear selection afterwards.
   private async runBulk(
     verb: string,
-    total: number,
     op: () => Promise<BulkResult>,
   ): Promise<void> {
+    this.bulkRunning.set(true);
     try {
       const result = await op();
+      // Full roll-up so a partial result is legible, e.g. "7 succeeded, 1
+      // pending, 2 failed". pending = an async CF job still completing.
+      const parts: string[] = [];
+      if (result.succeeded) { parts.push(`${result.succeeded} succeeded`); }
+      if (result.pending) { parts.push(`${result.pending} pending`); }
+      if (result.failed) { parts.push(`${result.failed} failed`); }
+      const summary = `Bulk ${verb}: ${parts.length ? parts.join(', ') : `nothing to ${verb}`}`;
       if (result.failed > 0) {
-        this.snackBar.error(`${result.failed} of ${total} applications failed to ${verb}`);
+        this.snackBar.error(summary);
       } else {
-        this.snackBar.open(`${total} ${total === 1 ? 'application' : 'applications'} ${verb} requested`);
+        this.snackBar.open(summary);
       }
     } catch (err: unknown) {
       this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
     } finally {
+      this.bulkRunning.set(false);
       this.selectedAppKeys.set(new Set());
     }
   }
@@ -360,7 +374,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('delete', targets.length, () =>
+            await this.runBulk('delete', () =>
               this.appsConfig.bulkDeleteApps(cnsi, targets.map(a => a.guid)));
           });
         },
