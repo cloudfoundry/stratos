@@ -15,7 +15,7 @@ You will need to have installed Docker, see [Docker Installation Documentation](
 Run Stratos in Docker locally:
 
 ```
-$ docker run -p 5443:5443 splatform/stratos:stable 
+$ docker run -p 5443:5443 ghcr.io/cloudfoundry/stratos:latest
 ```
 
 Once that has finished, you can then access Stratos by visiting [https://localhost:5443](https://localhost:5443).
