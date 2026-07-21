@@ -167,6 +167,11 @@ func (m *SqliteStore) Save(r *http.Request, w http.ResponseWriter, session *sess
 	if err != nil {
 		return err
 	}
+	// NOTE: Stratos serves the console over HTTPS and requires secure session
+	// cookies (initSessionStore sets Options.Secure = true for every provider).
+	// Enforce it here so the guarantee is local to the store and not dependent
+	// on the caller's configuration.
+	session.Options.Secure = true
 	http.SetCookie(w, sessions.NewCookie(session.Name(), encoded, session.Options))
 	return nil
 }
@@ -221,6 +226,8 @@ func (m *SqliteStore) Delete(r *http.Request, w http.ResponseWriter, session *se
 	// Set cookie to expire.
 	options := *session.Options
 	options.MaxAge = -1
+	// NOTE: keep the expiring cookie secure too — see Save above.
+	options.Secure = true
 	http.SetCookie(w, sessions.NewCookie(session.Name(), "", &options))
 	// Clear session values.
 	for k := range session.Values {
