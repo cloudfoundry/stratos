@@ -336,17 +336,20 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
     this.bulkRunning.set(true);
     try {
       const result = await op();
-      // Full roll-up so a partial result is legible, e.g. "7 succeeded, 1
-      // pending, 2 failed". pending = an async CF job still completing.
-      const parts: string[] = [];
-      if (result.succeeded) { parts.push(`${result.succeeded} succeeded`); }
-      if (result.pending) { parts.push(`${result.pending} pending`); }
-      if (result.failed) { parts.push(`${result.failed} failed`); }
-      const summary = `Bulk ${verb}: ${parts.length ? parts.join(', ') : `nothing to ${verb}`}`;
+      // succeeded + pending are BOTH the non-error count (the BulkResult
+      // contract): a CF delete accepted async comes back PENDING with a job
+      // still completing, not a failure — so we report it as "requested"
+      // rather than surfacing the raw "pending" state, which reads as stuck.
+      // True completion tracking (polling those jobs) is a separate follow-up.
+      const requested = result.succeeded + result.pending;
       if (result.failed > 0) {
-        this.snackBar.error(summary);
+        this.snackBar.error(
+          `Bulk ${verb}: ${result.failed} failed${requested ? `, ${requested} requested` : ''}`,
+        );
       } else {
-        this.snackBar.open(summary);
+        this.snackBar.open(
+          `${requested} ${requested === 1 ? 'application' : 'applications'} ${verb} requested`,
+        );
       }
     } catch (err: unknown) {
       this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
