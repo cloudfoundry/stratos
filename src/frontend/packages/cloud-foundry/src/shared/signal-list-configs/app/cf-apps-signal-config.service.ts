@@ -332,9 +332,17 @@ export class CfAppsSignalConfigService {
       const space = this.selectedSpace();
       if (cnsi != null && !cnsiValues.has(cnsi)) this.selectedCnsi.set(null);
       const selectedCfFailed = cnsi != null && errorsByCnsi?.has(cnsi);
+      // Only validate a selection against a catalog that has actually loaded.
+      // The per-CF tab loads org/space names LAZILY, so orgOptions/spaceOptions
+      // can still be just "All" long after _hasLoadedOnce flips true (esp. with
+      // pre-seeded apps). Clearing then would drop a valid filter carried in
+      // from an org/space summary. `length > 1` == the catalog has real entries;
+      // once it loads, a genuinely stale selection still clears as before.
+      const orgCatalogReady = this.orgOptions().length > 1;
+      const spaceCatalogReady = this.spaceOptions().length > 1;
       if (!selectedCfFailed) {
-        if (org != null && !orgValues.has(org)) this.selectedOrg.set(null);
-        if (space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
+        if (orgCatalogReady && org != null && !orgValues.has(org)) this.selectedOrg.set(null);
+        if (spaceCatalogReady && space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
       }
     });
 

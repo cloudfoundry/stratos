@@ -208,6 +208,25 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.selectedCnsi()).toBe('cf-1');
   });
 
+  it('keeps a pre-set org filter while the org catalog is still empty (lazy load)', async () => {
+    // An org filter carried in from an org summary (goToCfApplications) must
+    // NOT be dropped in the window after apps load but before the lazily-
+    // fetched org catalog arrives. makeHttp() returns no orgs, so orgOptions
+    // stays just "All" — without the catalog-ready guard, _hasLoadedOnce flips
+    // true and the stale-selection effect wrongly clears the valid org.
+    const http = makeHttp();
+    const cf = makeStubCfService([{ guid: 'cf-1', name: 'Primary CF' }]);
+    const svc = makeSvc(http, cf);
+    svc.initialize(['cf-1']);
+    svc.selectedCnsi.set('cf-1');
+    svc.selectedOrg.set('org-1');
+    await svc.loadAll();
+    TestBed.tick();
+    // Catalog never loaded (orgOptions is just "All"); the org must survive.
+    expect(svc.orgOptions().length).toBe(1);
+    expect(svc.selectedOrg()).toBe('org-1');
+  });
+
   it('lists orgs from the per-CF catalog even when they contain zero loaded apps', async () => {
     // Regression (dev.58 smoke test): the user filtered apps by org=e2e,
     // deleted the only app in e2e, and returned to the app-wall. orgOptions
