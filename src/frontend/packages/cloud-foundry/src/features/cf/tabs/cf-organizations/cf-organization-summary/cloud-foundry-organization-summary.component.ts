@@ -8,7 +8,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { goToAppWall } from '../../../cf.helpers';
+import { goToCfApplications } from '../../../cf.helpers';
 import { CfAppsSignalConfigService } from '../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -66,7 +66,7 @@ export class CloudFoundryOrganizationSummaryComponent {
 
     const router = this.router;
     this.appLink = () => {
-      goToAppWall(appsConfig, router, cfOrgService.cfGuid, cfOrgService.orgGuid);
+      goToCfApplications(appsConfig, router, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now

@@ -257,6 +257,26 @@ export function goToAppWall(
   router.navigate(['applications']);
 }
 
+// Like goToAppWall, but navigates to the CF-SCOPED applications tab
+// (/cloud-foundry/<cf>/applications — one endpoint) rather than the global
+// cross-CF wall (/applications). CF-scoped context must stay CF-scoped: an
+// org/space summary's "Applications" count links here. Setting the toolbar
+// signals before navigation means the tab's initialize() sees the pre-set
+// filter and eager-loads the org/space catalog, so the selection survives the
+// stale-selection reconciliation.
+export function goToCfApplications(
+  appsConfig: CfAppsSignalConfigService,
+  router: Router,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string
+) {
+  appsConfig.selectedCnsi.set(cfGuid ?? null);
+  appsConfig.selectedOrg.set(orgGuid ?? null);
+  appsConfig.selectedSpace.set(spaceGuid ?? null);
+  router.navigate(['/cloud-foundry', cfGuid, 'applications']);
+}
+
 export function canUpdateOrgSpaceRoles(
   perms: CurrentUserPermissionsService,
   cfGuid: string,
