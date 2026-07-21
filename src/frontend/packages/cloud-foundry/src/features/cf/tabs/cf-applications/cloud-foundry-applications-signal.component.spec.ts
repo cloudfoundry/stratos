@@ -106,6 +106,7 @@ function makeStubAppsConfig() {
   const allOption = { label: 'All', value: null };
   const view = {
     pagedItems: signal([]).asReadonly(),
+    filteredItems: signal([] as StApp[]).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
     totalItems: signal(0).asReadonly(),
@@ -121,6 +122,7 @@ function makeStubAppsConfig() {
     loadAll: vi.fn().mockResolvedValue(undefined),
     refresh: vi.fn().mockResolvedValue(undefined),
     deleteApp: vi.fn().mockResolvedValue(undefined),
+    bulkDeleteApps: vi.fn().mockResolvedValue({ results: [], succeeded: 0, failed: 0, pending: 0 }),
     startStatsPolling: vi.fn(),
     clearFilters: vi.fn(),
     registerSortExtractor: vi.fn(),
@@ -196,5 +198,26 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
     // Both dropdowns share one handler scoped to the route's single CNSI;
     // the service-side promise dedupes repeated opens to one fanout.
     expect(stubAppsConfig.ensureNamesLoaded).toHaveBeenCalledWith(['cnsi-1']);
+  });
+
+  // GUARD: bulk delete was never on this endpoint-wide tab (only the
+  // per-space list had it), so it kept looking "missing" in card view. This
+  // fails if the checkbox selection column OR the bulk delete action is
+  // dropped from the CF Applications tab.
+  it('exposes a checkbox selection column and a non-empty bulk delete action', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+
+    const checkboxCol = cfg!.columns.find(c => c.kind === 'checkbox');
+    expect(checkboxCol).toBeDefined();
+
+    expect(cfg!.bulkActions).toBeDefined();
+    expect(cfg!.bulkActions!.length).toBeGreaterThan(0);
+    const deleteAction = cfg!.bulkActions!.find(
+      a => (a.dataTest ?? a.label).toLowerCase().includes('delete'),
+    );
+    expect(deleteAction).toBeDefined();
+    expect(deleteAction!.label).toBe('Delete');
   });
 });

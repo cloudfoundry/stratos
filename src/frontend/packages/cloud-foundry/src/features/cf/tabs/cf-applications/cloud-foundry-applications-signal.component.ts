@@ -11,6 +11,7 @@ import {
   isUnlimited,
   ListSubNavAddAction,
   ListSubNavComponent,
+  SignalListBulkAction,
   SignalListCompoundSegment,
   SignalListComponent,
   SignalListConfig,
@@ -25,9 +26,10 @@ import {
 } from '@stratosui/store';
 
 import { applicationEntityType } from '../../../../cf-entity-types';
-import { CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
+import { BulkResult, CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import type { StApp } from '../../../../services/endpoint-data/stratos-types';
 
 // Per-CF Applications tab. Scoped to one CNSI via the parent route's
@@ -95,6 +97,12 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
     { initialValue: new Set<string>() },
   );
 
+  // Selected row keys for bulk operations — key is `${cnsiGuid}:${guid}`,
+  // matching getRowKey. Owned here; the checkbox column reads/writes it and
+  // the bulk-action bar derives its targets from it. Selection can span
+  // orgs/spaces within this CNSI — the backend delete fans out per guid.
+  private readonly selectedAppKeys: WritableSignal<ReadonlySet<string>> = signal(new Set());
+
   public listConfig: WritableSignal<SignalListConfig<StApp> | undefined> = signal(undefined);
 
   async ngOnInit(): Promise<void> {
@@ -159,6 +167,21 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
       errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
       columns: [
+        {
+          header: '', key: 'select',
+          kind: 'checkbox',
+          checkbox: {
+            selectedKeys: this.selectedAppKeys,
+            selectAll: {
+              // Filtered set size, not just the current page — matches the
+              // tri-state header's "all selectable rows" semantics.
+              selectableCount: () => this.appsConfig.view.totalFilteredResults(),
+              onToggle: () => this.toggleSelectAll(),
+            },
+          },
+          render: () => '',
+          widthHint: '3rem',
+        },
         {
           header: 'Name', key: 'name', sortField: 'name',
           kind: 'link',
@@ -253,6 +276,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       cardAccentColor: stateColor,
       viewMode: this.appsConfig.viewMode,
       sort: this.appsConfig.sort,
+      bulkActions: this.buildBulkActions(),
     });
 
     // Sort + filter extractors for the Org/Space column (composed from name
@@ -276,6 +300,72 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   private toggleAppFavorite(app: StApp): void {
     const fav = new UserFavorite(app.cnsiGuid, 'cf', applicationEntityType, app.guid);
     this.userFavoriteManager.toggleFavorite(fav);
+  }
+
+  // Select-all flips between "every filtered row selected" and cleared,
+  // keyed off the full filtered set (not just the current page).
+  private toggleSelectAll(): void {
+    const filtered = this.appsConfig.view.filteredItems();
+    const selected = this.selectedAppKeys();
+    if (selected.size >= filtered.length && filtered.length > 0) {
+      this.selectedAppKeys.set(new Set());
+    } else {
+      this.selectedAppKeys.set(new Set(filtered.map(a => `${a.cnsiGuid}:${a.guid}`)));
+    }
+  }
+
+  // Resolve the selected row keys back to StApp objects from the current
+  // filtered set. Keys are `${cnsiGuid}:${guid}`; intersecting with live rows
+  // drops any stale keys for rows that have since left the view.
+  private resolveSelectedApps(keys: ReadonlySet<string>): StApp[] {
+    return this.appsConfig.view.filteredItems()
+      .filter(a => keys.has(`${a.cnsiGuid}:${a.guid}`));
+  }
+
+  // Run a bulk op, report partial failures, and clear selection afterwards.
+  private async runBulk(
+    verb: string,
+    total: number,
+    op: () => Promise<BulkResult>,
+  ): Promise<void> {
+    try {
+      const result = await op();
+      if (result.failed > 0) {
+        this.snackBar.error(`${result.failed} of ${total} applications failed to ${verb}`);
+      } else {
+        this.snackBar.open(`${total} ${total === 1 ? 'application' : 'applications'} ${verb} requested`);
+      }
+    } catch (err: unknown) {
+      this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
+    } finally {
+      this.selectedAppKeys.set(new Set());
+    }
+  }
+
+  // Bulk Delete, rendered in the selection bar when 1+ rows are selected.
+  // Selection can span orgs/spaces within this CNSI; the backend
+  // (/pp/v1/cf/apps/:cnsi/bulk/delete) fans out the per-app deletes.
+  private buildBulkActions(): SignalListBulkAction<StApp>[] {
+    const cnsi = this.cfEndpointService.cfGuid;
+    return [
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        run: (keys: ReadonlySet<string>) => {
+          const targets = this.resolveSelectedApps(keys);
+          if (targets.length === 0) return;
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Applications',
+            `Delete ${targets.length} ${targets.length === 1 ? 'application' : 'applications'}? This cannot be undone.`,
+            'Delete',
+            true,
+          );
+          this.confirmDialog.open(confirm, async () => {
+            await this.runBulk('delete', targets.length, () =>
+              this.appsConfig.bulkDeleteApps(cnsi, targets.map(a => a.guid)));
+          });
+        },
+      },
+    ];
   }
 
   private buildAppActions = (app: StApp): readonly SignalListRowAction<StApp>[] => {
