@@ -70,6 +70,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private enterData: any;
   private snackBarRef!: TailwindSnackBarRef<any>;
+  // First-step unblock poller (see setActive). Held as a field so destroy can
+  // clear it — a local timer kept ticking after teardown and then called
+  // afterNextRender against a destroyed injector (NG0205).
+  private firstStepTimer?: ReturnType<typeof setInterval>;
+  private isDestroyed = false;
 
   // Signal (read directly in the template as currentIndex()) so the action
   // buttons' [disabled]/text bindings re-render under zoneless CD when the
@@ -103,6 +108,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnInit() { }
 
   ngOnDestroy() {
+    this.isDestroyed = true;
+    clearInterval(this.firstStepTimer);
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
     if (this.snackBarRef) {
@@ -285,7 +292,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           // wizards) receive the enter callback — the legacy onEnter @Input
           // defaults to a no-op so a raw step.onEnter call swallows
           // signalHandle.onEnter.
-          const timer = setInterval(() => {
+          clearInterval(this.firstStepTimer);
+          this.firstStepTimer = setInterval(() => {
+            if (this.isDestroyed) {
+              clearInterval(this.firstStepTimer);
+              return;
+            }
             if (this.allSteps[index].blocked === false) {
               const step = this.allSteps[index];
               step.active = true;
@@ -296,7 +308,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               // afterNextRender waits on.
               this.cdr.markForCheck();
               afterNextRender(() => step.pOnEnter(this.enterData), { injector: this.injector });
-              clearInterval(timer);
+              clearInterval(this.firstStepTimer);
             }
           }, 5);
         }

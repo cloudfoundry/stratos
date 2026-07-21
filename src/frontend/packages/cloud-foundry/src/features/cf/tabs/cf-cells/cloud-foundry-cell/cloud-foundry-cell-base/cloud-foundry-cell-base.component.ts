@@ -68,7 +68,9 @@ export class CloudFoundryCellBaseComponent {
       startWith(true)
     );
     this.name$ = cfCellService.cellMetric$.pipe(
-      map(metric => `${metric.bosh_job_id}`)
+      // The metric can emit null before the cell metric resolves; a bare
+      // deref threw an unhandled TypeError inside the rxjs map.
+      map(metric => `${metric?.bosh_job_id ?? ''}`)
     );
 
     this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
