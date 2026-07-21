@@ -18,6 +18,13 @@ on:
       - develop
       - main
 
+# One live run per ref: a push to a PR branch (or develop/main) cancels the
+# in-flight run for the same ref, so overlapping runs never contend for
+# runners and only the newest commit is gated.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # pull-requests: read is required by dorny/paths-filter, which lists a
 # PR's changed files through the API.
 permissions:
