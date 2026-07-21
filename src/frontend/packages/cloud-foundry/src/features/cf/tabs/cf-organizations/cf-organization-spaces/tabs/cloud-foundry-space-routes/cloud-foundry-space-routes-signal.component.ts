@@ -100,16 +100,26 @@ export class CloudFoundrySpaceRoutesSignalComponent {
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.routesConfig.initialize(cfGuid, spaceGuid);
 
+    const routeBase = (r: StRoute): string =>
+      r.url && r.url.length > 0 ? r.url : ((r.host ?? '') + (r.path ?? ''));
+
     const displayUrl = (r: StRoute): string => {
       // Match legacy UI: full URL with scheme. TCP routes render as
       // host:port (no scheme); HTTP routes get an http:// prefix.
-      const base = r.url && r.url.length > 0
-        ? r.url
-        : ((r.host ?? '') + (r.path ?? ''));
+      const base = routeBase(r);
       if (r.port != null) return `${base}:${r.port}`;
+      // A route on a domain root (no host/path/url and no port) has nothing to
+      // display; fall back to a short guid so the row is still distinguishable.
+      // The full guid is on hover (urlTooltip).
+      if (base === '') return `(unnamed) ${r.guid.slice(0, 8)}`;
       if (/^https?:\/\//i.test(base)) return base;
       return `http://${base}`;
     };
+
+    // Hover tooltip for the Route title: full guid for unnamed routes (the
+    // visible title shows only the short guid), otherwise the full URL.
+    const urlTooltip = (r: StRoute): string =>
+      routeBase(r) === '' && r.port == null ? r.guid : displayUrl(r);
 
     const renderApps = (r: StRoute): string => {
       // Used for sort/filter string shape; the visual cell renders via
@@ -173,6 +183,7 @@ export class CloudFoundrySpaceRoutesSignalComponent {
           header: 'Route', key: 'url', sortField: 'url',
           kind: 'text',
           render: displayUrl,
+          tooltip: urlTooltip,
           widthHint: '24rem',
         },
         {

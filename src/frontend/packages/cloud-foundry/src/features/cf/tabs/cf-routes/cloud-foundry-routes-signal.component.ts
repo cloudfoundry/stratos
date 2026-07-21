@@ -95,19 +95,29 @@ export class CloudFoundryRoutesSignalComponent {
     // No spaceGuid — service shows every route in the CNSI.
     this.routesConfig.initialize(cfGuid);
 
+    const routeBase = (r: StRoute): string =>
+      r.url && r.url.length > 0 ? r.url : ((r.host ?? '') + (r.path ?? ''));
+
     const displayUrl = (r: StRoute): string => {
       // Prefix with http:// for HTTP routes to match the legacy UI's
       // Route column, which always rendered the full URL with scheme.
       // TCP routes aren't HTTP so they render as host:port without scheme.
-      const base = r.url && r.url.length > 0
-        ? r.url
-        : ((r.host ?? '') + (r.path ?? ''));
+      const base = routeBase(r);
       if (r.port != null) return `${base}:${r.port}`;
+      // A route on a domain root (no host/path/url and no port) has nothing to
+      // display; fall back to a short guid so the row is still distinguishable.
+      // The full guid is on hover (urlTooltip).
+      if (base === '') return `(unnamed) ${r.guid.slice(0, 8)}`;
       // Avoid double-prepending if CF has already rendered scheme into url
       // (shouldn't today, but future-proof).
       if (/^https?:\/\//i.test(base)) return base;
       return `http://${base}`;
     };
+
+    // Hover tooltip for the Route title: full guid for unnamed routes (the
+    // visible title shows only the short guid), otherwise the full URL.
+    const urlTooltip = (r: StRoute): string =>
+      routeBase(r) === '' && r.port == null ? r.guid : displayUrl(r);
 
     const renderApps = (r: StRoute): string => {
       const guids = r.appGuids ?? [];
@@ -206,6 +216,7 @@ export class CloudFoundryRoutesSignalComponent {
           header: 'Route', key: 'url', sortField: 'url',
           kind: 'text',
           render: displayUrl,
+          tooltip: urlTooltip,
           widthHint: '22rem',
         },
         {
