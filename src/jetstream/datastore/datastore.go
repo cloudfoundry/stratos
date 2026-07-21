@@ -21,8 +21,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"
 
-	// Sqlite driver
-	_ "github.com/mattn/go-sqlite3"
+	// Sqlite driver — pure-Go (sqlite compiled to wasm, run on wazero), so
+	// the driver works under CGO_ENABLED=0. mattn/go-sqlite3 is cgo-only and
+	// silently became a runtime stub in the CGO_ENABLED=0 release binaries.
+	// Registers under the name "sqlite3", so datastore, goose, and the
+	// nwmac/sqlitestore session store all keep working unchanged.
+	_ "github.com/ncruces/go-sqlite3/driver"
 
 	"github.com/pressly/goose"
 )
