@@ -891,6 +891,52 @@ describe('SignalListComponent', () => {
     });
   });
 
+  // Guard: while a bulk op is in flight (bulkRunning() === true) the bar shows
+  // the "Working…" spinner and disables its action buttons so the user can't
+  // double-fire; it clears once the op settles.
+  describe('bulk-action bar in-flight spinner (bulkRunning)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config"></app-signal-list>`,
+    })
+    class BulkRunningHost {
+      items = signal([{ name: 'one' }]);
+      selected = signal<ReadonlySet<string>>(new Set(['one']));
+      running = signal(true);
+      config: SignalListConfig<{ name: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(1).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        viewMode: signal<'table' | 'card'>('table'),
+        columns: [
+          { header: 'Pick', key: 'pick', kind: 'checkbox', render: () => '', checkbox: { selectedKeys: this.selected } },
+          { header: 'Name', key: 'name', render: r => r.name },
+        ],
+        bulkActions: [{ label: 'Delete', run: () => undefined }],
+        bulkRunning: this.running,
+        getRowKey: r => r.name,
+      };
+    }
+
+    it('shows the spinner and disables actions while running, clears when done', () => {
+      const fixture = TestBed.createComponent(BulkRunningHost);
+      fixture.detectChanges();
+      const del = () => fixture.nativeElement.querySelector('[data-test="bulk-action-Delete"]') as HTMLButtonElement;
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-running"]')).not.toBeNull();
+      expect(del().disabled).toBe(true);
+
+      fixture.componentInstance.running.set(false);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-running"]')).toBeNull();
+      expect(del().disabled).toBe(false);
+    });
+  });
+
   describe('external-link column (externalLink)', () => {
     @Component({
       standalone: true,

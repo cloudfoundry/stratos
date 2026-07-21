@@ -427,6 +427,12 @@ export interface SignalListConfig<T> {
   // this field is undefined/empty — no visual impact on lists that don't
   // opt in.
   readonly bulkActions?: readonly SignalListBulkAction<T>[];
+  // Optional. When it reads true, the bulk-action bar shows an indeterminate
+  // "Working…" spinner and disables its action buttons. The consumer owns it
+  // (set true while a bulk op runs, false when it settles) because the work
+  // happens behind a confirm dialog after `run()` has already returned, so the
+  // bar can't infer the in-flight state itself. Omit to keep the bar static.
+  readonly bulkRunning?: Signal<boolean>;
 }
 
 @Component({
