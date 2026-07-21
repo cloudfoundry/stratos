@@ -142,4 +142,20 @@ describe('ApplicationTabsBaseComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  // GUARD: an app-detail error bounce must stay CF-scoped when the app was
+  // opened from the per-CF applications tab (?breadcrumbs=cf), not dump the
+  // user on the global cross-CF wall. Mirrors the delete flow's scoping.
+  describe('appErrorRedirect', () => {
+    it('returns the CF-scoped apps tab when opened from it (breadcrumbs=cf)', () => {
+      expect(ApplicationTabsBaseComponent.appErrorRedirect('cf', 'cf-1'))
+        .toEqual(['/cloud-foundry', 'cf-1', 'applications']);
+    });
+
+    it('returns the global wall for any other source', () => {
+      expect(ApplicationTabsBaseComponent.appErrorRedirect(undefined, 'cf-1')).toEqual(['applications']);
+      expect(ApplicationTabsBaseComponent.appErrorRedirect('org', 'cf-1')).toEqual(['applications']);
+      expect(ApplicationTabsBaseComponent.appErrorRedirect(null, 'cf-1')).toEqual(['applications']);
+    });
+  });
 });

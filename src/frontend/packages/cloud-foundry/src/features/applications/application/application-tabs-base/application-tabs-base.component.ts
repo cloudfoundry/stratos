@@ -191,6 +191,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   tabLinks: IPageSideNavTab[];
 
+  // Where an app-detail error bounce (app deleted elsewhere / 404 / permission
+  // lost) should land: back to the per-CF applications tab when the app was
+  // opened from there (?breadcrumbs=cf), otherwise the global cross-CF wall.
+  // Keeps CF-scoped context CF-scoped, matching the delete flow's redirect.
+  static appErrorRedirect(breadcrumbs: string | null | undefined, cfGuid: string): string[] {
+    return breadcrumbs === 'cf' ? ['/cloud-foundry', cfGuid, 'applications'] : ['applications'];
+  }
+
   private getBreadcrumbs(
     application: IApp,
     endpoint: EndpointModel,
@@ -294,7 +302,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     runInInjectionContext(this.injector, () => {
       this.errorRedirectEffect = effect(() => {
         if (this.detail.errors().app) {
-          this.router.navigate(['applications']);
+          // Stay CF-scoped when the app was opened from the per-CF applications
+          // tab (?breadcrumbs=cf) — mirror the delete flow's redirect so an
+          // error bounce doesn't kick the user out to the global cross-CF wall.
+          const breadcrumbs = this.router.parseUrl(this.router.url).queryParams['breadcrumbs'];
+          this.router.navigate(
+            ApplicationTabsBaseComponent.appErrorRedirect(breadcrumbs, this.applicationService.cfGuid),
+          );
         }
       });
     });
