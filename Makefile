@@ -355,7 +355,7 @@ define build.backend
 	@if [ -n "$(PLATFORM)" ]; then \
 		echo "Building backend for $($(_HIDE)CURRENT_PLATFORM)..."; \
 		mkdir -p $($(_HIDE)BIN_DIR); \
-		cd src/jetstream && $($(_HIDE)GO_ENV) go build -ldflags "$($(_HIDE)GO_LDFLAGS)" -o ../../$($(_HIDE)BIN_DIR)/jetstream; \
+		cd src/jetstream && $($(_HIDE)GO_ENV) CGO_ENABLED=0 go build -ldflags "$($(_HIDE)GO_LDFLAGS)" -o ../../$($(_HIDE)BIN_DIR)/jetstream; \
 		echo "Backend built: $($(_HIDE)BIN_DIR)/jetstream"; \
 	else \
 		echo "Cross-compiling backend for all platforms..."; \
