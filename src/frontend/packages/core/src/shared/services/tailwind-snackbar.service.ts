@@ -39,6 +39,10 @@ export class TailwindSnackBarRefImpl<T> implements TailwindSnackBarRef<T> {
     this.removeCallback();
     this._afterDismissed.next(null);
     this._afterDismissed.complete();
+    // Prevent race-condition mutations during removeSnackbar's 300ms fade-out:
+    // clear the update callback so that any in-flight update() calls (e.g. from
+    // settlement polling in the caller) become inert and don't mutate a fading element.
+    this.updateCallback = undefined;
   }
 
   dismissWithAction(): void {
