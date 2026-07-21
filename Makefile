@@ -149,6 +149,7 @@ endif
 $(_HIDE)WANT_CF     :=
 $(_HIDE)WANT_KORIFI :=
 $(_HIDE)WANT_GITHUB :=
+$(_HIDE)WANT_AIO    :=
 $(_HIDE)WANT_PAGES  :=
 
 ifneq ($(filter cf,$(MAKECMDGOALS)),)
@@ -163,8 +164,11 @@ endif
 ifneq ($(filter github,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_GITHUB := yes
 endif
+ifneq ($(filter aio,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_AIO := yes
+endif
 ifneq ($(filter release,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB),)
+ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB)$($(_HIDE)WANT_AIO),)
   $(_HIDE)WANT_CF     := yes
   $(_HIDE)WANT_GITHUB := yes
 endif
@@ -289,8 +293,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses
-frontend backend website booklets cf korifi github pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses
+frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -728,6 +732,16 @@ define release.github
 	@./build/release-github.sh "$($(_HIDE)SEMVER_VERSION)"
 endef
 $(call register, release, github)
+
+# ── All-in-one image payload ──────────────────────────────────
+# Stages dist/aio-package/ (reusing the release-built jetstream + ui) as the
+# Docker build context for deploy/all-in-one/Dockerfile. Does NOT build.
+
+define release.aio
+	@chmod +x deploy/all-in-one/stage-aio.sh
+	@./deploy/all-in-one/stage-aio.sh "$($(_HIDE)SEMVER_VERSION)"
+endef
+$(call register, release, aio)
 
 # ── Deploy (documentation website) ───────────────────────────
 # Grammar: make deploy website <destination> — the component says what is

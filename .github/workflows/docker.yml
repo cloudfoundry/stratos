@@ -96,85 +96,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  build-all-in-one:
-    name: Build All-in-One Image
-    runs-on: ubuntu-latest
-    needs: build-matrix
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-        with:
-          persist-credentials: false
-
-      - name: Get version
-        id: version
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]; then
-            VERSION="${INPUT_VERSION}"
-          else
-            VERSION="${RELEASE_TAG}"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "version_short=${VERSION#v}" >> $GITHUB_OUTPUT
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
-
-      - name: Log in to GitHub Container Registry
-        if: github.event_name != 'workflow_dispatch' || inputs.push
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check for all-in-one Dockerfile
-        id: check-aio
-        run: |
-          if [ -f "deploy/all-in-one/Dockerfile" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ All-in-one Dockerfile not found, skipping"
-          fi
-
-      - name: Extract metadata
-        if: steps.check-aio.outputs.exists == 'true'
-        id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
-        with:
-          images: ${{ env.IMAGE_BASE }}
-          tags: |
-            type=semver,pattern={{version}},value=${{ steps.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.version }}
-            type=semver,pattern={{major}},value=${{ steps.version.outputs.version }}
-            type=raw,value=latest,enable=${{ !contains(steps.version.outputs.version, '-') }}
-
-      - name: Build and push all-in-one
-        if: steps.check-aio.outputs.exists == 'true'
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
-        with:
-          context: .
-          file: deploy/all-in-one/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'workflow_dispatch' || inputs.push }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            stratos_version=${{ steps.version.outputs.version_short }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  # The all-in-one image is built in release.yml (build-all-in-one-image),
+  # which reuses the release-built jetstream + ui via a thin Dockerfile — no
+  # in-image source build. The old job here checked for a Dockerfile and
+  # silently skipped when absent, reporting green while shipping no image.
 
   verify-images:
     name: Verify Images
     runs-on: ubuntu-latest
-    needs: [build-matrix, build-all-in-one]
+    needs: [build-matrix]
     if: github.event_name != 'workflow_dispatch' || inputs.push
     permissions:
       contents: read
