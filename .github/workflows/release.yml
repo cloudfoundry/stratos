@@ -113,9 +113,11 @@ jobs:
           VERSION: ${{ needs.validate-version.outputs.version }}
         run: |
           # cf first (writes dist/stratos-cf-*.zip), then github (rebuilds
-          # dist/release/); stage the cf-pushable zip into dist/release so it
-          # is checksummed and published alongside the platform archives.
-          make release cf github VERSION="$VERSION"
+          # dist/release/), then aio (stages dist/aio-package for the docker
+          # image, reusing the same release-built jetstream + ui). Stage the
+          # cf-pushable zip into dist/release so it is checksummed and
+          # published alongside the platform archives.
+          make release cf github aio VERSION="$VERSION"
           cp dist/stratos-cf-*.zip dist/release/
 
       - name: Generate checksums
@@ -137,6 +139,76 @@ jobs:
           name: release-artifacts
           path: dist/release/*
           retention-days: 30
+
+      - name: Upload all-in-one image payload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: aio-package
+          path: dist/aio-package/**
+          retention-days: 30
+          include-hidden-files: true
+
+  build-all-in-one-image:
+    name: Build All-in-One Image
+    runs-on: ubuntu-latest
+    needs: [validate-version, build-release]
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/stratos
+    steps:
+      # No source checkout — the image is built entirely from the staged
+      # payload (release-built jetstream + ui), so there is nothing to build
+      # from the tree here.
+      - name: Download all-in-one payload
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: aio-package
+          path: aio-package
+
+      - name: Fetch the all-in-one Dockerfile
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ needs.validate-version.outputs.version }}
+        run: |
+          # Only the Dockerfile is needed from the tree; the build context is
+          # the downloaded payload. Pull it at the released ref.
+          gh api "repos/${GITHUB_REPOSITORY}/contents/deploy/all-in-one/Dockerfile?ref=${REF}" \
+            --jq '.content' | base64 -d > aio-package/Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.validate-version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.validate-version.outputs.version }}
+            type=raw,value=latest,enable=${{ needs.validate-version.outputs.is_prerelease == 'false' }}
+
+      # Built and pushed for prereleases too (unlike the k8s component images
+      # in docker.yml) so rc/alpha/beta tags get a runnable all-in-one image.
+      # linux/amd64 only for now — the staged jetstream is amd64.
+      - name: Build and push all-in-one image
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
+        with:
+          context: aio-package
+          file: aio-package/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   create-github-release:
     name: Create GitHub Release

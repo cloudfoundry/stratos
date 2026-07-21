@@ -22,6 +22,7 @@ $(_HIDE)FLAG_booklets    := $($(_HIDE)WANT_BOOKLETS)
 $(_HIDE)FLAG_cf          := $($(_HIDE)WANT_CF)
 $(_HIDE)FLAG_korifi      := $($(_HIDE)WANT_KORIFI)
 $(_HIDE)FLAG_github      := $($(_HIDE)WANT_GITHUB)
+$(_HIDE)FLAG_aio         := $($(_HIDE)WANT_AIO)
 $(_HIDE)FLAG_pages       := $($(_HIDE)WANT_PAGES)
 $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
 $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
@@ -40,7 +41,7 @@ $(_HIDE)FLAG_history     := $($(_HIDE)WANT_HISTORY)
 $(_HIDE)FLAG_licenses    := $($(_HIDE)WANT_LICENSES)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github pages e2e dist version actions packages secrets lint gate tests coverage summary dependabot tree history licenses
+$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist version actions packages secrets lint gate tests coverage summary dependabot tree history licenses
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=
