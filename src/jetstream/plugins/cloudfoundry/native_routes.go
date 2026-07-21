@@ -36,6 +36,18 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	// per-item outcomes in a BulkResult envelope.
 	nativeGroup.POST("/cf/routes/:cnsiGuid/bulk/delete", c.bulkDeleteNativeRoutes)
 	nativeGroup.POST("/cf/routes/:cnsiGuid/bulk/unmap", c.bulkUnmapNativeRoutes)
+	// Bulk apps delete: fan-out N DELETE /v3/apps/:guid (mirrors routes bulk).
+	nativeGroup.POST("/cf/apps/:cnsiGuid/bulk/delete", c.bulkDeleteNativeApps)
+	// Bulk "apply source entity to N targets" — CF v3 relationship endpoints
+	// that accept the target GUID array natively (single passthrough call,
+	// body {"guids":[...]}). Org/space quota + plan visibility already exist
+	// above (applyOrgQuotaToOrgs / applySpaceQuotaToSpaces /
+	// applyNativeServicePlanVisibility); these add the remaining four.
+	nativeGroup.POST("/cf/isolation_segments/:cnsiGuid/:isoGuid/relationships/organizations", c.entitleIsolationSegmentOrgs)
+	nativeGroup.POST("/cf/service_instances/:cnsiGuid/:siGuid/relationships/shared_spaces", c.shareServiceInstanceSpaces)
+	nativeGroup.POST("/cf/security_groups/:cnsiGuid/:sgGuid/relationships/running_spaces", c.bindSecurityGroupRunningSpaces)
+	nativeGroup.POST("/cf/security_groups/:cnsiGuid/:sgGuid/relationships/staging_spaces", c.bindSecurityGroupStagingSpaces)
+	nativeGroup.POST("/cf/domains/:cnsiGuid/:domainGuid/relationships/shared_organizations", c.shareDomainOrgs)
 	nativeGroup.POST("/cf/routes/:cnsiGuid/:routeGuid/unmap_all", c.unmapAllRouteDestinations)
 	nativeGroup.POST("/cf/service_bindings/:cnsiGuid", c.createServiceBinding)
 	nativeGroup.DELETE("/cf/service_bindings/:cnsiGuid/:bindingGuid", c.deleteServiceBinding)
