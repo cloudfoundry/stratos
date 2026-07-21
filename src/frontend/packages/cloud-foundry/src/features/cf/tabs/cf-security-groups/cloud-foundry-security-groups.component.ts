@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, WritableSignal, computed, inject, signal } from '@angular/core';
 
-import { SignalListComponent, SignalListConfig } from '@stratosui/core';
+import { SignalListComponent, SignalListConfig, SignalListRowAction, TailwindDialogService } from '@stratosui/core';
 
 import { CfSecurityGroupsSignalConfigService } from '../../../../shared/signal-list-configs/cf-security-groups/cf-security-groups-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StSecurityGroup } from '../../../../services/endpoint-data/stratos-types';
+import {
+  BindSecurityGroupSpacesDialogComponent,
+  BindSecurityGroupSpacesDialogData,
+} from './bind-security-group-spaces-dialog.component';
 
 // Signal-native CF Security Groups tab. Read-only list of egress rule
 // bundles registered on the foundation. Replaces the legacy ListConfig +
@@ -24,6 +28,7 @@ import type { StSecurityGroup } from '../../../../services/endpoint-data/stratos
 export class CloudFoundrySecurityGroupsComponent {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private securityGroupsConfig = inject(CfSecurityGroupsSignalConfigService);
+  private dialog = inject(TailwindDialogService);
 
   public listConfig: WritableSignal<SignalListConfig<StSecurityGroup> | undefined> = signal(undefined);
 
@@ -87,6 +92,13 @@ export class CloudFoundrySecurityGroupsComponent {
           render: (g: StSecurityGroup) => CloudFoundrySecurityGroupsComponent.formatDate(g.updatedAt),
           widthHint: '12rem',
         },
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: this.buildSecurityGroupActions,
+          render: () => '',
+          widthHint: '3rem',
+        },
       ],
       getRowKey: (g: StSecurityGroup) => `${g.cnsiGuid}:${g.guid}`,
       emptyMessage: 'There are no security groups in this Cloud Foundry',
@@ -102,6 +114,33 @@ export class CloudFoundrySecurityGroupsComponent {
       viewMode: this.securityGroupsConfig.viewMode,
       sort: this.securityGroupsConfig.sort,
     });
+  }
+
+  // Per-row "Bind to spaces" action — the security-group bulk-bind entry
+  // point. There is no per-group detail surface yet, so this list row action
+  // is the minimal home for the affordance; it opens the multi-select spaces
+  // dialog (running/staging chosen inside) which POSTs the bind.
+  private buildSecurityGroupActions = (sg: StSecurityGroup): readonly SignalListRowAction<StSecurityGroup>[] => [
+    {
+      label: 'Bind to spaces', icon: 'link',
+      dataTest: 'bind-security-group-spaces',
+      invoke: () => this.openBindToSpaces(sg),
+    },
+  ];
+
+  private openBindToSpaces(sg: StSecurityGroup): void {
+    this.dialog.open<BindSecurityGroupSpacesDialogComponent, BindSecurityGroupSpacesDialogData, boolean>(
+      BindSecurityGroupSpacesDialogComponent,
+      {
+        ariaLabelledBy: 'bind-security-group-spaces-dialog-title',
+        data: {
+          cfGuid: this.cfEndpointService.cfGuid,
+          sgGuid: sg.guid,
+          sgName: sg.name,
+        },
+        width: '520px',
+      },
+    );
   }
 
   static formatDate(iso: string | null | undefined): string {

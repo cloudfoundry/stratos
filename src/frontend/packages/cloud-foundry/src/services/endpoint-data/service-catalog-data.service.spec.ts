@@ -132,4 +132,62 @@ describe('ServiceCatalogDataService', () => {
     expect(vis?.type).toBe('organization');
     expect(vis?.organizations).toHaveLength(1);
   });
+
+  // Guard: the multi-org apply affordance. A type=organization apply must
+  // POST every selected org guid in the `organizations` array of the body
+  // — this is the single-call fan-out the bulk surface exists for, and
+  // matches the backend StServicePlanVisibilityRequest shape
+  // ({ type, organizations: []string }). If the method stops forwarding
+  // the full org list (regresses to single-org / drops the array), this
+  // fails.
+  it('applyPlanVisibility POSTs organizations-scoped visibility with N org guids', () => {
+    const source = service.applyPlanVisibility('cnsi-1', 'plan-1', 'organization', ['org-1', 'org-2', 'org-3']);
+    expect(source.isLoading()).toBe(true);
+
+    const req = httpMock.expectOne('/pp/v1/cf/service_plans/cnsi-1/plan-1/visibility');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ type: 'organization', organizations: ['org-1', 'org-2', 'org-3'] });
+
+    req.flush({ type: 'organization', organizations: [{ guid: 'org-1' }, { guid: 'org-2' }, { guid: 'org-3' }] });
+
+    const vis = source.value();
+    expect(vis?.organizations).toHaveLength(3);
+    expect(source.isLoading()).toBe(false);
+  });
+
+  it('applyPlanVisibility PATCHes when mode=merge (apply/merge onto existing)', () => {
+    service.applyPlanVisibility('cnsi-1', 'plan-1', 'organization', ['org-9'], 'merge');
+
+    const req = httpMock.expectOne('/pp/v1/cf/service_plans/cnsi-1/plan-1/visibility');
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ type: 'organization', organizations: ['org-9'] });
+    req.flush({ type: 'organization', organizations: [{ guid: 'org-9' }] });
+  });
+
+  // Guard: the bulk share-to-spaces affordance. Sharing a service instance
+  // with N spaces must POST every selected space guid in the `guids` array of
+  // the body — the single-call fan-out the share dialog forwards to the
+  // backend decodeBulkGUIDs shape ({ guids: []string }). If the method is
+  // removed or regresses (drops the array / changes the endpoint), this fails.
+  it('shareServiceInstanceWithSpaces POSTs { guids } to .../relationships/shared_spaces', () => {
+    const obs = service.shareServiceInstanceWithSpaces('cnsi-1', 'si-1', ['space-a', 'space-b', 'space-c']);
+    let resolved: unknown = null;
+    obs.subscribe(v => (resolved = v));
+
+    const req = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-1/relationships/shared_spaces');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ guids: ['space-a', 'space-b', 'space-c'] });
+
+    req.flush({ data: [{ guid: 'space-a' }, { guid: 'space-b' }, { guid: 'space-c' }] });
+    expect(resolved).toEqual({ data: [{ guid: 'space-a' }, { guid: 'space-b' }, { guid: 'space-c' }] });
+  });
+
+  it('applyPlanVisibility sends an empty org list for non-organization scopes', () => {
+    service.applyPlanVisibility('cnsi-1', 'plan-1', 'public');
+
+    const req = httpMock.expectOne('/pp/v1/cf/service_plans/cnsi-1/plan-1/visibility');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ type: 'public', organizations: [] });
+    req.flush({ type: 'public' });
+  });
 });

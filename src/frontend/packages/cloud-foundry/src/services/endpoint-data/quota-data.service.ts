@@ -150,6 +150,19 @@ export class QuotaDataService {
     );
   }
 
+  // Bulk-apply a space quota to one or more spaces in a single call. Wraps
+  // the backend's POST /cf/space_quotas/:cnsi/:quota/relationships/spaces,
+  // which fans out to CF V3 POST /v3/space_quotas/{guid}/relationships/spaces.
+  // Note the body shape differs from applyOrgQuotaToOrgs: the space-quota
+  // handler decodes { space_guids: [...] } (a flat guid array), not the V3
+  // { data: [{ guid }] } relationship envelope.
+  applySpaceQuotaToSpaces(cnsiGuid: string, quotaGuid: string, spaceGuids: string[]): Observable<unknown> {
+    return this.http.post(
+      `/pp/v1/cf/space_quotas/${cnsiGuid}/${quotaGuid}/relationships/spaces`,
+      { space_guids: spaceGuids },
+    );
+  }
+
   private signalize<T>(obs: Observable<T>, initial: T): SignalSource<T> {
     const value = signal<T>(initial);
     const isLoading = signal(true);

@@ -13,6 +13,7 @@ import {
   LoadingPageComponent,
   PageHeaderComponent,
   PageSubNavComponent,
+  TailwindDialogService,
   TileComponent,
   TileGridComponent,
   TileGroupComponent,
@@ -20,6 +21,10 @@ import {
 import { EndpointModel } from '@stratosui/store';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { StOrgDetail, StSpace, StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
+import {
+  ApplyQuotaToSpacesDialogComponent,
+  ApplyQuotaToSpacesDialogData,
+} from './apply-quota-to-spaces-dialog/apply-quota-to-spaces-dialog.component';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
@@ -57,6 +62,11 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
   readonly detailsLoading$: Observable<boolean>;
   readonly editLink: Signal<string[]>;
   readonly canEditQuota: Signal<boolean>;
+  // The quota guid this page resolved to (route param, or the assigned quota of
+  // the space in view). Captured as a field so openApplyToSpaces() can read it.
+  readonly resolvedQuotaGuid: Signal<string | null>;
+
+  private readonly dialog = inject(TailwindDialogService);
 
   editParams!: object;
   public isOrg = false;
@@ -82,6 +92,7 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
       if (this.quotaGuid) return this.quotaGuid;
       return this.space()?.quotaGuid ?? null;
     });
+    this.resolvedQuotaGuid = resolvedQuotaGuid;
 
     const sourceSignal = computed(() => {
       const guid = resolvedQuotaGuid();
@@ -103,6 +114,26 @@ export class SpaceQuotaDefinitionComponent extends QuotaDefinitionBaseComponent 
         'edit-space-quota'
       ] : [];
     });
+  }
+
+  // Opens the multi-select "apply to spaces" dialog. The quota + its org are
+  // fixed by the page in view; the dialog only chooses which spaces receive it,
+  // then calls QuotaDataService.applySpaceQuotaToSpaces for the whole set.
+  openApplyToSpaces(): void {
+    const quotaGuid = this.resolvedQuotaGuid();
+    if (!quotaGuid) return;
+    this.dialog.open<ApplyQuotaToSpacesDialogComponent, ApplyQuotaToSpacesDialogData, boolean>(
+      ApplyQuotaToSpacesDialogComponent,
+      {
+        ariaLabelledBy: 'apply-quota-to-spaces-title',
+        data: {
+          cfGuid: this.cfGuid,
+          orgGuid: this.orgGuid,
+          quotaGuid,
+          quotaName: this.spaceQuotaDefinition()?.name,
+        },
+      },
+    );
   }
 
   protected override getBreadcrumbs(

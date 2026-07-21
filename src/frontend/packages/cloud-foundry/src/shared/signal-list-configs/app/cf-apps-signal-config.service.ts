@@ -20,6 +20,13 @@ import type { StratosJob } from '../../../services/async-jobs/async-job.types';
 import type { SignalListDropdownOption } from '@stratosui/core';
 import { ListStateStore, naturalCompare } from '@stratosui/core';
 
+// Re-export the bulk-endpoint response shapes so per-space app consumers
+// import a single BulkResult type without reaching across into the routes
+// config service. The backend envelope is identical
+// (POST /pp/v1/cf/apps/:cnsi/bulk/delete) — one shape, one definition.
+export type { BulkItemResult, BulkResult } from '../route/cf-routes-signal-config.service';
+import type { BulkResult } from '../route/cf-routes-signal-config.service';
+
 @Injectable({ providedIn: 'root' })
 export class CfAppsSignalConfigService {
   orchestrator!: MergeOrchestrator<StApp>;
@@ -1030,5 +1037,26 @@ export class CfAppsSignalConfigService {
       path: `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`,
     });
     this.orchestrator?.removeRow(cnsiGuid, appGuid);
+  }
+
+  // Bulk delete: destroys each app entity (cascading its routes/bindings on
+  // the CF side). CF v3 has no batch delete, so the backend fans out one
+  // DELETE /v3/apps/{guid} per item and returns a BulkResult with per-guid
+  // outcomes; pending items carry an async CF job tracking completion.
+  // Optimistically drops every non-failed row from the orchestrator's
+  // aggregated view (mirrors deleteApp's removeRow) so the list reflects the
+  // request immediately without a full re-fetch — a pending delete that later
+  // fails resurfaces on the next refresh.
+  async bulkDeleteApps(cnsiGuid: string, appGuids: string[]): Promise<BulkResult> {
+    const result = await firstValueFrom(this.http.post<BulkResult>(
+      `/pp/v1/cf/apps/${cnsiGuid}/bulk/delete`,
+      { guids: appGuids },
+    ));
+    for (const item of result.results) {
+      if (item.state !== 'failed') {
+        this.orchestrator?.removeRow(cnsiGuid, item.guid);
+      }
+    }
+    return result;
   }
 }

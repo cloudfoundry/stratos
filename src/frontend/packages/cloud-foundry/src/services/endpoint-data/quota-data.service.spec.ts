@@ -111,4 +111,16 @@ describe('QuotaDataService', () => {
     expect(req.request.method).toBe('PATCH');
     req.flush({ guid: 'sq-1', name: 'renamed' });
   });
+
+  // Guard: the bulk-apply request targets the space-quota relationships
+  // endpoint and sends the flat { space_guids } body the Go handler decodes
+  // (NOT the { data: [{ guid }] } envelope applyOrgQuotaToOrgs uses). Fails if
+  // the method is removed or its URL/body shape drifts from the backend.
+  it('applySpaceQuotaToSpaces POSTs { space_guids } to the relationships endpoint', () => {
+    service.applySpaceQuotaToSpaces('cnsi-1', 'sq-1', ['space-a', 'space-b']).subscribe();
+    const req = httpMock.expectOne('/pp/v1/cf/space_quotas/cnsi-1/sq-1/relationships/spaces');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ space_guids: ['space-a', 'space-b'] });
+    req.flush({});
+  });
 });

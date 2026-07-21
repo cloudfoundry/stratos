@@ -21,6 +21,7 @@ function makeStubAppsConfig() {
   const sortSig = signal({ field: 'name' as const, direction: 'asc' as const });
   const view = {
     pagedItems: signal([]).asReadonly(),
+    filteredItems: signal([]).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
     totalItems: signal(0).asReadonly(),
@@ -37,6 +38,7 @@ function makeStubAppsConfig() {
     loadAll: vi.fn().mockResolvedValue(undefined),
     refresh: vi.fn().mockResolvedValue(undefined),
     deleteApp: vi.fn().mockResolvedValue(undefined),
+    bulkDeleteApps: vi.fn().mockResolvedValue({ results: [], succeeded: 0, failed: 0, pending: 0 }),
     startStatsPolling: vi.fn(),
     appStats: stats,
     filter: filterSig,
@@ -101,7 +103,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      'Name', 'Status', 'Instances', 'Memory', 'Disk', 'Created', '', '',
+      '', 'Name', 'Status', 'Instances', 'Memory', 'Disk', 'Created', '', '',
     ]);
     // No filter dropdowns — single-CNSI single-space tab.
     expect(cfg!.filterDropdowns).toBeUndefined();
@@ -134,6 +136,29 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     expect(instCol!.render!(app)).toBe('— / 3');
     stubAppsConfig.appStats.set(new Map([['cnsi-1:app-1', { running: 2, total: 3 }]]));
     expect(instCol!.render!(app)).toBe('2 / 3');
+  });
+
+  // GUARD: bulk delete has been silently dropped from this tab multiple
+  // times because nothing asserted the multi-select affordance survived a
+  // refactor. This test fails if the checkbox selection column OR the bulk
+  // delete action goes missing.
+  it('exposes a checkbox selection column and a non-empty bulk delete action', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+
+    // Multi-select requires a kind:'checkbox' column.
+    const checkboxCol = cfg!.columns.find(c => c.kind === 'checkbox');
+    expect(checkboxCol).toBeDefined();
+
+    // bulkActions must be present and carry a delete action.
+    expect(cfg!.bulkActions).toBeDefined();
+    expect(cfg!.bulkActions!.length).toBeGreaterThan(0);
+    const deleteAction = cfg!.bulkActions!.find(
+      a => (a.dataTest ?? a.label).toLowerCase().includes('delete'),
+    );
+    expect(deleteAction).toBeDefined();
+    expect(deleteAction!.label).toBe('Delete');
   });
 
   it('formatMb returns human-friendly units and ∞ for unlimited', () => {

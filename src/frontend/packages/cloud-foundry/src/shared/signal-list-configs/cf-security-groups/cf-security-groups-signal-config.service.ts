@@ -1,11 +1,25 @@
 import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { firstValueFrom } from 'rxjs';
+
 import { ListStateStore } from '@stratosui/core';
 
 import { CnsiSecurityGroupsSource } from '../../../services/data-sources/cnsi-security-groups-source';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import type { StSecurityGroup } from '../../../services/endpoint-data/stratos-types';
+
+// SecurityGroupSpaceBindLifecycle selects which CF lifecycle relationship a
+// bulk space-bind targets. CF models running and staging security-group
+// bindings as two distinct sub-resources; a bind names exactly one.
+export type SecurityGroupSpaceBindLifecycle = 'running' | 'staging';
+
+// SecurityGroupBindResult mirrors the backend response — the CF v3 to-many
+// relationship the bind endpoints return (POST .../relationships/{running,
+// staging}_spaces). `data` is the full post-bind space set for the group.
+export interface SecurityGroupBindResult {
+  data: { guid: string }[];
+}
 
 // CF Security Groups list config — single-CNSI, read-only. Drives the
 // per-CF /cloud-foundry/:cnsi/security-groups tab. Security groups are
@@ -91,6 +105,28 @@ export class CfSecurityGroupsSignalConfigService {
     this.nameFilter.set('');
     this.sort.set({ field: 'name', direction: 'asc' });
     this.pageIndex.set(0);
+  }
+
+  // Bulk-bind a security group to N spaces for one lifecycle. Wraps the
+  // backend POST /pp/v1/cf/security_groups/{cnsi}/{sg}/relationships/
+  // {running,staging}_spaces (body {"guids":[...]}), which forwards to CF v3's
+  // single batch relationship endpoint — one call binds every space at once.
+  // Refreshes the list on success so the affected group's running/staging
+  // space counts update. Running vs staging is purely the lifecycle argument;
+  // both share this one method to keep the two paths from drifting.
+  async bindSpaces(
+    cnsiGuid: string,
+    sgGuid: string,
+    spaceGuids: string[],
+    lifecycle: SecurityGroupSpaceBindLifecycle,
+  ): Promise<SecurityGroupBindResult> {
+    const rel = lifecycle === 'staging' ? 'staging_spaces' : 'running_spaces';
+    const result = await firstValueFrom(this.http.post<SecurityGroupBindResult>(
+      `/pp/v1/cf/security_groups/${cnsiGuid}/${sgGuid}/relationships/${rel}`,
+      { guids: spaceGuids },
+    ));
+    await this.refresh();
+    return result;
   }
 
   registerSortExtractor(fieldKey: string, extractor: (row: StSecurityGroup) => unknown): void {

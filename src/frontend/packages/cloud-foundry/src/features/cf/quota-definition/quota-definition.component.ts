@@ -13,6 +13,7 @@ import {
   LoadingPageComponent,
   PageHeaderComponent,
   PageSubNavComponent,
+  TailwindDialogService,
   TileComponent,
   TileGridComponent,
   TileGroupComponent,
@@ -25,6 +26,10 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
+import {
+  ApplyQuotaToOrgsDialogComponent,
+  ApplyQuotaToOrgsDialogData,
+} from './apply-quota-to-orgs-dialog.component';
 
 export const QUOTA_ORG_GUID = 'org';
 
@@ -60,6 +65,8 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
 
   editParams: object;
   public isCf = false;
+
+  private readonly dialog = inject(TailwindDialogService);
 
   constructor() {
     const endpoints = inject(CfEndpointsDataService);
@@ -104,6 +111,30 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
         'edit-quota'
       ] : [];
     });
+  }
+
+  // Opens the multi-select "Apply to organizations" dialog for THIS quota.
+  // Bulk entry point: pick N orgs, apply the quota to all of them in one
+  // call (QuotaDataService.applyOrgQuotaToOrgs). Only wired on the CF-level
+  // quota detail page (isCf) where "this quota" is unambiguous; gated on
+  // QUOTA_EDIT in the template alongside the Edit button.
+  openApplyToOrgs(): void {
+    const quota = this.quotaDefinition();
+    if (!quota) {
+      return;
+    }
+    this.dialog.open<ApplyQuotaToOrgsDialogComponent, ApplyQuotaToOrgsDialogData, boolean>(
+      ApplyQuotaToOrgsDialogComponent,
+      {
+        ariaLabelledBy: 'apply-quota-to-orgs-dialog-title',
+        data: {
+          cfGuid: this.cfGuid,
+          quotaGuid: quota.guid,
+          quotaName: quota.name,
+        },
+        width: '520px',
+      },
+    );
   }
 
   protected override getBreadcrumbs(

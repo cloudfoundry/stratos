@@ -1,7 +1,14 @@
 <app-page-header [breadcrumbs]="breadcrumbs">
   {{ title() }}
-  @if (actions().length) {
+  @if (actions().length || canShare()) {
     <div class="page-header-right flex gap-2">
+      @if (canShare()) {
+        <button type="button" data-test="share-service-instance-action"
+          (click)="openShareToSpaces()" class="btn btn-secondary btn-sm">
+          <span class="material-icons text-base align-middle">share</span>
+          Share to spaces
+        </button>
+      }
       @for (a of actions(); track a.label) {
         <button type="button" (click)="runAction(a)"
           [class]="a.danger ? 'btn btn-secondary btn-sm text-danger' : 'btn btn-secondary btn-sm'">

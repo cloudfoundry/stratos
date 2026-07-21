@@ -69,4 +69,25 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // Guard: the "Bind to spaces" per-row affordance must be present on the
+  // list config. Removing the actions column or the bind action fails here.
+  it('exposes a "Bind to spaces" row action', () => {
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+
+    const actionsCol = cfg!.columns.find(col => col.key === 'actions');
+    expect(actionsCol).toBeDefined();
+    expect(actionsCol!.actions).toBeDefined();
+
+    const sampleGroup = {
+      guid: 'sg-1', name: 'public_networks',
+      globallyEnabledRunning: true, globallyEnabledStaging: false,
+      ruleCount: 1, runningSpaceCount: 0, stagingSpaceCount: 0,
+      cnsiGuid: testSCFEndpointGuid,
+      createdAt: '2026-04-22T12:00:00Z', updatedAt: '2026-04-22T12:00:00Z',
+    };
+    const actions = actionsCol!.actions!(sampleGroup);
+    expect(actions.some(a => a.label === 'Bind to spaces')).toBe(true);
+  });
 });
