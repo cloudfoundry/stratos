@@ -99,7 +99,7 @@ function unwrapFastPathBody(body: unknown): unknown {
   return body;
 }
 
-async function pollJob<T>(
+export async function pollJob<T>(
   http: HttpClient,
   jobId: string,
   opts: WriteWithJobOptions,
