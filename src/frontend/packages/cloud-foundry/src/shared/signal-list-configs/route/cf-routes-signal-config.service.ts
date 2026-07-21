@@ -10,16 +10,21 @@ import { EntityDeleteController } from '../../../services/deletes/entity-delete.
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../../cf-entity-types';
 import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
+import type { StratosJob } from '../../../services/async-jobs/async-job.types';
 
 // Shape of the backend bulk endpoints' JSON response
 // (POST /pp/v1/cf/routes/:cnsi/bulk/{delete,unmap}). Per-guid outcome plus
 // roll-up counts. `pending` items have an async CF job tracking completion,
 // so the UI treats succeeded+pending as the non-error count.
+export type BulkItemState = 'COMPLETE' | 'FAILED' | 'PENDING';
+
 export interface BulkItemResult {
   readonly guid: string;
-  readonly state: 'succeeded' | 'failed' | 'pending';
-  readonly errors?: readonly { code: number; message: string }[];
-  readonly job?: string;
+  readonly state: BulkItemState;
+  readonly errors?: readonly { code: string; message: string }[];
+  // StratosJob handoff for PENDING items (frontend polls it). Absent when
+  // the item settled in the fast path or the async tracker is unwired.
+  readonly job?: StratosJob;
 }
 
 export interface BulkResult {

@@ -551,6 +551,31 @@ describe('CfAppsSignalConfigService', () => {
     src._items.set(apps);
   }
 
+  it('bulkDeleteApps does NOT optimistically remove rows whose delete FAILED', async () => {
+    const httpMock = {
+      get: makeHttp().get,
+      post: vi.fn(() => of({
+        results: [
+          { guid: 'app-ok', state: 'COMPLETE' },
+          { guid: 'app-bad', state: 'FAILED', errors: [{ code: 'CF-Err', message: 'nope' }] },
+        ],
+        succeeded: 1, failed: 1, pending: 0,
+      })),
+    } as unknown as HttpClient;
+    const cf = makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]);
+    const svc = makeSvc(httpMock, cf);
+    svc.initialize(['cnsi-1']);
+    const mk = (guid: string): StApp => ({
+      guid, name: guid, state: 'STARTED', cnsiGuid: 'cnsi-1', spaceGuid: 'sp-1',
+      instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp);
+    seedApps(svc, [mk('app-ok'), mk('app-bad')]);
+    TestBed.tick();
+    await svc.bulkDeleteApps('cnsi-1', ['app-ok', 'app-bad']);
+    const remaining = svc.orchestrator.allItems().map(a => a.guid);
+    expect(remaining).toEqual(['app-bad']); // failed row stays; completed row removed
+  });
+
   it('resolver fetches space names for visible-row guids that are NOT in the catalog', async () => {
     // Catalog (per_page=500&page=1) returns NO spaces — simulating the
     // overflow case where the visible row's space lives beyond page 1.
