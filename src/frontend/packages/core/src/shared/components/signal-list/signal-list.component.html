@@ -279,13 +279,15 @@
               @for (col of config.columns; track col.key; let first = $first) {
                 @if (first) {
                   <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
-                    <span class="truncate min-w-0" [attr.title]="col.render(row)">
-                      @if (col.kind === 'link' && col.link && col.link(row); as target) {
-                        <a [routerLink]="target" [queryParams]="col.linkQueryParams ? col.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ col.render(row) }}</a>
-                      } @else {
-                        {{ col.render(row) }}
-                      }
-                    </span>
+                    @if (titleColumn(); as tc) {
+                      <span class="truncate min-w-0" [attr.title]="tc.tooltip ? tc.tooltip(row) : tc.render(row)">
+                        @if (tc.kind === 'link' && tc.link && tc.link(row); as target) {
+                          <a [routerLink]="target" [queryParams]="tc.linkQueryParams ? tc.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
+                        } @else {
+                          {{ tc.render(row) }}
+                        }
+                      </span>
+                    }
                     <div class="flex items-center gap-0 shrink-0">
                       @if (favoriteColumn(); as fc) {
                         <button
@@ -298,6 +300,18 @@
                             {{ isFavorite(fc, row) ? 'star' : 'star_border' }}
                           </span>
                         </button>
+                      }
+                      @if (checkboxColumn(); as cbCol) {
+                        <input
+                          data-test="card-select-checkbox"
+                          type="checkbox"
+                          [checked]="isCheckboxSelected(cbCol, row)"
+                          [disabled]="isCheckboxDisabled(cbCol, row)"
+                          (click)="onToggleCheckbox(cbCol, row, $event)"
+                          class="w-4 h-4 mx-0.5 accent-accent"
+                          [class.cursor-pointer]="!isCheckboxDisabled(cbCol, row)"
+                          [class.cursor-not-allowed]="isCheckboxDisabled(cbCol, row)"
+                          [class.opacity-40]="isCheckboxDisabled(cbCol, row)" />
                       }
                       @if (actionsColumn(); as ac) {
                         <div class="relative inline-block">
@@ -338,8 +352,12 @@
                       }
                     </div>
                   </div>
-                } @else if (col.kind === 'favorite' || col.kind === 'actions') {
-                  <!-- Suppressed: star + kebab are attached to the Name row above -->
+                } @else if (isTitleColumn(col) || col.kind === 'favorite' || col.kind === 'actions' || col.kind === 'checkbox') {
+                  <!-- Suppressed: title is the card header; star, checkbox, and
+                       kebab live in the header cluster (order: star, checkbox,
+                       kebab). The checkbox column is not the title even when it's
+                       listed first, so a leading selection column no longer
+                       blanks the title or hides its checkbox. -->
                 } @else if (col.kind === 'radio' && col.radio) {
                   <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                     <span class="text-content-muted">{{ col.header }}</span>
@@ -353,19 +371,6 @@
                       [class.cursor-pointer]="!isRadioDisabled(col, row)"
                       [class.cursor-not-allowed]="isRadioDisabled(col, row)"
                       [class.opacity-40]="isRadioDisabled(col, row)" />
-                  </div>
-                } @else if (col.kind === 'checkbox' && col.checkbox) {
-                  <div class="flex justify-between items-center gap-2 text-sm py-0.5">
-                    <span class="text-content-muted">{{ col.header }}</span>
-                    <input
-                      data-test="row-checkbox"
-                      type="checkbox"
-                      [checked]="isCheckboxSelected(col, row)"
-                      [disabled]="isCheckboxDisabled(col, row)"
-                      (click)="onToggleCheckbox(col, row, $event)"
-                      [class.cursor-pointer]="!isCheckboxDisabled(col, row)"
-                      [class.cursor-not-allowed]="isCheckboxDisabled(col, row)"
-                      [class.opacity-40]="isCheckboxDisabled(col, row)" />
                   </div>
                 } @else if (col.kind === 'template' && cellTemplateFor(col); as tpl) {
                   <div class="flex justify-between items-start gap-2 text-sm py-0.5">

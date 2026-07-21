@@ -820,6 +820,77 @@ describe('SignalListComponent', () => {
     });
   });
 
+  // Guard: card view must expose bulk selection in the header cluster, and a
+  // leading checkbox column must NOT steal the title slot. Routes list its
+  // checkbox column first, which previously blanked the card title (title =
+  // columns[0]) and hid the checkbox entirely. These fail if the checkbox
+  // stops rendering in the header, or if the title reverts to columns[0].
+  describe('card-view bulk select (default renderer, leading checkbox column)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config"></app-signal-list>`,
+    })
+    class CardBulkHost {
+      items = signal([{ name: 'one', guid: 'g-one' }, { name: 'two', guid: 'g-two' }]);
+      selected = signal<ReadonlySet<string>>(new Set<string>());
+      config: SignalListConfig<{ name: string; guid: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(2).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        viewMode: signal<'table' | 'card'>('card'),
+        columns: [
+          // Checkbox FIRST — the routes ordering that used to break the title.
+          {
+            header: 'Pick', key: 'pick', kind: 'checkbox', render: () => '',
+            checkbox: { selectedKeys: this.selected },
+          },
+          { header: 'Name', key: 'name', render: r => r.name, tooltip: r => r.guid },
+        ],
+        bulkActions: [{ label: 'Delete', run: () => undefined }],
+        getRowKey: r => r.name,
+      };
+    }
+
+    it('renders the checkbox in the header cluster; selecting drives the bulk bar', () => {
+      const fixture = TestBed.createComponent(CardBulkHost);
+      fixture.detectChanges();
+      const boxes = fixture.nativeElement
+        .querySelectorAll('[data-test="card-select-checkbox"]') as NodeListOf<HTMLInputElement>;
+      expect(boxes.length).toBe(2);
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).toBeNull();
+      boxes[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.selected().has('one')).toBe(true);
+      expect(fixture.nativeElement.querySelector('[data-test="bulk-action-bar"]')).not.toBeNull();
+    });
+
+    it('uses the first non-control column as the title (checkbox does not blank it)', () => {
+      const fixture = TestBed.createComponent(CardBulkHost);
+      fixture.detectChanges();
+      const cards = fixture.nativeElement.querySelectorAll('[data-test="card"]');
+      // Title text is the Name column, not the empty checkbox column.
+      expect((cards[0] as HTMLElement).textContent).toContain('one');
+      // Title tooltip comes from the column's tooltip fn (full guid on hover).
+      const title = cards[0].querySelector('span[title]') as HTMLElement;
+      expect(title.getAttribute('title')).toBe('g-one');
+    });
+
+    it('does not also render the title column as a body detail row', () => {
+      const fixture = TestBed.createComponent(CardBulkHost);
+      fixture.detectChanges();
+      const card = fixture.nativeElement.querySelector('[data-test="card"]') as HTMLElement;
+      // The title column is the header; it must not repeat as a label:value
+      // detail row. A doubled title means the suppression missed it.
+      const nameOccurrences = (card.textContent!.match(/one/g) ?? []).length;
+      expect(nameOccurrences).toBe(1);
+    });
+  });
+
   describe('external-link column (externalLink)', () => {
     @Component({
       standalone: true,

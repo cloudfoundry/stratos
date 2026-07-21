@@ -178,6 +178,11 @@ export interface SignalListColumn<T> {
   // cell the signal-list migration dropped. Does not make the row clickable
   // (rowLink only follows `kind: 'link'` + `link`).
   externalLink?: (row: T) => string | null;
+  // Optional, kind-agnostic. Overrides the hover `title` (tooltip) for this
+  // column's cell/card-title; defaults to the rendered text. Used by the
+  // routes card to show a route's full guid on hover while the visible title
+  // shows a short-guid fallback for unnamed routes.
+  tooltip?: (row: T) => string;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
   // Required when kind === 'compound'. Returns an ordered list of segments;
@@ -698,6 +703,25 @@ export class SignalListComponent<T> implements AfterViewInit {
   // column doesn't render as a label:value detail line.
   actionsColumn(): SignalListColumn<T> | null {
     return this.config.columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
+  }
+
+  // Returns the first non-control column; the card header renders it as the
+  // title. Skips checkbox/favorite/actions/radio so a list that puts a
+  // leading selection column first (e.g. routes) still gets a real title
+  // instead of a blank one, and its checkbox moves to the header cluster.
+  titleColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c =>
+      c.kind !== 'checkbox' && c.kind !== 'favorite' &&
+      c.kind !== 'actions' && c.kind !== 'radio'
+    ) ?? null;
+  }
+
+  // True when `col` is the card's title column. Compared by identity (key,
+  // falling back to header) rather than object reference so it holds even if
+  // the consumer rebuilds its column array between change-detection reads.
+  isTitleColumn(col: SignalListColumn<T>): boolean {
+    const tc = this.titleColumn();
+    return !!tc && (tc.key ?? tc.header) === (col.key ?? col.header);
   }
 
   // Bulk-action bar helpers --------------------------------------------
