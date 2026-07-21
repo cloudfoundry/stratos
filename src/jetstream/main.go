@@ -31,7 +31,7 @@ import (
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/nwmac/sqlitestore"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/sqlitestore"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger"
