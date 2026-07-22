@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
+import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -16,6 +16,15 @@ import {
 import { CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StApp } from '../../../../services/endpoint-data/stratos-types';
+
+// Mirrors the mock in bulk-progress.spec.ts: show/open/error recorded
+// separately (runBulkWithProgress calls each for a different phase) and a
+// ref exposing update/dismiss for the in-place progress snackbar.
+function makeSnackBar() {
+  const ref = { update: vi.fn(), dismiss: vi.fn(), afterDismissed: vi.fn(), onAction: vi.fn(), dismissWithAction: vi.fn() };
+  return { ref, open: vi.fn(() => ref), show: vi.fn(() => ref), error: vi.fn(() => ref) };
+}
+const flush = async (n = 16) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
 
 // The per-CF Applications tab shows an Org/Space compound column — the
 // application wall's CF/Org/Space column minus the CF (endpoint) segment,
@@ -153,9 +162,11 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
   let component: CloudFoundryApplicationsSignalComponent;
   let fixture: ComponentFixture<CloudFoundryApplicationsSignalComponent>;
   let stubAppsConfig: ReturnType<typeof makeStubAppsConfig>;
+  let snackBar: ReturnType<typeof makeSnackBar>;
 
   beforeEach(async () => {
     stubAppsConfig = makeStubAppsConfig();
+    snackBar = makeSnackBar();
     const stubEndpointService = { cfGuid: 'cnsi-1' } as any;
     await TestBed.configureTestingModule({
       imports: [CloudFoundryApplicationsSignalComponent],
@@ -169,6 +180,11 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
         { provide: CfAppsSignalConfigService, useValue: stubAppsConfig },
         { provide: CloudFoundryEndpointService, useValue: stubEndpointService },
         { provide: CurrentUserPermissionsService, useValue: { can: () => of(true) } },
+        { provide: TailwindSnackBarService, useValue: snackBar },
+        // The confirm dialog normally opens a modal and waits for the user;
+        // the harness fires the confirm callback immediately so the bulk
+        // action's run() drives straight into runBulk/runBulkWithProgress.
+        { provide: ConfirmationDialogService, useValue: { open: (_cfg: unknown, doFn: () => void) => doFn() } },
       ],
     }).compileComponents();
 
@@ -219,5 +235,40 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
     );
     expect(deleteAction).toBeDefined();
     expect(deleteAction!.label).toBe('Delete');
+  });
+
+  // Bulk delete now reports the settled outcome via runBulkWithProgress
+  // (Task 4), not the old "N applications delete requested" fire-and-forget
+  // wording — a CF delete accepted async settles for real once its job
+  // completes, and the summary should say so.
+  it('bulk delete reports settled outcome wording, not "requested"', async () => {
+    const targets: StApp[] = [
+      app({ cnsiGuid: 'cnsi-1', guid: 'app-1' }),
+      app({ cnsiGuid: 'cnsi-1', guid: 'app-2' }),
+    ];
+    stubAppsConfig.view.filteredItems = signal(targets).asReadonly();
+    stubAppsConfig.bulkDeleteApps.mockResolvedValue({
+      results: [
+        { guid: 'app-1', state: 'COMPLETE' },
+        { guid: 'app-2', state: 'COMPLETE' },
+      ],
+      succeeded: 2,
+      failed: 0,
+      pending: 0,
+    });
+
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    const deleteAction = cfg!.bulkActions!.find(a => a.label === 'Delete');
+    expect(deleteAction).toBeDefined();
+
+    deleteAction!.run(new Set(['cnsi-1:app-1', 'cnsi-1:app-2']));
+    await flush();
+
+    expect(stubAppsConfig.bulkDeleteApps).toHaveBeenCalledWith('cnsi-1', ['app-1', 'app-2']);
+    expect(snackBar.show).toHaveBeenCalledWith('2 applications deleted');
+    const allCalls = [...snackBar.open.mock.calls, ...snackBar.show.mock.calls, ...snackBar.error.mock.calls]
+      .map(c => c[0]);
+    expect(allCalls.join(' ')).not.toContain('requested');
   });
 });
