@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of } from 'rxjs';
-import { pollBulkResult } from './bulk-progress';
+import { pollBulkResult, runBulkWithProgress } from './bulk-progress';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import type { StratosJob } from './async-job.types';
 
@@ -77,5 +77,94 @@ describe('pollBulkResult', () => {
     expect(t.deleted).toBe(10);
     expect(t.settled).toBe(10);
     expect((http as any).get).toHaveBeenCalledTimes(10);
+  });
+});
+
+function makeSnackBar() {
+  const updates: string[] = [];
+  const ref = { update: (m: string) => updates.push(m), dismiss: vi.fn(), afterDismissed: vi.fn(), onAction: vi.fn(), dismissWithAction: vi.fn() };
+  return {
+    updates,
+    ref,
+    open: vi.fn(() => ref),
+    show: vi.fn(() => ref),
+    error: vi.fn(() => ref),
+  };
+}
+const flush = async (n = 8) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
+
+describe('runBulkWithProgress', () => {
+  it('clean sync result → auto-dismissing final summary, no progress phase, no refresh', async () => {
+    const sb = makeSnackBar();
+    const refresh = vi.fn();
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([{ guid: 'a', state: 'COMPLETE' }, { guid: 'b', state: 'COMPLETE' }]),
+      refresh,
+    });
+    await flush();
+    expect(sb.show).toHaveBeenCalledWith('2 applications deleted');
+    expect(sb.open).not.toHaveBeenCalled();   // no progress snackbar
+    expect(sb.error).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it('failures → persistent error summary + refresh', async () => {
+    const sb = makeSnackBar();
+    const refresh = vi.fn(async () => {});
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([{ guid: 'a', state: 'COMPLETE' }, { guid: 'b', state: 'FAILED' }]),
+      refresh,
+    });
+    await flush();
+    expect(sb.error).toHaveBeenCalledWith('1 application deleted, 1 failed');
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('pending items → progress snackbar updates in place, then final summary', async () => {
+    const sb = makeSnackBar();
+    const http = {
+      get: vi.fn(() => of(new HttpResponse({ status: 200, body: job('j-1', 'COMPLETE') }))),
+    } as unknown as HttpClient;
+    await runBulkWithProgress({
+      snackBar: sb as any, http,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([
+        { guid: 'a', state: 'COMPLETE' },
+        { guid: 'b', state: 'PENDING', job: job('j-1', 'PROCESSING') },
+      ]),
+      backoffMs: [0],
+    });
+    await flush(16);
+    expect(sb.open).toHaveBeenCalledWith('Deleting 2 applications… 1 of 2', undefined, { duration: 0 });
+    expect(sb.ref.dismiss).toHaveBeenCalled();          // progress replaced by final
+    expect(sb.show).toHaveBeenCalledWith('2 applications deleted');
+  });
+
+  it('bulkRunning covers only the POST phase', async () => {
+    const sb = makeSnackBar();
+    const states: boolean[] = [];
+    const bulkRunning = { set: (v: boolean) => states.push(v) };
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any, bulkRunning: bulkRunning as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([{ guid: 'a', state: 'COMPLETE' }]),
+    });
+    expect(states).toEqual([true, false]);  // false by the time the await returns
+  });
+
+  it('POST failure → error snackbar with extracted message, no settlement phase', async () => {
+    const sb = makeSnackBar();
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => { throw new Error('boom'); },
+    });
+    await flush();
+    expect(sb.error).toHaveBeenCalledWith(expect.stringContaining('Bulk delete failed'));
+    expect(sb.show).not.toHaveBeenCalled();
   });
 });

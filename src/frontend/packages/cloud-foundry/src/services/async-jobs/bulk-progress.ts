@@ -1,5 +1,8 @@
 import { HttpClient } from '@angular/common/http';
+import { WritableSignal } from '@angular/core';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
 import { pollJob } from './write-with-job';
+import { extractHttpErrorMessage } from '../extract-error-message';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 
 export interface BulkTally {
@@ -54,4 +57,72 @@ export async function pollBulkResult(
   const width = Math.min(opts.concurrency ?? 6, pendingJobs.length);
   await Promise.all(Array.from({ length: width }, () => worker()));
   return tally;
+}
+
+export interface BulkProgressOptions {
+  snackBar: TailwindSnackBarService;
+  http: HttpClient;
+  bulkRunning?: WritableSignal<boolean>;
+  noun: string;
+  verb: string;
+  progressVerb: string;
+  doneVerb: string;
+  op: () => Promise<BulkResult>;
+  refresh?: () => Promise<void>;
+  refreshAfterPending?: boolean;
+  backoffMs?: readonly number[];   // test hook, forwarded to pollBulkResult
+}
+
+const plural = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
+// Owns the whole bulk lifecycle. Resolves when the POST phase ends (bulk
+// bar closes, rows already handled by op); settlement (job polling +
+// snackbar updates + final summary + refresh) continues detached and
+// swallows every error — nothing may escape as an unhandled rejection.
+export async function runBulkWithProgress(o: BulkProgressOptions): Promise<void> {
+  let result: BulkResult;
+  o.bulkRunning?.set(true);
+  try {
+    result = await o.op();
+  } catch (err: unknown) {
+    o.snackBar.error(`Bulk ${o.verb} failed: ${extractHttpErrorMessage(err)}`);
+    return;
+  } finally {
+    o.bulkRunning?.set(false);
+  }
+  void trackSettlement(o, result).catch(() => { /* defensive: see contract above */ });
+}
+
+async function trackSettlement(o: BulkProgressOptions, result: BulkResult): Promise<void> {
+  const total = result.results.length;
+  const hadPending = result.results.some(r => r.state === 'PENDING');
+  let progressRef: TailwindSnackBarRef<unknown> | undefined;
+
+  const report = (t: { settled: number; total: number }): void => {
+    if (t.settled >= t.total) { return; }
+    const msg = `${o.progressVerb} ${plural(total, o.noun)}… ${t.settled} of ${t.total}`;
+    if (progressRef) { progressRef.update(msg); }
+    else { progressRef = o.snackBar.open(msg, undefined, { duration: 0 }); }
+  };
+
+  const tally = await pollBulkResult(o.http, result, {
+    onProgress: hadPending ? report : undefined,
+    backoffMs: o.backoffMs,
+  });
+  progressRef?.dismiss();
+
+  const parts = [`${plural(tally.deleted, o.noun)} ${o.doneVerb}`];
+  if (tally.failed > 0) { parts.push(`${tally.failed} failed`); }
+  if (tally.unconfirmed > 0) { parts.push(`${tally.unconfirmed} unconfirmed`); }
+  const message = parts.join(', ');
+
+  const clean = tally.failed === 0 && tally.unconfirmed === 0;
+  if (clean) {
+    o.snackBar.show(message);  // default 5s auto-dismiss = readable linger
+  } else {
+    o.snackBar.error(message); // persistent until manually dismissed
+  }
+  if (!clean || (hadPending && o.refreshAfterPending)) {
+    try { await o.refresh?.(); } catch { /* next manual refresh surfaces it */ }
+  }
 }
