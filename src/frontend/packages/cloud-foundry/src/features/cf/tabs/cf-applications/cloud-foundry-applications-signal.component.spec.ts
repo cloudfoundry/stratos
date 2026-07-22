@@ -266,6 +266,10 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
     await flush();
 
     expect(stubAppsConfig.bulkDeleteApps).toHaveBeenCalledWith('cnsi-1', ['app-1', 'app-2']);
+    // Progress snackbar opens at POST start (the selection count is known
+    // before bulkDeleteApps is even called) — a fast POST still gives
+    // visible in-progress feedback, not silence until the final summary.
+    expect(snackBar.open).toHaveBeenCalledWith('Deleting 2 applications…', undefined, { duration: 0 });
     expect(snackBar.show).toHaveBeenCalledWith('2 applications deleted');
     const allCalls = [...snackBar.open.mock.calls, ...snackBar.show.mock.calls, ...snackBar.error.mock.calls]
       .map(c => c[0]);

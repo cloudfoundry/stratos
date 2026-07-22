@@ -321,6 +321,7 @@ export class CloudFoundryRoutesSignalComponent {
   // straight to the final summary for that kind.
   private async runBulk(
     kind: 'delete' | 'unmap',
+    count: number,
     op: () => Promise<BulkResult>,
   ): Promise<void> {
     try {
@@ -338,6 +339,7 @@ export class CloudFoundryRoutesSignalComponent {
         // pends, so refreshAfterPending is a no-op for it.
         refresh: () => this.routesConfig.refresh(),
         refreshAfterPending: kind === 'delete',
+        count,
       });
     } finally {
       this.selectedRouteKeys.set(new Set());
@@ -370,7 +372,7 @@ export class CloudFoundryRoutesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('unmap', () =>
+            await this.runBulk('unmap', targets.length, () =>
               this.routesConfig.bulkUnmapRoutes(cnsi, targets.map(r => r.guid)));
           });
         },
@@ -387,7 +389,7 @@ export class CloudFoundryRoutesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('delete', () =>
+            await this.runBulk('delete', targets.length, () =>
               this.routesConfig.bulkDeleteRoutes(cnsi, targets.map(r => r.guid)));
           });
         },

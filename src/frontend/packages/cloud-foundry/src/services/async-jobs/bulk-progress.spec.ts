@@ -94,7 +94,10 @@ function makeSnackBar() {
 const flush = async (n = 8) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
 
 describe('runBulkWithProgress', () => {
-  it('clean sync result → auto-dismissing final summary, no progress phase, no refresh', async () => {
+  // No `count` passed — the no-count contract: nothing opens before the
+  // POST, and since this result never goes PENDING, nothing opens after
+  // it either.
+  it('clean sync result, no count → auto-dismissing final summary, no progress phase, no refresh', async () => {
     const sb = makeSnackBar();
     const refresh = vi.fn();
     await runBulkWithProgress({
@@ -108,6 +111,44 @@ describe('runBulkWithProgress', () => {
     expect(sb.open).not.toHaveBeenCalled();   // no progress snackbar
     expect(sb.error).not.toHaveBeenCalled();
     expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it('count provided → progress snackbar opens BEFORE the POST resolves, then dismisses for the final summary', async () => {
+    const sb = makeSnackBar();
+    let openCalledBeforeOpResolved = false;
+    const op = () => new Promise<BulkResult>(resolve => {
+      // Captured synchronously inside the op's own executor, before
+      // this Promise has a chance to settle — proves the snackbar was
+      // opened at POST START, not after op() resolves.
+      openCalledBeforeOpResolved = (sb.open as any).mock.calls.length > 0;
+      resolve(bulk([{ guid: 'a', state: 'COMPLETE' }, { guid: 'b', state: 'COMPLETE' }]));
+    });
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      count: 2,
+      op,
+    });
+    await flush();
+    expect(openCalledBeforeOpResolved).toBe(true);
+    expect(sb.open).toHaveBeenCalledWith('Deleting 2 applications…', undefined, { duration: 0 });
+    expect(sb.ref.dismiss).toHaveBeenCalled();
+    expect(sb.show).toHaveBeenCalledWith('2 applications deleted');
+  });
+
+  it('POST failure with count → progress ref dismissed before the error snackbar', async () => {
+    const sb = makeSnackBar();
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      count: 2,
+      op: async () => { throw new Error('boom'); },
+    });
+    await flush();
+    expect(sb.open).toHaveBeenCalledWith('Deleting 2 applications…', undefined, { duration: 0 });
+    expect(sb.ref.dismiss).toHaveBeenCalled();
+    expect(sb.error).toHaveBeenCalledWith(expect.stringContaining('Bulk delete failed'));
+    expect(sb.show).not.toHaveBeenCalled();
   });
 
   it('failures → persistent error summary + refresh', async () => {
